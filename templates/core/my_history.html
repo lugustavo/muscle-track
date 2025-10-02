@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}Meu Histórico - Muscle Track{% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="bi bi-graph-up"></i> Meu Histórico de Treinos</h1>
+
+{% if completed_sessions %}
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Sessões Concluídas (últimas 20)</h5>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Treino</th>
+                        <th>Início</th>
+                        <th>Término</th>
+                        <th>Duração</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in completed_sessions %}
+                    <tr>
+                        <td>{{ session.start_time|date:"d/m/Y" }}</td>
+                        <td>
+                            <strong>{{ session.person_routine.routine.routine_name }}</strong>
+                            <br>
+                            <small class="text-muted">{{ session.person_routine.routine.get_difficulty_level_display }}</small>
+                        </td>
+                        <td>{{ session.start_time|date:"H:i" }}</td>
+                        <td>
+                            {% if session.end_time %}
+                                {{ session.end_time|date:"H:i" }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if session.duration_minutes %}
+                                <span class="badge bg-success">{{ session.duration_minutes }} min</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Estatísticas Resumidas -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h3 class="text-primary">{{ completed_sessions.count }}</h3>
+                        <p class="mb-0">Total de Treinos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h3 class="text-success">
+                            {% widthratio completed_sessions|length 1 7 %}
+                        </h3>
+                        <p class="mb-0">Treinos/Semana (aprox.)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h3 class="text-info">
+                            {{ person.routines.count }}
+                        </h3>
+                        <p class="mb-0">Treinos Atribuídos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> Você ainda não concluiu nenhum treino.
+    <br><br>
+    <a href="{% url 'core:my_workouts' %}" class="btn btn-primary">
+        <i class="bi bi-fire"></i> Iniciar Treino Agora
+    </a>
+</div>
+{% endif %}
+
+<!-- Gráfico de Evolução (Placeholder) -->
+{% if completed_sessions %}
+<div class="card mt-4">
+    <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-bar-chart"></i> Evolução de Treinos</h5>
+        <div id="workoutChart" style="height: 300px;">
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// Preparar dados para o gráfico
+const sessions = [
+    {% for session in completed_sessions reversed %}
+    {
+        date: '{{ session.start_time|date:"d/m" }}',
+        duration: {{ session.duration_minutes|default:0 }},
+        workout: '{{ session.person_routine.routine.routine_name|truncatechars:15 }}'
+    },
+    {% endfor %}
+];
+
+// Criar gráfico
+const ctx = document.getElementById('myChart');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: sessions.map(s => s.date),
+        datasets: [{
+            label: 'Duração (minutos)',
+            data: sessions.map(s => s.duration),
+            backgroundColor: 'rgba(255, 107, 107, 0.7)',
+            borderColor: 'rgba(255, 107, 107, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Duração (min)'
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Data'
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                callbacks: {
+                    afterLabel: function(context) {
+                        return 'Treino: ' + sessions[context.dataIndex].workout;
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+{% endif %}
+
+{% endblock %}

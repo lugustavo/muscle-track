@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}Histórico de {{ student.person_name }} - Muscle Track{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-graph-up"></i> Histórico - {{ student.person_name }}</h1>
+    <a href="{% url 'core:student_detail' student.pk %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+{% if completed_sessions %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Sessões de Treino Concluídas</h5>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Treino</th>
+                        <th>Início</th>
+                        <th>Término</th>
+                        <th>Duração</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in completed_sessions %}
+                    <tr>
+                        <td>{{ session.start_time|date:"d/m/Y" }}</td>
+                        <td>
+                            <strong>{{ session.person_routine.routine.routine_name }}</strong>
+                            <br>
+                            <small class="text-muted">{{ session.person_routine.routine.get_difficulty_level_display }}</small>
+                        </td>
+                        <td>{{ session.start_time|date:"H:i" }}</td>
+                        <td>
+                            {% if session.end_time %}
+                                {{ session.end_time|date:"H:i" }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if session.duration_minutes %}
+                                <span class="badge bg-success">{{ session.duration_minutes }} min</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'core:person_routine_detail' session.person_routine.pk %}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> Detalhes
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="row mt-4">
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h3 class="text-primary">{{ completed_sessions.count }}</h3>
+                        <p class="mb-0">Total de Treinos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h3 class="text-success">
+                            {% widthratio completed_sessions|length 1 7 %}
+                        </h3>
+                        <p class="mb-0">Treinos/Semana</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h3 class="text-info">{{ student.routines.count }}</h3>
+                        <p class="mb-0">Treinos Atribuídos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h3 class="text-warning">
+                            {% if completed_sessions %}
+                                {{ completed_sessions.0.duration_minutes|default:"0" }}
+                            {% else %}
+                                0
+                            {% endif %}
+                        </h3>
+                        <p class="mb-0">Última Duração (min)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráfico de Evolução -->
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-bar-chart"></i> Gráfico de Evolução</h5>
+        <canvas id="evolutionChart" style="max-height: 400px;"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const sessions = [
+    {% for session in completed_sessions reversed %}
+    {
+        date: '{{ session.start_time|date:"d/m/Y" }}',
+        duration: {{ session.duration_minutes|default:0 }},
+        workout: '{{ session.person_routine.routine.routine_name }}'
+    },
+    {% endfor %}
+];
+
+const ctx = document.getElementById('evolutionChart');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: sessions.map(s => s.date),
+        datasets: [{
+            label: 'Duração dos Treinos (minutos)',
+            data: sessions.map(s => s.duration),
+            backgroundColor: 'rgba(78, 205, 196, 0.2)',
+            borderColor: 'rgba(78, 205, 196, 1)',
+            borderWidth: 2,
+            tension: 0.3,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Duração (min)'
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Data'
+                }
+            }
+        },
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    afterLabel: function(context) {
+                        return 'Treino: ' + sessions[context.dataIndex].workout;
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> {{ student.person_name }} ainda não concluiu nenhum treino.
+</div>
+{% endif %}
+
+{% endblock %}

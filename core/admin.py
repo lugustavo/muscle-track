@@ -1,0 +1,111 @@
+from django.contrib import admin
+from .models import (
+    Person, Exercise, Routine, RoutineExercise,
+    PersonRoutine, PersonRoutineExercise, WorkoutSession
+)
+
+
+class RoutineExerciseInline(admin.TabularInline):
+    model = RoutineExercise
+    extra = 1
+    fields = ['exercise', 'order', 'sets', 'reps', 'rest_seconds', 'notes']
+
+
+class PersonRoutineExerciseInline(admin.TabularInline):
+    model = PersonRoutineExercise
+    extra = 0
+    fields = ['exercise', 'sets_completed', 'reps_completed', 'weight_used', 'is_completed']
+    readonly_fields = ['completed_at']
+
+
+@admin.register(Person)
+class PersonAdmin(admin.ModelAdmin):
+    list_display = ['person_name', 'phone', 'city', 'is_active', 'created_at']
+    list_filter = ['is_active', 'city', 'state']
+    search_fields = ['person_name', 'phone', 'user__email']
+    fieldsets = [
+        ('Informações Básicas', {
+            'fields': ['user', 'person_name', 'birth_date', 'phone']
+        }),
+        ('Endereço', {
+            'fields': ['address', 'city', 'state', 'zip_code'],
+            'classes': ['collapse']
+        }),
+        ('Outras Informações', {
+            'fields': ['notes', 'is_active']
+        }),
+    ]
+
+
+@admin.register(Exercise)
+class ExerciseAdmin(admin.ModelAdmin):
+    list_display = ['exercise_name', 'muscle_group', 'default_sets', 'default_reps', 'media_type', 'is_active']
+    list_filter = ['muscle_group', 'media_type', 'is_active']
+    search_fields = ['exercise_name', 'description']
+    fieldsets = [
+        ('Informações Básicas', {
+            'fields': ['exercise_name', 'muscle_group', 'description']
+        }),
+        ('Configurações Padrão', {
+            'fields': ['default_sets', 'default_reps']
+        }),
+        ('Mídia', {
+            'fields': ['media_type', 'media_file', 'media_url', 'thumbnail']
+        }),
+        ('Instruções', {
+            'fields': ['instructions', 'is_active']
+        }),
+    ]
+
+
+@admin.register(Routine)
+class RoutineAdmin(admin.ModelAdmin):
+    list_display = ['routine_name', 'difficulty_level', 'estimated_duration', 'is_active', 'created_at']
+    list_filter = ['difficulty_level', 'is_active']
+    search_fields = ['routine_name', 'description']
+    inlines = [RoutineExerciseInline]
+
+
+@admin.register(RoutineExercise)
+class RoutineExerciseAdmin(admin.ModelAdmin):
+    list_display = ['routine', 'exercise', 'order', 'sets', 'reps', 'rest_seconds']
+    list_filter = ['routine']
+    search_fields = ['routine__routine_name', 'exercise__exercise_name']
+
+
+@admin.register(PersonRoutine)
+class PersonRoutineAdmin(admin.ModelAdmin):
+    list_display = ['person', 'routine', 'routine_date', 'is_active', 'time_taken']
+    list_filter = ['is_active', 'routine_date', 'routine']
+    search_fields = ['person__person_name', 'routine__routine_name']
+    date_hierarchy = 'routine_date'
+    inlines = [PersonRoutineExerciseInline]
+    fieldsets = [
+        ('Informações Básicas', {
+            'fields': ['person', 'routine', 'routine_date', 'is_active']
+        }),
+        ('Datas Planejadas', {
+            'fields': ['start_date', 'end_date'],
+            'classes': ['collapse']
+        }),
+        ('Execução', {
+            'fields': ['time_taken', 'notes']
+        }),
+    ]
+
+
+@admin.register(PersonRoutineExercise)
+class PersonRoutineExerciseAdmin(admin.ModelAdmin):
+    list_display = ['person_routine', 'exercise', 'sets_completed', 'reps_completed', 'weight_used', 'is_completed']
+    list_filter = ['is_completed', 'exercise']
+    search_fields = ['person_routine__person__person_name', 'exercise__exercise_name']
+    readonly_fields = ['completed_at']
+
+
+@admin.register(WorkoutSession)
+class WorkoutSessionAdmin(admin.ModelAdmin):
+    list_display = ['person_routine', 'start_time', 'end_time', 'duration_minutes', 'is_completed']
+    list_filter = ['is_completed', 'start_time']
+    search_fields = ['person_routine__person__person_name']
+    date_hierarchy = 'start_time'
+    readonly_fields = ['start_time']

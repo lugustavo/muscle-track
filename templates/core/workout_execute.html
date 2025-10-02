@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Executar Treino - {{ person_routine.routine.routine_name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="bi bi-fire"></i> {{ person_routine.routine.routine_name }}</h3>
+            </div>
+            <div class="card-body">
+                {% if active_session %}
+                <div class="alert alert-success">
+                    <h4 id="timer" class="mb-0"><i class="bi bi-stopwatch"></i> <span id="time">00:00:00</span></h4>
+                </div>
+                {% endif %}
+
+                <h5 class="mb-3">Exercícios</h5>
+                {% for routine_exercise in routine_exercises %}
+                    {% for execution in exercise_executions %}
+                        {% if execution.exercise.id == routine_exercise.exercise.id %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="form-check">
+                                    <input class="form-check-input exercise-checkbox" type="checkbox"
+                                           id="exercise_{{ execution.id }}"
+                                           data-exercise-id="{{ execution.id }}"
+                                           {% if execution.is_completed %}checked{% endif %}>
+                                    <label class="form-check-label" for="exercise_{{ execution.id }}">
+                                        <h5>{{ routine_exercise.exercise.exercise_name }}</h5>
+                                    </label>
+                                </div>
+                                <p class="mb-2">
+                                    <strong>{{ routine_exercise.sets }} séries x {{ routine_exercise.reps }} repetições</strong>
+                                    <br>
+                                    <small class="text-muted">Descanso: {{ routine_exercise.rest_seconds }}s</small>
+                                </p>
+                                <div class="input-group" style="max-width: 200px;">
+                                    <span class="input-group-text">Carga (kg)</span>
+                                    <input type="number" class="form-control weight-input"
+                                           data-exercise-id="{{ execution.id }}"
+                                           value="{{ execution.weight_used|default:'' }}"
+                                           placeholder="0">
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+
+                {% if active_session %}
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{% url 'core:workout_end' active_session.pk %}" class="btn btn-success btn-lg">
+                        <i class="bi bi-check-circle"></i> Finalizar Treino
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Timer
+let startTime = new Date('{{ active_session.start_time|date:"c" }}');
+function updateTimer() {
+    const now = new Date();
+    const diff = Math.floor((now - startTime) / 1000);
+    const hours = Math.floor(diff / 3600);
+    const minutes = Math.floor((diff % 3600) / 60);
+    const seconds = diff % 60;
+    document.getElementById('time').textContent =
+        String(hours).padStart(2, '0') + ':' +
+        String(minutes).padStart(2, '0') + ':' +
+        String(seconds).padStart(2, '0');
+}
+{% if active_session %}
+setInterval(updateTimer, 1000);
+updateTimer();
+{% endif %}
+
+// Exercise completion toggle
+document.querySelectorAll('.exercise-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const exerciseId = this.dataset.exerciseId;
+        fetch(`/api/exercise/${exerciseId}/toggle/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        });
+    });
+});
+
+// Weight update
+document.querySelectorAll('.weight-input').forEach(input => {
+    input.addEventListener('blur', function() {
+        const exerciseId = this.dataset.exerciseId;
+        const weight = this.value;
+        if (weight) {
+            fetch(`/api/exercise/${exerciseId}/update-weight/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ weight: weight })
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}{{ title }} - Muscle Track{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-activity"></i> {{ title }}</h1>
+    <a href="{% url 'core:exercise_list' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Informações do Exercício</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="{{ form.exercise_name.id_for_label }}" class="form-label">
+                                <i class="bi bi-tag"></i> Nome do Exercício *
+                            </label>
+                            {{ form.exercise_name }}
+                            {% if form.exercise_name.errors %}
+                                <div class="text-danger small">{{ form.exercise_name.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.muscle_group.id_for_label }}" class="form-label">
+                                <i class="bi bi-diagram-3"></i> Grupo Muscular *
+                            </label>
+                            {{ form.muscle_group }}
+                            {% if form.muscle_group.errors %}
+                                <div class="text-danger small">{{ form.muscle_group.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">
+                            <i class="bi bi-text-paragraph"></i> Descrição
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger small">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.default_sets.id_for_label }}" class="form-label">
+                                <i class="bi bi-bar-chart"></i> Séries Padrão *
+                            </label>
+                            {{ form.default_sets }}
+                            {% if form.default_sets.errors %}
+                                <div class="text-danger small">{{ form.default_sets.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.default_reps.id_for_label }}" class="form-label">
+                                <i class="bi bi-arrow-repeat"></i> Repetições Padrão *
+                            </label>
+                            {{ form.default_reps }}
+                            {% if form.default_reps.errors %}
+                                <div class="text-danger small">{{ form.default_reps.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h6 class="mb-3"><i class="bi bi-image"></i> Mídia do Exercício</h6>
+
+                    <div class="mb-3">
+                        <label for="{{ form.media_type.id_for_label }}" class="form-label">
+                            Tipo de Mídia
+                        </label>
+                        {{ form.media_type }}
+                        {% if form.media_type.errors %}
+                            <div class="text-danger small">{{ form.media_type.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.media_file.id_for_label }}" class="form-label">
+                            Arquivo (Imagem/GIF/Vídeo)
+                        </label>
+                        {{ form.media_file }}
+                        {% if form.media_file.errors %}
+                            <div class="text-danger small">{{ form.media_file.errors }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">Formatos aceitos: JPG, PNG, GIF, MP4</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.media_url.id_for_label }}" class="form-label">
+                            URL da Mídia (YouTube, Link, etc)
+                        </label>
+                        {{ form.media_url }}
+                        {% if form.media_url.errors %}
+                            <div class="text-danger small">{{ form.media_url.errors }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">Ex: https://www.youtube.com/watch?v=...</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.thumbnail.id_for_label }}" class="form-label">
+                            Thumbnail (Miniatura)
+                        </label>
+                        {{ form.thumbnail }}
+                        {% if form.thumbnail.errors %}
+                            <div class="text-danger small">{{ form.thumbnail.errors }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">Imagem de visualização (recomendado)</small>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="mb-3">
+                        <label for="{{ form.instructions.id_for_label }}" class="form-label">
+                            <i class="bi bi-list-check"></i> Instruções de Execução
+                        </label>
+                        {{ form.instructions }}
+                        {% if form.instructions.errors %}
+                            <div class="text-danger small">{{ form.instructions.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-check mb-3">
+                        {{ form.is_active }}
+                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                            Exercício ativo (disponível para uso)
+                        </label>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Salvar Exercício
+                        </button>
+                        <a href="{% url 'core:exercise_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview da Mídia -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-eye"></i> Preview</h6>
+            </div>
+            <div class="card-body">
+                <div id="mediaPreview" class="text-center">
+                    {% if form.instance.thumbnail %}
+                        <img src="{{ form.instance.thumbnail.url }}" class="img-fluid rounded" alt="Preview" onerror="this.src='{% static 'images/no-image.svg' %}'">
+                    {% elif form.instance.media_url %}
+                        <img src="{{ form.instance.media_url }}" class="img-fluid rounded" alt="Preview" onerror="this.src='{% static 'images/no-image.svg' %}'">
+                    {% else %}
+                        <img src="{% static 'images/no-image.svg' %}" class="img-fluid rounded" alt="Sem imagem">
+                    {% endif %}
+                </div>
+
+                {% if form.instance.pk %}
+                <hr>
+                <h6 class="mb-2">Informações</h6>
+                <ul class="list-unstyled small text-muted">
+                    <li><strong>ID:</strong> {{ form.instance.pk }}</li>
+                    <li><strong>Criado:</strong> {{ form.instance.created_at|date:"d/m/Y H:i" }}</li>
+                    <li><strong>Atualizado:</strong> {{ form.instance.updated_at|date:"d/m/Y H:i" }}</li>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Preview de imagem ao selecionar arquivo
+document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+    if (e.target.files && e.target.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            document.getElementById('mediaPreview').innerHTML =
+                '<img src="' + event.target.result + '" class="img-fluid rounded" alt="Preview">';
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    }
+});
+</script>
+{% endblock %}

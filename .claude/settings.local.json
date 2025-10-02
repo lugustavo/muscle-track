@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(django-admin startproject:*)",
+      "Bash(python manage.py startapp:*)",
+      "Bash(python:*)",
+      "Bash(venv\\Scripts\\pip install:*)",
+      "Bash(.\\venv\\Scripts\\pip install:*)",
+      "Bash(pip install:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Exercícios - Muscle Track{% endblock %}
+
+{% block extra_css %}
+<style>
+    .exercise-thumbnail {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    .list-view .exercise-card {
+        margin-bottom: 1rem;
+    }
+    .list-view .card-body {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .list-view .exercise-info {
+        flex: 1;
+    }
+    .grid-view .exercise-card {
+        height: 100%;
+    }
+    .grid-view .exercise-thumbnail {
+        width: 100%;
+        height: 200px;
+    }
+    .filter-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+    .view-toggle {
+        display: flex;
+        gap: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-activity"></i> Exercícios</h1>
+    <a href="{% url 'core:exercise_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Novo Exercício
+    </a>
+</div>
+
+<!-- Filtros -->
+<div class="filter-section">
+    <form method="get" action="{% url 'core:exercise_list' %}" id="filterForm">
+        <div class="row g-3">
+            <div class="col-md-5">
+                <label for="search" class="form-label"><i class="bi bi-search"></i> Buscar Exercício</label>
+                <input type="text"
+                       class="form-control"
+                       id="search"
+                       name="search"
+                       value="{{ search }}"
+                       placeholder="Digite o nome ou descrição..."
+                       autocomplete="off">
+            </div>
+            <div class="col-md-4">
+                <label for="muscle_group" class="form-label"><i class="bi bi-filter"></i> Grupo Muscular</label>
+                <select class="form-select" id="muscle_group" name="muscle_group" onchange="document.getElementById('filterForm').submit();">
+                    <option value="">Todos os grupos</option>
+                    {% for value, label in muscle_groups %}
+                        <option value="{{ value }}" {% if selected_muscle_group == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label"><i class="bi bi-grid-3x3"></i> Visualização</label>
+                <div class="view-toggle">
+                    <a href="?search={{ search }}&muscle_group={{ selected_muscle_group }}&view=grid"
+                       class="btn {% if view_mode == 'grid' %}btn-primary{% else %}btn-outline-primary{% endif %} flex-fill">
+                        <i class="bi bi-grid-3x3-gap"></i> Grade
+                    </a>
+                    <a href="?search={{ search }}&muscle_group={{ selected_muscle_group }}&view=list"
+                       class="btn {% if view_mode == 'list' %}btn-primary{% else %}btn-outline-primary{% endif %} flex-fill">
+                        <i class="bi bi-list-ul"></i> Lista
+                    </a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Resultados -->
+<div class="mb-3">
+    <small class="text-muted">
+        <i class="bi bi-info-circle"></i>
+        Encontrados <strong>{{ exercises.count }}</strong> exercício(s)
+        {% if search %}
+            para "<strong>{{ search }}</strong>"
+        {% endif %}
+        {% if selected_muscle_group %}
+            no grupo <strong>{{ selected_muscle_group|title }}</strong>
+        {% endif %}
+    </small>
+</div>
+
+<!-- Visualização Grid -->
+{% if view_mode == 'grid' %}
+<div class="row g-4 grid-view">
+    {% for exercise in exercises %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card exercise-card">
+            {% if exercise.thumbnail %}
+                <img src="{{ exercise.thumbnail.url }}" class="card-img-top exercise-thumbnail" alt="{{ exercise.exercise_name }}" onerror="this.src='{% static 'images/no-image.svg' %}'">
+            {% elif exercise.media_url %}
+                <img src="{{ exercise.media_url }}" class="card-img-top exercise-thumbnail" alt="{{ exercise.exercise_name }}" onerror="this.src='{% static 'images/no-image.svg' %}'">
+            {% else %}
+                <img src="{% static 'images/no-image.svg' %}" class="card-img-top exercise-thumbnail" alt="Sem imagem">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ exercise.exercise_name }}</h5>
+                <div class="mb-2">
+                    <span class="badge bg-secondary">{{ exercise.get_muscle_group_display }}</span>
+                    <span class="badge bg-info">{{ exercise.default_sets }}x{{ exercise.default_reps }}</span>
+                </div>
+                <p class="card-text text-muted small">{{ exercise.description|truncatewords:15 }}</p>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'core:exercise_detail' exercise.pk %}" class="btn btn-sm btn-outline-primary flex-fill">
+                        <i class="bi bi-eye"></i> Ver
+                    </a>
+                    <a href="{% url 'core:exercise_edit' exercise.pk %}" class="btn btn-sm btn-outline-secondary flex-fill">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Nenhum exercício encontrado com os filtros selecionados.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Visualização Lista -->
+{% if view_mode == 'list' %}
+<div class="list-view">
+    {% for exercise in exercises %}
+    <div class="card exercise-card">
+        <div class="card-body">
+            <div class="exercise-thumbnail-container">
+                {% if exercise.thumbnail %}
+                    <img src="{{ exercise.thumbnail.url }}" class="exercise-thumbnail" alt="{{ exercise.exercise_name }}" onerror="this.src='{% static 'images/no-image.svg' %}'">
+                {% elif exercise.media_url %}
+                    <img src="{{ exercise.media_url }}" class="exercise-thumbnail" alt="{{ exercise.exercise_name }}" onerror="this.src='{% static 'images/no-image.svg' %}'">
+                {% else %}
+                    <img src="{% static 'images/no-image.svg' %}" class="exercise-thumbnail" alt="Sem imagem">
+                {% endif %}
+            </div>
+            <div class="exercise-info">
+                <h5 class="mb-1">{{ exercise.exercise_name }}</h5>
+                <div class="mb-2">
+                    <span class="badge bg-secondary">{{ exercise.get_muscle_group_display }}</span>
+                    <span class="badge bg-info">{{ exercise.default_sets }} séries x {{ exercise.default_reps }} reps</span>
+                </div>
+                <p class="text-muted small mb-0">{{ exercise.description|truncatewords:25 }}</p>
+            </div>
+            <div class="exercise-actions d-flex flex-column gap-2">
+                <a href="{% url 'core:exercise_detail' exercise.pk %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-eye"></i> Ver Detalhes
+                </a>
+                <a href="{% url 'core:exercise_edit' exercise.pk %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-pencil"></i> Editar
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Nenhum exercício encontrado com os filtros selecionados.
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-submit do formulário ao digitar (com delay)
+let searchTimeout;
+const searchInput = document.getElementById('search');
+
+// Restaurar foco após reload
+if (searchInput.value) {
+    searchInput.focus();
+    // Posicionar cursor no final
+    searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+}
+
+searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function() {
+        // Salvar posição do cursor antes do submit
+        sessionStorage.setItem('searchFocus', 'true');
+        document.getElementById('filterForm').submit();
+    }, 500);
+});
+
+// Se veio de um submit de busca, focar no campo
+if (sessionStorage.getItem('searchFocus') === 'true') {
+    sessionStorage.removeItem('searchFocus');
+    searchInput.focus();
+    searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+}
+</script>
+{% endblock %}

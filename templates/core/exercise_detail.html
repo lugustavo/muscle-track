@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ exercise.exercise_name }} - Muscle Track{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-activity"></i> {{ exercise.exercise_name }}</h1>
+    <div>
+        <a href="{% url 'core:exercise_edit' exercise.pk %}" class="btn btn-primary">
+            <i class="bi bi-pencil"></i> Editar
+        </a>
+        <a href="{% url 'core:exercise_list' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Grupo Muscular:</strong><br>
+                        <span class="badge bg-secondary mt-1">{{ exercise.get_muscle_group_display }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Padrão:</strong><br>
+                        <span class="badge bg-info mt-1">{{ exercise.default_sets }}x{{ exercise.default_reps }}</span>
+                    </div>
+                </div>
+                <p>{{ exercise.description }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                {% if exercise.thumbnail %}
+                    <img src="{{ exercise.thumbnail.url }}" class="img-fluid rounded" alt="{{ exercise.exercise_name }}" onerror="this.src='{% static 'images/no-image.svg' %}'">
+                {% elif exercise.media_url %}
+                    <img src="{{ exercise.media_url }}" class="img-fluid rounded" alt="{{ exercise.exercise_name }}" onerror="this.src='{% static 'images/no-image.svg' %}'">
+                {% else %}
+                    <img src="{% static 'images/no-image.svg' %}" class="img-fluid rounded" alt="Sem imagem">
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

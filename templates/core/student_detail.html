@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ student.person_name }}</h1>
+<div class="card mb-4">
+    <div class="card-body">
+        <p><strong>Telefone:</strong> {{ student.phone }}</p>
+        <p><strong>Cidade:</strong> {{ student.city }}</p>
+        <a href="{% url 'core:student_edit' student.pk %}" class="btn btn-primary">Editar</a>
+    </div>
+</div>
+
+<h3>Treinos Ativos</h3>
+{% for routine in active_routines %}
+<div class="card mb-2">
+    <div class="card-body">
+        <h5>{{ routine.routine.routine_name }}</h5>
+    </div>
+</div>
+{% empty %}
+<p>Nenhum treino ativo.</p>
+{% endfor %}
+{% endblock %}

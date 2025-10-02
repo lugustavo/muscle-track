@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Treinos - Muscle Track{% endblock %}
+
+{% block extra_css %}
+<style>
+    .routine-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        height: 100%;
+    }
+    .routine-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .list-view .routine-card {
+        margin-bottom: 1rem;
+    }
+    .list-view .card-body {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    .list-view .routine-info {
+        flex: 1;
+    }
+    .filter-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+    .view-toggle {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .difficulty-badge {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+    }
+    .stats-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-calendar-check"></i> Treinos</h1>
+    <div>
+        <a href="{% url 'core:routine_generate_ai' %}" class="btn btn-success me-2">
+            <i class="bi bi-magic"></i> Gerar com IA
+        </a>
+        <a href="{% url 'core:routine_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Novo Treino
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="filter-section">
+    <form method="get" action="{% url 'core:routine_list' %}" id="filterForm">
+        <div class="row g-3">
+            <div class="col-md-5">
+                <label for="search" class="form-label"><i class="bi bi-search"></i> Buscar Treino</label>
+                <input type="text"
+                       class="form-control"
+                       id="search"
+                       name="search"
+                       value="{{ search }}"
+                       placeholder="Digite o nome ou descrição..."
+                       autocomplete="off">
+            </div>
+            <div class="col-md-4">
+                <label for="difficulty" class="form-label"><i class="bi bi-filter"></i> Dificuldade</label>
+                <select class="form-select" id="difficulty" name="difficulty" onchange="document.getElementById('filterForm').submit();">
+                    <option value="">Todas as dificuldades</option>
+                    {% for value, label in difficulty_choices %}
+                        <option value="{{ value }}" {% if selected_difficulty == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label"><i class="bi bi-grid-3x3"></i> Visualização</label>
+                <div class="view-toggle">
+                    <a href="?search={{ search }}&difficulty={{ selected_difficulty }}&view=grid"
+                       class="btn {% if view_mode == 'grid' %}btn-primary{% else %}btn-outline-primary{% endif %} flex-fill">
+                        <i class="bi bi-grid-3x3-gap"></i> Grade
+                    </a>
+                    <a href="?search={{ search }}&difficulty={{ selected_difficulty }}&view=list"
+                       class="btn {% if view_mode == 'list' %}btn-primary{% else %}btn-outline-primary{% endif %} flex-fill">
+                        <i class="bi bi-list-ul"></i> Lista
+                    </a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Resultados -->
+<div class="mb-3">
+    <small class="text-muted">
+        <i class="bi bi-info-circle"></i>
+        Encontrados <strong>{{ routines.count }}</strong> treino(s)
+        {% if search %}
+            para "<strong>{{ search }}</strong>"
+        {% endif %}
+        {% if selected_difficulty %}
+            com dificuldade <strong>{{ selected_difficulty|title }}</strong>
+        {% endif %}
+    </small>
+</div>
+
+<!-- Visualização Grid -->
+{% if view_mode == 'grid' %}
+<div class="row g-4 grid-view">
+    {% for routine in routines %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card routine-card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">{{ routine.routine_name }}</h5>
+                <div class="mb-3">
+                    {% if routine.difficulty_level == 'iniciante' %}
+                        <span class="badge bg-success difficulty-badge">
+                            <i class="bi bi-star"></i> {{ routine.get_difficulty_level_display }}
+                        </span>
+                    {% elif routine.difficulty_level == 'intermediario' %}
+                        <span class="badge bg-warning difficulty-badge">
+                            <i class="bi bi-star-fill"></i> {{ routine.get_difficulty_level_display }}
+                        </span>
+                    {% else %}
+                        <span class="badge bg-danger difficulty-badge">
+                            <i class="bi bi-star-fill"></i> {{ routine.get_difficulty_level_display }}
+                        </span>
+                    {% endif %}
+                    <span class="badge bg-info difficulty-badge">
+                        <i class="bi bi-clock"></i> {{ routine.estimated_duration }} min
+                    </span>
+                </div>
+                <p class="card-text text-muted small">{{ routine.description|truncatewords:20 }}</p>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <div class="text-center bg-light p-2 rounded">
+                            <div class="fw-bold text-primary">{{ routine.exercise_count }}</div>
+                            <small class="text-muted">Exercícios</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center bg-light p-2 rounded">
+                            <div class="fw-bold text-success">{{ routine.student_count }}</div>
+                            <small class="text-muted">Alunos</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a href="{% url 'core:routine_detail' routine.pk %}" class="btn btn-sm btn-outline-primary flex-fill">
+                        <i class="bi bi-eye"></i> Ver
+                    </a>
+                    <a href="{% url 'core:routine_edit' routine.pk %}" class="btn btn-sm btn-outline-secondary flex-fill">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Nenhum treino encontrado com os filtros selecionados.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Visualização Lista -->
+{% if view_mode == 'list' %}
+<div class="list-view">
+    {% for routine in routines %}
+    <div class="card routine-card">
+        <div class="card-body">
+            <div class="routine-info">
+                <h5 class="mb-2">{{ routine.routine_name }}</h5>
+                <div class="mb-2">
+                    {% if routine.difficulty_level == 'iniciante' %}
+                        <span class="badge bg-success">{{ routine.get_difficulty_level_display }}</span>
+                    {% elif routine.difficulty_level == 'intermediario' %}
+                        <span class="badge bg-warning">{{ routine.get_difficulty_level_display }}</span>
+                    {% else %}
+                        <span class="badge bg-danger">{{ routine.get_difficulty_level_display }}</span>
+                    {% endif %}
+                    <span class="badge bg-info"><i class="bi bi-clock"></i> {{ routine.estimated_duration }} min</span>
+                    <span class="badge bg-secondary stats-badge">
+                        <i class="bi bi-activity"></i> {{ routine.exercise_count }} exercícios
+                    </span>
+                    <span class="badge bg-secondary stats-badge">
+                        <i class="bi bi-people"></i> {{ routine.student_count }} alunos
+                    </span>
+                </div>
+                <p class="text-muted small mb-0">{{ routine.description|truncatewords:30 }}</p>
+            </div>
+            <div class="routine-actions d-flex flex-column gap-2">
+                <a href="{% url 'core:routine_detail' routine.pk %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-eye"></i> Ver Detalhes
+                </a>
+                <a href="{% url 'core:routine_edit' routine.pk %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-pencil"></i> Editar
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Nenhum treino encontrado com os filtros selecionados.
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-submit do formulário ao digitar (com delay)
+let searchTimeout;
+const searchInput = document.getElementById('search');
+
+// Restaurar foco após reload
+if (searchInput.value) {
+    searchInput.focus();
+    searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+}
+
+searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function() {
+        sessionStorage.setItem('searchFocus', 'true');
+        document.getElementById('filterForm').submit();
+    }, 500);
+});
+
+// Se veio de um submit de busca, focar no campo
+if (sessionStorage.getItem('searchFocus') === 'true') {
+    sessionStorage.removeItem('searchFocus');
+    searchInput.focus();
+    searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+}
+</script>
+{% endblock %}
