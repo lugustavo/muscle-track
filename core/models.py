@@ -4,6 +4,25 @@ from django.core.validators import MinValueValidator
 from django.utils import timezone
 
 
+class MuscleGroup(models.Model):
+    """Model representing a muscle group"""
+    name = models.CharField(max_length=50, unique=True, verbose_name='Nome')
+    slug = models.SlugField(max_length=50, unique=True, verbose_name='Slug')
+    description = models.TextField(blank=True, verbose_name='Descrição')
+    is_active = models.BooleanField(default=True, verbose_name='Ativo')
+    order = models.IntegerField(default=0, verbose_name='Ordem de Exibição')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Grupo Muscular'
+        verbose_name_plural = 'Grupos Musculares'
+        ordering = ['order', 'name']
+
+    def __str__(self):
+        return self.name
+
+
 class Person(models.Model):
     """Model representing a student/person in the gym"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='person')
@@ -27,6 +46,30 @@ class Person(models.Model):
     def __str__(self):
         return self.person_name
 
+    @property
+    def age(self):
+        """Calculate age from birth_date"""
+        if not self.birth_date:
+            return None
+        today = timezone.now().date()
+        age = today.year - self.birth_date.year
+        if today.month < self.birth_date.month or (today.month == self.birth_date.month and today.day < self.birth_date.day):
+            age -= 1
+        return age
+
+    def get_last_workout_session(self):
+        """Get the most recent workout session"""
+        return WorkoutSession.objects.filter(
+            person_routine__person=self
+        ).order_by('-start_time').first()
+
+    def get_total_workouts(self):
+        """Get total number of completed workouts"""
+        return WorkoutSession.objects.filter(
+            person_routine__person=self,
+            is_completed=True
+        ).count()
+
 
 class Exercise(models.Model):
     """Model representing an exercise"""
@@ -38,24 +81,9 @@ class Exercise(models.Model):
         ('url', 'Link Externo'),
     ]
 
-    MUSCLE_GROUP_CHOICES = [
-        ('peito', 'Peito'),
-        ('costas', 'Costas'),
-        ('ombros', 'Ombros'),
-        ('biceps', 'Bíceps'),
-        ('triceps', 'Tríceps'),
-        ('pernas', 'Pernas'),
-        ('gluteos', 'Glúteos'),
-        ('abdomen', 'Abdômen'),
-        ('panturrilha', 'Panturrilha'),
-        ('antebraco', 'Antebraço'),
-        ('cardio', 'Cardio'),
-        ('funcional', 'Funcional'),
-    ]
-
     exercise_name = models.CharField(max_length=200, verbose_name='Nome do Exercício')
     description = models.TextField(blank=True, verbose_name='Descrição')
-    muscle_group = models.CharField(max_length=50, choices=MUSCLE_GROUP_CHOICES, verbose_name='Grupo Muscular')
+    muscle_group = models.ForeignKey(MuscleGroup, on_delete=models.PROTECT, related_name='exercises', verbose_name='Grupo Muscular')
     default_reps = models.IntegerField(default=12, validators=[MinValueValidator(1)], verbose_name='Repetições Padrão')
     default_sets = models.IntegerField(default=3, validators=[MinValueValidator(1)], verbose_name='Séries Padrão')
 
@@ -76,7 +104,7 @@ class Exercise(models.Model):
         ordering = ['exercise_name']
 
     def __str__(self):
-        return f"{self.exercise_name} ({self.get_muscle_group_display()})"
+        return f"{self.exercise_name} ({self.muscle_group.name})"
 
 
 class Routine(models.Model):

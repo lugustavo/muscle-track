@@ -1,15 +1,467 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
 {% block content %}
-<h1>{{ title|default:"Página" }}</h1>
-<div class="card"><div class="card-body">
-{% if form %}
-<form method="post" enctype="multipart/form-data">
-{% csrf_token %}{{ form|crispy }}
-<button type="submit" class="btn btn-primary">Salvar</button>
-</form>
-{% else %}
-<p>Conteúdo da página</p>
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">{{ title }}</h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Início</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'core:routine_list' %}">Rotinas</a></li>
+                            <li class="breadcrumb-item active">{{ title }}</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <a href="{% url 'core:routine_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" id="routineForm">
+        {% csrf_token %}
+        <input type="hidden" name="exercises_data" id="exercisesData" value="[]">
+
+        <div class="row">
+            <!-- Form Section -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">Informações Básicas</h5>
+                    </div>
+                    <div class="card-body">
+                        {{ form|crispy }}
+                    </div>
+                </div>
+
+                <!-- Exercises Section -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Exercícios do Treino</h5>
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#exerciseModal">
+                            <i class="bi bi-plus-circle me-1"></i> Adicionar Exercícios
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="selectedExercisesList" class="list-group list-group-flush">
+                            <!-- Exercícios serão inseridos aqui via JavaScript -->
+                        </div>
+                        <div id="emptyExercisesMessage" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                            <p class="mt-3">Nenhum exercício adicionado. Clique em "Adicionar Exercícios" para começar.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Section -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">Resumo</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <strong class="text-muted">Total de Exercícios:</strong>
+                            <div class="mt-1">
+                                <h3 id="exerciseCount" class="mb-0 text-primary">0</h3>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <strong class="text-muted">Duração Estimada:</strong>
+                            <div class="mt-1">
+                                <span id="estimatedDuration" class="h5 mb-0">0 minutos</span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save me-2"></i>Salvar Treino
+                            </button>
+                            <a href="{% url 'core:routine_list' %}" class="btn btn-outline-secondary">
+                                Cancelar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Exercise Selection Modal -->
+<div class="modal fade" id="exerciseModal" tabindex="-1" aria-labelledby="exerciseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exerciseModalLabel">Selecionar Exercícios</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Search and Filter -->
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" id="exerciseSearch" placeholder="Pesquisar exercício...">
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="muscleGroupFilter">
+                            <option value="">Todos os grupos musculares</option>
+                            {% for mg in muscle_groups %}
+                            <option value="{{ mg.id }}">{{ mg.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Exercises Grid -->
+                <div id="exercisesGrid" class="row g-3" style="max-height: 400px; overflow-y: auto;">
+                    <!-- Exercícios serão carregados via JavaScript -->
+                </div>
+
+                <div id="loadingExercises" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="confirmSelection">
+                    Confirmar Seleção (<span id="selectionCount">0</span>)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Exercise Modal -->
+<div class="modal fade" id="editExerciseModal" tabindex="-1" aria-labelledby="editExerciseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editExerciseModalLabel">Editar Parâmetros</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editExerciseId">
+                <div class="mb-3">
+                    <label for="editSets" class="form-label">Séries</label>
+                    <input type="number" class="form-control" id="editSets" min="1" value="3">
+                </div>
+                <div class="mb-3">
+                    <label for="editReps" class="form-label">Repetições</label>
+                    <input type="number" class="form-control" id="editReps" min="1" value="12">
+                </div>
+                <div class="mb-3">
+                    <label for="editRest" class="form-label">Descanso (segundos)</label>
+                    <input type="number" class="form-control" id="editRest" min="0" value="60">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="saveExerciseEdit">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Estado global
+let selectedExercises = [];
+let allExercises = [];
+let tempSelectedIds = new Set();
+
+// Carregar exercícios existentes (modo edição)
+{% if routine_exercises %}
+selectedExercises = [
+    {% for re in routine_exercises %}
+    {
+        id: {{ re.exercise.pk }},
+        name: "{{ re.exercise.exercise_name|escapejs }}",
+        muscle_group: "{{ re.exercise.get_muscle_group_display|escapejs }}",
+        sets: {{ re.sets }},
+        reps: {{ re.reps }},
+        rest: {{ re.rest_seconds }},
+        thumbnail: "{% if re.exercise.thumbnail %}{{ re.exercise.thumbnail.url }}{% else %}{% static 'images/no-image.svg' %}{% endif %}"
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
 {% endif %}
-</div></div>
+
+// Inicializar quando o documento estiver pronto
+document.addEventListener('DOMContentLoaded', function() {
+    updateSelectedExercisesList();
+    updateSummary();
+});
+
+// Carregar exercícios quando o modal for aberto
+document.getElementById('exerciseModal').addEventListener('show.bs.modal', function() {
+    loadExercises();
+    tempSelectedIds = new Set(selectedExercises.map(e => e.id));
+    updateSelectionCount();
+});
+
+// Carregar lista de exercícios via fetch
+function loadExercises() {
+    const grid = document.getElementById('exercisesGrid');
+    const loading = document.getElementById('loadingExercises');
+
+    loading.style.display = 'block';
+    grid.innerHTML = '';
+
+    // Simulando carregamento - em produção, usar fetch para API
+    fetch('/api/exercises/')
+        .then(response => response.json())
+        .then(data => {
+            allExercises = data;
+            renderExercises(data);
+            loading.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Erro ao carregar exercícios:', error);
+            // Fallback: usar dados inline do Django
+            loadExercisesFromTemplate();
+            loading.style.display = 'none';
+        });
+}
+
+// Fallback: carregar exercícios do template
+function loadExercisesFromTemplate() {
+    // Esta função seria populada com dados do Django template se necessário
+    renderExercises(allExercises);
+}
+
+// Renderizar exercícios no grid
+function renderExercises(exercises) {
+    const grid = document.getElementById('exercisesGrid');
+    grid.innerHTML = '';
+
+    const search = document.getElementById('exerciseSearch').value.toLowerCase();
+    const muscleGroup = document.getElementById('muscleGroupFilter').value;
+
+    let filtered = exercises.filter(ex => {
+        const matchSearch = ex.name.toLowerCase().includes(search);
+        const matchGroup = !muscleGroup || ex.muscle_group_id === parseInt(muscleGroup);
+        return matchSearch && matchGroup;
+    });
+
+    filtered.forEach(exercise => {
+        const isSelected = tempSelectedIds.has(exercise.id);
+        const card = document.createElement('div');
+        card.className = 'col-md-4';
+        card.innerHTML = `
+            <div class="card h-100 exercise-card ${isSelected ? 'border-primary' : ''}" style="cursor: pointer;" data-exercise-id="${exercise.id}">
+                <div class="card-body p-2">
+                    <div class="d-flex align-items-center">
+                        <img src="${exercise.thumbnail}" class="rounded me-2" style="width: 60px; height: 60px; object-fit: cover;" alt="${exercise.name}">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1 small">${exercise.name}</h6>
+                            <small class="text-muted">${exercise.muscle_group_display}</small>
+                        </div>
+                        <div>
+                            ${isSelected ? '<i class="bi bi-check-circle-fill text-primary"></i>' : '<i class="bi bi-circle text-muted"></i>'}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        card.querySelector('.exercise-card').addEventListener('click', function() {
+            toggleExerciseSelection(exercise.id);
+        });
+
+        grid.appendChild(card);
+    });
+
+    if (filtered.length === 0) {
+        grid.innerHTML = '<div class="col-12 text-center text-muted py-4">Nenhum exercício encontrado</div>';
+    }
+}
+
+// Toggle seleção de exercício
+function toggleExerciseSelection(exerciseId) {
+    if (tempSelectedIds.has(exerciseId)) {
+        tempSelectedIds.delete(exerciseId);
+    } else {
+        tempSelectedIds.add(exerciseId);
+    }
+    updateSelectionCount();
+    renderExercises(allExercises);
+}
+
+// Atualizar contador de seleção
+function updateSelectionCount() {
+    document.getElementById('selectionCount').textContent = tempSelectedIds.size;
+}
+
+// Confirmar seleção
+document.getElementById('confirmSelection').addEventListener('click', function() {
+    selectedExercises = [];
+
+    tempSelectedIds.forEach(id => {
+        const exercise = allExercises.find(ex => ex.id === id);
+        if (exercise) {
+            // Buscar dados existentes ou usar defaults
+            const existing = selectedExercises.find(e => e.id === id);
+            selectedExercises.push({
+                id: exercise.id,
+                name: exercise.name,
+                muscle_group: exercise.muscle_group_display,
+                sets: existing?.sets || exercise.default_sets || 3,
+                reps: existing?.reps || exercise.default_reps || 12,
+                rest: existing?.rest || 60,
+                thumbnail: exercise.thumbnail
+            });
+        }
+    });
+
+    updateSelectedExercisesList();
+    updateSummary();
+
+    // Fechar modal
+    bootstrap.Modal.getInstance(document.getElementById('exerciseModal')).hide();
+});
+
+// Atualizar lista de exercícios selecionados
+function updateSelectedExercisesList() {
+    const list = document.getElementById('selectedExercisesList');
+    const emptyMessage = document.getElementById('emptyExercisesMessage');
+
+    list.innerHTML = '';
+
+    if (selectedExercises.length === 0) {
+        emptyMessage.style.display = 'block';
+        list.style.display = 'none';
+        return;
+    }
+
+    emptyMessage.style.display = 'none';
+    list.style.display = 'block';
+
+    selectedExercises.forEach((exercise, index) => {
+        const item = document.createElement('div');
+        item.className = 'list-group-item';
+        item.innerHTML = `
+            <div class="d-flex align-items-center">
+                <div class="me-3" style="cursor: move;">
+                    <i class="bi bi-grip-vertical text-muted"></i>
+                </div>
+                <div class="me-3">
+                    <span class="badge bg-primary">${index + 1}</span>
+                </div>
+                <div class="me-3">
+                    <img src="${exercise.thumbnail}" class="rounded" style="width: 50px; height: 50px; object-fit: cover;" alt="${exercise.name}">
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="mb-0">${exercise.name}</h6>
+                    <small class="text-muted">${exercise.muscle_group}</small>
+                </div>
+                <div class="me-3">
+                    <small class="text-muted">
+                        ${exercise.sets} séries × ${exercise.reps} reps | ${exercise.rest}s descanso
+                    </small>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="editExercise(${exercise.id})">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeExercise(${exercise.id})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+// Remover exercício
+function removeExercise(exerciseId) {
+    selectedExercises = selectedExercises.filter(e => e.id !== exerciseId);
+    updateSelectedExercisesList();
+    updateSummary();
+}
+
+// Editar parâmetros do exercício
+function editExercise(exerciseId) {
+    const exercise = selectedExercises.find(e => e.id === exerciseId);
+    if (!exercise) return;
+
+    document.getElementById('editExerciseId').value = exerciseId;
+    document.getElementById('editSets').value = exercise.sets;
+    document.getElementById('editReps').value = exercise.reps;
+    document.getElementById('editRest').value = exercise.rest;
+
+    const modal = new bootstrap.Modal(document.getElementById('editExerciseModal'));
+    modal.show();
+}
+
+// Salvar edição de exercício
+document.getElementById('saveExerciseEdit').addEventListener('click', function() {
+    const exerciseId = parseInt(document.getElementById('editExerciseId').value);
+    const exercise = selectedExercises.find(e => e.id === exerciseId);
+
+    if (exercise) {
+        exercise.sets = parseInt(document.getElementById('editSets').value);
+        exercise.reps = parseInt(document.getElementById('editReps').value);
+        exercise.rest = parseInt(document.getElementById('editRest').value);
+
+        updateSelectedExercisesList();
+        updateSummary();
+    }
+
+    bootstrap.Modal.getInstance(document.getElementById('editExerciseModal')).hide();
+});
+
+// Atualizar resumo
+function updateSummary() {
+    document.getElementById('exerciseCount').textContent = selectedExercises.length;
+
+    // Calcular duração estimada baseada nos exercícios
+    let totalMinutes = 0;
+    selectedExercises.forEach(exercise => {
+        // Estimar: (sets * reps * 3 segundos por rep) + (sets * rest)
+        const exerciseTime = (exercise.sets * exercise.reps * 3) + (exercise.sets * exercise.rest);
+        totalMinutes += exerciseTime;
+    });
+    totalMinutes = Math.ceil(totalMinutes / 60);
+
+    document.getElementById('estimatedDuration').textContent = `${totalMinutes} minutos`;
+}
+
+// Antes de submeter o form, atualizar o campo hidden com os dados
+document.getElementById('routineForm').addEventListener('submit', function(e) {
+    document.getElementById('exercisesData').value = JSON.stringify(selectedExercises);
+});
+
+// Filtros no modal
+document.getElementById('exerciseSearch').addEventListener('input', function() {
+    renderExercises(allExercises);
+});
+
+document.getElementById('muscleGroupFilter').addEventListener('change', function() {
+    renderExercises(allExercises);
+});
+</script>
+
+<style>
+.exercise-card {
+    transition: all 0.2s;
+}
+.exercise-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+</style>
 {% endblock %}

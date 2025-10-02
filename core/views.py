@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.db.models import Count, Q
 from .models import (
-    Person, Exercise, Routine, RoutineExercise,
+    MuscleGroup, Person, Exercise, Routine, RoutineExercise,
     PersonRoutine, PersonRoutineExercise, WorkoutSession
 )
 from .forms import (
@@ -29,9 +29,54 @@ def home(request):
 
 @login_required
 def student_list(request):
-    """List all students"""
-    students = Person.objects.filter(is_active=True).order_by('person_name')
-    return render(request, 'core/student_list.html', {'students': students})
+    """List all students with filters and statistics"""
+    search = request.GET.get('search', '')
+    status = request.GET.get('status', '')
+    view_mode = request.GET.get('view', request.COOKIES.get('student_view_mode', 'grid'))
+
+    # Base queryset
+    students = Person.objects.all().select_related('user')
+
+    # Filtro por busca (nome, email, telefone, ID)
+    if search:
+        students = students.filter(
+            Q(person_name__icontains=search) |
+            Q(user__email__icontains=search) |
+            Q(phone__icontains=search) |
+            Q(id__icontains=search)
+        )
+
+    # Filtro por status
+    if status == 'active':
+        students = students.filter(is_active=True)
+    elif status == 'inactive':
+        students = students.filter(is_active=False)
+
+    students = students.order_by('person_name')
+
+    # Adicionar estatísticas para cada aluno
+    students_with_stats = []
+    for student in students:
+        last_session = student.get_last_workout_session()
+        students_with_stats.append({
+            'student': student,
+            'last_session': last_session,
+            'total_workouts': student.get_total_workouts(),
+            'age': student.age
+        })
+
+    response = render(request, 'core/student_list.html', {
+        'students_with_stats': students_with_stats,
+        'search': search,
+        'selected_status': status,
+        'view_mode': view_mode
+    })
+
+    # Salvar view_mode no cookie
+    if 'view' in request.GET:
+        response.set_cookie('student_view_mode', view_mode, max_age=31536000)
+
+    return response
 
 
 @login_required
@@ -150,11 +195,12 @@ def routine_list(request):
     """List all routines"""
     search = request.GET.get('search', '')
     difficulty = request.GET.get('difficulty', '')
+    status = request.GET.get('status', '')
 
     # Pegar view_mode do cookie ou GET, padrão é 'grid'
     view_mode = request.GET.get('view', request.COOKIES.get('routine_view_mode', 'grid'))
-
-    routines = Routine.objects.filter(is_active=True).prefetch_related('exercises')
+    #is_active=active
+    routines = Routine.objects.filter().prefetch_related('exercises')
 
     # Filtro por busca
     if search:
@@ -166,6 +212,12 @@ def routine_list(request):
     # Filtro por dificuldade
     if difficulty:
         routines = routines.filter(difficulty_level=difficulty)
+
+    # Filtro por status
+    if status == 'active':
+        routines = routines.filter(is_active=True)
+    elif status == 'inactive':
+        routines = routines.filter(is_active=False)
 
     routines = routines.order_by('routine_name')
 
@@ -180,6 +232,7 @@ def routine_list(request):
         'routines': routines,
         'search': search,
         'selected_difficulty': difficulty,
+        'selected_status': status,
         'view_mode': view_mode,
         'difficulty_choices': Routine._meta.get_field('difficulty_level').choices
     })
@@ -198,11 +251,42 @@ def routine_create(request):
         form = RoutineForm(request.POST)
         if form.is_valid():
             routine = form.save()
-            messages.success(request, 'Treino criado com sucesso!')
-            return redirect('core:routine_detail', pk=routine.pk)
+
+            # Processar exercícios selecionados
+            import json
+            exercises_data = request.POST.get('exercises_data', '[]')
+            try:
+                exercises_list = json.loads(exercises_data)
+
+                # Adicionar exercícios
+                for idx, exercise_data in enumerate(exercises_list, start=1):
+                    exercise = Exercise.objects.get(pk=exercise_data['id'])
+                    RoutineExercise.objects.create(
+                        routine=routine,
+                        exercise=exercise,
+                        order=idx,
+                        sets=exercise_data.get('sets', exercise.default_sets),
+                        reps=exercise_data.get('reps', exercise.default_reps),
+                        rest_seconds=exercise_data.get('rest', 60)
+                    )
+
+                messages.success(request, 'Treino criado com sucesso!')
+                return redirect('core:routine_detail', pk=routine.pk)
+            except json.JSONDecodeError:
+                messages.error(request, 'Erro ao processar exercícios.')
     else:
         form = RoutineForm()
-    return render(request, 'core/routine_form.html', {'form': form, 'title': 'Criar Treino'})
+
+    # Buscar grupos musculares
+    muscle_groups = MuscleGroup.objects.filter(is_active=True).order_by('order')
+
+    return render(request, 'core/routine_form.html', {
+        'form': form,
+        'title': 'Criar Treino',
+        'routine': None,
+        'routine_exercises': [],
+        'muscle_groups': muscle_groups
+    })
 
 
 @login_required
@@ -231,15 +315,12 @@ def routine_detail(request, pk):
 
     return render(request, 'core/routine_detail.html', {
         'routine': routine,
-        'exercises': exercises,
-        'stats': {
-            'students_with_routine': students_with_routine,
-            'active_students': active_students,
-            'total_sessions': total_sessions,
-            'completed_sessions': completed_sessions,
-            'avg_duration': round(avg_duration) if avg_duration else 0,
-            'exercise_count': exercises.count()
-        }
+        'routine_exercises': exercises,
+        'students_with_routine': students_with_routine,
+        'active_students': active_students,
+        'total_sessions': total_sessions,
+        'completed_sessions': completed_sessions,
+        'avg_duration': avg_duration
     })
 
 
@@ -247,15 +328,53 @@ def routine_detail(request, pk):
 def routine_edit(request, pk):
     """Edit routine"""
     routine = get_object_or_404(Routine, pk=pk)
+
     if request.method == 'POST':
         form = RoutineForm(request.POST, instance=routine)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Treino atualizado com sucesso!')
-            return redirect('core:routine_detail', pk=pk)
+            routine = form.save()
+
+            # Processar exercícios selecionados
+            import json
+            exercises_data = request.POST.get('exercises_data', '[]')
+            try:
+                exercises_list = json.loads(exercises_data)
+
+                # Remover exercícios existentes
+                routine.exercises.all().delete()
+
+                # Adicionar novos exercícios
+                for idx, exercise_data in enumerate(exercises_list, start=1):
+                    exercise = Exercise.objects.get(pk=exercise_data['id'])
+                    RoutineExercise.objects.create(
+                        routine=routine,
+                        exercise=exercise,
+                        order=idx,
+                        sets=exercise_data.get('sets', exercise.default_sets),
+                        reps=exercise_data.get('reps', exercise.default_reps),
+                        rest_seconds=exercise_data.get('rest', 60)
+                    )
+
+                messages.success(request, 'Treino atualizado com sucesso!')
+                return redirect('core:routine_detail', pk=pk)
+            except json.JSONDecodeError:
+                messages.error(request, 'Erro ao processar exercícios.')
     else:
         form = RoutineForm(instance=routine)
-    return render(request, 'core/routine_form.html', {'form': form, 'title': 'Editar Treino'})
+
+    # Buscar exercícios atuais da rotina
+    routine_exercises = routine.exercises.all().select_related('exercise').order_by('order')
+
+    # Buscar grupos musculares
+    muscle_groups = MuscleGroup.objects.filter(is_active=True).order_by('order')
+
+    return render(request, 'core/routine_form.html', {
+        'form': form,
+        'title': 'Editar Treino',
+        'routine': routine,
+        'routine_exercises': routine_exercises,
+        'muscle_groups': muscle_groups
+    })
 
 
 # ============= PERSON ROUTINE VIEWS =============
@@ -386,7 +505,27 @@ def exercise_update_weight(request, pk):
             exercise_execution.save()
             return JsonResponse({'success': True})
 
-    return JsonResponse({'success': False}, status=400)
+
+@login_required
+def api_exercises_list(request):
+    """API endpoint to get all active exercises for routine form"""
+    exercises = Exercise.objects.filter(is_active=True).select_related('muscle_group').order_by('exercise_name')
+
+    exercises_data = []
+    for exercise in exercises:
+        thumbnail_url = exercise.thumbnail.url if exercise.thumbnail else '/static/images/no-image.svg'
+
+        exercises_data.append({
+            'id': exercise.pk,
+            'name': exercise.exercise_name,
+            'muscle_group_id': exercise.muscle_group.id,
+            'muscle_group_display': exercise.muscle_group.name,
+            'default_sets': exercise.default_sets,
+            'default_reps': exercise.default_reps,
+            'thumbnail': thumbnail_url
+        })
+
+    return JsonResponse(exercises_data, safe=False)
 
 
 # ============= HISTORY AND PROGRESS =============

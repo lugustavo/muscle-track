@@ -62,7 +62,7 @@
 <div class="filter-section">
     <form method="get" action="{% url 'core:routine_list' %}" id="filterForm">
         <div class="row g-3">
-            <div class="col-md-5">
+            <div class="col-md-4">
                 <label for="search" class="form-label"><i class="bi bi-search"></i> Buscar Treino</label>
                 <input type="text"
                        class="form-control"
@@ -72,7 +72,7 @@
                        placeholder="Digite o nome ou descrição..."
                        autocomplete="off">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label for="difficulty" class="form-label"><i class="bi bi-filter"></i> Dificuldade</label>
                 <select class="form-select" id="difficulty" name="difficulty" onchange="document.getElementById('filterForm').submit();">
                     <option value="">Todas as dificuldades</option>
@@ -83,7 +83,15 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-3">
+                <div class="col-md-2">
+                    <label for="status" class="form-label small text-muted">Status</label>
+                    <select class="form-select" id="status" name="status" onchange="this.form.submit()">
+                        <option value="">Todos</option>
+                        <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Ativos</option>
+                        <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Inativos</option>
+                    </select>
+                </div>
+            <div class="col-md-2">
                 <label class="form-label"><i class="bi bi-grid-3x3"></i> Visualização</label>
                 <div class="view-toggle">
                     <a href="?search={{ search }}&difficulty={{ selected_difficulty }}&view=grid"

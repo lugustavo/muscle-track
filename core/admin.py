@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    Person, Exercise, Routine, RoutineExercise,
+    MuscleGroup, Person, Exercise, Routine, RoutineExercise,
     PersonRoutine, PersonRoutineExercise, WorkoutSession
 )
 
@@ -16,6 +16,16 @@ class PersonRoutineExerciseInline(admin.TabularInline):
     extra = 0
     fields = ['exercise', 'sets_completed', 'reps_completed', 'weight_used', 'is_completed']
     readonly_fields = ['completed_at']
+
+
+@admin.register(MuscleGroup)
+class MuscleGroupAdmin(admin.ModelAdmin):
+    list_display = ['name', 'slug', 'order', 'is_active', 'created_at']
+    list_filter = ['is_active']
+    search_fields = ['name', 'slug']
+    prepopulated_fields = {'slug': ('name',)}
+    list_editable = ['order', 'is_active']
+    ordering = ['order', 'name']
 
 
 @admin.register(Person)

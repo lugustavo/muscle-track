@@ -39,6 +39,9 @@ urlpatterns = [
     path('api/exercise/<int:pk>/toggle/', views.exercise_toggle_completion, name='exercise_toggle_completion'),
     path('api/exercise/<int:pk>/update-weight/', views.exercise_update_weight, name='exercise_update_weight'),
 
+    # Exercise list API for routine form
+    path('api/exercises/', views.api_exercises_list, name='api_exercises_list'),
+
     # History and Progress
     path('my-history/', views.my_history, name='my_history'),
     path('students/<int:pk>/history/', views.student_history, name='student_history'),
