@@ -6,21 +6,34 @@
 {% block content %}
 <h1 class="mb-4"><i class="bi bi-fire"></i> Meus Treinos Ativos</h1>
 
-{% if active_routines %}
+{% if routines_with_sessions %}
 <div class="row g-4">
-    {% for person_routine in active_routines %}
+    {% for item in routines_with_sessions %}
     <div class="col-md-6 col-lg-4">
-        <div class="card exercise-card">
+        <div class="card exercise-card {% if item.active_session %}border-warning{% endif %}">
             <div class="card-body">
-                <h5 class="card-title">{{ person_routine.routine_name }}</h5>
-                <p class="card-text">{{ person_routine.description|truncatewords:20 }}</p>
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="badge bg-info">{{ person_routine.get_difficulty_level_display }}</span>
-                    <span class="text-muted"><i class="bi bi-clock"></i> {{ person_routine.estimated_duration }} min</span>
+                {% if item.active_session %}
+                <div class="alert alert-warning py-2 px-3 mb-3" role="alert">
+                    <i class="bi bi-hourglass-split"></i> <strong>Sessão em andamento</strong>
+                    <br>
+                    <small>Iniciada em {{ item.active_session.start_time|date:"H:i" }}</small>
                 </div>
-                <a href="{% url 'core:workout_start' person_routine.pk %}" class="btn btn-primary w-100">
+                {% endif %}
+                <h5 class="card-title">{{ item.routine.routine_name }}</h5>
+                <p class="card-text">{{ item.routine.description|truncatewords:20 }}</p>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge bg-info">{{ item.routine.get_difficulty_level_display }}</span>
+                    <span class="text-muted"><i class="bi bi-clock"></i> {{ item.routine.estimated_duration }} min</span>
+                </div>
+                {% if item.active_session %}
+                <a href="{% url 'core:workout_execute' item.routine.pk %}" class="btn btn-warning w-100">
+                    <i class="bi bi-arrow-clockwise"></i> Continuar Treino
+                </a>
+                {% else %}
+                <a href="{% url 'core:workout_start' item.routine.pk %}" class="btn btn-primary w-100">
                     <i class="bi bi-play-fill"></i> Iniciar Treino
                 </a>
+                {% endif %}
             </div>
         </div>
     </div>

@@ -1,11 +1,17 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block title %}Home - Muscle Track{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col-12 text-center">
         <h1 class="display-4"><i class="bi bi-lightning-charge-fill"></i> Muscle Track</h1>
+        <!-- <h1 class="display-4">
+            <img src="{% static 'images/favicon.svg' %}" alt="Muscle Track" width="64" height="64" class="me-2">
+            Muscle Track
+        </h1> -->
         <p class="lead">Sistema de Gerenciamento de Treinos Personalizados</p>
     </div>
 </div>

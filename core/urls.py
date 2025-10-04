@@ -51,6 +51,9 @@ urlpatterns = [
     path('my-history/', views.my_history, name='my_history'),
     path('students/<int:pk>/history/', views.student_history, name='student_history'),
 
+    # Session details
+    path('sessions/<int:pk>/', views.session_detail, name='session_detail'),
+
     # AI-powered workout generation
     path('routines/generate-ai/', views.routine_generate_ai, name='routine_generate_ai'),
 ]

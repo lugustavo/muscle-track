@@ -659,6 +659,28 @@ def person_routine_detail(request, pk):
     # Sessões recentes para gráfico (últimas 20)
     recent_sessions = completed_sessions[:20]
 
+    # Preparar dados para o gráfico (duração e carga média por sessão)
+    chart_data = []
+    for session in reversed(list(recent_sessions)):
+        # Calcular carga média dos exercícios completados próximos a esta sessão
+        # Buscar exercícios completados entre o início e fim da sessão
+        session_start = session.start_time
+        session_end = session.end_time if session.end_time else session.start_time + timedelta(hours=3)
+
+        exercises = person_routine.exercises.filter(
+            is_completed=True,
+            completed_at__gte=session_start,
+            completed_at__lte=session_end
+        )
+        avg_weight = exercises.aggregate(avg=Avg('weight_used'))['avg']
+        avg_weight = float(avg_weight) if avg_weight else 0
+
+        chart_data.append({
+            'date': session.start_time.strftime('%d/%m'),
+            'duration': session.duration_minutes or 0,
+            'avg_weight': round(avg_weight, 1)
+        })
+
     return render(request, 'core/person_routine_progress.html', {
         'person_routine': person_routine,
         'student': person_routine.person,
@@ -671,6 +693,7 @@ def person_routine_detail(request, pk):
         'sessions_last_month': sessions_last_month,
         'completion_rate': round(completion_rate, 1),
         'routine_exercises': routine_exercises,
+        'chart_data': json.dumps(chart_data),
     })
 
 
@@ -748,15 +771,35 @@ def person_routine_deactivate(request, pk):
 @login_required
 def my_workouts(request):
     """Student's active workouts"""
+    from datetime import timedelta
+
     try:
         person = request.user.person
         active_routines = PersonRoutine.objects.filter(
             person=person,
             is_active=True
-        ).select_related('routine_template')
+        ).select_related('routine_template').prefetch_related('sessions')
+
+        # Check for active sessions and auto-close old ones
+        routines_with_sessions = []
+        for routine in active_routines:
+            active_session = routine.sessions.filter(is_completed=False).first()
+
+            # Auto-close sessions older than 120 minutes
+            if active_session:
+                time_elapsed = timezone.now() - active_session.start_time
+                if time_elapsed > timedelta(minutes=120):
+                    active_session.end_session()
+                    active_session = None
+
+            routines_with_sessions.append({
+                'routine': routine,
+                'active_session': active_session
+            })
+
         return render(request, 'core/my_workouts.html', {
             'person': person,
-            'active_routines': active_routines
+            'routines_with_sessions': routines_with_sessions
         })
     except Person.DoesNotExist:
         messages.warning(request, 'Você não está cadastrado como aluno.')
@@ -765,26 +808,56 @@ def my_workouts(request):
 
 @login_required
 def workout_start(request, pk):
-    """Start a workout session"""
+    """Start a workout session or recover active session"""
+    from datetime import timedelta
+
     person_routine = get_object_or_404(PersonRoutine, pk=pk)
 
-    # Create workout session
-    session = WorkoutSession.objects.create(person_routine=person_routine)
+    # Check for active session
+    active_session = person_routine.sessions.filter(is_completed=False).first()
 
-    # PersonRoutineExercise already exists (created when routine was assigned)
-    # No need to create them here anymore
+    if active_session:
+        # Check if session is too old (>120 minutes) - auto close it
+        time_elapsed = timezone.now() - active_session.start_time
+        if time_elapsed > timedelta(minutes=120):
+            active_session.end_session()
+            messages.warning(request, 'Sessão anterior foi encerrada automaticamente (tempo excedido).')
+            # Create new session
+            session = WorkoutSession.objects.create(person_routine=person_routine)
+            messages.success(request, 'Novo treino iniciado! Boa sorte!')
+        else:
+            # Recover active session
+            messages.info(request, 'Recuperando sua sessão de treino em andamento...')
+    else:
+        # Create new workout session
+        session = WorkoutSession.objects.create(person_routine=person_routine)
+        messages.success(request, 'Treino iniciado! Boa sorte!')
 
-    messages.success(request, 'Treino iniciado! Boa sorte!')
     return redirect('core:workout_execute', pk=pk)
 
 
 @login_required
 def workout_execute(request, pk):
     """Execute workout with timer - shows previous session data for reference"""
+    from datetime import timedelta
+
     person_routine = get_object_or_404(PersonRoutine, pk=pk)
 
     # Get active (current) session
     active_session = person_routine.sessions.filter(is_completed=False).first()
+
+    # Auto-close sessions older than 120 minutes
+    if active_session:
+        time_elapsed = timezone.now() - active_session.start_time
+        if time_elapsed > timedelta(minutes=120):
+            active_session.end_session()
+            messages.warning(request, 'Sessão anterior foi encerrada automaticamente (tempo excedido).')
+            active_session = None
+
+    # If no active session, redirect to start one
+    if not active_session:
+        messages.warning(request, 'Nenhuma sessão ativa encontrada. Inicie um novo treino.')
+        return redirect('core:my_workouts')
 
     # Get routine exercises for current session
     routine_exercises = person_routine.exercises.select_related('exercise').order_by('order')
@@ -802,13 +875,6 @@ def workout_execute(request, pk):
         }
         exercises_with_previous.append(exercise_data)
 
-        # Reset current session status (start fresh)
-        if active_session:
-            # Store previous data before resetting
-            if not hasattr(exercise, '_previous_stored'):
-                exercise._previous_stored = True
-                # Don't actually reset here, just prepare the UI to show it as not completed
-
     return render(request, 'core/workout_execute.html', {
         'person_routine': person_routine,
         'exercises_with_previous': exercises_with_previous,
@@ -824,6 +890,35 @@ def workout_end(request, pk):
     session.end_session()
     messages.success(request, f'Treino concluído! Duração: {session.duration_minutes} minutos')
     return redirect('core:my_workouts')
+
+
+@login_required
+def session_detail(request, pk):
+    """View completed workout session details (read-only for admin)"""
+    session = get_object_or_404(WorkoutSession, pk=pk)
+    person_routine = session.person_routine
+
+    # Get routine exercises with their execution data at the time of this session
+    routine_exercises = person_routine.exercises.select_related('exercise').order_by('order')
+
+    # Build exercise data for this specific session
+    exercises_data = []
+    for exercise in routine_exercises:
+        # Since we don't have session-specific execution data yet,
+        # we'll show the current state of the exercise
+        exercises_data.append({
+            'exercise': exercise,
+            'completed_at': exercise.completed_at,
+            'weight_used': exercise.weight_used,
+            'is_completed': exercise.is_completed
+        })
+
+    return render(request, 'core/session_detail.html', {
+        'session': session,
+        'person_routine': person_routine,
+        'student': person_routine.person,
+        'exercises_data': exercises_data
+    })
 
 
 @login_required
@@ -987,6 +1082,28 @@ def student_history(request, pk):
     # Dados para gráfico de evolução (últimas 30 sessões)
     recent_sessions = completed_sessions[:30]
 
+    # Preparar dados para o gráfico (duração e carga média por sessão)
+    chart_data = []
+    for session in reversed(list(recent_sessions)):
+        # Calcular carga média dos exercícios completados próximos a esta sessão
+        session_start = session.start_time
+        session_end = session.end_time if session.end_time else session.start_time + timedelta(hours=3)
+
+        exercises = PersonRoutineExercise.objects.filter(
+            person_routine=session.person_routine,
+            is_completed=True,
+            completed_at__gte=session_start,
+            completed_at__lte=session_end
+        )
+        avg_weight = exercises.aggregate(avg=Avg('weight_used'))['avg']
+        avg_weight = float(avg_weight) if avg_weight else 0
+
+        chart_data.append({
+            'date': session.start_time.strftime('%d/%m'),
+            'duration': session.duration_minutes or 0,
+            'avg_weight': round(avg_weight, 1)
+        })
+
     # Frequência semanal (últimos 3 meses)
     three_months_ago = timezone.now() - timedelta(days=90)
     sessions_three_months = completed_sessions.filter(start_time__gte=three_months_ago).count()
@@ -1005,6 +1122,7 @@ def student_history(request, pk):
         'last_session': last_session,
         'sessions_by_routine': sessions_by_routine,
         'avg_weekly_frequency': round(avg_weekly_frequency, 1),
+        'chart_data': json.dumps(chart_data),
     })
 
 

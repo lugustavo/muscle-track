@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes da Sessão - {{ person_routine.routine_name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1><i class="bi bi-clipboard-data"></i> Detalhes da Sessão</h1>
+                <p class="text-muted mb-0">{{ student.person_name }} - {{ person_routine.routine_name }}</p>
+            </div>
+            <a href="{% url 'core:person_routine_detail' person_routine.pk %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+
+        <!-- Session Information -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="bi bi-info-circle"></i> Informações da Sessão</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-2">
+                            <strong><i class="bi bi-calendar"></i> Data:</strong>
+                            {{ session.start_time|date:"d/m/Y" }}
+                        </p>
+                        <p class="mb-2">
+                            <strong><i class="bi bi-clock"></i> Início:</strong>
+                            {{ session.start_time|date:"H:i" }}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-2">
+                            <strong><i class="bi bi-clock-history"></i> Término:</strong>
+                            {% if session.end_time %}
+                                {{ session.end_time|date:"H:i" }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </p>
+                        <p class="mb-2">
+                            <strong><i class="bi bi-stopwatch"></i> Duração:</strong>
+                            {% if session.duration_minutes %}
+                                <span class="badge bg-success">{{ session.duration_minutes }} min</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exercises List -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="bi bi-list-check"></i> Exercícios Executados</h3>
+            </div>
+            <div class="card-body">
+                {% for item in exercises_data %}
+                <div class="card mb-3 {% if item.is_completed %}border-success{% endif %}">
+                    <div class="card-body">
+                        <!-- Exercise Header -->
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="mb-0">
+                                {{ item.exercise.exercise.exercise_name }}
+                                {% if item.is_completed %}
+                                    <span class="badge bg-success ms-2">
+                                        <i class="bi bi-check-circle"></i> Concluído
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary ms-2">
+                                        <i class="bi bi-x-circle"></i> Não executado
+                                    </span>
+                                {% endif %}
+                            </h5>
+                        </div>
+
+                        <!-- Exercise Parameters -->
+                        <p class="mb-2">
+                            <strong>{{ item.exercise.sets }} séries x {{ item.exercise.reps }} repetições</strong>
+                            <br>
+                            <small class="text-muted">Descanso: {{ item.exercise.rest_seconds }}s</small>
+                        </p>
+
+                        {% if item.is_completed %}
+                        <!-- Execution Data -->
+                        <div class="alert alert-success py-2 mb-0">
+                            <small>
+                                {% if item.completed_at %}
+                                <span class="me-3">
+                                    <strong><i class="bi bi-clock-fill"></i> Concluído em:</strong>
+                                    {{ item.completed_at|date:"d/m/Y H:i" }}
+                                </span>
+                                {% endif %}
+                                {% if item.weight_used %}
+                                <span>
+                                    <strong><i class="bi bi-box"></i> Carga:</strong>
+                                    {{ item.weight_used }} kg
+                                </span>
+                                {% endif %}
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
