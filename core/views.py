@@ -780,21 +780,40 @@ def workout_start(request, pk):
 
 @login_required
 def workout_execute(request, pk):
-    """Execute workout with timer"""
+    """Execute workout with timer - shows previous session data for reference"""
     person_routine = get_object_or_404(PersonRoutine, pk=pk)
 
-    # Get active session
+    # Get active (current) session
     active_session = person_routine.sessions.filter(is_completed=False).first()
 
-    # Get routine exercises with executions
-    routine_exercises = person_routine.exercises.all().order_by('order')
-    exercise_executions = person_routine.exercises.all()
+    # Get routine exercises for current session
+    routine_exercises = person_routine.exercises.select_related('exercise').order_by('order')
+
+    # Get last completed session
+    last_completed_session = person_routine.sessions.filter(is_completed=True).first()
+
+    # Build exercises with previous session data
+    exercises_with_previous = []
+    for exercise in routine_exercises:
+        exercise_data = {
+            'current': exercise,
+            'previous_date': exercise.completed_at if exercise.is_completed else None,
+            'previous_weight': exercise.weight_used if exercise.is_completed else None,
+        }
+        exercises_with_previous.append(exercise_data)
+
+        # Reset current session status (start fresh)
+        if active_session:
+            # Store previous data before resetting
+            if not hasattr(exercise, '_previous_stored'):
+                exercise._previous_stored = True
+                # Don't actually reset here, just prepare the UI to show it as not completed
 
     return render(request, 'core/workout_execute.html', {
         'person_routine': person_routine,
-        'routine_exercises': routine_exercises,
-        'exercise_executions': exercise_executions,
-        'active_session': active_session
+        'exercises_with_previous': exercises_with_previous,
+        'active_session': active_session,
+        'last_completed_session': last_completed_session
     })
 
 

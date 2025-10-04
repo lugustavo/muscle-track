@@ -17,36 +17,74 @@
                 {% endif %}
 
                 <h5 class="mb-3">Exercícios</h5>
-                {% for routine_exercise in routine_exercises %}
-                    {% for execution in exercise_executions %}
-                        {% if execution.exercise.id == routine_exercise.exercise.id %}
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <div class="form-check">
-                                    <input class="form-check-input exercise-checkbox" type="checkbox"
-                                           id="exercise_{{ execution.id }}"
-                                           data-exercise-id="{{ execution.id }}"
-                                           {% if execution.is_completed %}checked{% endif %}>
-                                    <label class="form-check-label" for="exercise_{{ execution.id }}">
-                                        <h5>{{ routine_exercise.exercise.exercise_name }}</h5>
-                                    </label>
-                                </div>
-                                <p class="mb-2">
-                                    <strong>{{ routine_exercise.sets }} séries x {{ routine_exercise.reps }} repetições</strong>
-                                    <br>
-                                    <small class="text-muted">Descanso: {{ routine_exercise.rest_seconds }}s</small>
-                                </p>
-                                <div class="input-group" style="max-width: 200px;">
-                                    <span class="input-group-text">Carga (kg)</span>
-                                    <input type="number" class="form-control weight-input"
-                                           data-exercise-id="{{ execution.id }}"
-                                           value="{{ execution.weight_used|default:'' }}"
-                                           placeholder="0">
+                {% for item in exercises_with_previous %}
+                <div class="card mb-3" id="exercise-card-{{ item.current.id }}">
+                    <div class="card-body">
+                        <!-- Header com checkbox sempre visível -->
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input exercise-checkbox" type="checkbox"
+                                       id="exercise_{{ item.current.id }}"
+                                       data-exercise-id="{{ item.current.id }}">
+                                <label class="form-check-label" for="exercise_{{ item.current.id }}">
+                                    <h5 class="mb-0">{{ item.current.exercise.exercise_name }}</h5>
+                                </label>
+                            </div>
+                            <span class="badge bg-success d-none" id="badge-{{ item.current.id }}">
+                                <i class="bi bi-check-circle"></i> Concluído
+                            </span>
+                        </div>
+
+                        <!-- Conteúdo que será colapsado -->
+                        <div class="collapse show" id="collapse-{{ item.current.id }}">
+                            <p class="mb-2">
+                                <strong>{{ item.current.sets }} séries x {{ item.current.reps }} repetições</strong>
+                                <br>
+                                <small class="text-muted">Descanso: {{ item.current.rest_seconds }}s</small>
+                            </p>
+
+                            <!-- Dados da Sessão Anterior (Referência) -->
+                            {% if item.previous_date or item.previous_weight %}
+                            <!-- <div class="alert alert-info py-2 mb-2"> -->
+                                <small class="text-muted">
+                                    <strong><i class="bi bi-info-circle"></i> Sessão Anterior:</strong>
+                                    {% if item.previous_date %}
+                                    <span class="me-2">
+                                        <i class="bi bi-clock"></i> {{ item.previous_date|date:"d/m/Y H:i" }}
+                                    </span>
+                                    {% endif %}
+                                    {% if item.previous_weight %}
+                                    <span>
+                                        <i class="bi bi-box"></i> Carga: {{ item.previous_weight }} kg
+                                    </span>
+                                    {% endif %}
+                                </small>
+                            <!-- </div> -->
+                            {% endif %}
+
+                            <!-- Input para Sessão Atual -->
+                            <div class="row g-2">
+                                <div class="col-auto">
+                                    <div class="input-group" style="max-width: 200px;">
+                                        <span class="input-group-text">Carga (kg)</span>
+                                        <input type="number" class="form-control weight-input"
+                                               data-exercise-id="{{ item.current.id }}"
+                                               value=""
+                                               placeholder="{% if item.previous_weight %}{{ item.previous_weight }}{% else %}0{% endif %}"
+                                               step="0.5">
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        {% endif %}
-                    {% endfor %}
+
+                        <!-- Status da Sessão Atual (visível quando concluído) -->
+                        <div class="mt-2 text-success d-none" id="current-status-{{ item.current.id }}">
+                            <small>
+                                <i class="bi bi-check-circle-fill"></i> <span id="current-time-{{ item.current.id }}"></span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
                 {% endfor %}
 
                 {% if active_session %}
@@ -84,6 +122,52 @@ updateTimer();
 document.querySelectorAll('.exercise-checkbox').forEach(checkbox => {
     checkbox.addEventListener('change', function() {
         const exerciseId = this.dataset.exerciseId;
+        const isChecked = this.checked;
+        const badge = document.getElementById(`badge-${exerciseId}`);
+        const card = document.getElementById(`exercise-card-${exerciseId}`);
+        const currentStatus = document.getElementById(`current-status-${exerciseId}`);
+        const currentTime = document.getElementById(`current-time-${exerciseId}`);
+        const collapseDiv = document.getElementById(`collapse-${exerciseId}`);
+
+        // Update UI
+        if (isChecked) {
+            // Collapse content
+            const bsCollapse = new bootstrap.Collapse(collapseDiv, {
+                toggle: true
+            });
+
+            badge.classList.remove('d-none');
+            card.classList.add('border-success');
+            currentStatus.classList.remove('d-none');
+
+            // Show current completion time
+            const now = new Date();
+            const timeStr = now.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            currentTime.textContent = `Concluído agora: ${timeStr}`;
+        } else {
+            // Expand content
+            const bsCollapse = bootstrap.Collapse.getInstance(collapseDiv);
+            if (bsCollapse) {
+                bsCollapse.show();
+            } else {
+                const newCollapse = new bootstrap.Collapse(collapseDiv, {
+                    toggle: false
+                });
+                newCollapse.show();
+            }
+
+            badge.classList.add('d-none');
+            card.classList.remove('border-success');
+            currentStatus.classList.add('d-none');
+        }
+
+        // Send to backend
         fetch(`/api/exercise/${exerciseId}/toggle/`, {
             method: 'POST',
             headers: {
