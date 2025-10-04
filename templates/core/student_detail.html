@@ -1,22 +1,260 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ student.person_name }} - Muscle Track{% endblock %}
+
+{% block extra_css %}
+<style>
+    .student-avatar {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .student-header-info {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<h1>{{ student.person_name }}</h1>
-<div class="card mb-4">
-    <div class="card-body">
-        <p><strong>Telefone:</strong> {{ student.phone }}</p>
-        <p><strong>Cidade:</strong> {{ student.city }}</p>
-        <a href="{% url 'core:student_edit' student.pk %}" class="btn btn-primary">Editar</a>
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div class="student-header-info">
+        <img src="{{ student.get_avatar_url }}" class="student-avatar" alt="{{ student.person_name }}">
+        <div>
+            <h1 class="mb-1"><i class="bi bi-person-circle"></i> {{ student.person_name }}</h1>
+            {% if student.is_active %}
+                <span class="badge bg-success">Ativo</span>
+            {% else %}
+                <span class="badge bg-danger">Inativo</span>
+            {% endif %}
+        </div>
+    </div>
+    <div>
+        <a href="{% url 'core:person_routine_create' %}" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Atribuir Treino
+        </a>
+        <a href="{% url 'core:student_edit' student.pk %}" class="btn btn-primary">
+            <i class="bi bi-pencil"></i> Editar
+        </a>
+        <a href="{% url 'core:student_list' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
     </div>
 </div>
 
-<h3>Treinos Ativos</h3>
-{% for routine in active_routines %}
-<div class="card mb-2">
-    <div class="card-body">
-        <h5>{{ routine.routine.routine_name }}</h5>
+<!-- Estatísticas -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-calendar-check fs-1 text-primary"></i>
+                <h3 class="mt-2">{{ total_sessions }}</h3>
+                <p class="text-muted mb-0">Sessões Completadas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-graph-up fs-1 text-success"></i>
+                <h3 class="mt-2">{{ sessions_last_month }}</h3>
+                <p class="text-muted mb-0">Treinos (30 dias)</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-clock fs-1 text-info"></i>
+                <h3 class="mt-2">{% if avg_duration %}{{ avg_duration|floatformat:0 }}min{% else %}-{% endif %}</h3>
+                <p class="text-muted mb-0">Duração Média</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-calendar-event fs-1 text-warning"></i>
+                <h3 class="mt-2" style="font-size: 1.2rem;">
+                    {% if last_session %}
+                        {{ last_session.start_time|date:"d/m/Y" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </h3>
+                <p class="text-muted mb-0">Última Sessão</p>
+            </div>
+        </div>
     </div>
 </div>
-{% empty %}
-<p>Nenhum treino ativo.</p>
+
+<!-- Informações do Aluno -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informações Pessoais</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Email:</strong><br>
+                        <span>{{ student.user.email|default:"-" }}</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Telefone:</strong><br>
+                        <span>{{ student.phone|default:"-" }}</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Cidade:</strong><br>
+                        <span>{{ student.city|default:"-" }}</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Data de Nascimento:</strong><br>
+                        <span>{{ student.birth_date|date:"d/m/Y"|default:"-" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Treinos Ativos e Histórico -->
+<div class="row">
+    <!-- Treinos Ativos -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-lightning-charge"></i> Treinos Ativos</h5>
+                <a href="{% url 'core:person_routine_create' %}" class="btn btn-sm btn-success">
+                    <i class="bi bi-plus-circle"></i> Adicionar
+                </a>
+            </div>
+            <div class="card-body">
+                {% if active_routines_with_stats %}
+                    <div class="list-group">
+                        {% for item in active_routines_with_stats %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <h6 class="mb-1">{{ item.person_routine.routine_name }}</h6>
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar3"></i> Iniciado em: {{ item.person_routine.routine_date|date:"d/m/Y" }}
+                                        {% if item.person_routine.end_date %}
+                                            • Até: {{ item.person_routine.end_date|date:"d/m/Y" }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    {% if item.person_routine.routine_template %}
+                                    <a href="{% url 'core:routine_detail' item.person_routine.routine_template.pk %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> Ver Template
+                                    </a>
+                                    {% endif %}
+                                    <a href="{% url 'core:person_routine_detail' item.person_routine.pk %}" class="btn btn-sm btn-outline-info">
+                                        <i class="bi bi-bar-chart"></i> Progresso
+                                    </a>
+                                    <a href="{% url 'core:person_routine_edit' item.person_routine.pk %}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deactivateModal{{ item.person_routine.pk }}">
+                                        <i class="bi bi-trash"></i> Remover
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-3">
+                                <span class="badge bg-info">{{ item.exercise_count }} exercício{{ item.exercise_count|pluralize }}</span>
+                                <span class="badge bg-success">{{ item.sessions_count }} sessõe{{ item.sessions_count|pluralize:"s,s" }} completas</span>
+                                <span class="badge bg-secondary">{{ item.person_routine.difficulty_level|capfirst }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle"></i> Nenhum treino ativo.
+                        <a href="{% url 'core:person_routine_create' %}" class="alert-link">Clique aqui para adicionar um treino.</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Histórico de Treinos Anteriores -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-archive"></i> Treinos Anteriores</h5>
+            </div>
+            <div class="card-body">
+                {% if inactive_routines %}
+                    <div class="list-group list-group-flush">
+                        {% for person_routine in inactive_routines %}
+                        <div class="list-group-item px-0">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">{{ person_routine.routine_name }}</h6>
+                                    <small class="text-muted">
+                                        {{ person_routine.routine_date|date:"d/m/Y" }}
+                                        {% if person_routine.end_date %}
+                                            - {{ person_routine.end_date|date:"d/m/Y" }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'core:student_history' student.pk %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-clock-history"></i> Ver Histórico Completo
+                        </a>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Nenhum treino anterior registrado.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modais de confirmação para remover treinos -->
+{% for item in active_routines_with_stats %}
+<div class="modal fade" id="deactivateModal{{ item.person_routine.pk }}" tabindex="-1" aria-labelledby="deactivateModalLabel{{ item.person_routine.pk }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deactivateModalLabel{{ item.person_routine.pk }}">
+                    <i class="bi bi-exclamation-triangle text-warning"></i> Confirmar Remoção
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja remover o treino <strong>"{{ item.person_routine.routine_name }}"</strong> do aluno <strong>{{ student.person_name }}</strong>?</p>
+                <p class="text-muted mb-0">
+                    <i class="bi bi-info-circle"></i> O treino será movido para o histórico de treinos anteriores e não será mais exibido como ativo.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+                <form method="post" action="{% url 'core:person_routine_deactivate' item.person_routine.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Sim, Remover
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endfor %}
 {% endblock %}

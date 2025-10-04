@@ -14,7 +14,7 @@ class RoutineExerciseInline(admin.TabularInline):
 class PersonRoutineExerciseInline(admin.TabularInline):
     model = PersonRoutineExercise
     extra = 0
-    fields = ['exercise', 'sets_completed', 'reps_completed', 'weight_used', 'is_completed']
+    fields = ['exercise', 'order', 'sets', 'reps', 'rest_seconds', 'sets_completed', 'reps_completed', 'weight_used', 'is_completed']
     readonly_fields = ['completed_at']
 
 
@@ -85,31 +85,32 @@ class RoutineExerciseAdmin(admin.ModelAdmin):
 
 @admin.register(PersonRoutine)
 class PersonRoutineAdmin(admin.ModelAdmin):
-    list_display = ['person', 'routine', 'routine_date', 'is_active', 'time_taken']
-    list_filter = ['is_active', 'routine_date', 'routine']
-    search_fields = ['person__person_name', 'routine__routine_name']
+    list_display = ['person', 'routine_name', 'difficulty_level', 'routine_date', 'is_active']
+    list_filter = ['is_active', 'routine_date', 'difficulty_level']
+    search_fields = ['person__person_name', 'routine_name', 'routine_template__routine_name']
     date_hierarchy = 'routine_date'
     inlines = [PersonRoutineExerciseInline]
     fieldsets = [
         ('Informações Básicas', {
-            'fields': ['person', 'routine', 'routine_date', 'is_active']
+            'fields': ['person', 'routine_template', 'routine_name', 'description', 'difficulty_level', 'estimated_duration']
         }),
-        ('Datas Planejadas', {
-            'fields': ['start_date', 'end_date'],
+        ('Datas', {
+            'fields': ['routine_date', 'start_date', 'end_date', 'is_active']
+        }),
+        ('Observações', {
+            'fields': ['notes'],
             'classes': ['collapse']
-        }),
-        ('Execução', {
-            'fields': ['time_taken', 'notes']
         }),
     ]
 
 
 @admin.register(PersonRoutineExercise)
 class PersonRoutineExerciseAdmin(admin.ModelAdmin):
-    list_display = ['person_routine', 'exercise', 'sets_completed', 'reps_completed', 'weight_used', 'is_completed']
+    list_display = ['person_routine', 'exercise', 'order', 'sets', 'reps', 'sets_completed', 'reps_completed', 'is_completed']
     list_filter = ['is_completed', 'exercise']
     search_fields = ['person_routine__person__person_name', 'exercise__exercise_name']
     readonly_fields = ['completed_at']
+    ordering = ['person_routine', 'order']
 
 
 @admin.register(WorkoutSession)

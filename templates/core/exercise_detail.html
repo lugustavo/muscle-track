@@ -16,26 +16,107 @@
     </div>
 </div>
 
+<!-- Estatísticas -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-calendar-check fs-1 text-primary"></i>
+                <h3 class="mt-2">{{ routines_count }}</h3>
+                <p class="text-muted mb-0">Treino{{ routines_count|pluralize }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-people fs-1 text-success"></i>
+                <h3 class="mt-2">{{ active_students }}</h3>
+                <p class="text-muted mb-0">Aluno{{ active_students|pluralize }} Ativo{{ active_students|pluralize }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-clock-history fs-1 text-info"></i>
+                <h3 class="mt-2">{{ sessions_count }}</h3>
+                <p class="text-muted mb-0">Sessõe{{ sessions_count|pluralize:"s,s" }} Realizadas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-check-circle fs-1 text-warning"></i>
+                <h3 class="mt-2">{{ completed_count }}</h3>
+                <p class="text-muted mb-0">Execuçõ{{ completed_count|pluralize:"es,es" }} Completas</p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-md-8">
+        <!-- Informações do Exercício -->
         <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informações</h5>
+            </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <strong>Grupo Muscular:</strong><br>
-                        <span class="badge bg-secondary mt-1">{{ exercise.get_muscle_group_display }}</span>
+                        <span class="badge bg-secondary mt-1">{{ exercise.muscle_group.name }}</span>
                     </div>
                     <div class="col-md-6">
                         <strong>Padrão:</strong><br>
                         <span class="badge bg-info mt-1">{{ exercise.default_sets }}x{{ exercise.default_reps }}</span>
                     </div>
                 </div>
-                <p>{{ exercise.description }}</p>
+                <div class="mb-2">
+                    <strong>Descrição:</strong>
+                </div>
+                <p class="mb-0">{{ exercise.description }}</p>
             </div>
         </div>
+
+        <!-- Treinos que incluem este exercício -->
+        {% if routine_exercises %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Treinos que incluem este exercício</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for routine_exercise in routine_exercises %}
+                    <a href="{% url 'core:routine_detail' routine_exercise.routine.pk %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ routine_exercise.routine.routine_name }}</h6>
+                                <small class="text-muted">
+                                    {{ routine_exercise.sets }} séries x {{ routine_exercise.reps }} reps
+                                    {% if routine_exercise.rest_seconds %}
+                                        • {{ routine_exercise.rest_seconds }}s descanso
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <span class="badge bg-primary">Ordem: {{ routine_exercise.order }}</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
+
+    <!-- Imagem do Exercício -->
     <div class="col-md-4">
         <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-image"></i> Imagem</h5>
+            </div>
             <div class="card-body text-center">
                 {% if exercise.thumbnail %}
                     <img src="{{ exercise.thumbnail.url }}" class="img-fluid rounded" alt="{{ exercise.exercise_name }}" onerror="this.src='{% static 'images/no-image.svg' %}'">

@@ -1,15 +1,411 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Editar Treino{% else %}Atribuir Treino{% endif %} - Muscle Track{% endblock %}
+
 {% block content %}
-<h1>{{ title|default:"Página" }}</h1>
-<div class="card"><div class="card-body">
-{% if form %}
-<form method="post" enctype="multipart/form-data">
-{% csrf_token %}{{ form|crispy }}
-<button type="submit" class="btn btn-primary">Salvar</button>
-</form>
-{% else %}
-<p>Conteúdo da página</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-clipboard-plus"></i> {% if is_edit %}Editar Treino{% else %}Atribuir Treino ao Aluno{% endif %}</h1>
+    <a href="{% url 'core:student_list' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informações do Treino</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" id="personRoutineForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="template_id" id="templateId" value="">
+                    <input type="hidden" name="exercises_data" id="exercisesData" value="[]">
+
+                    <div class="mb-3">
+                        {{ form.person.label_tag }}
+                        {{ form.person }}
+                        {% if form.person.errors %}
+                            <div class="text-danger">{{ form.person.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    {% if not is_edit %}
+                    <div class="mb-3">
+                        <label class="form-label">Template de Treino</label>
+                        <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#templateModal">
+                            <i class="bi bi-search"></i> <span id="selectedTemplateName">Selecionar Template</span>
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        {{ form.routine_name.label_tag }}
+                        {{ form.routine_name }}
+                        {% if form.routine_name.errors %}
+                            <div class="text-danger">{{ form.routine_name.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.description.label_tag }}
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.difficulty_level.label_tag }}
+                            {{ form.difficulty_level }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.estimated_duration.label_tag }}
+                            {{ form.estimated_duration }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            {{ form.routine_date.label_tag }}
+                            {{ form.routine_date }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form.start_date.label_tag }}
+                            {{ form.start_date }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form.end_date.label_tag }}
+                            {{ form.end_date }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.notes.label_tag }}
+                        {{ form.notes }}
+                    </div>
+
+                    <div class="form-check mb-3">
+                        {{ form.is_active }}
+                        {{ form.is_active.label_tag }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-list-ol"></i> Exercícios</h5>
+                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#exerciseModal">
+                    <i class="bi bi-plus"></i> Adicionar
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="exercisesList" class="list-group">
+                    {% if is_edit and current_exercises %}
+                        {% for ex in current_exercises %}
+                        <div class="list-group-item" data-exercise-id="{{ ex.exercise.id }}" data-sets="{{ ex.sets }}" data-reps="{{ ex.reps }}" data-rest="{{ ex.rest_seconds }}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ ex.exercise.exercise_name }}</strong>
+                                    <br><small class="text-muted">{{ ex.sets }}x{{ ex.reps }} • {{ ex.rest_seconds }}s</small>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-danger remove-exercise">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <p class="text-muted text-center">Nenhum exercício adicionado</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-primary w-100 mt-3" onclick="submitForm()">
+            <i class="bi bi-check-circle"></i> {% if is_edit %}Atualizar Treino{% else %}Criar Treino{% endif %}
+        </button>
+    </div>
+</div>
+
+<!-- Modal de seleção de template -->
+<div class="modal fade" id="templateModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-clipboard-check"></i> Selecionar Template de Treino</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="templateSearch" class="form-control mb-3" placeholder="Buscar template...">
+                <div id="templatesList" class="list-group">
+                    <!-- Templates will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de seleção de exercício -->
+<div class="modal fade" id="exerciseModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Adicionar Exercício</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="exerciseSearch" class="form-control mb-3" placeholder="Buscar exercício...">
+                <div id="exerciseSearchList" class="list-group mb-3" style="max-height: 300px; overflow-y: auto;">
+                    <!-- Exercises will be loaded here -->
+                </div>
+                <div id="exerciseConfig" style="display: none;">
+                    <h6>Configuração</h6>
+                    <input type="hidden" id="selectedExerciseId">
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label>Séries</label>
+                            <input type="number" id="exerciseSets" class="form-control" value="3" min="1">
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label>Repetições</label>
+                            <input type="number" id="exerciseReps" class="form-control" value="12" min="1">
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label>Descanso (s)</label>
+                            <input type="number" id="exerciseRest" class="form-control" value="60" min="0">
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary w-100 mt-2" onclick="addExercise()">
+                        Adicionar ao Treino
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let allRoutines = [];
+let allExercises = [];
+let selectedExercises = [];
+
+// Load templates
+fetch('{% url "core:api_routines_list" %}')
+    .then(response => response.json())
+    .then(data => {
+        allRoutines = data;
+        displayRoutines(data);
+    });
+
+// Load exercises
+fetch('{% url "core:api_exercises_list" %}')
+    .then(response => response.json())
+    .then(data => {
+        allExercises = data;
+    });
+
+// Load existing exercises if editing
+{% if is_edit and current_exercises %}
+selectedExercises = [
+    {% for ex in current_exercises %}
+    {
+        exercise_id: {{ ex.exercise.id }},
+        name: "{{ ex.exercise.exercise_name|escapejs }}",
+        sets: {{ ex.sets }},
+        reps: {{ ex.reps }},
+        rest_seconds: {{ ex.rest_seconds }}
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
 {% endif %}
-</div></div>
+
+function displayRoutines(routines) {
+    const list = document.getElementById('templatesList');
+    list.innerHTML = '';
+
+    routines.forEach(routine => {
+        const item = document.createElement('a');
+        item.href = '#';
+        item.className = 'list-group-item list-group-item-action';
+        item.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1">${routine.name}</h6>
+                    <small class="text-muted">${routine.description || ''}</small>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-secondary">${routine.difficulty_display}</span>
+                    <br><small class="text-muted">${routine.exercises_count} exercícios • ${routine.estimated_duration}min</small>
+                </div>
+            </div>
+        `;
+        item.onclick = (e) => {
+            e.preventDefault();
+            selectTemplate(routine);
+        };
+        list.appendChild(item);
+    });
+}
+
+async function selectTemplate(routine) {
+    document.getElementById('templateId').value = routine.id;
+    document.getElementById('selectedTemplateName').textContent = routine.name;
+    document.getElementById('id_routine_name').value = routine.name;
+    document.getElementById('id_description').value = routine.description;
+    document.getElementById('id_difficulty_level').value = routine.difficulty_level;
+    document.getElementById('id_estimated_duration').value = routine.estimated_duration;
+
+    // Load exercises from template
+    try {
+        const response = await fetch(`/api/routines/${routine.id}/exercises/`);
+        const exercises = await response.json();
+
+        selectedExercises = exercises.map(ex => ({
+            exercise_id: ex.exercise_id,
+            name: ex.name,
+            sets: ex.sets,
+            reps: ex.reps,
+            rest_seconds: ex.rest_seconds,
+            notes: ex.notes || ''
+        }));
+
+        updateExercisesList();
+    } catch (error) {
+        console.error('Erro ao carregar exercícios do template:', error);
+        selectedExercises = [];
+        updateExercisesList();
+    }
+
+    bootstrap.Modal.getInstance(document.getElementById('templateModal')).hide();
+}
+
+// Template search
+document.getElementById('templateSearch')?.addEventListener('input', (e) => {
+    const search = e.target.value.toLowerCase();
+    const filtered = allRoutines.filter(r =>
+        r.name.toLowerCase().includes(search) ||
+        (r.description && r.description.toLowerCase().includes(search))
+    );
+    displayRoutines(filtered);
+});
+
+// Exercise search
+document.getElementById('exerciseSearch')?.addEventListener('input', (e) => {
+    const search = e.target.value.toLowerCase();
+    const filtered = allExercises.filter(ex =>
+        ex.name.toLowerCase().includes(search)
+    );
+    displayExercises(filtered);
+});
+
+function displayExercises(exercises) {
+    const list = document.getElementById('exerciseSearchList');
+    list.innerHTML = '';
+
+    exercises.forEach(exercise => {
+        const item = document.createElement('a');
+        item.href = '#';
+        item.className = 'list-group-item list-group-item-action';
+        item.innerHTML = `
+            <div class="d-flex justify-content-between">
+                <div>
+                    <strong>${exercise.name}</strong>
+                    <br><small class="text-muted">${exercise.muscle_group_display}</small>
+                </div>
+                <small class="text-muted">${exercise.default_sets}x${exercise.default_reps}</small>
+            </div>
+        `;
+        item.onclick = (e) => {
+            e.preventDefault();
+            selectExercise(exercise);
+        };
+        list.appendChild(item);
+    });
+}
+
+function selectExercise(exercise) {
+    document.getElementById('selectedExerciseId').value = exercise.id;
+    document.getElementById('exerciseSets').value = exercise.default_sets;
+    document.getElementById('exerciseReps').value = exercise.default_reps;
+    document.getElementById('exerciseSearchList').style.display = 'none';
+    document.getElementById('exerciseConfig').style.display = 'block';
+}
+
+function addExercise() {
+    const exerciseId = parseInt(document.getElementById('selectedExerciseId').value);
+    const sets = parseInt(document.getElementById('exerciseSets').value);
+    const reps = parseInt(document.getElementById('exerciseReps').value);
+    const rest = parseInt(document.getElementById('exerciseRest').value);
+
+    const exercise = allExercises.find(e => e.id === exerciseId);
+    if (!exercise) return;
+
+    selectedExercises.push({
+        exercise_id: exerciseId,
+        name: exercise.name,
+        sets: sets,
+        reps: reps,
+        rest_seconds: rest
+    });
+
+    updateExercisesList();
+
+    // Reset
+    document.getElementById('exerciseConfig').style.display = 'none';
+    document.getElementById('exerciseSearchList').style.display = 'block';
+    bootstrap.Modal.getInstance(document.getElementById('exerciseModal')).hide();
+}
+
+function updateExercisesList() {
+    const list = document.getElementById('exercisesList');
+    list.innerHTML = '';
+
+    if (selectedExercises.length === 0) {
+        list.innerHTML = '<p class="text-muted text-center">Nenhum exercício adicionado</p>';
+        return;
+    }
+
+    selectedExercises.forEach((ex, index) => {
+        const item = document.createElement('div');
+        item.className = 'list-group-item';
+        item.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>${ex.name}</strong>
+                    <br><small class="text-muted">${ex.sets}x${ex.reps} • ${ex.rest_seconds}s</small>
+                </div>
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeExercise(${index})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+function removeExercise(index) {
+    selectedExercises.splice(index, 1);
+    updateExercisesList();
+}
+
+function submitForm() {
+    document.getElementById('exercisesData').value = JSON.stringify(selectedExercises);
+    document.getElementById('personRoutineForm').submit();
+}
+
+// Show exercise modal
+document.getElementById('exerciseModal')?.addEventListener('show.bs.modal', () => {
+    displayExercises(allExercises);
+    document.getElementById('exerciseConfig').style.display = 'none';
+    document.getElementById('exerciseSearchList').style.display = 'block';
+});
+</script>
 {% endblock %}

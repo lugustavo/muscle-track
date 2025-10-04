@@ -6,7 +6,9 @@
       "Bash(python:*)",
       "Bash(venv\\Scripts\\pip install:*)",
       "Bash(.\\venv\\Scripts\\pip install:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(del coremigrations0005_alter_personroutineexercise_options_and_more.py)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

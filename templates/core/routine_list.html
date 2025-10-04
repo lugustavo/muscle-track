@@ -91,7 +91,7 @@
                         <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Inativos</option>
                     </select>
                 </div>
-            <div class="col-md-2">
+            <!--<div class="col-md-2">
                 <label class="form-label"><i class="bi bi-grid-3x3"></i> Visualização</label>
                 <div class="view-toggle">
                     <a href="?search={{ search }}&difficulty={{ selected_difficulty }}&view=grid"
@@ -103,13 +103,13 @@
                         <i class="bi bi-list-ul"></i> Lista
                     </a>
                 </div>
-            </div>
+            </div>-->
         </div>
     </form>
 </div>
 
 <!-- Resultados -->
-<div class="mb-3">
+<!--<div class="mb-3">
     <small class="text-muted">
         <i class="bi bi-info-circle"></i>
         Encontrados <strong>{{ routines.count }}</strong> treino(s)
@@ -120,6 +120,32 @@
             com dificuldade <strong>{{ selected_difficulty|title }}</strong>
         {% endif %}
     </small>
+</div> -->
+
+<!-- View Toggle and Count -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="mb-3">
+        <small class="text-muted">
+            <i class="bi bi-info-circle"></i>
+            Encontrados <strong>{{ routines.count }}</strong> treino(s)
+            {% if search %}
+                para "<strong>{{ search }}</strong>"
+            {% endif %}
+            {% if selected_difficulty %}
+                com dificuldade <strong>{{ selected_difficulty|title }}</strong>
+            {% endif %}
+        </small>
+    </div>
+    <div class="btn-group" role="group">
+        <a href="?{% if search %}search={{ search }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}view=grid"
+            class="btn btn-sm {% if view_mode == 'grid' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            <i class="bi bi-grid-3x3-gap"></i> Grade
+        </a>
+        <a href="?{% if search %}search={{ search }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}view=list"
+            class="btn btn-sm {% if view_mode == 'list' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            <i class="bi bi-list-ul"></i> Lista
+        </a>
+    </div>
 </div>
 
 <!-- Visualização Grid -->

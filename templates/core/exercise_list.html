@@ -68,9 +68,9 @@
                 <label for="muscle_group" class="form-label"><i class="bi bi-filter"></i> Grupo Muscular</label>
                 <select class="form-select" id="muscle_group" name="muscle_group" onchange="document.getElementById('filterForm').submit();">
                     <option value="">Todos os grupos</option>
-                    {% for value, label in muscle_groups %}
-                        <option value="{{ value }}" {% if selected_muscle_group == value %}selected{% endif %}>
-                            {{ label }}
+                    {% for muscle_group in muscle_groups %}
+                        <option value="{{ muscle_group.id }}" {% if selected_muscle_group == muscle_group.id|stringformat:"s" %}selected{% endif %}>
+                            {{ muscle_group.name }}
                         </option>
                     {% endfor %}
                 </select>
@@ -110,7 +110,7 @@
 {% if view_mode == 'grid' %}
 <div class="row g-4 grid-view">
     {% for exercise in exercises %}
-    <div class="col-md-6 col-lg-4">
+    <div class="col-md-6 col-lg-2">
         <div class="card exercise-card">
             {% if exercise.thumbnail %}
                 <img src="{{ exercise.thumbnail.url }}" class="card-img-top exercise-thumbnail" alt="{{ exercise.exercise_name }}" onerror="this.src='{% static 'images/no-image.svg' %}'">
@@ -122,7 +122,7 @@
             <div class="card-body">
                 <h5 class="card-title">{{ exercise.exercise_name }}</h5>
                 <div class="mb-2">
-                    <span class="badge bg-secondary">{{ exercise.get_muscle_group_display }}</span>
+                    <span class="badge bg-secondary">{{ exercise.muscle_group.name }}</span>
                     <span class="badge bg-info">{{ exercise.default_sets }}x{{ exercise.default_reps }}</span>
                 </div>
                 <p class="card-text text-muted small">{{ exercise.description|truncatewords:15 }}</p>
@@ -165,7 +165,7 @@
             <div class="exercise-info">
                 <h5 class="mb-1">{{ exercise.exercise_name }}</h5>
                 <div class="mb-2">
-                    <span class="badge bg-secondary">{{ exercise.get_muscle_group_display }}</span>
+                    <span class="badge bg-secondary">{{ exercise.muscle_group.name }}</span>
                     <span class="badge bg-info">{{ exercise.default_sets }} séries x {{ exercise.default_reps }} reps</span>
                 </div>
                 <p class="text-muted small mb-0">{{ exercise.description|truncatewords:25 }}</p>

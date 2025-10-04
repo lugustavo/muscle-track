@@ -4,13 +4,70 @@ from .models import Person, Exercise, Routine, RoutineExercise, PersonRoutine
 
 
 class PersonForm(forms.ModelForm):
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'email@exemplo.com'}),
+        label='Email',
+        help_text='O aluno receberá um email de confirmação neste endereço'
+    )
+
     class Meta:
         model = Person
-        fields = ['user', 'person_name', 'address', 'city', 'state', 'zip_code',
+        fields = ['person_name', 'email', 'avatar', 'address', 'city', 'state', 'zip_code',
                   'phone', 'birth_date', 'notes', 'is_active']
         widgets = {
-            'birth_date': forms.DateInput(attrs={'type': 'date'}),
-            'notes': forms.Textarea(attrs={'rows': 3}),
+            'birth_date': forms.DateInput(
+                attrs={'type': 'date', 'class': 'form-control'},
+                format='%Y-%m-%d'
+            ),
+            'notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'person_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'address': forms.TextInput(attrs={'class': 'form-control'}),
+            'city': forms.TextInput(attrs={'class': 'form-control'}),
+            'state': forms.TextInput(attrs={'class': 'form-control', 'maxlength': '2'}),
+            'zip_code': forms.TextInput(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'avatar': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Se estiver editando, preencher o email do usuário existente
+        if self.instance and self.instance.pk and self.instance.user:
+            self.fields['email'].initial = self.instance.user.email
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        # Verificar se o email já está em uso (exceto pelo usuário atual em edição)
+        user_exists = User.objects.filter(email=email)
+        if self.instance and self.instance.pk and self.instance.user:
+            user_exists = user_exists.exclude(pk=self.instance.user.pk)
+
+        if user_exists.exists():
+            raise forms.ValidationError('Este email já está cadastrado no sistema.')
+
+        return email
+
+
+class StudentProfileForm(forms.ModelForm):
+    """Form for students to edit their own profile (restricted fields)"""
+    class Meta:
+        model = Person
+        fields = ['person_name', 'avatar', 'address', 'city', 'state', 'zip_code',
+                  'phone', 'birth_date', 'notes']
+        widgets = {
+            'birth_date': forms.DateInput(
+                attrs={'type': 'date', 'class': 'form-control'},
+                format='%Y-%m-%d'
+            ),
+            'notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control', 'placeholder': 'Observações pessoais...'}),
+            'person_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'address': forms.TextInput(attrs={'class': 'form-control'}),
+            'city': forms.TextInput(attrs={'class': 'form-control'}),
+            'state': forms.TextInput(attrs={'class': 'form-control', 'maxlength': '2'}),
+            'zip_code': forms.TextInput(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'avatar': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
         }
 
 
@@ -48,13 +105,19 @@ class RoutineExerciseForm(forms.ModelForm):
 class PersonRoutineForm(forms.ModelForm):
     class Meta:
         model = PersonRoutine
-        fields = ['person', 'routine', 'routine_date', 'start_date', 'end_date',
+        fields = ['person', 'routine_name', 'description', 'difficulty_level',
+                  'estimated_duration', 'routine_date', 'start_date', 'end_date',
                   'notes', 'is_active']
         widgets = {
-            'routine_date': forms.DateInput(attrs={'type': 'date'}),
-            'start_date': forms.DateInput(attrs={'type': 'date'}),
-            'end_date': forms.DateInput(attrs={'type': 'date'}),
-            'notes': forms.Textarea(attrs={'rows': 3}),
+            'routine_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'routine_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'difficulty_level': forms.Select(attrs={'class': 'form-select'}),
+            'estimated_duration': forms.NumberInput(attrs={'class': 'form-control'}),
+            'person': forms.Select(attrs={'class': 'form-select'}),
         }
 
 

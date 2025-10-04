@@ -1,17 +1,91 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .avatar-preview {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 3px solid #dee2e6;
+        margin-bottom: 1rem;
+    }
+    .avatar-upload-container {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <h1 class="mb-4">{{ title }}</h1>
 
 <div class="card">
     <div class="card-body">
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            {{ form|crispy }}
-            <button type="submit" class="btn btn-primary">Salvar</button>
-            <a href="{% url 'core:student_list' %}" class="btn btn-secondary">Cancelar</a>
+
+            <!-- Avatar Upload Section -->
+            <div class="avatar-upload-container">
+                <div id="avatarPreview">
+                    {% if form.instance.avatar %}
+                        <img src="{{ form.instance.avatar.url }}" class="avatar-preview" alt="Avatar" id="previewImage">
+                    {% else %}
+                        <img src="{% static 'images/default-avatar.svg' %}" class="avatar-preview" alt="Avatar padrão" id="previewImage">
+                    {% endif %}
+                </div>
+                <div class="mb-2">
+                    <label for="{{ form.avatar.id_for_label }}" class="form-label fw-bold">
+                        <i class="bi bi-camera"></i> {{ form.avatar.label }}
+                    </label>
+                    {{ form.avatar }}
+                    {% if form.avatar.help_text %}
+                        <small class="form-text text-muted d-block">{{ form.avatar.help_text }}</small>
+                    {% endif %}
+                    {% if form.avatar.errors %}
+                        <div class="text-danger">{{ form.avatar.errors }}</div>
+                    {% endif %}
+                </div>
+                <small class="text-muted">
+                    <i class="bi bi-info-circle"></i> Formatos: JPG, PNG, GIF, WEBP | Tamanho máx: 5MB | Dimensões: 100x100px a 2000x2000px
+                </small>
+            </div>
+
+            <!-- Other Form Fields -->
+            {% for field in form %}
+                {% if field.name != 'avatar' %}
+                    {{ field|as_crispy_field }}
+                {% endif %}
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i> Salvar
+            </button>
+            <a href="{% url 'core:student_list' %}" class="btn btn-secondary">
+                <i class="bi bi-x-circle"></i> Cancelar
+            </a>
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Preview avatar before upload
+document.getElementById('{{ form.avatar.id_for_label }}').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImage').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
 {% endblock %}

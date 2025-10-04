@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
-{% block title %}Executar Treino - {{ person_routine.routine.routine_name }}{% endblock %}
+{% block title %}Executar Treino - {{ person_routine.routine_name }}{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-8 mx-auto">
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
-                <h3 class="mb-0"><i class="bi bi-fire"></i> {{ person_routine.routine.routine_name }}</h3>
+                <h3 class="mb-0"><i class="bi bi-fire"></i> {{ person_routine.routine_name }}</h3>
             </div>
             <div class="card-body">
                 {% if active_session %}

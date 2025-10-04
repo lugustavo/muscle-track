@@ -4,7 +4,7 @@
     <circle cx="50" cy="50" r="40" opacity="0.3"/>
     <path d="M50 20 L50 80 M20 50 L80 50" stroke="#6c757d" stroke-width="4" stroke-linecap="round"/>
   </g>
-  <text x="200" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#6c757d">
+  <text x="200" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#6c757d">
     Sem Imagem
   </text>
 </svg>

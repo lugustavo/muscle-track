@@ -25,9 +25,9 @@
                     <tr>
                         <td>{{ session.start_time|date:"d/m/Y" }}</td>
                         <td>
-                            <strong>{{ session.person_routine.routine.routine_name }}</strong>
+                            <strong>{{ session.person_routine.routine_name }}</strong>
                             <br>
-                            <small class="text-muted">{{ session.person_routine.routine.get_difficulty_level_display }}</small>
+                            <small class="text-muted">{{ session.person_routine.get_difficulty_level_display }}</small>
                         </td>
                         <td>{{ session.start_time|date:"H:i" }}</td>
                         <td>
@@ -112,7 +112,7 @@ const sessions = [
     {
         date: '{{ session.start_time|date:"d/m" }}',
         duration: {{ session.duration_minutes|default:0 }},
-        workout: '{{ session.person_routine.routine.routine_name|truncatechars:15 }}'
+        workout: '{{ session.person_routine.routine_name|truncatechars:15 }}'
     },
     {% endfor %}
 ];
