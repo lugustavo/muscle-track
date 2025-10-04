@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Entrar - Muscle Track{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg border-0">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <img src="{% load static %}{% static 'images/favicon.svg' %}" alt="Muscle Track" width="64" height="64" class="mb-3">
+                    <h2 class="mb-2">Entrar</h2>
+                    <p class="text-muted">Bem-vindo de volta ao Muscle Track</p>
+                </div>
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <form method="post" action="{% url 'account_login' %}">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="{{ form.login.id_for_label }}" class="form-label">
+                            <i class="bi bi-envelope"></i> E-mail
+                        </label>
+                        <input type="email"
+                               name="{{ form.login.name }}"
+                               class="form-control form-control-lg {% if form.login.errors %}is-invalid{% endif %}"
+                               id="{{ form.login.id_for_label }}"
+                               placeholder="seu@email.com"
+                               value="{{ form.login.value|default:'' }}"
+                               required>
+                        {% if form.login.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.login.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.password.id_for_label }}" class="form-label">
+                            <i class="bi bi-lock"></i> Senha
+                        </label>
+                        <input type="password"
+                               name="{{ form.password.name }}"
+                               class="form-control form-control-lg {% if form.password.errors %}is-invalid{% endif %}"
+                               id="{{ form.password.id_for_label }}"
+                               placeholder="••••••••"
+                               required>
+                        {% if form.password.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.password.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox"
+                               name="{{ form.remember.name }}"
+                               class="form-check-input"
+                               id="{{ form.remember.id_for_label }}">
+                        <label class="form-check-label" for="{{ form.remember.id_for_label }}">
+                            Lembrar de mim
+                        </label>
+                    </div>
+
+                    {% if redirect_field_value %}
+                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                    {% endif %}
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                        <i class="bi bi-box-arrow-in-right"></i> Entrar
+                    </button>
+
+                    <div class="text-center">
+                        <a href="{% url 'account_reset_password' %}" class="text-decoration-none">
+                            <i class="bi bi-question-circle"></i> Esqueceu sua senha?
+                        </a>
+                    </div>
+                </form>
+
+                {% if SOCIALACCOUNT_ENABLED %}
+                <hr class="my-4">
+                <div class="text-center">
+                    <p class="text-muted mb-3">Ou use uma conta de terceiros</p>
+                    <div class="d-grid gap-2">
+                        <a href="#" class="btn btn-outline-secondary">
+                            <i class="bi bi-facebook"></i> Facebook
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary">
+                            <i class="bi bi-github"></i> GitHub
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary">
+                            <i class="bi bi-google"></i> Google
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <hr class="my-4">
+                <div class="text-center">
+                    <p class="mb-0">
+                        Não tem uma conta?
+                        <a href="{% url 'account_signup' %}" class="text-decoration-none fw-bold">
+                            Cadastrar-se
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
