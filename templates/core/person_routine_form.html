@@ -25,9 +25,17 @@
 
                     <div class="mb-3">
                         {{ form.person.label_tag }}
-                        {{ form.person }}
-                        {% if form.person.errors %}
-                            <div class="text-danger">{{ form.person.errors }}</div>
+                        {% if selected_person %}
+                            <input type="text" class="form-control" value="{{ selected_person.person_name }}" readonly style="background-color: #e9ecef;">
+                            <input type="hidden" name="person" value="{{ selected_person.pk }}">
+                            <!--<small class="form-text text-muted">
+                                <i class="bi bi-info-circle"></i> O aluno foi pré-selecionado e não pode ser alterado nesta tela.
+                            </small>-->
+                        {% else %}
+                            {{ form.person }}
+                            {% if form.person.errors %}
+                                <div class="text-danger">{{ form.person.errors }}</div>
+                            {% endif %}
                         {% endif %}
                     </div>
 

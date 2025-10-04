@@ -109,9 +109,18 @@ class PersonRoutineForm(forms.ModelForm):
                   'estimated_duration', 'routine_date', 'start_date', 'end_date',
                   'notes', 'is_active']
         widgets = {
-            'routine_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'routine_date': forms.DateInput(
+                attrs={'type': 'date', 'class': 'form-control'},
+                format='%Y-%m-%d'
+            ),
+            'start_date': forms.DateInput(
+                attrs={'type': 'date', 'class': 'form-control'},
+                format='%Y-%m-%d'
+            ),
+            'end_date': forms.DateInput(
+                attrs={'type': 'date', 'class': 'form-control'},
+                format='%Y-%m-%d'
+            ),
             'description': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'routine_name': forms.TextInput(attrs={'class': 'form-control'}),

@@ -145,6 +145,9 @@
     </div>
 </div>
 
+<!-- SortableJS para drag and drop -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
 <!-- Edit Exercise Modal -->
 <div class="modal fade" id="editExerciseModal" tabindex="-1" aria-labelledby="editExerciseModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -189,7 +192,7 @@ selectedExercises = [
     {
         id: {{ re.exercise.pk }},
         name: "{{ re.exercise.exercise_name|escapejs }}",
-        muscle_group: "{{ re.exercise.get_muscle_group_display|escapejs }}",
+        muscle_group: "{{ re.exercise.muscle_group.name|escapejs }}",
         sets: {{ re.sets }},
         reps: {{ re.reps }},
         rest: {{ re.rest_seconds }},
@@ -352,6 +355,7 @@ function updateSelectedExercisesList() {
     selectedExercises.forEach((exercise, index) => {
         const item = document.createElement('div');
         item.className = 'list-group-item';
+        item.setAttribute('data-exercise-id', exercise.id);
         item.innerHTML = `
             <div class="d-flex align-items-center">
                 <div class="me-3" style="cursor: move;">
@@ -383,6 +387,41 @@ function updateSelectedExercisesList() {
             </div>
         `;
         list.appendChild(item);
+    });
+
+    // Inicializar Sortable para drag and drop
+    initializeSortable();
+}
+
+// Inicializar Sortable para drag and drop
+function initializeSortable() {
+    const list = document.getElementById('selectedExercisesList');
+    if (!list || list.children.length === 0) return;
+
+    new Sortable(list, {
+        animation: 150,
+        handle: '.bi-grip-vertical',
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        dragClass: 'sortable-drag',
+        onEnd: function(evt) {
+            // Reordenar o array selectedExercises baseado na nova ordem
+            const newOrder = Array.from(list.children).map(item => {
+                return parseInt(item.getAttribute('data-exercise-id'));
+            });
+
+            const reordered = [];
+            newOrder.forEach(id => {
+                const exercise = selectedExercises.find(e => e.id === id);
+                if (exercise) {
+                    reordered.push(exercise);
+                }
+            });
+
+            selectedExercises = reordered;
+            updateSelectedExercisesList();
+            updateSummary();
+        }
     });
 }
 
@@ -462,6 +501,29 @@ document.getElementById('muscleGroupFilter').addEventListener('change', function
 .exercise-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Sortable drag and drop styles */
+.sortable-ghost {
+    opacity: 0.4;
+    background: #f8f9fa;
+}
+
+.sortable-chosen {
+    background: #e7f3ff;
+    border-left: 3px solid #0d6efd;
+}
+
+.sortable-drag {
+    opacity: 0.8;
+}
+
+#selectedExercisesList .list-group-item {
+    transition: all 0.2s;
+}
+
+#selectedExercisesList .list-group-item:hover {
+    background-color: #f8f9fa;
 }
 </style>
 {% endblock %}

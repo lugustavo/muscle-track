@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Progresso - {{ person_routine.routine_name }} - Muscle Track{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1><i class="bi bi-bar-chart-line"></i> Progresso do Treino</h1>
+        <h4 class="text-muted mb-0">{{ person_routine.routine_name }}</h4>
+        <small class="text-muted">Aluno: {{ student.person_name }}</small>
+    </div>
+    <a href="{% url 'core:student_detail' student.pk %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar ao Aluno
+    </a>
+</div>
+
+<!-- Informações do Treino -->
+<div class="card mb-4 border-0 shadow-sm">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-8">
+                <h5><i class="bi bi-info-circle"></i> Detalhes do Treino</h5>
+                <p class="mb-1"><strong>Dificuldade:</strong>
+                    <span class="badge bg-{{ person_routine.difficulty_level }}">
+                        {{ person_routine.get_difficulty_level_display }}
+                    </span>
+                </p>
+                <p class="mb-1"><strong>Duração Estimada:</strong> {{ person_routine.estimated_duration }} minutos</p>
+                {% if person_routine.description %}
+                <p class="mb-1"><strong>Descrição:</strong> {{ person_routine.description }}</p>
+                {% endif %}
+                <p class="mb-0">
+                    <strong>Data de Início:</strong>
+                    {{ person_routine.start_date|date:"d/m/Y"|default:"Não definida" }}
+                    {% if person_routine.end_date %}
+                    | <strong>Data de Término:</strong> {{ person_routine.end_date|date:"d/m/Y" }}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-4">
+                <h5><i class="bi bi-list-check"></i> Exercícios ({{ routine_exercises.count }})</h5>
+                <ul class="list-unstyled mb-0">
+                    {% for ex in routine_exercises|slice:":5" %}
+                    <li class="mb-1">
+                        <small>{{ ex.order }}. {{ ex.exercise.exercise_name }}</small>
+                    </li>
+                    {% endfor %}
+                    {% if routine_exercises.count > 5 %}
+                    <li><small class="text-muted">+ {{ routine_exercises.count|add:"-5" }} mais...</small></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estatísticas do Progresso -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"></i>
+                <h2 class="mt-2 mb-0">{{ total_sessions }}</h2>
+                <p class="text-muted mb-0">Sessões Concluídas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-calendar-check text-primary" style="font-size: 2rem;"></i>
+                <h2 class="mt-2 mb-0">{{ sessions_last_month }}</h2>
+                <p class="text-muted mb-0">Último Mês</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-clock-history text-info" style="font-size: 2rem;"></i>
+                <h2 class="mt-2 mb-0">{{ avg_duration }}</h2>
+                <p class="text-muted mb-0">Duração Média (min)</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-percent text-warning" style="font-size: 2rem;"></i>
+                <h2 class="mt-2 mb-0">{{ completion_rate }}%</h2>
+                <p class="text-muted mb-0">Taxa de Conclusão</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if completed_sessions %}
+<!-- Gráfico de Evolução -->
+<div class="card mb-4 border-0 shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="bi bi-graph-up"></i> Evolução da Duração</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="durationChart" style="max-height: 300px;"></canvas>
+    </div>
+</div>
+
+<!-- Histórico de Sessões -->
+<div class="card mb-4 border-0 shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Histórico de Sessões</h5>
+        <span class="badge bg-primary">{{ completed_sessions.count }} sessões</span>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Data</th>
+                        <th>Início</th>
+                        <th>Término</th>
+                        <th>Duração</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in completed_sessions %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ session.start_time|date:"d/m/Y" }}</td>
+                        <td>{{ session.start_time|date:"H:i" }}</td>
+                        <td>
+                            {% if session.end_time %}
+                                {{ session.end_time|date:"H:i" }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if session.duration_minutes %}
+                                <span class="badge bg-info">{{ session.duration_minutes }} min</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if session.is_completed %}
+                                <span class="badge bg-success">Concluído</span>
+                            {% else %}
+                                <span class="badge bg-warning">Em andamento</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'core:workout_execute' session.pk %}"
+                               class="btn btn-sm btn-outline-primary"
+                               title="Ver detalhes">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const sessions = [
+    {% for session in recent_sessions reversed %}
+    {
+        date: '{{ session.start_time|date:"d/m" }}',
+        duration: {{ session.duration_minutes|default:0 }}
+    },
+    {% endfor %}
+];
+
+const ctx = document.getElementById('durationChart');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: sessions.map(s => s.date),
+        datasets: [{
+            label: 'Duração (minutos)',
+            data: sessions.map(s => s.duration),
+            backgroundColor: 'rgba(78, 205, 196, 0.2)',
+            borderColor: 'rgba(78, 205, 196, 1)',
+            borderWidth: 2,
+            tension: 0.3,
+            fill: true,
+            pointRadius: 4,
+            pointHoverRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Duração (min)'
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Data da Sessão'
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top'
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                padding: 12,
+                titleFont: {
+                    size: 14
+                },
+                bodyFont: {
+                    size: 13
+                }
+            }
+        }
+    }
+});
+</script>
+
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> Ainda não há sessões concluídas para este treino.
+</div>
+{% endif %}
+
+{% endblock %}

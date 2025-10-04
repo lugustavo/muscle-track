@@ -35,7 +35,7 @@
         </div>
     </div>
     <div>
-        <a href="{% url 'core:person_routine_create' %}" class="btn btn-success">
+        <a href="{% url 'core:person_routine_create' %}?person={{ student.pk }}" class="btn btn-success">
             <i class="bi bi-plus-circle"></i> Atribuir Treino
         </a>
         <a href="{% url 'core:student_edit' student.pk %}" class="btn btn-primary">
@@ -106,17 +106,21 @@
                         <strong>Email:</strong><br>
                         <span>{{ student.user.email|default:"-" }}</span>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <strong>Telefone:</strong><br>
                         <span>{{ student.phone|default:"-" }}</span>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <strong>Cidade:</strong><br>
                         <span>{{ student.city|default:"-" }}</span>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <strong>Data de Nascimento:</strong><br>
                         <span>{{ student.birth_date|date:"d/m/Y"|default:"-" }}</span>
+                    </div>
+                    <div class="col-md-2">
+                        <strong>Idade:</strong><br>
+                        <span>{{ student.age|default:"-" }}</span>
                     </div>
                 </div>
             </div>
@@ -131,7 +135,7 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-lightning-charge"></i> Treinos Ativos</h5>
-                <a href="{% url 'core:person_routine_create' %}" class="btn btn-sm btn-success">
+                <a href="{% url 'core:person_routine_create' %}?person={{ student.pk }}" class="btn btn-sm btn-success">
                     <i class="bi bi-plus-circle"></i> Adicionar
                 </a>
             </div>
@@ -180,7 +184,7 @@
                 {% else %}
                     <div class="alert alert-info mb-0">
                         <i class="bi bi-info-circle"></i> Nenhum treino ativo.
-                        <a href="{% url 'core:person_routine_create' %}" class="alert-link">Clique aqui para adicionar um treino.</a>
+                        <a href="{% url 'core:person_routine_create' %}?person={{ student.pk }}" class="alert-link">Clique aqui para adicionar um treino.</a>
                     </div>
                 {% endif %}
             </div>

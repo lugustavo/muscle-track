@@ -1,19 +1,148 @@
 {% extends 'base.html' %}
 
-{% block title %}Histórico de {{ student.person_name }} - Muscle Track{% endblock %}
+{% block title %}Histórico e Progresso de {{ student.person_name }} - Muscle Track{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-graph-up"></i> Histórico - {{ student.person_name }}</h1>
+    <div>
+        <h1><i class="bi bi-graph-up"></i> Histórico e Progresso</h1>
+        <p class="text-muted mb-0">{{ student.person_name }}</p>
+    </div>
     <a href="{% url 'core:student_detail' student.pk %}" class="btn btn-secondary">
         <i class="bi bi-arrow-left"></i> Voltar
     </a>
 </div>
 
+<!-- Estatísticas Principais -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"></i>
+                <h2 class="mt-2 mb-0">{{ total_sessions }}</h2>
+                <p class="text-muted mb-0">Sessões Concluídas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-calendar-month text-primary" style="font-size: 2rem;"></i>
+                <h2 class="mt-2 mb-0">{{ sessions_last_month }}</h2>
+                <p class="text-muted mb-0">Treinos no Último Mês</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-clock-history text-info" style="font-size: 2rem;"></i>
+                <h2 class="mt-2 mb-0">{{ avg_duration }}</h2>
+                <p class="text-muted mb-0">Duração Média (min)</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-bar-chart-fill text-warning" style="font-size: 2rem;"></i>
+                <h2 class="mt-2 mb-0">{{ avg_weekly_frequency }}</h2>
+                <p class="text-muted mb-0">Média Semanal (3m)</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cards Informativos -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-clipboard-check"></i> Treinos Atribuídos</h5>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">{{ total_routines_assigned }}</h3>
+                        <small class="text-muted">Total de treinos</small>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-success" style="font-size: 1rem;">{{ active_routines }} Ativos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-clock"></i> Última Sessão</h5>
+                {% if last_session %}
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1">{{ last_session.person_routine.routine_name }}</h6>
+                        <small class="text-muted">{{ last_session.start_time|date:"d/m/Y - H:i" }}</small>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-info" style="font-size: 1rem;">{{ last_session.duration_minutes|default:"0" }} min</span>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">Nenhuma sessão concluída ainda</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
 {% if completed_sessions %}
-<div class="card mb-4">
+
+<!-- Treinos Mais Realizados -->
+{% if sessions_by_routine %}
+<div class="card mb-4 border-0 shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="bi bi-trophy-fill text-warning"></i> Treinos Mais Realizados</h5>
+    </div>
     <div class="card-body">
-        <h5 class="card-title">Sessões de Treino Concluídas</h5>
+        <div class="row">
+            {% for routine in sessions_by_routine|slice:":3" %}
+            <div class="col-md-4">
+                <div class="card bg-light mb-3 mb-md-0">
+                    <div class="card-body">
+                        <h6 class="card-title">{{ routine.person_routine__routine_name }}</h6>
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">Sessões</small>
+                                <h4 class="mb-0 text-primary">{{ routine.count }}</h4>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-muted">Duração Média</small>
+                                <h4 class="mb-0 text-info">{{ routine.avg_duration|floatformat:0|default:"0" }}m</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Gráfico de Evolução -->
+<div class="card mb-4 border-0 shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="bi bi-bar-chart-line"></i> Evolução da Duração dos Treinos</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="evolutionChart" style="max-height: 300px;"></canvas>
+    </div>
+</div>
+
+<!-- Histórico de Sessões -->
+<div class="card mb-4 border-0 shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Histórico de Sessões</h5>
+    </div>
+    <div class="card-body">
         <div class="table-responsive">
             <table class="table table-striped table-hover">
                 <thead>
@@ -61,69 +190,17 @@
                 </tbody>
             </table>
         </div>
-
-        <!-- Estatísticas -->
-        <div class="row mt-4">
-            <div class="col-md-3">
-                <div class="card bg-light">
-                    <div class="card-body text-center">
-                        <h3 class="text-primary">{{ completed_sessions.count }}</h3>
-                        <p class="mb-0">Total de Treinos</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card bg-light">
-                    <div class="card-body text-center">
-                        <h3 class="text-success">
-                            {% widthratio completed_sessions|length 1 7 %}
-                        </h3>
-                        <p class="mb-0">Treinos/Semana</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card bg-light">
-                    <div class="card-body text-center">
-                        <h3 class="text-info">{{ student.routines.count }}</h3>
-                        <p class="mb-0">Treinos Atribuídos</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card bg-light">
-                    <div class="card-body text-center">
-                        <h3 class="text-warning">
-                            {% if completed_sessions %}
-                                {{ completed_sessions.0.duration_minutes|default:"0" }}
-                            {% else %}
-                                0
-                            {% endif %}
-                        </h3>
-                        <p class="mb-0">Última Duração (min)</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Gráfico de Evolução -->
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title"><i class="bi bi-bar-chart"></i> Gráfico de Evolução</h5>
-        <canvas id="evolutionChart" style="max-height: 400px;"></canvas>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 const sessions = [
-    {% for session in completed_sessions reversed %}
+    {% for session in recent_sessions reversed %}
     {
-        date: '{{ session.start_time|date:"d/m/Y" }}',
+        date: '{{ session.start_time|date:"d/m" }}',
         duration: {{ session.duration_minutes|default:0 }},
-        workout: '{{ session.person_routine.routine_name }}'
+        workout: '{{ session.person_routine.routine_name|escapejs }}'
     },
     {% endfor %}
 ];

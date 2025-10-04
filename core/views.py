@@ -605,18 +605,73 @@ def person_routine_create(request):
         # Pre-fill person if provided in URL
         person_id = request.GET.get('person')
         initial_data = {}
+        selected_person = None
         if person_id:
             initial_data['person'] = person_id
+            try:
+                selected_person = Person.objects.get(pk=person_id)
+            except Person.DoesNotExist:
+                pass
         form = PersonRoutineForm(initial=initial_data)
 
-    return render(request, 'core/person_routine_form.html', {'form': form})
+    return render(request, 'core/person_routine_form.html', {
+        'form': form,
+        'selected_person': selected_person
+    })
 
 
 @login_required
 def person_routine_detail(request, pk):
-    """View person routine details"""
+    """View person routine progress - all sessions for this specific routine"""
+    from django.db.models import Avg, Count
+    from datetime import timedelta
+
     person_routine = get_object_or_404(PersonRoutine, pk=pk)
-    return render(request, 'core/person_routine_detail.html', {'person_routine': person_routine})
+
+    # Todas as sessões deste treino específico
+    all_sessions = WorkoutSession.objects.filter(
+        person_routine=person_routine
+    ).order_by('-start_time')
+
+    # Sessões concluídas
+    completed_sessions = all_sessions.filter(is_completed=True)
+
+    # Estatísticas
+    total_sessions = completed_sessions.count()
+
+    # Última sessão
+    last_session = completed_sessions.first()
+
+    # Duração média
+    avg_duration = completed_sessions.aggregate(avg=Avg('duration_minutes'))['avg'] or 0
+
+    # Sessões do último mês
+    one_month_ago = timezone.now() - timedelta(days=30)
+    sessions_last_month = completed_sessions.filter(start_time__gte=one_month_ago).count()
+
+    # Taxa de conclusão (sessões concluídas vs iniciadas)
+    total_started = all_sessions.count()
+    completion_rate = (total_sessions / total_started * 100) if total_started > 0 else 0
+
+    # Exercícios do treino
+    routine_exercises = person_routine.exercises.all().select_related('exercise').order_by('order')
+
+    # Sessões recentes para gráfico (últimas 20)
+    recent_sessions = completed_sessions[:20]
+
+    return render(request, 'core/person_routine_progress.html', {
+        'person_routine': person_routine,
+        'student': person_routine.person,
+        'all_sessions': all_sessions,
+        'completed_sessions': completed_sessions,
+        'recent_sessions': recent_sessions,
+        'total_sessions': total_sessions,
+        'last_session': last_session,
+        'avg_duration': round(avg_duration, 1),
+        'sessions_last_month': sessions_last_month,
+        'completion_rate': round(completion_rate, 1),
+        'routine_exercises': routine_exercises,
+    })
 
 
 @login_required
@@ -665,7 +720,8 @@ def person_routine_edit(request, pk):
         'form': form,
         'person_routine': person_routine,
         'current_exercises': current_exercises,
-        'is_edit': True
+        'is_edit': True,
+        'selected_person': person_routine.person  # Always show person as read-only in edit mode
     })
 
 
@@ -872,16 +928,64 @@ def my_history(request):
 
 @login_required
 def student_history(request, pk):
-    """View student's workout history"""
+    """View student's workout history with detailed statistics"""
+    from django.db.models import Avg, Sum, Count
+    from datetime import timedelta
+
     student = get_object_or_404(Person, pk=pk)
+
+    # Sessões concluídas
     completed_sessions = WorkoutSession.objects.filter(
         person_routine__person=student,
         is_completed=True
-    ).order_by('-start_time')
+    ).select_related('person_routine').order_by('-start_time')
+
+    # Estatísticas gerais
+    total_sessions = completed_sessions.count()
+
+    # Sessões do último mês
+    one_month_ago = timezone.now() - timedelta(days=30)
+    sessions_last_month = completed_sessions.filter(start_time__gte=one_month_ago).count()
+
+    # Duração média
+    avg_duration = completed_sessions.aggregate(avg=Avg('duration_minutes'))['avg'] or 0
+
+    # Total de treinos atribuídos (ativos e inativos)
+    total_routines_assigned = PersonRoutine.objects.filter(person=student).count()
+    active_routines = PersonRoutine.objects.filter(person=student, is_active=True).count()
+
+    # Última sessão
+    last_session = completed_sessions.first()
+
+    # Sessões por treino (para ver qual treino é mais realizado)
+    sessions_by_routine = completed_sessions.values(
+        'person_routine__routine_name'
+    ).annotate(
+        count=Count('id'),
+        avg_duration=Avg('duration_minutes')
+    ).order_by('-count')
+
+    # Dados para gráfico de evolução (últimas 30 sessões)
+    recent_sessions = completed_sessions[:30]
+
+    # Frequência semanal (últimos 3 meses)
+    three_months_ago = timezone.now() - timedelta(days=90)
+    sessions_three_months = completed_sessions.filter(start_time__gte=three_months_ago).count()
+    weeks_in_period = 12  # aproximadamente 3 meses
+    avg_weekly_frequency = sessions_three_months / weeks_in_period if weeks_in_period > 0 else 0
 
     return render(request, 'core/student_history.html', {
         'student': student,
-        'completed_sessions': completed_sessions
+        'completed_sessions': completed_sessions,
+        'recent_sessions': recent_sessions,
+        'total_sessions': total_sessions,
+        'sessions_last_month': sessions_last_month,
+        'avg_duration': round(avg_duration, 1),
+        'total_routines_assigned': total_routines_assigned,
+        'active_routines': active_routines,
+        'last_session': last_session,
+        'sessions_by_routine': sessions_by_routine,
+        'avg_weekly_frequency': round(avg_weekly_frequency, 1),
     })
 
 
