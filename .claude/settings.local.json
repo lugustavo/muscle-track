@@ -8,7 +8,8 @@
       "Bash(.\\venv\\Scripts\\pip install:*)",
       "Bash(pip install:*)",
       "Bash(del coremigrations0005_alter_personroutineexercise_options_and_more.py)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(pip freeze)"
     ],
     "deny": [],
     "ask": []
