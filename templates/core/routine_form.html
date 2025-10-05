@@ -2,117 +2,201 @@
 {% load crispy_forms_tags %}
 {% load static %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title }} - Muscle Track{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="mb-1">{{ title }}</h2>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb mb-0">
-                            <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Início</a></li>
-                            <li class="breadcrumb-item"><a href="{% url 'core:routine_list' %}">Rotinas</a></li>
-                            <li class="breadcrumb-item active">{{ title }}</li>
-                        </ol>
-                    </nav>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1><i class="bi bi-clipboard-check"></i> {{ title }}</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Início</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:routine_list' %}">Rotinas</a></li>
+                <li class="breadcrumb-item active">{{ title }}</li>
+            </ol>
+        </nav>
+    </div>
+    <a href="{% url 'core:routine_list' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<form method="post" id="routineForm">
+    {% csrf_token %}
+    <input type="hidden" name="exercises_data" id="exercisesData" value="[]">
+
+    <div class="row">
+        <!-- Formulário Principal -->
+        <div class="col-lg-8">
+            <!-- Informações Básicas -->
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informações Básicas</h5>
                 </div>
-                <div>
-                    <a href="{% url 'core:routine_list' %}" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Voltar
-                    </a>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.routine_name.id_for_label }}" class="form-label fw-bold">
+                            <i class="bi bi-tag"></i> Nome do Treino *
+                        </label>
+                        <input type="text"
+                               name="{{ form.routine_name.name }}"
+                               class="form-control {% if form.routine_name.errors %}is-invalid{% endif %}"
+                               id="{{ form.routine_name.id_for_label }}"
+                               value="{{ form.routine_name.value|default:'' }}"
+                               placeholder="Ex: Treino de Peito e Tríceps"
+                               required>
+                        {% if form.routine_name.errors %}
+                            <div class="invalid-feedback">{{ form.routine_name.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">
+                            <i class="bi bi-text-paragraph"></i> Descrição
+                        </label>
+                        <textarea name="{{ form.description.name }}"
+                                  class="form-control {% if form.description.errors %}is-invalid{% endif %}"
+                                  id="{{ form.description.id_for_label }}"
+                                  rows="3"
+                                  placeholder="Breve descrição do treino e objetivos...">{{ form.description.value|default:'' }}</textarea>
+                        {% if form.description.errors %}
+                            <div class="invalid-feedback">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.difficulty_level.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-speedometer2"></i> Nível de Dificuldade *
+                            </label>
+                            <select name="{{ form.difficulty_level.name }}"
+                                    class="form-select {% if form.difficulty_level.errors %}is-invalid{% endif %}"
+                                    id="{{ form.difficulty_level.id_for_label }}"
+                                    required>
+                                {% for value, label in form.difficulty_level.field.choices %}
+                                <option value="{{ value }}" {% if form.difficulty_level.value == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            {% if form.difficulty_level.errors %}
+                                <div class="invalid-feedback">{{ form.difficulty_level.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.estimated_duration.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-clock"></i> Duração Estimada (min) *
+                            </label>
+                            <input type="number"
+                                   name="{{ form.estimated_duration.name }}"
+                                   class="form-control {% if form.estimated_duration.errors %}is-invalid{% endif %}"
+                                   id="{{ form.estimated_duration.id_for_label }}"
+                                   value="{{ form.estimated_duration.value|default:'60' }}"
+                                   min="1"
+                                   placeholder="60"
+                                   required>
+                            {% if form.estimated_duration.errors %}
+                                <div class="invalid-feedback">{{ form.estimated_duration.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-check">
+                        <input type="checkbox"
+                               name="{{ form.is_active.name }}"
+                               class="form-check-input"
+                               id="{{ form.is_active.id_for_label }}"
+                               {% if form.is_active.value %}checked{% endif %}>
+                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                            <i class="bi bi-check-circle"></i> Treino ativo (disponível para uso)
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exercícios do Treino -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-list-task"></i> Exercícios do Treino</h5>
+                    <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#exerciseModal">
+                        <i class="bi bi-plus-circle"></i> Adicionar Exercícios
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div id="selectedExercisesList" class="list-group list-group-flush">
+                        <!-- Exercícios serão inseridos aqui via JavaScript -->
+                    </div>
+                    <div id="emptyExercisesMessage" class="text-center py-5">
+                        <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
+                        <p class="text-muted mt-3 mb-0">Nenhum exercício adicionado.<br>Clique em "Adicionar Exercícios" para começar.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar: Resumo e Ações -->
+        <div class="col-lg-4">
+            <!-- Resumo -->
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0"><i class="bi bi-bar-chart"></i> Resumo do Treino</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4 text-center">
+                        <small class="text-muted d-block mb-2">Total de Exercícios</small>
+                        <h2 id="exerciseCount" class="mb-0 text-primary">0</h2>
+                    </div>
+                    <div class="mb-4 text-center">
+                        <small class="text-muted d-block mb-2">Duração Estimada</small>
+                        <h4 id="estimatedDuration" class="mb-0 text-secondary">0 minutos</h4>
+                    </div>
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-check-circle"></i> Salvar Treino
+                        </button>
+                        <a href="{% url 'core:routine_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dicas -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0"><i class="bi bi-lightbulb"></i> Dicas</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="small mb-0 ps-3">
+                        <li class="mb-2">Arraste os exercícios para reordenar</li>
+                        <li class="mb-2">Clique em <i class="bi bi-pencil"></i> para ajustar séries/reps</li>
+                        <li class="mb-2">Agrupe exercícios por grupo muscular</li>
+                        <li>Configure descanso adequado entre séries</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
+</form>
 
-    <form method="post" id="routineForm">
-        {% csrf_token %}
-        <input type="hidden" name="exercises_data" id="exercisesData" value="[]">
-
-        <div class="row">
-            <!-- Form Section -->
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3">
-                        <h5 class="mb-0">Informações Básicas</h5>
-                    </div>
-                    <div class="card-body">
-                        {{ form|crispy }}
-                    </div>
-                </div>
-
-                <!-- Exercises Section -->
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Exercícios do Treino</h5>
-                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#exerciseModal">
-                            <i class="bi bi-plus-circle me-1"></i> Adicionar Exercícios
-                        </button>
-                    </div>
-                    <div class="card-body p-0">
-                        <div id="selectedExercisesList" class="list-group list-group-flush">
-                            <!-- Exercícios serão inseridos aqui via JavaScript -->
-                        </div>
-                        <div id="emptyExercisesMessage" class="text-center py-5 text-muted">
-                            <i class="bi bi-inbox" style="font-size: 3rem;"></i>
-                            <p class="mt-3">Nenhum exercício adicionado. Clique em "Adicionar Exercícios" para começar.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Summary Section -->
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm mb-3">
-                    <div class="card-header bg-white py-3">
-                        <h5 class="mb-0">Resumo</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <strong class="text-muted">Total de Exercícios:</strong>
-                            <div class="mt-1">
-                                <h3 id="exerciseCount" class="mb-0 text-primary">0</h3>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <strong class="text-muted">Duração Estimada:</strong>
-                            <div class="mt-1">
-                                <span id="estimatedDuration" class="h5 mb-0">0 minutos</span>
-                            </div>
-                        </div>
-                        <hr>
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-save me-2"></i>Salvar Treino
-                            </button>
-                            <a href="{% url 'core:routine_list' %}" class="btn btn-outline-secondary">
-                                Cancelar
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
-
-<!-- Exercise Selection Modal -->
+<!-- Modal: Selecionar Exercícios -->
 <div class="modal fade" id="exerciseModal" tabindex="-1" aria-labelledby="exerciseModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exerciseModalLabel">Selecionar Exercícios</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="exerciseModalLabel">
+                    <i class="bi bi-search"></i> Selecionar Exercícios
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- Search and Filter -->
-                <div class="row mb-3">
+                <!-- Filtros -->
+                <div class="row mb-4">
                     <div class="col-md-8">
-                        <input type="text" class="form-control" id="exerciseSearch" placeholder="Pesquisar exercício...">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" id="exerciseSearch" placeholder="Pesquisar exercício...">
+                        </div>
                     </div>
                     <div class="col-md-4">
                         <select class="form-select" id="muscleGroupFilter">
@@ -124,21 +208,68 @@
                     </div>
                 </div>
 
-                <!-- Exercises Grid -->
-                <div id="exercisesGrid" class="row g-3" style="max-height: 400px; overflow-y: auto;">
+                <!-- Grid de Exercícios -->
+                <div id="exercisesGrid" class="row g-3" style="max-height: 450px; overflow-y: auto;">
                     <!-- Exercícios serão carregados via JavaScript -->
                 </div>
 
+                <!-- Loading -->
                 <div id="loadingExercises" class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Carregando...</span>
                     </div>
+                    <p class="text-muted mt-3">Carregando exercícios...</p>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Fechar
+                </button>
                 <button type="button" class="btn btn-primary" id="confirmSelection">
-                    Confirmar Seleção (<span id="selectionCount">0</span>)
+                    <i class="bi bi-check-circle"></i> Confirmar Seleção (<span id="selectionCount">0</span>)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Editar Parâmetros do Exercício -->
+<div class="modal fade" id="editExerciseModal" tabindex="-1" aria-labelledby="editExerciseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editExerciseModalLabel">
+                    <i class="bi bi-sliders"></i> Editar Parâmetros
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editExerciseId">
+                <div class="mb-3">
+                    <label for="editSets" class="form-label fw-bold">
+                        <i class="bi bi-bar-chart"></i> Séries
+                    </label>
+                    <input type="number" class="form-control" id="editSets" min="1" value="3">
+                </div>
+                <div class="mb-3">
+                    <label for="editReps" class="form-label fw-bold">
+                        <i class="bi bi-arrow-repeat"></i> Repetições
+                    </label>
+                    <input type="number" class="form-control" id="editReps" min="1" value="12">
+                </div>
+                <div class="mb-3">
+                    <label for="editRest" class="form-label fw-bold">
+                        <i class="bi bi-clock"></i> Descanso (segundos)
+                    </label>
+                    <input type="number" class="form-control" id="editRest" min="0" value="60">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" id="saveExerciseEdit">
+                    <i class="bi bi-check-circle"></i> Salvar
                 </button>
             </div>
         </div>
@@ -148,37 +279,9 @@
 <!-- SortableJS para drag and drop -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
-<!-- Edit Exercise Modal -->
-<div class="modal fade" id="editExerciseModal" tabindex="-1" aria-labelledby="editExerciseModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editExerciseModalLabel">Editar Parâmetros</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="editExerciseId">
-                <div class="mb-3">
-                    <label for="editSets" class="form-label">Séries</label>
-                    <input type="number" class="form-control" id="editSets" min="1" value="3">
-                </div>
-                <div class="mb-3">
-                    <label for="editReps" class="form-label">Repetições</label>
-                    <input type="number" class="form-control" id="editReps" min="1" value="12">
-                </div>
-                <div class="mb-3">
-                    <label for="editRest" class="form-label">Descanso (segundos)</label>
-                    <input type="number" class="form-control" id="editRest" min="0" value="60">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="saveExerciseEdit">Salvar</button>
-            </div>
-        </div>
-    </div>
-</div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
 // Estado global
 let selectedExercises = [];
@@ -206,6 +309,10 @@ selectedExercises = [
 document.addEventListener('DOMContentLoaded', function() {
     updateSelectedExercisesList();
     updateSummary();
+
+    // Event listeners para filtros
+    document.getElementById('exerciseSearch').addEventListener('input', () => renderExercises(allExercises));
+    document.getElementById('muscleGroupFilter').addEventListener('change', () => renderExercises(allExercises));
 });
 
 // Carregar exercícios quando o modal for aberto
@@ -223,7 +330,6 @@ function loadExercises() {
     loading.style.display = 'block';
     grid.innerHTML = '';
 
-    // Simulando carregamento - em produção, usar fetch para API
     fetch('/api/exercises/')
         .then(response => response.json())
         .then(data => {
@@ -233,16 +339,8 @@ function loadExercises() {
         })
         .catch(error => {
             console.error('Erro ao carregar exercícios:', error);
-            // Fallback: usar dados inline do Django
-            loadExercisesFromTemplate();
-            loading.style.display = 'none';
+            loading.innerHTML = '<div class="alert alert-danger">Erro ao carregar exercícios. Tente novamente.</div>';
         });
-}
-
-// Fallback: carregar exercícios do template
-function loadExercisesFromTemplate() {
-    // Esta função seria populada com dados do Django template se necessário
-    renderExercises(allExercises);
 }
 
 // Renderizar exercícios no grid
@@ -264,23 +362,23 @@ function renderExercises(exercises) {
         const card = document.createElement('div');
         card.className = 'col-md-4';
         card.innerHTML = `
-            <div class="card h-100 exercise-card ${isSelected ? 'border-primary' : ''}" style="cursor: pointer;" data-exercise-id="${exercise.id}">
-                <div class="card-body p-2">
+            <div class="card h-100 ${isSelected ? 'border-primary shadow-sm' : 'border'}" style="cursor: pointer;" data-exercise-id="${exercise.id}">
+                <div class="card-body p-3">
                     <div class="d-flex align-items-center">
-                        <img src="${exercise.thumbnail}" class="rounded me-2" style="width: 60px; height: 60px; object-fit: cover;" alt="${exercise.name}">
+                        <img src="${exercise.thumbnail}" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;" alt="${exercise.name}">
                         <div class="flex-grow-1">
-                            <h6 class="mb-1 small">${exercise.name}</h6>
+                            <h6 class="mb-1">${exercise.name}</h6>
                             <small class="text-muted">${exercise.muscle_group_display}</small>
                         </div>
-                        <div>
-                            ${isSelected ? '<i class="bi bi-check-circle-fill text-primary"></i>' : '<i class="bi bi-circle text-muted"></i>'}
+                        <div class="ms-2">
+                            ${isSelected ? '<i class="bi bi-check-circle-fill text-primary fs-4"></i>' : '<i class="bi bi-circle text-muted fs-4"></i>'}
                         </div>
                     </div>
                 </div>
             </div>
         `;
 
-        card.querySelector('.exercise-card').addEventListener('click', function() {
+        card.querySelector('.card').addEventListener('click', function() {
             toggleExerciseSelection(exercise.id);
         });
 
@@ -288,7 +386,7 @@ function renderExercises(exercises) {
     });
 
     if (filtered.length === 0) {
-        grid.innerHTML = '<div class="col-12 text-center text-muted py-4">Nenhum exercício encontrado</div>';
+        grid.innerHTML = '<div class="col-12"><div class="alert alert-info text-center"><i class="bi bi-info-circle"></i> Nenhum exercício encontrado</div></div>';
     }
 }
 
@@ -310,24 +408,32 @@ function updateSelectionCount() {
 
 // Confirmar seleção
 document.getElementById('confirmSelection').addEventListener('click', function() {
-    selectedExercises = [];
+    // Manter exercícios já selecionados
+    const currentIds = new Set(selectedExercises.map(e => e.id));
+    const newExercises = [];
 
     tempSelectedIds.forEach(id => {
-        const exercise = allExercises.find(ex => ex.id === id);
-        if (exercise) {
-            // Buscar dados existentes ou usar defaults
-            const existing = selectedExercises.find(e => e.id === id);
-            selectedExercises.push({
-                id: exercise.id,
-                name: exercise.name,
-                muscle_group: exercise.muscle_group_display,
-                sets: existing?.sets || exercise.default_sets || 3,
-                reps: existing?.reps || exercise.default_reps || 12,
-                rest: existing?.rest || 60,
-                thumbnail: exercise.thumbnail
-            });
+        if (!currentIds.has(id)) {
+            const exercise = allExercises.find(ex => ex.id === id);
+            if (exercise) {
+                newExercises.push({
+                    id: exercise.id,
+                    name: exercise.name,
+                    muscle_group: exercise.muscle_group_display,
+                    sets: exercise.default_sets || 3,
+                    reps: exercise.default_reps || 12,
+                    rest: 60,
+                    thumbnail: exercise.thumbnail
+                });
+            }
         }
     });
+
+    // Remover exercícios desmarcados
+    selectedExercises = selectedExercises.filter(e => tempSelectedIds.has(e.id));
+
+    // Adicionar novos exercícios
+    selectedExercises.push(...newExercises);
 
     updateSelectedExercisesList();
     updateSummary();
@@ -357,30 +463,30 @@ function updateSelectedExercisesList() {
         item.className = 'list-group-item';
         item.setAttribute('data-exercise-id', exercise.id);
         item.innerHTML = `
-            <div class="d-flex align-items-center">
-                <div class="me-3" style="cursor: move;">
-                    <i class="bi bi-grip-vertical text-muted"></i>
+            <div class="d-flex align-items-center py-2">
+                <div class="me-3" style="cursor: grab;">
+                    <i class="bi bi-grip-vertical text-muted fs-4"></i>
                 </div>
                 <div class="me-3">
-                    <span class="badge bg-primary">${index + 1}</span>
+                    <span class="badge bg-primary rounded-circle" style="width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;">${index + 1}</span>
                 </div>
                 <div class="me-3">
-                    <img src="${exercise.thumbnail}" class="rounded" style="width: 50px; height: 50px; object-fit: cover;" alt="${exercise.name}">
+                    <img src="${exercise.thumbnail}" class="rounded shadow-sm" style="width: 50px; height: 50px; object-fit: cover;" alt="${exercise.name}">
                 </div>
                 <div class="flex-grow-1">
-                    <h6 class="mb-0">${exercise.name}</h6>
-                    <small class="text-muted">${exercise.muscle_group}</small>
-                </div>
-                <div class="me-3">
+                    <h6 class="mb-1">${exercise.name}</h6>
                     <small class="text-muted">
-                        ${exercise.sets} séries × ${exercise.reps} reps | ${exercise.rest}s descanso
+                        <i class="bi bi-diagram-3"></i> ${exercise.muscle_group} |
+                        <i class="bi bi-bar-chart"></i> ${exercise.sets} séries ×
+                        <i class="bi bi-arrow-repeat"></i> ${exercise.reps} reps |
+                        <i class="bi bi-clock"></i> ${exercise.rest}s
                     </small>
                 </div>
-                <div>
-                    <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="editExercise(${exercise.id})">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="editExercise(${exercise.id})" title="Editar parâmetros">
                         <i class="bi bi-pencil"></i>
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeExercise(${exercise.id})">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeExercise(${exercise.id})" title="Remover exercício">
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>
@@ -393,46 +499,26 @@ function updateSelectedExercisesList() {
     initializeSortable();
 }
 
-// Inicializar Sortable para drag and drop
+// Inicializar drag and drop com SortableJS
 function initializeSortable() {
     const list = document.getElementById('selectedExercisesList');
-    if (!list || list.children.length === 0) return;
-
-    new Sortable(list, {
-        animation: 150,
-        handle: '.bi-grip-vertical',
-        ghostClass: 'sortable-ghost',
-        chosenClass: 'sortable-chosen',
-        dragClass: 'sortable-drag',
-        onEnd: function(evt) {
-            // Reordenar o array selectedExercises baseado na nova ordem
-            const newOrder = Array.from(list.children).map(item => {
-                return parseInt(item.getAttribute('data-exercise-id'));
-            });
-
-            const reordered = [];
-            newOrder.forEach(id => {
-                const exercise = selectedExercises.find(e => e.id === id);
-                if (exercise) {
-                    reordered.push(exercise);
-                }
-            });
-
-            selectedExercises = reordered;
-            updateSelectedExercisesList();
-            updateSummary();
-        }
-    });
+    if (list && selectedExercises.length > 0) {
+        new Sortable(list, {
+            animation: 150,
+            handle: '.bi-grip-vertical',
+            ghostClass: 'bg-light',
+            onEnd: function(evt) {
+                // Reordenar array
+                const movedItem = selectedExercises.splice(evt.oldIndex, 1)[0];
+                selectedExercises.splice(evt.newIndex, 0, movedItem);
+                updateSelectedExercisesList();
+                updateSummary();
+            }
+        });
+    }
 }
 
-// Remover exercício
-function removeExercise(exerciseId) {
-    selectedExercises = selectedExercises.filter(e => e.id !== exerciseId);
-    updateSelectedExercisesList();
-    updateSummary();
-}
-
-// Editar parâmetros do exercício
+// Editar exercício
 function editExercise(exerciseId) {
     const exercise = selectedExercises.find(e => e.id === exerciseId);
     if (!exercise) return;
@@ -442,8 +528,7 @@ function editExercise(exerciseId) {
     document.getElementById('editReps').value = exercise.reps;
     document.getElementById('editRest').value = exercise.rest;
 
-    const modal = new bootstrap.Modal(document.getElementById('editExerciseModal'));
-    modal.show();
+    new bootstrap.Modal(document.getElementById('editExerciseModal')).show();
 }
 
 // Salvar edição de exercício
@@ -458,72 +543,43 @@ document.getElementById('saveExerciseEdit').addEventListener('click', function()
 
         updateSelectedExercisesList();
         updateSummary();
-    }
 
-    bootstrap.Modal.getInstance(document.getElementById('editExerciseModal')).hide();
+        bootstrap.Modal.getInstance(document.getElementById('editExerciseModal')).hide();
+    }
 });
+
+// Remover exercício
+function removeExercise(exerciseId) {
+    if (confirm('Remover este exercício do treino?')) {
+        selectedExercises = selectedExercises.filter(e => e.id !== exerciseId);
+        updateSelectedExercisesList();
+        updateSummary();
+    }
+}
 
 // Atualizar resumo
 function updateSummary() {
     document.getElementById('exerciseCount').textContent = selectedExercises.length;
 
-    // Calcular duração estimada baseada nos exercícios
-    let totalMinutes = 0;
-    selectedExercises.forEach(exercise => {
-        // Estimar: (sets * reps * 3 segundos por rep) + (sets * rest)
-        const exerciseTime = (exercise.sets * exercise.reps * 3) + (exercise.sets * exercise.rest);
-        totalMinutes += exerciseTime;
-    });
-    totalMinutes = Math.ceil(totalMinutes / 60);
-
-    document.getElementById('estimatedDuration').textContent = `${totalMinutes} minutos`;
+    // Calcular duração estimada (aproximado: 2 min por exercício)
+    const duration = selectedExercises.reduce((total, ex) => {
+        return total + (ex.sets * (ex.rest / 60 + 1));
+    }, 0);
+    document.getElementById('estimatedDuration').textContent = Math.round(duration) + ' minutos';
 }
 
-// Antes de submeter o form, atualizar o campo hidden com os dados
+// Salvar formulário
 document.getElementById('routineForm').addEventListener('submit', function(e) {
-    document.getElementById('exercisesData').value = JSON.stringify(selectedExercises);
-});
+    // Preparar dados dos exercícios para envio
+    const exercisesData = selectedExercises.map((ex, index) => ({
+        exercise_id: ex.id,
+        order: index + 1,
+        sets: ex.sets,
+        reps: ex.reps,
+        rest_seconds: ex.rest
+    }));
 
-// Filtros no modal
-document.getElementById('exerciseSearch').addEventListener('input', function() {
-    renderExercises(allExercises);
-});
-
-document.getElementById('muscleGroupFilter').addEventListener('change', function() {
-    renderExercises(allExercises);
+    document.getElementById('exercisesData').value = JSON.stringify(exercisesData);
 });
 </script>
-
-<style>
-.exercise-card {
-    transition: all 0.2s;
-}
-.exercise-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-/* Sortable drag and drop styles */
-.sortable-ghost {
-    opacity: 0.4;
-    background: #f8f9fa;
-}
-
-.sortable-chosen {
-    background: #e7f3ff;
-    border-left: 3px solid #0d6efd;
-}
-
-.sortable-drag {
-    opacity: 0.8;
-}
-
-#selectedExercisesList .list-group-item {
-    transition: all 0.2s;
-}
-
-#selectedExercisesList .list-group-item:hover {
-    background-color: #f8f9fa;
-}
-</style>
 {% endblock %}

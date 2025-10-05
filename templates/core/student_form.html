@@ -2,90 +2,333 @@
 {% load crispy_forms_tags %}
 {% load static %}
 
-{% block extra_css %}
-<style>
-    .avatar-preview {
-        width: 150px;
-        height: 150px;
-        object-fit: cover;
-        border-radius: 50%;
-        border: 3px solid #dee2e6;
-        margin-bottom: 1rem;
-    }
-    .avatar-upload-container {
-        text-align: center;
-        margin-bottom: 1.5rem;
-        padding: 1rem;
-        background-color: #f8f9fa;
-        border-radius: 10px;
-    }
-</style>
-{% endblock %}
+{% block title %}{{ title }} - Muscle Track{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">{{ title }}</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-person-badge"></i> {{ title }}</h1>
+    <a href="{% url 'core:student_list' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
 
-<div class="card">
-    <div class="card-body">
+<div class="row">
+    <div class="col-lg-8">
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
-            <!-- Avatar Upload Section -->
-            <div class="avatar-upload-container">
-                <div id="avatarPreview">
-                    {% if form.instance.avatar %}
-                        <img src="{{ form.instance.avatar.url }}" class="avatar-preview" alt="Avatar" id="previewImage">
-                    {% else %}
-                        <img src="{% static 'images/default-avatar.svg' %}" class="avatar-preview" alt="Avatar padrão" id="previewImage">
-                    {% endif %}
+            <!-- Foto de Perfil -->
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-camera"></i> Foto de Perfil</h5>
                 </div>
-                <div class="mb-2">
-                    <label for="{{ form.avatar.id_for_label }}" class="form-label fw-bold">
-                        <i class="bi bi-camera"></i> {{ form.avatar.label }}
-                    </label>
-                    {{ form.avatar }}
-                    {% if form.avatar.help_text %}
-                        <small class="form-text text-muted d-block">{{ form.avatar.help_text }}</small>
-                    {% endif %}
-                    {% if form.avatar.errors %}
-                        <div class="text-danger">{{ form.avatar.errors }}</div>
-                    {% endif %}
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <img id="avatarPreview"
+                             src="{% if form.instance.avatar %}{{ form.instance.avatar.url }}{% else %}{% static 'images/default-avatar.svg' %}{% endif %}"
+                             class="rounded-circle shadow-sm mb-3"
+                             style="width: 150px; height: 150px; object-fit: cover; border: 4px solid #e9ecef;"
+                             alt="Avatar">
+                    </div>
+                    <div class="mb-2">
+                        <label for="{{ form.avatar.id_for_label }}" class="btn btn-outline-primary">
+                            <i class="bi bi-upload"></i> Escolher Foto
+                        </label>
+                        <input type="file"
+                               name="{{ form.avatar.name }}"
+                               class="d-none"
+                               id="{{ form.avatar.id_for_label }}"
+                               accept="image/*">
+                        {% if form.avatar.errors %}
+                            <div class="text-danger mt-2">{{ form.avatar.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i> JPG, PNG, GIF, WEBP | Máx: 5MB | 100x100 até 2000x2000px
+                    </small>
                 </div>
-                <small class="text-muted">
-                    <i class="bi bi-info-circle"></i> Formatos: JPG, PNG, GIF, WEBP | Tamanho máx: 5MB | Dimensões: 100x100px a 2000x2000px
-                </small>
             </div>
 
-            <!-- Other Form Fields -->
-            {% for field in form %}
-                {% if field.name != 'avatar' %}
-                    {{ field|as_crispy_field }}
-                {% endif %}
-            {% endfor %}
+            <!-- Informações Pessoais -->
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-person"></i> Informações Pessoais</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.person_name.id_for_label }}" class="form-label fw-bold">
+                            <i class="bi bi-person-fill"></i> Nome Completo *
+                        </label>
+                        <input type="text"
+                               name="{{ form.person_name.name }}"
+                               class="form-control {% if form.person_name.errors %}is-invalid{% endif %}"
+                               id="{{ form.person_name.id_for_label }}"
+                               value="{{ form.person_name.value|default:'' }}"
+                               placeholder="Nome completo do aluno"
+                               required>
+                        {% if form.person_name.errors %}
+                            <div class="invalid-feedback">{{ form.person_name.errors }}</div>
+                        {% endif %}
+                    </div>
 
-            <button type="submit" class="btn btn-primary">
-                <i class="bi bi-save"></i> Salvar
-            </button>
-            <a href="{% url 'core:student_list' %}" class="btn btn-secondary">
-                <i class="bi bi-x-circle"></i> Cancelar
-            </a>
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-envelope"></i> E-mail *
+                            </label>
+                            <input type="email"
+                                   name="{{ form.email.name }}"
+                                   class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                                   id="{{ form.email.id_for_label }}"
+                                   value="{{ form.email.value|default:'' }}"
+                                   placeholder="email@exemplo.com"
+                                   required>
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback">{{ form.email.errors }}</div>
+                            {% endif %}
+                            {% if not form.instance.pk %}
+                            <small class="form-text text-muted">
+                                <i class="bi bi-info-circle"></i> Será enviado um e-mail de confirmação
+                            </small>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.birth_date.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-calendar"></i> Data de Nascimento
+                            </label>
+                            <input type="date"
+                                   name="{{ form.birth_date.name }}"
+                                   class="form-control {% if form.birth_date.errors %}is-invalid{% endif %}"
+                                   id="{{ form.birth_date.id_for_label }}"
+                                   value="{{ form.birth_date.value|default:'' }}">
+                            {% if form.birth_date.errors %}
+                                <div class="invalid-feedback">{{ form.birth_date.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.phone.id_for_label }}" class="form-label fw-bold">
+                            <i class="bi bi-telephone"></i> Telefone
+                        </label>
+                        <input type="tel"
+                               name="{{ form.phone.name }}"
+                               class="form-control {% if form.phone.errors %}is-invalid{% endif %}"
+                               id="{{ form.phone.id_for_label }}"
+                               value="{{ form.phone.value|default:'' }}"
+                               placeholder="(00) 00000-0000">
+                        {% if form.phone.errors %}
+                            <div class="invalid-feedback">{{ form.phone.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Endereço -->
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Endereço</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.address.id_for_label }}" class="form-label fw-bold">
+                            <i class="bi bi-house-door"></i> Endereço
+                        </label>
+                        <input type="text"
+                               name="{{ form.address.name }}"
+                               class="form-control {% if form.address.errors %}is-invalid{% endif %}"
+                               id="{{ form.address.id_for_label }}"
+                               value="{{ form.address.value|default:'' }}"
+                               placeholder="Rua, número, complemento">
+                        {% if form.address.errors %}
+                            <div class="invalid-feedback">{{ form.address.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.city.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-building"></i> Cidade
+                            </label>
+                            <input type="text"
+                                   name="{{ form.city.name }}"
+                                   class="form-control {% if form.city.errors %}is-invalid{% endif %}"
+                                   id="{{ form.city.id_for_label }}"
+                                   value="{{ form.city.value|default:'' }}"
+                                   placeholder="Nome da cidade">
+                            {% if form.city.errors %}
+                                <div class="invalid-feedback">{{ form.city.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label for="{{ form.state.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-map"></i> Estado
+                            </label>
+                            <input type="text"
+                                   name="{{ form.state.name }}"
+                                   class="form-control {% if form.state.errors %}is-invalid{% endif %}"
+                                   id="{{ form.state.id_for_label }}"
+                                   value="{{ form.state.value|default:'' }}"
+                                   placeholder="UF"
+                                   maxlength="2">
+                            {% if form.state.errors %}
+                                <div class="invalid-feedback">{{ form.state.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label for="{{ form.zip_code.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-mailbox"></i> CEP
+                            </label>
+                            <input type="text"
+                                   name="{{ form.zip_code.name }}"
+                                   class="form-control {% if form.zip_code.errors %}is-invalid{% endif %}"
+                                   id="{{ form.zip_code.id_for_label }}"
+                                   value="{{ form.zip_code.value|default:'' }}"
+                                   placeholder="00000-000">
+                            {% if form.zip_code.errors %}
+                                <div class="invalid-feedback">{{ form.zip_code.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Observações -->
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-journal-text"></i> Observações</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.notes.id_for_label }}" class="form-label fw-bold">
+                            Anotações adicionais
+                        </label>
+                        <textarea name="{{ form.notes.name }}"
+                                  class="form-control {% if form.notes.errors %}is-invalid{% endif %}"
+                                  id="{{ form.notes.id_for_label }}"
+                                  rows="4"
+                                  placeholder="Informações relevantes sobre o aluno, objetivos, restrições médicas, etc.">{{ form.notes.value|default:'' }}</textarea>
+                        {% if form.notes.errors %}
+                            <div class="invalid-feedback">{{ form.notes.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-check">
+                        <input type="checkbox"
+                               name="{{ form.is_active.name }}"
+                               class="form-check-input"
+                               id="{{ form.is_active.id_for_label }}"
+                               {% if form.is_active.value %}checked{% endif %}>
+                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                            <i class="bi bi-check-circle"></i> Aluno ativo
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="d-flex gap-2 mb-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Salvar Aluno
+                </button>
+                <a href="{% url 'core:student_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </a>
+            </div>
         </form>
     </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Resumo -->
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Informações</h6>
+            </div>
+            <div class="card-body">
+                {% if form.instance.pk %}
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <small class="text-muted d-block">ID do Aluno</small>
+                        <strong>#{{ form.instance.pk }}</strong>
+                    </li>
+                    <li class="mb-2">
+                        <small class="text-muted d-block">Cadastrado em</small>
+                        <strong>{{ form.instance.created_at|date:"d/m/Y" }}</strong>
+                        <br>
+                        <small class="text-muted">{{ form.instance.created_at|date:"H:i" }}</small>
+                    </li>
+                    <li class="mb-2">
+                        <small class="text-muted d-block">Última atualização</small>
+                        <strong>{{ form.instance.updated_at|date:"d/m/Y" }}</strong>
+                        <br>
+                        <small class="text-muted">{{ form.instance.updated_at|date:"H:i" }}</small>
+                    </li>
+                    {% if form.instance.user %}
+                    <li>
+                        <small class="text-muted d-block">Conta de usuário</small>
+                        <span class="badge bg-success">
+                            <i class="bi bi-check-circle"></i> Criada
+                        </span>
+                    </li>
+                    {% else %}
+                    <li>
+                        <small class="text-muted d-block">Conta de usuário</small>
+                        <span class="badge bg-warning">
+                            <i class="bi bi-clock"></i> Pendente
+                        </span>
+                    </li>
+                    {% endif %}
+                </ul>
+                {% else %}
+                <div class="alert alert-info mb-0" role="alert">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Novo aluno</strong>
+                    <p class="mb-0 mt-2 small">
+                        Ao salvar, será criada uma conta de usuário e enviado um e-mail de confirmação para o aluno.
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Dicas -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0"><i class="bi bi-lightbulb"></i> Dicas</h6>
+            </div>
+            <div class="card-body">
+                <ul class="small mb-0 ps-3">
+                    <li class="mb-2">Use uma foto clara e recente do aluno</li>
+                    <li class="mb-2">O e-mail será usado para login do aluno</li>
+                    <li class="mb-2">Anote restrições médicas nas observações</li>
+                    <li>Mantenha os dados atualizados para melhor acompanhamento</li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Preview avatar before upload
-document.getElementById('{{ form.avatar.id_for_label }}').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('previewImage').src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-});
+// Preview avatar ao selecionar arquivo
+const avatarInput = document.getElementById('{{ form.avatar.id_for_label }}');
+if (avatarInput) {
+    avatarInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatarPreview').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
 </script>
 {% endblock %}
