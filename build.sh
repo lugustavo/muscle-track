@@ -10,3 +10,6 @@ python manage.py collectstatic --no-input
 
 # Run migrations
 python manage.py migrate
+
+#create test data
+python populate_db.py
