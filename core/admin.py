@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     MuscleGroup, Person, Exercise, Routine, RoutineExercise,
-    PersonRoutine, PersonRoutineExercise, WorkoutSession
+    PersonRoutine, PersonRoutineExercise, WorkoutSession, SessionExercise
 )
 
 
@@ -113,6 +113,13 @@ class PersonRoutineExerciseAdmin(admin.ModelAdmin):
     ordering = ['person_routine', 'order']
 
 
+class SessionExerciseInline(admin.TabularInline):
+    model = SessionExercise
+    extra = 0
+    fields = ['person_routine_exercise', 'weight_used', 'is_completed', 'completed_at']
+    readonly_fields = ['completed_at']
+
+
 @admin.register(WorkoutSession)
 class WorkoutSessionAdmin(admin.ModelAdmin):
     list_display = ['person_routine', 'start_time', 'end_time', 'duration_minutes', 'is_completed']
@@ -120,3 +127,13 @@ class WorkoutSessionAdmin(admin.ModelAdmin):
     search_fields = ['person_routine__person__person_name']
     date_hierarchy = 'start_time'
     readonly_fields = ['start_time']
+    inlines = [SessionExerciseInline]
+
+
+@admin.register(SessionExercise)
+class SessionExerciseAdmin(admin.ModelAdmin):
+    list_display = ['session', 'person_routine_exercise', 'weight_used', 'is_completed', 'completed_at']
+    list_filter = ['is_completed', 'session__start_time']
+    search_fields = ['session__person_routine__person__person_name', 'person_routine_exercise__exercise__exercise_name']
+    readonly_fields = ['completed_at']
+    ordering = ['session', 'person_routine_exercise__order']

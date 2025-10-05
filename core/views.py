@@ -660,19 +660,17 @@ def person_routine_detail(request, pk):
     recent_sessions = completed_sessions[:20]
 
     # Preparar dados para o gráfico (duração e carga média por sessão)
+    from .models import SessionExercise
+
     chart_data = []
     for session in reversed(list(recent_sessions)):
-        # Calcular carga média dos exercícios completados próximos a esta sessão
-        # Buscar exercícios completados entre o início e fim da sessão
-        session_start = session.start_time
-        session_end = session.end_time if session.end_time else session.start_time + timedelta(hours=3)
-
-        exercises = person_routine.exercises.filter(
+        # Calcular carga média dos exercícios desta sessão específica usando SessionExercise
+        session_exercises = SessionExercise.objects.filter(
+            session=session,
             is_completed=True,
-            completed_at__gte=session_start,
-            completed_at__lte=session_end
+            weight_used__isnull=False
         )
-        avg_weight = exercises.aggregate(avg=Avg('weight_used'))['avg']
+        avg_weight = session_exercises.aggregate(avg=Avg('weight_used'))['avg']
         avg_weight = float(avg_weight) if avg_weight else 0
 
         chart_data.append({
@@ -840,6 +838,7 @@ def workout_start(request, pk):
 def workout_execute(request, pk):
     """Execute workout with timer - shows previous session data for reference"""
     from datetime import timedelta
+    from .models import SessionExercise
 
     person_routine = get_object_or_404(PersonRoutine, pk=pk)
 
@@ -862,16 +861,40 @@ def workout_execute(request, pk):
     # Get routine exercises for current session
     routine_exercises = person_routine.exercises.select_related('exercise').order_by('order')
 
-    # Get last completed session
-    last_completed_session = person_routine.sessions.filter(is_completed=True).first()
+    # Create SessionExercise entries for active session if they don't exist
+    for exercise in routine_exercises:
+        SessionExercise.objects.get_or_create(
+            session=active_session,
+            person_routine_exercise=exercise
+        )
 
-    # Build exercises with previous session data
+    # Get last completed session
+    last_completed_session = person_routine.sessions.filter(is_completed=True).order_by('-end_time').first()
+
+    # Build exercises with previous and current session data
     exercises_with_previous = []
     for exercise in routine_exercises:
+        # Get current session data
+        current_session_exercise = SessionExercise.objects.filter(
+            session=active_session,
+            person_routine_exercise=exercise
+        ).first()
+
+        # Get previous session data (from last completed session for this same exercise)
+        previous_session_exercise = None
+        if last_completed_session:
+            previous_session_exercise = SessionExercise.objects.filter(
+                session=last_completed_session,
+                person_routine_exercise__exercise=exercise.exercise  # Match by exercise, not by PersonRoutineExercise
+            ).first()
+
         exercise_data = {
             'current': exercise,
-            'previous_date': exercise.completed_at if exercise.is_completed else None,
-            'previous_weight': exercise.weight_used if exercise.is_completed else None,
+            'current_session_id': current_session_exercise.id if current_session_exercise else None,
+            'current_weight': current_session_exercise.weight_used if current_session_exercise else None,
+            'current_is_completed': current_session_exercise.is_completed if current_session_exercise else False,
+            'previous_date': previous_session_exercise.completed_at if previous_session_exercise else None,
+            'previous_weight': previous_session_exercise.weight_used if previous_session_exercise else None,
         }
         exercises_with_previous.append(exercise_data)
 
@@ -895,22 +918,24 @@ def workout_end(request, pk):
 @login_required
 def session_detail(request, pk):
     """View completed workout session details (read-only for admin)"""
+    from .models import SessionExercise
+
     session = get_object_or_404(WorkoutSession, pk=pk)
     person_routine = session.person_routine
 
-    # Get routine exercises with their execution data at the time of this session
-    routine_exercises = person_routine.exercises.select_related('exercise').order_by('order')
+    # Get session-specific exercise execution data
+    session_exercises = SessionExercise.objects.filter(
+        session=session
+    ).select_related('person_routine_exercise__exercise').order_by('person_routine_exercise__order')
 
     # Build exercise data for this specific session
     exercises_data = []
-    for exercise in routine_exercises:
-        # Since we don't have session-specific execution data yet,
-        # we'll show the current state of the exercise
+    for session_exercise in session_exercises:
         exercises_data.append({
-            'exercise': exercise,
-            'completed_at': exercise.completed_at,
-            'weight_used': exercise.weight_used,
-            'is_completed': exercise.is_completed
+            'exercise': session_exercise.person_routine_exercise,
+            'completed_at': session_exercise.completed_at,
+            'weight_used': session_exercise.weight_used,
+            'is_completed': session_exercise.is_completed
         })
 
     return render(request, 'core/session_detail.html', {
@@ -923,35 +948,45 @@ def session_detail(request, pk):
 
 @login_required
 def exercise_toggle_completion(request, pk):
-    """Toggle exercise completion status"""
+    """Toggle exercise completion status in active session"""
     if request.method == 'POST':
-        exercise_execution = get_object_or_404(PersonRoutineExercise, pk=pk)
-        exercise_execution.is_completed = not exercise_execution.is_completed
-        if exercise_execution.is_completed:
-            exercise_execution.completed_at = timezone.now()
+        from .models import SessionExercise
+
+        # pk here is the SessionExercise ID, not PersonRoutineExercise
+        session_exercise = get_object_or_404(SessionExercise, pk=pk)
+        session_exercise.is_completed = not session_exercise.is_completed
+
+        if session_exercise.is_completed:
+            session_exercise.mark_completed()
         else:
-            exercise_execution.completed_at = None
-        exercise_execution.save()
+            session_exercise.completed_at = None
+            session_exercise.save()
 
         return JsonResponse({
             'success': True,
-            'is_completed': exercise_execution.is_completed
+            'is_completed': session_exercise.is_completed
         })
     return JsonResponse({'success': False}, status=400)
 
 
 @login_required
 def exercise_update_weight(request, pk):
-    """Update exercise weight"""
+    """Update exercise weight in active session"""
     if request.method == 'POST':
-        exercise_execution = get_object_or_404(PersonRoutineExercise, pk=pk)
+        from .models import SessionExercise
+
+        # pk here is the SessionExercise ID
+        session_exercise = get_object_or_404(SessionExercise, pk=pk)
         data = json.loads(request.body)
         weight = data.get('weight')
 
         if weight:
-            exercise_execution.weight_used = float(weight)
-            exercise_execution.save()
+            session_exercise.weight_used = float(weight)
+            session_exercise.save()
             return JsonResponse({'success': True})
+
+        return JsonResponse({'success': False, 'error': 'No weight provided'}, status=400)
+    return JsonResponse({'success': False}, status=400)
 
 
 @login_required
@@ -1024,6 +1059,10 @@ def api_routine_exercises(request, pk):
 @login_required
 def my_history(request):
     """Student's workout history"""
+    from django.db.models import Avg
+    from .models import SessionExercise
+    import json
+
     try:
         person = request.user.person
         completed_sessions = WorkoutSession.objects.filter(
@@ -1031,9 +1070,29 @@ def my_history(request):
             is_completed=True
         ).order_by('-start_time')[:20]
 
+        # Preparar dados para o gráfico (incluindo carga média)
+        chart_data = []
+        for session in reversed(list(completed_sessions)):
+            # Calcular carga média dos exercícios desta sessão
+            session_exercises = SessionExercise.objects.filter(
+                session=session,
+                is_completed=True,
+                weight_used__isnull=False
+            )
+            avg_weight = session_exercises.aggregate(avg=Avg('weight_used'))['avg']
+            avg_weight = float(avg_weight) if avg_weight else 0
+
+            chart_data.append({
+                'date': session.start_time.strftime('%d/%m'),
+                'duration': session.duration_minutes or 0,
+                'avg_weight': round(avg_weight, 1),
+                'workout': session.person_routine.routine_name[:15]
+            })
+
         return render(request, 'core/my_history.html', {
             'person': person,
-            'completed_sessions': completed_sessions
+            'completed_sessions': completed_sessions,
+            'chart_data': json.dumps(chart_data)
         })
     except Person.DoesNotExist:
         messages.warning(request, 'Você não está cadastrado como aluno.')
@@ -1083,19 +1142,17 @@ def student_history(request, pk):
     recent_sessions = completed_sessions[:30]
 
     # Preparar dados para o gráfico (duração e carga média por sessão)
+    from .models import SessionExercise
+
     chart_data = []
     for session in reversed(list(recent_sessions)):
-        # Calcular carga média dos exercícios completados próximos a esta sessão
-        session_start = session.start_time
-        session_end = session.end_time if session.end_time else session.start_time + timedelta(hours=3)
-
-        exercises = PersonRoutineExercise.objects.filter(
-            person_routine=session.person_routine,
+        # Calcular carga média dos exercícios desta sessão específica usando SessionExercise
+        session_exercises = SessionExercise.objects.filter(
+            session=session,
             is_completed=True,
-            completed_at__gte=session_start,
-            completed_at__lte=session_end
+            weight_used__isnull=False
         )
-        avg_weight = exercises.aggregate(avg=Avg('weight_used'))['avg']
+        avg_weight = session_exercises.aggregate(avg=Avg('weight_used'))['avg']
         avg_weight = float(avg_weight) if avg_weight else 0
 
         chart_data.append({

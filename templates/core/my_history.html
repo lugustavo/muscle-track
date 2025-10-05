@@ -106,57 +106,113 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-// Preparar dados para o gráfico
-const sessions = [
-    {% for session in completed_sessions reversed %}
-    {
-        date: '{{ session.start_time|date:"d/m" }}',
-        duration: {{ session.duration_minutes|default:0 }},
-        workout: '{{ session.person_routine.routine_name|truncatechars:15 }}'
-    },
-    {% endfor %}
-];
+// Dados do gráfico vindos do backend
+const chartData = {{ chart_data|safe }};
 
-// Criar gráfico
+// Criar gráfico com dois eixos Y
 const ctx = document.getElementById('myChart');
 new Chart(ctx, {
-    type: 'bar',
+    type: 'line',
     data: {
-        labels: sessions.map(s => s.date),
-        datasets: [{
-            label: 'Duração (minutos)',
-            data: sessions.map(s => s.duration),
-            backgroundColor: 'rgba(255, 107, 107, 0.7)',
-            borderColor: 'rgba(255, 107, 107, 1)',
-            borderWidth: 1
-        }]
+        labels: chartData.map(s => s.date),
+        datasets: [
+            {
+                label: 'Duração (minutos)',
+                data: chartData.map(s => s.duration),
+                backgroundColor: 'rgba(78, 205, 196, 0.2)',
+                borderColor: 'rgba(78, 205, 196, 1)',
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                yAxisID: 'y'
+            },
+            {
+                label: 'Carga Média (kg)',
+                data: chartData.map(s => s.avg_weight),
+                backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                borderColor: 'rgba(255, 159, 64, 1)',
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                yAxisID: 'y1'
+            }
+        ]
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: {
+            mode: 'index',
+            intersect: false
+        },
         scales: {
             y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
                 beginAtZero: true,
                 title: {
                     display: true,
                     text: 'Duração (min)'
                 }
             },
+            y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Carga Média (kg)'
+                },
+                grid: {
+                    drawOnChartArea: false
+                }
+            },
             x: {
                 title: {
                     display: true,
-                    text: 'Data'
+                    text: 'Data da Sessão'
                 }
             }
         },
         plugins: {
             legend: {
-                display: false
+                display: true,
+                position: 'top'
             },
             tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                padding: 12,
+                titleFont: {
+                    size: 14
+                },
+                bodyFont: {
+                    size: 13
+                },
                 callbacks: {
-                    afterLabel: function(context) {
-                        return 'Treino: ' + sessions[context.dataIndex].workout;
+                    afterTitle: function(context) {
+                        if (context[0].dataIndex < chartData.length) {
+                            return 'Treino: ' + chartData[context[0].dataIndex].workout;
+                        }
+                        return '';
+                    },
+                    label: function(context) {
+                        let label = context.dataset.label || '';
+                        if (label) {
+                            label += ': ';
+                        }
+                        label += context.parsed.y;
+                        if (context.dataset.label === 'Carga Média (kg)') {
+                            label += ' kg';
+                        } else {
+                            label += ' min';
+                        }
+                        return label;
                     }
                 }
             }

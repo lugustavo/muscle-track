@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load l10n %}
 
 {% block title %}Executar Treino - {{ person_routine.routine_name }}{% endblock %}
 
@@ -18,25 +19,26 @@
 
                 <h5 class="mb-3">Exercícios</h5>
                 {% for item in exercises_with_previous %}
-                <div class="card mb-3" id="exercise-card-{{ item.current.id }}">
+                <div class="card mb-3 {% if item.current_is_completed %}border-success{% endif %}" id="exercise-card-{{ item.current_session_id }}">
                     <div class="card-body">
                         <!-- Header com checkbox sempre visível -->
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div class="form-check">
                                 <input class="form-check-input exercise-checkbox" type="checkbox"
-                                       id="exercise_{{ item.current.id }}"
-                                       data-exercise-id="{{ item.current.id }}">
-                                <label class="form-check-label" for="exercise_{{ item.current.id }}">
+                                       id="exercise_{{ item.current_session_id }}"
+                                       data-exercise-id="{{ item.current_session_id }}"
+                                       {% if item.current_is_completed %}checked{% endif %}>
+                                <label class="form-check-label" for="exercise_{{ item.current_session_id }}">
                                     <h5 class="mb-0">{{ item.current.exercise.exercise_name }}</h5>
                                 </label>
                             </div>
-                            <span class="badge bg-success d-none" id="badge-{{ item.current.id }}">
+                            <span class="badge bg-success {% if not item.current_is_completed %}d-none{% endif %}" id="badge-{{ item.current_session_id }}">
                                 <i class="bi bi-check-circle"></i> Concluído
                             </span>
                         </div>
 
                         <!-- Conteúdo que será colapsado -->
-                        <div class="collapse show" id="collapse-{{ item.current.id }}">
+                        <div class="collapse {% if not item.current_is_completed %}show{% endif %}" id="collapse-{{ item.current_session_id }}">
                             <p class="mb-2">
                                 <strong>{{ item.current.sets }} séries x {{ item.current.reps }} repetições</strong>
                                 <br>
@@ -45,7 +47,6 @@
 
                             <!-- Dados da Sessão Anterior (Referência) -->
                             {% if item.previous_date or item.previous_weight %}
-                            <!-- <div class="alert alert-info py-2 mb-2"> -->
                                 <small class="text-muted">
                                     <strong><i class="bi bi-info-circle"></i> Sessão Anterior:</strong>
                                     {% if item.previous_date %}
@@ -59,7 +60,6 @@
                                     </span>
                                     {% endif %}
                                 </small>
-                            <!-- </div> -->
                             {% endif %}
 
                             <!-- Input para Sessão Atual -->
@@ -68,9 +68,9 @@
                                     <div class="input-group" style="max-width: 200px;">
                                         <span class="input-group-text">Carga (kg)</span>
                                         <input type="number" class="form-control weight-input"
-                                               data-exercise-id="{{ item.current.id }}"
-                                               value=""
-                                               placeholder="{% if item.previous_weight %}{{ item.previous_weight }}{% else %}0{% endif %}"
+                                               data-exercise-id="{{ item.current_session_id }}"
+                                               {% if item.current_weight %}value="{{ item.current_weight|unlocalize }}"{% elif item.previous_weight %}value="{{ item.previous_weight|unlocalize }}"{% endif %}
+                                               placeholder="0"
                                                step="0.5">
                                     </div>
                                 </div>
@@ -78,9 +78,11 @@
                         </div>
 
                         <!-- Status da Sessão Atual (visível quando concluído) -->
-                        <div class="mt-2 text-success d-none" id="current-status-{{ item.current.id }}">
+                        <div class="mt-2 text-success {% if not item.current_is_completed %}d-none{% endif %}" id="current-status-{{ item.current_session_id }}">
                             <small>
-                                <i class="bi bi-check-circle-fill"></i> <span id="current-time-{{ item.current.id }}"></span>
+                                <i class="bi bi-check-circle-fill"></i> <span id="current-time-{{ item.current_session_id }}">
+                                    {% if item.current_is_completed %}Concluído nesta sessão{% endif %}
+                                </span>
                             </small>
                         </div>
                     </div>
@@ -100,19 +102,32 @@
 </div>
 
 <script>
-// Timer
+// Timer with auto-close after 120 minutes
 let startTime = new Date('{{ active_session.start_time|date:"c" }}');
+const MAX_SESSION_MINUTES = 120;
+let sessionClosed = false;
+
 function updateTimer() {
     const now = new Date();
     const diff = Math.floor((now - startTime) / 1000);
+    const totalMinutes = Math.floor(diff / 60);
     const hours = Math.floor(diff / 3600);
     const minutes = Math.floor((diff % 3600) / 60);
     const seconds = diff % 60;
+
     document.getElementById('time').textContent =
         String(hours).padStart(2, '0') + ':' +
         String(minutes).padStart(2, '0') + ':' +
         String(seconds).padStart(2, '0');
+
+    // Auto-close session after 120 minutes
+    if (totalMinutes >= MAX_SESSION_MINUTES && !sessionClosed) {
+        sessionClosed = true;
+        alert('Sessão encerrada automaticamente após 120 minutos. Redirecionando...');
+        window.location.href = '{% url "core:my_workouts" %}';
+    }
 }
+
 {% if active_session %}
 setInterval(updateTimer, 1000);
 updateTimer();

@@ -295,3 +295,47 @@ class WorkoutSession(models.Model):
             self.duration_minutes = int(duration.total_seconds() / 60)
             self.is_completed = True
             self.save()
+
+
+class SessionExercise(models.Model):
+    """Model tracking individual exercise execution within a session"""
+    session = models.ForeignKey(
+        WorkoutSession,
+        on_delete=models.CASCADE,
+        related_name='exercise_logs',
+        verbose_name='Sessão'
+    )
+    person_routine_exercise = models.ForeignKey(
+        PersonRoutineExercise,
+        on_delete=models.CASCADE,
+        related_name='session_logs',
+        verbose_name='Exercício do Treino'
+    )
+
+    # Execution data for this specific session
+    weight_used = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        verbose_name='Carga (kg)'
+    )
+    is_completed = models.BooleanField(default=False, verbose_name='Concluído')
+    completed_at = models.DateTimeField(null=True, blank=True, verbose_name='Completado em')
+    notes = models.TextField(blank=True, verbose_name='Observações')
+
+    class Meta:
+        verbose_name = 'Execução de Exercício na Sessão'
+        verbose_name_plural = 'Execuções de Exercícios nas Sessões'
+        unique_together = ['session', 'person_routine_exercise']
+        ordering = ['person_routine_exercise__order']
+
+    def __str__(self):
+        return f"{self.session} - {self.person_routine_exercise.exercise.exercise_name}"
+
+    def mark_completed(self):
+        """Mark exercise as completed in this session"""
+        self.is_completed = True
+        self.completed_at = timezone.now()
+        self.save()
