@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.db.models import Count, Q
 from .models import (
     MuscleGroup, Person, Exercise, Routine, RoutineExercise,
-    PersonRoutine, PersonRoutineExercise, WorkoutSession
+    PersonRoutine, PersonRoutineExercise, WorkoutSession, SessionExercise
 )
 from .forms import (
     PersonForm, ExerciseForm, RoutineForm, PersonRoutineForm,
@@ -770,15 +770,35 @@ def person_routine_deactivate(request, pk):
 def my_workouts(request):
     """Student's active workouts"""
     from datetime import timedelta
+    from django.db.models import Prefetch
 
     try:
         person = request.user.person
+
+        # Prefetch apenas as últimas sessões completadas de cada exercício
+        last_session_prefetch = Prefetch(
+            'session_logs',
+            queryset=SessionExercise.objects.filter(
+                session__is_completed=True,
+                is_completed=True
+            ).select_related('session').order_by('-completed_at')[:1],
+            to_attr='last_session_log'
+        )
+
+        # Prefetch dos exercícios com suas sessões e dados do exercício
+        exercises_prefetch = Prefetch(
+            'exercises',
+            queryset=PersonRoutineExercise.objects.select_related('exercise').prefetch_related(
+                last_session_prefetch
+            ).order_by('order')
+        )
+
         active_routines = PersonRoutine.objects.filter(
             person=person,
             is_active=True
         ).select_related('routine_template').prefetch_related(
             'sessions',
-            'exercises__exercise'
+            exercises_prefetch
         )
 
         # Check for active sessions and auto-close old ones

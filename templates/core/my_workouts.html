@@ -62,13 +62,35 @@
                                     <small class="text-muted">#{{ routine_exercise.order }}</small>
                                 </div>
                                 <p class="mb-1 text-muted small">{{ routine_exercise.exercise.exercise_description|truncatewords:15 }}</p>
+
+                                <!-- Configuração do exercício -->
                                 <div class="d-flex gap-3 mt-2">
                                     <small><i class="bi bi-arrow-repeat"></i> {{ routine_exercise.sets }} séries</small>
                                     <small><i class="bi bi-123"></i> {{ routine_exercise.reps }} reps</small>
-                                    {% if routine_exercise.weight_used %}
-                                    <small><i class="bi bi-box"></i> {{ routine_exercise.weight_used }} kg</small>
+                                    {% if routine_exercise.rest_seconds %}
+                                    <small><i class="bi bi-clock"></i> {{ routine_exercise.rest_seconds }}s</small>
                                     {% endif %}
                                 </div>
+
+                                <!-- Dados da última sessão -->
+                                {% if routine_exercise.last_session_log %}
+                                {% with last_session=routine_exercise.last_session_log.0 %}
+                                <div class="mt-2 p-2 bg-light rounded">
+                                    <small class="text-success fw-bold">
+                                        <i class="bi bi-calendar-check"></i> Última execução:
+                                    </small>
+                                    <div class="d-flex gap-3 mt-1">
+                                        {% if last_session.weight_used %}
+                                        <small><i class="bi bi-box"></i> Carga: {{ last_session.weight_used }} kg</small>
+                                        {% endif %}
+                                        {% if last_session.completed_at %}
+                                        <small><i class="bi bi-check-circle"></i> {{ last_session.completed_at|date:"d/m/Y H:i" }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endwith %}
+                                {% endif %}
+
                                 {% if routine_exercise.notes %}
                                 <div class="mt-2">
                                     <small class="text-info"><i class="bi bi-info-circle"></i> {{ routine_exercise.notes }}</small>
