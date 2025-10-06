@@ -18,11 +18,55 @@ import json
 
 def home(request):
     """Home page"""
-    context = {
-        'total_students': Person.objects.filter(is_active=True).count(),
-        'total_exercises': Exercise.objects.filter(is_active=True).count(),
-        'total_routines': Routine.objects.filter(is_active=True).count(),
-    }
+    from django.db.models import Avg, Count
+
+    context = {}
+
+    # Se for admin/staff, mostra estatísticas gerais
+    if request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser):
+        context = {
+            'total_students': Person.objects.filter(is_active=True).count(),
+            'total_exercises': Exercise.objects.filter(is_active=True).count(),
+            'total_routines': Routine.objects.filter(is_active=True).count(),
+        }
+    # Se for aluno, mostra estatísticas pessoais
+    elif request.user.is_authenticated:
+        try:
+            person = request.user.person
+            sessions = WorkoutSession.objects.filter(
+                person_routine__person=person,
+                is_completed=True
+            )
+
+            total_workouts = sessions.count()
+            avg_duration = sessions.aggregate(Avg('duration_minutes'))['duration_minutes__avg'] or 0
+
+            # Calcula assiduidade (últimos 30 dias)
+            from datetime import timedelta
+            thirty_days_ago = timezone.now() - timedelta(days=30)
+            recent_workouts = sessions.filter(start_time__gte=thirty_days_ago).count()
+
+            context = {
+                'total_workouts': total_workouts,
+                'recent_workouts': recent_workouts,
+                'avg_duration': round(avg_duration, 1) if avg_duration else 0,
+                'is_student': True,
+            }
+        except Person.DoesNotExist:
+            # Usuário autenticado mas não é aluno cadastrado
+            context = {
+                'total_students': Person.objects.filter(is_active=True).count(),
+                'total_exercises': Exercise.objects.filter(is_active=True).count(),
+                'total_routines': Routine.objects.filter(is_active=True).count(),
+            }
+    else:
+        # Usuário não autenticado
+        context = {
+            'total_students': Person.objects.filter(is_active=True).count(),
+            'total_exercises': Exercise.objects.filter(is_active=True).count(),
+            'total_routines': Routine.objects.filter(is_active=True).count(),
+        }
+
     return render(request, 'core/home.html', context)
 
 
