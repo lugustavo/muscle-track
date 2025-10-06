@@ -776,7 +776,10 @@ def my_workouts(request):
         active_routines = PersonRoutine.objects.filter(
             person=person,
             is_active=True
-        ).select_related('routine_template').prefetch_related('sessions')
+        ).select_related('routine_template').prefetch_related(
+            'sessions',
+            'exercises__exercise'
+        )
 
         # Check for active sessions and auto-close old ones
         routines_with_sessions = []
