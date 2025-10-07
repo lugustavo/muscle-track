@@ -22,9 +22,13 @@
             <div class="col-md-8">
                 <h5><i class="bi bi-info-circle"></i> Detalhes do Treino</h5>
                 <p class="mb-1"><strong>Dificuldade:</strong>
-                    <span class="badge bg-{{ person_routine.difficulty_level }}">
-                        {{ person_routine.get_difficulty_level_display }}
-                    </span>
+                    {% if person_routine.difficulty_level == 'iniciante' %}
+                        <span class="badge bg-success">{{ person_routine.get_difficulty_level_display }}</span>
+                    {% elif person_routine.difficulty_level == 'intermediario' %}
+                        <span class="badge bg-warning">{{ person_routine.get_difficulty_level_display }}</span>
+                    {% else %}
+                        <span class="badge bg-danger">{{ person_routine.get_difficulty_level_display }}</span>
+                    {% endif %}
                 </p>
                 <p class="mb-1"><strong>Duração Estimada:</strong> {{ person_routine.estimated_duration }} minutos</p>
                 {% if person_routine.description %}
