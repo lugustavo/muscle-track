@@ -59,11 +59,33 @@
                 <div class="list-group-item text-success"><i class="bi bi-check-circle"></i> Todo mundo está em dia.</div>
                 {% endfor %}
                 {% if dashboard.inactive_more %}
-                <a href="{% url 'core:student_list' %}" class="list-group-item list-group-item-action text-muted small">e mais {{ dashboard.inactive_more }} — veja a lista de alunos</a>
+                <a href="{% url 'core:student_list' %}?filtro=inactive_7d" class="list-group-item list-group-item-action text-muted small">e mais {{ dashboard.inactive_more }} — veja a lista de alunos</a>
                 {% endif %}
             </div>
         </div>
     </div>
+
+    {% if dashboard.invites_total %}
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between">
+                <strong><i class="bi bi-hourglass-split text-primary"></i> Aguardando convite</strong>
+                <span class="badge bg-primary">{{ dashboard.invites_total }}</span>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for row in dashboard.invites %}
+                <a href="{% nav_url 'core:student_invite' row.student.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <span>{{ row.student.person_name }}</span>
+                    <small class="text-muted">cadastrado há {{ row.days }} dia{{ row.days|pluralize }} · ainda não criou a senha</small>
+                </a>
+                {% endfor %}
+                {% if dashboard.invites_more %}
+                <a href="{% url 'core:student_list' %}?filtro=invite_pending" class="list-group-item list-group-item-action text-muted small">e mais {{ dashboard.invites_more }} — veja a lista de alunos</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <div class="col-lg-6">
         <div class="card h-100">

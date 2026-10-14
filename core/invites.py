@@ -5,14 +5,33 @@ one-time link. Opening it lets the student choose a password and log in. The
 token is Django's password-reset token: it is bound to the user's current
 password hash, so it dies as soon as it is used, and it expires after
 PASSWORD_RESET_TIMEOUT. Generating a new link for the same student therefore
-doubles as "reset access".
+doubles as "reset access". The token also carries Person.invite_version, so the
+trainer can revoke links already sent ("Revogar e gerar novo link").
 """
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+
+
+class InviteTokenGenerator(PasswordResetTokenGenerator):
+    key_salt = 'core.invites.InviteTokenGenerator'
+
+    def _make_hash_value(self, user, timestamp):
+        person = getattr(user, 'person', None)
+        version = person.invite_version if person else 0
+        return f'{super()._make_hash_value(user, timestamp)}{version}'
+
+
+default_token_generator = InviteTokenGenerator()
+
+
+def revoke_invites(person):
+    """Invalidate every invite link already generated for this student."""
+    person.invite_version += 1
+    person.save(update_fields=['invite_version'])
 
 
 def build_invite_path(user):

@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% load navigation %}
-{% block title %}Convite - {{ student.person_name }} - Muscle Track{% endblock %}
+{% block title %}Link de acesso - {{ student.person_name }} - Muscle Track{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-send"></i> Convite para {{ student.person_name }}</h1>
+    <h1><i class="bi bi-send"></i> Link de acesso de {{ student.person_name }}</h1>
     {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default %}
 </div>
 
@@ -16,7 +16,7 @@
                 {% if has_password %}
                 <div class="alert alert-info">
                     <i class="bi bi-info-circle"></i> Este aluno já criou uma senha. O link abaixo serve para
-                    <strong>redefinir o acesso</strong> (por exemplo, se ele esqueceu a senha). Ao ser usado, ele define uma nova senha.
+                    <strong>redefinir o acesso</strong> (por exemplo, se ele esqueceu a senha e o e-mail de recuperação não chegou). Ao ser usado, ele define uma nova senha.
                 </div>
                 {% else %}
                 <div class="alert alert-warning">
@@ -43,8 +43,13 @@
 
         <p class="text-muted">
             <i class="bi bi-shield-lock"></i> Quem tiver este link consegue entrar como o aluno até ele ser usado,
-            então envie só para o próprio aluno. Depois de usado o link deixa de funcionar; para gerar outro, abra esta página de novo.
+            então envie só para o próprio aluno. Depois de usado o link deixa de funcionar.
+            Enviou para a pessoa errada? Revogue: o link atual para de funcionar e um novo é gerado.
         </p>
+        <form method="post" onsubmit="return confirm('Revogar o link atual? Quem tiver o link antigo não conseguirá mais usá-lo.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger"><i class="bi bi-arrow-repeat"></i> Revogar e gerar novo link</button>
+        </form>
     </div>
 </div>
 

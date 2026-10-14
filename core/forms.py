@@ -1,17 +1,40 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.db.models import Q
+from .validators import normalize_phone, normalize_state, normalize_zip_code, validate_birth_date, digits_only
 from .models import (
     Assessment, Exercise, Person, PersonRoutine, ProgressPhoto, Routine, RoutineExercise, StudentNote,
 )
 
 
-class PersonForm(forms.ModelForm):
+class ContactValidationMixin:
+    """Same checks and normalization for every form that edits a student's contact data."""
+
+    def clean_phone(self):
+        return normalize_phone(self.cleaned_data.get('phone'))
+
+    def clean_state(self):
+        return normalize_state(self.cleaned_data.get('state'))
+
+    def clean_zip_code(self):
+        return normalize_zip_code(self.cleaned_data.get('zip_code'))
+
+    def clean_birth_date(self):
+        value = self.cleaned_data.get('birth_date')
+        validate_birth_date(value)
+        return value
+
+
+class PersonForm(ContactValidationMixin, forms.ModelForm):
     email = forms.EmailField(
         required=True,
         widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'email@exemplo.com'}),
         label='Email',
+        max_length=150,
         help_text='Usado para o login do aluno. Depois de salvar, você recebe um link de convite para enviar a ele.'
+    )
+    confirm_duplicate = forms.BooleanField(
+        required=False, label='Confirmo que é outra pessoa, pode cadastrar mesmo assim',
     )
 
     class Meta:
@@ -44,15 +67,19 @@ class PersonForm(forms.ModelForm):
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
             'avatar': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
         }
+        labels = {'notes': 'Anotações internas (o aluno não vê)'}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.duplicates = []
         # Se estiver editando, preencher o email do usuário existente
         if self.instance and self.instance.pk and self.instance.user:
             self.fields['email'].initial = self.instance.user.email
 
     def clean_email(self):
         email = self.cleaned_data.get('email', '').strip().lower()
+        if len(email) > 150:
+            raise forms.ValidationError('O e-mail pode ter no máximo 150 caracteres.')
         # Verificar se o email já está em uso (exceto pelo usuário atual em edição)
         user_exists = User.objects.filter(Q(email__iexact=email) | Q(username__iexact=email))
         if self.instance and self.instance.pk and self.instance.user:
@@ -63,19 +90,47 @@ class PersonForm(forms.ModelForm):
 
         return email
 
+    def clean_emergency_contact_phone(self):
+        return normalize_phone(self.cleaned_data.get('emergency_contact_phone'))
 
-class StudentProfileForm(forms.ModelForm):
+    def _find_duplicates(self):
+        """Other students with the same normalized phone or the same name."""
+        name = (self.cleaned_data.get('person_name') or '').strip()
+        phone = digits_only(self.cleaned_data.get('phone'))
+        others = Person.objects.exclude(pk=self.instance.pk) if self.instance.pk else Person.objects.all()
+        found = {}
+        if name:
+            for p in others.filter(person_name__iexact=name):
+                found[p.pk] = (p, 'mesmo nome')
+        if phone:
+            for p in others.exclude(phone='').only('pk', 'person_name', 'phone'):
+                if digits_only(p.phone) == phone:
+                    found[p.pk] = (p, 'mesmo telefone')
+        return list(found.values())
+
+    def clean(self):
+        cleaned = super().clean()
+        if self.errors:
+            return cleaned
+        self.duplicates = self._find_duplicates()
+        if self.duplicates and not cleaned.get('confirm_duplicate'):
+            raise forms.ValidationError(
+                'Já existe aluno com dados parecidos (veja abaixo). '
+                'Se for outra pessoa, marque a confirmação e salve de novo.')
+        return cleaned
+
+
+class StudentProfileForm(ContactValidationMixin, forms.ModelForm):
     """Form for students to edit their own profile (restricted fields)"""
     class Meta:
         model = Person
         fields = ['person_name', 'avatar', 'address', 'city', 'state', 'zip_code',
-                  'phone', 'birth_date', 'notes']
+                  'phone', 'birth_date']
         widgets = {
             'birth_date': forms.DateInput(
                 attrs={'type': 'date', 'class': 'form-control'},
                 format='%Y-%m-%d'
             ),
-            'notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control', 'placeholder': 'Observações pessoais...'}),
             'person_name': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.TextInput(attrs={'class': 'form-control'}),
             'city': forms.TextInput(attrs={'class': 'form-control'}),

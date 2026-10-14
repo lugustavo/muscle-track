@@ -1,7 +1,7 @@
 import json
 from datetime import timedelta
 from decimal import Decimal, InvalidOperation
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 
 from django.contrib import messages
 from django.contrib.auth import login
@@ -9,8 +9,10 @@ from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Avg, Count, Max, Prefetch, Q
+from django.db.models import Avg, Count, Exists, F, Max, OuterRef, Prefetch, Q, Subquery, Value
+from django.db.models.functions import Coalesce, Replace
 from django.http import FileResponse, Http404, JsonResponse
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -19,18 +21,19 @@ from django.views.decorators.http import require_POST
 
 from allauth.account.models import EmailAddress
 
-from .dashboard import trainer_dashboard
+from .dashboard import INACTIVE_DAYS, INVITE_PENDING, trainer_dashboard
 from .forms import (
     AIWorkoutGenerationForm, AssessmentForm, ExerciseForm, PersonForm, PersonRoutineForm,
     ProgressPhotoForm, RoutineForm, StudentNoteForm,
 )
-from .invites import build_invite_url, get_user_from_invite
+from .invites import build_invite_url, get_user_from_invite, revoke_invites
 from .models import (
     Assessment, Exercise, MuscleGroup, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
     Routine, RoutineExercise, SessionExercise, SessionSet, StudentNote, WorkoutSession,
 )
 from .navigation import after_save_url, back_label, safe_next_url
 from .permissions import is_trainer, staff_required, student_required
+from .validators import digits_only
 
 
 def home(request):
@@ -57,49 +60,101 @@ def home(request):
 
 # ============= STUDENT VIEWS =============
 
+STUDENT_PAGE_SIZE = 24
+STUDENT_FILTERS = {
+    'plan_expiring': 'Plano vencendo',
+    'plan_expired': 'Plano vencido',
+    'inactive_7d': 'Sem treinar há 7+ dias',
+    'no_routine': 'Sem treino ativo',
+    'invite_pending': 'Convite pendente',
+}
+
+
+def _phone_digits(expr):
+    for ch in '()-+. ':
+        expr = Replace(expr, Value(ch), Value(''))
+    return expr
+
+
+def _students_queryset():
+    """Students with the list statistics computed in the same query (no per-row queries)."""
+    sessions = WorkoutSession.objects.filter(person_routine__person=OuterRef('pk'), is_completed=True)
+    last_workout = sessions.order_by('-start_time').values('start_time')[:1]
+    total = sessions.order_by().values('person_routine__person').annotate(c=Count('pk')).values('c')
+    return Person.objects.select_related('user').annotate(
+        last_workout_at=Subquery(last_workout),
+        total_workouts=Coalesce(Subquery(total), 0),
+        has_routine=Exists(PersonRoutine.objects.filter(person=OuterRef('pk'), is_active=True)),
+        phone_digits=_phone_digits(F('phone')),
+    )
+
+
+def _apply_student_search(students, search):
+    search = search.strip()
+    if not search:
+        return students
+    if search.startswith('#') and search[1:].isdigit():
+        return students.filter(pk=int(search[1:]))
+    query = (Q(person_name__icontains=search) | Q(user__email__icontains=search)
+             | Q(phone__icontains=search))
+    digits = digits_only(search)
+    if len(digits) >= 3:
+        query |= Q(phone_digits__icontains=digits)
+        if digits.startswith('55') and len(digits) >= 5:
+            query |= Q(phone_digits__icontains=digits[2:])  # typed with the country code
+    return students.filter(query)
+
+
+def _apply_student_filter(students, name):
+    today = timezone.localdate()
+    if name == 'plan_expiring':
+        return students.filter(is_active=True, plan_expires_on__gte=today,
+                               plan_expires_on__lte=today + timedelta(days=Person.PLAN_EXPIRING_DAYS))
+    if name == 'plan_expired':
+        return students.filter(is_active=True, plan_expires_on__lt=today)
+    if name == 'inactive_7d':
+        return students.filter(is_active=True, has_routine=True).exclude(INVITE_PENDING).filter(
+            Q(last_workout_at__lt=timezone.now() - timedelta(days=INACTIVE_DAYS))
+            | Q(last_workout_at__isnull=True))
+    if name == 'no_routine':
+        return students.filter(is_active=True, has_routine=False)
+    if name == 'invite_pending':
+        return students.filter(INVITE_PENDING)
+    return students
+
+
 @staff_required
 def student_list(request):
-    """List all students with filters and statistics"""
+    """List students with search, filters, statistics and pagination"""
     search = request.GET.get('search', '')
     status = request.GET.get('status', '')
+    filter_name = request.GET.get('filtro', '')
+    if filter_name not in STUDENT_FILTERS:
+        filter_name = ''
     view_mode = request.GET.get('view', request.COOKIES.get('student_view_mode', 'grid'))
 
-    # Base queryset
-    students = Person.objects.all().select_related('user')
-
-    # Filtro por busca (nome, email, telefone, ID)
-    if search:
-        students = students.filter(
-            Q(person_name__icontains=search) |
-            Q(user__email__icontains=search) |
-            Q(phone__icontains=search) |
-            Q(id__icontains=search)
-        )
-
-    # Filtro por status
+    students = _apply_student_search(_students_queryset(), search)
     if status == 'active':
         students = students.filter(is_active=True)
     elif status == 'inactive':
         students = students.filter(is_active=False)
+    students = _apply_student_filter(students, filter_name).order_by('person_name', 'pk')
 
-    students = students.order_by('person_name')
+    page = Paginator(students, STUDENT_PAGE_SIZE).get_page(request.GET.get('page'))
 
-    # Adicionar estatísticas para cada aluno
-    students_with_stats = []
-    for student in students:
-        last_session = student.get_last_workout_session()
-        students_with_stats.append({
-            'student': student,
-            'last_session': last_session,
-            'total_workouts': student.get_total_workouts(),
-            'age': student.age
-        })
+    # Query string that keeps search/filters when changing page or view mode
+    kept = {k: v for k, v in (('search', search), ('status', status), ('filtro', filter_name)) if v}
+    base_qs = urlencode(kept)
 
     response = render(request, 'core/student_list.html', {
-        'students_with_stats': students_with_stats,
+        'students': page,
+        'page': page,
         'search': search,
         'selected_status': status,
-        'view_mode': view_mode
+        'selected_filter': filter_name,
+        'filters': STUDENT_FILTERS,
+        'base_qs': base_qs,
+        'view_mode': view_mode,
     })
 
     # Salvar view_mode no cookie
@@ -125,6 +180,8 @@ def student_create(request):
 
                 person = form.save(commit=False)
                 person.user = user
+                if not person.is_active:
+                    person.deactivated_at = timezone.now()
                 person.save()
 
                 EmailAddress.objects.create(user=user, email=email, primary=True, verified=False)
@@ -140,6 +197,10 @@ def student_create(request):
 def student_invite(request, pk):
     """Show the one-time link (and a WhatsApp shortcut) the student uses to set a password"""
     student = get_object_or_404(Person.objects.select_related('user'), pk=pk)
+    if request.method == 'POST':
+        revoke_invites(student)
+        messages.success(request, 'Link anterior revogado. Este é o novo link de acesso.')
+        return redirect(request.get_full_path())
     invite_url = build_invite_url(request, student.user)
 
     phone_digits = ''.join(ch for ch in student.phone if ch.isdigit())
@@ -284,6 +345,12 @@ def student_edit(request, pk):
                 # (A student who never used the invite has no usable password, so cannot log in anyway.)
                 user.is_active = person.is_active
                 user.save()
+                if not person.is_active and person.deactivated_at is None:
+                    person.deactivated_at = timezone.now()
+                    person.save(update_fields=['deactivated_at'])
+                elif person.is_active and person.deactivated_at is not None:
+                    person.deactivated_at = None
+                    person.save(update_fields=['deactivated_at'])
                 if email_changed:
                     EmailAddress.objects.update_or_create(
                         user=user, primary=True, defaults={'email': email, 'verified': False})
@@ -296,6 +363,28 @@ def student_edit(request, pk):
     else:
         form = PersonForm(instance=student)
     return render(request, 'core/student_form.html', {'form': form, 'title': 'Editar Aluno'})
+
+
+@staff_required
+def student_delete(request, pk):
+    """Permanently delete a student: account, workouts, assessments, notes and photo files (LGPD)"""
+    student = get_object_or_404(Person.objects.select_related('user'), pk=pk)
+    if student.user.is_staff or student.user.is_superuser:
+        raise PermissionDenied  # never delete a trainer account through the student screen
+    if request.method == 'POST':
+        name = student.person_name
+        with transaction.atomic():
+            student.user.delete()  # cascades to Person and everything hanging from it
+        messages.success(request, f'{name} e todos os dados foram excluídos.')
+        return redirect('core:student_list')
+    counts = {
+        'routines': student.routines.count(),
+        'sessions': WorkoutSession.objects.filter(person_routine__person=student).count(),
+        'assessments': student.assessments.count(),
+        'photos': student.progress_photos.count(),
+        'notes': student.trainer_notes.count(),
+    }
+    return render(request, 'core/student_delete.html', {'student': student, 'counts': counts})
 
 
 @student_required

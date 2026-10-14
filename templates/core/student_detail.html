@@ -43,10 +43,13 @@
             <i class="bi bi-plus-circle"></i> Atribuir Treino
         </a>
         <a href="{% nav_url 'core:student_invite' student.pk %}" class="btn btn-outline-primary">
-            <i class="bi bi-send"></i> {% if student.user.has_usable_password %}Redefinir acesso{% else %}Convite{% endif %}
+            <i class="bi bi-send"></i> {% if student.user.has_usable_password %}Redefinir senha{% else %}Convite{% endif %}
         </a>
         <a href="{% nav_url 'core:student_edit' student.pk %}" class="btn btn-primary">
             <i class="bi bi-pencil"></i> Editar
+        </a>
+        <a href="{% nav_url 'core:student_delete' student.pk %}" class="btn btn-outline-danger" title="Excluir aluno e todos os dados">
+            <i class="bi bi-trash"></i> Excluir
         </a>
         {% url 'core:student_list' as back_default %}{% back_button back_default %}
     </div>

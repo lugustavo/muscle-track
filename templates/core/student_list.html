@@ -28,16 +28,16 @@
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
             <form method="get" id="filterForm" class="row g-3 align-items-end">
-                <div class="col-md-5">
+                <div class="col-md-4">
                     <label for="search" class="form-label small text-muted">Pesquisar</label>
                     <input type="text"
                            class="form-control"
                            id="search"
                            name="search"
                            value="{{ search }}"
-                           placeholder="Nome, email, telefone ou ID...">
+                           placeholder="Nome, e-mail, telefone ou #ID...">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label for="status" class="form-label small text-muted">Status</label>
                     <select class="form-select" id="status" name="status" onchange="this.form.submit()">
                         <option value="">Todos</option>
@@ -46,13 +46,22 @@
                     </select>
                 </div>
                 <div class="col-md-2">
+                    <label for="filtro" class="form-label small text-muted">Situação</label>
+                    <select class="form-select" id="filtro" name="filtro" onchange="this.form.submit()">
+                        <option value="">Todas</option>
+                        {% for key, label in filters.items %}
+                        <option value="{{ key }}" {% if selected_filter == key %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-1">
                     <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-search me-1"></i> Filtrar
+                        <i class="bi bi-search"></i><span class="visually-hidden">Filtrar</span>
                     </button>
                 </div>
-                <div class="col-md-2">
-                    <a href="{% url 'core:student_list' %}" class="btn btn-outline-secondary w-100">
-                        <i class="bi bi-x-circle me-1"></i> Limpar
+                <div class="col-md-1">
+                    <a href="{% url 'core:student_list' %}" class="btn btn-outline-secondary w-100" title="Limpar filtros">
+                        <i class="bi bi-x-circle"></i><span class="visually-hidden">Limpar</span>
                     </a>
                 </div>
             </form>
@@ -62,14 +71,14 @@
     <!-- View Toggle and Count -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <span class="text-muted">{{ students_with_stats|length }} aluno{{ students_with_stats|length|pluralize }} encontrado{{ students_with_stats|length|pluralize }}</span>
+            <span class="text-muted">{{ page.paginator.count }} aluno{{ page.paginator.count|pluralize }} encontrado{{ page.paginator.count|pluralize }}</span>
         </div>
         <div class="btn-group" role="group">
-            <a href="?{% if search %}search={{ search }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}view=grid"
+            <a href="?{% if base_qs %}{{ base_qs }}&{% endif %}view=grid"
                class="btn btn-sm {% if view_mode == 'grid' %}btn-primary{% else %}btn-outline-primary{% endif %}">
                 <i class="bi bi-grid-3x3-gap"></i> Grade
             </a>
-            <a href="?{% if search %}search={{ search }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}view=list"
+            <a href="?{% if base_qs %}{{ base_qs }}&{% endif %}view=list"
                class="btn btn-sm {% if view_mode == 'list' %}btn-primary{% else %}btn-outline-primary{% endif %}">
                 <i class="bi bi-list-ul"></i> Lista
             </a>
@@ -79,48 +88,48 @@
     <!-- Grid View -->
     {% if view_mode == 'grid' %}
     <div class="row g-3">
-        {% for item in students_with_stats %}
+        {% for student in students %}
         <div class="col-md-6 col-lg-4 col-xl-3">
             <div class="card h-100 border-0 shadow-sm hover-shadow">
                 <div class="card-body">
                     <div class="text-center mb-3">
-                        <img src="{{ item.student.get_avatar_url }}" alt="{{ item.student.person_name }}" class="student-avatar-grid">
+                        <img src="{{ student.get_avatar_url }}" alt="{{ student.person_name }}" class="student-avatar-grid">
                     </div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
                             <h5 class="card-title mb-1">
-                                <a href="{% nav_url 'core:student_detail' item.student.pk %}" class="text-decoration-none text-dark">
-                                    {{ item.student.person_name }}
+                                <a href="{% nav_url 'core:student_detail' student.pk %}" class="text-decoration-none text-dark">
+                                    {{ student.person_name }}
                                 </a>
                             </h5>
-                            <small class="text-muted">ID: #{{ item.student.id }}</small>
+                            <small class="text-muted">ID: #{{ student.id }}</small>
                         </div>
                         <div>
-                            {% if item.student.is_active %}
+                            {% if student.is_active %}
                             <span class="badge bg-success">Ativo</span>
                             {% else %}
                             <span class="badge bg-secondary">Inativo</span>
                             {% endif %}
-                            {% if item.student.plan_status == 'expired' %}<span class="badge bg-danger" title="Plano vencido em {{ item.student.plan_expires_on|date:'d/m/Y' }}">plano vencido</span>
-                            {% elif item.student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark" title="Vence em {{ item.student.plan_expires_on|date:'d/m/Y' }}">plano vence em {{ item.student.days_to_plan_expiry }}d</span>{% endif %}
+                            {% if student.plan_status == 'expired' %}<span class="badge bg-danger" title="Plano vencido em {{ student.plan_expires_on|date:'d/m/Y' }}">plano vencido</span>
+                            {% elif student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark" title="Vence em {{ student.plan_expires_on|date:'d/m/Y' }}">plano vence em {{ student.days_to_plan_expiry }}d</span>{% endif %}
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <div class="d-flex align-items-center mb-2">
                             <i class="bi bi-envelope text-muted me-2"></i>
-                            <small class="text-muted text-truncate">{{ item.student.user.email }}</small>
+                            <small class="text-muted text-truncate">{{ student.user.email }}</small>
                         </div>
-                        {% if item.student.phone %}
+                        {% if student.phone %}
                         <div class="d-flex align-items-center mb-2">
                             <i class="bi bi-telephone text-muted me-2"></i>
-                            <small class="text-muted">{{ item.student.phone }}</small>
+                            <small class="text-muted">{{ student.phone }}</small>
                         </div>
                         {% endif %}
-                        {% if item.age %}
+                        {% if student.age %}
                         <div class="d-flex align-items-center mb-2">
                             <i class="bi bi-calendar text-muted me-2"></i>
-                            <small class="text-muted">{{ item.age }} anos</small>
+                            <small class="text-muted">{{ student.age }} anos</small>
                         </div>
                         {% endif %}
                     </div>
@@ -128,14 +137,14 @@
                     <div class="border-top pt-3">
                         <div class="row text-center">
                             <div class="col-6 border-end">
-                                <div class="text-primary fw-bold">{{ item.total_workouts }}</div>
+                                <div class="text-primary fw-bold">{{ student.total_workouts }}</div>
                                 <small class="text-muted">Treinos</small>
                             </div>
                             <div class="col-6">
-                                {% if item.last_session %}
+                                {% if student.last_workout_at %}
                                 <div class="small text-success">
                                     <i class="bi bi-clock"></i>
-                                    {{ item.last_session.start_time|timesince }}
+                                    {{ student.last_workout_at|timesince }}
                                 </div>
                                 <small class="text-muted">Último treino</small>
                                 {% else %}
@@ -147,7 +156,7 @@
                     </div>
 
                     <div class="mt-3">
-                        <a href="{% nav_url 'core:student_detail' item.student.pk %}" class="btn btn-sm btn-outline-primary w-100">
+                        <a href="{% nav_url 'core:student_detail' student.pk %}" class="btn btn-sm btn-outline-primary w-100">
                             Ver Detalhes
                         </a>
                     </div>
@@ -185,62 +194,62 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in students_with_stats %}
+                    {% for student in students %}
                     <tr>
                         <td>
-                            <img src="{{ item.student.get_avatar_url }}" alt="{{ item.student.person_name }}" class="student-avatar-list">
+                            <img src="{{ student.get_avatar_url }}" alt="{{ student.person_name }}" class="student-avatar-list">
                         </td>
-                        <td class="text-muted small">#{{ item.student.id }}</td>
+                        <td class="text-muted small">#{{ student.id }}</td>
                         <td>
-                            <a href="{% nav_url 'core:student_detail' item.student.pk %}" class="text-decoration-none fw-semibold">
-                                {{ item.student.person_name }}
+                            <a href="{% nav_url 'core:student_detail' student.pk %}" class="text-decoration-none fw-semibold">
+                                {{ student.person_name }}
                             </a>
                         </td>
                         <td>
-                            {% if item.age %}
-                                {{ item.age }} anos
+                            {% if student.age %}
+                                {{ student.age }} anos
                             {% else %}
                                 <span class="text-muted">-</span>
                             {% endif %}
                         </td>
                         <td>
-                            <small class="text-muted">{{ item.student.user.email }}</small>
+                            <small class="text-muted">{{ student.user.email }}</small>
                         </td>
                         <td>
-                            {% if item.student.phone %}
-                                {{ item.student.phone }}
+                            {% if student.phone %}
+                                {{ student.phone }}
                             {% else %}
                                 <span class="text-muted">-</span>
                             {% endif %}
                         </td>
                         <td class="text-center">
-                            <span class="badge bg-primary">{{ item.total_workouts }}</span>
+                            <span class="badge bg-primary">{{ student.total_workouts }}</span>
                         </td>
                         <td>
-                            {% if item.last_session %}
+                            {% if student.last_workout_at %}
                                 <small class="text-success">
                                     <i class="bi bi-clock"></i>
-                                    {{ item.last_session.start_time|timesince }} atrás
+                                    {{ student.last_workout_at|timesince }} atrás
                                 </small>
                             {% else %}
                                 <small class="text-muted">Nenhum</small>
                             {% endif %}
                         </td>
                         <td class="text-center">
-                            {% if item.student.is_active %}
+                            {% if student.is_active %}
                             <span class="badge bg-success">Ativo</span>
                             {% else %}
                             <span class="badge bg-secondary">Inativo</span>
                             {% endif %}
-                            {% if item.student.plan_status == 'expired' %}<span class="badge bg-danger" title="Plano vencido em {{ item.student.plan_expires_on|date:'d/m/Y' }}">plano vencido</span>
-                            {% elif item.student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark" title="Vence em {{ item.student.plan_expires_on|date:'d/m/Y' }}">plano vence em {{ item.student.days_to_plan_expiry }}d</span>{% endif %}
+                            {% if student.plan_status == 'expired' %}<span class="badge bg-danger" title="Plano vencido em {{ student.plan_expires_on|date:'d/m/Y' }}">plano vencido</span>
+                            {% elif student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark" title="Vence em {{ student.plan_expires_on|date:'d/m/Y' }}">plano vence em {{ student.days_to_plan_expiry }}d</span>{% endif %}
                         </td>
                         <td class="text-center">
-                            <a href="{% nav_url 'core:student_detail' item.student.pk %}" class="btn btn-sm btn-outline-primary" title="Ver Detalhes">
+                            <a href="{% nav_url 'core:student_detail' student.pk %}" class="btn btn-sm btn-outline-primary" title="Ver Detalhes">
                                 <i class="bi bi-eye"></i>
                             </a>
                             {% if user.is_staff %}
-                            <a href="{% nav_url 'core:student_edit' item.student.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                            <a href="{% nav_url 'core:student_edit' student.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </a>
                             {% endif %}
@@ -258,6 +267,20 @@
             </table>
         </div>
     </div>
+    {% endif %}
+
+    {% if page.has_other_pages %}
+    <nav aria-label="Paginação" class="mt-4">
+        <ul class="pagination justify-content-center flex-wrap">
+            {% if page.has_previous %}
+            <li class="page-item"><a class="page-link" href="?{% if base_qs %}{{ base_qs }}&{% endif %}view={{ view_mode }}&page={{ page.previous_page_number }}">&laquo; Anterior</a></li>
+            {% endif %}
+            <li class="page-item disabled"><span class="page-link">Página {{ page.number }} de {{ page.paginator.num_pages }}</span></li>
+            {% if page.has_next %}
+            <li class="page-item"><a class="page-link" href="?{% if base_qs %}{{ base_qs }}&{% endif %}view={{ view_mode }}&page={{ page.next_page_number }}">Próxima &raquo;</a></li>
+            {% endif %}
+        </ul>
+    </nav>
     {% endif %}
 </div>
 

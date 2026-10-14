@@ -204,7 +204,8 @@ class ProgressPhotoTests(BaseTestCase):
         photo = ProgressPhoto.objects.get()
         paths = [photo.image.path, photo.thumbnail.path]
         self.assertTrue(all(os.path.exists(p) for p in paths))
-        self.client.post(reverse('core:photo_delete', kwargs={'pk': photo.pk}))
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.post(reverse('core:photo_delete', kwargs={'pk': photo.pk}))
         self.assertFalse(ProgressPhoto.objects.exists())
         self.assertFalse(any(os.path.exists(p) for p in paths))
 
