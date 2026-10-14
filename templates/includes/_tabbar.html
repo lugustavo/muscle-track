@@ -1,0 +1,64 @@
+{% load static %}
+{% if tabbar %}
+<nav class="tabbar d-lg-none" aria-label="Menu principal">
+    {% if tabbar.role == 'student' %}
+        {% for item in tabbar.items %}
+            {% if item.key == 'center' %}
+            <div class="tab tab-center {% if tabbar.center.state == 'continue' %}running{% endif %}">
+                {% if tabbar.center.state == 'start' %}
+                <form method="post" action="{{ tabbar.center.url }}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-center" aria-label="Iniciar o treino de hoje">
+                        <span class="circle"><i class="bi bi-play-fill"></i></span>
+                        <span class="label">{{ tabbar.center.label }}</span>
+                    </button>
+                </form>
+                {% elif tabbar.center.state == 'continue' %}
+                <a href="{{ tabbar.center.url }}" class="btn-center" aria-label="Continuar o treino em andamento">
+                    <span class="circle"><i class="bi bi-stopwatch"></i></span>
+                    <span class="label tab-timer" data-tabbar-timer="{{ tabbar.center.started_ms }}">{{ tabbar.center.label }}</span>
+                </a>
+                {% else %}
+                <a href="{{ tabbar.center.url }}" class="btn-center">
+                    <span class="circle"><i class="bi bi-play-fill"></i></span>
+                    <span class="label">{{ tabbar.center.label }}</span>
+                </a>
+                {% endif %}
+            </div>
+            {% else %}
+            <a href="{{ item.url }}" class="tab {% if item.active %}active{% endif %}" {% if item.active %}aria-current="page"{% endif %}>
+                <i class="bi {{ item.icon }}"></i><span class="label">{{ item.label }}</span>
+            </a>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        {% for item in tabbar.items %}
+        <a href="{{ item.url }}" class="tab {% if item.active %}active{% endif %}" {% if item.active %}aria-current="page"{% endif %}>
+            <i class="bi {{ item.icon }}"></i><span class="label">{{ item.label }}</span>
+            {% if item.badge %}<span class="tab-badge" aria-hidden="true">{{ item.badge }}</span><span class="visually-hidden">, {{ item.badge }} pendente{{ item.badge|pluralize }}</span>{% endif %}
+        </a>
+        {% endfor %}
+        <button type="button" class="tab {% if tabbar.more_active %}active{% endif %}" data-bs-toggle="offcanvas" data-bs-target="#moreSheet" aria-controls="moreSheet">
+            <i class="bi bi-three-dots"></i><span class="label">Mais</span>
+        </button>
+    {% endif %}
+</nav>
+{% if tabbar.role == 'staff' %}
+<div class="offcanvas offcanvas-bottom" tabindex="-1" id="moreSheet" aria-labelledby="moreSheetLabel" style="height: auto;">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="moreSheetLabel">Mais</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body pt-0" style="padding-bottom: calc(1rem + env(safe-area-inset-bottom));">
+        <div class="list-group list-group-flush">
+            {% for entry in tabbar.more %}
+            <a href="{{ entry.url }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3">
+                <i class="bi {{ entry.icon }} fs-5"></i> {{ entry.label }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+<script src="{% static 'js/tabbar.js' %}"></script>
+{% endif %}

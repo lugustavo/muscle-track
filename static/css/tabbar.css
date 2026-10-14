@@ -1,0 +1,120 @@
+/* Bottom navigation bar (phones and small tablets). Hidden from the lg breakpoint up, where the top menu is used. */
+.tabbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1035;
+    display: flex;
+    align-items: stretch;
+    background: #fff;
+    border-top: 1px solid rgba(0, 0, 0, .12);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, .06);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+@media (min-width: 992px) {
+    .tabbar { display: none !important; }
+}
+body.kbd-open .tabbar { display: none; }
+
+.tabbar .tab {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 56px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 6px 2px;
+    background: none;
+    border: 0;
+    color: #6c757d;
+    text-decoration: none;
+    font-size: .7rem;
+    line-height: 1.1;
+    position: relative;
+}
+.tabbar .tab i { font-size: 1.35rem; line-height: 1; }
+.tabbar .tab span.label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tabbar .tab.active { color: var(--primary-color); font-weight: 600; }
+.tabbar .tab:focus-visible { outline: 2px solid var(--primary-color); outline-offset: -4px; border-radius: .5rem; }
+.tabbar .tab-badge {
+    position: absolute;
+    top: 4px;
+    left: calc(50% + 6px);
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: #dc3545;
+    color: #fff;
+    font-size: .65rem;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+}
+
+/* Central workout button: raised, in the brand color */
+.tabbar .tab-center { flex: 1.15 1 0; }
+.tabbar .tab-center form { display: contents; }
+.tabbar .tab-center .btn-center {
+    width: 100%;
+    height: 100%;
+    background: none;
+    border: 0;
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: .7rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    text-decoration: none;
+    padding: 0;
+}
+.tabbar .tab-center .circle {
+    width: 48px;
+    height: 48px;
+    margin-top: -18px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    box-shadow: 0 3px 10px rgba(255, 107, 107, .5);
+}
+.tabbar .tab-center.running .circle { background: #198754; box-shadow: 0 3px 10px rgba(25, 135, 84, .5); }
+.tabbar .tab-center.running .btn-center { color: #198754; }
+.tabbar .tab-center .btn-center:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; border-radius: .5rem; }
+.tabbar .tab-timer { font-variant-numeric: tabular-nums; }
+
+@media (max-width: 991.98px) {
+    body.has-tabbar .main-content {
+        padding-top: 1rem;
+        padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+    }
+}
+
+/* "Hoje" screen */
+.today-hero .btn-start { min-height: 56px; font-size: 1.15rem; }
+.week-dots { display: flex; justify-content: space-between; gap: .25rem; }
+.week-dots .dot { flex: 1; text-align: center; font-size: .75rem; color: #6c757d; }
+.week-dots .dot .dot-mark {
+    width: 32px;
+    height: 32px;
+    margin: 0 auto .25rem;
+    border-radius: 50%;
+    border: 2px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.week-dots .dot.done .dot-mark { background: var(--secondary-color); border-color: var(--secondary-color); color: #fff; }
+.week-dots .dot.today .dot-mark { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(255, 107, 107, .25); }
+.week-dots .dot.today { color: var(--primary-color); font-weight: 700; }
+.today-stats div { text-align: center; }
+.today-stats .num { font-size: 1.4rem; font-weight: 700; line-height: 1.1; }

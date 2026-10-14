@@ -11,6 +11,8 @@ App web **self-hosted** para personal trainers: cadastro de alunos, fichas de tr
 - **Fotos de progresso** — privadas (só a personal e o próprio aluno abrem), com miniaturas
 - **Anotações datadas** — só a personal vê
 - **Alunos** — cadastro com validação (data de nascimento, telefone, UF, CEP), aviso de cadastro duplicado, lista paginada com busca (nome, e-mail, telefone sem formatação, `#ID`) e filtros (plano vencendo/vencido, sem treinar, sem treino ativo, convite pendente)
+- **Barra de menu inferior no celular** — no celular e em tablets pequenos o menu fica no rodapé (aluno: Hoje · Treinos · **Treinar** · Histórico · Perfil; personal: Hoje · Alunos · Agenda · Financeiro · Mais), com selos de pendências para a personal; no desktop continua o menu do topo
+- **Tela "Hoje" do aluno** — o treino do dia com um botão grande para iniciar (ou continuar), a semana em 7 pontos com a meta do plano, e os números em uma linha; descartar um treino iniciado por engano
 - **Planos (modelos)** — catálogo de planos como o de exercícios: periodicidade, aulas por semana e valor de tabela. Ao atribuir ao aluno, nome e valor são copiados e podem ser ajustados por aluno
 - **Valor negociado e valor/hora por aluno** — individual e **sigiloso**: só a personal vê (nunca aparece para o aluno, nem na exportação dele, nem no histórico)
 - **Financeiro** — registro manual de pagamentos (valor e período sugeridos, vencimento do plano avança sozinho), recebido/previsto do mês, quem está em atraso e cobrança pelo WhatsApp (com sua chave Pix), exportação CSV para o Excel
@@ -185,7 +187,7 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 - **Marca:** o visual é o padrão do Bootstrap, sem identidade própria (cores, tipografia, ícone, vazios).
 
 **Ideias**
-- **Barra de menu inferior no celular (tab bar), no lugar do hambúrguer** — convenção de plataforma (Material e iOS), então não é cópia de nenhum app. Só abaixo de 768 px; no desktop continua o menu do topo.
+- **Barra de menu inferior no celular (tab bar), no lugar do hambúrguer** — convenção de plataforma (Material e iOS), então não é cópia de nenhum app. *(Feito, com uma diferença: a barra aparece abaixo de 992 px, o mesmo ponto em que o menu do topo vira hambúrguer, e o item do aluno se chama "Histórico", como a página.)*
   - *Aluno:* **Hoje · Treinos · Evolução · Perfil**, com o botão do meio em destaque para **iniciar o treino do dia** (vira "Continuar" com o timer quando há treino em andamento). "Privacidade", "Alterar senha" e "Sair" ficam dentro de Perfil.
   - *Personal:* **Hoje · Alunos · Agenda · Financeiro · Mais** (Exercícios, Treinos, Planos, Admin e Sair em "Mais"). Selo numérico em Hoje (atrasos e pedidos de exclusão) e em Agenda (aulas de hoje sem marcação).
   - *Comportamento:* item ativo destacado e com `aria-current`, alvos de toque de pelo menos 44 px, respeita a área segura do iPhone (`safe-area-inset-bottom`), some na tela de treino em andamento (que tem a própria barra) e no teclado aberto, o conteúdo ganha espaço no fim para nada ficar escondido. O rodapé de direitos autorais sai do celular e fica só no desktop (ou dentro de "Mais").
@@ -219,7 +221,7 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 
 **Licenças: o que NÃO copiar.** O openGym é **AGPL-3.0**: copiar código, textos ou telas dele nos obrigaria a licenciar o muscle-track também em AGPL e mantém o direito autoral dele. As **animações de exercícios** têm licença própria restrita (só dentro do openGym, sem reutilização) e o texto de parte dos exercícios veio de outro projeto sob MIT; nada disso pode ser reaproveitado. Usamos só as **ideias e convenções** (barra inferior, menu por exercício, mapa muscular, heatmap), com código, textos, ícones e imagens próprios. Para exercícios, procurar base com licença clara (por exemplo as de domínio público/Unlicense ou CC) e **conferir a licença de cada imagem antes de usar**; o desenho do mapa muscular do openGym vem de um projeto MIT à parte, que daria para usar direto, com atribuição, depois de conferir a licença no repositório de origem. Também falta definir a **licença do muscle-track** (hoje não há arquivo `LICENSE`).
 
-**Ordem sugerida:** (1) barra inferior + tela "Hoje" do aluno + rodapé fora do celular; (2) treino em modo foco e resumo; (3) personal no celular (menu "⋯", agenda com faixa de dias, botão "+"); (4) identidade visual e temas; (5) busca global, primeiros passos e formulários; (6) constância, PWA e centro de avisos.
+**Ordem sugerida:** (1) ~~barra inferior + tela "Hoje" do aluno + rodapé fora do celular~~ *(feito)*; (2) treino em modo foco e resumo; (3) personal no celular (menu "⋯", agenda com faixa de dias, botão "+"); (4) identidade visual e temas; (5) busca global, primeiros passos e formulários; (6) constância, PWA e centro de avisos.
 
 **Princípio: inspiração sem cópia.** Referências são convenções comuns (barra inferior, anel de meta, linha do tempo, folha deslizante), que nenhum app possui. Não copiar layouts específicos, nomes, textos, ícones, cores nem ilustrações de nenhum produto; usar só ativos próprios ou com licença livre e registrada (Bootstrap Icons e as fontes já usadas são MIT/OFL). Cada tela nova passa pela mesma regra de navegação (`?next=`, breadcrumbs no desktop) e pelos mesmos testes.
 

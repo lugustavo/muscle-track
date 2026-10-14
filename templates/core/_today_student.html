@@ -1,0 +1,69 @@
+{% load navigation %}
+<div class="mx-auto" style="max-width: 560px;">
+    <div class="mb-3">
+        <h1 class="h3 mb-0">Oi{% if today.first_name %}, {{ today.first_name }}{% endif %}!</h1>
+        <div class="text-muted">{{ today.today|date:"l, j \d\e F"|lower|capfirst }}</div>
+    </div>
+
+    <div class="card today-hero shadow-sm mb-3 {% if today.state == 'in_progress' %}border-success{% elif today.state == 'ready' %}border-primary{% endif %}">
+        <div class="card-body">
+            {% if today.state == 'in_progress' %}
+                <div class="text-success fw-semibold small mb-1"><i class="bi bi-stopwatch"></i> Treino em andamento</div>
+                <h2 class="h4">{{ today.in_progress.routine.routine_name }}</h2>
+                <p class="text-muted mb-3">Iniciado às {{ today.in_progress.open_start|time:"H:i" }}</p>
+                <a href="{% url 'core:workout_execute' today.in_progress.routine.pk %}" class="btn btn-success btn-start w-100"><i class="bi bi-play-fill"></i> Continuar treino</a>
+            {% elif today.state == 'done' %}
+                <div class="text-success fw-semibold small mb-1"><i class="bi bi-check-circle-fill"></i> Treino de hoje feito</div>
+                <h2 class="h4">{{ today.done_today.person_routine.routine_name }}</h2>
+                <p class="text-muted mb-3">{% if today.done_today.duration_minutes %}{{ today.done_today.duration_minutes }} min · {% endif %}parabéns pela constância!</p>
+                <a href="{% url 'core:my_workouts' %}" class="btn btn-outline-primary w-100">Fazer outro treino</a>
+            {% elif today.state == 'ready' %}
+                <div class="text-primary fw-semibold small mb-1"><i class="bi bi-star-fill"></i> Treino de hoje</div>
+                <h2 class="h4">{{ today.suggested.routine.routine_name }}</h2>
+                <p class="text-muted mb-3">
+                    {{ today.suggested.exercise_count }} exercício{{ today.suggested.exercise_count|pluralize }}
+                    · cerca de {{ today.suggested.routine.estimated_duration }} min
+                    {% if today.suggested.last_done %}<br><small>Último: {{ today.suggested.last_done|date:"d/m" }}</small>{% endif %}
+                </p>
+                <form method="post" action="{% url 'core:workout_start' today.suggested.routine.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-start w-100"><i class="bi bi-play-fill"></i> Iniciar treino</button>
+                </form>
+                <div class="text-center mt-2"><a href="{% url 'core:my_workouts' %}" class="small">Escolher outro treino</a></div>
+            {% else %}
+                <h2 class="h5"><i class="bi bi-hourglass-split"></i> Seu treino ainda não está pronto</h2>
+                <p class="text-muted mb-0">Sua personal ainda não montou um treino para você. Assim que ele aparecer, é só tocar em iniciar.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-baseline mb-2">
+                <strong>Sua semana</strong>
+                <small class="text-muted">
+                    {% if today.week_goal %}{{ today.week_done }} de {{ today.week_goal }} treino{{ today.week_goal|pluralize }}
+                    {% else %}{{ today.week_done }} treino{{ today.week_done|pluralize }}{% endif %}
+                </small>
+            </div>
+            <div class="week-dots" role="img" aria-label="Treinos desta semana: {{ today.week_done }}">
+                {% for d in today.week %}
+                <div class="dot {% if d.done %}done{% endif %} {% if d.is_today %}today{% endif %}">
+                    <div class="dot-mark">{% if d.done %}<i class="bi bi-check-lg"></i>{% endif %}</div>
+                    {{ d.letter }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row today-stats g-0">
+                <div class="col-4"><div class="num">{{ today.total_workouts }}</div><small class="text-muted">treinos</small></div>
+                <div class="col-4"><div class="num">{{ today.recent_workouts }}</div><small class="text-muted">em 30 dias</small></div>
+                <div class="col-4"><div class="num">{{ today.avg_duration }}<small class="fs-6"> min</small></div><small class="text-muted">em média</small></div>
+            </div>
+        </div>
+    </div>
+</div>
