@@ -125,6 +125,12 @@
             <button type="submit" class="btn btn-success btn-lg w-100"><i class="bi bi-check-circle"></i> Finalizar Treino</button>
         </div>
     </form>
+
+    <form method="post" action="{% url 'core:workout_discard' active_session.pk %}" class="text-center mb-5"
+          onsubmit="return confirm('Descartar este treino? Nada do que foi feito nele será guardado.');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-link text-danger btn-sm"><i class="bi bi-trash"></i> Descartar treino</button>
+    </form>
 </div>
 
 <div id="restBar" class="rest-bar d-none" role="timer" aria-live="off">

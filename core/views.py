@@ -48,6 +48,7 @@ from .models import (
 )
 from .navigation import after_save_url, back_label, safe_next_url
 from .permissions import is_trainer, staff_required, student_required
+from .today import MAX_SESSION_MINUTES, student_today, suggest_index
 from .validators import digits_only
 from .whatsapp import whatsapp_url
 
@@ -64,14 +65,8 @@ def home(request):
     elif user.is_authenticated:
         person = Person.objects.filter(user=user).first()
         if person:
-            sessions = WorkoutSession.objects.filter(person_routine__person=person, is_completed=True)
-            avg_duration = sessions.aggregate(Avg('duration_minutes'))['duration_minutes__avg'] or 0
-            context.update({
-                'is_student': True,
-                'total_workouts': sessions.count(),
-                'recent_workouts': sessions.filter(start_time__gte=timezone.now() - timedelta(days=30)).count(),
-                'avg_duration': round(avg_duration, 1),
-            })
+            context['is_student'] = True
+            context['today'] = student_today(request, person)
 
     return render(request, 'core/home.html', context)
 
@@ -1080,7 +1075,6 @@ def person_routine_deactivate(request, pk):
 
 # ============= STUDENT WORKOUT AREA =============
 
-MAX_SESSION_MINUTES = 120
 
 
 def _close_if_stale(session):
@@ -1178,12 +1172,10 @@ def my_workouts(request, person):
         })
 
     # "Treino de hoje": continue the one in progress, otherwise the one done longest ago
-    # (never done first) - this rotates A/B/C naturally.
+    # (never done first) - this rotates A/B/C naturally (rule shared with the Hoje screen).
     if len(items) > 1:
-        in_progress = [i for i in items if i['active_session']]
-        pool = in_progress or items
-        pool_sorted = sorted(pool, key=lambda i: (i['last_done'] is not None, i['last_done'] or 0))
-        pool_sorted[0]['suggested'] = True
+        index = suggest_index([(bool(i['active_session']), i['last_done']) for i in items])
+        items[index]['suggested'] = True
         items.sort(key=lambda i: not i['suggested'])
 
     return render(request, 'core/my_workouts.html', {
@@ -1315,6 +1307,21 @@ def workout_end(request, pk, person):
         session.save(update_fields=['notes'])
     session.end_session()
     messages.success(request, f'Treino concluído! Duração: {session.duration_minutes} minutos')
+    return redirect('core:my_workouts')
+
+
+@student_required(consent_gate=False)
+@require_POST
+def workout_discard(request, pk, person):
+    """Throw away a session that was started by mistake (nothing logged yet)"""
+    session = _active_session_or_404(pk, person)
+    has_sets = SessionSet.objects.filter(session_exercise__session=session, is_done=True).exists()
+    has_notes = bool(session.notes.strip()) or session.exercise_logs.exclude(notes='').exists()
+    if has_sets or has_notes:
+        messages.warning(request, 'Este treino já tem séries ou comentários. Finalize-o em vez de descartar.')
+        return redirect('core:workout_execute', pk=session.person_routine_id)
+    session.delete()
+    messages.info(request, 'Treino descartado.')
     return redirect('core:my_workouts')
 
 

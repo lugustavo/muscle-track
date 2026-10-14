@@ -3,7 +3,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>{% block title %}Muscle Track{% endblock %}</title>
 
     <!-- Favicon -->
@@ -21,6 +21,7 @@
     <!-- Bootstrap 5 CSS -->
     <link href="{% static 'vendor/bootstrap/5.3.0/bootstrap.min.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/1.11.0/bootstrap-icons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/tabbar.css' %}">
 
     <style>
         :root {
@@ -88,7 +89,7 @@
 
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="{% if tabbar %}has-tabbar{% endif %}">
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--dark-color);">
         <div class="container">
@@ -96,7 +97,7 @@
                 <img src="{% static 'images/favicon.svg' %}" alt="Muscle Track" width="32" height="32" class="me-2">
                 Muscle Track
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler{% if tabbar %} d-none{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -210,12 +211,14 @@
     </main>
 
     <!-- Footer -->
-    <footer>
+    <footer{% if tabbar %} class="d-none d-lg-block"{% endif %}>
         <div class="container text-center">
             <p class="mb-0">&copy; 2025 Muscle Track - Sistema de Gerenciamento de Treinos
                 · <a href="{% url 'core:privacy_policy' %}" class="text-white-50">Privacidade</a></p>
         </div>
     </footer>
+
+    {% include 'includes/_tabbar.html' %}
 
     <!-- Bootstrap 5 JS -->
     <script src="{% static 'vendor/bootstrap/5.3.0/bootstrap.bundle.min.js' %}"></script>

@@ -77,6 +77,7 @@ urlpatterns = [
     path('my-workouts/<int:pk>/execute/', views.workout_execute, name='workout_execute'),
     path('my-workouts/session/<int:pk>/end/', views.workout_end, name='workout_end'),
 
+    path('my-workouts/session/<int:pk>/discard/', views.workout_discard, name='workout_discard'),
     path('my-workouts/session/<int:pk>/pause/', views.workout_pause, name='workout_pause'),
     path('my-workouts/session/<int:pk>/resume/', views.workout_resume, name='workout_resume'),
     path('my-exercises/<int:exercise_pk>/', views.my_exercise_progress, name='my_exercise_progress'),
