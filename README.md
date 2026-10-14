@@ -172,6 +172,41 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 - **Temas claro / escuro / automático:** Bootstrap 5.3 `data-bs-theme`, seletor no menu (guardado no navegador/perfil), "automático" via `prefers-color-scheme` e script no `<head>` para evitar o "flash". Trocar cores fixas por variáveis CSS, revisar `bg-light`/`text-dark`/estilos inline, cores do Chart.js e o `theme-color` do PWA; checar contraste (WCAG AA).
 - *Ordem sugerida:* temas → idiomas (o maior; mexe em todas as strings, melhor com o layout estável). Os breadcrumbs já estão padronizados.
 
+### Experiência no celular — análise de UX e ideias
+*Análise feita com prints do app em 390 px (aluno e personal). A maior parte do uso é no celular, na academia, com uma mão e pouca atenção.*
+
+**O que a análise encontrou**
+- **Menu:** o menu é só o hambúrguer do topo, mesmo no celular. O aluno tem 3 destinos e precisa de 2 toques para chegar a qualquer um; a personal tem 6 (Alunos, Exercícios, Treinos, Agenda, Financeiro, Admin).
+- **Rodapé:** o rodapé escuro com "© 2025..." ocupa uma tela inteira de espaço nobre e não serve para nada na navegação.
+- **Início do aluno:** três cartões grandes de estatística (todos "0" para quem está começando) empurram o que importa, "Comece seu treino agora", para fora da primeira tela.
+- **Treino em andamento:** o cabeçalho do site continua ocupando espaço, o título "Série" quebra em duas linhas ("SÉRI/E") e a carga exige digitar. É a tela mais usada e a mais apertada.
+- **Ficha do aluno (personal):** no celular os botões de ação do cabeçalho viram uma pilha de 5 botões ao lado do nome e as estatísticas ocupam 3 telas antes do conteúdo.
+- **Agenda:** a semana vira 7 blocos empilhados, a maioria vazia; para ver "hoje" é preciso rolar.
+- **Marca:** o visual é o padrão do Bootstrap, sem identidade própria (cores, tipografia, ícone, vazios).
+
+**Ideias**
+- **Barra de menu inferior no celular (tab bar), no lugar do hambúrguer** — convenção de plataforma (Material e iOS), então não é cópia de nenhum app. Só abaixo de 768 px; no desktop continua o menu do topo.
+  - *Aluno:* **Hoje · Treinos · Evolução · Perfil**, com o botão do meio em destaque para **iniciar o treino do dia** (vira "Continuar" com o timer quando há treino em andamento). "Privacidade", "Alterar senha" e "Sair" ficam dentro de Perfil.
+  - *Personal:* **Hoje · Alunos · Agenda · Financeiro · Mais** (Exercícios, Treinos, Planos, Admin e Sair em "Mais"). Selo numérico em Hoje (atrasos e pedidos de exclusão) e em Agenda (aulas de hoje sem marcação).
+  - *Comportamento:* item ativo destacado e com `aria-current`, alvos de toque de pelo menos 44 px, respeita a área segura do iPhone (`safe-area-inset-bottom`), some na tela de treino em andamento (que tem a própria barra) e no teclado aberto, o conteúdo ganha espaço no fim para nada ficar escondido. O rodapé de direitos autorais sai do celular e fica só no desktop (ou dentro de "Mais").
+- **Início do aluno virar a tela "Hoje":** o treino do dia como cartão principal com o botão de iniciar (a sugestão por rodízio já existe), a semana em 7 pontinhos (dias treinados, meta = aulas por semana do plano), recordes recentes e, quando a visão do aluno existir, a próxima aula. As estatísticas viram uma linha compacta.
+- **Treino em modo foco:** sem cabeçalho do site, com progresso do treino ("exercício 3 de 8"), passo de carga com − / + (por exemplo 2,5 kg) e "repetir a série anterior", próximo exercício deslizando ou em botão, cabeçalho de colunas sem quebra, mais vibração e som opcionais. Ao finalizar, um **resumo** (duração, volume levantado, recordes, comparação com o último treino) em vez de só voltar para a lista.
+- **Personal no celular:** ações da ficha em um menu "⋯" com 1 botão principal; estatísticas em uma linha rolável; abas da ficha fixas no topo ao rolar; **agenda com faixa de dias** (toca em um dia e vê a linha do tempo dele, em vez de 7 blocos); botão flutuante "+" para nova aula, novo aluno e registrar pagamento; listas com filtros em uma folha deslizante (*bottom sheet*) e cartões no lugar de tabelas.
+- **Busca global** (atalho `/` ou Ctrl+K e um ícone de lupa no celular): alunos, exercícios e treinos num lugar só, com recentes.
+- **Painel da personal por prioridade:** o que precisa de ação agora no topo, cada item com a ação ao lado (cobrar, remarcar, registrar), e o resto recolhido. Já escondemos os cartões vazios; falta ordenar por urgência.
+- **Primeiros passos (personal):** lista de passos com progresso (cadastrar exercícios → criar um plano → montar um treino → cadastrar o primeiro aluno → enviar o convite), que some quando concluída. Para o aluno, 3 telas curtas no primeiro acesso (como marcar série, descanso, comentários).
+- **Formulários:** a ficha do aluno é longa; dividir em seções recolhíveis ou em passos, com barra de salvar fixa no celular, máscaras (telefone, CEP) e preenchimento do endereço pelo CEP, teclado numérico/telefone/e-mail certo em cada campo e rascunho que não se perde.
+- **Constância e motivação (opcional, desligável):** meta semanal em anel, sequência de semanas treinadas, marcos (10, 50, 100 treinos), "seu mês" em um cartão que o aluno pode compartilhar. Sem comparar alunos entre si.
+- **PWA mais "de app":** convite para instalar, atalhos do ícone (Iniciar treino, Agenda), indicador de offline, modo *standalone* sem barra do navegador, `theme-color` por tema.
+- **Identidade visual própria:** paleta, tipografia, ícones, logo e ilustrações de estados vazios definidos como *design tokens* (isso já casa com o item de temas claro/escuro); avisos em *toast* em vez de faixa; esqueletos de carregamento.
+- **Acessibilidade:** contraste AA, foco visível, alvos de 44 px, `prefers-reduced-motion`, texto que cresce com a fonte do sistema, timer anunciado (`aria-live`) com opção de desligar.
+- **Texto neutro quanto ao gênero:** hoje há "aluno" e "aluna" misturados; padronizar "aluno(a)" ou um campo de tratamento no perfil.
+- **Centro de avisos no app** (sino com avisos não lidos): casa com o item de notificações dos alunos.
+
+**Ordem sugerida:** (1) barra inferior + tela "Hoje" do aluno + rodapé fora do celular; (2) treino em modo foco e resumo; (3) personal no celular (menu "⋯", agenda com faixa de dias, botão "+"); (4) identidade visual e temas; (5) busca global, primeiros passos e formulários; (6) constância, PWA e centro de avisos.
+
+**Princípio: inspiração sem cópia.** Referências são convenções comuns (barra inferior, anel de meta, linha do tempo, folha deslizante), que nenhum app possui. Não copiar layouts específicos, nomes, textos, ícones, cores nem ilustrações de nenhum produto; usar só ativos próprios ou com licença livre e registrada (Bootstrap Icons e as fontes já usadas são MIT/OFL). Cada tela nova passa pela mesma regra de navegação (`?next=`, breadcrumbs no desktop) e pelos mesmos testes.
+
 ## Estrutura
 
 ```
