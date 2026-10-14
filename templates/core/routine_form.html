@@ -9,13 +9,6 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h1><i class="bi bi-clipboard-check"></i> {{ title }}</h1>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Início</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'core:routine_list' %}">Rotinas</a></li>
-                <li class="breadcrumb-item active">{{ title }}</li>
-            </ol>
-        </nav>
     </div>
     {% if routine %}{% url 'core:routine_detail' routine.id as back_default %}{% else %}{% url 'core:routine_list' as back_default %}{% endif %}
     {% back_button back_default %}

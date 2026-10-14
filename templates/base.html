@@ -1,4 +1,4 @@
-{% load static %}
+{% load static navigation %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -49,6 +49,11 @@
         .btn-primary:hover {
             background-color: #ee5a5a;
             border-color: #ee5a5a;
+        }
+
+        .breadcrumb-nav .breadcrumb {
+            font-size: .9rem;
+            margin-bottom: 1rem;
         }
 
         .main-content {
@@ -177,6 +182,7 @@
     <!-- Main Content -->
     <main class="main-content">
         <div class="container">
+            {% block breadcrumbs %}{% breadcrumbs %}{% endblock %}
             {% block content %}{% endblock %}
         </div>
     </main>
