@@ -247,6 +247,12 @@
                         </div>
                         <div class="col-md-6">
                     <div class="mb-3">
+                        <label for="{{ form.plan.id_for_label }}" class="form-label fw-bold">{{ form.plan.label }}</label>
+                        {{ form.plan }}
+                        {% if form.plan.errors %}<div class="text-danger small">{{ form.plan.errors }}</div>{% endif %}
+                        <div class="form-text">Ao escolher um plano, nome e valor são copiados para este aluno (você pode ajustar). <a href="{% url 'core:plan_list' %}" target="_blank" rel="noopener">Gerenciar planos</a></div>
+                    </div>
+                    <div class="mb-3">
                         <label for="{{ form.plan_name.id_for_label }}" class="form-label fw-bold">Plano contratado</label>
                         {{ form.plan_name }}
                         {% if form.plan_name.errors %}<div class="text-danger small">{{ form.plan_name.errors }}</div>{% endif %}
@@ -257,6 +263,21 @@
                         <label for="{{ form.plan_expires_on.id_for_label }}" class="form-label fw-bold">Vencimento do plano</label>
                         {{ form.plan_expires_on }}
                         {% if form.plan_expires_on.errors %}<div class="text-danger small">{{ form.plan_expires_on.errors }}</div>{% endif %}
+                    </div>
+                        </div>
+                        <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.plan_price.id_for_label }}" class="form-label fw-bold"><i class="bi bi-lock"></i> {{ form.plan_price.label }}</label>
+                        {{ form.plan_price }}
+                        {% if form.plan_price.errors %}<div class="text-danger small">{{ form.plan_price.errors }}</div>{% endif %}
+                    </div>
+                        </div>
+                        <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.hourly_rate.id_for_label }}" class="form-label fw-bold"><i class="bi bi-lock"></i> {{ form.hourly_rate.label }}</label>
+                        {{ form.hourly_rate }}
+                        {% if form.hourly_rate.errors %}<div class="text-danger small">{{ form.hourly_rate.errors }}</div>{% endif %}
+                        <div class="form-text">Sigiloso: só você vê. Sugere o valor do pagamento (valor/hora × aulas por semana do plano).</div>
                     </div>
                         </div>
                     </div>

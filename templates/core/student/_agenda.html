@@ -1,0 +1,47 @@
+{% load navigation %}
+<div class="row g-4">
+    <div class="col-lg-6">
+        <h5 class="mb-3"><i class="bi bi-calendar-week"></i> Horários fixos</h5>
+        <ul class="list-group mb-3">
+            {% for slot in slots %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span><strong>{{ slot.get_weekday_display }}</strong> às {{ slot.start_time|time:"H:i" }} <small class="text-muted">({{ slot.duration_minutes }} min)</small></span>
+                <form method="post" action="{% nav_url 'core:slot_delete' slot.pk %}" onsubmit="return confirm('Remover este horário? As aulas futuras dele saem da agenda.');">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-link text-danger p-0" title="Remover"><i class="bi bi-trash"></i></button>
+                </form>
+            </li>
+            {% empty %}
+            <li class="list-group-item text-muted">Nenhum horário fixo. Adicione abaixo (ex.: segunda 07:00).</li>
+            {% endfor %}
+        </ul>
+        <form method="post" action="{% nav_url 'core:slot_add' student.pk %}" class="row g-2 align-items-end">
+            {% csrf_token %}
+            <div class="col-sm-4"><label class="form-label small mb-0" for="id_weekday">Dia</label>{{ slot_form.weekday }}</div>
+            <div class="col-sm-3"><label class="form-label small mb-0" for="id_start_time">Horário</label>{{ slot_form.start_time }}</div>
+            <div class="col-sm-3"><label class="form-label small mb-0" for="id_duration_minutes">Duração</label>{{ slot_form.duration_minutes }}</div>
+            <div class="col-sm-2"><button class="btn btn-primary w-100" title="Adicionar"><i class="bi bi-plus-lg"></i></button></div>
+        </form>
+        {% if not student.is_active %}<p class="small text-muted mt-2">Aluno sem acesso: não gera aulas na agenda enquanto estiver {{ student.get_status_display|lower }}.</p>{% endif %}
+    </div>
+
+    <div class="col-lg-6">
+        <h5 class="mb-3"><i class="bi bi-graph-up"></i> Frequência (30 dias)</h5>
+        <div class="row text-center g-2 mb-3">
+            <div class="col-4"><div class="card"><div class="card-body py-2"><div class="fs-4 fw-bold text-success">{{ attendance.attended }}</div><small class="text-muted">compareceu</small></div></div></div>
+            <div class="col-4"><div class="card"><div class="card-body py-2"><div class="fs-4 fw-bold text-danger">{{ attendance.missed }}</div><small class="text-muted">faltou</small></div></div></div>
+            <div class="col-4"><div class="card"><div class="card-body py-2"><div class="fs-4 fw-bold">{% if attendance.rate is None %}—{% else %}{{ attendance.rate }}%{% endif %}</div><small class="text-muted">presença</small></div></div></div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong>Próximas aulas</strong>
+            <a href="{% nav_url 'core:appointment_create' %}&person={{ student.pk }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-circle"></i> Aula avulsa</a>
+        </div>
+        <ul class="list-group">
+            {% for a in upcoming %}
+            <li class="list-group-item d-flex justify-content-between"><span>{{ a.starts_at|date:"D d/m" }} às {{ a.starts_at|time:"H:i" }}</span><small class="text-muted">{{ a.get_kind_display }}</small></li>
+            {% empty %}
+            <li class="list-group-item text-muted">Nenhuma aula marcada.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>

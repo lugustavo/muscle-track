@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from .validators import normalize_phone, normalize_state, normalize_zip_code, validate_birth_date, digits_only
 from .models import (
+    Appointment, Payment, Plan, ScheduleSlot,
     Assessment, Exercise, Person, PersonRoutine, ProgressPhoto, Routine, RoutineExercise, StudentNote,
 )
 
@@ -41,7 +42,8 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
         model = Person
         fields = ['person_name', 'email', 'avatar', 'address', 'city', 'state', 'zip_code',
                   'phone', 'birth_date', 'notes', 'goal', 'health_notes', 'emergency_contact_name',
-                  'emergency_contact_phone', 'plan_name', 'plan_expires_on', 'status']
+                  'emergency_contact_phone', 'plan', 'plan_name', 'plan_price', 'hourly_rate', 'plan_expires_on',
+                  'status']
         widgets = {
             'birth_date': forms.DateInput(
                 attrs={'type': 'date', 'class': 'form-control'},
@@ -58,6 +60,9 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
             'emergency_contact_name': forms.TextInput(attrs={'class': 'form-control'}),
             'emergency_contact_phone': forms.TextInput(attrs={'class': 'form-control'}),
             'plan_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex.: Mensal 3x/semana'}),
+            'plan': forms.Select(attrs={'class': 'form-select'}),
+            'plan_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'placeholder': '0,00'}),
+            'hourly_rate': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'placeholder': '0,00'}),
             'notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'person_name': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.TextInput(attrs={'class': 'form-control'}),
@@ -67,11 +72,20 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
             'avatar': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
         }
-        labels = {'notes': 'Anotações internas (o aluno não vê)'}
+        labels = {
+            'notes': 'Anotações internas (o aluno não vê)',
+            'plan': 'Plano (modelo)',
+            'plan_price': 'Valor negociado do período (R$)',
+            'hourly_rate': 'Valor/hora negociado (R$)',
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.duplicates = []
+        # Only active plan templates can be chosen (plus the one the student already has)
+        plans = Plan.objects.filter(Q(is_active=True) | Q(pk=self.instance.plan_id))
+        self.fields['plan'].queryset = plans
+        self.fields['plan'].empty_label = '— sem plano do catálogo —'
         if self.instance.pk:
             # Changing the lifecycle goes through "Alterar situação" (history + reason)
             del self.fields['status']
@@ -119,10 +133,21 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
                     found[p.pk] = (p, 'mesmo telefone')
         return list(found.values())
 
+    def _copy_plan_values(self, cleaned):
+        """Assigning a plan copies its name and price to the student unless the trainer typed their own."""
+        plan = cleaned.get('plan')
+        if plan is None or plan.pk == self.instance.plan_id:
+            return
+        if 'plan_name' not in self.changed_data or not cleaned.get('plan_name'):
+            cleaned['plan_name'] = plan.name
+        if 'plan_price' not in self.changed_data or cleaned.get('plan_price') is None:
+            cleaned['plan_price'] = plan.price
+
     def clean(self):
         cleaned = super().clean()
         if self.errors:
             return cleaned
+        self._copy_plan_values(cleaned)
         self.duplicates = self._find_duplicates()
         if self.duplicates and not cleaned.get('confirm_duplicate'):
             raise forms.ValidationError(
@@ -301,3 +326,76 @@ class ConsentForm(forms.Form):
     terms = forms.BooleanField(label='', error_messages={'required': 'É preciso aceitar para continuar.'})
     health_data = forms.BooleanField(label='', error_messages={'required': 'É preciso aceitar para continuar.'})
     photos = forms.BooleanField(required=False, label='')
+
+
+class PlanForm(forms.ModelForm):
+    class Meta:
+        model = Plan
+        fields = ['name', 'description', 'months', 'sessions_per_week', 'price', 'is_active']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex.: Mensal 3x por semana'}),
+            'description': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'months': forms.Select(attrs={'class': 'form-select'}),
+            'sessions_per_week': forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': '14'}),
+            'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
+        }
+        labels = {'price': 'Valor de tabela do período (R$)'}
+
+
+class PaymentForm(forms.ModelForm):
+    class Meta:
+        model = Payment
+        fields = ['plan', 'amount', 'paid_on', 'method', 'period_start', 'period_end', 'notes']
+        widgets = {
+            'plan': forms.Select(attrs={'class': 'form-select'}),
+            'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0.01'}),
+            'paid_on': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
+            'method': forms.Select(attrs={'class': 'form-select'}),
+            'period_start': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
+            'period_end': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
+            'notes': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+        labels = {'amount': 'Valor (R$)'}
+
+    def __init__(self, *args, person=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['plan'].queryset = Plan.objects.filter(Q(is_active=True) | Q(pk=getattr(person, 'plan_id', None)))
+        self.fields['plan'].required = False
+        self.fields['plan'].empty_label = '— sem plano do catálogo —'
+
+    def clean(self):
+        cleaned = super().clean()
+        start, end = cleaned.get('period_start'), cleaned.get('period_end')
+        if start and end and end < start:
+            self.add_error('period_end', 'O fim do período não pode ser antes do início.')
+        return cleaned
+
+
+class ScheduleSlotForm(forms.ModelForm):
+    class Meta:
+        model = ScheduleSlot
+        fields = ['weekday', 'start_time', 'duration_minutes']
+        widgets = {
+            'weekday': forms.Select(attrs={'class': 'form-select'}),
+            'start_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}, format='%H:%M'),
+            'duration_minutes': forms.NumberInput(attrs={'class': 'form-control', 'min': '10', 'max': '480', 'step': '5'}),
+        }
+
+
+class AppointmentForm(forms.Form):
+    """A one-off class (trial, makeup...) or the new time of a rescheduled one."""
+    person = forms.ModelChoiceField(
+        queryset=Person.objects.none(), label='Aluno', widget=forms.Select(attrs={'class': 'form-select'}))
+    date = forms.DateField(label='Data', widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
+    time = forms.TimeField(label='Horário', widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}, format='%H:%M'))
+    duration_minutes = forms.IntegerField(
+        label='Duração (min)', min_value=10, max_value=480, initial=60,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '5'}))
+    kind = forms.ChoiceField(choices=Appointment.Kind.choices, label='Tipo', initial=Appointment.Kind.REGULAR,
+                             widget=forms.Select(attrs={'class': 'form-select'}))
+    notes = forms.CharField(required=False, max_length=200, label='Observação',
+                            widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['person'].queryset = Person.objects.filter(is_active=True).order_by('person_name')

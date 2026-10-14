@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 import io
 import os
 import uuid
+from datetime import timedelta
+from decimal import Decimal
 
 from django.core.files.base import ContentFile
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -55,6 +57,15 @@ class Person(models.Model):
     emergency_contact_phone = models.CharField(max_length=20, blank=True, verbose_name='Telefone de emergência')
     plan_name = models.CharField(max_length=100, blank=True, verbose_name='Plano contratado')
     plan_expires_on = models.DateField(null=True, blank=True, verbose_name='Vencimento do plano')
+    # Where the plan came from (a template, like Routine -> PersonRoutine). The values below are
+    # copied to the student when the plan is assigned, so editing the template never changes them.
+    plan = models.ForeignKey('Plan', on_delete=models.SET_NULL, null=True, blank=True,
+                             related_name='students', verbose_name='Plano (modelo)')
+    # Confidential commercial terms: only the trainer sees or edits them
+    plan_price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
+                                     validators=[MinValueValidator(0)], verbose_name='Valor negociado do período')
+    hourly_rate = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
+                                      validators=[MinValueValidator(0)], verbose_name='Valor/hora negociado')
 
     class Status(models.TextChoices):
         TRIAL = 'trial', 'Experimental'
@@ -114,8 +125,12 @@ class Person(models.Model):
         self.is_active = status in self.OPEN_STATUSES
         if self.is_active:
             self.deactivated_at = None
-        elif self.deactivated_at is None:
-            self.deactivated_at = now
+        else:
+            if self.deactivated_at is None:
+                self.deactivated_at = now
+            # A student without access no longer has upcoming classes on the calendar
+            Appointment.objects.filter(person=self, status=Appointment.Status.SCHEDULED,
+                                       starts_at__gt=now).delete()
         self.save(update_fields=['status', 'status_reason', 'status_changed_at', 'is_active',
                                  'deactivated_at', 'updated_at'])
         User.objects.filter(pk=self.user_id).update(is_active=self.is_active)
@@ -597,6 +612,7 @@ class StudentEvent(models.Model):
         INVITE_REVOKED = 'invite_revoked', 'Convite revogado'
         INVITE_ACCEPTED = 'invite_accepted', 'Convite aceito'
         CONSENT = 'consent', 'Consentimento'
+        PAYMENT = 'payment', 'Pagamento'
         DATA_EXPORT = 'data_export', 'Exportação de dados'
         ERASURE_REQUEST = 'erasure_request', 'Pedido de exclusão'
 
@@ -657,3 +673,125 @@ class ConsentRecord(models.Model):
 
     def __str__(self):
         return f'{self.person_id} {self.kind} v{self.version} {"sim" if self.granted else "não"}'
+
+
+class Plan(models.Model):
+    """Plan template (catalog), reused for many students like Exercise and Routine."""
+    MONTH_CHOICES = [(1, 'Mensal'), (3, 'Trimestral'), (6, 'Semestral'), (12, 'Anual')]
+
+    name = models.CharField(max_length=100, unique=True, verbose_name='Nome')
+    description = models.TextField(blank=True, verbose_name='Descrição')
+    months = models.PositiveSmallIntegerField(choices=MONTH_CHOICES, default=1, verbose_name='Periodicidade')
+    sessions_per_week = models.PositiveSmallIntegerField(
+        null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(14)],
+        verbose_name='Aulas por semana')
+    price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
+                                validators=[MinValueValidator(0)], verbose_name='Valor de tabela do período')
+    is_active = models.BooleanField(default=True, verbose_name='Ativo')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Plano'
+        verbose_name_plural = 'Planos'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class Payment(models.Model):
+    """A payment received from a student, covering a period of the plan."""
+
+    class Method(models.TextChoices):
+        PIX = 'pix', 'Pix'
+        CASH = 'cash', 'Dinheiro'
+        CARD = 'card', 'Cartão'
+        TRANSFER = 'transfer', 'Transferência'
+        OTHER = 'other', 'Outro'
+
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='payments', verbose_name='Aluno')
+    plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, null=True, blank=True, related_name='payments',
+                             verbose_name='Plano')
+    plan_name = models.CharField(max_length=100, blank=True, verbose_name='Plano')
+    amount = models.DecimalField(max_digits=8, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))],
+                                 verbose_name='Valor')
+    paid_on = models.DateField(default=timezone.localdate, verbose_name='Data do pagamento')
+    method = models.CharField(max_length=10, choices=Method.choices, default=Method.PIX, verbose_name='Forma')
+    period_start = models.DateField(verbose_name='Período de')
+    period_end = models.DateField(verbose_name='Período até')
+    notes = models.CharField(max_length=200, blank=True, verbose_name='Observação')
+    recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Pagamento'
+        verbose_name_plural = 'Pagamentos'
+        ordering = ['-paid_on', '-pk']
+
+    def __str__(self):
+        return f'{self.person_id} {self.paid_on:%d/%m/%Y} {self.amount}'
+
+
+class ScheduleSlot(models.Model):
+    """Fixed weekly time of a student (e.g. Mondays 07:00)."""
+    WEEKDAYS = [(0, 'Segunda'), (1, 'Terça'), (2, 'Quarta'), (3, 'Quinta'), (4, 'Sexta'), (5, 'Sábado'), (6, 'Domingo')]
+
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='slots', verbose_name='Aluno')
+    weekday = models.PositiveSmallIntegerField(choices=WEEKDAYS, verbose_name='Dia da semana')
+    start_time = models.TimeField(verbose_name='Horário')
+    duration_minutes = models.PositiveSmallIntegerField(
+        default=60, validators=[MinValueValidator(10), MaxValueValidator(480)], verbose_name='Duração (min)')
+    is_active = models.BooleanField(default=True, verbose_name='Ativo')
+    valid_from = models.DateField(default=timezone.localdate, verbose_name='Vale a partir de')
+    valid_until = models.DateField(null=True, blank=True, verbose_name='Vale até')
+
+    class Meta:
+        verbose_name = 'Horário fixo'
+        verbose_name_plural = 'Horários fixos'
+        ordering = ['weekday', 'start_time']
+        constraints = [models.UniqueConstraint(fields=['person', 'weekday', 'start_time'], name='unique_slot')]
+
+    def __str__(self):
+        return f'{self.get_weekday_display()} {self.start_time:%H:%M}'
+
+
+class Appointment(models.Model):
+    """One concrete class on the calendar (generated from a slot, or created by hand)."""
+
+    class Kind(models.TextChoices):
+        REGULAR = 'regular', 'Aula'
+        TRIAL = 'trial', 'Experimental'
+        MAKEUP = 'makeup', 'Reposição'
+        OTHER = 'other', 'Outro'
+
+    class Status(models.TextChoices):
+        SCHEDULED = 'scheduled', 'Marcada'
+        ATTENDED = 'attended', 'Compareceu'
+        MISSED = 'missed', 'Faltou'
+        CANCELLED = 'cancelled', 'Cancelada'
+        RESCHEDULED = 'rescheduled', 'Remarcada'
+
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='appointments', verbose_name='Aluno')
+    starts_at = models.DateTimeField(verbose_name='Início')
+    duration_minutes = models.PositiveSmallIntegerField(
+        default=60, validators=[MinValueValidator(10), MaxValueValidator(480)], verbose_name='Duração (min)')
+    kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.REGULAR, verbose_name='Tipo')
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.SCHEDULED, verbose_name='Situação')
+    slot = models.ForeignKey(ScheduleSlot, on_delete=models.SET_NULL, null=True, blank=True,
+                             related_name='appointments')
+    notes = models.CharField(max_length=200, blank=True, verbose_name='Observação')
+    status_changed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Aula'
+        verbose_name_plural = 'Aulas'
+        ordering = ['starts_at']
+        constraints = [models.UniqueConstraint(fields=['person', 'starts_at'], name='unique_appointment')]
+
+    @property
+    def ends_at(self):
+        return self.starts_at + timedelta(minutes=self.duration_minutes)
+
+    def __str__(self):
+        return f'{self.person_id} {self.starts_at:%d/%m/%Y %H:%M} {self.status}'

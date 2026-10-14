@@ -11,6 +11,10 @@ App web **self-hosted** para personal trainers: cadastro de alunos, fichas de tr
 - **Fotos de progresso** — privadas (só a personal e o próprio aluno abrem), com miniaturas
 - **Anotações datadas** — só a personal vê
 - **Alunos** — cadastro com validação (data de nascimento, telefone, UF, CEP), aviso de cadastro duplicado, lista paginada com busca (nome, e-mail, telefone sem formatação, `#ID`) e filtros (plano vencendo/vencido, sem treinar, sem treino ativo, convite pendente)
+- **Planos (modelos)** — catálogo de planos como o de exercícios: periodicidade, aulas por semana e valor de tabela. Ao atribuir ao aluno, nome e valor são copiados e podem ser ajustados por aluno
+- **Valor negociado e valor/hora por aluno** — individual e **sigiloso**: só a personal vê (nunca aparece para o aluno, nem na exportação dele, nem no histórico)
+- **Financeiro** — registro manual de pagamentos (valor e período sugeridos, vencimento do plano avança sozinho), recebido/previsto do mês, quem está em atraso e cobrança pelo WhatsApp (com sua chave Pix), exportação CSV para o Excel
+- **Agenda** — horários fixos semanais por aluno, semana em colunas, marcar compareceu/faltou/cancelada, remarcar, aulas avulsas (experimental, reposição), aviso de sobreposição e frequência dos últimos 30 dias. Painel: aulas de hoje, faltas da semana e pagamentos em atraso, com WhatsApp pronto
 - **Situação do aluno** — Experimental, Ativo, Pausado ou Ex-aluno, com motivo e data; pausado e ex-aluno perdem o acesso ao app e podem ser reativados. O painel avisa quem está em experimental há mais de 14 dias
 - **Histórico de alterações** — quem mudou o quê e quando (dados, situação, convites, consentimentos); textos de saúde e anotações internas aparecem só como "alterado", sem o conteúdo
 - **LGPD** — tela de consentimento no primeiro acesso (termos, dados de saúde, fotos opcional), registro de consentimento dado fora do app, política de privacidade em `/privacy/`, exportação dos dados (ZIP) e pedido de exclusão pelo aluno
@@ -94,6 +98,7 @@ Os dados vivem em volumes do Docker: `pgdata` (banco), `media` (fotos e mídia d
 | `ALLOW_PUBLIC_SIGNUP` | `False` (padrão): só entra quem foi convidado |
 | `OPENAI_API_KEY`, `OPENAI_MODEL` | Geração de treino com IA (opcional) |
 | `PRIVACY_CONTROLLER_NAME`, `PRIVACY_CONTACT_EMAIL` | Nome e e-mail do responsável pelos dados, exibidos na política de privacidade |
+| `PIX_KEY` | Chave Pix incluída na mensagem de cobrança pelo WhatsApp (opcional) |
 | `EMAIL_*` | SMTP, só para o "esqueci minha senha" (opcional) |
 | `SITE_URL`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, `SECURE_HSTS_SECONDS` | Avançado: sobrescrevem os valores derivados de `DOMAIN` |
 
@@ -128,6 +133,7 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 - Área da personal restrita a contas `is_staff`; cada aluno só enxerga e altera os **próprios** treinos e sessões
 - Cadastro público fechado; acesso por convite de uso único (7 dias), revogável
 - Consentimento LGPD registrado (versão do texto, data, quem), exportação e exclusão de dados; histórico não guarda conteúdo de saúde
+- Valor/hora e valor negociado só na área da personal
 - Anotações internas da personal nunca aparecem nem são editáveis pela aluna
 - HTTPS automático, cookies `Secure`, HSTS, `X-Content-Type-Options`
 - Container da aplicação roda sem root; só o Caddy expõe portas (banco e app ficam na rede interna)
@@ -137,7 +143,8 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 - **Backup automático** (pg_dump diário + `media`, retenção e restauração testada; cópia fora do servidor) — a pasta `media` inclui as fotos de progresso, que são dados sensíveis
 - Configurar SMTP no servidor para o "esqueci minha senha" chegar por e-mail (hoje o caminho é a personal gerar um novo link)
 - Revisar o texto da política de privacidade (`templates/core/privacy_policy.html`, é um modelo) com apoio jurídico; subir `CURRENT_VERSION` em `core/consent.py` quando o texto mudar
-- Financeiro (planos, pagamentos, inadimplência), agenda e presença, metas, lembretes de reavaliação
+- Aluno ver a própria agenda e pedir remarcação; cobrança automática com gateway (Pix/cartão); lembretes enviados automaticamente
+- Metas com prazo e lembrete de reavaliação, marcação do aniversário, importação/exportação de alunos em CSV
 - Aluno ver as próprias avaliações e fotos de progresso; comparação lado a lado de fotos
 - Lembrete automático de plano vencendo (WhatsApp/e-mail)
 - Séries por tempo/técnicas (drop-set, bi-set), periodização

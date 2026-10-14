@@ -119,6 +119,20 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" href="{% url 'core:agenda' %}">
+                                    <i class="bi bi-calendar-week"></i> Agenda
+                                </a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="financeDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-cash-coin"></i> Financeiro
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'core:finance' %}"><i class="bi bi-graph-up"></i> Resumo e pagamentos</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'core:plan_list' %}"><i class="bi bi-card-checklist"></i> Planos</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" href="/admin/">
                                     <i class="bi bi-gear"></i> Admin
                                 </a>

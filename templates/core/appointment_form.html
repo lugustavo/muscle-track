@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load navigation %}
+
+{% block title %}{{ title }} - Muscle Track{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-calendar-plus"></i> {{ title }}</h1>
+    {% url 'core:agenda' as back_default %}{% back_button back_default %}
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <form method="post" class="card mb-4">
+            {% csrf_token %}
+            <div class="card-body">
+                {% if appointment %}<p class="text-muted">Horário atual: <strong>{{ appointment.starts_at|date:"D d/m H:i" }}</strong>. A aula original fica como "remarcada".</p>{% endif %}
+                {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+                {% for field in form %}
+                <div class="mb-3">
+                    <label for="{{ field.id_for_label }}" class="form-label fw-bold">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<div class="text-danger small">{{ field.errors|join:" " }}</div>{% endif %}
+                </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Salvar</button>
+                {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='bi-x-circle' %}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
