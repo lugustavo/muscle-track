@@ -114,7 +114,7 @@
             </div>
             <div class="list-group list-group-flush">
                 {% for session in dashboard.sessions %}
-                <a href="{% url 'core:session_detail' session.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <a href="{% url 'core:session_detail' session.pk %}?next={{ request.get_full_path|urlencode }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                     <span>{{ session.person_routine.person.person_name }} <small class="text-muted">· {{ session.person_routine.routine_name }}</small></span>
                     {% if session.is_completed %}
                         <span class="badge bg-success">{{ session.duration_minutes }} min</span>
@@ -134,7 +134,7 @@
             <div class="card-header"><strong><i class="bi bi-chat-left-text text-info"></i> Comentários dos alunos (7 dias)</strong></div>
             <div class="list-group list-group-flush">
                 {% for c in dashboard.comments %}
-                <a href="{% url 'core:session_detail' c.session_pk %}" class="list-group-item list-group-item-action">
+                <a href="{% url 'core:session_detail' c.session_pk %}?next={{ request.get_full_path|urlencode }}" class="list-group-item list-group-item-action">
                     <div class="d-flex justify-content-between">
                         <strong>{{ c.student.person_name }}</strong>
                         <small class="text-muted">{{ c.when|date:"d/m H:i" }}</small>

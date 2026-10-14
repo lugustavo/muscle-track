@@ -29,6 +29,7 @@ from .models import (
     Assessment, Exercise, MuscleGroup, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
     Routine, RoutineExercise, SessionExercise, SessionSet, StudentNote, WorkoutSession,
 )
+from .navigation import back_label, safe_next_url
 from .permissions import is_trainer, staff_required, student_required
 
 
@@ -1096,11 +1097,19 @@ def session_detail(request, pk):
         'sets': list(se.sets.all()),
     } for se in session_exercises]
 
+    if is_trainer(request.user):
+        default_back = reverse('core:person_routine_detail', kwargs={'pk': person_routine.pk})
+    else:
+        default_back = reverse('core:my_history')
+    back_url = safe_next_url(request, default_back)
+
     return render(request, 'core/session_detail.html', {
         'session': session,
         'person_routine': person_routine,
         'student': person_routine.person,
-        'exercises_data': exercises_data
+        'exercises_data': exercises_data,
+        'back_url': back_url,
+        'back_label': back_label(back_url),
     })
 
 
