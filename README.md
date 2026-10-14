@@ -133,6 +133,12 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 - Monitoramento/alertas e logs centralizados
 - Servir `media/` direto pelo Caddy
 
+### Normalização de UX
+- **Multi-idioma (pt-BR e inglês primeiro):** usar o i18n do Django (`gettext_lazy`, `{% trans %}`/`{% blocktrans %}`, `LocaleMiddleware`, `locale/`) com seletor de idioma (cookie/preferência do usuário). Cobrir templates, mensagens das views, labels/choices de models e forms, textos em JS (alertas do treino), o texto do convite por WhatsApp e o idioma do prompt da IA; formatos de data/número por idioma. Hoje há **0** textos marcados para tradução (todo o português está fixo em ~35 templates, views, forms e JS). Os testes devem rodar nos dois idiomas.
+- **Temas claro / escuro / automático:** Bootstrap 5.3 `data-bs-theme`, seletor no menu (guardado no navegador/perfil), "automático" via `prefers-color-scheme` e script no `<head>` para evitar o "flash". Trocar cores fixas por variáveis CSS, revisar `bg-light`/`text-dark`/estilos inline, cores do Chart.js e o `theme-color` do PWA; checar contraste (WCAG AA).
+- **Breadcrumbs padronizados:** hoje só `/students`, o detalhe do treino e o formulário de treino têm; as demais telas não, e o rótulo diverge ("Rotinas" no breadcrumb × "Treinos" no menu). Definir um componente único no `base.html` (Início › Alunos › Aluno › seção) com os rótulos do menu, em todas as telas da personal. O breadcrumb mostra a hierarquia; o botão Voltar continua sendo o histórico (`?next=`). Teste que percorre as telas e confere presença e ordem.
+- *Ordem sugerida:* breadcrumbs (pequeno) → temas → idiomas (o maior; mexe em todas as strings, melhor com o layout estável).
+
 ## Estrutura
 
 ```
