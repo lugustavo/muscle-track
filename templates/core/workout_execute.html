@@ -1,224 +1,144 @@
 {% extends 'base.html' %}
-{% load l10n %}
+{% load l10n static %}
 
-{% block title %}Executar Treino - {{ person_routine.routine_name }}{% endblock %}
+{% block title %}Treino - {{ person_routine.routine_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .workout-header { position: sticky; top: 0; z-index: 20; }
+    .set-grid { display: grid; grid-template-columns: 2rem 1fr 1fr 3.25rem 1.5rem; gap: .5rem; align-items: center; }
+    .set-grid .head { font-size: .75rem; text-transform: uppercase; color: #6c757d; }
+    .set-num { font-weight: 600; text-align: center; color: #6c757d; }
+    .set-row .form-control { text-align: center; font-size: 1.1rem; min-height: 44px; }
+    .set-row .set-done { min-height: 44px; font-size: 1.25rem; }
+    .set-done-row .form-control { background-color: #e9f7ef; }
+    .exercise-header { cursor: pointer; }
+    .exercise-thumb { width: 56px; height: 56px; object-fit: cover; border-radius: .5rem; }
+    .rest-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1030; background: #2C3E50; color: #fff;
+                padding: .75rem 1rem; box-shadow: 0 -4px 12px rgba(0,0,0,.25); }
+    .rest-bar .progress { height: 6px; background: rgba(255,255,255,.2); }
+    .rest-bar .progress-bar { background: var(--secondary-color); transition: width .25s linear; }
+    .toast-lite { position: fixed; top: 4.5rem; left: 50%; transform: translateX(-50%); z-index: 1040;
+                  background: #198754; color: #fff; padding: .6rem 1.2rem; border-radius: 2rem;
+                  box-shadow: 0 4px 12px rgba(0,0,0,.3); font-weight: 600; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8 mx-auto">
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h3 class="mb-0"><i class="bi bi-fire"></i> {{ person_routine.routine_name }}</h3>
+<div id="workout" class="mx-auto" style="max-width: 720px;"
+     data-csrf="{{ csrf_token }}"
+     data-elapsed="{{ elapsed_seconds }}"
+     data-paused="{{ active_session.is_paused|yesno:'true,false' }}"
+     data-stale-in="{{ stale_in_seconds }}"
+     data-my-workouts-url="{% url 'core:my_workouts' %}"
+     data-pause-url="{% url 'core:workout_pause' active_session.pk %}"
+     data-resume-url="{% url 'core:workout_resume' active_session.pk %}">
+
+    <div class="card workout-header mb-3 shadow-sm">
+        <div class="card-body py-2 d-flex justify-content-between align-items-center gap-2">
+            <div class="text-truncate">
+                <div class="fw-bold text-truncate"><i class="bi bi-fire text-danger"></i> {{ person_routine.routine_name }}</div>
+                <span id="syncState" class="badge bg-success-subtle text-success-emphasis"><i class="bi bi-cloud-check"></i> Salvo</span>
             </div>
-            <div class="card-body">
-                {% if active_session %}
-                <div class="alert alert-success">
-                    <h4 id="timer" class="mb-0"><i class="bi bi-stopwatch"></i> <span id="time">00:00:00</span></h4>
-                </div>
-                {% endif %}
-
-                <h5 class="mb-3">Exercícios</h5>
-                {% for item in exercises_with_previous %}
-                <div class="card mb-3 {% if item.current_is_completed %}border-success{% endif %}" id="exercise-card-{{ item.current_session_id }}">
-                    <div class="card-body">
-                        <!-- Header com checkbox sempre visível -->
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div class="form-check">
-                                <input class="form-check-input exercise-checkbox" type="checkbox"
-                                       id="exercise_{{ item.current_session_id }}"
-                                       data-exercise-id="{{ item.current_session_id }}"
-                                       {% if item.current_is_completed %}checked{% endif %}>
-                                <label class="form-check-label" for="exercise_{{ item.current_session_id }}">
-                                    <h5 class="mb-0">{{ item.current.exercise.exercise_name }}</h5>
-                                </label>
-                            </div>
-                            <span class="badge bg-success {% if not item.current_is_completed %}d-none{% endif %}" id="badge-{{ item.current_session_id }}">
-                                <i class="bi bi-check-circle"></i> Concluído
-                            </span>
-                        </div>
-
-                        <!-- Conteúdo que será colapsado -->
-                        <div class="collapse {% if not item.current_is_completed %}show{% endif %}" id="collapse-{{ item.current_session_id }}">
-                            <p class="mb-2">
-                                <strong>{{ item.current.sets }} séries x {{ item.current.reps }} repetições</strong>
-                                <br>
-                                <small class="text-muted">Descanso: {{ item.current.rest_seconds }}s</small>
-                            </p>
-
-                            <!-- Dados da Sessão Anterior (Referência) -->
-                            {% if item.previous_date or item.previous_weight %}
-                                <small class="text-muted">
-                                    <strong><i class="bi bi-info-circle"></i> Sessão Anterior:</strong>
-                                    {% if item.previous_date %}
-                                    <span class="me-2">
-                                        <i class="bi bi-clock"></i> {{ item.previous_date|date:"d/m/Y H:i" }}
-                                    </span>
-                                    {% endif %}
-                                    {% if item.previous_weight %}
-                                    <span>
-                                        <i class="bi bi-box"></i> Carga: {{ item.previous_weight }} kg
-                                    </span>
-                                    {% endif %}
-                                </small>
-                            {% endif %}
-
-                            <!-- Input para Sessão Atual -->
-                            <div class="row g-2">
-                                <div class="col-auto">
-                                    <div class="input-group" style="max-width: 200px;">
-                                        <span class="input-group-text">Carga (kg)</span>
-                                        <input type="number" class="form-control weight-input"
-                                               data-exercise-id="{{ item.current_session_id }}"
-                                               {% if item.current_weight %}value="{{ item.current_weight|unlocalize }}"{% elif item.previous_weight %}value="{{ item.previous_weight|unlocalize }}"{% endif %}
-                                               placeholder="0"
-                                               step="0.5">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Status da Sessão Atual (visível quando concluído) -->
-                        <div class="mt-2 text-success {% if not item.current_is_completed %}d-none{% endif %}" id="current-status-{{ item.current_session_id }}">
-                            <small>
-                                <i class="bi bi-check-circle-fill"></i> <span id="current-time-{{ item.current_session_id }}">
-                                    {% if item.current_is_completed %}Concluído nesta sessão{% endif %}
-                                </span>
-                            </small>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-
-                {% if active_session %}
-                <form method="post" action="{% url 'core:workout_end' active_session.pk %}" class="d-grid gap-2 mt-4">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-success btn-lg">
-                        <i class="bi bi-check-circle"></i> Finalizar Treino
-                    </button>
-                </form>
-                {% endif %}
+            <div class="d-flex align-items-center gap-2">
+                <span id="timer" class="fs-4 fw-bold font-monospace">00:00:00</span>
+                <button type="button" id="pauseBtn" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pause-fill"></i> Pausar</button>
             </div>
         </div>
     </div>
+
+    <div id="toast" class="toast-lite d-none" role="status"></div>
+
+    {% for e in exercises %}
+    <div class="card mb-3 {% if e.log.is_completed %}border-success{% endif %}" data-exercise-card
+         data-rest="{{ e.prx.rest_seconds }}"
+         data-record="{% if e.record is not None %}{{ e.record|unlocalize }}{% endif %}"
+         data-complete="{{ e.log.is_completed|yesno:'true,false' }}">
+        <div class="card-body">
+            <div class="exercise-header d-flex align-items-center gap-3">
+                {% if e.prx.exercise.thumbnail %}
+                <img src="{{ e.prx.exercise.thumbnail.url }}" alt="" class="exercise-thumb">
+                {% endif %}
+                <div class="flex-grow-1">
+                    <h5 class="mb-0">{{ e.prx.exercise.exercise_name }}</h5>
+                    <small class="text-muted">{{ e.prx.sets }} × {{ e.prx.reps }}{% if e.prx.rest_seconds %} · descanso {{ e.prx.rest_seconds }}s{% endif %}</small>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-success complete-badge {% if not e.log.is_completed %}d-none{% endif %}"><i class="bi bi-check-circle"></i> Feito</span>
+                    <div class="small text-muted"><span data-progress>{{ e.done_count }}/{{ e.sets|length }}</span> séries</div>
+                </div>
+            </div>
+
+            <div class="exercise-body mt-3 {% if e.log.is_completed %}d-none{% endif %}">
+                {% if e.prx.notes %}
+                <div class="alert alert-info py-2 small mb-2"><i class="bi bi-chat-left-text"></i> {{ e.prx.notes }}</div>
+                {% endif %}
+
+                <div class="small text-muted mb-2">
+                    {% if e.previous_weight is not None %}
+                    <span class="me-3"><i class="bi bi-clock-history"></i> Última vez: <strong>{{ e.previous_weight|unlocalize }} kg</strong>{% if e.previous_date %} ({{ e.previous_date|date:"d/m" }}){% endif %}</span>
+                    {% endif %}
+                    {% if e.record is not None %}
+                    <a href="{% url 'core:my_exercise_progress' e.prx.exercise.pk %}" class="me-3 text-decoration-none"><i class="bi bi-trophy"></i> Recorde: <strong>{{ e.record|unlocalize }} kg</strong></a>
+                    {% endif %}
+                    {% if e.prx.exercise.media_url %}
+                    <a href="{{ e.prx.exercise.media_url }}" target="_blank" rel="noopener" class="text-decoration-none"><i class="bi bi-play-circle"></i> Ver execução</a>
+                    {% elif e.prx.exercise.media_file %}
+                    <a href="{{ e.prx.exercise.media_file.url }}" target="_blank" rel="noopener" class="text-decoration-none"><i class="bi bi-play-circle"></i> Ver execução</a>
+                    {% endif %}
+                </div>
+
+                <div class="set-grid mb-1">
+                    <span class="head text-center">Série</span><span class="head text-center">Carga (kg)</span>
+                    <span class="head text-center">Reps</span><span class="head text-center">Feita</span><span></span>
+                </div>
+                {% for s in e.sets %}
+                <div class="set-grid set-row mb-2" data-url="{% url 'core:workout_set_update' s.pk %}" data-done="{{ s.is_done|yesno:'true,false' }}">
+                    <span class="set-num">{{ s.number }}</span>
+                    <input type="number" inputmode="decimal" step="0.5" min="0" max="9999" class="form-control set-weight"
+                           {% if s.weight is not None %}value="{{ s.weight|unlocalize }}"{% endif %} placeholder="kg" aria-label="Carga da série {{ s.number }}">
+                    <input type="number" inputmode="numeric" step="1" min="0" max="999" class="form-control set-reps"
+                           {% if s.reps is not None %}value="{{ s.reps }}"{% endif %} placeholder="reps" aria-label="Repetições da série {{ s.number }}">
+                    <button type="button" class="btn btn-outline-secondary set-done" aria-label="Marcar série {{ s.number }} como feita"><i class="bi bi-check-lg"></i></button>
+                    <span class="set-record d-none" title="Novo recorde de carga">🏆</span>
+                </div>
+                {% endfor %}
+
+                <textarea class="form-control form-control-sm mt-2 exercise-notes" rows="1" maxlength="1000"
+                          data-url="{% url 'core:workout_exercise_notes' e.log.pk %}"
+                          placeholder="Observação sobre este exercício (dor, ajuste, sensação...)">{{ e.log.notes }}</textarea>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="alert alert-info">Este treino ainda não tem exercícios. Fale com a sua personal trainer.</div>
+    {% endfor %}
+
+    <form id="finishForm" method="post" action="{% url 'core:workout_end' active_session.pk %}" class="card mb-4">
+        {% csrf_token %}
+        <div class="card-body">
+            <label for="sessionNotes" class="form-label fw-bold">Como foi o treino?</label>
+            <textarea id="sessionNotes" name="notes" class="form-control mb-2" rows="2" maxlength="2000"
+                      placeholder="Cansaço, dores, o que mudou... (a personal vai ler)">{{ active_session.notes }}</textarea>
+            <div id="finishHint" class="small text-muted mb-3"></div>
+            <button type="submit" class="btn btn-success btn-lg w-100"><i class="bi bi-check-circle"></i> Finalizar Treino</button>
+        </div>
+    </form>
 </div>
 
-<script>
-// Timer with auto-close after 120 minutes
-let startTime = new Date('{{ active_session.start_time|date:"c" }}');
-const MAX_SESSION_MINUTES = 120;
-let sessionClosed = false;
+<div id="restBar" class="rest-bar d-none" role="timer" aria-live="off">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div><i class="bi bi-hourglass-split"></i> Descanso <strong id="restTime" class="font-monospace fs-5">00:00</strong></div>
+        <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-light" id="restMinus">−15s</button>
+            <button type="button" class="btn btn-outline-light" id="restPlus">+15s</button>
+            <button type="button" class="btn btn-light" id="restSkip">Pular</button>
+        </div>
+    </div>
+    <div class="progress"><div id="restProgress" class="progress-bar" style="width: 0%"></div></div>
+</div>
+{% endblock %}
 
-function updateTimer() {
-    const now = new Date();
-    const diff = Math.floor((now - startTime) / 1000);
-    const totalMinutes = Math.floor(diff / 60);
-    const hours = Math.floor(diff / 3600);
-    const minutes = Math.floor((diff % 3600) / 60);
-    const seconds = diff % 60;
-
-    document.getElementById('time').textContent =
-        String(hours).padStart(2, '0') + ':' +
-        String(minutes).padStart(2, '0') + ':' +
-        String(seconds).padStart(2, '0');
-
-    // Auto-close session after 120 minutes
-    if (totalMinutes >= MAX_SESSION_MINUTES && !sessionClosed) {
-        sessionClosed = true;
-        alert('Sessão encerrada automaticamente após 120 minutos. Redirecionando...');
-        window.location.href = '{% url "core:my_workouts" %}';
-    }
-}
-
-{% if active_session %}
-setInterval(updateTimer, 1000);
-updateTimer();
-{% endif %}
-
-// A failed save (offline, expired session, invalid value) must not look like success
-function checkSaved(response) {
-    if (!response.ok) throw new Error('save failed');
-}
-function saveFailed() {
-    alert('Não foi possível salvar. Verifique a conexão e o valor informado.');
-    window.location.reload();
-}
-
-// Exercise completion toggle
-document.querySelectorAll('.exercise-checkbox').forEach(checkbox => {
-    checkbox.addEventListener('change', function() {
-        const exerciseId = this.dataset.exerciseId;
-        const isChecked = this.checked;
-        const badge = document.getElementById(`badge-${exerciseId}`);
-        const card = document.getElementById(`exercise-card-${exerciseId}`);
-        const currentStatus = document.getElementById(`current-status-${exerciseId}`);
-        const currentTime = document.getElementById(`current-time-${exerciseId}`);
-        const collapseDiv = document.getElementById(`collapse-${exerciseId}`);
-
-        // Update UI
-        if (isChecked) {
-            // Collapse content
-            const bsCollapse = new bootstrap.Collapse(collapseDiv, {
-                toggle: true
-            });
-
-            badge.classList.remove('d-none');
-            card.classList.add('border-success');
-            currentStatus.classList.remove('d-none');
-
-            // Show current completion time
-            const now = new Date();
-            const timeStr = now.toLocaleString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-            currentTime.textContent = `Concluído agora: ${timeStr}`;
-        } else {
-            // Expand content
-            const bsCollapse = bootstrap.Collapse.getInstance(collapseDiv);
-            if (bsCollapse) {
-                bsCollapse.show();
-            } else {
-                const newCollapse = new bootstrap.Collapse(collapseDiv, {
-                    toggle: false
-                });
-                newCollapse.show();
-            }
-
-            badge.classList.add('d-none');
-            card.classList.remove('border-success');
-            currentStatus.classList.add('d-none');
-        }
-
-        // Send to backend
-        fetch(`/api/exercise/${exerciseId}/toggle/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json'
-            }
-        }).then(checkSaved).catch(saveFailed);
-    });
-});
-
-// Weight update
-document.querySelectorAll('.weight-input').forEach(input => {
-    input.addEventListener('blur', function() {
-        const exerciseId = this.dataset.exerciseId;
-        const weight = this.value;
-        if (weight !== '') {
-            fetch(`/api/exercise/${exerciseId}/update-weight/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ weight: weight })
-            }).then(checkSaved).catch(saveFailed);
-        }
-    });
-});
-</script>
+{% block extra_js %}
+<script src="{% static 'js/workout.js' %}"></script>
 {% endblock %}

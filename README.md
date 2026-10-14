@@ -15,6 +15,14 @@ Aplicação web completa desenvolvida em **Django** para gestão de alunos, exer
 - ✅ **Geração de Treinos com IA** - Usar ChatGPT para criar treinos automaticamente
 
 ### 👤 Área do Aluno
+- ✅ **Treino de hoje** - O app sugere o próximo treino (A/B/C) pelo rodízio
+- ✅ **Controle por série** - Carga e repetições de cada série, já preenchidas com os valores da última vez
+- ✅ **Timer de descanso** - Contagem regressiva com som e vibração, ±15s; tela do celular fica acesa durante o treino
+- ✅ **Timer do treino com pausa** - O tempo pausado não conta na duração
+- ✅ **Recordes e evolução** - 🏆 ao bater recorde de carga, gráfico por exercício e tabela de recordes
+- ✅ **Observações** - O aluno comenta cada exercício e o treino; a personal lê no detalhe da sessão
+- ✅ **Funciona com internet fraca** - Séries marcadas offline entram numa fila e sincronizam ao voltar o sinal
+- ✅ **Instalável no celular (PWA)** - "Adicionar à tela inicial" (precisa de HTTPS)
 - ✅ **Meus Treinos Ativos** - Visualizar treinos disponíveis
 - ✅ **Timer de Treino** - Iniciar sessão com cronômetro automático
 - ✅ **Controle de Execução** - Marcar exercícios concluídos e registrar carga utilizada

@@ -40,9 +40,18 @@ urlpatterns = [
     path('my-workouts/<int:pk>/execute/', views.workout_execute, name='workout_execute'),
     path('my-workouts/session/<int:pk>/end/', views.workout_end, name='workout_end'),
 
-    # Exercise completion API
-    path('api/exercise/<int:pk>/toggle/', views.exercise_toggle_completion, name='exercise_toggle_completion'),
-    path('api/exercise/<int:pk>/update-weight/', views.exercise_update_weight, name='exercise_update_weight'),
+    path('my-workouts/session/<int:pk>/pause/', views.workout_pause, name='workout_pause'),
+    path('my-workouts/session/<int:pk>/resume/', views.workout_resume, name='workout_resume'),
+    path('my-exercises/<int:exercise_pk>/', views.my_exercise_progress, name='my_exercise_progress'),
+
+    # Workout tracking API (per set / per exercise comment)
+    path('api/sets/<int:pk>/', views.workout_set_update, name='workout_set_update'),
+    path('api/session-exercise/<int:pk>/notes/', views.workout_exercise_notes, name='workout_exercise_notes'),
+
+    # PWA
+    path('manifest.webmanifest', views.pwa_manifest, name='pwa_manifest'),
+    path('sw.js', views.service_worker, name='service_worker'),
+    path('offline/', views.offline_page, name='offline'),
 
     # APIs for forms
     path('api/exercises/', views.api_exercises_list, name='api_exercises_list'),

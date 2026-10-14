@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.db.models import Avg, Count, Prefetch, Q
+from django.db.models import Avg, Count, Max, Prefetch, Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
@@ -25,7 +25,7 @@ from .forms import (
 from .invites import build_invite_url, get_user_from_invite
 from .models import (
     MuscleGroup, Person, Exercise, Routine, RoutineExercise,
-    PersonRoutine, PersonRoutineExercise, WorkoutSession, SessionExercise
+    PersonRoutine, PersonRoutineExercise, WorkoutSession, SessionExercise, SessionSet
 )
 from .permissions import is_trainer, staff_required, student_required
 
@@ -752,27 +752,9 @@ def person_routine_detail(request, pk):
     routine_exercises = person_routine.exercises.all().select_related('exercise').order_by('order')
 
     # Sessões recentes para gráfico (últimas 20)
-    recent_sessions = completed_sessions[:20]
+    recent_sessions = list(completed_sessions[:20])
 
-    # Preparar dados para o gráfico (duração e carga média por sessão)
-    from .models import SessionExercise
-
-    chart_data = []
-    for session in reversed(list(recent_sessions)):
-        # Calcular carga média dos exercícios desta sessão específica usando SessionExercise
-        session_exercises = SessionExercise.objects.filter(
-            session=session,
-            is_completed=True,
-            weight_used__isnull=False
-        )
-        avg_weight = session_exercises.aggregate(avg=Avg('weight_used'))['avg']
-        avg_weight = float(avg_weight) if avg_weight else 0
-
-        chart_data.append({
-            'date': session.start_time.strftime('%d/%m'),
-            'duration': session.duration_minutes or 0,
-            'avg_weight': round(avg_weight, 1)
-        })
+    chart_data = _chart_points(recent_sessions)
 
     return render(request, 'core/person_routine_progress.html', {
         'person_routine': person_routine,
@@ -849,32 +831,72 @@ MAX_SESSION_MINUTES = 120
 def _close_if_stale(session):
     """Close a session that has been open longer than MAX_SESSION_MINUTES.
 
+    An abandoned session is closed at its cap, not "now", so a forgotten
+    workout does not end up recorded as an 8-hour training.
     Returns True when the session was closed.
     """
-    if session and timezone.now() - session.start_time > timedelta(minutes=MAX_SESSION_MINUTES):
-        session.end_session()
+    if not session:
+        return False
+    limit = session.start_time + timedelta(minutes=MAX_SESSION_MINUTES)
+    if timezone.now() > limit:
+        session.end_session(at=limit)
         return True
     return False
 
 
+def _chart_points(sessions, with_workout_name=False):
+    """Duration and average heaviest-set weight for each session (oldest first).
+
+    One aggregate query for all sessions instead of one query per session.
+    """
+    sessions = list(reversed(list(sessions)))
+    averages = {
+        row['session_id']: row['avg']
+        for row in SessionExercise.objects.filter(
+            session__in=sessions, weight_used__isnull=False
+        ).values('session_id').annotate(avg=Avg('weight_used'))
+    }
+    points = []
+    for session in sessions:
+        avg = averages.get(session.pk)
+        point = {
+            'date': session.start_time.strftime('%d/%m'),
+            'duration': session.duration_minutes or 0,
+            'avg_weight': round(float(avg), 1) if avg else 0,
+        }
+        if with_workout_name:
+            point['workout'] = session.person_routine.routine_name[:15]
+        points.append(point)
+    return points
+
+
+def _personal_record(person, exercise_id, exclude_session=None):
+    """Heaviest weight this student ever completed in the given exercise (or None)."""
+    logs = SessionExercise.objects.filter(
+        session__person_routine__person=person,
+        person_routine_exercise__exercise_id=exercise_id,
+        weight_used__isnull=False,
+    )
+    if exclude_session is not None:
+        logs = logs.exclude(session=exclude_session)
+    return logs.aggregate(best=Max('weight_used'))['best']
+
+
 @student_required
 def my_workouts(request, person):
-    """Student's active workouts"""
-    # Prefetch apenas as últimas sessões completadas de cada exercício
-    last_session_prefetch = Prefetch(
+    """Student's active workouts, with a suggestion of which one is next"""
+    last_log_prefetch = Prefetch(
         'session_logs',
         queryset=SessionExercise.objects.filter(
             session__is_completed=True,
-            is_completed=True
+            weight_used__isnull=False
         ).select_related('session').order_by('-completed_at')[:1],
         to_attr='last_session_log'
     )
-
-    # Prefetch dos exercícios com suas sessões e dados do exercício
     exercises_prefetch = Prefetch(
         'exercises',
         queryset=PersonRoutineExercise.objects.select_related('exercise').prefetch_related(
-            last_session_prefetch
+            last_log_prefetch
         ).order_by('order')
     )
 
@@ -884,23 +906,34 @@ def my_workouts(request, person):
     ).select_related('routine_template').prefetch_related(
         'sessions',
         exercises_prefetch
-    )
+    ).order_by('routine_name')
 
-    # Check for active sessions and auto-close old ones
-    routines_with_sessions = []
+    items = []
     for routine in active_routines:
-        active_session = routine.sessions.filter(is_completed=False).first()
+        sessions = list(routine.sessions.all())  # prefetched
+        active_session = next((x for x in sessions if not x.is_completed), None)
         if _close_if_stale(active_session):
             active_session = None
-
-        routines_with_sessions.append({
+        done_dates = [x.start_time for x in sessions if x.is_completed]
+        items.append({
             'routine': routine,
-            'active_session': active_session
+            'active_session': active_session,
+            'last_done': max(done_dates) if done_dates else None,
+            'suggested': False,
         })
+
+    # "Treino de hoje": continue the one in progress, otherwise the one done longest ago
+    # (never done first) - this rotates A/B/C naturally.
+    if len(items) > 1:
+        in_progress = [i for i in items if i['active_session']]
+        pool = in_progress or items
+        pool_sorted = sorted(pool, key=lambda i: (i['last_done'] is not None, i['last_done'] or 0))
+        pool_sorted[0]['suggested'] = True
+        items.sort(key=lambda i: not i['suggested'])
 
     return render(request, 'core/my_workouts.html', {
         'person': person,
-        'routines_with_sessions': routines_with_sessions
+        'routines_with_sessions': items
     })
 
 
@@ -923,73 +956,132 @@ def workout_start(request, pk, person):
     return redirect('core:workout_execute', pk=pk)
 
 
+def _ensure_session_sets(session, routine_exercises, previous_logs):
+    """Make sure every exercise of the session has its sets.
+
+    New sets are pre-filled from the same set number of the previous session
+    (falling back to the heaviest weight of the previous session) so the
+    student only changes what is different today.
+    """
+    logs = {
+        log.person_routine_exercise_id: log
+        for log in SessionExercise.objects.filter(session=session).prefetch_related('sets')
+    }
+    for prx in routine_exercises:
+        log = logs.get(prx.pk)
+        if log is None:
+            log = logs[prx.pk] = SessionExercise.objects.create(session=session, person_routine_exercise=prx)
+        existing = {x.number for x in log.sets.all()}
+        previous = previous_logs.get(prx.exercise_id)
+        previous_sets = {x.number: x for x in previous.sets.all()} if previous else {}
+        new_sets = []
+        for number in range(1, prx.sets + 1):
+            if number in existing:
+                continue
+            prev_set = previous_sets.get(number)
+            weight = prev_set.weight if prev_set and prev_set.weight is not None else (
+                previous.weight_used if previous else None)
+            new_sets.append(SessionSet(session_exercise=log, number=number, weight=weight, reps=prx.reps))
+        if new_sets:
+            SessionSet.objects.bulk_create(new_sets)
+    return logs
+
+
 @student_required
 def workout_execute(request, pk, person):
-    """Execute workout with timer - shows previous session data for reference"""
+    """Execute workout: timer, per-set tracking, rest timer, previous values and records"""
     person_routine = get_object_or_404(PersonRoutine, pk=pk, person=person)
 
-    # Get active (current) session
     active_session = person_routine.sessions.filter(is_completed=False).first()
-
-    # Auto-close sessions older than MAX_SESSION_MINUTES
     if _close_if_stale(active_session):
         messages.warning(request, 'Sessão anterior foi encerrada automaticamente (tempo excedido).')
         active_session = None
-
-    # If no active session, redirect to start one
     if not active_session:
         messages.warning(request, 'Nenhuma sessão ativa encontrada. Inicie um novo treino.')
         return redirect('core:my_workouts')
 
     routine_exercises = list(person_routine.exercises.select_related('exercise').order_by('order'))
 
-    # Create SessionExercise entries for active session if they don't exist
-    current_by_prx = {}
-    for exercise in routine_exercises:
-        current_by_prx[exercise.pk], _ = SessionExercise.objects.get_or_create(
-            session=active_session,
-            person_routine_exercise=exercise
-        )
-
-    # Previous data: last completed session, matched by Exercise (not by PersonRoutineExercise)
+    # Previous data: last completed session of this routine, matched by Exercise
     last_completed_session = person_routine.sessions.filter(is_completed=True).order_by('-end_time').first()
-    previous_by_exercise = {}
+    previous_logs = {}
     if last_completed_session:
-        previous_logs = SessionExercise.objects.filter(
+        for log in SessionExercise.objects.filter(
             session=last_completed_session
-        ).select_related('person_routine_exercise')
-        for log in previous_logs:
-            previous_by_exercise.setdefault(log.person_routine_exercise.exercise_id, log)
+        ).select_related('person_routine_exercise', 'session').prefetch_related('sets').order_by('person_routine_exercise__order'):
+            previous_logs.setdefault(log.person_routine_exercise.exercise_id, log)
 
-    exercises_with_previous = []
-    for exercise in routine_exercises:
-        current = current_by_prx[exercise.pk]
-        previous = previous_by_exercise.get(exercise.exercise_id)
-        exercises_with_previous.append({
-            'current': exercise,
-            'current_session_id': current.id,
-            'current_weight': current.weight_used,
-            'current_is_completed': current.is_completed,
-            'previous_date': previous.completed_at if previous else None,
+    logs = _ensure_session_sets(active_session, routine_exercises, previous_logs)
+
+    records = {
+        row['person_routine_exercise__exercise_id']: row['best']
+        for row in SessionExercise.objects.filter(
+            session__person_routine__person=person, weight_used__isnull=False
+        ).exclude(session=active_session).values(
+            'person_routine_exercise__exercise_id'
+        ).annotate(best=Max('weight_used'))
+    }
+
+    exercises = []
+    for prx in routine_exercises:
+        log = logs[prx.pk]
+        sets = list(log.sets.order_by('number'))
+        previous = previous_logs.get(prx.exercise_id)
+        exercises.append({
+            'prx': prx,
+            'log': log,
+            'sets': sets,
+            'done_count': sum(1 for x in sets if x.is_done),
+            'previous': previous,
             'previous_weight': previous.weight_used if previous else None,
+            'previous_date': previous.session.start_time if previous else None,
+            'record': records.get(prx.exercise_id),
         })
 
+    stale_in = max(0, int((active_session.start_time + timedelta(minutes=MAX_SESSION_MINUTES)
+                           - timezone.now()).total_seconds()))
     return render(request, 'core/workout_execute.html', {
         'person_routine': person_routine,
-        'exercises_with_previous': exercises_with_previous,
         'active_session': active_session,
-        'last_completed_session': last_completed_session
+        'exercises': exercises,
+        'elapsed_seconds': active_session.elapsed_seconds(),
+        'stale_in_seconds': stale_in,
+        'all_done': all(e['done_count'] == len(e['sets']) for e in exercises) if exercises else False,
     })
 
 
 @student_required
 @require_POST
 def workout_end(request, pk, person):
-    """End a workout session"""
+    """End a workout session, saving the student's final comment"""
     session = get_object_or_404(WorkoutSession, pk=pk, person_routine__person=person)
+    if not session.is_completed:
+        session.notes = request.POST.get('notes', '').strip()[:2000]
+        session.save(update_fields=['notes'])
     session.end_session()
     messages.success(request, f'Treino concluído! Duração: {session.duration_minutes} minutos')
     return redirect('core:my_workouts')
+
+
+def _active_session_or_404(pk, person):
+    return get_object_or_404(
+        WorkoutSession, pk=pk, person_routine__person=person, is_completed=False)
+
+
+@student_required
+@require_POST
+def workout_pause(request, pk, person):
+    session = _active_session_or_404(pk, person)
+    session.pause()
+    return JsonResponse({'success': True, 'paused': True, 'elapsed_seconds': session.elapsed_seconds()})
+
+
+@student_required
+@require_POST
+def workout_resume(request, pk, person):
+    session = _active_session_or_404(pk, person)
+    session.resume()
+    return JsonResponse({'success': True, 'paused': False, 'elapsed_seconds': session.elapsed_seconds()})
 
 
 @login_required
@@ -1003,16 +1095,18 @@ def session_detail(request, pk):
     if not is_trainer(request.user) and person_routine.person.user_id != request.user.pk:
         raise PermissionDenied
 
-    # Get session-specific exercise execution data
     session_exercises = SessionExercise.objects.filter(
         session=session
-    ).select_related('person_routine_exercise__exercise').order_by('person_routine_exercise__order')
+    ).select_related('person_routine_exercise__exercise').prefetch_related('sets').order_by(
+        'person_routine_exercise__order')
 
     exercises_data = [{
         'exercise': se.person_routine_exercise,
         'completed_at': se.completed_at,
         'weight_used': se.weight_used,
         'is_completed': se.is_completed,
+        'notes': se.notes,
+        'sets': list(se.sets.all()),
     } for se in session_exercises]
 
     return render(request, 'core/session_detail.html', {
@@ -1023,57 +1117,119 @@ def session_detail(request, pk):
     })
 
 
-def _active_session_exercise_or_404(pk, person):
-    """SessionExercise of an open session that belongs to this student"""
-    return get_object_or_404(
-        SessionExercise,
-        pk=pk,
-        session__person_routine__person=person,
-        session__is_completed=False,
-    )
+def _parse_json_body(request):
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return None
+    return data if isinstance(data, dict) else None
 
 
 @student_required
 @require_POST
-def exercise_toggle_completion(request, pk, person):
-    """Toggle exercise completion status in active session"""
-    # pk here is the SessionExercise ID, not PersonRoutineExercise
-    session_exercise = _active_session_exercise_or_404(pk, person)
+def workout_set_update(request, pk, person):
+    """Idempotent update of one set: any of weight / reps / done.
 
-    if session_exercise.is_completed:
-        session_exercise.is_completed = False
-        session_exercise.completed_at = None
-        session_exercise.save()
-    else:
-        session_exercise.mark_completed()
+    Sends absolute values (not toggles), so a request queued while offline can
+    be replayed safely.
+    """
+    workout_set = get_object_or_404(
+        SessionSet.objects.select_related('session_exercise'),
+        pk=pk,
+        session_exercise__session__person_routine__person=person,
+        session_exercise__session__is_completed=False,
+    )
+    data = _parse_json_body(request)
+    if data is None:
+        return JsonResponse({'success': False, 'error': 'Dados inválidos'}, status=400)
 
+    try:
+        if 'weight' in data:
+            raw = data['weight']
+            if raw is None or str(raw).strip() == '':
+                workout_set.weight = None
+            else:
+                weight = Decimal(str(raw).replace(',', '.')).quantize(Decimal('0.01'))
+                if not weight.is_finite() or weight < 0 or weight > Decimal('9999.99'):
+                    raise ValueError('weight')
+                workout_set.weight = weight
+        if 'reps' in data:
+            raw = data['reps']
+            if raw is None or str(raw).strip() == '':
+                workout_set.reps = None
+            else:
+                reps = int(str(raw))
+                if reps < 0 or reps > 999:
+                    raise ValueError('reps')
+                workout_set.reps = reps
+        if 'done' in data:
+            if not isinstance(data['done'], bool):
+                raise ValueError('done')
+            if data['done'] and not workout_set.is_done:
+                workout_set.completed_at = timezone.now()
+            elif not data['done']:
+                workout_set.completed_at = None
+            workout_set.is_done = data['done']
+    except (ValueError, InvalidOperation):
+        return JsonResponse({'success': False, 'error': 'Valor inválido'}, status=400)
+
+    workout_set.save()
+    log = workout_set.session_exercise
+    done, total = log.sync_from_sets()
     return JsonResponse({
         'success': True,
-        'is_completed': session_exercise.is_completed
+        'done': workout_set.is_done,
+        'exercise_completed': log.is_completed,
+        'done_sets': done,
+        'total_sets': total,
     })
 
 
 @student_required
 @require_POST
-def exercise_update_weight(request, pk, person):
-    """Update exercise weight in active session"""
-    # pk here is the SessionExercise ID
-    session_exercise = _active_session_exercise_or_404(pk, person)
-
-    try:
-        data = json.loads(request.body)
-        raw = data.get('weight') if isinstance(data, dict) else None
-        if raw is None or str(raw).strip() == '':
-            raise ValueError('missing')
-        weight = Decimal(str(raw).replace(',', '.')).quantize(Decimal('0.01'))
-        if not weight.is_finite() or weight < 0 or weight > Decimal('9999.99'):
-            raise ValueError('range')
-    except (json.JSONDecodeError, ValueError, InvalidOperation):
-        return JsonResponse({'success': False, 'error': 'Carga inválida'}, status=400)
-
-    session_exercise.weight_used = weight
-    session_exercise.save(update_fields=['weight_used'])
+def workout_exercise_notes(request, pk, person):
+    """Student's comment on one exercise of the running session"""
+    log = get_object_or_404(
+        SessionExercise,
+        pk=pk,
+        session__person_routine__person=person,
+        session__is_completed=False,
+    )
+    data = _parse_json_body(request)
+    if data is None or not isinstance(data.get('notes', ''), str):
+        return JsonResponse({'success': False, 'error': 'Dados inválidos'}, status=400)
+    log.notes = data.get('notes', '').strip()[:1000]
+    log.save(update_fields=['notes'])
     return JsonResponse({'success': True})
+
+
+@student_required
+def my_exercise_progress(request, exercise_pk, person):
+    """Evolution and personal record of one exercise"""
+    exercise = get_object_or_404(Exercise, pk=exercise_pk)
+    logs = list(SessionExercise.objects.filter(
+        session__person_routine__person=person,
+        person_routine_exercise__exercise=exercise,
+        weight_used__isnull=False,
+    ).select_related('session').prefetch_related('sets').order_by('session__start_time'))
+
+    points = [{'date': log.session.start_time.strftime('%d/%m/%y'), 'weight': float(log.weight_used)}
+              for log in logs]
+    record_log = max(logs, key=lambda l: (l.weight_used, l.session.start_time), default=None)
+    history = []
+    for log in reversed(logs[-10:]):
+        done_sets = [x for x in log.sets.all() if x.is_done]
+        history.append({
+            'log': log,
+            'sets': done_sets,
+        })
+    return render(request, 'core/exercise_progress.html', {
+        'exercise': exercise,
+        'chart_points': points,
+        'record_log': record_log,
+        'history': history,
+        'sessions_count': len(logs),
+    })
 
 
 @staff_required
@@ -1145,32 +1301,29 @@ def api_routine_exercises(request, pk):
 
 @student_required
 def my_history(request, person):
-    """Student's workout history"""
-    completed_sessions = WorkoutSession.objects.filter(
+    """Student's workout history and personal records"""
+    completed_sessions = list(WorkoutSession.objects.filter(
         person_routine__person=person,
         is_completed=True
-    ).select_related('person_routine').order_by('-start_time')[:20]
+    ).select_related('person_routine').order_by('-start_time')[:20])
 
-    # Preparar dados para o gráfico (incluindo carga média)
-    chart_data = []
-    for session in reversed(list(completed_sessions)):
-        avg_weight = SessionExercise.objects.filter(
-            session=session,
-            is_completed=True,
-            weight_used__isnull=False
-        ).aggregate(avg=Avg('weight_used'))['avg']
-
-        chart_data.append({
-            'date': session.start_time.strftime('%d/%m'),
-            'duration': session.duration_minutes or 0,
-            'avg_weight': round(float(avg_weight), 1) if avg_weight else 0,
-            'workout': session.person_routine.routine_name[:15]
-        })
+    records = SessionExercise.objects.filter(
+        session__person_routine__person=person,
+        weight_used__isnull=False,
+    ).values(
+        'person_routine_exercise__exercise_id',
+        'person_routine_exercise__exercise__exercise_name',
+    ).annotate(
+        best=Max('weight_used'),
+        sessions=Count('session', distinct=True),
+        last=Max('session__start_time'),
+    ).order_by('person_routine_exercise__exercise__exercise_name')
 
     return render(request, 'core/my_history.html', {
         'person': person,
         'completed_sessions': completed_sessions,
-        'chart_data': json.dumps(chart_data)
+        'records': records,
+        'chart_data': json.dumps(_chart_points(completed_sessions, with_workout_name=True))
     })
 
 
@@ -1214,27 +1367,9 @@ def student_history(request, pk):
     ).order_by('-count')
 
     # Dados para gráfico de evolução (últimas 30 sessões)
-    recent_sessions = completed_sessions[:30]
+    recent_sessions = list(completed_sessions[:30])
 
-    # Preparar dados para o gráfico (duração e carga média por sessão)
-    from .models import SessionExercise
-
-    chart_data = []
-    for session in reversed(list(recent_sessions)):
-        # Calcular carga média dos exercícios desta sessão específica usando SessionExercise
-        session_exercises = SessionExercise.objects.filter(
-            session=session,
-            is_completed=True,
-            weight_used__isnull=False
-        )
-        avg_weight = session_exercises.aggregate(avg=Avg('weight_used'))['avg']
-        avg_weight = float(avg_weight) if avg_weight else 0
-
-        chart_data.append({
-            'date': session.start_time.strftime('%d/%m'),
-            'duration': session.duration_minutes or 0,
-            'avg_weight': round(avg_weight, 1)
-        })
+    chart_data = _chart_points(recent_sessions)
 
     # Frequência semanal (últimos 3 meses)
     three_months_ago = timezone.now() - timedelta(days=90)
@@ -1282,3 +1417,21 @@ def routine_generate_ai(request):
         form = AIWorkoutGenerationForm()
 
     return render(request, 'core/routine_generate_ai.html', {'form': form, 'title': 'Gerar Treino com IA'})
+
+
+# ============= PWA =============
+
+def pwa_manifest(request):
+    return render(request, 'pwa/manifest.webmanifest', content_type='application/manifest+json')
+
+
+def service_worker(request):
+    """Served from the site root so its scope covers the whole app"""
+    response = render(request, 'pwa/sw.js', content_type='application/javascript')
+    response['Service-Worker-Allowed'] = '/'
+    response['Cache-Control'] = 'no-cache'
+    return response
+
+
+def offline_page(request):
+    return render(request, 'pwa/offline.html')
