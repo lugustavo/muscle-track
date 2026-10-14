@@ -133,6 +133,7 @@ class PersonRoutineForm(forms.ModelForm):
 class AIWorkoutGenerationForm(forms.Form):
     description = forms.CharField(
         label='Descrição do Treino',
+        max_length=1000,
         widget=forms.Textarea(attrs={'rows': 4, 'placeholder': 'Ex: Treino para hipertrofia de peito e tríceps, com foco em exercícios compostos'}),
         help_text='Descreva o tipo de treino que deseja gerar'
     )

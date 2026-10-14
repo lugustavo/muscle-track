@@ -2,9 +2,16 @@
 # -*- coding: utf-8 -*-
 """
 Script para popular o banco de dados com dados iniciais
-Execute: python populate_db.py
+
+  python populate_db.py          # só grupos musculares, exercícios e modelos de treino
+  python populate_db.py --demo   # + alunos/sessões de exemplo (NÃO use em produção)
+
+Nunca cria contas com senha fixa: a senha dos usuários demo vem de
+DEMO_PASSWORD ou é gerada aleatoriamente e exibida uma única vez.
+O administrador/personal é criado com `python manage.py createsuperuser`.
 """
 import os
+import secrets
 import sys
 import django
 
@@ -18,7 +25,7 @@ django.setup()
 from django.contrib.auth.models import User
 from core.models import (
     Person, Exercise, Routine, RoutineExercise, PersonRoutine,
-    PersonRoutineExercise, WorkoutSession, MuscleGroup
+    PersonRoutineExercise, WorkoutSession, SessionExercise, MuscleGroup
 )
 from datetime import date, timedelta
 
@@ -51,17 +58,13 @@ def create_muscle_groups():
 
 
 def create_users_and_students():
-    """Criar usuários e alunos"""
-    print("Criando usuários e alunos...")
+    """Criar alunos de exemplo (somente --demo)"""
+    print("Criando alunos de exemplo...")
 
-    # Criar superusuário admin
-    if not User.objects.filter(email='admin@muscletrack.com').exists():
-        admin = User.objects.create_superuser(
-            username='admin',
-            email='admin@muscletrack.com',
-            password='admin123'
-        )
-        print("✓ Superusuário admin criado (email: admin@muscletrack.com, senha: admin123)")
+    demo_password = os.environ.get('DEMO_PASSWORD')
+    if not demo_password:
+        demo_password = secrets.token_urlsafe(9)
+        print(f"  Senha gerada para os alunos demo (anote, não será exibida de novo): {demo_password}")
 
     # Criar alunos exemplo
     students_data = [
@@ -75,7 +78,7 @@ def create_users_and_students():
             user = User.objects.create_user(
                 username=student_data['email'].split('@')[0],
                 email=student_data['email'],
-                password='senha123'
+                password=demo_password
             )
             Person.objects.create(
                 user=user,
@@ -84,7 +87,7 @@ def create_users_and_students():
                 city=student_data['city'],
                 state='SP' if 'São Paulo' in student_data['city'] else 'RJ'
             )
-            print(f"✓ Aluno criado: {student_data['name']} ({student_data['email']}, senha: senha123)")
+            print(f"✓ Aluno criado: {student_data['name']} ({student_data['email']})")
 
 
 def create_exercises():
@@ -266,7 +269,7 @@ def create_routines():
                 rest_seconds=rest
             )
 
-    print(f"✓ 4 treinos configurados (A, B, C, D)")
+    print("✓ 4 treinos configurados (A, B, C, D)")
 
 
 def assign_routines_to_students():
@@ -336,7 +339,7 @@ def assign_routines_to_students():
                             notes=routine_exercise.notes
                         )
 
-            print(f"✓ Treinos atribuídos a João Silva")
+            print("✓ Treinos atribuídos a João Silva")
         except Exception as e:
             print(f"⚠ Erro ao atribuir treinos a João: {e}")
 
@@ -401,7 +404,7 @@ def assign_routines_to_students():
                             notes=routine_exercise.notes
                         )
 
-            print(f"✓ Treinos atribuídos a Maria Santos")
+            print("✓ Treinos atribuídos a Maria Santos")
         except Exception as e:
             print(f"⚠ Erro ao atribuir treinos a Maria: {e}")
 
@@ -433,40 +436,41 @@ def create_sample_workout_sessions():
 
                 # Marcar alguns exercícios como completados
                 for exercise in person_routine.exercises.all()[:3]:
-                    exercise.sets_completed = exercise.sets
-                    exercise.reps_completed = exercise.reps
-                    exercise.weight_used = 20.0 if 'Supino' in exercise.exercise.exercise_name else 10.0
-                    exercise.mark_completed()
+                    log = SessionExercise.objects.create(
+                        session=session,
+                        person_routine_exercise=exercise,
+                        weight_used=20.0 if 'Supino' in exercise.exercise.exercise_name else 10.0,
+                    )
+                    log.mark_completed()
 
-                print(f"✓ Sessão de treino criada para João Silva")
+                print("✓ Sessão de treino criada para João Silva")
         except Exception as e:
             print(f"⚠ Erro ao criar sessão de treino: {e}")
 
 
 def main():
+    demo = '--demo' in sys.argv
+
     print("=" * 60)
     print("POPULANDO BANCO DE DADOS - MUSCLE TRACK")
     print("=" * 60)
 
     create_muscle_groups()
-    create_users_and_students()
     create_exercises()
     create_routines()
-    assign_routines_to_students()
-    create_sample_workout_sessions()
+
+    if demo:
+        create_users_and_students()
+        assign_routines_to_students()
+        create_sample_workout_sessions()
 
     print("\n" + "=" * 60)
     print("DADOS INICIAIS CRIADOS COM SUCESSO!")
     print("=" * 60)
-    print("\nCREDENCIAIS DE ACESSO:")
-    print("\nAdmin:")
-    print("  Email: admin@muscletrack.com")
-    print("  Senha: admin123")
-    print("\nAlunos:")
-    print("  Email: joao@example.com / Senha: senha123")
-    print("  Email: maria@example.com / Senha: senha123")
-    print("  Email: pedro@example.com / Senha: senha123")
-    print("\nPróximo passo: python manage.py runserver")
+    if demo:
+        print("\nAlunos de exemplo: joao@example.com, maria@example.com, pedro@example.com")
+        print("A senha é a de DEMO_PASSWORD ou a gerada acima (exibida só na criação).")
+    print("\nCrie a personal/admin com: python manage.py createsuperuser")
     print("=" * 60)
 
 

@@ -14,8 +14,7 @@ class RoutineExerciseInline(admin.TabularInline):
 class PersonRoutineExerciseInline(admin.TabularInline):
     model = PersonRoutineExercise
     extra = 0
-    fields = ['exercise', 'order', 'sets', 'reps', 'rest_seconds', 'sets_completed', 'reps_completed', 'weight_used', 'is_completed']
-    readonly_fields = ['completed_at']
+    fields = ['exercise', 'order', 'sets', 'reps', 'rest_seconds', 'notes']
 
 
 @admin.register(MuscleGroup)
@@ -106,10 +105,9 @@ class PersonRoutineAdmin(admin.ModelAdmin):
 
 @admin.register(PersonRoutineExercise)
 class PersonRoutineExerciseAdmin(admin.ModelAdmin):
-    list_display = ['person_routine', 'exercise', 'order', 'sets', 'reps', 'sets_completed', 'reps_completed', 'is_completed']
-    list_filter = ['is_completed', 'exercise']
+    list_display = ['person_routine', 'exercise', 'order', 'sets', 'reps', 'rest_seconds']
+    list_filter = ['exercise']
     search_fields = ['person_routine__person__person_name', 'exercise__exercise_name']
-    readonly_fields = ['completed_at']
     ordering = ['person_routine', 'order']
 
 

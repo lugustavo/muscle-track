@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.utils import timezone
 
+from .validators import validate_avatar_image
+
 
 class MuscleGroup(models.Model):
     """Model representing a muscle group"""
@@ -27,7 +29,7 @@ class Person(models.Model):
     """Model representing a student/person in the gym"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='person')
     person_name = models.CharField(max_length=200, verbose_name='Nome')
-    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, verbose_name='Foto de Perfil')
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, validators=[validate_avatar_image], verbose_name='Foto de Perfil')
     address = models.CharField(max_length=300, blank=True, verbose_name='Endereço')
     city = models.CharField(max_length=100, blank=True, verbose_name='Cidade')
     state = models.CharField(max_length=2, blank=True, verbose_name='Estado')
@@ -227,7 +229,8 @@ class PersonRoutineExercise(models.Model):
         related_name='exercises',
         verbose_name='Treino do Aluno'
     )
-    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE, verbose_name='Exercício')
+    # PROTECT: deleting an exercise must not silently wipe the students' history
+    exercise = models.ForeignKey(Exercise, on_delete=models.PROTECT, verbose_name='Exercício')
 
     # Exercise configuration (copied from template, editable per person)
     order = models.IntegerField(default=1, validators=[MinValueValidator(1)], verbose_name='Ordem')
@@ -236,20 +239,6 @@ class PersonRoutineExercise(models.Model):
     rest_seconds = models.IntegerField(default=60, validators=[MinValueValidator(0)], verbose_name='Descanso (seg)')
     notes = models.TextField(blank=True, verbose_name='Observações')
 
-    # Execution tracking
-    sets_completed = models.IntegerField(default=0, validators=[MinValueValidator(0)], verbose_name='Séries Completadas')
-    reps_completed = models.IntegerField(default=0, validators=[MinValueValidator(0)], verbose_name='Repetições Completadas')
-    weight_used = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        validators=[MinValueValidator(0)],
-        verbose_name='Carga (kg)'
-    )
-    is_completed = models.BooleanField(default=False, verbose_name='Concluído')
-    completed_at = models.DateTimeField(null=True, blank=True, verbose_name='Completado em')
-
     class Meta:
         verbose_name = 'Exercício do Treino do Aluno'
         verbose_name_plural = 'Exercícios dos Treinos dos Alunos'
@@ -257,12 +246,6 @@ class PersonRoutineExercise(models.Model):
 
     def __str__(self):
         return f"{self.person_routine} - {self.exercise.exercise_name}"
-
-    def mark_completed(self):
-        """Mark exercise as completed"""
-        self.is_completed = True
-        self.completed_at = timezone.now()
-        self.save()
 
 
 class WorkoutSession(models.Model):

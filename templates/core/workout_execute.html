@@ -90,11 +90,12 @@
                 {% endfor %}
 
                 {% if active_session %}
-                <div class="d-grid gap-2 mt-4">
-                    <a href="{% url 'core:workout_end' active_session.pk %}" class="btn btn-success btn-lg">
+                <form method="post" action="{% url 'core:workout_end' active_session.pk %}" class="d-grid gap-2 mt-4">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-lg">
                         <i class="bi bi-check-circle"></i> Finalizar Treino
-                    </a>
-                </div>
+                    </button>
+                </form>
                 {% endif %}
             </div>
         </div>
@@ -132,6 +133,15 @@ function updateTimer() {
 setInterval(updateTimer, 1000);
 updateTimer();
 {% endif %}
+
+// A failed save (offline, expired session, invalid value) must not look like success
+function checkSaved(response) {
+    if (!response.ok) throw new Error('save failed');
+}
+function saveFailed() {
+    alert('Não foi possível salvar. Verifique a conexão e o valor informado.');
+    window.location.reload();
+}
 
 // Exercise completion toggle
 document.querySelectorAll('.exercise-checkbox').forEach(checkbox => {
@@ -189,7 +199,7 @@ document.querySelectorAll('.exercise-checkbox').forEach(checkbox => {
                 'X-CSRFToken': '{{ csrf_token }}',
                 'Content-Type': 'application/json'
             }
-        });
+        }).then(checkSaved).catch(saveFailed);
     });
 });
 
@@ -198,7 +208,7 @@ document.querySelectorAll('.weight-input').forEach(input => {
     input.addEventListener('blur', function() {
         const exerciseId = this.dataset.exerciseId;
         const weight = this.value;
-        if (weight) {
+        if (weight !== '') {
             fetch(`/api/exercise/${exerciseId}/update-weight/`, {
                 method: 'POST',
                 headers: {
@@ -206,7 +216,7 @@ document.querySelectorAll('.weight-input').forEach(input => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ weight: weight })
-            });
+            }).then(checkSaved).catch(saveFailed);
         }
     });
 });

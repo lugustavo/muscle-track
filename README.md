@@ -1,6 +1,6 @@
 # 💪 Muscle Track - Sistema de Gerenciamento de Treinos
 
-Aplicação web completa desenvolvida em **Django** para gestão de alunos, exercícios e planos de treino personalizados, com suporte a autenticação social (SSO), timer de treino, histórico de evolução e geração automática de treinos via **IA (ChatGPT)**.
+Aplicação web completa desenvolvida em **Django** para gestão de alunos, exercícios e planos de treino personalizados, com timer de treino, histórico de evolução e geração automática de treinos via **IA (ChatGPT)**.
 
 ---
 
@@ -21,7 +21,6 @@ Aplicação web completa desenvolvida em **Django** para gestão de alunos, exer
 - ✅ **Histórico Pessoal** - Ver treinos anteriores e evolução
 
 ### 🔐 Autenticação
-- ✅ **Login SSO** - Google, Facebook, GitHub
 - ✅ **Registro Rápido** - Cadastro com link de ativação por email
 - ✅ **Django Allauth** - Sistema completo de autenticação
 
@@ -71,29 +70,24 @@ cp .env.example .env
 
 **Configurações principais no `.env`:**
 - `SECRET_KEY` - Chave secreta do Django (mude em produção!)
-- `DEBUG` - `True` para desenvolvimento, `False` para produção
+- `DEBUG` - `True` só no seu computador (o padrão é `False`; com `False` o `SECRET_KEY` é obrigatório)
 - `OPENAI_API_KEY` - Sua chave da API do OpenAI (para geração de treinos com IA)
 - Configurações de email (para ativação de contas)
-- Credenciais de SSO (Google, Facebook, GitHub)
 
 ### 5. Execute as migrations
 ```bash
 python manage.py migrate
 ```
 
-### 6. Popule o banco com dados iniciais
+### 6. Crie a conta da personal (admin) e, opcionalmente, dados iniciais
 ```bash
-python populate_db.py
+python manage.py createsuperuser        # conta da personal trainer (is_staff)
+python populate_db.py                   # grupos musculares, exercícios e modelos de treino A/B/C/D
+python populate_db.py --demo            # + alunos/sessões de exemplo (apenas desenvolvimento)
 ```
 
-Este script cria:
-- ✅ Superusuário admin
-- ✅ 3 alunos de exemplo
-- ✅ 21 exercícios básicos
-- ✅ 4 treinos prontos (A, B, C, D)
-- ✅ Treinos atribuídos aos alunos
-
-**Nota:** O script é idempotente - pode ser executado múltiplas vezes sem causar duplicatas.
+O script é idempotente. **Não existem mais contas com senha fixa**: a senha dos alunos demo vem de
+`DEMO_PASSWORD` ou é gerada e exibida uma única vez. O `build.sh` (deploy) nunca apaga nem popula o banco.
 
 ### 7. Execute o servidor
 ```bash
@@ -104,16 +98,10 @@ Acesse: **http://localhost:8000**
 
 ---
 
-## 🔑 Credenciais de Acesso
+## 🔑 Acesso e papéis
 
-### Administrador
-- **Email:** admin@muscletrack.com
-- **Senha:** admin123
-
-### Alunos de Teste
-- **Email:** joao@example.com | **Senha:** senha123
-- **Email:** maria@example.com | **Senha:** senha123
-- **Email:** pedro@example.com | **Senha:** senha123
+- **Personal trainer (admin):** conta criada com `createsuperuser` (ou qualquer usuário `is_staff`). Acessa alunos, exercícios, treinos e históricos.
+- **Aluno:** usuário vinculado a um aluno cadastrado. Só enxerga e altera os **próprios** treinos e sessões (outras contas recebem 403/404).
 
 ---
 
@@ -201,26 +189,9 @@ Para usar a funcionalidade de geração automática de treinos:
 
 ---
 
-## 🔧 Configuração de SSO (Social Login)
+## 🔧 Login social (SSO)
 
-### Google OAuth
-1. Acesse: https://console.cloud.google.com/
-2. Crie um projeto e configure OAuth 2.0
-3. Adicione URLs de callback:
-   - `http://localhost:8000/accounts/google/login/callback/`
-4. Copie Client ID e Secret para o `.env`
-
-### Facebook
-1. Acesse: https://developers.facebook.com/
-2. Crie um app e configure Login do Facebook
-3. Adicione URL de callback
-4. Copie App ID e Secret para o `.env`
-
-### GitHub
-1. Acesse: https://github.com/settings/developers
-2. Crie um OAuth App
-3. Configure callback URL
-4. Copie Client ID e Secret para o `.env`
+Removido por enquanto: os botões eram apenas placeholders. O login é por e-mail e senha.
 
 ---
 
@@ -316,12 +287,6 @@ O script `populate_db.py` já trata isso automaticamente.
 
 ### Erro ao carregar imagens
 Verifique se a pasta `media/` tem permissões corretas.
-
-### SSO não funciona
-Certifique-se de que:
-- As credenciais estão corretas no `.env`
-- As URLs de callback estão configuradas nos provedores
-- O SITE_ID está correto (padrão: 1)
 
 ---
 

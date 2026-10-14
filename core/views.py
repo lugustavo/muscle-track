@@ -1,24 +1,32 @@
-from django.shortcuts import render, redirect, get_object_or_404
+import json
+from datetime import timedelta
+from decimal import Decimal, InvalidOperation
+
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.contrib import messages
+from django.core.exceptions import PermissionDenied
+from django.db import transaction
+from django.db.models import Avg, Count, Prefetch, Q
 from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
-from django.db.models import Count, Q
-from .models import (
-    MuscleGroup, Person, Exercise, Routine, RoutineExercise,
-    PersonRoutine, PersonRoutineExercise, WorkoutSession, SessionExercise
-)
+from django.views.decorators.http import require_POST
+
 from .forms import (
     PersonForm, ExerciseForm, RoutineForm, PersonRoutineForm,
     AIWorkoutGenerationForm
 )
-import json
+from .models import (
+    MuscleGroup, Person, Exercise, Routine, RoutineExercise,
+    PersonRoutine, PersonRoutineExercise, WorkoutSession, SessionExercise
+)
+from .permissions import is_trainer, staff_required, student_required
 
 
 def home(request):
     """Home page"""
-    from django.db.models import Avg, Count
+    from django.db.models import Avg
 
     context = {}
 
@@ -72,7 +80,7 @@ def home(request):
 
 # ============= STUDENT VIEWS =============
 
-@login_required
+@staff_required
 def student_list(request):
     """List all students with filters and statistics"""
     search = request.GET.get('search', '')
@@ -124,7 +132,7 @@ def student_list(request):
     return response
 
 
-@login_required
+@staff_required
 def student_create(request):
     """Create a new student"""
     if request.method == 'POST':
@@ -164,11 +172,11 @@ def student_create(request):
     return render(request, 'core/student_form.html', {'form': form, 'title': 'Cadastrar Aluno'})
 
 
-@login_required
+@staff_required
 def student_detail(request, pk):
     """View student details"""
     from django.db.models import Avg
-    from datetime import datetime, timedelta
+    from datetime import timedelta
     from django.utils import timezone
 
     student = get_object_or_404(Person, pk=pk)
@@ -227,7 +235,7 @@ def student_detail(request, pk):
     })
 
 
-@login_required
+@staff_required
 def student_edit(request, pk):
     """Edit student"""
     student = get_object_or_404(Person, pk=pk)
@@ -273,40 +281,31 @@ def student_edit(request, pk):
     return render(request, 'core/student_form.html', {'form': form, 'title': 'Editar Aluno'})
 
 
-@login_required
-def my_profile(request):
+@student_required
+def my_profile(request, person):
     """Student edits their own profile"""
-    try:
-        person = Person.objects.get(user=request.user)
-    except Person.DoesNotExist:
-        messages.error(request, 'Perfil de aluno não encontrado para este usuário.')
-        return redirect('core:home')
+    from .forms import StudentProfileForm
 
     if request.method == 'POST':
-        from .forms import StudentProfileForm
         form = StudentProfileForm(request.POST, request.FILES, instance=person)
         if form.is_valid():
             form.save()
             messages.success(request, 'Seu perfil foi atualizado com sucesso!')
             return redirect('core:my_profile')
     else:
-        from .forms import StudentProfileForm
         form = StudentProfileForm(instance=person)
-
-    # Mostrar email atual (somente leitura)
-    user_email = request.user.email
 
     return render(request, 'core/my_profile.html', {
         'form': form,
         'title': 'Meu Perfil',
-        'user_email': user_email,
+        'user_email': request.user.email,
         'person': person
     })
 
 
 # ============= EXERCISE VIEWS =============
 
-@login_required
+@staff_required
 def exercise_list(request):
     """List all exercises"""
     search = request.GET.get('search', '')
@@ -340,7 +339,7 @@ def exercise_list(request):
     })
 
 
-@login_required
+@staff_required
 def exercise_create(request):
     """Create a new exercise"""
     if request.method == 'POST':
@@ -354,7 +353,7 @@ def exercise_create(request):
     return render(request, 'core/exercise_form.html', {'form': form, 'title': 'Cadastrar Exercício'})
 
 
-@login_required
+@staff_required
 def exercise_detail(request, pk):
     """View exercise details"""
     exercise = get_object_or_404(Exercise, pk=pk)
@@ -377,8 +376,8 @@ def exercise_detail(request, pk):
     ).distinct().count()
 
     # Quantidade de vezes que o exercício foi completado
-    completed_count = PersonRoutineExercise.objects.filter(
-        exercise=exercise,
+    completed_count = SessionExercise.objects.filter(
+        person_routine_exercise__exercise=exercise,
         is_completed=True
     ).count()
 
@@ -397,7 +396,7 @@ def exercise_detail(request, pk):
     })
 
 
-@login_required
+@staff_required
 def exercise_edit(request, pk):
     """Edit exercise"""
     exercise = get_object_or_404(Exercise, pk=pk)
@@ -414,7 +413,101 @@ def exercise_edit(request, pk):
 
 # ============= ROUTINE VIEWS =============
 
-@login_required
+def _to_int(value, default, minimum=0):
+    try:
+        return max(int(value), minimum)
+    except (TypeError, ValueError):
+        return default
+
+
+def _load_exercise_items(raw, id_key):
+    """Parse the `exercises_data` JSON sent by the routine forms.
+
+    Returns (items, exercises_by_id). Raises ValueError with a user-facing
+    message when the payload is malformed or references unknown exercises.
+    """
+    try:
+        items = json.loads(raw or '[]')
+    except json.JSONDecodeError:
+        raise ValueError('Erro ao processar exercícios.')
+    if not isinstance(items, list) or not all(isinstance(i, dict) for i in items):
+        raise ValueError('Erro ao processar exercícios.')
+
+    ids = []
+    for item in items:
+        ex_id = _to_int(item.get(id_key), None, 1)
+        if ex_id is None:
+            raise ValueError('Exercício inválido na lista.')
+        item[id_key] = ex_id
+        ids.append(ex_id)
+
+    exercises = Exercise.objects.in_bulk(set(ids))
+    if len(exercises) != len(set(ids)):
+        raise ValueError('Um dos exercícios selecionados não existe mais.')
+    return items, exercises
+
+
+def _replace_routine_exercises(routine, items, exercises):
+    """Rewrite the exercises of a routine *template* (nothing references them)."""
+    routine.exercises.all().delete()
+    for idx, item in enumerate(items, start=1):
+        exercise = exercises[item['id']]
+        RoutineExercise.objects.create(
+            routine=routine,
+            exercise=exercise,
+            order=idx,
+            sets=_to_int(item.get('sets'), exercise.default_sets, 1),
+            reps=_to_int(item.get('reps'), exercise.default_reps, 1),
+            rest_seconds=_to_int(item.get('rest'), 60, 0),
+        )
+
+
+def _sync_person_routine_exercises(person_routine, items, exercises):
+    """Update a student's routine in place.
+
+    Rows are matched by exercise so the SessionExercise history (cascade from
+    PersonRoutineExercise) survives edits; only exercises the trainer actually
+    removed are deleted.
+    """
+    existing = {}
+    for row in person_routine.exercises.order_by('order', 'pk'):
+        existing.setdefault(row.exercise_id, []).append(row)
+
+    keep = []
+    for idx, item in enumerate(items, start=1):
+        values = {
+            'order': idx,
+            'sets': _to_int(item.get('sets'), 3, 1),
+            'reps': _to_int(item.get('reps'), 12, 1),
+            'rest_seconds': _to_int(item.get('rest_seconds'), 60, 0),
+            'notes': str(item.get('notes') or ''),
+        }
+        pool = existing.get(item['exercise_id'])
+        if pool:
+            row = pool.pop(0)
+            for field, value in values.items():
+                setattr(row, field, value)
+            row.save()
+        else:
+            row = PersonRoutineExercise.objects.create(
+                person_routine=person_routine,
+                exercise=exercises[item['exercise_id']],
+                **values
+            )
+        keep.append(row.pk)
+    person_routine.exercises.exclude(pk__in=keep).delete()
+
+
+def _routine_form_context(form, title, routine, routine_exercises):
+    return {
+        'form': form,
+        'title': title,
+        'routine': routine,
+        'routine_exercises': routine_exercises,
+        'muscle_groups': MuscleGroup.objects.filter(is_active=True).order_by('order'),
+    }
+
+@staff_required
 def routine_list(request):
     """List all routines"""
     search = request.GET.get('search', '')
@@ -446,7 +539,6 @@ def routine_list(request):
     routines = routines.order_by('routine_name')
 
     # Anotar com contagem de alunos e exercícios
-    from django.db.models import Count
     routines = routines.annotate(
         student_count=Count('person_routines', distinct=True),
         exercise_count=Count('exercises', distinct=True)
@@ -468,52 +560,30 @@ def routine_list(request):
     return response
 
 
-@login_required
+@staff_required
 def routine_create(request):
     """Create a new routine"""
     if request.method == 'POST':
         form = RoutineForm(request.POST)
         if form.is_valid():
-            routine = form.save()
-
-            # Processar exercícios selecionados
-            import json
-            exercises_data = request.POST.get('exercises_data', '[]')
             try:
-                exercises_list = json.loads(exercises_data)
-
-                # Adicionar exercícios
-                for idx, exercise_data in enumerate(exercises_list, start=1):
-                    exercise = Exercise.objects.get(pk=exercise_data['id'])
-                    RoutineExercise.objects.create(
-                        routine=routine,
-                        exercise=exercise,
-                        order=idx,
-                        sets=exercise_data.get('sets', exercise.default_sets),
-                        reps=exercise_data.get('reps', exercise.default_reps),
-                        rest_seconds=exercise_data.get('rest', 60)
-                    )
-
+                with transaction.atomic():
+                    routine = form.save()
+                    items, exercises = _load_exercise_items(request.POST.get('exercises_data'), 'id')
+                    _replace_routine_exercises(routine, items, exercises)
+            except ValueError as e:
+                messages.error(request, str(e))
+            else:
                 messages.success(request, 'Treino criado com sucesso!')
                 return redirect('core:routine_detail', pk=routine.pk)
-            except json.JSONDecodeError:
-                messages.error(request, 'Erro ao processar exercícios.')
     else:
         form = RoutineForm()
 
-    # Buscar grupos musculares
-    muscle_groups = MuscleGroup.objects.filter(is_active=True).order_by('order')
-
-    return render(request, 'core/routine_form.html', {
-        'form': form,
-        'title': 'Criar Treino',
-        'routine': None,
-        'routine_exercises': [],
-        'muscle_groups': muscle_groups
-    })
+    return render(request, 'core/routine_form.html',
+                  _routine_form_context(form, 'Criar Treino', None, []))
 
 
-@login_required
+@staff_required
 def routine_detail(request, pk):
     """View routine details"""
     routine = get_object_or_404(Routine, pk=pk)
@@ -548,7 +618,7 @@ def routine_detail(request, pk):
     })
 
 
-@login_required
+@staff_required
 def routine_edit(request, pk):
     """Edit routine"""
     routine = get_object_or_404(Routine, pk=pk)
@@ -556,107 +626,59 @@ def routine_edit(request, pk):
     if request.method == 'POST':
         form = RoutineForm(request.POST, instance=routine)
         if form.is_valid():
-            routine = form.save()
-
-            # Processar exercícios selecionados
-            import json
-            exercises_data = request.POST.get('exercises_data', '[]')
             try:
-                exercises_list = json.loads(exercises_data)
-
-                # Remover exercícios existentes
-                routine.exercises.all().delete()
-
-                # Adicionar novos exercícios
-                for idx, exercise_data in enumerate(exercises_list, start=1):
-                    exercise = Exercise.objects.get(pk=exercise_data['id'])
-                    RoutineExercise.objects.create(
-                        routine=routine,
-                        exercise=exercise,
-                        order=idx,
-                        sets=exercise_data.get('sets', exercise.default_sets),
-                        reps=exercise_data.get('reps', exercise.default_reps),
-                        rest_seconds=exercise_data.get('rest', 60)
-                    )
-
+                with transaction.atomic():
+                    routine = form.save()
+                    items, exercises = _load_exercise_items(request.POST.get('exercises_data'), 'id')
+                    _replace_routine_exercises(routine, items, exercises)
+            except ValueError as e:
+                messages.error(request, str(e))
+            else:
                 messages.success(request, 'Treino atualizado com sucesso!')
                 return redirect('core:routine_detail', pk=pk)
-            except json.JSONDecodeError:
-                messages.error(request, 'Erro ao processar exercícios.')
     else:
         form = RoutineForm(instance=routine)
 
-    # Buscar exercícios atuais da rotina
     routine_exercises = routine.exercises.all().select_related('exercise').order_by('order')
-
-    # Buscar grupos musculares
-    muscle_groups = MuscleGroup.objects.filter(is_active=True).order_by('order')
-
-    return render(request, 'core/routine_form.html', {
-        'form': form,
-        'title': 'Editar Treino',
-        'routine': routine,
-        'routine_exercises': routine_exercises,
-        'muscle_groups': muscle_groups
-    })
+    return render(request, 'core/routine_form.html',
+                  _routine_form_context(form, 'Editar Treino', routine, routine_exercises))
 
 
 # ============= PERSON ROUTINE VIEWS =============
 
-@login_required
+@staff_required
 def person_routine_create(request):
     """Assign a routine template to a student (creates personalized copy)"""
+    selected_person = None
+
     if request.method == 'POST':
-        # Get template ID from POST data
-        template_id = request.POST.get('template_id')
-
-        # Get exercises data (JSON)
-        exercises_data = request.POST.get('exercises_data', '[]')
-
         form = PersonRoutineForm(request.POST)
         if form.is_valid():
-            person_routine = form.save(commit=False)
-
-            # Set template reference if provided
-            if template_id:
-                try:
-                    template = Routine.objects.get(pk=template_id)
-                    person_routine.routine_template = template
-                except Routine.DoesNotExist:
-                    pass
-
-            person_routine.save()
-
-            # Process exercises
             try:
-                exercises_list = json.loads(exercises_data)
-                for idx, exercise_data in enumerate(exercises_list, start=1):
-                    PersonRoutineExercise.objects.create(
-                        person_routine=person_routine,
-                        exercise_id=exercise_data['exercise_id'],
-                        order=exercise_data.get('order', idx),
-                        sets=exercise_data.get('sets', 3),
-                        reps=exercise_data.get('reps', 12),
-                        rest_seconds=exercise_data.get('rest_seconds', 60),
-                        notes=exercise_data.get('notes', '')
-                    )
-            except json.JSONDecodeError:
-                pass
+                with transaction.atomic():
+                    person_routine = form.save(commit=False)
 
-            messages.success(request, f'Treino "{person_routine.routine_name}" atribuído a {person_routine.person.person_name} com sucesso!')
-            return redirect('core:student_detail', pk=person_routine.person.pk)
+                    template_id = request.POST.get('template_id', '')
+                    if template_id.isdigit():
+                        person_routine.routine_template = Routine.objects.filter(pk=template_id).first()
+
+                    person_routine.save()
+                    items, exercises = _load_exercise_items(
+                        request.POST.get('exercises_data'), 'exercise_id')
+                    _sync_person_routine_exercises(person_routine, items, exercises)
+            except ValueError as e:
+                messages.error(request, str(e))
+            else:
+                messages.success(request, f'Treino "{person_routine.routine_name}" atribuído a {person_routine.person.person_name} com sucesso!')
+                return redirect('core:student_detail', pk=person_routine.person.pk)
+        person_id = request.POST.get('person')
     else:
         # Pre-fill person if provided in URL
         person_id = request.GET.get('person')
-        initial_data = {}
-        selected_person = None
-        if person_id:
-            initial_data['person'] = person_id
-            try:
-                selected_person = Person.objects.get(pk=person_id)
-            except Person.DoesNotExist:
-                pass
-        form = PersonRoutineForm(initial=initial_data)
+        form = PersonRoutineForm(initial={'person': person_id} if person_id else None)
+
+    if person_id and str(person_id).isdigit():
+        selected_person = Person.objects.filter(pk=person_id).first()
 
     return render(request, 'core/person_routine_form.html', {
         'form': form,
@@ -664,10 +686,10 @@ def person_routine_create(request):
     })
 
 
-@login_required
+@staff_required
 def person_routine_detail(request, pk):
     """View person routine progress - all sessions for this specific routine"""
-    from django.db.models import Avg, Count
+    from django.db.models import Avg
     from datetime import timedelta
 
     person_routine = get_object_or_404(PersonRoutine, pk=pk)
@@ -739,46 +761,28 @@ def person_routine_detail(request, pk):
     })
 
 
-@login_required
+@staff_required
 def person_routine_edit(request, pk):
     """Edit a person's routine"""
     person_routine = get_object_or_404(PersonRoutine, pk=pk)
 
     if request.method == 'POST':
-        # Get exercises data (JSON)
-        exercises_data = request.POST.get('exercises_data', '[]')
-
         form = PersonRoutineForm(request.POST, instance=person_routine)
         if form.is_valid():
-            person_routine = form.save()
-
-            # Update exercises
             try:
-                exercises_list = json.loads(exercises_data)
-
-                # Delete existing exercises
-                person_routine.exercises.all().delete()
-
-                # Create new exercises
-                for idx, exercise_data in enumerate(exercises_list, start=1):
-                    PersonRoutineExercise.objects.create(
-                        person_routine=person_routine,
-                        exercise_id=exercise_data['exercise_id'],
-                        order=exercise_data.get('order', idx),
-                        sets=exercise_data.get('sets', 3),
-                        reps=exercise_data.get('reps', 12),
-                        rest_seconds=exercise_data.get('rest_seconds', 60),
-                        notes=exercise_data.get('notes', '')
-                    )
-            except json.JSONDecodeError:
-                pass
-
-            messages.success(request, f'Treino "{person_routine.routine_name}" atualizado com sucesso!')
-            return redirect('core:student_detail', pk=person_routine.person.pk)
+                with transaction.atomic():
+                    person_routine = form.save()
+                    items, exercises = _load_exercise_items(
+                        request.POST.get('exercises_data'), 'exercise_id')
+                    _sync_person_routine_exercises(person_routine, items, exercises)
+            except ValueError as e:
+                messages.error(request, str(e))
+            else:
+                messages.success(request, f'Treino "{person_routine.routine_name}" atualizado com sucesso!')
+                return redirect('core:student_detail', pk=person_routine.person.pk)
     else:
         form = PersonRoutineForm(instance=person_routine)
 
-    # Get current exercises
     current_exercises = person_routine.exercises.all().select_related('exercise').order_by('order')
 
     return render(request, 'core/person_routine_form.html', {
@@ -790,7 +794,7 @@ def person_routine_edit(request, pk):
     })
 
 
-@login_required
+@staff_required
 def person_routine_deactivate(request, pk):
     """Deactivate a person routine (move to history)"""
     if request.method == 'POST':
@@ -810,160 +814,136 @@ def person_routine_deactivate(request, pk):
 
 # ============= STUDENT WORKOUT AREA =============
 
-@login_required
-def my_workouts(request):
+MAX_SESSION_MINUTES = 120
+
+
+def _close_if_stale(session):
+    """Close a session that has been open longer than MAX_SESSION_MINUTES.
+
+    Returns True when the session was closed.
+    """
+    if session and timezone.now() - session.start_time > timedelta(minutes=MAX_SESSION_MINUTES):
+        session.end_session()
+        return True
+    return False
+
+
+@student_required
+def my_workouts(request, person):
     """Student's active workouts"""
-    from datetime import timedelta
-    from django.db.models import Prefetch
+    # Prefetch apenas as últimas sessões completadas de cada exercício
+    last_session_prefetch = Prefetch(
+        'session_logs',
+        queryset=SessionExercise.objects.filter(
+            session__is_completed=True,
+            is_completed=True
+        ).select_related('session').order_by('-completed_at')[:1],
+        to_attr='last_session_log'
+    )
 
-    try:
-        person = request.user.person
+    # Prefetch dos exercícios com suas sessões e dados do exercício
+    exercises_prefetch = Prefetch(
+        'exercises',
+        queryset=PersonRoutineExercise.objects.select_related('exercise').prefetch_related(
+            last_session_prefetch
+        ).order_by('order')
+    )
 
-        # Prefetch apenas as últimas sessões completadas de cada exercício
-        last_session_prefetch = Prefetch(
-            'session_logs',
-            queryset=SessionExercise.objects.filter(
-                session__is_completed=True,
-                is_completed=True
-            ).select_related('session').order_by('-completed_at')[:1],
-            to_attr='last_session_log'
-        )
+    active_routines = PersonRoutine.objects.filter(
+        person=person,
+        is_active=True
+    ).select_related('routine_template').prefetch_related(
+        'sessions',
+        exercises_prefetch
+    )
 
-        # Prefetch dos exercícios com suas sessões e dados do exercício
-        exercises_prefetch = Prefetch(
-            'exercises',
-            queryset=PersonRoutineExercise.objects.select_related('exercise').prefetch_related(
-                last_session_prefetch
-            ).order_by('order')
-        )
+    # Check for active sessions and auto-close old ones
+    routines_with_sessions = []
+    for routine in active_routines:
+        active_session = routine.sessions.filter(is_completed=False).first()
+        if _close_if_stale(active_session):
+            active_session = None
 
-        active_routines = PersonRoutine.objects.filter(
-            person=person,
-            is_active=True
-        ).select_related('routine_template').prefetch_related(
-            'sessions',
-            exercises_prefetch
-        )
-
-        # Check for active sessions and auto-close old ones
-        routines_with_sessions = []
-        for routine in active_routines:
-            active_session = routine.sessions.filter(is_completed=False).first()
-
-            # Auto-close sessions older than 120 minutes
-            if active_session:
-                time_elapsed = timezone.now() - active_session.start_time
-                if time_elapsed > timedelta(minutes=120):
-                    active_session.end_session()
-                    active_session = None
-
-            routines_with_sessions.append({
-                'routine': routine,
-                'active_session': active_session
-            })
-
-        return render(request, 'core/my_workouts.html', {
-            'person': person,
-            'routines_with_sessions': routines_with_sessions
+        routines_with_sessions.append({
+            'routine': routine,
+            'active_session': active_session
         })
-    except Person.DoesNotExist:
-        messages.warning(request, 'Você não está cadastrado como aluno.')
-        return redirect('core:home')
+
+    return render(request, 'core/my_workouts.html', {
+        'person': person,
+        'routines_with_sessions': routines_with_sessions
+    })
 
 
-@login_required
-def workout_start(request, pk):
+@student_required
+@require_POST
+def workout_start(request, pk, person):
     """Start a workout session or recover active session"""
-    from datetime import timedelta
+    person_routine = get_object_or_404(PersonRoutine, pk=pk, person=person, is_active=True)
 
-    person_routine = get_object_or_404(PersonRoutine, pk=pk)
-
-    # Check for active session
     active_session = person_routine.sessions.filter(is_completed=False).first()
 
-    if active_session:
-        # Check if session is too old (>120 minutes) - auto close it
-        time_elapsed = timezone.now() - active_session.start_time
-        if time_elapsed > timedelta(minutes=120):
-            active_session.end_session()
-            messages.warning(request, 'Sessão anterior foi encerrada automaticamente (tempo excedido).')
-            # Create new session
-            session = WorkoutSession.objects.create(person_routine=person_routine)
-            messages.success(request, 'Novo treino iniciado! Boa sorte!')
-        else:
-            # Recover active session
-            messages.info(request, 'Recuperando sua sessão de treino em andamento...')
+    if active_session and not _close_if_stale(active_session):
+        messages.info(request, 'Recuperando sua sessão de treino em andamento...')
     else:
-        # Create new workout session
-        session = WorkoutSession.objects.create(person_routine=person_routine)
+        if active_session:
+            messages.warning(request, 'Sessão anterior foi encerrada automaticamente (tempo excedido).')
+        WorkoutSession.objects.create(person_routine=person_routine)
         messages.success(request, 'Treino iniciado! Boa sorte!')
 
     return redirect('core:workout_execute', pk=pk)
 
 
-@login_required
-def workout_execute(request, pk):
+@student_required
+def workout_execute(request, pk, person):
     """Execute workout with timer - shows previous session data for reference"""
-    from datetime import timedelta
-    from .models import SessionExercise
-
-    person_routine = get_object_or_404(PersonRoutine, pk=pk)
+    person_routine = get_object_or_404(PersonRoutine, pk=pk, person=person)
 
     # Get active (current) session
     active_session = person_routine.sessions.filter(is_completed=False).first()
 
-    # Auto-close sessions older than 120 minutes
-    if active_session:
-        time_elapsed = timezone.now() - active_session.start_time
-        if time_elapsed > timedelta(minutes=120):
-            active_session.end_session()
-            messages.warning(request, 'Sessão anterior foi encerrada automaticamente (tempo excedido).')
-            active_session = None
+    # Auto-close sessions older than MAX_SESSION_MINUTES
+    if _close_if_stale(active_session):
+        messages.warning(request, 'Sessão anterior foi encerrada automaticamente (tempo excedido).')
+        active_session = None
 
     # If no active session, redirect to start one
     if not active_session:
         messages.warning(request, 'Nenhuma sessão ativa encontrada. Inicie um novo treino.')
         return redirect('core:my_workouts')
 
-    # Get routine exercises for current session
-    routine_exercises = person_routine.exercises.select_related('exercise').order_by('order')
+    routine_exercises = list(person_routine.exercises.select_related('exercise').order_by('order'))
 
     # Create SessionExercise entries for active session if they don't exist
+    current_by_prx = {}
     for exercise in routine_exercises:
-        SessionExercise.objects.get_or_create(
+        current_by_prx[exercise.pk], _ = SessionExercise.objects.get_or_create(
             session=active_session,
             person_routine_exercise=exercise
         )
 
-    # Get last completed session
+    # Previous data: last completed session, matched by Exercise (not by PersonRoutineExercise)
     last_completed_session = person_routine.sessions.filter(is_completed=True).order_by('-end_time').first()
+    previous_by_exercise = {}
+    if last_completed_session:
+        previous_logs = SessionExercise.objects.filter(
+            session=last_completed_session
+        ).select_related('person_routine_exercise')
+        for log in previous_logs:
+            previous_by_exercise.setdefault(log.person_routine_exercise.exercise_id, log)
 
-    # Build exercises with previous and current session data
     exercises_with_previous = []
     for exercise in routine_exercises:
-        # Get current session data
-        current_session_exercise = SessionExercise.objects.filter(
-            session=active_session,
-            person_routine_exercise=exercise
-        ).first()
-
-        # Get previous session data (from last completed session for this same exercise)
-        previous_session_exercise = None
-        if last_completed_session:
-            previous_session_exercise = SessionExercise.objects.filter(
-                session=last_completed_session,
-                person_routine_exercise__exercise=exercise.exercise  # Match by exercise, not by PersonRoutineExercise
-            ).first()
-
-        exercise_data = {
+        current = current_by_prx[exercise.pk]
+        previous = previous_by_exercise.get(exercise.exercise_id)
+        exercises_with_previous.append({
             'current': exercise,
-            'current_session_id': current_session_exercise.id if current_session_exercise else None,
-            'current_weight': current_session_exercise.weight_used if current_session_exercise else None,
-            'current_is_completed': current_session_exercise.is_completed if current_session_exercise else False,
-            'previous_date': previous_session_exercise.completed_at if previous_session_exercise else None,
-            'previous_weight': previous_session_exercise.weight_used if previous_session_exercise else None,
-        }
-        exercises_with_previous.append(exercise_data)
+            'current_session_id': current.id,
+            'current_weight': current.weight_used,
+            'current_is_completed': current.is_completed,
+            'previous_date': previous.completed_at if previous else None,
+            'previous_weight': previous.weight_used if previous else None,
+        })
 
     return render(request, 'core/workout_execute.html', {
         'person_routine': person_routine,
@@ -973,10 +953,11 @@ def workout_execute(request, pk):
     })
 
 
-@login_required
-def workout_end(request, pk):
+@student_required
+@require_POST
+def workout_end(request, pk, person):
     """End a workout session"""
-    session = get_object_or_404(WorkoutSession, pk=pk)
+    session = get_object_or_404(WorkoutSession, pk=pk, person_routine__person=person)
     session.end_session()
     messages.success(request, f'Treino concluído! Duração: {session.duration_minutes} minutos')
     return redirect('core:my_workouts')
@@ -984,26 +965,26 @@ def workout_end(request, pk):
 
 @login_required
 def session_detail(request, pk):
-    """View completed workout session details (read-only for admin)"""
-    from .models import SessionExercise
-
-    session = get_object_or_404(WorkoutSession, pk=pk)
+    """View a workout session: the trainer sees any session, a student only their own"""
+    session = get_object_or_404(
+        WorkoutSession.objects.select_related('person_routine__person'), pk=pk
+    )
     person_routine = session.person_routine
+
+    if not is_trainer(request.user) and person_routine.person.user_id != request.user.pk:
+        raise PermissionDenied
 
     # Get session-specific exercise execution data
     session_exercises = SessionExercise.objects.filter(
         session=session
     ).select_related('person_routine_exercise__exercise').order_by('person_routine_exercise__order')
 
-    # Build exercise data for this specific session
-    exercises_data = []
-    for session_exercise in session_exercises:
-        exercises_data.append({
-            'exercise': session_exercise.person_routine_exercise,
-            'completed_at': session_exercise.completed_at,
-            'weight_used': session_exercise.weight_used,
-            'is_completed': session_exercise.is_completed
-        })
+    exercises_data = [{
+        'exercise': se.person_routine_exercise,
+        'completed_at': se.completed_at,
+        'weight_used': se.weight_used,
+        'is_completed': se.is_completed,
+    } for se in session_exercises]
 
     return render(request, 'core/session_detail.html', {
         'session': session,
@@ -1013,50 +994,60 @@ def session_detail(request, pk):
     })
 
 
-@login_required
-def exercise_toggle_completion(request, pk):
+def _active_session_exercise_or_404(pk, person):
+    """SessionExercise of an open session that belongs to this student"""
+    return get_object_or_404(
+        SessionExercise,
+        pk=pk,
+        session__person_routine__person=person,
+        session__is_completed=False,
+    )
+
+
+@student_required
+@require_POST
+def exercise_toggle_completion(request, pk, person):
     """Toggle exercise completion status in active session"""
-    if request.method == 'POST':
-        from .models import SessionExercise
+    # pk here is the SessionExercise ID, not PersonRoutineExercise
+    session_exercise = _active_session_exercise_or_404(pk, person)
 
-        # pk here is the SessionExercise ID, not PersonRoutineExercise
-        session_exercise = get_object_or_404(SessionExercise, pk=pk)
-        session_exercise.is_completed = not session_exercise.is_completed
+    if session_exercise.is_completed:
+        session_exercise.is_completed = False
+        session_exercise.completed_at = None
+        session_exercise.save()
+    else:
+        session_exercise.mark_completed()
 
-        if session_exercise.is_completed:
-            session_exercise.mark_completed()
-        else:
-            session_exercise.completed_at = None
-            session_exercise.save()
-
-        return JsonResponse({
-            'success': True,
-            'is_completed': session_exercise.is_completed
-        })
-    return JsonResponse({'success': False}, status=400)
+    return JsonResponse({
+        'success': True,
+        'is_completed': session_exercise.is_completed
+    })
 
 
-@login_required
-def exercise_update_weight(request, pk):
+@student_required
+@require_POST
+def exercise_update_weight(request, pk, person):
     """Update exercise weight in active session"""
-    if request.method == 'POST':
-        from .models import SessionExercise
+    # pk here is the SessionExercise ID
+    session_exercise = _active_session_exercise_or_404(pk, person)
 
-        # pk here is the SessionExercise ID
-        session_exercise = get_object_or_404(SessionExercise, pk=pk)
+    try:
         data = json.loads(request.body)
-        weight = data.get('weight')
+        raw = data.get('weight') if isinstance(data, dict) else None
+        if raw is None or str(raw).strip() == '':
+            raise ValueError('missing')
+        weight = Decimal(str(raw).replace(',', '.')).quantize(Decimal('0.01'))
+        if not weight.is_finite() or weight < 0 or weight > Decimal('9999.99'):
+            raise ValueError('range')
+    except (json.JSONDecodeError, ValueError, InvalidOperation):
+        return JsonResponse({'success': False, 'error': 'Carga inválida'}, status=400)
 
-        if weight:
-            session_exercise.weight_used = float(weight)
-            session_exercise.save()
-            return JsonResponse({'success': True})
-
-        return JsonResponse({'success': False, 'error': 'No weight provided'}, status=400)
-    return JsonResponse({'success': False}, status=400)
+    session_exercise.weight_used = weight
+    session_exercise.save(update_fields=['weight_used'])
+    return JsonResponse({'success': True})
 
 
-@login_required
+@staff_required
 def api_exercises_list(request):
     """API endpoint to get all active exercises for routine form"""
     exercises = Exercise.objects.filter(is_active=True).select_related('muscle_group').order_by('exercise_name')
@@ -1078,7 +1069,7 @@ def api_exercises_list(request):
     return JsonResponse(exercises_data, safe=False)
 
 
-@login_required
+@staff_required
 def api_routines_list(request):
     """API endpoint to get all active routine templates"""
     routines = Routine.objects.filter(is_active=True).prefetch_related('exercises__exercise')
@@ -1100,7 +1091,7 @@ def api_routines_list(request):
     return JsonResponse(routines_data, safe=False)
 
 
-@login_required
+@staff_required
 def api_routine_exercises(request, pk):
     """API endpoint to get exercises from a specific routine template"""
     routine = get_object_or_404(Routine, pk=pk)
@@ -1123,53 +1114,41 @@ def api_routine_exercises(request, pk):
 
 # ============= HISTORY AND PROGRESS =============
 
-@login_required
-def my_history(request):
+@student_required
+def my_history(request, person):
     """Student's workout history"""
-    from django.db.models import Avg
-    from .models import SessionExercise
-    import json
+    completed_sessions = WorkoutSession.objects.filter(
+        person_routine__person=person,
+        is_completed=True
+    ).select_related('person_routine').order_by('-start_time')[:20]
 
-    try:
-        person = request.user.person
-        completed_sessions = WorkoutSession.objects.filter(
-            person_routine__person=person,
-            is_completed=True
-        ).order_by('-start_time')[:20]
+    # Preparar dados para o gráfico (incluindo carga média)
+    chart_data = []
+    for session in reversed(list(completed_sessions)):
+        avg_weight = SessionExercise.objects.filter(
+            session=session,
+            is_completed=True,
+            weight_used__isnull=False
+        ).aggregate(avg=Avg('weight_used'))['avg']
 
-        # Preparar dados para o gráfico (incluindo carga média)
-        chart_data = []
-        for session in reversed(list(completed_sessions)):
-            # Calcular carga média dos exercícios desta sessão
-            session_exercises = SessionExercise.objects.filter(
-                session=session,
-                is_completed=True,
-                weight_used__isnull=False
-            )
-            avg_weight = session_exercises.aggregate(avg=Avg('weight_used'))['avg']
-            avg_weight = float(avg_weight) if avg_weight else 0
-
-            chart_data.append({
-                'date': session.start_time.strftime('%d/%m'),
-                'duration': session.duration_minutes or 0,
-                'avg_weight': round(avg_weight, 1),
-                'workout': session.person_routine.routine_name[:15]
-            })
-
-        return render(request, 'core/my_history.html', {
-            'person': person,
-            'completed_sessions': completed_sessions,
-            'chart_data': json.dumps(chart_data)
+        chart_data.append({
+            'date': session.start_time.strftime('%d/%m'),
+            'duration': session.duration_minutes or 0,
+            'avg_weight': round(float(avg_weight), 1) if avg_weight else 0,
+            'workout': session.person_routine.routine_name[:15]
         })
-    except Person.DoesNotExist:
-        messages.warning(request, 'Você não está cadastrado como aluno.')
-        return redirect('core:home')
+
+    return render(request, 'core/my_history.html', {
+        'person': person,
+        'completed_sessions': completed_sessions,
+        'chart_data': json.dumps(chart_data)
+    })
 
 
-@login_required
+@staff_required
 def student_history(request, pk):
     """View student's workout history with detailed statistics"""
-    from django.db.models import Avg, Sum, Count
+    from django.db.models import Avg
     from datetime import timedelta
 
     student = get_object_or_404(Person, pk=pk)
@@ -1252,13 +1231,13 @@ def student_history(request, pk):
 
 # ============= AI WORKOUT GENERATION =============
 
-@login_required
+@staff_required
 def routine_generate_ai(request):
     """Generate workout routine using AI"""
     if request.method == 'POST':
         form = AIWorkoutGenerationForm(request.POST)
         if form.is_valid():
-            from .ai_service import generate_workout_with_ai
+            from .ai_service import AIGenerationError, generate_workout_with_ai
 
             description = form.cleaned_data['description']
             difficulty = form.cleaned_data['difficulty_level']
@@ -1268,9 +1247,9 @@ def routine_generate_ai(request):
                 routine = generate_workout_with_ai(description, difficulty, duration)
                 messages.success(request, 'Treino gerado com IA com sucesso!')
                 return redirect('core:routine_detail', pk=routine.pk)
-            except Exception as e:
-                messages.error(request, f'Erro ao gerar treino: {str(e)}')
+            except AIGenerationError as e:
+                messages.error(request, f'Erro ao gerar treino: {e}')
     else:
         form = AIWorkoutGenerationForm()
 
-    return render(request, 'core/routine_generate_ai.html', {'form': form})
+    return render(request, 'core/routine_generate_ai.html', {'form': form, 'title': 'Gerar Treino com IA'})

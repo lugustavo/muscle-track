@@ -2,7 +2,7 @@
 Django settings for muscle-track project.
 """
 
-import os
+import sys
 from pathlib import Path
 from decouple import config, Csv
 import dj_database_url
@@ -10,11 +10,17 @@ import dj_database_url
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-in-production')
+TESTING = 'test' in sys.argv
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+# Off by default: set DEBUG=True in your local .env for development.
+DEBUG = config('DEBUG', default=False, cast=bool)
+
+# SECURITY WARNING: keep the secret key used in production secret!
+if DEBUG or TESTING:
+    SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-only-for-local-use')
+else:
+    SECRET_KEY = config('SECRET_KEY')  # required: fails loudly if missing
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
@@ -34,10 +40,6 @@ INSTALLED_APPS = [
     # Third party apps
     'allauth',
     'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
-    'allauth.socialaccount.providers.facebook',
-    'allauth.socialaccount.providers.github',
     'crispy_forms',
     'crispy_bootstrap5',
     'django_select2',
@@ -123,7 +125,16 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {
+        # The manifest storage needs `collectstatic`, so keep the plain one for tests
+        'BACKEND': (
+            'django.contrib.staticfiles.storage.StaticFilesStorage' if TESTING
+            else 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+        ),
+    },
+}
 
 # Media files
 MEDIA_URL = '/media/'
@@ -150,57 +161,12 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@muscle-track.com')
 
 # Django-allauth settings
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = config('ACCOUNT_EMAIL_VERIFICATION', default='optional')  # 'none', 'optional' ou 'mandatory'
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_SIGNUP_EMAIL_ENTER_TWICE = False
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True  # Login automático após confirmação (se acontecer)
 LOGIN_REDIRECT_URL = '/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
-
-# Social providers
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'APP': {
-            'client_id': config('GOOGLE_CLIENT_ID', default=''),
-            'secret': config('GOOGLE_CLIENT_SECRET', default=''),
-        },
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        }
-    },
-    'facebook': {
-        'APP': {
-            'client_id': config('FACEBOOK_APP_ID', default=''),
-            'secret': config('FACEBOOK_APP_SECRET', default=''),
-        },
-        'METHOD': 'oauth2',
-        'SCOPE': ['email', 'public_profile'],
-        'FIELDS': [
-            'id',
-            'email',
-            'name',
-            'first_name',
-            'last_name',
-        ],
-    },
-    'github': {
-        'APP': {
-            'client_id': config('GITHUB_CLIENT_ID', default=''),
-            'secret': config('GITHUB_CLIENT_SECRET', default=''),
-        },
-        'SCOPE': [
-            'user',
-            'repo',
-            'read:org',
-        ],
-    }
-}
 
 # Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
@@ -208,6 +174,14 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # OpenAI Configuration
 OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
+OPENAI_MODEL = config('OPENAI_MODEL', default='gpt-4o-mini')
+
+# Avatar upload limits (see core/validators.py)
+AVATAR_MAX_SIZE_MB = config('AVATAR_MAX_SIZE_MB', default=5, cast=int)
+AVATAR_MAX_WIDTH = config('AVATAR_MAX_WIDTH', default=6000, cast=int)
+AVATAR_MAX_HEIGHT = config('AVATAR_MAX_HEIGHT', default=6000, cast=int)
+AVATAR_MIN_WIDTH = config('AVATAR_MIN_WIDTH', default=100, cast=int)
+AVATAR_MIN_HEIGHT = config('AVATAR_MIN_HEIGHT', default=100, cast=int)
 
 # Site URL
 SITE_URL = config('SITE_URL', default='http://localhost:8000')

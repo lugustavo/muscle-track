@@ -10,7 +10,7 @@
                 <h1><i class="bi bi-clipboard-data"></i> Detalhes da Sessão</h1>
                 <p class="text-muted mb-0">{{ student.person_name }} - {{ person_routine.routine_name }}</p>
             </div>
-            <a href="{% url 'core:person_routine_detail' person_routine.pk %}" class="btn btn-secondary">
+            <a href="{% if user.is_staff or user.is_superuser %}{% url 'core:person_routine_detail' person_routine.pk %}{% else %}{% url 'core:my_history' %}{% endif %}" class="btn btn-secondary">
                 <i class="bi bi-arrow-left"></i> Voltar
             </a>
         </div>
