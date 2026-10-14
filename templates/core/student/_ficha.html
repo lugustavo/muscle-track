@@ -12,8 +12,12 @@
                     <div class="col-md-6"><strong>Telefone</strong><br>{{ student.phone|default:"-" }}</div>
                     <div class="col-md-6"><strong>Nascimento</strong><br>{% if student.birth_date %}{{ student.birth_date|date:"d/m/Y" }} ({{ student.age }} anos){% else %}-{% endif %}</div>
                     <div class="col-md-6"><strong>Cidade</strong><br>{{ student.city|default:"-" }}{% if student.state %}/{{ student.state }}{% endif %}</div>
-                    <div class="col-md-6"><strong>Aluno desde</strong><br>{{ student.created_at|date:"d/m/Y" }}
-                        {% if not student.is_active and student.deactivated_at %}<br><span class="text-danger small">Inativo desde {{ student.deactivated_at|date:"d/m/Y" }}</span>{% endif %}</div>
+                    <div class="col-md-6"><strong>Aluno desde</strong><br>{{ student.created_at|date:"d/m/Y" }}</div>
+                    <div class="col-md-6"><strong>Situação</strong><br>
+                        {{ student.get_status_display }}{% if student.status_changed_at %} <span class="text-muted small">desde {{ student.status_changed_at|date:"d/m/Y" }}</span>{% endif %}
+                        {% if student.status_reason %}<br><span class="small text-muted">{{ student.status_reason|linebreaksbr }}</span>{% endif %}
+                        <br><a href="{% nav_url 'core:student_status' student.pk %}" class="small"><i class="bi bi-arrow-repeat"></i> Alterar situação</a>
+                    </div>
                     <div class="col-md-6"><strong>Acesso ao app</strong><br>
                         {% if not student.user.has_usable_password %}<span class="text-warning-emphasis"><i class="bi bi-hourglass-split"></i> Aguardando convite</span>
                         {% elif student.user.last_login %}Último acesso em {{ student.user.last_login|date:"d/m/Y H:i" }}

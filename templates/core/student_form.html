@@ -283,16 +283,18 @@
                         {% endif %}
                     </div>
 
-                    <div class="form-check">
-                        <input type="checkbox"
-                               name="{{ form.is_active.name }}"
-                               class="form-check-input"
-                               id="{{ form.is_active.id_for_label }}"
-                               {% if form.is_active.value %}checked{% endif %}>
-                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
-                            <i class="bi bi-check-circle"></i> Aluno ativo
-                        </label>
+                    {% if form.status %}
+                    <div class="mb-0">
+                        <label for="{{ form.status.id_for_label }}" class="form-label fw-bold">Situação inicial</label>
+                        {{ form.status }}
+                        <div class="form-text">Para pausar ou encerrar depois, use "Alterar situação" na ficha (fica registrado no histórico).</div>
                     </div>
+                    {% else %}
+                    <div class="small text-muted">
+                        Situação: <strong>{{ form.instance.get_status_display }}</strong> —
+                        <a href="{% nav_url 'core:student_status' form.instance.pk %}">alterar situação</a>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 

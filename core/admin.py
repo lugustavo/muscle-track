@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     MuscleGroup, Person, Exercise, Routine, RoutineExercise,
     PersonRoutine, PersonRoutineExercise, WorkoutSession, SessionExercise, SessionSet,
-    Assessment, ProgressPhoto, StudentNote,
+    Assessment, ProgressPhoto, StudentNote, StudentEvent, ConsentRecord,
 )
 
 
@@ -30,8 +30,8 @@ class MuscleGroupAdmin(admin.ModelAdmin):
 
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ['person_name', 'phone', 'city', 'is_active', 'created_at']
-    list_filter = ['is_active', 'city', 'state']
+    list_display = ['person_name', 'phone', 'city', 'status', 'created_at']
+    list_filter = ['status', 'city', 'state']
     search_fields = ['person_name', 'phone', 'user__email']
     fieldsets = [
         ('Informações Básicas', {
@@ -42,9 +42,11 @@ class PersonAdmin(admin.ModelAdmin):
             'classes': ['collapse']
         }),
         ('Outras Informações', {
-            'fields': ['notes', 'is_active']
+            'fields': ['notes', 'status', 'status_reason', 'status_changed_at', 'is_active']
         }),
     ]
+    # Lifecycle changes go through the app (Person.set_status keeps access and history in sync)
+    readonly_fields = ['status', 'status_reason', 'status_changed_at', 'is_active']
 
 
 @admin.register(Exercise)
@@ -163,3 +165,24 @@ class ProgressPhotoAdmin(admin.ModelAdmin):
 class StudentNoteAdmin(admin.ModelAdmin):
     list_display = ['person', 'author', 'created_at']
     search_fields = ['person__person_name', 'text']
+
+
+class ReadOnlyAdmin(admin.ModelAdmin):
+    """Audit data: visible in the admin, never edited there."""
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(StudentEvent)
+class StudentEventAdmin(ReadOnlyAdmin):
+    list_display = ['person', 'kind', 'summary', 'actor', 'at']
+    list_filter = ['kind']
+
+
+@admin.register(ConsentRecord)
+class ConsentRecordAdmin(ReadOnlyAdmin):
+    list_display = ['person', 'kind', 'version', 'granted', 'source', 'at']
+    list_filter = ['kind', 'granted', 'source']

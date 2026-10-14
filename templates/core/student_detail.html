@@ -28,10 +28,12 @@
         <img src="{{ student.get_avatar_url }}" class="student-avatar" alt="{{ student.person_name }}">
         <div>
             <h1 class="mb-1"><i class="bi bi-person-circle"></i> {{ student.person_name }}</h1>
-            {% if student.is_active %}
-                <span class="badge bg-success">Ativo</span>
-            {% else %}
-                <span class="badge bg-danger">Inativo</span>
+            <span class="badge {% if student.status == 'active' %}bg-success{% elif student.status == 'trial' %}bg-info text-dark{% elif student.status == 'paused' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ student.get_status_display }}</span>
+            {% if not has_consent %}
+                <span class="badge bg-warning text-dark" title="Ainda não aceitou os termos de uso e de dados de saúde"><i class="bi bi-shield-exclamation"></i> Sem consentimento</span>
+            {% endif %}
+            {% if erasure_requested %}
+                <span class="badge bg-danger" title="O aluno pediu a exclusão dos próprios dados"><i class="bi bi-trash"></i> Pediu exclusão</span>
             {% endif %}
             {% if not student.user.has_usable_password %}
                 <span class="badge bg-warning text-dark" title="O aluno ainda não criou a senha"><i class="bi bi-hourglass-split"></i> Convite pendente</span>
@@ -118,6 +120,7 @@
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-ficha" type="button" role="tab"><i class="bi bi-person-vcard"></i> Ficha</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-avaliacoes" type="button" role="tab"><i class="bi bi-rulers"></i> Avaliações <span class="badge bg-secondary">{{ assessments|length }}</span></button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-fotos" type="button" role="tab"><i class="bi bi-images"></i> Fotos <span class="badge bg-secondary">{{ photos|length }}</span></button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-historico" type="button" role="tab"><i class="bi bi-clock-history"></i> Histórico</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-notas" type="button" role="tab"><i class="bi bi-journal-text"></i> Anotações <span class="badge bg-secondary">{{ notes|length }}</span></button></li>
 </ul>
 
@@ -230,6 +233,7 @@
 <div class="tab-pane fade" id="tab-avaliacoes" role="tabpanel">{% include 'core/student/_avaliacoes.html' %}</div>
 <div class="tab-pane fade" id="tab-fotos" role="tabpanel">{% include 'core/student/_fotos.html' %}</div>
 <div class="tab-pane fade" id="tab-notas" role="tabpanel">{% include 'core/student/_notas.html' %}</div>
+<div class="tab-pane fade" id="tab-historico" role="tabpanel">{% include 'core/student/_historico.html' %}</div>
 </div>
 
 <!-- Modais de confirmação para remover treinos -->

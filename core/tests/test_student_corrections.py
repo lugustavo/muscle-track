@@ -161,25 +161,21 @@ class AuditTrailTests(BaseTestCase):
     def setUp(self):
         self.login(self.trainer)
         self.person = self.alice.person
-        self.url = reverse('core:student_edit', kwargs={'pk': self.person.pk})
-
-    def edit(self, **extra):
-        data = {'person_name': 'Alice', 'email': self.alice.email}
-        data.update(extra)
-        return self.client.post(self.url, data)
+        self.status_url = reverse('core:student_status', kwargs={'pk': self.person.pk})
 
     def test_deactivation_date_is_recorded_and_cleared(self):
-        self.edit()  # no is_active => inactive
+        self.client.post(self.status_url, {'status': 'paused', 'reason': 'Viagem'})
         self.person.refresh_from_db()
         self.assertFalse(self.person.is_active)
-        self.assertIsNotNone(self.person.deactivated_at)
         first = self.person.deactivated_at
-        self.edit()  # still inactive: date stays
+        self.assertIsNotNone(first)
+        self.client.post(self.status_url, {'status': 'former', 'reason': 'Mudou de cidade'})  # still closed: date stays
         self.person.refresh_from_db()
         self.assertEqual(self.person.deactivated_at, first)
-        self.edit(is_active='on')
+        self.client.post(self.status_url, {'status': 'active'})
         self.person.refresh_from_db()
         self.assertIsNone(self.person.deactivated_at)
+        self.assertTrue(self.person.is_active)
 
     def test_file_shows_access_state(self):
         detail = reverse('core:student_detail', kwargs={'pk': self.person.pk})
@@ -190,8 +186,8 @@ class AuditTrailTests(BaseTestCase):
         self.alice.set_unusable_password()
         self.alice.save()
         self.assertContains(self.client.get(detail), 'Aguardando convite')
-        self.edit()
-        self.assertContains(self.client.get(detail), 'Inativo desde')
+        self.client.post(self.status_url, {'status': 'paused', 'reason': 'Viagem'})
+        self.assertContains(self.client.get(detail), 'Pausado')
 
 
 class ContactValidationTests(BaseTestCase):

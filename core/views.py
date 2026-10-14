@@ -1,8 +1,10 @@
 import json
-from datetime import timedelta
+import logging
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal, InvalidOperation
 from urllib.parse import quote, urlencode
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.forms import SetPasswordForm
@@ -23,17 +25,25 @@ from allauth.account.models import EmailAddress
 
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, trainer_dashboard
 from .forms import (
-    AIWorkoutGenerationForm, AssessmentForm, ExerciseForm, PersonForm, PersonRoutineForm,
-    ProgressPhotoForm, RoutineForm, StudentNoteForm,
+    AIWorkoutGenerationForm, AssessmentForm, ConsentForm, ExerciseForm, PersonForm, PersonRoutineForm,
+    ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
 )
+from .consent import (
+    ALL_KINDS, CURRENT_VERSION as CONSENT_VERSION, DESCRIPTIONS as CONSENT_DESCRIPTIONS, REQUIRED_KINDS,
+    current_consents, has_current_consent, is_granted, record_consent,
+)
+from .exports import build_export
+from .history import log_event, log_profile_edit
 from .invites import build_invite_url, get_user_from_invite, revoke_invites
 from .models import (
-    Assessment, Exercise, MuscleGroup, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
-    Routine, RoutineExercise, SessionExercise, SessionSet, StudentNote, WorkoutSession,
+    Assessment, ConsentRecord, Exercise, MuscleGroup, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
+    Routine, RoutineExercise, SessionExercise, SessionSet, StudentEvent, StudentNote, WorkoutSession,
 )
 from .navigation import after_save_url, back_label, safe_next_url
 from .permissions import is_trainer, staff_required, student_required
 from .validators import digits_only
+
+logger = logging.getLogger(__name__)
 
 
 def home(request):
@@ -62,6 +72,10 @@ def home(request):
 
 STUDENT_PAGE_SIZE = 24
 STUDENT_FILTERS = {
+    'trial': 'Experimental',
+    'paused': 'Pausado',
+    'former': 'Ex-aluno',
+    'consent_pending': 'Sem consentimento (LGPD)',
     'plan_expiring': 'Plano vencendo',
     'plan_expired': 'Plano vencido',
     'inactive_7d': 'Sem treinar há 7+ dias',
@@ -120,6 +134,13 @@ def _apply_student_filter(students, name):
         return students.filter(is_active=True, has_routine=False)
     if name == 'invite_pending':
         return students.filter(INVITE_PENDING)
+    if name in ('trial', 'paused', 'former'):
+        return students.filter(status=name)
+    if name == 'consent_pending':
+        def granted(kind):
+            return Exists(ConsentRecord.objects.filter(
+                person=OuterRef('pk'), kind=kind, granted=True, version=CONSENT_VERSION))
+        return students.filter(is_active=True).exclude(granted(ConsentRecord.Kind.TERMS) & granted(ConsentRecord.Kind.HEALTH_DATA))
     return students
 
 
@@ -174,17 +195,18 @@ def student_create(request):
 
             with transaction.atomic():
                 # Account without a password: the student chooses it through the invite link
-                user = User(username=email, email=email, is_active=form.cleaned_data['is_active'])
+                user = User(username=email, email=email, is_active=True)
                 user.set_unusable_password()
                 user.save()
 
                 person = form.save(commit=False)
                 person.user = user
-                if not person.is_active:
-                    person.deactivated_at = timezone.now()
+                person.status_changed_at = timezone.now()
                 person.save()
 
                 EmailAddress.objects.create(user=user, email=email, primary=True, verified=False)
+                log_event(person, StudentEvent.Kind.CREATED, request.user,
+                          f'Cadastro criado ({person.get_status_display()})')
 
             messages.success(request, 'Aluno cadastrado! Envie o link de convite para ele criar a senha.')
             return redirect('core:student_invite', pk=person.pk)
@@ -199,6 +221,7 @@ def student_invite(request, pk):
     student = get_object_or_404(Person.objects.select_related('user'), pk=pk)
     if request.method == 'POST':
         revoke_invites(student)
+        log_event(student, StudentEvent.Kind.INVITE_REVOKED, request.user, 'Link de acesso revogado e gerado de novo')
         messages.success(request, 'Link anterior revogado. Este é o novo link de acesso.')
         return redirect(request.get_full_path())
     invite_url = build_invite_url(request, student.user)
@@ -236,6 +259,7 @@ def accept_invite(request, uidb64, token):
             user.save(update_fields=['is_active'])
             EmailAddress.objects.update_or_create(
                 user=user, email=user.email, defaults={'primary': True, 'verified': True})
+            log_event(user.person, StudentEvent.Kind.INVITE_ACCEPTED, user, 'Criou a senha pelo link de acesso')
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, 'Senha criada! Bem-vindo(a) ao Muscle Track.')
             return redirect('core:my_workouts')
@@ -314,6 +338,13 @@ def student_detail(request, pk):
         'latest_assessment': assessments[0] if assessments else None,
         'assessment_chart': chart_points if len(chart_points) >= 2 else [],
         'photos': list(student.progress_photos.all()),
+        'events': list(student.events.select_related('actor')[:100]),
+        'consents': [(ConsentRecord.Kind(kind).label, record, is_granted(record), kind in REQUIRED_KINDS)
+                     for kind, record in current_consents(student).items()],
+        'has_consent': has_current_consent(student),
+        'erasure_requested': student.events.filter(kind=StudentEvent.Kind.ERASURE_REQUEST).exists(),
+        'consent_kinds': [(kind, ConsentRecord.Kind(kind).label) for kind in ALL_KINDS],
+        'today': timezone.localdate(),
         'notes': list(student.trainer_notes.select_related('author')),
         'note_form': StudentNoteForm(),
         'active_routines_with_stats': active_routines_with_stats,
@@ -341,19 +372,10 @@ def student_edit(request, pk):
                 if email_changed:
                     user.email = email
                     user.username = email
-                # An inactive student loses access; reactivating restores it.
-                # (A student who never used the invite has no usable password, so cannot log in anyway.)
-                user.is_active = person.is_active
-                user.save()
-                if not person.is_active and person.deactivated_at is None:
-                    person.deactivated_at = timezone.now()
-                    person.save(update_fields=['deactivated_at'])
-                elif person.is_active and person.deactivated_at is not None:
-                    person.deactivated_at = None
-                    person.save(update_fields=['deactivated_at'])
-                if email_changed:
+                    user.save()
                     EmailAddress.objects.update_or_create(
                         user=user, primary=True, defaults={'email': email, 'verified': False})
+                log_profile_edit(person, form, request.user)
 
             if email_changed:
                 messages.success(request, 'Aluno atualizado! O e-mail de login mudou: confira o convite se o aluno ainda não criou a senha.')
@@ -375,6 +397,7 @@ def student_delete(request, pk):
         name = student.person_name
         with transaction.atomic():
             student.user.delete()  # cascades to Person and everything hanging from it
+        logger.info('Student #%s deleted by user #%s', pk, request.user.pk)  # no personal data
         messages.success(request, f'{name} e todos os dados foram excluídos.')
         return redirect('core:student_list')
     counts = {
@@ -387,6 +410,124 @@ def student_delete(request, pk):
     return render(request, 'core/student_delete.html', {'student': student, 'counts': counts})
 
 
+@staff_required
+def student_status(request, pk):
+    """Change a student's lifecycle status (trial / active / paused / former) with the reason"""
+    student = get_object_or_404(Person.objects.select_related('user'), pk=pk)
+    if student.user.is_staff or student.user.is_superuser:
+        raise PermissionDenied
+    form = StatusForm(request.POST or None, initial={'status': student.status, 'reason': student.status_reason})
+    if request.method == 'POST' and form.is_valid():
+        changed = student.set_status(form.cleaned_data['status'], form.cleaned_data['reason'], actor=request.user)
+        if changed:
+            messages.success(request, f'Situação atualizada: {student.get_status_display()}.')
+        return redirect(after_save_url(request, reverse('core:student_detail', kwargs={'pk': pk})))
+    return render(request, 'core/student_status.html', {'student': student, 'form': form})
+
+
+@staff_required
+@require_POST
+def student_export(request, pk):
+    """The trainer downloads everything stored about a student (including internal notes)"""
+    student = get_object_or_404(Person.objects.select_related('user'), pk=pk)
+    log_event(student, StudentEvent.Kind.DATA_EXPORT, request.user, 'Exportação de dados feita pela personal')
+    return _zip_response(build_export(student, include_internal_notes=True), f'aluno-{student.pk}-dados.zip')
+
+
+@staff_required
+@require_POST
+def student_consent_record(request, pk):
+    """The trainer records consents the student gave outside the app (paper, WhatsApp)"""
+    student = get_object_or_404(Person, pk=pk)
+    given = set(request.POST.getlist('kinds'))
+    try:
+        when = timezone.make_aware(datetime.combine(date.fromisoformat(request.POST.get('date', '')), time(12, 0)))
+    except ValueError:
+        when = timezone.now()
+    count = 0
+    for kind in ALL_KINDS:
+        if kind in given:
+            record_consent(student, kind, True, source=ConsentRecord.Source.TRAINER, actor=request.user, at=when)
+            count += 1
+    if count:
+        messages.success(request, 'Consentimento registrado.')
+    else:
+        messages.warning(request, 'Marque pelo menos um consentimento para registrar.')
+    return redirect(_student_tab(request, student.pk, 'historico'))
+
+
+def _zip_response(handle, filename):
+    return FileResponse(handle, as_attachment=True, filename=filename, content_type='application/zip')
+
+
+def privacy_policy(request):
+    """Public privacy policy (a template text: the trainer reviews it before relying on it)"""
+    return render(request, 'core/privacy_policy.html', {
+        'controller': settings.PRIVACY_CONTROLLER_NAME,
+        'contact_email': settings.PRIVACY_CONTACT_EMAIL,
+        'version': CONSENT_VERSION,
+    })
+
+
+@student_required(consent_gate=False)
+def consent(request, person):
+    """First access (or new text version): the student accepts the terms before using the app"""
+    default = reverse('core:my_workouts')
+    if has_current_consent(person):
+        return redirect(safe_next_url(request, default))
+    form = ConsentForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        for kind in (ConsentRecord.Kind.TERMS, ConsentRecord.Kind.HEALTH_DATA):
+            record_consent(person, kind, True, actor=request.user)
+        if form.cleaned_data['photos']:
+            record_consent(person, ConsentRecord.Kind.PHOTOS, True, actor=request.user)
+        messages.success(request, 'Obrigado! Você já pode treinar.')
+        return redirect(safe_next_url(request, default))
+    return render(request, 'core/consent.html', {
+        'form': form, 'descriptions': CONSENT_DESCRIPTIONS, 'version': CONSENT_VERSION,
+        'policy_url': reverse('core:privacy_policy'),
+    })
+
+
+@student_required(consent_gate=False)
+def my_privacy(request, person):
+    """Student: consents, download my data, ask for deletion"""
+    state = current_consents(person)
+    return render(request, 'core/my_privacy.html', {
+        'person': person,
+        'consents': [(kind, ConsentRecord.Kind(kind).label, state[kind], is_granted(state[kind]),
+                      kind in REQUIRED_KINDS) for kind in ALL_KINDS],
+        'erasure_requested': person.events.filter(kind=StudentEvent.Kind.ERASURE_REQUEST).exists(),
+        'contact_email': settings.PRIVACY_CONTACT_EMAIL,
+    })
+
+
+@student_required(consent_gate=False)
+@require_POST
+def my_export(request, person):
+    log_event(person, StudentEvent.Kind.DATA_EXPORT, request.user, 'Baixou os próprios dados')
+    return _zip_response(build_export(person, include_internal_notes=False), 'meus-dados.zip')
+
+
+@student_required(consent_gate=False)
+@require_POST
+def my_consent_photos(request, person):
+    """Give or withdraw the optional photo consent (the required ones end only with deletion)"""
+    granted = request.POST.get('granted') == '1'
+    record_consent(person, ConsentRecord.Kind.PHOTOS, granted, actor=request.user)
+    messages.success(request, 'Preferência de fotos atualizada.')
+    return redirect('core:my_privacy')
+
+
+@student_required(consent_gate=False)
+@require_POST
+def my_erasure_request(request, person):
+    if not person.events.filter(kind=StudentEvent.Kind.ERASURE_REQUEST).exists():
+        log_event(person, StudentEvent.Kind.ERASURE_REQUEST, request.user, 'Pediu a exclusão dos próprios dados')
+    messages.success(request, 'Pedido enviado. Sua personal vai apagar seus dados e avisar você.')
+    return redirect('core:my_privacy')
+
+
 @student_required
 def my_profile(request, person):
     """Student edits their own profile"""
@@ -396,6 +537,7 @@ def my_profile(request, person):
         form = StudentProfileForm(request.POST, request.FILES, instance=person)
         if form.is_valid():
             form.save()
+            log_profile_edit(person, form, request.user)
             messages.success(request, 'Seu perfil foi atualizado com sucesso!')
             return redirect('core:my_profile')
     else:
@@ -1136,7 +1278,7 @@ def workout_execute(request, pk, person):
     })
 
 
-@student_required
+@student_required(consent_gate=False)
 @require_POST
 def workout_end(request, pk, person):
     """End a workout session, saving the student's final comment"""
@@ -1154,7 +1296,7 @@ def _active_session_or_404(pk, person):
         WorkoutSession, pk=pk, person_routine__person=person, is_completed=False)
 
 
-@student_required
+@student_required(consent_gate=False)
 @require_POST
 def workout_pause(request, pk, person):
     session = _active_session_or_404(pk, person)
@@ -1162,7 +1304,7 @@ def workout_pause(request, pk, person):
     return JsonResponse({'success': True, 'paused': True, 'elapsed_seconds': session.elapsed_seconds()})
 
 
-@student_required
+@student_required(consent_gate=False)
 @require_POST
 def workout_resume(request, pk, person):
     session = _active_session_or_404(pk, person)
@@ -1219,7 +1361,7 @@ def _parse_json_body(request):
     return data if isinstance(data, dict) else None
 
 
-@student_required
+@student_required(consent_gate=False)
 @require_POST
 def workout_set_update(request, pk, person):
     """Idempotent update of one set: any of weight / reps / done.
@@ -1279,7 +1421,7 @@ def workout_set_update(request, pk, person):
     })
 
 
-@student_required
+@student_required(consent_gate=False)
 @require_POST
 def workout_exercise_notes(request, pk, person):
     """Student's comment on one exercise of the running session"""
@@ -1595,7 +1737,8 @@ def photo_upload(request, pk):
         photo.save()
         messages.success(request, 'Foto adicionada.')
         return redirect(_student_tab(request, student.pk, 'fotos'))
-    return render(request, 'core/photo_form.html', {'form': form, 'student': student})
+    photos_consent = is_granted(current_consents(student)[ConsentRecord.Kind.PHOTOS])
+    return render(request, 'core/photo_form.html', {'form': form, 'student': student, 'photos_consent': photos_consent})
 
 
 @staff_required

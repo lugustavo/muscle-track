@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Privacidade e meus dados - Muscle Track{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-shield-lock"></i> Privacidade e meus dados</h1>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card mb-4">
+            <div class="card-header"><strong>Meus consentimentos</strong></div>
+            <ul class="list-group list-group-flush">
+                {% for kind, label, record, granted, required in consents %}
+                <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+                    <span>{{ label }}{% if required %} <small class="text-muted">(obrigatório)</small>{% endif %}
+                        {% if record %}<br><small class="text-muted">{{ record.at|date:"d/m/Y" }}</small>{% endif %}</span>
+                    {% if kind == 'photos' %}
+                    <form method="post" action="{% url 'core:my_consent_photos' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="granted" value="{% if granted %}0{% else %}1{% endif %}">
+                        <button class="btn btn-sm {% if granted %}btn-outline-danger{% else %}btn-outline-success{% endif %}">{% if granted %}Retirar{% else %}Autorizar{% endif %}</button>
+                    </form>
+                    {% else %}
+                    <span class="badge {% if granted %}bg-success{% else %}bg-warning text-dark{% endif %}">{% if granted %}ok{% else %}pendente{% endif %}</span>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <p class="small text-muted"><a href="{% url 'core:privacy_policy' %}" target="_blank" rel="noopener">Ler a política de privacidade</a></p>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card mb-4">
+            <div class="card-header"><strong><i class="bi bi-download"></i> Baixar meus dados</strong></div>
+            <div class="card-body">
+                <p class="small text-muted">Um arquivo ZIP com seus dados, avaliações, treinos, fotos e consentimentos.</p>
+                <form method="post" action="{% url 'core:my_export' %}">
+                    {% csrf_token %}
+                    <button class="btn btn-outline-primary"><i class="bi bi-file-earmark-zip"></i> Baixar</button>
+                </form>
+            </div>
+        </div>
+        <div class="card border-danger">
+            <div class="card-header text-danger"><strong><i class="bi bi-trash"></i> Excluir meus dados</strong></div>
+            <div class="card-body">
+                {% if erasure_requested %}
+                <div class="alert alert-info mb-0"><i class="bi bi-hourglass-split"></i> Pedido enviado. Sua personal vai apagar seus dados.</div>
+                {% else %}
+                <p class="small text-muted">Sua personal apaga sua conta, treinos, avaliações e fotos definitivamente.{% if contact_email %} Se preferir, escreva para {{ contact_email }}.{% endif %}</p>
+                <form method="post" action="{% url 'core:my_erasure_request' %}" onsubmit="return confirm('Pedir a exclusão de todos os meus dados?');">
+                    {% csrf_token %}
+                    <button class="btn btn-outline-danger">Pedir exclusão</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

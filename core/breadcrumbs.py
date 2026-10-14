@@ -183,6 +183,7 @@ TRAILS = {
     'student_edit': _student_edit,
     'student_invite': _student_page('Convite'),
     'student_delete': _student_page('Excluir'),
+    'student_status': _student_page('Situação'),
     'student_history': _student_page('Histórico'),
     'assessment_create': _assessment(None),
     'assessment_edit': _assessment(None),
@@ -203,6 +204,7 @@ TRAILS = {
     'my_workouts': _my_workouts,
     'my_history': _my_history_trail,
     'my_profile': _my_profile,
+    'my_privacy': lambda request, ctx: [_home(), ('Privacidade e meus dados', None)],
     'my_exercise_progress': _my_exercise_progress,
 }
 
@@ -211,6 +213,8 @@ NO_BREADCRUMB = {
     'home',                 # the root
     'workout_execute',      # focused workout screen (sticky header with the timer)
     'accept_invite',        # public invitation page
+    'consent',              # first-access screen, the student must decide before using the app
+    'privacy_policy',       # public text page
 }
 
 
