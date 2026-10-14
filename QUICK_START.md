@@ -7,10 +7,15 @@
 pip install -r requirements.txt
 ```
 
-### 2. Configure o banco de dados
+### 2. Configure o ambiente local e o banco
+```bash
+cp .env.example .env   # e ajuste: DEBUG=True (somente local)
+```
+
 ```bash
 python manage.py migrate
-python populate_db.py
+python manage.py createsuperuser   # conta da personal
+python populate_db.py              # exercícios e treinos modelo (use --demo para alunos de exemplo)
 ```
 
 ### 3. Inicie o servidor
@@ -25,15 +30,8 @@ Abra seu navegador em: **http://localhost:8000**
 
 ## 🔑 Login
 
-### Como Administrador:
-- Email: `admin@muscletrack.com`
-- Senha: `admin123`
-- Acesso completo ao sistema
-
-### Como Aluno:
-- Email: `joao@example.com`
-- Senha: `senha123`
-- Visualizar e executar treinos
+- **Personal trainer:** a conta criada com `createsuperuser`.
+- **Alunos:** não há mais senhas fixas. Com `python populate_db.py --demo` a senha dos alunos de exemplo vem de `DEMO_PASSWORD` ou é gerada e exibida na hora.
 
 ---
 
@@ -69,7 +67,7 @@ Para usar ChatGPT:
 
 ## 🎯 Recursos Principais
 
-✅ Login com Google, Facebook, GitHub (SSO)
+✅ Login por e-mail e senha
 ✅ Timer automático de treino
 ✅ Controle de carga e repetições
 ✅ Histórico de evolução

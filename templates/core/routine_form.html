@@ -16,7 +16,7 @@
             </ol>
         </nav>
     </div>
-    <a href="{% url 'core:routine_detail' routine.id %}" class="btn btn-secondary">
+    <a href="{% if routine %}{% url 'core:routine_detail' routine.id %}{% else %}{% url 'core:routine_list' %}{% endif %}" class="btn btn-secondary">
         <i class="bi bi-arrow-left"></i> Voltar
     </a>
 </div>

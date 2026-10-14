@@ -1,31 +1,18 @@
-from django.conf import settings
-from openai import OpenAI
-from .models import Routine, Exercise, RoutineExercise
 import json
 
+from django.conf import settings
+from django.db import transaction
+from openai import OpenAI, OpenAIError
 
-def generate_workout_with_ai(description, difficulty_level, estimated_duration):
-    """
-    Generate a workout routine using OpenAI GPT API
-    """
-    if not settings.OPENAI_API_KEY:
-        raise ValueError("OpenAI API key not configured")
+from .models import Exercise, Routine, RoutineExercise
 
-    client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
-    # Get available exercises
-    exercises = Exercise.objects.filter(is_active=True)
-    exercise_list = []
-    for ex in exercises:
-        exercise_list.append({
-            'id': ex.id,
-            'name': ex.exercise_name,
-            'muscle_group': ex.muscle_group,
-            'default_sets': ex.default_sets,
-            'default_reps': ex.default_reps
-        })
+class AIGenerationError(Exception):
+    """A failure the trainer can understand (misconfiguration, bad AI answer...)."""
 
-    prompt = f"""
+
+def _build_prompt(description, difficulty_level, estimated_duration, exercise_list):
+    return f"""
 Você é um personal trainer especializado. Crie um plano de treino com base na seguinte descrição:
 
 Descrição: {description}
@@ -35,71 +22,91 @@ Duração estimada: {estimated_duration} minutos
 Exercícios disponíveis:
 {json.dumps(exercise_list, indent=2, ensure_ascii=False)}
 
-Retorne APENAS um JSON válido no seguinte formato (sem markdown, sem ```json):
+Retorne APENAS um objeto JSON válido no seguinte formato:
 {{
   "routine_name": "Nome do Treino",
   "description": "Descrição detalhada",
   "exercises": [
-    {{
-      "exercise_id": 1,
-      "order": 1,
-      "sets": 3,
-      "reps": 12,
-      "rest_seconds": 60
-    }}
+    {{"exercise_id": 1, "sets": 3, "reps": 12, "rest_seconds": 60}}
   ]
 }}
 
-Escolha de 5 a 8 exercícios da lista disponível que melhor atendam a descrição.
+Escolha de 5 a 8 exercícios da lista disponível (use somente os ids da lista) que melhor
+atendam a descrição, na ordem em que devem ser executados.
 """
 
+
+def _clamp(value, default, low, high):
     try:
+        return min(max(int(value), low), high)
+    except (TypeError, ValueError):
+        return default
+
+
+def generate_workout_with_ai(description, difficulty_level, estimated_duration):
+    """Generate a workout routine template using the OpenAI chat API."""
+    if not settings.OPENAI_API_KEY:
+        raise AIGenerationError('Chave da API OpenAI não configurada (OPENAI_API_KEY).')
+
+    exercises = {
+        ex.id: ex
+        for ex in Exercise.objects.filter(is_active=True).select_related('muscle_group')
+    }
+    if not exercises:
+        raise AIGenerationError('Cadastre exercícios antes de gerar um treino com IA.')
+
+    exercise_list = [{
+        'id': ex.id,
+        'name': ex.exercise_name,
+        'muscle_group': ex.muscle_group.name,
+        'default_sets': ex.default_sets,
+        'default_reps': ex.default_reps,
+    } for ex in exercises.values()]
+
+    prompt = _build_prompt(description, difficulty_level, estimated_duration, exercise_list)
+
+    try:
+        client = OpenAI(api_key=settings.OPENAI_API_KEY)
         response = client.chat.completions.create(
-            model="gpt-4",
+            model=settings.OPENAI_MODEL,
             messages=[
-                {"role": "system", "content": "Você é um personal trainer expert. Sempre responda apenas com JSON válido, sem formatação markdown."},
-                {"role": "user", "content": prompt}
+                {"role": "system", "content": "Você é um personal trainer expert. Responda sempre apenas com JSON válido."},
+                {"role": "user", "content": prompt},
             ],
+            response_format={"type": "json_object"},
             temperature=0.7,
-            max_tokens=1500
+            max_tokens=2000,
         )
+        workout_data = json.loads(response.choices[0].message.content)
+    except OpenAIError as e:
+        raise AIGenerationError(f'Erro ao consultar a IA: {e}')
+    except (json.JSONDecodeError, TypeError, IndexError, AttributeError):
+        raise AIGenerationError('A IA devolveu uma resposta inválida. Tente novamente.')
 
-        # Parse the response
-        content = response.choices[0].message.content.strip()
+    items = workout_data.get('exercises') if isinstance(workout_data, dict) else None
+    chosen = []
+    for item in items if isinstance(items, list) else []:
+        exercise = exercises.get(item.get('exercise_id')) if isinstance(item, dict) else None
+        if exercise and exercise.id not in {c[0].id for c in chosen}:
+            chosen.append((exercise, item))
+    if not chosen:
+        raise AIGenerationError('A IA não escolheu nenhum exercício válido. Tente reformular a descrição.')
 
-        # Remove markdown code blocks if present
-        if content.startswith('```'):
-            lines = content.split('\n')
-            content = '\n'.join(lines[1:-1])
-            if content.startswith('json'):
-                content = content[4:]
-
-        workout_data = json.loads(content)
-
-        # Create the routine
+    with transaction.atomic():
         routine = Routine.objects.create(
-            routine_name=workout_data['routine_name'],
-            description=workout_data['description'],
+            routine_name=str(workout_data.get('routine_name') or 'Treino gerado por IA')[:200],
+            description=str(workout_data.get('description') or ''),
             difficulty_level=difficulty_level,
-            estimated_duration=estimated_duration
+            estimated_duration=estimated_duration,
         )
+        for order, (exercise, item) in enumerate(chosen, start=1):
+            RoutineExercise.objects.create(
+                routine=routine,
+                exercise=exercise,
+                order=order,
+                sets=_clamp(item.get('sets'), exercise.default_sets, 1, 10),
+                reps=_clamp(item.get('reps'), exercise.default_reps, 1, 100),
+                rest_seconds=_clamp(item.get('rest_seconds'), 60, 0, 600),
+            )
 
-        # Add exercises to the routine
-        for ex_data in workout_data['exercises']:
-            try:
-                exercise = Exercise.objects.get(id=ex_data['exercise_id'])
-                RoutineExercise.objects.create(
-                    routine=routine,
-                    exercise=exercise,
-                    order=ex_data['order'],
-                    sets=ex_data.get('sets', 3),
-                    reps=ex_data.get('reps', 12),
-                    rest_seconds=ex_data.get('rest_seconds', 60)
-                )
-            except Exercise.DoesNotExist:
-                continue
-
-        return routine
-
-    except Exception as e:
-        raise Exception(f"Erro ao gerar treino com IA: {str(e)}")
+    return routine

@@ -8,11 +8,5 @@ pip install -r requirements.txt
 # Collect static files
 python manage.py collectstatic --no-input
 
-# Limpar banco de dados (opcional)
-python manage.py flush --no-input
-
-# Run migrations
-python manage.py migrate
-
-#create test data
-python populate_db.py
+# Run migrations (NEVER flush/seed here: this runs on every deploy)
+python manage.py migrate --no-input
