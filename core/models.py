@@ -56,6 +56,19 @@ class Person(models.Model):
     plan_name = models.CharField(max_length=100, blank=True, verbose_name='Plano contratado')
     plan_expires_on = models.DateField(null=True, blank=True, verbose_name='Vencimento do plano')
 
+    class Status(models.TextChoices):
+        TRIAL = 'trial', 'Experimental'
+        ACTIVE = 'active', 'Ativo'
+        PAUSED = 'paused', 'Pausado'
+        FORMER = 'former', 'Ex-aluno'
+
+    OPEN_STATUSES = (Status.TRIAL, Status.ACTIVE)
+
+    # Lifecycle. `is_active` stays the access switch (login, dashboard, lists); only
+    # set_status() changes it, so the two never disagree.
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE, verbose_name='Situação')
+    status_reason = models.TextField(blank=True, verbose_name='Motivo da situação')
+    status_changed_at = models.DateTimeField(null=True, blank=True, verbose_name='Situação desde')
     is_active = models.BooleanField(default=True, verbose_name='Ativo')
     deactivated_at = models.DateTimeField(null=True, blank=True, editable=False, verbose_name='Inativado em')
     # Bumped to revoke invite links already handed out (see core/invites.py)
@@ -81,6 +94,38 @@ class Person(models.Model):
         if today.month < self.birth_date.month or (today.month == self.birth_date.month and today.day < self.birth_date.day):
             age -= 1
         return age
+
+    def set_status(self, status, reason='', actor=None):
+        """The single place that changes a student's lifecycle status.
+
+        Keeps is_active, deactivated_at and the login account in sync and writes the history.
+        Paused and former students cannot log in (same as the old "inactive")."""
+        if status not in self.Status.values:
+            raise ValueError(f'Unknown status: {status}')
+        previous, previous_reason = self.status, self.status_reason
+        reason = (reason or '').strip()
+        if status == previous and reason == previous_reason:
+            return False
+        now = timezone.now()
+        self.status = status
+        self.status_reason = reason
+        if status != previous:
+            self.status_changed_at = now
+        self.is_active = status in self.OPEN_STATUSES
+        if self.is_active:
+            self.deactivated_at = None
+        elif self.deactivated_at is None:
+            self.deactivated_at = now
+        self.save(update_fields=['status', 'status_reason', 'status_changed_at', 'is_active',
+                                 'deactivated_at', 'updated_at'])
+        User.objects.filter(pk=self.user_id).update(is_active=self.is_active)
+        labels = dict(self.Status.choices)
+        StudentEvent.objects.create(
+            person=self, actor=actor, kind=StudentEvent.Kind.STATUS,
+            summary=f'Situação: {labels[previous]} → {labels[status]}' if status != previous
+            else 'Motivo da situação atualizado',
+            changes={'status': [previous, status], 'reason': reason})
+        return True
 
     PLAN_EXPIRING_DAYS = 14
 
@@ -540,3 +585,75 @@ class StudentNote(models.Model):
 
     def __str__(self):
         return f'{self.person.person_name} - {self.created_at:%d/%m/%Y}'
+
+
+class StudentEvent(models.Model):
+    """Audit trail of a student's file: who changed what, when. Deleted together with the student."""
+
+    class Kind(models.TextChoices):
+        CREATED = 'created', 'Cadastro'
+        PROFILE_EDIT = 'profile_edit', 'Dados alterados'
+        STATUS = 'status', 'Situação'
+        INVITE_REVOKED = 'invite_revoked', 'Convite revogado'
+        INVITE_ACCEPTED = 'invite_accepted', 'Convite aceito'
+        CONSENT = 'consent', 'Consentimento'
+        DATA_EXPORT = 'data_export', 'Exportação de dados'
+        ERASURE_REQUEST = 'erasure_request', 'Pedido de exclusão'
+
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='events', verbose_name='Aluno')
+    actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+', verbose_name='Quem')
+    kind = models.CharField(max_length=20, choices=Kind.choices, verbose_name='Tipo')
+    summary = models.CharField(max_length=300, blank=True, verbose_name='Resumo')
+    # {field: [before, after]}; sensitive fields store [None, None] (only "changed")
+    changes = models.JSONField(default=dict, blank=True, verbose_name='Alterações')
+    at = models.DateTimeField(auto_now_add=True, verbose_name='Quando')
+
+    class Meta:
+        verbose_name = 'Evento do aluno'
+        verbose_name_plural = 'Histórico do aluno'
+        ordering = ['-at', '-pk']
+
+    @property
+    def change_rows(self):
+        """[(label, before, after)] of a profile edit; before/after are None for sensitive fields."""
+        from django.core.exceptions import FieldDoesNotExist
+        rows = []
+        for name, (before, after) in self.changes.items():
+            try:
+                label = str(Person._meta.get_field(name).verbose_name)
+            except FieldDoesNotExist:
+                label = {'email': 'E-mail'}.get(name, name)
+            rows.append((label, before, after))
+        return rows
+
+    def __str__(self):
+        return f'{self.person_id} {self.kind} {self.at:%d/%m/%Y}'
+
+
+class ConsentRecord(models.Model):
+    """One consent decision (LGPD). The current state of a kind is its latest record."""
+
+    class Kind(models.TextChoices):
+        TERMS = 'terms', 'Termos de uso e política de privacidade'
+        HEALTH_DATA = 'health_data', 'Tratamento de dados de saúde'
+        PHOTOS = 'photos', 'Fotos de evolução'
+
+    class Source(models.TextChoices):
+        STUDENT = 'student', 'Pelo próprio aluno'
+        TRAINER = 'trainer', 'Registrado pela personal'
+
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='consents', verbose_name='Aluno')
+    kind = models.CharField(max_length=20, choices=Kind.choices, verbose_name='Tipo')
+    version = models.CharField(max_length=20, verbose_name='Versão do texto')
+    granted = models.BooleanField(verbose_name='Concedido')
+    source = models.CharField(max_length=10, choices=Source.choices, default=Source.STUDENT)
+    recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
+    at = models.DateTimeField(default=timezone.now, verbose_name='Data')
+
+    class Meta:
+        verbose_name = 'Consentimento'
+        verbose_name_plural = 'Consentimentos'
+        ordering = ['-at', '-pk']
+
+    def __str__(self):
+        return f'{self.person_id} {self.kind} v{self.version} {"sim" if self.granted else "não"}'

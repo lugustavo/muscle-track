@@ -22,6 +22,7 @@ NOT_PAGES = {
     'note_add', 'note_delete', 'offline', 'person_routine_deactivate', 'photo_delete', 'photo_file',
     'photo_thumb', 'pwa_manifest', 'service_worker', 'workout_end', 'workout_exercise_notes',
     'workout_pause', 'workout_resume', 'workout_set_update', 'workout_start',
+    'student_export', 'student_consent_record', 'my_export', 'my_consent_photos', 'my_erasure_request',
 }
 
 

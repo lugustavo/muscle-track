@@ -105,11 +105,7 @@
                             <small class="text-muted">ID: #{{ student.id }}</small>
                         </div>
                         <div>
-                            {% if student.is_active %}
-                            <span class="badge bg-success">Ativo</span>
-                            {% else %}
-                            <span class="badge bg-secondary">Inativo</span>
-                            {% endif %}
+                            <span class="badge {% if student.status == 'active' %}bg-success{% elif student.status == 'trial' %}bg-info text-dark{% elif student.status == 'paused' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ student.get_status_display }}</span>
                             {% if student.plan_status == 'expired' %}<span class="badge bg-danger" title="Plano vencido em {{ student.plan_expires_on|date:'d/m/Y' }}">plano vencido</span>
                             {% elif student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark" title="Vence em {{ student.plan_expires_on|date:'d/m/Y' }}">plano vence em {{ student.days_to_plan_expiry }}d</span>{% endif %}
                         </div>
@@ -236,11 +232,7 @@
                             {% endif %}
                         </td>
                         <td class="text-center">
-                            {% if student.is_active %}
-                            <span class="badge bg-success">Ativo</span>
-                            {% else %}
-                            <span class="badge bg-secondary">Inativo</span>
-                            {% endif %}
+                            <span class="badge {% if student.status == 'active' %}bg-success{% elif student.status == 'trial' %}bg-info text-dark{% elif student.status == 'paused' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ student.get_status_display }}</span>
                             {% if student.plan_status == 'expired' %}<span class="badge bg-danger" title="Plano vencido em {{ student.plan_expires_on|date:'d/m/Y' }}">plano vencido</span>
                             {% elif student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark" title="Vence em {{ student.plan_expires_on|date:'d/m/Y' }}">plano vence em {{ student.days_to_plan_expiry }}d</span>{% endif %}
                         </td>

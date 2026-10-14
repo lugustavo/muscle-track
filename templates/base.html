@@ -150,6 +150,11 @@
                                 </a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 {% endif %}
+                                {% if not user.is_staff %}
+                                <li><a class="dropdown-item" href="{% url 'core:my_privacy' %}">
+                                    <i class="bi bi-shield-lock"></i> Privacidade e meus dados
+                                </a></li>
+                                {% endif %}
                                 <li><a class="dropdown-item" href="{% url 'account_change_password' %}">
                                     <i class="bi bi-key"></i> Alterar senha
                                 </a></li>
@@ -193,7 +198,8 @@
     <!-- Footer -->
     <footer>
         <div class="container text-center">
-            <p class="mb-0">&copy; 2025 Muscle Track - Sistema de Gerenciamento de Treinos</p>
+            <p class="mb-0">&copy; 2025 Muscle Track - Sistema de Gerenciamento de Treinos
+                · <a href="{% url 'core:privacy_policy' %}" class="text-white-50">Privacidade</a></p>
         </div>
     </footer>
 

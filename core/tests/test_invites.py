@@ -5,9 +5,15 @@ from django.urls import reverse
 
 from allauth.account.models import EmailAddress
 
+from core.consent import ALL_KINDS, record_consent
 from core.models import Person
 
 from .base import BaseTestCase
+
+
+def record_all_consents(person):
+    for kind in ALL_KINDS:
+        record_consent(person, kind, True)
 
 
 class StudentCreationTests(BaseTestCase):
@@ -74,10 +80,12 @@ class AcceptInviteTests(BaseTestCase):
 
     def test_student_sets_password_and_is_logged_in(self):
         response = self.client.post(self.path, {'new_password1': 'Sup3r-segura-123', 'new_password2': 'Sup3r-segura-123'})
-        self.assertRedirects(response, reverse('core:my_workouts'))
+        # first access: the consent screen comes before the workouts (see test_lifecycle_lgpd)
+        self.assertRedirects(response, reverse('core:my_workouts'), fetch_redirect_response=False)
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password('Sup3r-segura-123'))
         self.assertTrue(EmailAddress.objects.get(user=self.user).verified)
+        record_all_consents(self.user.person)
         self.assertEqual(self.client.get(reverse('core:my_workouts')).status_code, 200)
 
         # and can log in normally afterwards
@@ -137,15 +145,15 @@ class StudentEditTests(BaseTestCase):
         return self.client.post(reverse('core:student_edit', kwargs={'pk': student.person.pk}), data)
 
     def test_deactivating_blocks_login_and_reactivating_restores(self):
-        data = {'person_name': 'Alice', 'email': 'alice@example.com'}  # no is_active => off
-        self.client.post(reverse('core:student_edit', kwargs={'pk': self.alice.person.pk}), data)
+        status_url = reverse('core:student_status', kwargs={'pk': self.alice.person.pk})
+        self.client.post(status_url, {'status': 'paused', 'reason': 'Viagem'})
         self.alice.refresh_from_db()
         self.assertFalse(self.alice.is_active)
         self.client.logout()
         self.assertFalse(self.client.login(username='alice', password='pw-alice'))
 
         self.login(self.trainer)
-        self.edit(self.alice)
+        self.client.post(status_url, {'status': 'active', 'reason': ''})
         self.alice.refresh_from_db()
         self.assertTrue(self.alice.is_active)
         self.client.logout()

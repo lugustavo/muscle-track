@@ -65,6 +65,44 @@
         </div>
     </div>
 
+    {% if dashboard.erasures_total %}
+    <div class="col-lg-6">
+        <div class="card h-100 border-danger">
+            <div class="card-header d-flex justify-content-between">
+                <strong><i class="bi bi-trash text-danger"></i> Pedidos de exclusão de dados</strong>
+                <span class="badge bg-danger">{{ dashboard.erasures_total }}</span>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for row in dashboard.erasures %}
+                <a href="{% nav_url 'core:student_delete' row.student.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <span>{{ row.student.person_name }}</span>
+                    <small class="text-muted">pediu em {{ row.at|date:"d/m" }} · abrir a exclusão</small>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if dashboard.trials_total %}
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between">
+                <strong><i class="bi bi-person-badge text-info"></i> Experimental há mais de 14 dias</strong>
+                <span class="badge bg-info text-dark">{{ dashboard.trials_total }}</span>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for row in dashboard.trials %}
+                <a href="{% nav_url 'core:student_status' row.student.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <span>{{ row.student.person_name }}</span>
+                    <small class="text-muted">{{ row.days }} dias · decidir se vira aluno ativo</small>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     {% if dashboard.invites_total %}
     <div class="col-lg-6">
         <div class="card h-100">

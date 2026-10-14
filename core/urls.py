@@ -13,6 +13,9 @@ urlpatterns = [
     path('students/<int:pk>/', views.student_detail, name='student_detail'),
     path('students/<int:pk>/edit/', views.student_edit, name='student_edit'),
     path('students/<int:pk>/delete/', views.student_delete, name='student_delete'),
+    path('students/<int:pk>/status/', views.student_status, name='student_status'),
+    path('students/<int:pk>/export/', views.student_export, name='student_export'),
+    path('students/<int:pk>/consent/', views.student_consent_record, name='student_consent_record'),
     path('students/<int:pk>/invite/', views.student_invite, name='student_invite'),
     path('students/<int:pk>/assessments/new/', views.assessment_create, name='assessment_create'),
     path('assessments/<int:pk>/edit/', views.assessment_edit, name='assessment_edit'),
@@ -45,6 +48,12 @@ urlpatterns = [
 
     # Student Area
     path('my-profile/', views.my_profile, name='my_profile'),
+    path('my-privacy/', views.my_privacy, name='my_privacy'),
+    path('my-privacy/export/', views.my_export, name='my_export'),
+    path('my-privacy/photos-consent/', views.my_consent_photos, name='my_consent_photos'),
+    path('my-privacy/erasure/', views.my_erasure_request, name='my_erasure_request'),
+    path('consent/', views.consent, name='consent'),
+    path('privacy/', views.privacy_policy, name='privacy_policy'),
     path('my-workouts/', views.my_workouts, name='my_workouts'),
     path('my-workouts/<int:pk>/start/', views.workout_start, name='workout_start'),
     path('my-workouts/<int:pk>/execute/', views.workout_execute, name='workout_execute'),

@@ -211,6 +211,10 @@ AVATAR_MIN_HEIGHT = config('AVATAR_MIN_HEIGHT', default=100, cast=int)
 PHOTO_MAX_SIZE_MB = config('PHOTO_MAX_SIZE_MB', default=15, cast=int)
 PHOTO_MAX_DIMENSION = config('PHOTO_MAX_DIMENSION', default=12000, cast=int)
 
+# Privacy policy (LGPD): who is the data controller and how to reach them
+PRIVACY_CONTROLLER_NAME = config('PRIVACY_CONTROLLER_NAME', default='a personal trainer responsável pelo seu acompanhamento')
+PRIVACY_CONTACT_EMAIL = config('PRIVACY_CONTACT_EMAIL', default='')
+
 # Site URL
 # Public address of the app, used to build invitation links. Leave empty to use
 # the address the trainer is browsing from.

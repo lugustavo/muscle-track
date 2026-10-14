@@ -41,7 +41,7 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
         model = Person
         fields = ['person_name', 'email', 'avatar', 'address', 'city', 'state', 'zip_code',
                   'phone', 'birth_date', 'notes', 'goal', 'health_notes', 'emergency_contact_name',
-                  'emergency_contact_phone', 'plan_name', 'plan_expires_on', 'is_active']
+                  'emergency_contact_phone', 'plan_name', 'plan_expires_on', 'status']
         widgets = {
             'birth_date': forms.DateInput(
                 attrs={'type': 'date', 'class': 'form-control'},
@@ -72,6 +72,14 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.duplicates = []
+        if self.instance.pk:
+            # Changing the lifecycle goes through "Alterar situação" (history + reason)
+            del self.fields['status']
+        else:
+            self.fields['status'].choices = [
+                (value, label) for value, label in Person.Status.choices if value in Person.OPEN_STATUSES]
+            self.fields['status'].widget.attrs['class'] = 'form-select'
+            self.fields['status'].required = False
         # Se estiver editando, preencher o email do usuário existente
         if self.instance and self.instance.pk and self.instance.user:
             self.fields['email'].initial = self.instance.user.email
@@ -89,6 +97,9 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
             raise forms.ValidationError('Este email já está cadastrado no sistema.')
 
         return email
+
+    def clean_status(self):
+        return self.cleaned_data.get('status') or Person.Status.ACTIVE
 
     def clean_emergency_contact_phone(self):
         return normalize_phone(self.cleaned_data.get('emergency_contact_phone'))
@@ -265,3 +276,28 @@ class StudentNoteForm(forms.ModelForm):
                                           'placeholder': 'Anotação da personal (o aluno não vê)...'}),
         }
         labels = {'text': ''}
+
+
+class StatusForm(forms.Form):
+    """Lifecycle change of a student, with the reason."""
+    status = forms.ChoiceField(
+        choices=Person.Status.choices, label='Nova situação',
+        widget=forms.Select(attrs={'class': 'form-select'}))
+    reason = forms.CharField(
+        required=False, label='Motivo', max_length=1000,
+        widget=forms.Textarea(attrs={'rows': 3, 'class': 'form-control',
+                                     'placeholder': 'Ex.: viagem de 2 meses, mudou de cidade, fechou o plano...'}))
+
+    def clean(self):
+        cleaned = super().clean()
+        status = cleaned.get('status')
+        if status and status not in Person.OPEN_STATUSES and not cleaned.get('reason', '').strip():
+            self.add_error('reason', 'Informe o motivo ao pausar ou encerrar o aluno.')
+        return cleaned
+
+
+class ConsentForm(forms.Form):
+    """First-access consent screen: the two required consents plus the optional photos one."""
+    terms = forms.BooleanField(label='', error_messages={'required': 'É preciso aceitar para continuar.'})
+    health_data = forms.BooleanField(label='', error_messages={'required': 'É preciso aceitar para continuar.'})
+    photos = forms.BooleanField(required=False, label='')

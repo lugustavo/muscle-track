@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
 
+from core.consent import ALL_KINDS, record_consent
 from core.models import (
     Exercise, MuscleGroup, Person, PersonRoutine, PersonRoutineExercise, Routine,
     RoutineExercise,
@@ -27,6 +28,8 @@ class BaseTestCase(TestCase):
     def _make_student(cls, username, name):
         user = User.objects.create_user(username, f'{username}@example.com', f'pw-{username}')
         person = Person.objects.create(user=user, person_name=name)
+        for kind in ALL_KINDS:
+            record_consent(person, kind, True)
         routine = PersonRoutine.objects.create(person=person, routine_name=f'Treino de {name}')
         PersonRoutineExercise.objects.create(person_routine=routine, exercise=cls.supino, order=1)
         PersonRoutineExercise.objects.create(person_routine=routine, exercise=cls.crucifixo, order=2)

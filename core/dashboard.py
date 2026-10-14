@@ -5,11 +5,12 @@ from django.contrib.auth.hashers import UNUSABLE_PASSWORD_PREFIX
 from django.db.models import Exists, OuterRef, Q, Subquery
 from django.utils import timezone
 
-from .models import Person, PersonRoutine, SessionExercise, WorkoutSession
+from .models import Person, PersonRoutine, SessionExercise, StudentEvent, WorkoutSession
 
 INACTIVE_DAYS = 7
 EXPIRING_DAYS = 14
 COMMENT_DAYS = 7
+TRIAL_DAYS = 14
 LIST_LIMIT = 8
 
 # Student account that never set a password, i.e. never accepted the invite
@@ -56,6 +57,29 @@ def pending_invites(now=None):
         for p in Person.objects.filter(is_active=True).filter(INVITE_PENDING).select_related('user')
     ]
     rows.sort(key=lambda r: -r['days'])
+    return rows
+
+
+def long_trials(now=None):
+    """Trial students who have been in trial for more than TRIAL_DAYS: time to decide."""
+    now = now or timezone.now()
+    cutoff = now - timedelta(days=TRIAL_DAYS)
+    rows = []
+    for p in Person.objects.filter(status=Person.Status.TRIAL):
+        since = p.status_changed_at or p.created_at
+        if since < cutoff:
+            rows.append({'student': p, 'days': (now - since).days})
+    rows.sort(key=lambda r: -r['days'])
+    return rows
+
+
+def erasure_requests():
+    """Students who asked for their data to be deleted (the event goes away with the student)."""
+    seen, rows = set(), []
+    for event in StudentEvent.objects.filter(kind=StudentEvent.Kind.ERASURE_REQUEST).select_related('person').order_by('at'):
+        if event.person_id not in seen:
+            seen.add(event.person_id)
+            rows.append({'student': event.person, 'at': event.at})
     return rows
 
 
@@ -111,6 +135,8 @@ def trainer_dashboard():
     }
     inactive = inactive_students(now)
     invites = pending_invites(now)
+    trials = long_trials(now)
+    erasures = erasure_requests()
     plans = expiring_plans()
     routines = ending_routines()
     sessions = todays_sessions()
@@ -118,6 +144,8 @@ def trainer_dashboard():
         'counts': counts,
         'inactive': inactive[:LIST_LIMIT], 'inactive_total': len(inactive),
         'inactive_more': max(0, len(inactive) - LIST_LIMIT),
+        'trials': trials[:LIST_LIMIT], 'trials_total': len(trials),
+        'erasures': erasures, 'erasures_total': len(erasures),
         'invites': invites[:LIST_LIMIT], 'invites_total': len(invites),
         'invites_more': max(0, len(invites) - LIST_LIMIT),
         'plans': plans[:LIST_LIMIT], 'plans_total': len(plans),
