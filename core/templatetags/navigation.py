@@ -1,6 +1,7 @@
 from django import template
 from django.urls import reverse
 
+from core.breadcrumbs import build_breadcrumbs
 from core.navigation import back_label, safe_next_url, with_next
 
 register = template.Library()
@@ -24,3 +25,10 @@ def back_button(context, default_url, label=None, css='btn btn-secondary', icon=
     """A Back/Cancel button; the label is derived from the destination unless given."""
     url = safe_next_url(context['request'], default_url) + fragment
     return {'url': url, 'label': label or back_label(url), 'css': css, 'icon': icon}
+
+
+@register.inclusion_tag('core/_breadcrumbs.html', takes_context=True)
+def breadcrumbs(context):
+    """Breadcrumb trail of the current page (see core/breadcrumbs.py)."""
+    request = context.get('request')
+    return {'trail': build_breadcrumbs(request, context) if request is not None else []}
