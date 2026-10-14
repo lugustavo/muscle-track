@@ -172,6 +172,57 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 - **Temas claro / escuro / automático:** Bootstrap 5.3 `data-bs-theme`, seletor no menu (guardado no navegador/perfil), "automático" via `prefers-color-scheme` e script no `<head>` para evitar o "flash". Trocar cores fixas por variáveis CSS, revisar `bg-light`/`text-dark`/estilos inline, cores do Chart.js e o `theme-color` do PWA; checar contraste (WCAG AA).
 - *Ordem sugerida:* temas → idiomas (o maior; mexe em todas as strings, melhor com o layout estável). Os breadcrumbs já estão padronizados.
 
+### Experiência no celular — análise de UX e ideias
+*Análise feita com prints do app em 390 px (aluno e personal). A maior parte do uso é no celular, na academia, com uma mão e pouca atenção.*
+
+**O que a análise encontrou**
+- **Menu:** o menu é só o hambúrguer do topo, mesmo no celular. O aluno tem 3 destinos e precisa de 2 toques para chegar a qualquer um; a personal tem 6 (Alunos, Exercícios, Treinos, Agenda, Financeiro, Admin).
+- **Rodapé:** o rodapé escuro com "© 2025..." ocupa uma tela inteira de espaço nobre e não serve para nada na navegação.
+- **Início do aluno:** três cartões grandes de estatística (todos "0" para quem está começando) empurram o que importa, "Comece seu treino agora", para fora da primeira tela.
+- **Treino em andamento:** o cabeçalho do site continua ocupando espaço, o título "Série" quebra em duas linhas ("SÉRI/E") e a carga exige digitar. É a tela mais usada e a mais apertada.
+- **Ficha do aluno (personal):** no celular os botões de ação do cabeçalho viram uma pilha de 5 botões ao lado do nome e as estatísticas ocupam 3 telas antes do conteúdo.
+- **Agenda:** a semana vira 7 blocos empilhados, a maioria vazia; para ver "hoje" é preciso rolar.
+- **Marca:** o visual é o padrão do Bootstrap, sem identidade própria (cores, tipografia, ícone, vazios).
+
+**Ideias**
+- **Barra de menu inferior no celular (tab bar), no lugar do hambúrguer** — convenção de plataforma (Material e iOS), então não é cópia de nenhum app. Só abaixo de 768 px; no desktop continua o menu do topo.
+  - *Aluno:* **Hoje · Treinos · Evolução · Perfil**, com o botão do meio em destaque para **iniciar o treino do dia** (vira "Continuar" com o timer quando há treino em andamento). "Privacidade", "Alterar senha" e "Sair" ficam dentro de Perfil.
+  - *Personal:* **Hoje · Alunos · Agenda · Financeiro · Mais** (Exercícios, Treinos, Planos, Admin e Sair em "Mais"). Selo numérico em Hoje (atrasos e pedidos de exclusão) e em Agenda (aulas de hoje sem marcação).
+  - *Comportamento:* item ativo destacado e com `aria-current`, alvos de toque de pelo menos 44 px, respeita a área segura do iPhone (`safe-area-inset-bottom`), some na tela de treino em andamento (que tem a própria barra) e no teclado aberto, o conteúdo ganha espaço no fim para nada ficar escondido. O rodapé de direitos autorais sai do celular e fica só no desktop (ou dentro de "Mais").
+- **Início do aluno virar a tela "Hoje":** o treino do dia como cartão principal com o botão de iniciar (a sugestão por rodízio já existe), a semana em 7 pontinhos (dias treinados, meta = aulas por semana do plano), recordes recentes e, quando a visão do aluno existir, a próxima aula. As estatísticas viram uma linha compacta.
+- **Treino em modo foco:** sem cabeçalho do site, com progresso do treino ("exercício 3 de 8"), passo de carga com − / + (por exemplo 2,5 kg) e "repetir a série anterior", próximo exercício deslizando ou em botão, cabeçalho de colunas sem quebra, mais vibração e som opcionais. Ao finalizar, um **resumo** (duração, volume levantado, recordes, comparação com o último treino) em vez de só voltar para a lista.
+- **Personal no celular:** ações da ficha em um menu "⋯" com 1 botão principal; estatísticas em uma linha rolável; abas da ficha fixas no topo ao rolar; **agenda com faixa de dias** (toca em um dia e vê a linha do tempo dele, em vez de 7 blocos); botão flutuante "+" para nova aula, novo aluno e registrar pagamento; listas com filtros em uma folha deslizante (*bottom sheet*) e cartões no lugar de tabelas.
+- **Busca global** (atalho `/` ou Ctrl+K e um ícone de lupa no celular): alunos, exercícios e treinos num lugar só, com recentes.
+- **Painel da personal por prioridade:** o que precisa de ação agora no topo, cada item com a ação ao lado (cobrar, remarcar, registrar), e o resto recolhido. Já escondemos os cartões vazios; falta ordenar por urgência.
+- **Primeiros passos (personal):** lista de passos com progresso (cadastrar exercícios → criar um plano → montar um treino → cadastrar o primeiro aluno → enviar o convite), que some quando concluída. Para o aluno, 3 telas curtas no primeiro acesso (como marcar série, descanso, comentários).
+- **Formulários:** a ficha do aluno é longa; dividir em seções recolhíveis ou em passos, com barra de salvar fixa no celular, máscaras (telefone, CEP) e preenchimento do endereço pelo CEP, teclado numérico/telefone/e-mail certo em cada campo e rascunho que não se perde.
+- **Constância e motivação (opcional, desligável):** meta semanal em anel, sequência de semanas treinadas, marcos (10, 50, 100 treinos), "seu mês" em um cartão que o aluno pode compartilhar. Sem comparar alunos entre si.
+- **PWA mais "de app":** convite para instalar, atalhos do ícone (Iniciar treino, Agenda), indicador de offline, modo *standalone* sem barra do navegador, `theme-color` por tema.
+- **Identidade visual própria:** paleta, tipografia, ícones, logo e ilustrações de estados vazios definidos como *design tokens* (isso já casa com o item de temas claro/escuro); avisos em *toast* em vez de faixa; esqueletos de carregamento.
+- **Acessibilidade:** contraste AA, foco visível, alvos de 44 px, `prefers-reduced-motion`, texto que cresce com a fonte do sistema, timer anunciado (`aria-live`) com opção de desligar.
+- **Texto neutro quanto ao gênero:** hoje há "aluno" e "aluna" misturados; padronizar "aluno(a)" ou um campo de tratamento no perfil.
+- **Centro de avisos no app** (sino com avisos não lidos): casa com o item de notificações dos alunos.
+
+**Referência estudada: [openGym](https://github.com/DuarteSantos8/openGym)** (rastreador de treino pessoal, self-hosted). É de uso individual, sem personal nem aluno, então serve de inspiração para a experiência do aluno no treino e na evolução, não para o lado da personal. Ideias que valem para nós, **reescritas do nosso jeito**:
+- **Barra inferior com botão central de treinar:** o botão do meio vira "Continuar" e mostra o tempo decorrido quando há treino em andamento. Já está na ideia da barra acima.
+- **Tela inicial com o estado do dia:** "treino de hoje", "dia de descanso" (com quando é o próximo) ou "treino feito"; a semana em faixa, navegável para semanas anteriores.
+- **Tela de treino calma:** um único menu "⋯" por exercício (nota, trocar, mover, remover) e o número da série como menu da série; escolha de visão em cartões ou lista; chaves nas configurações para a pessoa deixar os botões à vista se preferir. Deslizar a série para um lado apaga (com Desfazer) e para o outro copia.
+- **Mais recursos de treino:** passo de carga do próprio exercício (+/−), repetições por lado, exercício de peso do corpo sem carga, exercício por tempo, esforço em RIR/RPE colorido, cálculo de anilhas, super-série, aquecimento e drop-set, e aviso de tela acesa/piscar a tela no fim do descanso para academia barulhenta.
+- **Progressão sugerida:** regras por exercício (linear, dupla progressão em faixa de repetições), sempre explicando por que aquela carga, e deload quando estagna; a personal aprova ou ajusta.
+- **Evolução do aluno:** calendário de atividade do ano (heatmap), 1RM estimado por exercício, **mapa muscular** (volume da semana, o que está recuperando, o que ficou sem treino), peso corporal com linha de meta e fotos em linha do tempo com comparação antes/depois (deslizante). Casa com "aluno ver as próprias avaliações e fotos".
+- **Corrigir o passado:** editar um treino já salvo, registrar um treino feito "no papel" ou mudar a data, com os recordes recalculados.
+- **Plano para levar:** exportar o treino em PDF/arquivo para imprimir ou compartilhar; importar de outros apps (CSV) para quem já treina; exportar tudo em JSON (já temos o ZIP da LGPD).
+- **Treinos iniciais prontos:** biblioteca de modelos (Push/Pull/Legs, Superior/Inferior, Corpo inteiro, 5×5) que carrega como treinos comuns e editáveis, para a personal começar sem digitar tudo.
+- **Biblioteca de exercícios melhor:** filtro por músculo (mapa do corpo) e por equipamento; as imagens/animações precisam de fonte com licença livre (ver abaixo).
+- **Login sem senha (passkey):** Face ID/digital do aluno via WebAuthn resolveria o beco do "esqueci minha senha" sem SMTP.
+- **Rotação A/B/C** (o próximo treino é o próximo que falta, não o do dia da semana) — já temos a sugestão por rodízio; avaliar expor como modo.
+
+**Licenças: o que NÃO copiar.** O openGym é **AGPL-3.0**: copiar código, textos ou telas dele nos obrigaria a licenciar o muscle-track também em AGPL e mantém o direito autoral dele. As **animações de exercícios** têm licença própria restrita (só dentro do openGym, sem reutilização) e o texto de parte dos exercícios veio de outro projeto sob MIT; nada disso pode ser reaproveitado. Usamos só as **ideias e convenções** (barra inferior, menu por exercício, mapa muscular, heatmap), com código, textos, ícones e imagens próprios. Para exercícios, procurar base com licença clara (por exemplo as de domínio público/Unlicense ou CC) e **conferir a licença de cada imagem antes de usar**; o desenho do mapa muscular do openGym vem de um projeto MIT à parte, que daria para usar direto, com atribuição, depois de conferir a licença no repositório de origem. Também falta definir a **licença do muscle-track** (hoje não há arquivo `LICENSE`).
+
+**Ordem sugerida:** (1) barra inferior + tela "Hoje" do aluno + rodapé fora do celular; (2) treino em modo foco e resumo; (3) personal no celular (menu "⋯", agenda com faixa de dias, botão "+"); (4) identidade visual e temas; (5) busca global, primeiros passos e formulários; (6) constância, PWA e centro de avisos.
+
+**Princípio: inspiração sem cópia.** Referências são convenções comuns (barra inferior, anel de meta, linha do tempo, folha deslizante), que nenhum app possui. Não copiar layouts específicos, nomes, textos, ícones, cores nem ilustrações de nenhum produto; usar só ativos próprios ou com licença livre e registrada (Bootstrap Icons e as fontes já usadas são MIT/OFL). Cada tela nova passa pela mesma regra de navegação (`?next=`, breadcrumbs no desktop) e pelos mesmos testes.
+
 ## Estrutura
 
 ```
