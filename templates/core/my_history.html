@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Meu Histórico - Muscle Track{% endblock %}
 
@@ -128,7 +129,7 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="{% static 'vendor/chartjs/4.4.0/chart.umd.js' %}"></script>
 <script>
 // Dados do gráfico vindos do backend
 const chartData = {{ chart_data|safe }};

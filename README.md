@@ -1,314 +1,129 @@
-# 💪 Muscle Track - Sistema de Gerenciamento de Treinos
+# 💪 Muscle Track
 
-Aplicação web completa desenvolvida em **Django** para gestão de alunos, exercícios e planos de treino personalizados, com timer de treino, histórico de evolução e geração automática de treinos via **IA (ChatGPT)**.
+App web **self-hosted** para personal trainers: cadastro de alunos, fichas de treino e acompanhamento da execução (séries, cargas, recordes, timer de descanso). Feito em Django, com PostgreSQL, HTTPS automático (Caddy) e instalável no celular (PWA).
 
----
+## Funcionalidades
 
-## 🎯 Funcionalidades
+### 👩‍🏫 Personal (admin)
+- **Alunos** — cadastro, ficha, histórico e evolução
+- **Convite por link** — ao cadastrar o aluno você recebe um link de uso único (copiar ou enviar por WhatsApp) para ele criar a senha; o mesmo link serve para redefinir o acesso
+- **Exercícios** com imagem, GIF, vídeo ou link
+- **Modelos de treino** (A/B/C…) e atribuição ao aluno, com cópia editável por aluno (editar não apaga o histórico)
+- **Geração de treino com IA** (opcional, OpenAI)
+- **Detalhe da sessão** com séries, cargas e os comentários do aluno
 
-### 👨‍💼 Área Administrativa
-- ✅ **Cadastro de Alunos** - Registro completo com dados pessoais e contato
-- ✅ **Cadastro de Exercícios** - Com suporte a vídeos, GIFs e imagens (YouTube, uploads, URLs)
-- ✅ **Montagem de Treinos** - Criar planos personalizados associando exercícios
-- ✅ **Atribuição de Treinos** - Vincular treinos aos alunos com datas de início/fim
-- ✅ **Histórico e Relatórios** - Visualizar evolução dos alunos com gráficos
-- ✅ **Geração de Treinos com IA** - Usar ChatGPT para criar treinos automaticamente
+### 🏋️ Aluno
+- **Treino de hoje** — o app sugere o próximo treino pelo rodízio
+- **Controle por série** — carga e repetições já preenchidas com os valores da última vez
+- **Timer de descanso** (som e vibração) e **timer do treino com pausa**; a tela fica acesa
+- **Recordes e evolução** por exercício, 🏆 ao bater recorde de carga
+- **Observações** por exercício e do treino
+- **Funciona com internet fraca** — séries marcadas offline sincronizam depois
+- **Instalável no celular** ("Adicionar à tela inicial")
 
-### 👤 Área do Aluno
-- ✅ **Treino de hoje** - O app sugere o próximo treino (A/B/C) pelo rodízio
-- ✅ **Controle por série** - Carga e repetições de cada série, já preenchidas com os valores da última vez
-- ✅ **Timer de descanso** - Contagem regressiva com som e vibração, ±15s; tela do celular fica acesa durante o treino
-- ✅ **Timer do treino com pausa** - O tempo pausado não conta na duração
-- ✅ **Recordes e evolução** - 🏆 ao bater recorde de carga, gráfico por exercício e tabela de recordes
-- ✅ **Observações** - O aluno comenta cada exercício e o treino; a personal lê no detalhe da sessão
-- ✅ **Funciona com internet fraca** - Séries marcadas offline entram numa fila e sincronizam ao voltar o sinal
-- ✅ **Instalável no celular (PWA)** - "Adicionar à tela inicial" (precisa de HTTPS)
-- ✅ **Meus Treinos Ativos** - Visualizar treinos disponíveis
-- ✅ **Timer de Treino** - Iniciar sessão com cronômetro automático
-- ✅ **Controle de Execução** - Marcar exercícios concluídos e registrar carga utilizada
-- ✅ **Histórico Pessoal** - Ver treinos anteriores e evolução
+## Instalação em um servidor (VPS)
 
-### 🔐 Autenticação
-- ✅ **Convite por link** - A personal cadastra o aluno e envia (copiar ou WhatsApp) um link de uso único para ele criar a senha; o mesmo link serve para redefinir o acesso
-- ✅ **Django Allauth** - Sistema completo de autenticação
+**Você precisa de:** um servidor Linux com [Docker](https://docs.docker.com/engine/install/) (e o plugin Compose), um **domínio** apontando para o IP do servidor (registro `A`) e as portas **80 e 443** abertas.
 
-### 🎨 Interface
-- ✅ **Design Responsivo** - Bootstrap 5 para desktop e mobile
-- ✅ **Interface Intuitiva** - Fácil navegação e uso
-
----
-
-## 📋 Requisitos
-
-- Python 3.11+
-- SQLite (incluído)
-- Pip
-
----
-
-## 🚀 Instalação e Configuração
-
-### 1. Clone o repositório
 ```bash
-git clone <url-do-repositorio>
-cd muscle-track2
-```
-
-### 2. Crie e ative um ambiente virtual (opcional, mas recomendado)
-```bash
-# Windows
-python -m venv venv
-venv\Scripts\activate
-
-# Linux/Mac
-python3 -m venv venv
-source venv/bin/activate
-```
-
-### 3. Instale as dependências
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Configure as variáveis de ambiente
-Copie o arquivo `.env.example` para `.env` e edite conforme necessário:
-```bash
+git clone https://github.com/lugustavo/muscle-track.git
+cd muscle-track
 cp .env.example .env
+nano .env          # preencha DOMAIN, SECRET_KEY e POSTGRES_PASSWORD (instruções no arquivo)
+docker compose up -d --build
 ```
 
-**Configurações principais no `.env`:**
-- `SECRET_KEY` - Chave secreta do Django (mude em produção!)
-- `DEBUG` - `True` só no seu computador (o padrão é `False`; com `False` o `SECRET_KEY` é obrigatório)
-- `OPENAI_API_KEY` - Sua chave da API do OpenAI (para geração de treinos com IA)
-- `SITE_URL` - endereço público do app (usado nos links de convite; se vazio, usa o endereço do navegador da personal)
-- Configurações de email (opcional: só para o "esqueci a senha")
+Na primeira subida o Caddy emite o certificado HTTPS sozinho (leva ~1 min). Depois crie a conta da personal:
 
-### 5. Execute as migrations
 ```bash
+docker compose exec web python manage.py createsuperuser
+```
+
+Pronto: abra `https://SEU-DOMINIO`, entre com essa conta e cadastre o primeiro aluno.
+
+Opcional — grupos musculares, exercícios e treinos modelo prontos:
+
+```bash
+docker compose exec web python populate_db.py
+```
+
+(`populate_db.py --demo` cria também alunos de exemplo; **não use em produção**.)
+
+### Operação do dia a dia
+
+| O que | Comando |
+|---|---|
+| Ver logs | `docker compose logs -f web` |
+| Estado dos serviços | `docker compose ps` |
+| Atualizar para a versão mais nova | `git pull && docker compose up -d --build` (as migrações rodam sozinhas) |
+| Reiniciar | `docker compose restart` |
+| Parar | `docker compose down` (os dados ficam nos volumes) |
+| Abrir um shell Django | `docker compose exec web python manage.py shell` |
+
+Os dados vivem em volumes do Docker: `pgdata` (banco), `media` (fotos e mídia dos exercícios) e `caddy_data` (certificados).
+
+> ⚠️ **Backup ainda não está automatizado** (está no backlog abaixo). Enquanto isso, o volume `pgdata` é a única cópia dos seus dados. Um backup manual rápido:
+> ```bash
+> docker compose exec -T db pg_dump -U muscle_track muscle_track > backup-$(date +%F).sql
+> docker run --rm -v muscle-track_media:/m -v "$PWD":/b alpine tar czf /b/media-$(date +%F).tgz -C /m .
+> ```
+
+### Checklist pós-instalação
+- [ ] `https://SEU-DOMINIO` abre com cadeado e `http://` redireciona para `https://`
+- [ ] Login da personal funciona
+- [ ] Cadastrar um aluno gera um link `https://…/invite/…` e o aluno consegue criar a senha
+- [ ] No celular do aluno: abrir o site → "Adicionar à tela inicial"
+- [ ] Anote o `.env` num lugar seguro (sem o `SECRET_KEY` e a senha do banco, não há como restaurar)
+
+## Configuração (`.env`)
+
+| Variável | Para quê |
+|---|---|
+| `DOMAIN` | Domínio público. Deriva hosts permitidos, origens CSRF e o endereço dos convites; liga cookies seguros e HSTS |
+| `SECRET_KEY` | Chave secreta do Django (obrigatória em produção) |
+| `POSTGRES_PASSWORD` | Senha do banco (só letras e números) |
+| `ALLOW_PUBLIC_SIGNUP` | `False` (padrão): só entra quem foi convidado |
+| `OPENAI_API_KEY`, `OPENAI_MODEL` | Geração de treino com IA (opcional) |
+| `EMAIL_*` | SMTP, só para o "esqueci minha senha" (opcional) |
+| `SITE_URL`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, `SECURE_HSTS_SECONDS` | Avançado: sobrescrevem os valores derivados de `DOMAIN` |
+
+## Desenvolvimento local (sem Docker)
+
+```bash
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env            # deixe DOMAIN vazio e defina DEBUG=True (usa SQLite)
 python manage.py migrate
-```
-
-### 6. Crie a conta da personal (admin) e, opcionalmente, dados iniciais
-```bash
-python manage.py createsuperuser        # conta da personal trainer (is_staff)
-python populate_db.py                   # grupos musculares, exercícios e modelos de treino A/B/C/D
-python populate_db.py --demo            # + alunos/sessões de exemplo (apenas desenvolvimento)
-```
-
-O script é idempotente. **Não existem mais contas com senha fixa**: a senha dos alunos demo vem de
-`DEMO_PASSWORD` ou é gerada e exibida uma única vez. O `build.sh` (deploy) nunca apaga nem popula o banco.
-
-### 7. Execute o servidor
-```bash
+python manage.py createsuperuser
+python populate_db.py           # opcional
 python manage.py runserver
+python manage.py test           # suíte de testes
 ```
 
-Acesse: **http://localhost:8000**
+Bootstrap, ícones, Chart.js e SortableJS são servidos localmente de `static/vendor/` (sem CDN); veja `static/vendor/README.md`.
 
----
+## Segurança — o que já está coberto
+- Área da personal restrita a contas `is_staff`; cada aluno só enxerga e altera os **próprios** treinos e sessões
+- Cadastro público fechado; acesso por convite de uso único (7 dias)
+- HTTPS automático, cookies `Secure`, HSTS, `X-Content-Type-Options`
+- Container da aplicação roda sem root; só o Caddy expõe portas (banco e app ficam na rede interna)
+- Nenhuma senha fixa; `SECRET_KEY` obrigatório
 
-## 🔑 Acesso e papéis
+## Backlog
+- **Backup automático** (pg_dump diário + `media`, retenção e restauração testada; cópia fora do servidor)
+- E-mail (SMTP) para "esqueci minha senha"
+- Ficha completa da personal: objetivo/lesões, avaliações físicas, fotos de progresso, notas, vencimento do plano e painel "quem sumiu"
+- Séries por tempo/técnicas (drop-set, bi-set), periodização
+- Monitoramento/alertas e logs centralizados
+- Servir `media/` direto pelo Caddy
 
-- **Personal trainer (admin):** conta criada com `createsuperuser` (ou qualquer usuário `is_staff`). Acessa alunos, exercícios, treinos e históricos.
-- **Aluno:** usuário vinculado a um aluno cadastrado. Só enxerga e altera os **próprios** treinos e sessões (outras contas recebem 403/404).
-
----
-
-## 📂 Estrutura do Projeto
+## Estrutura
 
 ```
-muscle-track2/
-├── config/                 # Configurações do Django
-│   ├── settings.py        # Settings principais
-│   ├── urls.py            # URLs raiz
-│   └── wsgi.py
-├── core/                   # App principal
-│   ├── models.py          # Modelos de dados
-│   ├── views.py           # Views
-│   ├── forms.py           # Formulários
-│   ├── admin.py           # Configuração do Admin
-│   ├── urls.py            # URLs do app
-│   └── ai_service.py      # Integração com ChatGPT
-├── templates/              # Templates HTML
-│   ├── base.html          # Template base
-│   └── core/              # Templates do app
-├── static/                 # Arquivos estáticos (CSS, JS)
-├── media/                  # Uploads de mídia
-├── .env                    # Variáveis de ambiente
-├── .env.example            # Exemplo de variáveis
-├── manage.py               # Django management
-├── populate_db.py          # Script de dados iniciais
-├── requirements.txt        # Dependências Python
-└── README.md               # Este arquivo
+config/            settings, urls, wsgi
+core/              app principal (models, views, forms, permissions, invites, ai_service, tests/)
+templates/         HTML (core/, account/, pwa/)
+static/            CSS/JS/imagens do app e vendor/ (libs locais)
+Dockerfile, docker-compose.yml, Caddyfile, entrypoint.sh
+docs/              documentos históricos
 ```
-
----
-
-## 🗄️ Modelo de Dados
-
-### Principais Modelos
-
-**Person** (Aluno)
-- Informações pessoais (nome, endereço, telefone, data nascimento)
-- Vinculado a um User (autenticação)
-
-**Exercise** (Exercício)
-- Nome, descrição, grupo muscular
-- Séries e repetições padrão
-- Mídia (imagem, GIF, vídeo, YouTube)
-- Thumbnail para visualização
-
-**Routine** (Treino/Modelo)
-- Nome do treino
-- Descrição e nível de dificuldade
-- Duração estimada
-
-**RoutineExercise** (Exercícios do Treino)
-- Vincula exercícios a um treino
-- Define ordem, séries, reps, descanso
-
-**PersonRoutine** (Treino do Aluno)
-- Atribui um treino a um aluno
-- Datas de início/fim
-- Status ativo/inativo
-
-**PersonRoutineExercise** (Execução)
-- Controle de execução de cada exercício
-- Carga utilizada
-- Status de conclusão
-
-**WorkoutSession** (Sessão de Treino)
-- Timer automático
-- Duração calculada
-- Histórico de treinos realizados
-
----
-
-## 🤖 Geração de Treinos com IA
-
-Para usar a funcionalidade de geração automática de treinos:
-
-1. Obtenha uma chave da API do OpenAI em: https://platform.openai.com/api-keys
-2. Configure no arquivo `.env`:
-   ```
-   OPENAI_API_KEY=sk-proj-...
-   ```
-3. Acesse no menu: **Treinos > Gerar com IA**
-4. Descreva o treino desejado e a IA criará automaticamente
-
----
-
-## 🔧 Login social (SSO)
-
-Removido por enquanto: os botões eram apenas placeholders. O login é por e-mail e senha.
-
----
-
-## 🚀 Deploy em Produção
-
-### Configurações Importantes
-
-1. **Altere o SECRET_KEY** no `.env`
-2. **Configure DEBUG=False**
-3. **Configure ALLOWED_HOSTS** com seu domínio
-4. **Configure email SMTP real** (não use console backend)
-5. **Use um servidor web** (Gunicorn + Nginx)
-
-### Exemplo com Gunicorn
-```bash
-gunicorn config.wsgi:application --bind 0.0.0.0:8000
-```
-
-### Colete arquivos estáticos
-```bash
-python manage.py collectstatic --noinput
-```
-
----
-
-## 📱 Uso da Aplicação
-
-### Para Administradores/Instrutores:
-
-1. **Faça login** com credenciais de admin
-2. **Cadastre exercícios** com vídeos/imagens
-3. **Crie treinos** montando os exercícios
-4. **Cadastre alunos**: ao salvar você recebe um link de convite para enviar ao aluno (botão *Convite* na ficha dele)
-5. **Atribua treinos** aos alunos
-6. **Acompanhe evolução** no histórico
-
-### Para Alunos:
-
-1. **Abra o link de convite** enviado pela personal, crie a senha (depois entre normalmente pelo login)
-2. **Acesse "Meus Treinos"**
-3. **Inicie um treino** (timer começa automaticamente)
-4. **Marque exercícios concluídos** e registre a carga
-5. **Finalize o treino** (duração é salva)
-6. **Veja seu histórico** e evolução
-
----
-
-## 🛠️ Tecnologias Utilizadas
-
-- **Backend:** Django 5.0
-- **Database:** SQLite (pode migrar para PostgreSQL/MySQL)
-- **Frontend:** Bootstrap 5, HTML5, CSS3, JavaScript
-- **Autenticação:** Django Allauth
-- **IA:** OpenAI GPT-4
-- **Forms:** Django Crispy Forms
-- **Deploy:** Whitenoise (static files), Gunicorn
-
----
-
-## 📝 Notas Adicionais
-
-- O sistema usa **SQLite** por padrão, ideal para desenvolvimento e pequenas instalações
-- Para produção com muitos usuários, considere migrar para **PostgreSQL** ou **MySQL**
-- As imagens/vídeos são armazenadas na pasta `media/`
-- O timer funciona com JavaScript no frontend e salva duração no backend
-- A geração de treinos com IA requer créditos na API da OpenAI
-
----
-
-## 🐛 Troubleshooting
-
-### Erro "MultipleObjectsReturned" ao executar populate_db.py
-Isso ocorre quando há registros duplicados. Solução:
-```bash
-# Limpe o banco e refaça
-rm db.sqlite3
-python manage.py migrate
-python populate_db.py
-```
-
-A versão corrigida do script é idempotente e pode ser executada múltiplas vezes.
-
-### Erro ao fazer migrations
-```bash
-# Limpe o banco e refaça
-rm db.sqlite3
-python manage.py migrate
-python populate_db.py
-```
-
-### Erro de encoding no Windows
-O script `populate_db.py` já trata isso automaticamente.
-
-### Erro ao carregar imagens
-Verifique se a pasta `media/` tem permissões corretas.
-
----
-
-## 📧 Suporte
-
-Para dúvidas ou problemas, entre em contato através do repositório.
-
----
-
-## 📄 Licença
-
-Este projeto foi desenvolvido para fins educacionais e de demonstração.
-
----
-
-**Desenvolvido com Django + Bootstrap + OpenAI** 💪🔥

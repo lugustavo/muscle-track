@@ -1,9 +1,9 @@
 // Muscle Track service worker.
-// - static files and CDN libraries: stale-while-revalidate (fast, works with a weak signal)
+// - static files (app code, Bootstrap, Chart.js...): stale-while-revalidate (fast, works with a weak signal)
 // - pages: always network; when offline, show /offline/
 // Authenticated pages are deliberately NOT cached (shared phones / after logout).
 // Offline set updates are queued by the page itself (static/js/workout.js).
-const CACHE = 'muscle-track-v1';
+const CACHE = 'muscle-track-v2'; // bump to drop old caches (v1 also cached CDN files)
 const OFFLINE_URL = '/offline/';
 
 self.addEventListener('install', (event) => {
@@ -19,7 +19,7 @@ self.addEventListener('activate', (event) => {
 });
 
 function isCacheableAsset(url) {
-  return url.pathname.startsWith('/static/') || url.hostname === 'cdn.jsdelivr.net';
+  return url.origin === self.location.origin && url.pathname.startsWith('/static/');
 }
 
 self.addEventListener('fetch', (event) => {
@@ -38,7 +38,7 @@ self.addEventListener('fetch', (event) => {
         cache.match(request).then((cached) => {
           const network = fetch(request)
             .then((response) => {
-              if (response && (response.ok || response.type === 'opaque')) cache.put(request, response.clone());
+              if (response && response.ok) cache.put(request, response.clone());
               return response;
             })
             .catch(() => cached);
