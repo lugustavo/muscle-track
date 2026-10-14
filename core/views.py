@@ -1,8 +1,11 @@
 import json
 from datetime import timedelta
 from decimal import Decimal, InvalidOperation
+from urllib.parse import quote
 
 from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
@@ -13,10 +16,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from allauth.account.models import EmailAddress
+
 from .forms import (
     PersonForm, ExerciseForm, RoutineForm, PersonRoutineForm,
     AIWorkoutGenerationForm
 )
+from .invites import build_invite_url, get_user_from_invite
 from .models import (
     MuscleGroup, Person, Exercise, Routine, RoutineExercise,
     PersonRoutine, PersonRoutineExercise, WorkoutSession, SessionExercise
@@ -134,42 +140,77 @@ def student_list(request):
 
 @staff_required
 def student_create(request):
-    """Create a new student"""
+    """Create a new student and hand the trainer an invitation link"""
     if request.method == 'POST':
         form = PersonForm(request.POST, request.FILES)
         if form.is_valid():
             email = form.cleaned_data['email']
 
-            # Criar usuário com username = email
-            user = User.objects.create_user(
-                username=email,
-                email=email,
-                is_active=False  # Inativo até confirmar o email
-            )
+            with transaction.atomic():
+                # Account without a password: the student chooses it through the invite link
+                user = User(username=email, email=email, is_active=form.cleaned_data['is_active'])
+                user.set_unusable_password()
+                user.save()
 
-            # Criar Person associado ao usuário
-            person = form.save(commit=False)
-            person.user = user
-            person.save()
+                person = form.save(commit=False)
+                person.user = user
+                person.save()
 
-            # Enviar email de confirmação via allauth
-            from allauth.account.models import EmailAddress
-            EmailAddress.objects.create(
-                user=user,
-                email=email,
-                primary=True,
-                verified=False
-            )
+                EmailAddress.objects.create(user=user, email=email, primary=True, verified=False)
 
-            # Enviar email de confirmação
-            from allauth.account.utils import send_email_confirmation
-            send_email_confirmation(request, user, signup=True)
-
-            messages.success(request, f'Aluno cadastrado com sucesso! Um email de confirmação foi enviado para {email}.')
-            return redirect('core:student_list')
+            messages.success(request, 'Aluno cadastrado! Envie o link de convite para ele criar a senha.')
+            return redirect('core:student_invite', pk=person.pk)
     else:
         form = PersonForm()
     return render(request, 'core/student_form.html', {'form': form, 'title': 'Cadastrar Aluno'})
+
+
+@staff_required
+def student_invite(request, pk):
+    """Show the one-time link (and a WhatsApp shortcut) the student uses to set a password"""
+    student = get_object_or_404(Person.objects.select_related('user'), pk=pk)
+    invite_url = build_invite_url(request, student.user)
+
+    phone_digits = ''.join(ch for ch in student.phone if ch.isdigit())
+    if phone_digits and not phone_digits.startswith('55') and len(phone_digits) <= 11:
+        phone_digits = '55' + phone_digits  # Brazilian number typed without country code
+    whatsapp_text = (
+        f'Olá, {student.person_name.split()[0]}! Seu acesso ao Muscle Track está pronto. '
+        f'Crie sua senha por este link (válido por 7 dias): {invite_url}'
+    )
+    whatsapp_url = f'https://wa.me/{phone_digits}?text={quote(whatsapp_text)}'
+
+    return render(request, 'core/student_invite.html', {
+        'student': student,
+        'invite_url': invite_url,
+        'whatsapp_url': whatsapp_url,
+        'has_password': student.user.has_usable_password(),
+    })
+
+
+def accept_invite(request, uidb64, token):
+    """Public page: the invited student chooses a password and is logged in"""
+    user = get_user_from_invite(uidb64, token)
+    if user is None:
+        return render(request, 'core/accept_invite.html', {'invalid': True}, status=400)
+    if not user.person.is_active:
+        return render(request, 'core/accept_invite.html', {'invalid': True, 'inactive': True}, status=403)
+
+    if request.method == 'POST':
+        form = SetPasswordForm(user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            user.is_active = True
+            user.save(update_fields=['is_active'])
+            EmailAddress.objects.update_or_create(
+                user=user, email=user.email, defaults={'primary': True, 'verified': True})
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            messages.success(request, 'Senha criada! Bem-vindo(a) ao Muscle Track.')
+            return redirect('core:my_workouts')
+    else:
+        form = SetPasswordForm(user)
+
+    return render(request, 'core/accept_invite.html', {'form': form, 'student': user.person})
 
 
 @staff_required
@@ -238,43 +279,31 @@ def student_detail(request, pk):
 @staff_required
 def student_edit(request, pk):
     """Edit student"""
-    student = get_object_or_404(Person, pk=pk)
+    student = get_object_or_404(Person.objects.select_related('user'), pk=pk)
     if request.method == 'POST':
         form = PersonForm(request.POST, request.FILES, instance=student)
         if form.is_valid():
             email = form.cleaned_data['email']
+            user = student.user
+            email_changed = user.email != email
 
-            # Verificar se o email foi alterado
-            if student.user.email != email:
-                # Atualizar email e username do usuário
-                student.user.email = email
-                student.user.username = email
-                student.user.save()
+            with transaction.atomic():
+                person = form.save()
+                if email_changed:
+                    user.email = email
+                    user.username = email
+                # An inactive student loses access; reactivating restores it.
+                # (A student who never used the invite has no usable password, so cannot log in anyway.)
+                user.is_active = person.is_active
+                user.save()
+                if email_changed:
+                    EmailAddress.objects.update_or_create(
+                        user=user, primary=True, defaults={'email': email, 'verified': False})
 
-                # Atualizar EmailAddress do allauth
-                from allauth.account.models import EmailAddress
-                email_address = EmailAddress.objects.filter(user=student.user, primary=True).first()
-                if email_address:
-                    email_address.email = email
-                    email_address.verified = False
-                    email_address.save()
-                else:
-                    EmailAddress.objects.create(
-                        user=student.user,
-                        email=email,
-                        primary=True,
-                        verified=False
-                    )
-
-                # Enviar novo email de confirmação
-                from allauth.account.utils import send_email_confirmation
-                send_email_confirmation(request, student.user, signup=False)
-
-                messages.success(request, f'Aluno atualizado com sucesso! Um novo email de confirmação foi enviado para {email}.')
+            if email_changed:
+                messages.success(request, 'Aluno atualizado! O e-mail de login mudou: confira o convite se o aluno ainda não criou a senha.')
             else:
                 messages.success(request, 'Aluno atualizado com sucesso!')
-
-            form.save()
             return redirect('core:student_detail', pk=pk)
     else:
         form = PersonForm(instance=student)

@@ -12,6 +12,8 @@ urlpatterns = [
     path('students/create/', views.student_create, name='student_create'),
     path('students/<int:pk>/', views.student_detail, name='student_detail'),
     path('students/<int:pk>/edit/', views.student_edit, name='student_edit'),
+    path('students/<int:pk>/invite/', views.student_invite, name='student_invite'),
+    path('invite/<uidb64>/<token>/', views.accept_invite, name='accept_invite'),
 
     # Exercises
     path('exercises/', views.exercise_list, name='exercise_list'),
