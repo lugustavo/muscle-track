@@ -1,0 +1,22 @@
+{% load static %}<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#FF6B6B">
+    <title>Sem conexão - Muscle Track</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; align-items: center;
+               justify-content: center; text-align: center; margin: 0; padding: 1rem; color: #2C3E50; }
+        h1 { color: #FF6B6B; }
+        button { background: #FF6B6B; color: #fff; border: 0; border-radius: .5rem; padding: .75rem 1.5rem; font-size: 1rem; }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>Sem conexão</h1>
+        <p>Não foi possível carregar esta página. Se você estava treinando, o que já foi marcado será enviado quando a internet voltar.</p>
+        <button onclick="location.reload()">Tentar de novo</button>
+    </div>
+</body>
+</html>

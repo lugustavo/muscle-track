@@ -10,8 +10,14 @@
 <div class="row g-4">
     {% for item in routines_with_sessions %}
     <div class="col-md-6 col-lg-4">
-        <div class="card exercise-card {% if item.active_session %}border-warning{% endif %}">
+        <div class="card exercise-card {% if item.active_session %}border-warning{% elif item.suggested %}border-primary border-2{% endif %}">
             <div class="card-body">
+                {% if item.suggested and not item.active_session %}
+                <span class="badge bg-primary mb-2"><i class="bi bi-star-fill"></i> Treino de hoje</span>
+                {% endif %}
+                {% if item.last_done and not item.active_session %}
+                <div class="text-muted small mb-2"><i class="bi bi-calendar-check"></i> Último: {{ item.last_done|date:"d/m" }}</div>
+                {% endif %}
                 {% if item.active_session %}
                 <div class="alert alert-warning py-2 px-3 mb-3" role="alert">
                     <i class="bi bi-hourglass-split"></i> <strong>Sessão em andamento</strong>
@@ -64,7 +70,7 @@
                                     <h6 class="mb-1">{{ routine_exercise.exercise.exercise_name }}</h6>
                                     <small class="text-muted">#{{ routine_exercise.order }}</small>
                                 </div>
-                                <p class="mb-1 text-muted small">{{ routine_exercise.exercise.exercise_description|truncatewords:15 }}</p>
+                                <p class="mb-1 text-muted small">{{ routine_exercise.exercise.description|truncatewords:15 }}</p>
 
                                 <!-- Configuração do exercício -->
                                 <div class="d-flex gap-3 mt-2">

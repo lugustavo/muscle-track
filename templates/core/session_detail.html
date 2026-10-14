@@ -54,6 +54,12 @@
             </div>
         </div>
 
+        {% if session.notes %}
+        <div class="alert alert-secondary mb-4">
+            <i class="bi bi-chat-left-text"></i> <strong>Comentário do aluno sobre o treino:</strong><br>{{ session.notes|linebreaksbr }}
+        </div>
+        {% endif %}
+
         <!-- Exercises List -->
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
@@ -86,8 +92,27 @@
                             <small class="text-muted">Descanso: {{ item.exercise.rest_seconds }}s</small>
                         </p>
 
-                        {% if item.is_completed %}
-                        <!-- Execution Data -->
+                        {% if item.sets %}
+                        <table class="table table-sm mb-2">
+                            <thead><tr><th>Série</th><th>Carga</th><th>Reps</th><th></th></tr></thead>
+                            <tbody>
+                            {% for s in item.sets %}
+                                <tr class="{% if s.is_done %}table-success{% else %}text-muted{% endif %}">
+                                    <td>{{ s.number }}</td>
+                                    <td>{% if s.weight is not None %}{{ s.weight }} kg{% else %}-{% endif %}</td>
+                                    <td>{% if s.reps is not None %}{{ s.reps }}{% else %}-{% endif %}</td>
+                                    <td>{% if s.is_done %}<i class="bi bi-check-circle-fill text-success"></i>{% else %}<i class="bi bi-dash-circle"></i>{% endif %}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                        {% endif %}
+                        {% if item.notes %}
+                        <div class="alert alert-secondary py-2 small mb-2"><i class="bi bi-chat-left-text"></i> <strong>Observação do aluno:</strong> {{ item.notes }}</div>
+                        {% endif %}
+
+                        {% if item.is_completed and not item.sets %}
+                        <!-- Execution Data (sessions recorded before per-set tracking) -->
                         <div class="alert alert-success py-2 mb-0">
                             <small>
                                 {% if item.completed_at %}

@@ -262,6 +262,10 @@ class WorkoutSession(models.Model):
     is_completed = models.BooleanField(default=False, verbose_name='Concluído')
     notes = models.TextField(blank=True, verbose_name='Observações')
 
+    # Pause support: time spent paused does not count towards the duration
+    paused_at = models.DateTimeField(null=True, blank=True, verbose_name='Pausado em')
+    paused_seconds = models.PositiveIntegerField(default=0, verbose_name='Segundos em pausa')
+
     class Meta:
         verbose_name = 'Sessão de Treino'
         verbose_name_plural = 'Sessões de Treino'
@@ -270,12 +274,43 @@ class WorkoutSession(models.Model):
     def __str__(self):
         return f"{self.person_routine.person.person_name} - {self.start_time.strftime('%d/%m/%Y %H:%M')}"
 
-    def end_session(self):
-        """End the workout session and calculate duration"""
+    @property
+    def is_paused(self):
+        return self.paused_at is not None and self.end_time is None
+
+    def elapsed_seconds(self, now=None):
+        """Active training time (wall-clock time minus paused time)."""
+        if self.end_time:
+            end = self.end_time
+        elif self.paused_at:
+            end = self.paused_at
+        else:
+            end = now or timezone.now()
+        return max(0, int((end - self.start_time).total_seconds()) - self.paused_seconds)
+
+    def pause(self):
+        if not self.end_time and not self.paused_at:
+            self.paused_at = timezone.now()
+            self.save(update_fields=['paused_at'])
+
+    def resume(self):
+        if self.paused_at and not self.end_time:
+            self.paused_seconds += max(0, int((timezone.now() - self.paused_at).total_seconds()))
+            self.paused_at = None
+            self.save(update_fields=['paused_at', 'paused_seconds'])
+
+    def end_session(self, at=None):
+        """End the workout session and calculate duration.
+
+        `at` lets callers close an abandoned session at a capped time instead of "now".
+        """
         if not self.end_time:
-            self.end_time = timezone.now()
-            duration = self.end_time - self.start_time
-            self.duration_minutes = int(duration.total_seconds() / 60)
+            now = at or timezone.now()
+            if self.paused_at:
+                self.paused_seconds += max(0, int((now - self.paused_at).total_seconds()))
+                self.paused_at = None
+            self.end_time = now
+            self.duration_minutes = self.elapsed_seconds() // 60
             self.is_completed = True
             self.save()
 
@@ -322,3 +357,45 @@ class SessionExercise(models.Model):
         self.is_completed = True
         self.completed_at = timezone.now()
         self.save()
+
+    def sync_from_sets(self):
+        """Derive the exercise-level summary from its sets.
+
+        weight_used = heaviest set actually done (what charts and records read);
+        is_completed = every set done.
+        """
+        sets = list(self.sets.all())
+        done = [s for s in sets if s.is_done]
+        weights = [s.weight for s in done if s.weight is not None]
+        self.weight_used = max(weights) if weights else None
+        self.is_completed = bool(sets) and len(done) == len(sets)
+        self.completed_at = max((s.completed_at for s in done if s.completed_at), default=None) if self.is_completed else None
+        self.save(update_fields=['weight_used', 'is_completed', 'completed_at'])
+        return len(done), len(sets)
+
+
+class SessionSet(models.Model):
+    """One set of an exercise performed in a session (weight, reps, done)"""
+    session_exercise = models.ForeignKey(
+        SessionExercise,
+        on_delete=models.CASCADE,
+        related_name='sets',
+        verbose_name='Exercício da sessão'
+    )
+    number = models.PositiveIntegerField(validators=[MinValueValidator(1)], verbose_name='Série')
+    weight = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True,
+        validators=[MinValueValidator(0)], verbose_name='Carga (kg)'
+    )
+    reps = models.PositiveIntegerField(null=True, blank=True, verbose_name='Repetições')
+    is_done = models.BooleanField(default=False, verbose_name='Feita')
+    completed_at = models.DateTimeField(null=True, blank=True, verbose_name='Completada em')
+
+    class Meta:
+        verbose_name = 'Série'
+        verbose_name_plural = 'Séries'
+        ordering = ['session_exercise', 'number']
+        unique_together = ['session_exercise', 'number']
+
+    def __str__(self):
+        return f'{self.session_exercise} - série {self.number}'

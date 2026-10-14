@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     MuscleGroup, Person, Exercise, Routine, RoutineExercise,
-    PersonRoutine, PersonRoutineExercise, WorkoutSession, SessionExercise
+    PersonRoutine, PersonRoutineExercise, WorkoutSession, SessionExercise, SessionSet
 )
 
 
@@ -118,13 +118,20 @@ class SessionExerciseInline(admin.TabularInline):
     readonly_fields = ['completed_at']
 
 
+class SessionSetInline(admin.TabularInline):
+    model = SessionSet
+    extra = 0
+    fields = ['number', 'weight', 'reps', 'is_done', 'completed_at']
+    readonly_fields = ['completed_at']
+
+
 @admin.register(WorkoutSession)
 class WorkoutSessionAdmin(admin.ModelAdmin):
     list_display = ['person_routine', 'start_time', 'end_time', 'duration_minutes', 'is_completed']
     list_filter = ['is_completed', 'start_time']
     search_fields = ['person_routine__person__person_name']
     date_hierarchy = 'start_time'
-    readonly_fields = ['start_time']
+    readonly_fields = ['start_time', 'paused_at', 'paused_seconds']
     inlines = [SessionExerciseInline]
 
 
@@ -135,3 +142,4 @@ class SessionExerciseAdmin(admin.ModelAdmin):
     search_fields = ['session__person_routine__person__person_name', 'person_routine_exercise__exercise__exercise_name']
     readonly_fields = ['completed_at']
     ordering = ['session', 'person_routine_exercise__order']
+    inlines = [SessionSetInline]

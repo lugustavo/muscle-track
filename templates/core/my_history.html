@@ -93,7 +93,31 @@
 </div>
 {% endif %}
 
-<!-- Gráfico de Evolução (Placeholder) -->
+<!-- Recordes pessoais -->
+{% if records %}
+<div class="card mt-4">
+    <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-trophy"></i> Meus Recordes de Carga</h5>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead><tr><th>Exercício</th><th class="text-end">Recorde</th><th class="text-end">Treinos</th><th class="text-end">Último</th></tr></thead>
+                <tbody>
+                {% for r in records %}
+                    <tr>
+                        <td><a href="{% url 'core:my_exercise_progress' r.person_routine_exercise__exercise_id %}" class="text-decoration-none">{{ r.person_routine_exercise__exercise__exercise_name }}</a></td>
+                        <td class="text-end"><strong>{{ r.best }} kg</strong></td>
+                        <td class="text-end">{{ r.sessions }}</td>
+                        <td class="text-end">{{ r.last|date:"d/m/Y" }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Gráfico de Evolução -->
 {% if completed_sessions %}
 <div class="card mt-4">
     <div class="card-body">
