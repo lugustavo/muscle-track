@@ -21,7 +21,7 @@ Aplicação web completa desenvolvida em **Django** para gestão de alunos, exer
 - ✅ **Histórico Pessoal** - Ver treinos anteriores e evolução
 
 ### 🔐 Autenticação
-- ✅ **Registro Rápido** - Cadastro com link de ativação por email
+- ✅ **Convite por link** - A personal cadastra o aluno e envia (copiar ou WhatsApp) um link de uso único para ele criar a senha; o mesmo link serve para redefinir o acesso
 - ✅ **Django Allauth** - Sistema completo de autenticação
 
 ### 🎨 Interface
@@ -72,7 +72,8 @@ cp .env.example .env
 - `SECRET_KEY` - Chave secreta do Django (mude em produção!)
 - `DEBUG` - `True` só no seu computador (o padrão é `False`; com `False` o `SECRET_KEY` é obrigatório)
 - `OPENAI_API_KEY` - Sua chave da API do OpenAI (para geração de treinos com IA)
-- Configurações de email (para ativação de contas)
+- `SITE_URL` - endereço público do app (usado nos links de convite; se vazio, usa o endereço do navegador da personal)
+- Configurações de email (opcional: só para o "esqueci a senha")
 
 ### 5. Execute as migrations
 ```bash
@@ -224,13 +225,13 @@ python manage.py collectstatic --noinput
 1. **Faça login** com credenciais de admin
 2. **Cadastre exercícios** com vídeos/imagens
 3. **Crie treinos** montando os exercícios
-4. **Cadastre alunos** e vincule-os a usuários
+4. **Cadastre alunos**: ao salvar você recebe um link de convite para enviar ao aluno (botão *Convite* na ficha dele)
 5. **Atribua treinos** aos alunos
 6. **Acompanhe evolução** no histórico
 
 ### Para Alunos:
 
-1. **Faça login** ou crie uma conta
+1. **Abra o link de convite** enviado pela personal, crie a senha (depois entre normalmente pelo login)
 2. **Acesse "Meus Treinos"**
 3. **Inicie um treino** (timer começa automaticamente)
 4. **Marque exercícios concluídos** e registre a carga

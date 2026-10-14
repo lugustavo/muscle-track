@@ -161,6 +161,9 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@muscle-track.com')
 
 # Django-allauth settings
+ACCOUNT_ADAPTER = 'core.adapters.AccountAdapter'
+# Students get an invite link from the trainer; set ALLOW_PUBLIC_SIGNUP=True to re-open self sign-up
+ALLOW_PUBLIC_SIGNUP = config('ALLOW_PUBLIC_SIGNUP', default=False, cast=bool)
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = config('ACCOUNT_EMAIL_VERIFICATION', default='optional')  # 'none', 'optional' ou 'mandatory'
@@ -184,4 +187,9 @@ AVATAR_MIN_WIDTH = config('AVATAR_MIN_WIDTH', default=100, cast=int)
 AVATAR_MIN_HEIGHT = config('AVATAR_MIN_HEIGHT', default=100, cast=int)
 
 # Site URL
-SITE_URL = config('SITE_URL', default='http://localhost:8000')
+# Public address of the app, used to build invitation links. Leave empty to use
+# the address the trainer is browsing from.
+SITE_URL = config('SITE_URL', default='')
+
+# How long a student invitation link stays valid
+PASSWORD_RESET_TIMEOUT = 7 * 24 * 60 * 60

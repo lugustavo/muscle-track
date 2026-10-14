@@ -32,11 +32,17 @@
             {% else %}
                 <span class="badge bg-danger">Inativo</span>
             {% endif %}
+            {% if not student.user.has_usable_password %}
+                <span class="badge bg-warning text-dark" title="O aluno ainda não criou a senha"><i class="bi bi-hourglass-split"></i> Convite pendente</span>
+            {% endif %}
         </div>
     </div>
     <div>
         <a href="{% url 'core:person_routine_create' %}?person={{ student.pk }}" class="btn btn-success">
             <i class="bi bi-plus-circle"></i> Atribuir Treino
+        </a>
+        <a href="{% url 'core:student_invite' student.pk %}" class="btn btn-outline-primary">
+            <i class="bi bi-send"></i> {% if student.user.has_usable_password %}Redefinir acesso{% else %}Convite{% endif %}
         </a>
         <a href="{% url 'core:student_edit' student.pk %}" class="btn btn-primary">
             <i class="bi bi-pencil"></i> Editar

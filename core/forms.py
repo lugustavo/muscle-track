@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.db.models import Q
 from .models import Person, Exercise, Routine, RoutineExercise, PersonRoutine
 
 
@@ -8,7 +9,7 @@ class PersonForm(forms.ModelForm):
         required=True,
         widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'email@exemplo.com'}),
         label='Email',
-        help_text='O aluno receberá um email de confirmação neste endereço'
+        help_text='Usado para o login do aluno. Depois de salvar, você recebe um link de convite para enviar a ele.'
     )
 
     class Meta:
@@ -37,9 +38,9 @@ class PersonForm(forms.ModelForm):
             self.fields['email'].initial = self.instance.user.email
 
     def clean_email(self):
-        email = self.cleaned_data.get('email')
+        email = self.cleaned_data.get('email', '').strip().lower()
         # Verificar se o email já está em uso (exceto pelo usuário atual em edição)
-        user_exists = User.objects.filter(email=email)
+        user_exists = User.objects.filter(Q(email__iexact=email) | Q(username__iexact=email))
         if self.instance and self.instance.pk and self.instance.user:
             user_exists = user_exists.exclude(pk=self.instance.user.pk)
 

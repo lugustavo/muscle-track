@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Convite - {{ student.person_name }} - Muscle Track{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-send"></i> Convite para {{ student.person_name }}</h1>
+    <a href="{% url 'core:student_detail' student.pk %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                {% if has_password %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> Este aluno já criou uma senha. O link abaixo serve para
+                    <strong>redefinir o acesso</strong> (por exemplo, se ele esqueceu a senha). Ao ser usado, ele define uma nova senha.
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-hourglass-split"></i> O aluno ainda <strong>não criou a senha</strong>. Envie o link abaixo.
+                </div>
+                {% endif %}
+
+                <label for="inviteUrl" class="form-label fw-bold">Link de acesso (uso único, válido por 7 dias)</label>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="inviteUrl" value="{{ invite_url }}" readonly>
+                    <button class="btn btn-primary" type="button" id="copyBtn">
+                        <i class="bi bi-clipboard"></i> Copiar
+                    </button>
+                </div>
+
+                <a href="{{ whatsapp_url }}" target="_blank" rel="noopener" class="btn btn-success">
+                    <i class="bi bi-whatsapp"></i> Enviar pelo WhatsApp
+                </a>
+                {% if not student.phone %}
+                <small class="text-muted d-block mt-2">Sem telefone cadastrado: o WhatsApp vai pedir para você escolher o contato.</small>
+                {% endif %}
+            </div>
+        </div>
+
+        <p class="text-muted">
+            <i class="bi bi-shield-lock"></i> Quem tiver este link consegue entrar como o aluno até ele ser usado,
+            então envie só para o próprio aluno. Depois de usado o link deixa de funcionar; para gerar outro, abra esta página de novo.
+        </p>
+    </div>
+</div>
+
+<script>
+document.getElementById('copyBtn').addEventListener('click', async function () {
+    const input = document.getElementById('inviteUrl');
+    try {
+        await navigator.clipboard.writeText(input.value);
+    } catch (e) {
+        input.select();
+        document.execCommand('copy');
+    }
+    this.innerHTML = '<i class="bi bi-check2"></i> Copiado!';
+});
+</script>
+{% endblock %}
