@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Adicionar foto - {{ student.person_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2"><i class="bi bi-camera"></i> Adicionar foto de progresso</h1>
+        <div class="text-muted">{{ student.person_name }}</div>
+    </div>
+    <a href="{% url 'core:student_detail' student.pk %}#tab-fotos" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="row">
+    {% csrf_token %}
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold" for="{{ form.image.id_for_label }}">Foto</label>
+                    {{ form.image }} {% if form.image.errors %}<div class="text-danger small">{{ form.image.errors }}</div>{% endif %}
+                    <div class="form-text">JPG, PNG ou WebP. A foto é privada: só você e o aluno conseguem abrir.</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold" for="{{ form.date.id_for_label }}">Data</label>
+                    {{ form.date }} {{ form.date.errors }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold" for="{{ form.caption.id_for_label }}">Legenda</label>
+                    {{ form.caption }}
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> Enviar foto</button>
+        <a href="{% url 'core:student_detail' student.pk %}#tab-fotos" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

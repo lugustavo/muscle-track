@@ -196,6 +196,55 @@
                 </div>
             </div>
 
+            <!-- Ficha da personal -->
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-person-vcard"></i> Ficha da personal</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.goal.id_for_label }}" class="form-label fw-bold">Objetivo</label>
+                        {{ form.goal }}
+                        {% if form.goal.errors %}<div class="text-danger small">{{ form.goal.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.health_notes.id_for_label }}" class="form-label fw-bold">Saúde, lesões e restrições</label>
+                        {{ form.health_notes }}
+                        {% if form.health_notes.errors %}<div class="text-danger small">{{ form.health_notes.errors }}</div>{% endif %}<div class="form-text">Aparece em destaque na ficha do aluno. O aluno não vê.</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.emergency_contact_name.id_for_label }}" class="form-label fw-bold">Contato de emergência</label>
+                        {{ form.emergency_contact_name }}
+                        {% if form.emergency_contact_name.errors %}<div class="text-danger small">{{ form.emergency_contact_name.errors }}</div>{% endif %}
+                    </div>
+                        </div>
+                        <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.emergency_contact_phone.id_for_label }}" class="form-label fw-bold">Telefone de emergência</label>
+                        {{ form.emergency_contact_phone }}
+                        {% if form.emergency_contact_phone.errors %}<div class="text-danger small">{{ form.emergency_contact_phone.errors }}</div>{% endif %}
+                    </div>
+                        </div>
+                        <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.plan_name.id_for_label }}" class="form-label fw-bold">Plano contratado</label>
+                        {{ form.plan_name }}
+                        {% if form.plan_name.errors %}<div class="text-danger small">{{ form.plan_name.errors }}</div>{% endif %}
+                    </div>
+                        </div>
+                        <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="{{ form.plan_expires_on.id_for_label }}" class="form-label fw-bold">Vencimento do plano</label>
+                        {{ form.plan_expires_on }}
+                        {% if form.plan_expires_on.errors %}<div class="text-danger small">{{ form.plan_expires_on.errors }}</div>{% endif %}
+                    </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Observações -->
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-primary text-white">

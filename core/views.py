@@ -11,75 +11,45 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Avg, Count, Max, Prefetch, Q
-from django.http import JsonResponse
+from django.http import FileResponse, Http404, JsonResponse
+from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from allauth.account.models import EmailAddress
 
+from .dashboard import trainer_dashboard
 from .forms import (
-    PersonForm, ExerciseForm, RoutineForm, PersonRoutineForm,
-    AIWorkoutGenerationForm
+    AIWorkoutGenerationForm, AssessmentForm, ExerciseForm, PersonForm, PersonRoutineForm,
+    ProgressPhotoForm, RoutineForm, StudentNoteForm,
 )
 from .invites import build_invite_url, get_user_from_invite
 from .models import (
-    MuscleGroup, Person, Exercise, Routine, RoutineExercise,
-    PersonRoutine, PersonRoutineExercise, WorkoutSession, SessionExercise, SessionSet
+    Assessment, Exercise, MuscleGroup, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
+    Routine, RoutineExercise, SessionExercise, SessionSet, StudentNote, WorkoutSession,
 )
 from .permissions import is_trainer, staff_required, student_required
 
 
 def home(request):
-    """Home page"""
-    from django.db.models import Avg
-
+    """Home: trainer dashboard, student stats, or a login prompt for visitors"""
     context = {}
+    user = request.user
 
-    # Se for admin/staff, mostra estatísticas gerais
-    if request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser):
-        context = {
-            'total_students': Person.objects.filter(is_active=True).count(),
-            'total_exercises': Exercise.objects.filter(is_active=True).count(),
-            'total_routines': Routine.objects.filter(is_active=True).count(),
-        }
-    # Se for aluno, mostra estatísticas pessoais
-    elif request.user.is_authenticated:
-        try:
-            person = request.user.person
-            sessions = WorkoutSession.objects.filter(
-                person_routine__person=person,
-                is_completed=True
-            )
-
-            total_workouts = sessions.count()
+    if is_trainer(user):
+        context['dashboard'] = trainer_dashboard()
+    elif user.is_authenticated:
+        person = Person.objects.filter(user=user).first()
+        if person:
+            sessions = WorkoutSession.objects.filter(person_routine__person=person, is_completed=True)
             avg_duration = sessions.aggregate(Avg('duration_minutes'))['duration_minutes__avg'] or 0
-
-            # Calcula assiduidade (últimos 30 dias)
-            from datetime import timedelta
-            thirty_days_ago = timezone.now() - timedelta(days=30)
-            recent_workouts = sessions.filter(start_time__gte=thirty_days_ago).count()
-
-            context = {
-                'total_workouts': total_workouts,
-                'recent_workouts': recent_workouts,
-                'avg_duration': round(avg_duration, 1) if avg_duration else 0,
+            context.update({
                 'is_student': True,
-            }
-        except Person.DoesNotExist:
-            # Usuário autenticado mas não é aluno cadastrado
-            context = {
-                'total_students': Person.objects.filter(is_active=True).count(),
-                'total_exercises': Exercise.objects.filter(is_active=True).count(),
-                'total_routines': Routine.objects.filter(is_active=True).count(),
-            }
-    else:
-        # Usuário não autenticado
-        context = {
-            'total_students': Person.objects.filter(is_active=True).count(),
-            'total_exercises': Exercise.objects.filter(is_active=True).count(),
-            'total_routines': Routine.objects.filter(is_active=True).count(),
-        }
+                'total_workouts': sessions.count(),
+                'recent_workouts': sessions.filter(start_time__gte=timezone.now() - timedelta(days=30)).count(),
+                'avg_duration': round(avg_duration, 1),
+            })
 
     return render(request, 'core/home.html', context)
 
@@ -265,8 +235,25 @@ def student_detail(request, pk):
             'sessions_count': sessions_count,
         })
 
+    assessments = list(student.assessments.all())
+    chart_points = [
+        {
+            'date': a.date.strftime('%d/%m/%y'),
+            'weight': float(a.weight_kg) if a.weight_kg is not None else None,
+            'body_fat': float(a.body_fat_pct) if a.body_fat_pct is not None else None,
+            'waist': float(a.waist_cm) if a.waist_cm is not None else None,
+        }
+        for a in reversed(assessments)
+    ]
+
     return render(request, 'core/student_detail.html', {
         'student': student,
+        'assessments': assessments,
+        'latest_assessment': assessments[0] if assessments else None,
+        'assessment_chart': chart_points if len(chart_points) >= 2 else [],
+        'photos': list(student.progress_photos.all()),
+        'notes': list(student.trainer_notes.select_related('author')),
+        'note_form': StudentNoteForm(),
         'active_routines_with_stats': active_routines_with_stats,
         'inactive_routines': inactive_routines,
         'last_session': last_session,
@@ -1447,3 +1434,109 @@ def healthz(request):
     except Exception:
         return JsonResponse({'status': 'error'}, status=503)
     return JsonResponse({'status': 'ok'})
+
+
+# ============= TRAINER'S FILE ON THE STUDENT =============
+
+def _student_tab(student_pk, tab):
+    return reverse('core:student_detail', kwargs={'pk': student_pk}) + f'#tab-{tab}'
+
+
+@staff_required
+def assessment_create(request, pk):
+    student = get_object_or_404(Person, pk=pk)
+    form = AssessmentForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        assessment = form.save(commit=False)
+        assessment.person = student
+        assessment.save()
+        messages.success(request, 'Avaliação registrada.')
+        return redirect(_student_tab(student.pk, 'avaliacoes'))
+    return render(request, 'core/assessment_form.html', {'form': form, 'student': student, 'title': 'Nova avaliação'})
+
+
+@staff_required
+def assessment_edit(request, pk):
+    assessment = get_object_or_404(Assessment.objects.select_related('person'), pk=pk)
+    form = AssessmentForm(request.POST or None, instance=assessment)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Avaliação atualizada.')
+        return redirect(_student_tab(assessment.person_id, 'avaliacoes'))
+    return render(request, 'core/assessment_form.html', {
+        'form': form, 'student': assessment.person, 'title': 'Editar avaliação'})
+
+
+@staff_required
+@require_POST
+def assessment_delete(request, pk):
+    assessment = get_object_or_404(Assessment, pk=pk)
+    person_id = assessment.person_id
+    assessment.delete()
+    messages.success(request, 'Avaliação removida.')
+    return redirect(_student_tab(person_id, 'avaliacoes'))
+
+
+@staff_required
+def photo_upload(request, pk):
+    student = get_object_or_404(Person, pk=pk)
+    form = ProgressPhotoForm(request.POST or None, request.FILES or None)
+    if request.method == 'POST' and form.is_valid():
+        photo = form.save(commit=False)
+        photo.person = student
+        photo.save()
+        messages.success(request, 'Foto adicionada.')
+        return redirect(_student_tab(student.pk, 'fotos'))
+    return render(request, 'core/photo_form.html', {'form': form, 'student': student})
+
+
+@staff_required
+@require_POST
+def photo_delete(request, pk):
+    photo = get_object_or_404(ProgressPhoto, pk=pk)
+    person_id = photo.person_id
+    photo.delete()
+    messages.success(request, 'Foto removida.')
+    return redirect(_student_tab(person_id, 'fotos'))
+
+
+@login_required
+def photo_file(request, pk, size='full'):
+    """Progress photos are private: only the trainer and the student themself can open them."""
+    photo = get_object_or_404(ProgressPhoto.objects.select_related('person'), pk=pk)
+    if not is_trainer(request.user) and photo.person.user_id != request.user.pk:
+        raise PermissionDenied
+    field = photo.thumbnail if size == 'thumb' and photo.thumbnail else photo.image
+    try:
+        handle = field.open('rb')
+    except FileNotFoundError:
+        raise Http404
+    response = FileResponse(handle, content_type='image/jpeg' if field is photo.thumbnail else None)
+    response['Cache-Control'] = 'private, max-age=3600'
+    return response
+
+
+@staff_required
+@require_POST
+def note_add(request, pk):
+    student = get_object_or_404(Person, pk=pk)
+    form = StudentNoteForm(request.POST)
+    if form.is_valid():
+        note = form.save(commit=False)
+        note.person = student
+        note.author = request.user
+        note.save()
+        messages.success(request, 'Anotação salva.')
+    else:
+        messages.error(request, 'Escreva a anotação antes de salvar.')
+    return redirect(_student_tab(student.pk, 'notas'))
+
+
+@staff_required
+@require_POST
+def note_delete(request, pk):
+    note = get_object_or_404(StudentNote, pk=pk)
+    person_id = note.person_id
+    note.delete()
+    messages.success(request, 'Anotação removida.')
+    return redirect(_student_tab(person_id, 'notas'))

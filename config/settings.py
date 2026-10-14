@@ -207,6 +207,10 @@ AVATAR_MAX_HEIGHT = config('AVATAR_MAX_HEIGHT', default=6000, cast=int)
 AVATAR_MIN_WIDTH = config('AVATAR_MIN_WIDTH', default=100, cast=int)
 AVATAR_MIN_HEIGHT = config('AVATAR_MIN_HEIGHT', default=100, cast=int)
 
+# Progress photos (taken with a phone camera)
+PHOTO_MAX_SIZE_MB = config('PHOTO_MAX_SIZE_MB', default=15, cast=int)
+PHOTO_MAX_DIMENSION = config('PHOTO_MAX_DIMENSION', default=12000, cast=int)
+
 # Site URL
 # Public address of the app, used to build invitation links. Leave empty to use
 # the address the trainer is browsing from.
@@ -221,6 +225,6 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {'simple': {'format': '%(asctime)s %(levelname)s %(name)s: %(message)s'}},
     'handlers': {'console': {'class': 'logging.StreamHandler', 'formatter': 'simple'}},
-    'root': {'handlers': ['console'], 'level': config('LOG_LEVEL', default='INFO')},
-    'loggers': {'django.request': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False}},
+    'root': {'handlers': ['console'], 'level': 'CRITICAL' if TESTING else config('LOG_LEVEL', default='INFO')},
+    'loggers': {'django.request': {'handlers': ['console'], 'level': 'CRITICAL' if TESTING else 'WARNING', 'propagate': False}},
 }

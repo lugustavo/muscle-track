@@ -99,41 +99,28 @@
     </div>
 </div>
 
-<!-- Informações do Aluno -->
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informações Pessoais</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3">
-                        <strong>Email:</strong><br>
-                        <span>{{ student.user.email|default:"-" }}</span>
-                    </div>
-                    <div class="col-md-2">
-                        <strong>Telefone:</strong><br>
-                        <span>{{ student.phone|default:"-" }}</span>
-                    </div>
-                    <div class="col-md-2">
-                        <strong>Cidade:</strong><br>
-                        <span>{{ student.city|default:"-" }}</span>
-                    </div>
-                    <div class="col-md-2">
-                        <strong>Data de Nascimento:</strong><br>
-                        <span>{{ student.birth_date|date:"d/m/Y"|default:"-" }}</span>
-                    </div>
-                    <div class="col-md-2">
-                        <strong>Idade:</strong><br>
-                        <span>{{ student.age|default:"-" }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+{% if student.health_notes %}
+<div class="alert alert-danger d-flex gap-2" role="alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <div><strong>Atenção — saúde/restrições:</strong> {{ student.health_notes|truncatechars:300 }}</div>
 </div>
+{% endif %}
+{% if student.plan_status == 'expired' %}
+<div class="alert alert-danger py-2"><i class="bi bi-calendar-x"></i> Plano vencido em {{ student.plan_expires_on|date:"d/m/Y" }}.</div>
+{% elif student.plan_status == 'expiring' %}
+<div class="alert alert-warning py-2"><i class="bi bi-calendar-event"></i> O plano vence em {{ student.days_to_plan_expiry }} dia{{ student.days_to_plan_expiry|pluralize }} ({{ student.plan_expires_on|date:"d/m/Y" }}).</div>
+{% endif %}
 
+<ul class="nav nav-tabs mb-4" id="studentTabs" role="tablist">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-treinos" type="button" role="tab"><i class="bi bi-lightning-charge"></i> Treinos</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-ficha" type="button" role="tab"><i class="bi bi-person-vcard"></i> Ficha</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-avaliacoes" type="button" role="tab"><i class="bi bi-rulers"></i> Avaliações <span class="badge bg-secondary">{{ assessments|length }}</span></button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-fotos" type="button" role="tab"><i class="bi bi-images"></i> Fotos <span class="badge bg-secondary">{{ photos|length }}</span></button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-notas" type="button" role="tab"><i class="bi bi-journal-text"></i> Anotações <span class="badge bg-secondary">{{ notes|length }}</span></button></li>
+</ul>
+
+<div class="tab-content">
+<div class="tab-pane fade show active" id="tab-treinos" role="tabpanel">
 <!-- Treinos Ativos e Histórico -->
 <div class="row">
     <!-- Treinos Ativos -->
@@ -235,6 +222,14 @@
     </div>
 </div>
 
+
+</div>
+<div class="tab-pane fade" id="tab-ficha" role="tabpanel">{% include 'core/student/_ficha.html' %}</div>
+<div class="tab-pane fade" id="tab-avaliacoes" role="tabpanel">{% include 'core/student/_avaliacoes.html' %}</div>
+<div class="tab-pane fade" id="tab-fotos" role="tabpanel">{% include 'core/student/_fotos.html' %}</div>
+<div class="tab-pane fade" id="tab-notas" role="tabpanel">{% include 'core/student/_notas.html' %}</div>
+</div>
+
 <!-- Modais de confirmação para remover treinos -->
 {% for item in active_routines_with_stats %}
 <div class="modal fade" id="deactivateModal{{ item.person_routine.pk }}" tabindex="-1" aria-labelledby="deactivateModalLabel{{ item.person_routine.pk }}" aria-hidden="true">
@@ -267,4 +262,48 @@
     </div>
 </div>
 {% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'vendor/chartjs/4.4.0/chart.umd.js' %}"></script>
+<script>
+// Open the tab named in the URL hash (#tab-avaliacoes) and keep the hash in sync
+(function () {
+    function showFromHash() {
+        var hash = window.location.hash;
+        if (!hash) return;
+        var btn = document.querySelector('[data-bs-target="' + hash + '"]');
+        if (btn) bootstrap.Tab.getOrCreateInstance(btn).show();
+    }
+    showFromHash();
+    document.querySelectorAll('#studentTabs [data-bs-toggle="tab"]').forEach(function (btn) {
+        btn.addEventListener('shown.bs.tab', function (e) {
+            history.replaceState(null, '', e.target.getAttribute('data-bs-target'));
+        });
+    });
+})();
+
+var dataEl = document.getElementById('assessment-chart-data');
+if (dataEl) {
+    var points = JSON.parse(dataEl.textContent);
+    new Chart(document.getElementById('assessmentChart'), {
+        type: 'line',
+        data: {
+            labels: points.map(function (p) { return p.date; }),
+            datasets: [
+                {label: 'Peso (kg)', data: points.map(function (p) { return p.weight; }), borderColor: '#FF6B6B', yAxisID: 'y', spanGaps: true, tension: 0.25},
+                {label: '% gordura', data: points.map(function (p) { return p.body_fat; }), borderColor: '#4ECDC4', borderDash: [6, 4], yAxisID: 'y1', spanGaps: true, tension: 0.25},
+                {label: 'Cintura (cm)', data: points.map(function (p) { return p.waist; }), borderColor: '#2C3E50', yAxisID: 'y', spanGaps: true, tension: 0.25, hidden: true}
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: {
+                y: {position: 'left', title: {display: true, text: 'kg / cm'}},
+                y1: {position: 'right', grid: {drawOnChartArea: false}, title: {display: true, text: '%'}}
+            }
+        }
+    });
+}
+</script>
 {% endblock %}

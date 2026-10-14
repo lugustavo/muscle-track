@@ -1,9 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.validators import MinValueValidator
+import io
+import os
+import uuid
+
+from django.core.files.base import ContentFile
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils import timezone
 
-from .validators import validate_avatar_image
+from PIL import Image, ImageOps
+
+from .validators import validate_avatar_image, validate_photo_image
 
 
 class MuscleGroup(models.Model):
@@ -37,6 +44,18 @@ class Person(models.Model):
     phone = models.CharField(max_length=20, blank=True, verbose_name='Telefone')
     birth_date = models.DateField(null=True, blank=True, verbose_name='Data de Nascimento')
     notes = models.TextField(blank=True, verbose_name='Observações')
+
+    # Trainer's file on the student (not editable by the student)
+    goal = models.TextField(blank=True, verbose_name='Objetivo')
+    health_notes = models.TextField(
+        blank=True, verbose_name='Saúde, lesões e restrições',
+        help_text='Lesões, cirurgias, medicamentos, limitações médicas...'
+    )
+    emergency_contact_name = models.CharField(max_length=200, blank=True, verbose_name='Contato de emergência')
+    emergency_contact_phone = models.CharField(max_length=20, blank=True, verbose_name='Telefone de emergência')
+    plan_name = models.CharField(max_length=100, blank=True, verbose_name='Plano contratado')
+    plan_expires_on = models.DateField(null=True, blank=True, verbose_name='Vencimento do plano')
+
     is_active = models.BooleanField(default=True, verbose_name='Ativo')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -59,6 +78,26 @@ class Person(models.Model):
         if today.month < self.birth_date.month or (today.month == self.birth_date.month and today.day < self.birth_date.day):
             age -= 1
         return age
+
+    PLAN_EXPIRING_DAYS = 14
+
+    @property
+    def days_to_plan_expiry(self):
+        if not self.plan_expires_on:
+            return None
+        return (self.plan_expires_on - timezone.localdate()).days
+
+    @property
+    def plan_status(self):
+        """'none' (no expiry set), 'ok', 'expiring' (within 14 days) or 'expired'"""
+        days = self.days_to_plan_expiry
+        if days is None:
+            return 'none'
+        if days < 0:
+            return 'expired'
+        if days <= self.PLAN_EXPIRING_DAYS:
+            return 'expiring'
+        return 'ok'
 
     def get_avatar_url(self):
         """Get avatar URL or default image"""
@@ -399,3 +438,109 @@ class SessionSet(models.Model):
 
     def __str__(self):
         return f'{self.session_exercise} - série {self.number}'
+
+
+class Assessment(models.Model):
+    """Physical assessment of a student on a given date (all measures optional)"""
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='assessments', verbose_name='Aluno')
+    date = models.DateField(default=timezone.localdate, verbose_name='Data')
+    weight_kg = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True,
+        validators=[MinValueValidator(1)], verbose_name='Peso (kg)')
+    height_cm = models.DecimalField(
+        max_digits=5, decimal_places=1, null=True, blank=True,
+        validators=[MinValueValidator(30)], verbose_name='Altura (cm)')
+    body_fat_pct = models.DecimalField(
+        max_digits=4, decimal_places=1, null=True, blank=True,
+        validators=[MinValueValidator(0), MaxValueValidator(100)], verbose_name='% de gordura')
+    chest_cm = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True,
+                                   validators=[MinValueValidator(0)], verbose_name='Peitoral (cm)')
+    waist_cm = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True,
+                                   validators=[MinValueValidator(0)], verbose_name='Cintura (cm)')
+    hip_cm = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True,
+                                 validators=[MinValueValidator(0)], verbose_name='Quadril (cm)')
+    arm_cm = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True,
+                                 validators=[MinValueValidator(0)], verbose_name='Braço (cm)')
+    thigh_cm = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True,
+                                   validators=[MinValueValidator(0)], verbose_name='Coxa (cm)')
+    notes = models.TextField(blank=True, verbose_name='Observações')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Avaliação física'
+        verbose_name_plural = 'Avaliações físicas'
+        ordering = ['-date', '-created_at']
+
+    def __str__(self):
+        return f'{self.person.person_name} - {self.date:%d/%m/%Y}'
+
+    @property
+    def bmi(self):
+        if self.weight_kg and self.height_cm:
+            meters = float(self.height_cm) / 100
+            return round(float(self.weight_kg) / (meters * meters), 1)
+        return None
+
+
+def progress_photo_path(instance, filename):
+    """Unguessable file names: photos are private, the name is not the only protection but helps."""
+    ext = os.path.splitext(filename)[1].lower()
+    return f'progress/{instance.person_id}/{uuid.uuid4().hex}{ext}'
+
+
+class ProgressPhoto(models.Model):
+    """Private progress photo of a student; only served to the trainer and the student"""
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='progress_photos', verbose_name='Aluno')
+    date = models.DateField(default=timezone.localdate, verbose_name='Data')
+    image = models.ImageField(upload_to=progress_photo_path, validators=[validate_photo_image], verbose_name='Foto')
+    thumbnail = models.ImageField(upload_to=progress_photo_path, blank=True, editable=False, verbose_name='Miniatura')
+    caption = models.CharField(max_length=200, blank=True, verbose_name='Legenda')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Foto de progresso'
+        verbose_name_plural = 'Fotos de progresso'
+        ordering = ['-date', '-created_at']
+
+    def __str__(self):
+        return f'{self.person.person_name} - {self.date:%d/%m/%Y}'
+
+    THUMBNAIL_SIZE = (480, 480)
+
+    def save(self, *args, **kwargs):
+        if self.image and not self.thumbnail:
+            self.thumbnail.save(f'{uuid.uuid4().hex}.jpg', self._make_thumbnail(), save=False)
+        super().save(*args, **kwargs)
+
+    def _make_thumbnail(self):
+        self.image.seek(0)
+        with Image.open(self.image) as img:
+            img = ImageOps.exif_transpose(img).convert('RGB')
+            img.thumbnail(self.THUMBNAIL_SIZE)
+            buffer = io.BytesIO()
+            img.save(buffer, 'JPEG', quality=80, optimize=True)
+        self.image.seek(0)
+        return ContentFile(buffer.getvalue())
+
+    def delete(self, *args, **kwargs):
+        files = [(f.storage, f.name) for f in (self.image, self.thumbnail) if f and f.name]
+        result = super().delete(*args, **kwargs)
+        for storage, name in files:
+            storage.delete(name)
+        return result
+
+
+class StudentNote(models.Model):
+    """Dated note written by the trainer about a student (never shown to the student)"""
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='trainer_notes', verbose_name='Aluno')
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+', verbose_name='Autor')
+    text = models.TextField(verbose_name='Anotação')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Anotação da personal'
+        verbose_name_plural = 'Anotações da personal'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.person.person_name} - {self.created_at:%d/%m/%Y}'

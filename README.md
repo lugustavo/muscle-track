@@ -5,7 +5,12 @@ App web **self-hosted** para personal trainers: cadastro de alunos, fichas de tr
 ## Funcionalidades
 
 ### 👩‍🏫 Personal (admin)
-- **Alunos** — cadastro, ficha, histórico e evolução
+- **Painel de hoje** — quem está há mais de 7 dias sem treinar, planos e fichas que vencem em 14 dias, treinos do dia e comentários recentes dos alunos
+- **Ficha do aluno** (em abas) — dados, objetivo, saúde/lesões/restrições (em destaque), contato de emergência, plano e vencimento
+- **Avaliações físicas** — peso, altura, % de gordura e medidas, com IMC e gráfico de evolução
+- **Fotos de progresso** — privadas (só a personal e o próprio aluno abrem), com miniaturas
+- **Anotações datadas** — só a personal vê
+- **Alunos** — cadastro, histórico e evolução
 - **Convite por link** — ao cadastrar o aluno você recebe um link de uso único (copiar ou enviar por WhatsApp) para ele criar a senha; o mesmo link serve para redefinir o acesso
 - **Exercícios** com imagem, GIF, vídeo ou link
 - **Modelos de treino** (A/B/C…) e atribuição ao aluno, com cópia editável por aluno (editar não apaga o histórico)
@@ -110,9 +115,10 @@ Bootstrap, ícones, Chart.js e SortableJS são servidos localmente de `static/ve
 - Nenhuma senha fixa; `SECRET_KEY` obrigatório
 
 ## Backlog
-- **Backup automático** (pg_dump diário + `media`, retenção e restauração testada; cópia fora do servidor)
+- **Backup automático** (pg_dump diário + `media`, retenção e restauração testada; cópia fora do servidor) — a pasta `media` inclui as fotos de progresso, que são dados sensíveis
 - E-mail (SMTP) para "esqueci minha senha"
-- Ficha completa da personal: objetivo/lesões, avaliações físicas, fotos de progresso, notas, vencimento do plano e painel "quem sumiu"
+- Aluno ver as próprias avaliações e fotos de progresso; comparação lado a lado de fotos
+- Lembrete automático de plano vencendo (WhatsApp/e-mail)
 - Séries por tempo/técnicas (drop-set, bi-set), periodização
 - Monitoramento/alertas e logs centralizados
 - Servir `media/` direto pelo Caddy
