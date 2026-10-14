@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - {{ student.person_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2"><i class="bi bi-rulers"></i> {{ title }}</h1>
+        <div class="text-muted">{{ student.person_name }}</div>
+    </div>
+    <a href="{% url 'core:student_detail' student.pk %}#tab-avaliacoes" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+</div>
+
+<form method="post" class="row">
+    {% csrf_token %}
+    <div class="col-lg-8">
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold" for="{{ form.date.id_for_label }}">Data</label>
+                        {{ form.date }} {{ form.date.errors }}
+                    </div>
+                    <div class="col-6 col-md-4"><label class="form-label fw-bold" for="{{ form.weight_kg.id_for_label }}">{{ form.weight_kg.label }}</label>{{ form.weight_kg }}{{ form.weight_kg.errors }}</div>
+                    <div class="col-6 col-md-4"><label class="form-label fw-bold" for="{{ form.height_cm.id_for_label }}">{{ form.height_cm.label }}</label>{{ form.height_cm }}{{ form.height_cm.errors }}</div>
+                    <div class="col-6 col-md-4"><label class="form-label fw-bold" for="{{ form.body_fat_pct.id_for_label }}">{{ form.body_fat_pct.label }}</label>{{ form.body_fat_pct }}{{ form.body_fat_pct.errors }}</div>
+                    <div class="col-6 col-md-4"><label class="form-label fw-bold" for="{{ form.chest_cm.id_for_label }}">{{ form.chest_cm.label }}</label>{{ form.chest_cm }}{{ form.chest_cm.errors }}</div>
+                    <div class="col-6 col-md-4"><label class="form-label fw-bold" for="{{ form.waist_cm.id_for_label }}">{{ form.waist_cm.label }}</label>{{ form.waist_cm }}{{ form.waist_cm.errors }}</div>
+                    <div class="col-6 col-md-4"><label class="form-label fw-bold" for="{{ form.hip_cm.id_for_label }}">{{ form.hip_cm.label }}</label>{{ form.hip_cm }}{{ form.hip_cm.errors }}</div>
+                    <div class="col-6 col-md-4"><label class="form-label fw-bold" for="{{ form.arm_cm.id_for_label }}">{{ form.arm_cm.label }}</label>{{ form.arm_cm }}{{ form.arm_cm.errors }}</div>
+                    <div class="col-6 col-md-4"><label class="form-label fw-bold" for="{{ form.thigh_cm.id_for_label }}">{{ form.thigh_cm.label }}</label>{{ form.thigh_cm }}{{ form.thigh_cm.errors }}</div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold" for="{{ form.notes.id_for_label }}">Observações</label>
+                        {{ form.notes }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Salvar avaliação</button>
+        <a href="{% url 'core:student_detail' student.pk %}#tab-avaliacoes" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

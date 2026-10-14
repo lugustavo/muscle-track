@@ -13,6 +13,15 @@ urlpatterns = [
     path('students/<int:pk>/', views.student_detail, name='student_detail'),
     path('students/<int:pk>/edit/', views.student_edit, name='student_edit'),
     path('students/<int:pk>/invite/', views.student_invite, name='student_invite'),
+    path('students/<int:pk>/assessments/new/', views.assessment_create, name='assessment_create'),
+    path('assessments/<int:pk>/edit/', views.assessment_edit, name='assessment_edit'),
+    path('assessments/<int:pk>/delete/', views.assessment_delete, name='assessment_delete'),
+    path('students/<int:pk>/photos/new/', views.photo_upload, name='photo_upload'),
+    path('photos/<int:pk>/delete/', views.photo_delete, name='photo_delete'),
+    path('photos/<int:pk>/file/', views.photo_file, name='photo_file'),
+    path('photos/<int:pk>/thumb/', views.photo_file, {'size': 'thumb'}, name='photo_thumb'),
+    path('students/<int:pk>/notes/add/', views.note_add, name='note_add'),
+    path('notes/<int:pk>/delete/', views.note_delete, name='note_delete'),
     path('invite/<uidb64>/<token>/', views.accept_invite, name='accept_invite'),
 
     # Exercises

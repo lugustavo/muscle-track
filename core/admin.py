@@ -1,7 +1,8 @@
 from django.contrib import admin
 from .models import (
     MuscleGroup, Person, Exercise, Routine, RoutineExercise,
-    PersonRoutine, PersonRoutineExercise, WorkoutSession, SessionExercise, SessionSet
+    PersonRoutine, PersonRoutineExercise, WorkoutSession, SessionExercise, SessionSet,
+    Assessment, ProgressPhoto, StudentNote,
 )
 
 
@@ -143,3 +144,22 @@ class SessionExerciseAdmin(admin.ModelAdmin):
     readonly_fields = ['completed_at']
     ordering = ['session', 'person_routine_exercise__order']
     inlines = [SessionSetInline]
+
+
+@admin.register(Assessment)
+class AssessmentAdmin(admin.ModelAdmin):
+    list_display = ['person', 'date', 'weight_kg', 'body_fat_pct', 'waist_cm']
+    list_filter = ['date']
+    search_fields = ['person__person_name']
+
+
+@admin.register(ProgressPhoto)
+class ProgressPhotoAdmin(admin.ModelAdmin):
+    list_display = ['person', 'date', 'caption']
+    search_fields = ['person__person_name']
+
+
+@admin.register(StudentNote)
+class StudentNoteAdmin(admin.ModelAdmin):
+    list_display = ['person', 'author', 'created_at']
+    search_fields = ['person__person_name', 'text']

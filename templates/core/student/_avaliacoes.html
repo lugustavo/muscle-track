@@ -1,0 +1,56 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0"><i class="bi bi-rulers"></i> Avaliações físicas</h5>
+    <a href="{% url 'core:assessment_create' student.pk %}" class="btn btn-success"><i class="bi bi-plus-circle"></i> Nova avaliação</a>
+</div>
+
+{% if assessment_chart %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h6 class="card-title">Evolução</h6>
+        <div style="height: 280px;"><canvas id="assessmentChart"></canvas></div>
+    </div>
+</div>
+{{ assessment_chart|json_script:"assessment-chart-data" }}
+{% endif %}
+
+{% if assessments %}
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Data</th><th class="text-end">Peso</th><th class="text-end">Altura</th><th class="text-end">IMC</th>
+                    <th class="text-end">% gordura</th><th class="text-end">Peito</th><th class="text-end">Cintura</th>
+                    <th class="text-end">Quadril</th><th class="text-end">Braço</th><th class="text-end">Coxa</th><th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for a in assessments %}
+                <tr>
+                    <td>{{ a.date|date:"d/m/Y" }}{% if a.notes %} <i class="bi bi-chat-left-text text-muted" title="{{ a.notes }}"></i>{% endif %}</td>
+                    <td class="text-end">{{ a.weight_kg|default_if_none:"-" }}</td>
+                    <td class="text-end">{{ a.height_cm|default_if_none:"-" }}</td>
+                    <td class="text-end">{{ a.bmi|default_if_none:"-" }}</td>
+                    <td class="text-end">{{ a.body_fat_pct|default_if_none:"-" }}</td>
+                    <td class="text-end">{{ a.chest_cm|default_if_none:"-" }}</td>
+                    <td class="text-end">{{ a.waist_cm|default_if_none:"-" }}</td>
+                    <td class="text-end">{{ a.hip_cm|default_if_none:"-" }}</td>
+                    <td class="text-end">{{ a.arm_cm|default_if_none:"-" }}</td>
+                    <td class="text-end">{{ a.thigh_cm|default_if_none:"-" }}</td>
+                    <td class="text-end text-nowrap">
+                        <a href="{% url 'core:assessment_edit' a.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar"><i class="bi bi-pencil"></i></a>
+                        <form method="post" action="{% url 'core:assessment_delete' a.pk %}" class="d-inline" onsubmit="return confirm('Remover esta avaliação?');">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-outline-danger" title="Remover"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<p class="text-muted small mt-2">Medidas em cm, peso em kg. Altura e peso geram o IMC.</p>
+{% else %}
+<div class="alert alert-info"><i class="bi bi-info-circle"></i> Nenhuma avaliação registrada ainda.</div>
+{% endif %}

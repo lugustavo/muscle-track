@@ -1,0 +1,31 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0"><i class="bi bi-images"></i> Fotos de progresso</h5>
+    <a href="{% url 'core:photo_upload' student.pk %}" class="btn btn-success"><i class="bi bi-camera"></i> Adicionar foto</a>
+</div>
+<p class="text-muted small"><i class="bi bi-lock"></i> Fotos privadas: só você e o próprio aluno conseguem abrir.</p>
+
+{% if photos %}
+<div class="row g-3">
+    {% for photo in photos %}
+    <div class="col-6 col-md-4 col-lg-3">
+        <div class="card h-100">
+            <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener">
+                <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" class="card-img-top" alt="Foto de {{ photo.date|date:'d/m/Y' }}" style="aspect-ratio: 3/4; object-fit: cover;">
+            </a>
+            <div class="card-body py-2">
+                <div class="fw-bold">{{ photo.date|date:"d/m/Y" }}</div>
+                {% if photo.caption %}<div class="small text-muted">{{ photo.caption }}</div>{% endif %}
+            </div>
+            <div class="card-footer bg-transparent py-1 text-end">
+                <form method="post" action="{% url 'core:photo_delete' photo.pk %}" class="d-inline" onsubmit="return confirm('Remover esta foto?');">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info"><i class="bi bi-info-circle"></i> Nenhuma foto ainda.</div>
+{% endif %}

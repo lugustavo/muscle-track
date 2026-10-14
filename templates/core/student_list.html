@@ -106,6 +106,8 @@
                             {% else %}
                             <span class="badge bg-secondary">Inativo</span>
                             {% endif %}
+                            {% if item.student.plan_status == 'expired' %}<span class="badge bg-danger" title="Plano vencido em {{ item.student.plan_expires_on|date:'d/m/Y' }}">plano vencido</span>
+                            {% elif item.student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark" title="Vence em {{ item.student.plan_expires_on|date:'d/m/Y' }}">plano vence em {{ item.student.days_to_plan_expiry }}d</span>{% endif %}
                         </div>
                     </div>
 
@@ -235,6 +237,8 @@
                             {% else %}
                             <span class="badge bg-secondary">Inativo</span>
                             {% endif %}
+                            {% if item.student.plan_status == 'expired' %}<span class="badge bg-danger" title="Plano vencido em {{ item.student.plan_expires_on|date:'d/m/Y' }}">plano vencido</span>
+                            {% elif item.student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark" title="Vence em {{ item.student.plan_expires_on|date:'d/m/Y' }}">plano vence em {{ item.student.days_to_plan_expiry }}d</span>{% endif %}
                         </td>
                         <td class="text-center">
                             <a href="{% url 'core:student_detail' item.student.pk %}" class="btn btn-sm btn-outline-primary" title="Ver Detalhes">

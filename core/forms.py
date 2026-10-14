@@ -1,7 +1,9 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.db.models import Q
-from .models import Person, Exercise, Routine, RoutineExercise, PersonRoutine
+from .models import (
+    Assessment, Exercise, Person, PersonRoutine, ProgressPhoto, Routine, RoutineExercise, StudentNote,
+)
 
 
 class PersonForm(forms.ModelForm):
@@ -15,12 +17,24 @@ class PersonForm(forms.ModelForm):
     class Meta:
         model = Person
         fields = ['person_name', 'email', 'avatar', 'address', 'city', 'state', 'zip_code',
-                  'phone', 'birth_date', 'notes', 'is_active']
+                  'phone', 'birth_date', 'notes', 'goal', 'health_notes', 'emergency_contact_name',
+                  'emergency_contact_phone', 'plan_name', 'plan_expires_on', 'is_active']
         widgets = {
             'birth_date': forms.DateInput(
                 attrs={'type': 'date', 'class': 'form-control'},
                 format='%Y-%m-%d'
             ),
+            'plan_expires_on': forms.DateInput(
+                attrs={'type': 'date', 'class': 'form-control'},
+                format='%Y-%m-%d'
+            ),
+            'goal': forms.Textarea(attrs={'rows': 2, 'class': 'form-control',
+                                          'placeholder': 'Ex.: hipertrofia, emagrecer 8 kg até dezembro...'}),
+            'health_notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control',
+                                                  'placeholder': 'Ex.: hérnia de disco L5, joelho direito operado em 2022, usa anticoncepcional...'}),
+            'emergency_contact_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'emergency_contact_phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'plan_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex.: Mensal 3x/semana'}),
             'notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'person_name': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.TextInput(attrs={'class': 'form-control'}),
@@ -153,3 +167,46 @@ class AIWorkoutGenerationForm(forms.Form):
         max_value=180,
         initial=60
     )
+
+
+class AssessmentForm(forms.ModelForm):
+    MEASURE_FIELDS = ['weight_kg', 'height_cm', 'body_fat_pct', 'chest_cm', 'waist_cm', 'hip_cm', 'arm_cm', 'thigh_cm']
+
+    class Meta:
+        model = Assessment
+        fields = ['date'] + ['weight_kg', 'height_cm', 'body_fat_pct', 'chest_cm', 'waist_cm', 'hip_cm',
+                             'arm_cm', 'thigh_cm'] + ['notes']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
+            'notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            **{name: forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'inputmode': 'decimal'})
+               for name in ['weight_kg', 'height_cm', 'body_fat_pct', 'chest_cm', 'waist_cm', 'hip_cm', 'arm_cm', 'thigh_cm']},
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        if not any(cleaned.get(name) is not None for name in self.MEASURE_FIELDS):
+            raise forms.ValidationError('Preencha pelo menos uma medida (peso, altura, % de gordura ou circunferência).')
+        return cleaned
+
+
+class ProgressPhotoForm(forms.ModelForm):
+    class Meta:
+        model = ProgressPhoto
+        fields = ['date', 'image', 'caption']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
+            'image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+            'caption': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex.: frente, perfil, costas'}),
+        }
+
+
+class StudentNoteForm(forms.ModelForm):
+    class Meta:
+        model = StudentNote
+        fields = ['text']
+        widgets = {
+            'text': forms.Textarea(attrs={'rows': 3, 'class': 'form-control',
+                                          'placeholder': 'Anotação da personal (o aluno não vê)...'}),
+        }
+        labels = {'text': ''}
