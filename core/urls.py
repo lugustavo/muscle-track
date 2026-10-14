@@ -52,6 +52,7 @@ urlpatterns = [
     path('manifest.webmanifest', views.pwa_manifest, name='pwa_manifest'),
     path('sw.js', views.service_worker, name='service_worker'),
     path('offline/', views.offline_page, name='offline'),
+    path('healthz', views.healthz, name='healthz'),
 
     # APIs for forms
     path('api/exercises/', views.api_exercises_list, name='api_exercises_list'),

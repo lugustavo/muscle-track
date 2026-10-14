@@ -22,10 +22,32 @@ if DEBUG or TESTING:
 else:
     SECRET_KEY = config('SECRET_KEY')  # required: fails loudly if missing
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+# Public domain of the installation (e.g. treino.example.com). When set, hosts, CSRF
+# origins and the invite-link base URL are derived from it, and HTTPS hardening is on.
+DOMAIN = config('DOMAIN', default='')
+USE_HTTPS = config('USE_HTTPS', default=bool(DOMAIN), cast=bool)
 
-# CSRF Trusted Origins (para produção)
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='http://localhost:8000', cast=Csv())
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default=','.join(filter(None, [DOMAIN, 'localhost', '127.0.0.1'])),
+    cast=Csv(),
+)
+
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default=f'https://{DOMAIN}' if DOMAIN else 'http://localhost:8000',
+    cast=Csv(),
+)
+
+if USE_HTTPS and not TESTING:
+    # TLS is terminated by the reverse proxy (Caddy), which sends X-Forwarded-Proto
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    # Start small: a wrong HSTS value locks browsers into HTTPS for that long
+    SECURE_HSTS_SECONDS = config('SECURE_HSTS_SECONDS', default=86400, cast=int)
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = 'same-origin'
 
 # Application definition
 INSTALLED_APPS = [
@@ -81,13 +103,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
-# Use PostgreSQL in production (Render), SQLite in development
+# PostgreSQL when DATABASE_URL is set (Docker Compose), SQLite for local development
 DATABASE_URL = config('DATABASE_URL', default=None)
 
 if DATABASE_URL:
-    # Production: Use PostgreSQL from Render
     DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL)
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=60)
     }
 else:
     # Development: Use SQLite
@@ -189,7 +210,17 @@ AVATAR_MIN_HEIGHT = config('AVATAR_MIN_HEIGHT', default=100, cast=int)
 # Site URL
 # Public address of the app, used to build invitation links. Leave empty to use
 # the address the trainer is browsing from.
-SITE_URL = config('SITE_URL', default='')
+SITE_URL = config('SITE_URL', default=f'https://{DOMAIN}' if DOMAIN else '')
 
 # How long a student invitation link stays valid
 PASSWORD_RESET_TIMEOUT = 7 * 24 * 60 * 60
+
+# Logging: everything to stdout so `docker compose logs` shows it
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {'simple': {'format': '%(asctime)s %(levelname)s %(name)s: %(message)s'}},
+    'handlers': {'console': {'class': 'logging.StreamHandler', 'formatter': 'simple'}},
+    'root': {'handlers': ['console'], 'level': config('LOG_LEVEL', default='INFO')},
+    'loggers': {'django.request': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False}},
+}

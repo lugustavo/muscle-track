@@ -19,3 +19,13 @@ jobs:
         env:
           SECRET_KEY: ci-only-key
       - run: python manage.py test
+      - run: node --check static/js/workout.js
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate compose file with the example env
+        run: cp .env.example .env && docker compose config --quiet
+      - name: Build image
+        run: docker build -t muscle-track:ci .

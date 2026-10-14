@@ -1,3 +1,5 @@
+> **Documento histórico** — escrito antes das Fases 0–4 e pode estar desatualizado (login social, senhas fixas e e-mail de ativação foram removidos). A referência atual é o [README](../README.md).
+
 # Sistema de Sessões de Treino - Correções Implementadas
 
 ## Problemas Corrigidos

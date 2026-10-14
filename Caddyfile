@@ -1,0 +1,18 @@
+# Caddy obtains and renews the HTTPS certificate for $DOMAIN automatically
+# (DNS must point to this server and ports 80/443 must be open).
+{$DOMAIN} {
+	encode zstd gzip
+
+	# room for exercise videos/GIFs uploaded by the trainer
+	request_body {
+		max_size 100MB
+	}
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		-Server
+	}
+
+	reverse_proxy web:8000
+}

@@ -1435,3 +1435,15 @@ def service_worker(request):
 
 def offline_page(request):
     return render(request, 'pwa/offline.html')
+
+
+def healthz(request):
+    """Liveness/readiness probe for Docker: 200 only if the database answers."""
+    from django.db import connection
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT 1')
+            cursor.fetchone()
+    except Exception:
+        return JsonResponse({'status': 'error'}, status=503)
+    return JsonResponse({'status': 'ok'})
