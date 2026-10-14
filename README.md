@@ -143,13 +143,29 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 - **Backup automático** (pg_dump diário + `media`, retenção e restauração testada; cópia fora do servidor) — a pasta `media` inclui as fotos de progresso, que são dados sensíveis
 - Configurar SMTP no servidor para o "esqueci minha senha" chegar por e-mail (hoje o caminho é a personal gerar um novo link)
 - Revisar o texto da política de privacidade (`templates/core/privacy_policy.html`, é um modelo) com apoio jurídico; subir `CURRENT_VERSION` em `core/consent.py` quando o texto mudar
-- Aluno ver a própria agenda e pedir remarcação; cobrança automática com gateway (Pix/cartão); lembretes enviados automaticamente
+- Cobrança automática com gateway (Pix/cartão)
+- Lembrete automático de plano vencendo, de aula e de reavaliação (depende das notificações abaixo)
 - Metas com prazo e lembrete de reavaliação, marcação do aniversário, importação/exportação de alunos em CSV
 - Aluno ver as próprias avaliações e fotos de progresso; comparação lado a lado de fotos
-- Lembrete automático de plano vencendo (WhatsApp/e-mail)
 - Séries por tempo/técnicas (drop-set, bi-set), periodização
 - Monitoramento/alertas e logs centralizados
 - Servir `media/` direto pelo Caddy
+
+### Agenda — próximos passos
+- **Recorrência e várias datas (como no Google Agenda):** hoje o horário fixo é só "dia da semana + hora". Aceitar repetir a cada N semanas, vários dias da semana, início e fim, e "termina: nunca / em uma data / após N ocorrências"; e criar várias aulas avulsas de uma vez (intervalo de datas). Ao editar uma aula de uma série, perguntar "só esta / esta e as próximas / todas", sem regenerar aulas canceladas.
+- **Arrastar e soltar:** mover a aula para outro dia ou horário direto na grade (e ajustar a duração), com o efeito de "remarcar" (a original fica remarcada, a nova é criada), aviso de sobreposição e desfazer. Tem que funcionar bem no celular.
+- **Tipos de vista:** mês, semana, dia, previsão (próximos dias) e lista/agenda no estilo do calendário do Sonarr/Radarr, com seletor e a escolha lembrada. A semana atual continua sendo a padrão.
+- **Visão do aluno:** o aluno ver a própria agenda e pedir remarcação (a personal aprova), com prazo de cancelamento.
+
+### Notificações dos alunos
+- **Quando avisar:** ao marcar falta, cancelamento ou remarcação na agenda; depois, lembrete de aula, vencimento do plano e reavaliação.
+- **Canais:** web push, Telegram e e-mail, só pelos que o aluno autorizou. Hoje não existe seção de notificações: criar **Notificações** no perfil do aluno, com liga/desliga por canal e por tipo de aviso.
+  - *Web push:* assinatura do navegador/PWA (chaves VAPID, `pywebpush`), aproveitando o service worker que já existe.
+  - *Telegram:* bot; o aluno vincula o próprio chat por um link ou código de uso único gerado no app.
+  - *E-mail:* precisa do SMTP configurado no servidor (já no backlog).
+- **LGPD:** cada canal é um consentimento próprio (versão e data, como em `core/consent.py`), revogável a qualquer momento; sem consentimento não se envia nada. Mensagens sem dados sensíveis (sem valores nem saúde).
+- **Infra:** envio assíncrono com tentativas e registro de entrega/falha, e o aviso registrado no histórico do aluno. Se nenhum canal estiver autorizado, a personal segue com o botão de WhatsApp que já existe.
+- *Ordem sugerida:* seção de notificações e consentimentos → e-mail (só depende de SMTP) → web push → Telegram.
 
 ### Normalização de UX
 - **Multi-idioma (pt-BR e inglês primeiro):** usar o i18n do Django (`gettext_lazy`, `{% trans %}`/`{% blocktrans %}`, `LocaleMiddleware`, `locale/`) com seletor de idioma (cookie/preferência do usuário). Cobrir templates, mensagens das views, labels/choices de models e forms, textos em JS (alertas do treino), o texto do convite por WhatsApp e o idioma do prompt da IA; formatos de data/número por idioma. Hoje há **0** textos marcados para tradução (todo o português está fixo em ~35 templates, views, forms e JS). Os testes devem rodar nos dois idiomas.
