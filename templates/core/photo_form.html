@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load navigation %}
 
 {% block title %}Adicionar foto - {{ student.person_name }}{% endblock %}
 
@@ -8,7 +9,7 @@
         <h1 class="h2"><i class="bi bi-camera"></i> Adicionar foto de progresso</h1>
         <div class="text-muted">{{ student.person_name }}</div>
     </div>
-    <a href="{% url 'core:student_detail' student.pk %}#tab-fotos" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+    {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default fragment='#tab-fotos' %}
 </div>
 
 <form method="post" enctype="multipart/form-data" class="row">
@@ -32,7 +33,7 @@
             </div>
         </div>
         <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> Enviar foto</button>
-        <a href="{% url 'core:student_detail' student.pk %}#tab-fotos" class="btn btn-outline-secondary">Cancelar</a>
+        {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='' fragment='#tab-fotos' %}
     </div>
 </form>
 {% endblock %}

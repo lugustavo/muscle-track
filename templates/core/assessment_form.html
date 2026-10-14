@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load navigation %}
 
 {% block title %}{{ title }} - {{ student.person_name }}{% endblock %}
 
@@ -8,7 +9,7 @@
         <h1 class="h2"><i class="bi bi-rulers"></i> {{ title }}</h1>
         <div class="text-muted">{{ student.person_name }}</div>
     </div>
-    <a href="{% url 'core:student_detail' student.pk %}#tab-avaliacoes" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+    {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default fragment='#tab-avaliacoes' %}
 </div>
 
 <form method="post" class="row">
@@ -38,7 +39,7 @@
             </div>
         </div>
         <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Salvar avaliação</button>
-        <a href="{% url 'core:student_detail' student.pk %}#tab-avaliacoes" class="btn btn-outline-secondary">Cancelar</a>
+        {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='' fragment='#tab-avaliacoes' %}
     </div>
 </form>
 {% endblock %}

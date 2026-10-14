@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load navigation %}
 {% load l10n static %}
 
 {% block title %}Treino - {{ person_routine.routine_name }}{% endblock %}
@@ -79,7 +80,7 @@
                     <span class="me-3"><i class="bi bi-clock-history"></i> Última vez: <strong>{{ e.previous_weight|unlocalize }} kg</strong>{% if e.previous_date %} ({{ e.previous_date|date:"d/m" }}){% endif %}</span>
                     {% endif %}
                     {% if e.record is not None %}
-                    <a href="{% url 'core:my_exercise_progress' e.prx.exercise.pk %}" class="me-3 text-decoration-none"><i class="bi bi-trophy"></i> Recorde: <strong>{{ e.record|unlocalize }} kg</strong></a>
+                    <a href="{% nav_url 'core:my_exercise_progress' e.prx.exercise.pk %}" class="me-3 text-decoration-none"><i class="bi bi-trophy"></i> Recorde: <strong>{{ e.record|unlocalize }} kg</strong></a>
                     {% endif %}
                     {% if e.prx.exercise.media_url %}
                     <a href="{{ e.prx.exercise.media_url }}" target="_blank" rel="noopener" class="text-decoration-none"><i class="bi bi-play-circle"></i> Ver execução</a>

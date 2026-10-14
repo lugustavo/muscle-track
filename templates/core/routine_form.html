@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
+{% load navigation %}
 {% load static %}
 
 {% block title %}{{ title }} - Muscle Track{% endblock %}
@@ -16,9 +17,8 @@
             </ol>
         </nav>
     </div>
-    <a href="{% if routine %}{% url 'core:routine_detail' routine.id %}{% else %}{% url 'core:routine_list' %}{% endif %}" class="btn btn-secondary">
-        <i class="bi bi-arrow-left"></i> Voltar
-    </a>
+    {% if routine %}{% url 'core:routine_detail' routine.id as back_default %}{% else %}{% url 'core:routine_list' as back_default %}{% endif %}
+    {% back_button back_default %}
 </div>
 
 <form method="post" id="routineForm">
@@ -154,9 +154,7 @@
                         <button type="submit" class="btn btn-success btn-lg">
                             <i class="bi bi-check-circle"></i> Salvar Treino
                         </button>
-                        <a href="{% url 'core:routine_list' %}" class="btn btn-outline-secondary">
-                            <i class="bi bi-x-circle"></i> Cancelar
-                        </a>
+                        {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='bi-x-circle' %}
                     </div>
                 </div>
             </div>

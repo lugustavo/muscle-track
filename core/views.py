@@ -29,7 +29,7 @@ from .models import (
     Assessment, Exercise, MuscleGroup, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
     Routine, RoutineExercise, SessionExercise, SessionSet, StudentNote, WorkoutSession,
 )
-from .navigation import back_label, safe_next_url
+from .navigation import after_save_url, back_label, safe_next_url
 from .permissions import is_trainer, staff_required, student_required
 
 
@@ -292,7 +292,7 @@ def student_edit(request, pk):
                 messages.success(request, 'Aluno atualizado! O e-mail de login mudou: confira o convite se o aluno ainda não criou a senha.')
             else:
                 messages.success(request, 'Aluno atualizado com sucesso!')
-            return redirect('core:student_detail', pk=pk)
+            return redirect(after_save_url(request, reverse('core:student_detail', kwargs={'pk': pk})))
     else:
         form = PersonForm(instance=student)
     return render(request, 'core/student_form.html', {'form': form, 'title': 'Editar Aluno'})
@@ -364,7 +364,7 @@ def exercise_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Exercício cadastrado com sucesso!')
-            return redirect('core:exercise_list')
+            return redirect(after_save_url(request, reverse('core:exercise_list'), forward_next=False))
     else:
         form = ExerciseForm()
     return render(request, 'core/exercise_form.html', {'form': form, 'title': 'Cadastrar Exercício'})
@@ -422,7 +422,7 @@ def exercise_edit(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Exercício atualizado com sucesso!')
-            return redirect('core:exercise_detail', pk=pk)
+            return redirect(after_save_url(request, reverse('core:exercise_detail', kwargs={'pk': pk})))
     else:
         form = ExerciseForm(instance=exercise)
     return render(request, 'core/exercise_form.html', {'form': form, 'title': 'Editar Exercício'})
@@ -592,7 +592,7 @@ def routine_create(request):
                 messages.error(request, str(e))
             else:
                 messages.success(request, 'Treino criado com sucesso!')
-                return redirect('core:routine_detail', pk=routine.pk)
+                return redirect(after_save_url(request, reverse('core:routine_detail', kwargs={'pk': routine.pk})))
     else:
         form = RoutineForm()
 
@@ -652,7 +652,7 @@ def routine_edit(request, pk):
                 messages.error(request, str(e))
             else:
                 messages.success(request, 'Treino atualizado com sucesso!')
-                return redirect('core:routine_detail', pk=pk)
+                return redirect(after_save_url(request, reverse('core:routine_detail', kwargs={'pk': pk})))
     else:
         form = RoutineForm(instance=routine)
 
@@ -662,6 +662,13 @@ def routine_edit(request, pk):
 
 
 # ============= PERSON ROUTINE VIEWS =============
+
+def _student_file_url(student):
+    """Default Back target for pages opened from a student's file (the list if unknown)."""
+    if student is None:
+        return reverse('core:student_list')
+    return reverse('core:student_detail', kwargs={'pk': student.pk})
+
 
 @staff_required
 def person_routine_create(request):
@@ -687,7 +694,7 @@ def person_routine_create(request):
                 messages.error(request, str(e))
             else:
                 messages.success(request, f'Treino "{person_routine.routine_name}" atribuído a {person_routine.person.person_name} com sucesso!')
-                return redirect('core:student_detail', pk=person_routine.person.pk)
+                return redirect(after_save_url(request, reverse('core:student_detail', kwargs={'pk': person_routine.person.pk})))
         person_id = request.POST.get('person')
     else:
         # Pre-fill person if provided in URL
@@ -699,7 +706,8 @@ def person_routine_create(request):
 
     return render(request, 'core/person_routine_form.html', {
         'form': form,
-        'selected_person': selected_person
+        'selected_person': selected_person,
+        'back_default': _student_file_url(selected_person),
     })
 
 
@@ -778,7 +786,7 @@ def person_routine_edit(request, pk):
                 messages.error(request, str(e))
             else:
                 messages.success(request, f'Treino "{person_routine.routine_name}" atualizado com sucesso!')
-                return redirect('core:student_detail', pk=person_routine.person.pk)
+                return redirect(after_save_url(request, reverse('core:student_detail', kwargs={'pk': person_routine.person.pk})))
     else:
         form = PersonRoutineForm(instance=person_routine)
 
@@ -789,7 +797,8 @@ def person_routine_edit(request, pk):
         'person_routine': person_routine,
         'current_exercises': current_exercises,
         'is_edit': True,
-        'selected_person': person_routine.person  # Always show person as read-only in edit mode
+        'selected_person': person_routine.person,  # Always show person as read-only in edit mode
+        'back_default': _student_file_url(person_routine.person),
     })
 
 
@@ -806,7 +815,7 @@ def person_routine_deactivate(request, pk):
         person_routine.save()
 
         messages.success(request, f'Treino "{person_routine.routine_name}" foi removido e movido para o histórico.')
-        return redirect('core:student_detail', pk=person_id)
+        return redirect(after_save_url(request, reverse('core:student_detail', kwargs={'pk': person_id})))
 
     return redirect('core:student_list')
 
@@ -1406,7 +1415,7 @@ def routine_generate_ai(request):
             try:
                 routine = generate_workout_with_ai(description, difficulty, duration)
                 messages.success(request, 'Treino gerado com IA com sucesso!')
-                return redirect('core:routine_detail', pk=routine.pk)
+                return redirect(after_save_url(request, reverse('core:routine_detail', kwargs={'pk': routine.pk})))
             except AIGenerationError as e:
                 messages.error(request, f'Erro ao gerar treino: {e}')
     else:
@@ -1447,8 +1456,9 @@ def healthz(request):
 
 # ============= TRAINER'S FILE ON THE STUDENT =============
 
-def _student_tab(student_pk, tab):
-    return reverse('core:student_detail', kwargs={'pk': student_pk}) + f'#tab-{tab}'
+def _student_tab(request, student_pk, tab):
+    """Back to the student's file on the given tab, keeping where the trainer came from."""
+    return after_save_url(request, reverse('core:student_detail', kwargs={'pk': student_pk}), fragment=f'#tab-{tab}')
 
 
 @staff_required
@@ -1460,7 +1470,7 @@ def assessment_create(request, pk):
         assessment.person = student
         assessment.save()
         messages.success(request, 'Avaliação registrada.')
-        return redirect(_student_tab(student.pk, 'avaliacoes'))
+        return redirect(_student_tab(request, student.pk, 'avaliacoes'))
     return render(request, 'core/assessment_form.html', {'form': form, 'student': student, 'title': 'Nova avaliação'})
 
 
@@ -1471,7 +1481,7 @@ def assessment_edit(request, pk):
     if request.method == 'POST' and form.is_valid():
         form.save()
         messages.success(request, 'Avaliação atualizada.')
-        return redirect(_student_tab(assessment.person_id, 'avaliacoes'))
+        return redirect(_student_tab(request, assessment.person_id, 'avaliacoes'))
     return render(request, 'core/assessment_form.html', {
         'form': form, 'student': assessment.person, 'title': 'Editar avaliação'})
 
@@ -1483,7 +1493,7 @@ def assessment_delete(request, pk):
     person_id = assessment.person_id
     assessment.delete()
     messages.success(request, 'Avaliação removida.')
-    return redirect(_student_tab(person_id, 'avaliacoes'))
+    return redirect(_student_tab(request, person_id, 'avaliacoes'))
 
 
 @staff_required
@@ -1495,7 +1505,7 @@ def photo_upload(request, pk):
         photo.person = student
         photo.save()
         messages.success(request, 'Foto adicionada.')
-        return redirect(_student_tab(student.pk, 'fotos'))
+        return redirect(_student_tab(request, student.pk, 'fotos'))
     return render(request, 'core/photo_form.html', {'form': form, 'student': student})
 
 
@@ -1506,7 +1516,7 @@ def photo_delete(request, pk):
     person_id = photo.person_id
     photo.delete()
     messages.success(request, 'Foto removida.')
-    return redirect(_student_tab(person_id, 'fotos'))
+    return redirect(_student_tab(request, person_id, 'fotos'))
 
 
 @login_required
@@ -1538,7 +1548,7 @@ def note_add(request, pk):
         messages.success(request, 'Anotação salva.')
     else:
         messages.error(request, 'Escreva a anotação antes de salvar.')
-    return redirect(_student_tab(student.pk, 'notas'))
+    return redirect(_student_tab(request, student.pk, 'notas'))
 
 
 @staff_required
@@ -1548,4 +1558,4 @@ def note_delete(request, pk):
     person_id = note.person_id
     note.delete()
     messages.success(request, 'Anotação removida.')
-    return redirect(_student_tab(person_id, 'notas'))
+    return redirect(_student_tab(request, person_id, 'notas'))
