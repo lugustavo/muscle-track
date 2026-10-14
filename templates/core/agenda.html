@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load navigation %}
+
+{% block title %}Agenda - Muscle Track{% endblock %}
+
+{% block extra_css %}
+<style>
+    .day-col.today { box-shadow: 0 0 0 2px var(--bs-primary); }
+    .appt { border-left: 4px solid #adb5bd; }
+    .appt.s-attended { border-left-color: #198754; }
+    .appt.s-missed { border-left-color: #dc3545; }
+    .appt.s-cancelled, .appt.s-rescheduled { opacity: .55; }
+    .appt.conflict { border-left-color: #fd7e14; background: #fff8f0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+    <h1 class="mb-0"><i class="bi bi-calendar-week"></i> Agenda</h1>
+    <div class="d-flex gap-2 flex-wrap">
+        <div class="btn-group">
+            <a href="?semana={{ prev_week }}" class="btn btn-outline-secondary" title="Semana anterior"><i class="bi bi-chevron-left"></i></a>
+            <span class="btn btn-light disabled text-dark fw-bold">{{ monday|date:"d/m" }} a {{ sunday|date:"d/m/Y" }}</span>
+            <a href="?semana={{ next_week }}" class="btn btn-outline-secondary" title="Próxima semana"><i class="bi bi-chevron-right"></i></a>
+            {% if not is_current_week %}<a href="{% url 'core:agenda' %}" class="btn btn-outline-primary">Hoje</a>{% endif %}
+        </div>
+        <a href="{% nav_url 'core:appointment_create' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Nova aula</a>
+    </div>
+</div>
+
+<div class="row g-3">
+    {% for day in days %}
+    <div class="col-md-6 col-xl">
+        <div class="card h-100 day-col {% if day.is_today %}today{% endif %}">
+            <div class="card-header {% if day.is_today %}bg-primary text-white{% endif %}">
+                <strong>{{ day.weekday }}</strong> <small>{{ day.date|date:"d/m" }}</small>
+            </div>
+            <div class="card-body p-2">
+                {% for a in day.items %}
+                <div class="card appt s-{{ a.status }} {% if a.pk in conflicts %}conflict{% endif %} mb-2">
+                    <div class="card-body p-2">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ a.starts_at|time:"H:i" }}</strong>
+                            <span class="badge {% if a.status == 'attended' %}bg-success{% elif a.status == 'missed' %}bg-danger{% elif a.status == 'scheduled' %}bg-light text-dark border{% else %}bg-secondary{% endif %}">{{ a.get_status_display }}</span>
+                        </div>
+                        <a href="{% nav_url 'core:student_detail' a.person.pk %}" class="text-decoration-none d-block text-truncate">{{ a.person.person_name }}</a>
+                        <small class="text-muted">{{ a.get_kind_display }} · {{ a.duration_minutes }} min</small>
+                        {% if a.pk in conflicts %}<div class="small text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> Sobreposta a outra aula</div>{% endif %}
+                        {% if a.status != 'rescheduled' %}
+                        <form method="post" action="{% nav_url 'core:appointment_status' a.pk %}" class="mt-1 d-flex flex-wrap gap-1">
+                            {% csrf_token %}
+                            {% if a.status != 'attended' %}<button name="status" value="attended" class="btn btn-sm btn-outline-success" title="Compareceu"><i class="bi bi-check-lg"></i></button>{% endif %}
+                            {% if a.status != 'missed' %}<button name="status" value="missed" class="btn btn-sm btn-outline-danger" title="Faltou"><i class="bi bi-x-lg"></i></button>{% endif %}
+                            {% if a.status != 'cancelled' %}<button name="status" value="cancelled" class="btn btn-sm btn-outline-secondary" title="Cancelar"><i class="bi bi-slash-circle"></i></button>{% endif %}
+                            {% if a.status != 'scheduled' %}<button name="status" value="scheduled" class="btn btn-sm btn-outline-secondary" title="Desfazer (voltar para marcada)"><i class="bi bi-arrow-counterclockwise"></i></button>{% endif %}
+                            <a href="{% nav_url 'core:appointment_reschedule' a.pk %}" class="btn btn-sm btn-outline-primary" title="Remarcar"><i class="bi bi-arrow-repeat"></i></a>
+                        </form>
+                        {% if not a.slot_id %}
+                        <form method="post" action="{% nav_url 'core:appointment_delete' a.pk %}" onsubmit="return confirm('Remover esta aula avulsa?');" class="mt-1">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-link text-danger p-0 small">remover</button>
+                        </form>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-muted small text-center py-2">—</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

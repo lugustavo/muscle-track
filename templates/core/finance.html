@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load navigation %}
+
+{% block title %}Financeiro - Muscle Track{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+    <h1 class="mb-0"><i class="bi bi-cash-coin"></i> Financeiro</h1>
+    <div class="btn-group">
+        <a href="?mes={{ prev_month }}" class="btn btn-outline-secondary" title="Mês anterior"><i class="bi bi-chevron-left"></i></a>
+        <span class="btn btn-light disabled text-dark fw-bold">{{ month_label|date:"F \d\e Y" }}</span>
+        <a href="?mes={{ next_month }}" class="btn btn-outline-secondary" title="Próximo mês"><i class="bi bi-chevron-right"></i></a>
+        {% if not is_current_month %}<a href="{% url 'core:finance' %}" class="btn btn-outline-primary">Mês atual</a>{% endif %}
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="card text-center h-100"><div class="card-body">
+        <div class="text-muted small">Recebido no mês</div>
+        <div class="fs-2 fw-bold text-success">R$ {{ summary.received|floatformat:2 }}</div>
+        <div class="small text-muted">{{ summary.payments|length }} pagamento{{ summary.payments|length|pluralize }}</div>
+    </div></div></div>
+    <div class="col-md-4"><div class="card text-center h-100"><div class="card-body">
+        <div class="text-muted small">Previsto (vencimentos do mês)</div>
+        <div class="fs-2 fw-bold">R$ {{ summary.expected|floatformat:2 }}</div>
+        <div class="small text-muted">{{ summary.expected_count }} aluno{{ summary.expected_count|pluralize }}{% if summary.unpriced %} · {{ summary.unpriced }} sem valor definido{% endif %}</div>
+    </div></div></div>
+    <div class="col-md-4"><div class="card text-center h-100 {% if overdue %}border-warning{% endif %}"><div class="card-body">
+        <div class="text-muted small">Em atraso agora</div>
+        <div class="fs-2 fw-bold {% if overdue %}text-warning-emphasis{% endif %}">R$ {{ overdue_total|floatformat:2 }}</div>
+        <div class="small text-muted">{{ overdue|length }} aluno{{ overdue|length|pluralize }}{% if overdue_unpriced %} · {{ overdue_unpriced }} sem valor definido{% endif %}</div>
+    </div></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header"><strong><i class="bi bi-exclamation-triangle text-warning"></i> Em atraso</strong></div>
+            <div class="list-group list-group-flush">
+                {% for row in overdue %}
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        <a href="{% nav_url 'core:student_detail' row.student.pk %}" class="text-decoration-none fw-semibold">{{ row.student.person_name }}</a><br>
+                        <small class="text-muted">venceu em {{ row.due|date:"d/m/Y" }} · {{ row.days }} dia{{ row.days|pluralize }}{% if row.amount %} · R$ {{ row.amount|floatformat:2 }}{% endif %}</small>
+                    </span>
+                    <span class="d-flex gap-1">
+                        <a href="{{ row.whatsapp }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success" title="Cobrar pelo WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                        <a href="{% nav_url 'core:payment_create' row.student.pk %}" class="btn btn-sm btn-success">Registrar</a>
+                    </span>
+                </div>
+                {% empty %}
+                <div class="list-group-item text-success"><i class="bi bi-check-circle"></i> Ninguém em atraso.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><strong>Por forma de pagamento</strong></div>
+            <ul class="list-group list-group-flush">
+                {% for m in summary.by_method %}
+                <li class="list-group-item d-flex justify-content-between"><span>{{ m.label }} <small class="text-muted">({{ m.count }})</small></span><strong>R$ {{ m.total|floatformat:2 }}</strong></li>
+                {% empty %}
+                <li class="list-group-item text-muted">Nada recebido neste mês.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Pagamentos do mês</strong>
+                <a href="{% url 'core:finance_export' %}?mes={{ month_value }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-filetype-csv"></i> Exportar CSV</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead class="table-light"><tr><th>Data</th><th>Aluno</th><th>Forma</th><th class="text-end">Valor</th></tr></thead>
+                    <tbody>
+                        {% for p in summary.payments %}
+                        <tr>
+                            <td>{{ p.paid_on|date:"d/m" }}</td>
+                            <td><a href="{% nav_url 'core:student_detail' p.person.pk %}" class="text-decoration-none">{{ p.person.person_name }}</a></td>
+                            <td>{{ p.get_method_display }}</td>
+                            <td class="text-end">R$ {{ p.amount|floatformat:2 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-muted text-center py-3">Nenhum pagamento neste mês.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

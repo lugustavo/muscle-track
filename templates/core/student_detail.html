@@ -120,6 +120,8 @@
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-ficha" type="button" role="tab"><i class="bi bi-person-vcard"></i> Ficha</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-avaliacoes" type="button" role="tab"><i class="bi bi-rulers"></i> Avaliações <span class="badge bg-secondary">{{ assessments|length }}</span></button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-fotos" type="button" role="tab"><i class="bi bi-images"></i> Fotos <span class="badge bg-secondary">{{ photos|length }}</span></button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-agenda" type="button" role="tab"><i class="bi bi-calendar-week"></i> Agenda</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pagamentos" type="button" role="tab"><i class="bi bi-cash-coin"></i> Pagamentos <span class="badge bg-secondary">{{ payments|length }}</span></button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-historico" type="button" role="tab"><i class="bi bi-clock-history"></i> Histórico</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-notas" type="button" role="tab"><i class="bi bi-journal-text"></i> Anotações <span class="badge bg-secondary">{{ notes|length }}</span></button></li>
 </ul>
@@ -233,6 +235,8 @@
 <div class="tab-pane fade" id="tab-avaliacoes" role="tabpanel">{% include 'core/student/_avaliacoes.html' %}</div>
 <div class="tab-pane fade" id="tab-fotos" role="tabpanel">{% include 'core/student/_fotos.html' %}</div>
 <div class="tab-pane fade" id="tab-notas" role="tabpanel">{% include 'core/student/_notas.html' %}</div>
+<div class="tab-pane fade" id="tab-agenda" role="tabpanel">{% include 'core/student/_agenda.html' %}</div>
+<div class="tab-pane fade" id="tab-pagamentos" role="tabpanel">{% include 'core/student/_pagamentos.html' %}</div>
 <div class="tab-pane fade" id="tab-historico" role="tabpanel">{% include 'core/student/_historico.html' %}</div>
 </div>
 

@@ -1,8 +1,9 @@
+import csv
 import json
 import logging
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal, InvalidOperation
-from urllib.parse import quote, urlencode
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib import messages
@@ -15,7 +16,7 @@ from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Avg, Count, Exists, F, Max, OuterRef, Prefetch, Q, Subquery, Value
 from django.db.models.functions import Coalesce, Replace
-from django.http import FileResponse, Http404, JsonResponse
+from django.http import FileResponse, Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
@@ -25,8 +26,14 @@ from allauth.account.models import EmailAddress
 
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, trainer_dashboard
 from .forms import (
-    AIWorkoutGenerationForm, AssessmentForm, ConsentForm, ExerciseForm, PersonForm, PersonRoutineForm,
+    AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ConsentForm, ExerciseForm, PaymentForm,
+    PersonForm, PersonRoutineForm, PlanForm, ScheduleSlotForm,
     ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
+)
+from .agenda import at, attendance_stats, conflicting_ids, ensure_appointments, parse_week
+from .billing import (
+    charge_message, delete_payment, month_bounds, month_summary, overdue_rows, parse_month,
+    register_payment, suggest_amount, suggest_period,
 )
 from .consent import (
     ALL_KINDS, CURRENT_VERSION as CONSENT_VERSION, DESCRIPTIONS as CONSENT_DESCRIPTIONS, REQUIRED_KINDS,
@@ -36,12 +43,13 @@ from .exports import build_export
 from .history import log_event, log_profile_edit
 from .invites import build_invite_url, get_user_from_invite, revoke_invites
 from .models import (
-    Assessment, ConsentRecord, Exercise, MuscleGroup, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
+    Appointment, Assessment, ConsentRecord, Exercise, MuscleGroup, Payment, Plan, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
     Routine, RoutineExercise, SessionExercise, SessionSet, StudentEvent, StudentNote, WorkoutSession,
 )
 from .navigation import after_save_url, back_label, safe_next_url
 from .permissions import is_trainer, staff_required, student_required
 from .validators import digits_only
+from .whatsapp import whatsapp_url
 
 logger = logging.getLogger(__name__)
 
@@ -226,19 +234,15 @@ def student_invite(request, pk):
         return redirect(request.get_full_path())
     invite_url = build_invite_url(request, student.user)
 
-    phone_digits = ''.join(ch for ch in student.phone if ch.isdigit())
-    if phone_digits and not phone_digits.startswith('55') and len(phone_digits) <= 11:
-        phone_digits = '55' + phone_digits  # Brazilian number typed without country code
     whatsapp_text = (
         f'Olá, {student.person_name.split()[0]}! Seu acesso ao Muscle Track está pronto. '
         f'Crie sua senha por este link (válido por 7 dias): {invite_url}'
     )
-    whatsapp_url = f'https://wa.me/{phone_digits}?text={quote(whatsapp_text)}'
 
     return render(request, 'core/student_invite.html', {
         'student': student,
         'invite_url': invite_url,
-        'whatsapp_url': whatsapp_url,
+        'whatsapp_url': whatsapp_url(student.phone, whatsapp_text),
         'has_password': student.user.has_usable_password(),
     })
 
@@ -267,6 +271,28 @@ def accept_invite(request, uidb64, token):
         form = SetPasswordForm(user)
 
     return render(request, 'core/accept_invite.html', {'form': form, 'student': user.person})
+
+
+def _finance_agenda_context(student):
+    """Plan/payments and calendar data for the student's file (trainer area only)"""
+    today = timezone.localdate()
+    payments = list(student.payments.all()[:50])
+    amount = suggest_amount(student)
+    owes = student.is_active and student.plan_expires_on and student.plan_expires_on < today
+    return {
+        'payments': payments,
+        'last_payment': payments[0] if payments else None,
+        'suggested_amount': amount,
+        'charge_url': whatsapp_url(student.phone, charge_message(student, amount, student.plan_expires_on))
+        if student.plan_expires_on and student.is_active and student.plan_status in ('expired', 'expiring') else '',
+        'owes': owes,
+        'slots': list(student.slots.filter(is_active=True)),
+        'upcoming': list(student.appointments.filter(
+            starts_at__gte=timezone.now(), status=Appointment.Status.SCHEDULED)[:8]),
+        'attendance': attendance_stats(student, 30, today),
+        'weekdays': ScheduleSlot.WEEKDAYS,
+        'slot_form': ScheduleSlotForm(),
+    }
 
 
 @staff_required
@@ -345,6 +371,7 @@ def student_detail(request, pk):
         'erasure_requested': student.events.filter(kind=StudentEvent.Kind.ERASURE_REQUEST).exists(),
         'consent_kinds': [(kind, ConsentRecord.Kind(kind).label) for kind in ALL_KINDS],
         'today': timezone.localdate(),
+        **_finance_agenda_context(student),
         'notes': list(student.trainer_notes.select_related('author')),
         'note_form': StudentNoteForm(),
         'active_routines_with_stats': active_routines_with_stats,
@@ -1791,3 +1818,282 @@ def note_delete(request, pk):
     note.delete()
     messages.success(request, 'Anotação removida.')
     return redirect(_student_tab(request, person_id, 'notas'))
+
+
+# ============= FINANCE =============
+
+def _csv_safe(value):
+    """Spreadsheets run cells that start with = + - @ as formulas."""
+    text = str(value)
+    return "'" + text if text[:1] in ('=', '+', '-', '@') else text
+
+
+def _month_nav(year, month):
+    prev_year, prev_month = (year - 1, 12) if month == 1 else (year, month - 1)
+    next_year, next_month = (year + 1, 1) if month == 12 else (year, month + 1)
+    return f'{prev_year}-{prev_month:02d}', f'{next_year}-{next_month:02d}'
+
+
+@staff_required
+def finance(request):
+    """Money overview: received and expected in a month, who is overdue, the month's payments"""
+    year, month = parse_month(request.GET.get('mes'))
+    summary = month_summary(year, month)
+    overdue = overdue_rows()
+    for row in overdue:
+        row['whatsapp'] = whatsapp_url(row['student'].phone, charge_message(row['student'], row['amount'], row['due']))
+    prev_month, next_month = _month_nav(year, month)
+    return render(request, 'core/finance.html', {
+        'month_value': f'{year}-{month:02d}', 'month_label': date(year, month, 1),
+        'prev_month': prev_month, 'next_month': next_month,
+        'is_current_month': (year, month) == (timezone.localdate().year, timezone.localdate().month),
+        'summary': summary, 'overdue': overdue,
+        'overdue_total': sum((r['amount'] or 0 for r in overdue), Decimal('0')),
+        'overdue_unpriced': sum(1 for r in overdue if r['amount'] is None),
+    })
+
+
+@staff_required
+def finance_export(request):
+    """The month's payments as a CSV that opens directly in a Brazilian Excel"""
+    year, month = parse_month(request.GET.get('mes'))
+    first, last = month_bounds(year, month)
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="pagamentos-{year}-{month:02d}.csv"'
+    response.write('﻿')
+    writer = csv.writer(response, delimiter=';')
+    writer.writerow(['Data', 'Aluno', 'Plano', 'Valor', 'Forma', 'Período de', 'Período até', 'Observação'])
+    for p in Payment.objects.filter(paid_on__range=(first, last)).select_related('person').order_by('paid_on', 'pk'):
+        writer.writerow([p.paid_on.strftime('%d/%m/%Y'), _csv_safe(p.person.person_name), _csv_safe(p.plan_name),
+                         f'{p.amount:.2f}'.replace('.', ','), p.get_method_display(),
+                         p.period_start.strftime('%d/%m/%Y'), p.period_end.strftime('%d/%m/%Y'), _csv_safe(p.notes)])
+    return response
+
+
+@staff_required
+def plan_list(request):
+    """Plan templates, like the exercise catalog"""
+    search = request.GET.get('search', '').strip()
+    status = request.GET.get('status', '')
+    plans = Plan.objects.annotate(student_count=Count('students'))
+    if search:
+        plans = plans.filter(Q(name__icontains=search) | Q(description__icontains=search))
+    if status == 'inactive':
+        plans = plans.filter(is_active=False)
+    elif status != 'all':
+        plans = plans.filter(is_active=True)
+    return render(request, 'core/plan_list.html', {
+        'plans': plans.order_by('name'), 'search': search, 'status': status or 'active'})
+
+
+@staff_required
+def plan_create(request):
+    form = PlanForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        plan = form.save()
+        messages.success(request, f'Plano "{plan.name}" criado.')
+        return redirect(after_save_url(request, reverse('core:plan_list'), forward_next=False))
+    return render(request, 'core/plan_form.html', {'form': form, 'title': 'Novo plano'})
+
+
+@staff_required
+def plan_edit(request, pk):
+    plan = get_object_or_404(Plan, pk=pk)
+    form = PlanForm(request.POST or None, instance=plan)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Plano atualizado. Os alunos que já têm o plano mantêm os valores deles.')
+        return redirect(after_save_url(request, reverse('core:plan_list'), forward_next=False))
+    return render(request, 'core/plan_form.html', {
+        'form': form, 'title': 'Editar plano', 'student_count': plan.students.count()})
+
+
+def _payment_initial(student, plan, today):
+    start, end = suggest_period(student, plan, today)
+    return {'plan': plan, 'amount': suggest_amount(student, plan), 'paid_on': today,
+            'period_start': start, 'period_end': end}
+
+
+@staff_required
+def payment_create(request, pk):
+    """Register a payment: suggests the amount and the period, both editable"""
+    student = get_object_or_404(Person.objects.select_related('plan'), pk=pk)
+    today = timezone.localdate()
+    if request.method == 'POST':
+        form = PaymentForm(request.POST, person=student)
+        if form.is_valid():
+            data = form.cleaned_data
+            register_payment(student, plan=data['plan'], amount=data['amount'], paid_on=data['paid_on'],
+                             method=data['method'], period_start=data['period_start'],
+                             period_end=data['period_end'], notes=data['notes'], actor=request.user)
+            messages.success(request, f'Pagamento registrado. Plano até {data["period_end"]:%d/%m/%Y}.')
+            return redirect(_student_tab(request, student.pk, 'pagamentos'))
+    else:
+        plan = student.plan
+        if request.GET.get('plan', '').isdigit():
+            plan = Plan.objects.filter(pk=int(request.GET['plan'])).first() or plan
+        form = PaymentForm(initial=_payment_initial(student, plan, today), person=student)
+    return render(request, 'core/payment_form.html', {'form': form, 'student': student})
+
+
+@staff_required
+@require_POST
+def payment_delete(request, pk):
+    payment = get_object_or_404(Payment.objects.select_related('person'), pk=pk)
+    person_id = payment.person_id
+    delete_payment(payment, request.user)
+    messages.success(request, 'Pagamento excluído.')
+    return redirect(_student_tab(request, person_id, 'pagamentos'))
+
+
+# ============= AGENDA =============
+
+@staff_required
+def agenda(request):
+    """The week: classes by day, with quick attendance buttons"""
+    today = timezone.localdate()
+    monday = parse_week(request.GET.get('semana'), today)
+    sunday = monday + timedelta(days=6)
+    ensure_appointments(monday, sunday, today)
+    items = list(Appointment.objects.filter(
+        starts_at__gte=at(monday, time.min), starts_at__lt=at(sunday + timedelta(days=1), time.min)
+    ).select_related('person'))
+    conflicts = conflicting_ids(items)
+    by_day = {monday + timedelta(days=i): [] for i in range(7)}
+    for item in items:
+        by_day[timezone.localtime(item.starts_at).date()].append(item)
+    days = [{'date': d, 'is_today': d == today, 'items': by_day[d],
+             'weekday': ScheduleSlot.WEEKDAYS[d.weekday()][1]} for d in sorted(by_day)]
+    return render(request, 'core/agenda.html', {
+        'days': days, 'conflicts': conflicts, 'monday': monday, 'sunday': sunday,
+        'prev_week': (monday - timedelta(days=7)).isoformat(), 'next_week': (monday + timedelta(days=7)).isoformat(),
+        'is_current_week': monday == parse_week(None, today), 'statuses': Appointment.Status,
+    })
+
+
+def _warn_if_conflict(request, appointment):
+    clash = Appointment.objects.filter(
+        starts_at__lt=appointment.ends_at, starts_at__gte=appointment.starts_at - timedelta(minutes=480)
+    ).exclude(pk=appointment.pk).exclude(
+        status__in=(Appointment.Status.CANCELLED, Appointment.Status.RESCHEDULED)).select_related('person')
+    others = [a for a in clash if a.ends_at > appointment.starts_at]
+    if others:
+        names = ', '.join(sorted({a.person.person_name for a in others}))
+        messages.warning(request, f'Atenção: este horário se sobrepõe a outra aula ({names}).')
+
+
+def _agenda_url_for(day):
+    return f"{reverse('core:agenda')}?semana={parse_week(day.isoformat()).isoformat()}"
+
+
+@staff_required
+def appointment_create(request):
+    """One-off class: trial, makeup..."""
+    initial = {'date': timezone.localdate(), 'time': time(7, 0)}
+    if request.GET.get('person', '').isdigit():
+        initial['person'] = int(request.GET['person'])
+    form = AppointmentForm(request.POST or None, initial=initial)
+    if request.method == 'POST' and form.is_valid():
+        data = form.cleaned_data
+        starts = at(data['date'], data['time'])
+        if Appointment.objects.filter(person=data['person'], starts_at=starts).exists():
+            form.add_error('time', 'Este aluno já tem uma aula neste horário.')
+        else:
+            appointment = Appointment.objects.create(
+                person=data['person'], starts_at=starts, duration_minutes=data['duration_minutes'],
+                kind=data['kind'], notes=data['notes'])
+            messages.success(request, 'Aula marcada.')
+            _warn_if_conflict(request, appointment)
+            return redirect(after_save_url(request, _agenda_url_for(data['date']), forward_next=False))
+    return render(request, 'core/appointment_form.html', {'form': form, 'title': 'Nova aula'})
+
+
+@staff_required
+def appointment_reschedule(request, pk):
+    appointment = get_object_or_404(Appointment.objects.select_related('person'), pk=pk)
+    if appointment.status == Appointment.Status.RESCHEDULED:
+        raise Http404
+    local = timezone.localtime(appointment.starts_at)
+    form = AppointmentForm(request.POST or None, initial={
+        'person': appointment.person_id, 'date': local.date(), 'time': local.time().replace(second=0, microsecond=0),
+        'duration_minutes': appointment.duration_minutes, 'kind': appointment.kind})
+    form.fields['person'].disabled = True
+    if request.method == 'POST' and form.is_valid():
+        data = form.cleaned_data
+        starts = at(data['date'], data['time'])
+        if starts == appointment.starts_at or Appointment.objects.filter(person=appointment.person, starts_at=starts).exists():
+            form.add_error('time', 'Escolha outro horário: este aluno já tem aula neste.')
+        else:
+            with transaction.atomic():
+                new = Appointment.objects.create(
+                    person=appointment.person, starts_at=starts, duration_minutes=data['duration_minutes'],
+                    kind=data['kind'], notes=data['notes'])
+                appointment.status = Appointment.Status.RESCHEDULED
+                appointment.status_changed_at = timezone.now()
+                appointment.save(update_fields=['status', 'status_changed_at'])
+            messages.success(request, 'Aula remarcada.')
+            _warn_if_conflict(request, new)
+            return redirect(after_save_url(request, _agenda_url_for(data['date']), forward_next=False))
+    return render(request, 'core/appointment_form.html', {
+        'form': form, 'title': 'Remarcar aula', 'appointment': appointment})
+
+
+@staff_required
+@require_POST
+def appointment_status(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+    status = request.POST.get('status')
+    allowed = (Appointment.Status.SCHEDULED, Appointment.Status.ATTENDED, Appointment.Status.MISSED,
+               Appointment.Status.CANCELLED)
+    if status not in allowed or appointment.status == Appointment.Status.RESCHEDULED:
+        return HttpResponseBadRequest('Situação inválida')
+    appointment.status = status
+    appointment.status_changed_at = timezone.now()
+    appointment.save(update_fields=['status', 'status_changed_at'])
+    return redirect(safe_next_url(request, _agenda_url_for(timezone.localtime(appointment.starts_at).date())))
+
+
+@staff_required
+@require_POST
+def appointment_delete(request, pk):
+    """Only one-off classes are deleted; a class from a fixed slot is cancelled instead (it would come back)"""
+    appointment = get_object_or_404(Appointment, pk=pk)
+    if appointment.slot_id:
+        messages.warning(request, 'Aula de horário fixo: use "Cancelar" (excluir faria ela voltar).')
+    else:
+        appointment.delete()
+        messages.success(request, 'Aula removida.')
+    return redirect(safe_next_url(request, _agenda_url_for(timezone.localtime(appointment.starts_at).date())))
+
+
+@staff_required
+@require_POST
+def slot_add(request, pk):
+    student = get_object_or_404(Person, pk=pk)
+    form = ScheduleSlotForm(request.POST)
+    if form.is_valid():
+        slot, created = ScheduleSlot.objects.get_or_create(
+            person=student, weekday=form.cleaned_data['weekday'], start_time=form.cleaned_data['start_time'],
+            defaults={'duration_minutes': form.cleaned_data['duration_minutes']})
+        if not created:
+            slot.duration_minutes = form.cleaned_data['duration_minutes']
+            slot.is_active = True
+            slot.save()
+        today = timezone.localdate()
+        ensure_appointments(today, today + timedelta(weeks=4), today)
+        messages.success(request, f'Horário fixo: {slot}.')
+    else:
+        messages.error(request, 'Horário inválido: ' + ' '.join(e for errs in form.errors.values() for e in errs))
+    return redirect(_student_tab(request, student.pk, 'agenda'))
+
+
+@staff_required
+@require_POST
+def slot_delete(request, pk):
+    slot = get_object_or_404(ScheduleSlot, pk=pk)
+    person_id = slot.person_id
+    with transaction.atomic():
+        slot.appointments.filter(status=Appointment.Status.SCHEDULED, starts_at__gt=timezone.now()).delete()
+        slot.delete()  # past classes stay (their slot link is cleared)
+    messages.success(request, 'Horário fixo removido. As aulas futuras dele saíram da agenda.')
+    return redirect(_student_tab(request, person_id, 'agenda'))

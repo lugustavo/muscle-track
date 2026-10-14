@@ -28,6 +28,24 @@ urlpatterns = [
     path('notes/<int:pk>/delete/', views.note_delete, name='note_delete'),
     path('invite/<uidb64>/<token>/', views.accept_invite, name='accept_invite'),
 
+    # Finance
+    path('finance/', views.finance, name='finance'),
+    path('finance/export/', views.finance_export, name='finance_export'),
+    path('plans/', views.plan_list, name='plan_list'),
+    path('plans/create/', views.plan_create, name='plan_create'),
+    path('plans/<int:pk>/edit/', views.plan_edit, name='plan_edit'),
+    path('students/<int:pk>/payments/new/', views.payment_create, name='payment_create'),
+    path('payments/<int:pk>/delete/', views.payment_delete, name='payment_delete'),
+
+    # Agenda
+    path('agenda/', views.agenda, name='agenda'),
+    path('agenda/new/', views.appointment_create, name='appointment_create'),
+    path('appointments/<int:pk>/reschedule/', views.appointment_reschedule, name='appointment_reschedule'),
+    path('appointments/<int:pk>/status/', views.appointment_status, name='appointment_status'),
+    path('appointments/<int:pk>/delete/', views.appointment_delete, name='appointment_delete'),
+    path('students/<int:pk>/slots/add/', views.slot_add, name='slot_add'),
+    path('slots/<int:pk>/delete/', views.slot_delete, name='slot_delete'),
+
     # Exercises
     path('exercises/', views.exercise_list, name='exercise_list'),
     path('exercises/create/', views.exercise_create, name='exercise_create'),

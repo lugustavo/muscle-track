@@ -215,6 +215,9 @@ PHOTO_MAX_DIMENSION = config('PHOTO_MAX_DIMENSION', default=12000, cast=int)
 PRIVACY_CONTROLLER_NAME = config('PRIVACY_CONTROLLER_NAME', default='a personal trainer responsável pelo seu acompanhamento')
 PRIVACY_CONTACT_EMAIL = config('PRIVACY_CONTACT_EMAIL', default='')
 
+# Pix key shown in the payment reminder message (optional)
+PIX_KEY = config('PIX_KEY', default='')
+
 # Site URL
 # Public address of the app, used to build invitation links. Leave empty to use
 # the address the trainer is browsing from.

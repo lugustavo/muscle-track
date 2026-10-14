@@ -36,6 +36,9 @@ def build_data(person, include_internal_notes):
     profile['last_login'] = person.user.last_login
     if include_internal_notes:
         profile['internal_notes'] = person.notes
+        # Commercial terms negotiated by the trainer: confidential, never in the student's own export
+        profile['hourly_rate'] = person.hourly_rate
+        profile['plan_price'] = person.plan_price
 
     routines = []
     for routine in person.routines.prefetch_related('exercises__exercise'):
@@ -72,6 +75,15 @@ def build_data(person, include_internal_notes):
             for p in person.progress_photos.all()],
         'routines': routines,
         'sessions': sessions,
+        'payments': [
+            {**_fields(p, ['paid_on', 'plan_name', 'amount', 'method', 'period_start', 'period_end', 'notes'])}
+            for p in person.payments.all()],
+        'schedule': {
+            'weekly_slots': [_fields(sl, ['weekday', 'start_time', 'duration_minutes', 'is_active'])
+                             for sl in person.slots.all()],
+            'appointments': [_fields(a, ['starts_at', 'duration_minutes', 'kind', 'status'])
+                             for a in person.appointments.all()],
+        },
         'consents': [
             {**_fields(c, ['kind', 'version', 'granted', 'source']), 'at': c.at} for c in person.consents.all()],
         'history': [

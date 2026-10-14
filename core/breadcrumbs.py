@@ -124,6 +124,18 @@ def _session_detail(request, ctx):
     return [_home(), _my_history(), label]
 
 
+def _finance():
+    return ('Financeiro', reverse('core:finance'))
+
+
+def _plans():
+    return ('Planos', reverse('core:plan_list'))
+
+
+def _agenda():
+    return ('Agenda', reverse('core:agenda'))
+
+
 def _exercise_list(request, ctx):
     return [_home(), ('Exercícios', None)]
 
@@ -177,6 +189,14 @@ def _my_exercise_progress(request, ctx):
 
 
 TRAILS = {
+    'finance': lambda request, ctx: [_home(), ('Financeiro', None)],
+    'plan_list': lambda request, ctx: [_home(), _finance(), ('Planos', None)],
+    'plan_create': lambda request, ctx: [_home(), _finance(), _plans(), ('Novo plano', None)],
+    'plan_edit': lambda request, ctx: [_home(), _finance(), _plans(), ('Editar plano', None)],
+    'payment_create': _student_page('Registrar pagamento'),
+    'agenda': lambda request, ctx: [_home(), ('Agenda', None)],
+    'appointment_create': lambda request, ctx: [_home(), _agenda(), ('Nova aula', None)],
+    'appointment_reschedule': lambda request, ctx: [_home(), _agenda(), ('Remarcar aula', None)],
     'student_list': _student_list,
     'student_create': _student_create,
     'student_detail': _student_detail,

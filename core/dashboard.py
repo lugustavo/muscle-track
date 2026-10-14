@@ -5,7 +5,10 @@ from django.contrib.auth.hashers import UNUSABLE_PASSWORD_PREFIX
 from django.db.models import Exists, OuterRef, Q, Subquery
 from django.utils import timezone
 
-from .models import Person, PersonRoutine, SessionExercise, StudentEvent, WorkoutSession
+from .agenda import ensure_appointments
+from .billing import charge_message, overdue_rows
+from .models import Appointment, Person, PersonRoutine, SessionExercise, StudentEvent, WorkoutSession
+from .whatsapp import whatsapp_url
 
 INACTIVE_DAYS = 7
 EXPIRING_DAYS = 14
@@ -57,6 +60,36 @@ def pending_invites(now=None):
         for p in Person.objects.filter(is_active=True).filter(INVITE_PENDING).select_related('user')
     ]
     rows.sort(key=lambda r: -r['days'])
+    return rows
+
+
+def overdue_payments():
+    """Overdue students with the ready-to-send WhatsApp charge message."""
+    rows = overdue_rows()
+    for row in rows:
+        row['whatsapp'] = whatsapp_url(row['student'].phone, charge_message(row['student'], row['amount'], row['due']))
+    return rows
+
+
+def todays_appointments():
+    """Today's classes, earliest first (fills the calendar for today when it is still empty)."""
+    today = timezone.localdate()
+    ensure_appointments(today, today, today)
+    start = _start_of_today()
+    return list(Appointment.objects.filter(
+        starts_at__gte=start, starts_at__lt=start + timedelta(days=1)
+    ).exclude(status__in=(Appointment.Status.CANCELLED, Appointment.Status.RESCHEDULED)).select_related('person'))
+
+
+def recent_misses(days=7, now=None):
+    """Missed classes of the last `days` days, with a ready WhatsApp message."""
+    now = now or timezone.now()
+    rows = []
+    for a in Appointment.objects.filter(status=Appointment.Status.MISSED, starts_at__gte=now - timedelta(days=days),
+                                        person__is_active=True).select_related('person').order_by('-starts_at'):
+        first = a.person.person_name.split()[0]
+        text = f'Oi, {first}! Sentimos sua falta na aula de {timezone.localtime(a.starts_at):%d/%m}. Vamos remarcar? 💪'
+        rows.append({'appointment': a, 'student': a.person, 'whatsapp': whatsapp_url(a.person.phone, text)})
     return rows
 
 
@@ -136,6 +169,9 @@ def trainer_dashboard():
     inactive = inactive_students(now)
     invites = pending_invites(now)
     trials = long_trials(now)
+    overdue = overdue_payments()
+    today_classes = todays_appointments()
+    misses = recent_misses(now=now)
     erasures = erasure_requests()
     plans = expiring_plans()
     routines = ending_routines()
@@ -144,6 +180,10 @@ def trainer_dashboard():
         'counts': counts,
         'inactive': inactive[:LIST_LIMIT], 'inactive_total': len(inactive),
         'inactive_more': max(0, len(inactive) - LIST_LIMIT),
+        'overdue': overdue[:LIST_LIMIT], 'overdue_total': len(overdue),
+        'overdue_more': max(0, len(overdue) - LIST_LIMIT),
+        'overdue_amount': sum((r['amount'] or 0 for r in overdue), 0),
+        'classes': today_classes, 'misses': misses[:LIST_LIMIT], 'misses_total': len(misses),
         'trials': trials[:LIST_LIMIT], 'trials_total': len(trials),
         'erasures': erasures, 'erasures_total': len(erasures),
         'invites': invites[:LIST_LIMIT], 'invites_total': len(invites),

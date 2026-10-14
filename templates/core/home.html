@@ -65,6 +65,73 @@
         </div>
     </div>
 
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between">
+                <strong><i class="bi bi-calendar-week text-primary"></i> Aulas de hoje</strong>
+                <a href="{% url 'core:agenda' %}" class="small">abrir a agenda</a>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for a in dashboard.classes %}
+                <a href="{% nav_url 'core:student_detail' a.person.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <span><strong>{{ a.starts_at|time:"H:i" }}</strong> {{ a.person.person_name }}</span>
+                    <span class="badge {% if a.status == 'attended' %}bg-success{% elif a.status == 'missed' %}bg-danger{% else %}bg-light text-dark border{% endif %}">{{ a.get_status_display }}</span>
+                </a>
+                {% empty %}
+                <div class="list-group-item text-muted">Nenhuma aula marcada para hoje.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% if dashboard.overdue_total %}
+    <div class="col-lg-6">
+        <div class="card h-100 border-warning">
+            <div class="card-header d-flex justify-content-between">
+                <strong><i class="bi bi-cash-coin text-warning"></i> Pagamentos em atraso</strong>
+                <span class="badge bg-warning text-dark">{{ dashboard.overdue_total }}{% if dashboard.overdue_amount %} · R$ {{ dashboard.overdue_amount|floatformat:2 }}{% endif %}</span>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for row in dashboard.overdue %}
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="{% nav_url 'core:student_detail' row.student.pk %}" class="text-decoration-none">{{ row.student.person_name }}</a>
+                    <span class="d-flex align-items-center gap-2">
+                        <small class="text-muted">{{ row.days }} dia{{ row.days|pluralize }}{% if row.amount %} · R$ {{ row.amount|floatformat:2 }}{% endif %}</small>
+                        <a href="{{ row.whatsapp }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success" title="Cobrar pelo WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                    </span>
+                </div>
+                {% endfor %}
+                {% if dashboard.overdue_more %}
+                <a href="{% url 'core:finance' %}" class="list-group-item list-group-item-action text-muted small">e mais {{ dashboard.overdue_more }} — veja o financeiro</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if dashboard.misses_total %}
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between">
+                <strong><i class="bi bi-person-x text-danger"></i> Faltas dos últimos 7 dias</strong>
+                <span class="badge bg-danger">{{ dashboard.misses_total }}</span>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for row in dashboard.misses %}
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="{% nav_url 'core:student_detail' row.student.pk %}" class="text-decoration-none">{{ row.student.person_name }}</a>
+                    <span class="d-flex align-items-center gap-2">
+                        <small class="text-muted">{{ row.appointment.starts_at|date:"d/m H:i" }}</small>
+                        <a href="{% url 'core:appointment_reschedule' row.appointment.pk %}" class="btn btn-sm btn-outline-secondary" title="Remarcar"><i class="bi bi-arrow-repeat"></i></a>
+                        <a href="{{ row.whatsapp }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success" title="Mensagem pelo WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     {% if dashboard.erasures_total %}
     <div class="col-lg-6">
         <div class="card h-100 border-danger">
