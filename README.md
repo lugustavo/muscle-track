@@ -5,13 +5,14 @@ App web **self-hosted** para personal trainers: cadastro de alunos, fichas de tr
 ## Funcionalidades
 
 ### 👩‍🏫 Personal (admin)
-- **Painel de hoje** — quem está há mais de 7 dias sem treinar, planos e fichas que vencem em 14 dias, treinos do dia e comentários recentes dos alunos
+- **Painel de hoje** — quem está há mais de 7 dias sem treinar, quem ainda não aceitou o convite, planos e fichas que vencem em 14 dias, treinos do dia e comentários recentes dos alunos
 - **Ficha do aluno** (em abas) — dados, objetivo, saúde/lesões/restrições (em destaque), contato de emergência, plano e vencimento
 - **Avaliações físicas** — peso, altura, % de gordura e medidas, com IMC e gráfico de evolução
 - **Fotos de progresso** — privadas (só a personal e o próprio aluno abrem), com miniaturas
 - **Anotações datadas** — só a personal vê
-- **Alunos** — cadastro, histórico e evolução
-- **Convite por link** — ao cadastrar o aluno você recebe um link de uso único (copiar ou enviar por WhatsApp) para ele criar a senha; o mesmo link serve para redefinir o acesso
+- **Alunos** — cadastro com validação (data de nascimento, telefone, UF, CEP), aviso de cadastro duplicado, lista paginada com busca (nome, e-mail, telefone sem formatação, `#ID`) e filtros (plano vencendo/vencido, sem treinar, sem treino ativo, convite pendente)
+- **Excluir aluno** — apaga conta, treinos, avaliações, anotações e os arquivos de foto (LGPD); para só bloquear o acesso mantendo o histórico, use *Aluno ativo* desmarcado
+- **Convite por link** — ao cadastrar o aluno você recebe um link de uso único (copiar ou enviar por WhatsApp) para ele criar a senha; o mesmo link serve para redefinir a senha (funciona sem e-mail configurado) e pode ser **revogado** se foi enviado para a pessoa errada
 - **Exercícios** com imagem, GIF, vídeo ou link
 - **Modelos de treino** (A/B/C…) e atribuição ao aluno, com cópia editável por aluno (editar não apaga o histórico)
 - **Geração de treino com IA** (opcional, OpenAI)
@@ -121,14 +122,16 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 
 ## Segurança — o que já está coberto
 - Área da personal restrita a contas `is_staff`; cada aluno só enxerga e altera os **próprios** treinos e sessões
-- Cadastro público fechado; acesso por convite de uso único (7 dias)
+- Cadastro público fechado; acesso por convite de uso único (7 dias), revogável
+- Anotações internas da personal nunca aparecem nem são editáveis pela aluna
 - HTTPS automático, cookies `Secure`, HSTS, `X-Content-Type-Options`
 - Container da aplicação roda sem root; só o Caddy expõe portas (banco e app ficam na rede interna)
 - Nenhuma senha fixa; `SECRET_KEY` obrigatório
 
 ## Backlog
 - **Backup automático** (pg_dump diário + `media`, retenção e restauração testada; cópia fora do servidor) — a pasta `media` inclui as fotos de progresso, que são dados sensíveis
-- E-mail (SMTP) para "esqueci minha senha"
+- Configurar SMTP no servidor para o "esqueci minha senha" chegar por e-mail (hoje o caminho é a personal gerar um novo link)
+- Ciclo de vida do aluno (experimental/pausado/ex-aluno), histórico de alterações e consentimento LGPD
 - Aluno ver as próprias avaliações e fotos de progresso; comparação lado a lado de fotos
 - Lembrete automático de plano vencendo (WhatsApp/e-mail)
 - Séries por tempo/técnicas (drop-set, bi-set), periodização

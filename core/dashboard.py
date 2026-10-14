@@ -1,6 +1,7 @@
 """Data for the trainer's home page: who needs attention today."""
 from datetime import datetime, time, timedelta
 
+from django.contrib.auth.hashers import UNUSABLE_PASSWORD_PREFIX
 from django.db.models import Exists, OuterRef, Q, Subquery
 from django.utils import timezone
 
@@ -11,13 +12,18 @@ EXPIRING_DAYS = 14
 COMMENT_DAYS = 7
 LIST_LIMIT = 8
 
+# Student account that never set a password, i.e. never accepted the invite
+INVITE_PENDING = Q(user__password__startswith=UNUSABLE_PASSWORD_PREFIX)
+
 
 def _start_of_today():
     return timezone.make_aware(datetime.combine(timezone.localdate(), time.min))
 
 
 def inactive_students(now=None):
-    """Active students with a running routine who have not trained for INACTIVE_DAYS (or never)."""
+    """Active students with a running routine who have not trained for INACTIVE_DAYS (or never).
+
+    Students who never accepted the invite are not here: they cannot train yet (see pending_invites)."""
     now = now or timezone.now()
     cutoff = now - timedelta(days=INACTIVE_DAYS)
     last_session = WorkoutSession.objects.filter(
@@ -27,7 +33,7 @@ def inactive_students(now=None):
     students = Person.objects.filter(is_active=True).annotate(
         has_routine=Exists(PersonRoutine.objects.filter(person=OuterRef('pk'), is_active=True)),
         last_session_at=Subquery(last_session),
-    ).filter(has_routine=True).filter(
+    ).filter(has_routine=True).exclude(INVITE_PENDING).filter(
         Q(last_session_at__lt=cutoff) | Q(last_session_at__isnull=True, created_at__lt=cutoff)
     )
     rows = []
@@ -38,6 +44,17 @@ def inactive_students(now=None):
             'last_session_at': student.last_session_at,
             'days': (now - reference).days,
         })
+    rows.sort(key=lambda r: -r['days'])
+    return rows
+
+
+def pending_invites(now=None):
+    """Active students who have not accepted the invite yet, oldest first."""
+    now = now or timezone.now()
+    rows = [
+        {'student': p, 'days': (now - p.created_at).days}
+        for p in Person.objects.filter(is_active=True).filter(INVITE_PENDING).select_related('user')
+    ]
     rows.sort(key=lambda r: -r['days'])
     return rows
 
@@ -93,6 +110,7 @@ def trainer_dashboard():
         'sessions_week': WorkoutSession.objects.filter(is_completed=True, start_time__gte=week_ago).count(),
     }
     inactive = inactive_students(now)
+    invites = pending_invites(now)
     plans = expiring_plans()
     routines = ending_routines()
     sessions = todays_sessions()
@@ -100,6 +118,8 @@ def trainer_dashboard():
         'counts': counts,
         'inactive': inactive[:LIST_LIMIT], 'inactive_total': len(inactive),
         'inactive_more': max(0, len(inactive) - LIST_LIMIT),
+        'invites': invites[:LIST_LIMIT], 'invites_total': len(invites),
+        'invites_more': max(0, len(invites) - LIST_LIMIT),
         'plans': plans[:LIST_LIMIT], 'plans_total': len(plans),
         'routines': routines[:LIST_LIMIT], 'routines_total': len(routines),
         'sessions': sessions[:LIST_LIMIT], 'sessions_total': len(sessions),

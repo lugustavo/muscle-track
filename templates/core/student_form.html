@@ -17,6 +17,24 @@
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
+            {% if form.non_field_errors and not form.duplicates %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+            {% if form.duplicates %}
+            <div class="alert alert-warning">
+                <strong><i class="bi bi-exclamation-triangle"></i> Possível cadastro duplicado</strong>
+                <ul class="mb-2">
+                    {% for other, reason in form.duplicates %}
+                    <li><a href="{% url 'core:student_detail' other.pk %}" target="_blank" rel="noopener">{{ other.person_name }}</a> ({{ reason }})</li>
+                    {% endfor %}
+                </ul>
+                <div class="form-check">
+                    <input type="checkbox" name="confirm_duplicate" id="confirm_duplicate" class="form-check-input">
+                    <label for="confirm_duplicate" class="form-check-label">{{ form.confirm_duplicate.label }}</label>
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Foto de Perfil -->
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-primary text-white">
@@ -88,7 +106,7 @@
                             {% endif %}
                             {% if not form.instance.pk %}
                             <small class="form-text text-muted">
-                                <i class="bi bi-info-circle"></i> Será enviado um e-mail de confirmação
+                                <i class="bi bi-info-circle"></i> Usado no login. Você recebe um link de acesso para enviar ao aluno
                             </small>
                             {% endif %}
                         </div>
@@ -248,18 +266,18 @@
             <!-- Observações -->
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-journal-text"></i> Observações</h5>
+                    <h5 class="mb-0"><i class="bi bi-journal-text"></i> Anotações internas</h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
                         <label for="{{ form.notes.id_for_label }}" class="form-label fw-bold">
-                            Anotações adicionais
+                            Anotações internas <small class="text-muted fw-normal">(o aluno não vê)</small>
                         </label>
                         <textarea name="{{ form.notes.name }}"
                                   class="form-control {% if form.notes.errors %}is-invalid{% endif %}"
                                   id="{{ form.notes.id_for_label }}"
                                   rows="4"
-                                  placeholder="Informações relevantes sobre o aluno, objetivos, restrições médicas, etc.">{{ form.notes.value|default:'' }}</textarea>
+                                  placeholder="Combinados, preferências, observações da personal...">{{ form.notes.value|default:'' }}</textarea>
                         {% if form.notes.errors %}
                             <div class="invalid-feedback">{{ form.notes.errors }}</div>
                         {% endif %}
@@ -335,7 +353,7 @@
                     <i class="bi bi-info-circle"></i>
                     <strong>Novo aluno</strong>
                     <p class="mb-0 mt-2 small">
-                        Ao salvar, será criada uma conta de usuário e enviado um e-mail de confirmação para o aluno.
+                        Ao salvar, será criada a conta do aluno e você recebe um link de uso único (copiar ou WhatsApp) para ele criar a senha.
                     </p>
                 </div>
                 {% endif %}
@@ -351,7 +369,7 @@
                 <ul class="small mb-0 ps-3">
                     <li class="mb-2">Use uma foto clara e recente do aluno</li>
                     <li class="mb-2">O e-mail será usado para login do aluno</li>
-                    <li class="mb-2">Anote restrições médicas nas observações</li>
+                    <li class="mb-2">Anote restrições médicas em &quot;Saúde, lesões e restrições&quot;</li>
                     <li>Mantenha os dados atualizados para melhor acompanhamento</li>
                 </ul>
             </div>

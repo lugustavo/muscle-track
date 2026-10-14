@@ -182,6 +182,7 @@ TRAILS = {
     'student_detail': _student_detail,
     'student_edit': _student_edit,
     'student_invite': _student_page('Convite'),
+    'student_delete': _student_page('Excluir'),
     'student_history': _student_page('Histórico'),
     'assessment_create': _assessment(None),
     'assessment_edit': _assessment(None),

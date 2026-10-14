@@ -57,6 +57,9 @@ class Person(models.Model):
     plan_expires_on = models.DateField(null=True, blank=True, verbose_name='Vencimento do plano')
 
     is_active = models.BooleanField(default=True, verbose_name='Ativo')
+    deactivated_at = models.DateTimeField(null=True, blank=True, editable=False, verbose_name='Inativado em')
+    # Bumped to revoke invite links already handed out (see core/invites.py)
+    invite_version = models.PositiveIntegerField(default=0, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -521,13 +524,6 @@ class ProgressPhoto(models.Model):
             img.save(buffer, 'JPEG', quality=80, optimize=True)
         self.image.seek(0)
         return ContentFile(buffer.getvalue())
-
-    def delete(self, *args, **kwargs):
-        files = [(f.storage, f.name) for f in (self.image, self.thumbnail) if f and f.name]
-        result = super().delete(*args, **kwargs)
-        for storage, name in files:
-            storage.delete(name)
-        return result
 
 
 class StudentNote(models.Model):

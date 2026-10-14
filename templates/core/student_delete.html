@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load navigation %}
+
+{% block title %}Excluir {{ student.person_name }} - Muscle Track{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-trash text-danger"></i> Excluir {{ student.person_name }}</h1>
+    {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default %}
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card border-danger mb-4">
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-octagon"></i> <strong>Esta ação não pode ser desfeita.</strong>
+                    O acesso do aluno e todos os dados abaixo serão apagados definitivamente, inclusive os arquivos de fotos.
+                </div>
+                <ul>
+                    <li>{{ counts.routines }} treino{{ counts.routines|pluralize }} atribuído{{ counts.routines|pluralize }}</li>
+                    <li>{{ counts.sessions }} sess{{ counts.sessions|pluralize:"ão,ões" }} de treino registrada{{ counts.sessions|pluralize }}</li>
+                    <li>{{ counts.assessments }} avaliaç{{ counts.assessments|pluralize:"ão,ões" }}</li>
+                    <li>{{ counts.photos }} foto{{ counts.photos|pluralize }} de evolução</li>
+                    <li>{{ counts.notes }} anotaç{{ counts.notes|pluralize:"ão,ões" }} da personal</li>
+                </ul>
+                <p class="text-muted">
+                    Só quer que ele pare de acessar o app, mantendo o histórico? Em vez de excluir,
+                    <a href="{% nav_url 'core:student_edit' student.pk %}">desative o aluno</a>.
+                </p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Excluir definitivamente</button>
+                    {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='bi-x-circle' %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

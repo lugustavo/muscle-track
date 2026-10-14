@@ -63,3 +63,61 @@ def validate_photo_image(image):
         max_width=settings.PHOTO_MAX_DIMENSION, max_height=settings.PHOTO_MAX_DIMENSION,
         min_width=100, min_height=100,
     )
+
+
+# ---- Contact data (shared by the trainer's and the student's forms) ----
+
+BR_STATES = {
+    'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA',
+    'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
+}
+MAX_AGE_YEARS = 120
+
+
+def digits_only(value):
+    return ''.join(ch for ch in (value or '') if ch.isdigit())
+
+
+def normalize_phone(value):
+    """Brazilian phone -> '(11) 98765-4321' (10 or 11 digits, optional leading 55)."""
+    value = (value or '').strip()
+    if not value:
+        return ''
+    if any(not (ch.isdigit() or ch in ' ()-+.') for ch in value):
+        raise ValidationError('Use apenas números, espaços, parênteses e hífen.')
+    digits = digits_only(value)
+    if len(digits) in (12, 13) and digits.startswith('55'):
+        digits = digits[2:]
+    if len(digits) not in (10, 11):
+        raise ValidationError('Informe o telefone com DDD (10 ou 11 dígitos).')
+    if len(digits) == 11:
+        return f'({digits[:2]}) {digits[2:7]}-{digits[7:]}'
+    return f'({digits[:2]}) {digits[2:6]}-{digits[6:]}'
+
+
+def normalize_state(value):
+    value = (value or '').strip().upper()
+    if value and value not in BR_STATES:
+        raise ValidationError('Informe a sigla de um estado válido (ex.: SP).')
+    return value
+
+
+def normalize_zip_code(value):
+    value = (value or '').strip()
+    if not value:
+        return ''
+    digits = digits_only(value)
+    if len(digits) != 8:
+        raise ValidationError('O CEP deve ter 8 dígitos.')
+    return f'{digits[:5]}-{digits[5:]}'
+
+
+def validate_birth_date(value):
+    from django.utils import timezone
+    if value is None:
+        return
+    today = timezone.localdate()
+    if value > today:
+        raise ValidationError('A data de nascimento não pode estar no futuro.')
+    if value.year < today.year - MAX_AGE_YEARS:
+        raise ValidationError('Confira a data de nascimento: o ano parece incorreto.')
