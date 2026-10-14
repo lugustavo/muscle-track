@@ -67,7 +67,7 @@ class StudentNameLinkTests(BaseTestCase):
     def test_trainer_sees_links_to_student_and_progress(self):
         self.login(self.trainer)
         page = self.client.get(self.url)
-        self.assertContains(page, f'href="{self.student_url}"')
+        self.assertContains(page, f'href="{self.student_url}?next=')
         self.assertContains(page, reverse('core:person_routine_detail', kwargs={'pk': self.alice_routine.pk}))
 
     def test_student_sees_plain_text(self):

@@ -1,7 +1,8 @@
+{% load navigation %}
 <h5 class="mb-3"><i class="bi bi-journal-text"></i> Anotações da personal</h5>
 <p class="text-muted small"><i class="bi bi-eye-slash"></i> Só você vê estas anotações; o aluno não tem acesso.</p>
 
-<form method="post" action="{% url 'core:note_add' student.pk %}" class="mb-4">
+<form method="post" action="{% nav_url 'core:note_add' student.pk %}" class="mb-4">
     {% csrf_token %}
     {{ note_form.text }}
     <button type="submit" class="btn btn-primary mt-2"><i class="bi bi-plus-circle"></i> Salvar anotação</button>
@@ -12,7 +13,7 @@
     <div class="card-body py-2">
         <div class="d-flex justify-content-between">
             <small class="text-muted">{{ note.created_at|date:"d/m/Y H:i" }}{% if note.author %} · {{ note.author.get_short_name|default:note.author.email }}{% endif %}</small>
-            <form method="post" action="{% url 'core:note_delete' note.pk %}" onsubmit="return confirm('Remover esta anotação?');">
+            <form method="post" action="{% nav_url 'core:note_delete' note.pk %}" onsubmit="return confirm('Remover esta anotação?');">
                 {% csrf_token %}
                 <button class="btn btn-sm btn-link text-danger p-0" title="Remover"><i class="bi bi-trash"></i></button>
             </form>

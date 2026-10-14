@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load navigation %}
 {% load static %}
 
 {% block title %}Alunos{% endblock %}
@@ -20,7 +21,7 @@
                 </div>
                 <div>
                     {% if user.is_staff %}
-                    <a href="{% url 'core:student_create' %}" class="btn btn-primary">
+                    <a href="{% nav_url 'core:student_create' %}" class="btn btn-primary">
                         <i class="bi bi-plus-circle me-1"></i> Novo Aluno
                     </a>
                     {% endif %}
@@ -94,7 +95,7 @@
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
                             <h5 class="card-title mb-1">
-                                <a href="{% url 'core:student_detail' item.student.pk %}" class="text-decoration-none text-dark">
+                                <a href="{% nav_url 'core:student_detail' item.student.pk %}" class="text-decoration-none text-dark">
                                     {{ item.student.person_name }}
                                 </a>
                             </h5>
@@ -152,7 +153,7 @@
                     </div>
 
                     <div class="mt-3">
-                        <a href="{% url 'core:student_detail' item.student.pk %}" class="btn btn-sm btn-outline-primary w-100">
+                        <a href="{% nav_url 'core:student_detail' item.student.pk %}" class="btn btn-sm btn-outline-primary w-100">
                             Ver Detalhes
                         </a>
                     </div>
@@ -197,7 +198,7 @@
                         </td>
                         <td class="text-muted small">#{{ item.student.id }}</td>
                         <td>
-                            <a href="{% url 'core:student_detail' item.student.pk %}" class="text-decoration-none fw-semibold">
+                            <a href="{% nav_url 'core:student_detail' item.student.pk %}" class="text-decoration-none fw-semibold">
                                 {{ item.student.person_name }}
                             </a>
                         </td>
@@ -241,11 +242,11 @@
                             {% elif item.student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark" title="Vence em {{ item.student.plan_expires_on|date:'d/m/Y' }}">plano vence em {{ item.student.days_to_plan_expiry }}d</span>{% endif %}
                         </td>
                         <td class="text-center">
-                            <a href="{% url 'core:student_detail' item.student.pk %}" class="btn btn-sm btn-outline-primary" title="Ver Detalhes">
+                            <a href="{% nav_url 'core:student_detail' item.student.pk %}" class="btn btn-sm btn-outline-primary" title="Ver Detalhes">
                                 <i class="bi bi-eye"></i>
                             </a>
                             {% if user.is_staff %}
-                            <a href="{% url 'core:student_edit' item.student.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                            <a href="{% nav_url 'core:student_edit' item.student.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </a>
                             {% endif %}

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load navigation %}
 {% load static %}
 
 {% block title %}Exercícios - Muscle Track{% endblock %}
@@ -45,7 +46,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1><i class="bi bi-activity"></i> Exercícios</h1>
-    <a href="{% url 'core:exercise_create' %}" class="btn btn-primary">
+    <a href="{% nav_url 'core:exercise_create' %}" class="btn btn-primary">
         <i class="bi bi-plus-circle"></i> Novo Exercício
     </a>
 </div>
@@ -127,10 +128,10 @@
                 </div>
                 <p class="card-text text-muted small">{{ exercise.description|truncatewords:15 }}</p>
                 <div class="d-flex gap-2">
-                    <a href="{% url 'core:exercise_detail' exercise.pk %}" class="btn btn-sm btn-outline-primary flex-fill">
+                    <a href="{% nav_url 'core:exercise_detail' exercise.pk %}" class="btn btn-sm btn-outline-primary flex-fill">
                         <i class="bi bi-eye"></i> Ver
                     </a>
-                    <a href="{% url 'core:exercise_edit' exercise.pk %}" class="btn btn-sm btn-outline-secondary flex-fill">
+                    <a href="{% nav_url 'core:exercise_edit' exercise.pk %}" class="btn btn-sm btn-outline-secondary flex-fill">
                         <i class="bi bi-pencil"></i> Editar
                     </a>
                 </div>
@@ -171,10 +172,10 @@
                 <p class="text-muted small mb-0">{{ exercise.description|truncatewords:25 }}</p>
             </div>
             <div class="exercise-actions d-flex flex-column gap-2">
-                <a href="{% url 'core:exercise_detail' exercise.pk %}" class="btn btn-sm btn-outline-primary">
+                <a href="{% nav_url 'core:exercise_detail' exercise.pk %}" class="btn btn-sm btn-outline-primary">
                     <i class="bi bi-eye"></i> Ver Detalhes
                 </a>
-                <a href="{% url 'core:exercise_edit' exercise.pk %}" class="btn btn-sm btn-outline-secondary">
+                <a href="{% nav_url 'core:exercise_edit' exercise.pk %}" class="btn btn-sm btn-outline-secondary">
                     <i class="bi bi-pencil"></i> Editar
                 </a>
             </div>

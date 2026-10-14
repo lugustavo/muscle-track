@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load navigation %}
 
 {% block title %}{{ exercise.exercise_name }} - Muscle Track{% endblock %}
 
@@ -7,12 +8,10 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1><i class="bi bi-activity"></i> {{ exercise.exercise_name }}</h1>
     <div>
-        <a href="{% url 'core:exercise_edit' exercise.pk %}" class="btn btn-primary">
+        <a href="{% nav_url 'core:exercise_edit' exercise.pk %}" class="btn btn-primary">
             <i class="bi bi-pencil"></i> Editar
         </a>
-        <a href="{% url 'core:exercise_list' %}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Voltar
-        </a>
+        {% url 'core:exercise_list' as back_default %}{% back_button back_default %}
     </div>
 </div>
 
@@ -90,7 +89,7 @@
             <div class="card-body">
                 <div class="list-group">
                     {% for routine_exercise in routine_exercises %}
-                    <a href="{% url 'core:routine_detail' routine_exercise.routine.pk %}" class="list-group-item list-group-item-action">
+                    <a href="{% nav_url 'core:routine_detail' routine_exercise.routine.pk %}" class="list-group-item list-group-item-action">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="mb-1">{{ routine_exercise.routine.routine_name }}</h6>
