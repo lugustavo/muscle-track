@@ -21,7 +21,7 @@ from django.templatetags.static import static
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_safe
 
 from allauth.account.models import EmailAddress
 
@@ -40,6 +40,7 @@ from .billing import (
     register_payment, suggest_amount, suggest_period,
 )
 from .consistency import celebrations
+from .calendar_feed import build_ics, feed_for_token, get_or_create_feed, mark_fetched, rotate
 from .contract import contract_card
 from .consent import (
     ALL_KINDS, CURRENT_VERSION as CONSENT_VERSION, DESCRIPTIONS as CONSENT_DESCRIPTIONS, REQUIRED_KINDS,
@@ -49,7 +50,7 @@ from .exports import build_export
 from .history import log_event, log_profile_edit
 from .invites import build_invite_url, get_user_from_invite, revoke_invites
 from .models import (
-    Appointment, Assessment, ConsentRecord, Exercise, MuscleGroup, Payment, Plan, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
+    Appointment, Assessment, CalendarFeed, ConsentRecord, Exercise, MuscleGroup, Payment, Plan, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
     Routine, RoutineExercise, SessionExercise, SessionSet, StudentEvent, StudentNote, WorkoutSession,
 )
 from .navigation import after_save_url, back_label, safe_next_url
@@ -1729,6 +1730,75 @@ def routine_generate_ai(request):
     return render(request, 'core/routine_generate_ai.html', {'form': form, 'title': 'Gerar Treino com IA'})
 
 
+# ============= CALENDAR LINK (Google Agenda, Apple Calendar...) =============
+
+def _public_base(request):
+    return (settings.SITE_URL or f'{request.scheme}://{request.get_host()}').rstrip('/')
+
+
+@require_safe
+def calendar_feed(request, token):
+    """The private .ics link: no login, the long random token is the credential."""
+    feed = feed_for_token(token)
+    if feed is None:
+        raise Http404
+    mark_fetched(feed)
+    host = request.get_host().split(':')[0]
+    response = HttpResponse(build_ics(feed, host, site_url=_public_base(request)), content_type='text/calendar; charset=utf-8')
+    response['Content-Disposition'] = 'inline; filename="muscle-track.ics"'
+    response['Cache-Control'] = 'private, no-store'
+    response['X-Robots-Tag'] = 'noindex, nofollow'
+    response['Referrer-Policy'] = 'no-referrer'
+    return response
+
+
+def _calendar_owner(request):
+    """('trainer' | 'student', person or None) for the signed-in account; a student without consent goes to /consent/."""
+    if is_trainer(request.user):
+        return 'trainer', None
+    person = Person.objects.filter(user=request.user).first()
+    if person is None:
+        raise PermissionDenied
+    return 'student', person
+
+
+@login_required
+def calendar_settings(request):
+    """Where each person finds their own calendar link, how to add it to Google Agenda, and renews it."""
+    role, person = _calendar_owner(request)
+    if person is not None and not has_current_consent(person):
+        return redirect('core:consent')
+    feed = get_or_create_feed(request.user)
+    url = f"{_public_base(request)}{reverse('core:calendar_feed', kwargs={'token': feed.token})}"
+    return render(request, 'core/calendar_settings.html', {
+        'role': role, 'feed': feed, 'feed_url': url, 'webcal_url': 'webcal://' + url.split('://', 1)[1],
+        'name_styles': CalendarFeed.NAME_STYLES, 'person': person,
+    })
+
+
+@login_required
+@require_POST
+def calendar_rotate(request):
+    _calendar_owner(request)
+    rotate(get_or_create_feed(request.user))
+    messages.success(request, 'Novo link gerado. O anterior deixou de funcionar: adicione o novo no Google Agenda.')
+    return redirect('core:calendar_settings')
+
+
+@staff_required
+@require_POST
+def calendar_style(request):
+    feed = get_or_create_feed(request.user)
+    value = request.POST.get('name_style')
+    if value in dict(CalendarFeed.NAME_STYLES):
+        feed.name_style = value
+        feed.save(update_fields=['name_style'])
+        messages.success(request, 'Preferência salva. O Google Agenda atualiza o calendário aos poucos.')
+    else:
+        messages.error(request, 'Escolha uma das opções.')
+    return redirect('core:calendar_settings')
+
+
 # ============= PWA =============
 
 def _manifest_shortcuts(user):
@@ -2091,6 +2161,7 @@ def agenda(request):
     prev_url, next_url, today_url, is_current = _agenda_nav(view, pivot, today)
     context = {
         'view': view, 'conflicts': conflicts, 'statuses': Appointment.Status,
+        'calendar_style': CalendarFeed.objects.filter(user=request.user).values_list('name_style', flat=True).first() or 'first',
         'range_start': start, 'range_end': end, 'pivot': pivot,
         'prev_url': prev_url, 'next_url': next_url, 'today_url': today_url, 'is_current': is_current,
         'view_links': [(key, label, _agenda_url(vista=key), key == view) for key, label in AGENDA_VIEW_LABELS],

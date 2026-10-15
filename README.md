@@ -14,6 +14,7 @@ App web **self-hosted** para personal trainers: cadastro de alunos, fichas de tr
 - **Barra de menu inferior no celular** — no celular e em tablets pequenos o menu fica no rodapé (aluno: Hoje · Treinos · **Treinar** · Histórico · Perfil; personal: Hoje · Alunos · Agenda · Financeiro · Mais), com selos de pendências para a personal; no desktop continua o menu do topo
 - **Tela "Hoje" do aluno** — o treino do dia com um botão grande para iniciar (ou continuar), a semana em 7 pontos com a meta do plano, e os números em uma linha; descartar um treino iniciado por engano
 - **Horários que se repetem** — a cada N semanas, vários dias de uma vez, com fim em uma data ou após N aulas; em "Nova aula" basta marcar "Repetir esta aula"; na agenda dá para encerrar a série a partir de uma aula ou remover o horário fixo inteiro
+- **Agenda no Google Agenda (link)** — em Agenda → "Google Agenda" (personal) e Perfil → "Minhas aulas no Google Agenda" (aluno): link `.ics` privado e revogável, passo a passo para adicionar no Google, aviso de que o Google atualiza aos poucos, "última vez que o link foi buscado", e botão "Adicionar ao Google Agenda" em cada aula da personal; o aluno só recebe as próprias aulas
 - **Agenda em quatro vistas** — Semana (padrão), Dia, Mês (grade com as aulas de cada dia; toque abre o dia) e Lista (próximos 14 dias, só os dias com aula); navegação anterior/próximo/hoje em cada vista, escolha lembrada e as mesmas ações de presença em todas
 - **Cartão "Contrato" na ficha do aluno** — na aba Ficha, no lugar do antigo cartão Plano: situação em cor (Em dia · Vence em N dias · Vencido há N dias · Sem plano · Pausado), nome e periodicidade, barra do período, aulas da semana (presenças × aulas por semana do plano), botões Registrar pagamento e Cobrar (o principal muda quando vencido), valores sigilosos ocultos até tocar no olho e comparação com o valor de tabela. Vocabulário único: **Plano** é o modelo do catálogo e **Contrato** é o combinado com o aluno
 - **Constância (aluno)** — anel da meta semanal (meta do plano, ou a que o aluno define), sequência de semanas seguidas (a semana em andamento nunca quebra a sequência), próximo marco de treinos (10, 25, 50, 100...) e avisos no resumo do treino ("Marco: 50 treinos", "Meta da semana batida"); tudo desligável no perfil e só sobre a própria história do aluno
@@ -111,6 +112,7 @@ Os dados vivem em volumes do Docker: `pgdata` (banco), `media` (fotos e mídia d
 | `ALLOW_PUBLIC_SIGNUP` | `False` (padrão): só entra quem foi convidado |
 | `OPENAI_API_KEY`, `OPENAI_MODEL` | Geração de treino com IA (opcional) |
 | `PRIVACY_CONTROLLER_NAME`, `PRIVACY_CONTACT_EMAIL` | Nome e e-mail do responsável pelos dados, exibidos na política de privacidade |
+| `CALENDAR_LOCATION` | Local das aulas que aparece no Google Agenda / Apple Calendar (opcional) |
 | `PIX_KEY` | Chave Pix incluída na mensagem de cobrança pelo WhatsApp (opcional) |
 | `EMAIL_*` | SMTP, só para o "esqueci minha senha" (opcional) |
 | `SITE_URL`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, `SECURE_HSTS_SECONDS` | Avançado: sobrescrevem os valores derivados de `DOMAIN` |
@@ -182,7 +184,9 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 - *Ordem sugerida:* seção de notificações e consentimentos → e-mail (só depende de SMTP) → web push → Telegram.
 
 ### Integração com o Google Agenda (personal e alunos)
-*Pedido: a personal e cada aluno verem as aulas no próprio Google Agenda. Vale o mesmo para Apple Calendar e Outlook quando der.*
+*Pedido: a personal e cada aluno verem as aulas no próprio Google Agenda. **Decisões:** todos têm conta Google, então a integração é **só com o Google** (o link `.ics` também abre em Apple/Outlook, mas não é prioridade); o app terá HTTPS em produção (e já tem localmente pelo Caddy); **começamos pelo link.***
+
+**Situação:** ~~1. link `.ics`~~ *(feito: `/calendar/`, um link por pessoa, botão "Adicionar ao Google Agenda" em cada aula da agenda da personal; a personal escolhe como o aluno aparece no título)*. Falta: 2. sincronização pela API (personal) e 3. (aluno). Detalhes do que foi feito: o token fica guardado em texto no banco (não em hash, para a tela poder mostrar o link de novo); "gerar novo link" derruba o antigo; o app registra quando o link foi buscado pela última vez; o título do aluno no evento é "Aula de treino" e nada de saúde, anotações ou valores entra no arquivo; `CALENDAR_LOCATION` no `.env` define o local das aulas.
 
 **Duas formas, da mais simples para a mais completa**
 - **1. Assinatura por link (arquivo `.ics`), sem login no Google.** O app publica um calendário em formato iCalendar numa URL secreta; a pessoa cola em Google Agenda → "Outros calendários" → "Por URL" (ou toca no link no celular).

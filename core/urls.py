@@ -41,6 +41,10 @@ urlpatterns = [
 
     # Agenda
     path('agenda/', views.agenda, name='agenda'),
+    path('calendar/', views.calendar_settings, name='calendar_settings'),
+    path('calendar/rotate/', views.calendar_rotate, name='calendar_rotate'),
+    path('calendar/style/', views.calendar_style, name='calendar_style'),
+    path('calendar/feed/<slug:token>.ics', views.calendar_feed, name='calendar_feed'),
     path('agenda/new/', views.appointment_create, name='appointment_create'),
     path('appointments/<int:pk>/reschedule/', views.appointment_reschedule, name='appointment_reschedule'),
     path('appointments/<int:pk>/status/', views.appointment_status, name='appointment_status'),
