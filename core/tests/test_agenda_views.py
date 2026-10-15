@@ -116,6 +116,30 @@ class AgendaViewsTests(BaseTestCase):
         self.assertIn('vista=dia&dia=2026-03-10', html)        # tapping a day opens it
         self.assertIn('month-chip s-missed', html)
 
+    def test_month_view_lists_the_classes_below_the_grid(self):
+        first = self.appt(date(2026, 3, 10), hour=8)
+        self.appt(date(2026, 3, 10), self.bob.person, hour=10, status='missed')
+        self.appt(date(2026, 3, 12), status='cancelled')
+        self.appt(date(2026, 4, 1))      # next month's day shown in the last grid row: not listed
+        response = self.client.get(self.url, {'vista': 'mes', 'mes': '2026-03'})
+        self.assertEqual([d['date'] for d in response.context['month_days']], [date(2026, 3, 10), date(2026, 3, 12)])
+        html = response.content.decode()
+        self.assertEqual(html.count('data-month-class='), 3)
+        listed = html[html.index('data-month-list'):]
+        self.assertIn('08:00', listed)
+        self.assertIn('Alice', listed)
+        self.assertIn('Bob', listed)
+        # the name opens the student's file on the Agenda tab
+        link = reverse('core:student_detail', kwargs={'pk': self.alice.person.pk})
+        self.assertIn(f'{link}?next=', listed)
+        self.assertIn('#tab-agenda', listed)
+        self.assertIn(f'data-month-class="{first.pk}"', listed)
+        self.assertIn('Faltou', listed)
+
+    def test_month_without_classes_says_so(self):
+        response = self.client.get(self.url, {'vista': 'mes', 'mes': '2026-03'})
+        self.assertContains(response, 'Nenhuma aula neste mês.')
+
     def test_month_navigation_links(self):
         response = self.client.get(self.url, {'vista': 'mes', 'mes': '2026-01'})
         self.assertIn('mes=2025-12', response.context['prev_url'])

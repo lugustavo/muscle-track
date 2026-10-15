@@ -6,10 +6,13 @@
             {% for slot in slots %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span><strong>{{ slot.get_weekday_display }}</strong> às {{ slot.start_time|time:"H:i" }} <small class="text-muted">({{ slot.duration_minutes }} min){% if slot.interval_weeks > 1 %} · a cada {{ slot.interval_weeks }} semanas{% endif %}{% if slot.valid_until %} · até {{ slot.valid_until|date:"d/m/Y" }}{% endif %}</small></span>
-                <form method="post" action="{% nav_url 'core:slot_delete' slot.pk %}" onsubmit="return confirm('Remover este horário? As aulas futuras dele saem da agenda.');">
+                <span class="text-nowrap">
+                <a href="{% nav_url 'core:slot_edit' slot.pk %}" class="btn btn-sm btn-link p-0 me-2" title="Editar"><i class="bi bi-pencil"></i></a>
+                <form method="post" action="{% nav_url 'core:slot_delete' slot.pk %}" class="d-inline" onsubmit="return confirm('Remover este horário? As aulas futuras dele saem da agenda.');">
                     {% csrf_token %}
                     <button class="btn btn-sm btn-link text-danger p-0" title="Remover"><i class="bi bi-trash"></i></button>
                 </form>
+                </span>
             </li>
             {% empty %}
             <li class="list-group-item text-muted">Nenhum horário fixo. Adicione abaixo (ex.: segunda 07:00).</li>

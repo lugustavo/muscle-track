@@ -478,6 +478,21 @@ class ScheduleSlotForm(RecurrenceMixin):
         return cleaned
 
 
+class SlotEditForm(forms.Form):
+    """Change a fixed time from a date on (core/recurrence.edit_series)."""
+    weekday = forms.TypedChoiceField(choices=ScheduleSlot.WEEKDAYS, coerce=int, label='Dia da semana',
+                                     widget=forms.Select(attrs={'class': 'form-select'}))
+    start_time = forms.TimeField(label='Horário',
+                                 widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}, format='%H:%M'))
+    duration_minutes = forms.IntegerField(
+        label='Duração (min)', min_value=10, max_value=480,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '10', 'max': '480', 'step': '5'}))
+    from_day = forms.DateField(label='A partir de', widget=forms.DateInput(
+        attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
+    valid_until = forms.DateField(required=False, label='Vale até (opcional)', widget=forms.DateInput(
+        attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
+
+
 class RepeatForm(RecurrenceMixin):
     """The "Repeat" part of a new class: only used when `enabled` is ticked."""
     enabled = forms.BooleanField(required=False, label='Repetir esta aula',
