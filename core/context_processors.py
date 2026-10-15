@@ -5,8 +5,8 @@ from django.utils import timezone
 from .models import Appointment, Person, StudentEvent
 from .today import open_row, rows_for, start_of_day, suggested_row
 
-# Pages where the bar would be in the way (it has its own header / needs a decision first)
-HIDDEN_ON = {'workout_execute', 'consent'}
+# Pages without the bar (and without the top hamburger either): the student must decide first
+HIDDEN_ON = {'consent'}
 
 STAFF_SECTIONS = (
     ('alunos', ('student_', 'assessment_', 'photo_', 'note_', 'person_routine_', 'session_detail', 'invite')),
@@ -14,6 +14,7 @@ STAFF_SECTIONS = (
     ('financeiro', ('finance', 'payment_', 'plan_')),
 )
 STUDENT_SECTIONS = (
+    ('center', ('workout_execute',)),   # the running workout: the central button is the active one
     ('treinos', ('my_workouts', 'workout_')),
     ('historico', ('my_history', 'my_exercise_progress')),
     ('perfil', ('my_profile', 'my_privacy')),
@@ -84,6 +85,7 @@ def _student_bar(request, person, active):
     for item in items:
         item['active'] = item['key'] == active
         item['badge'] = 0
+    center['active'] = active == 'center'
     return {'role': 'student', 'items': items, 'center': center}
 
 
@@ -95,7 +97,7 @@ def app_nav(request):
     match = getattr(request, 'resolver_match', None)
     name = match.url_name if match and match.url_name else ''
     if name in HIDDEN_ON:
-        return {'tabbar': None}
+        return {'tabbar': None, 'hide_topmenu': True}
     if user.is_staff or user.is_superuser:
         active = _section(name, STAFF_SECTIONS, fallback='mais' if name else '')
         return {'tabbar': _staff_bar(active)}

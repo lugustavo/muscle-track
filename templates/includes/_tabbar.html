@@ -4,7 +4,7 @@
     {% if tabbar.role == 'student' %}
         {% for item in tabbar.items %}
             {% if item.key == 'center' %}
-            <div class="tab tab-center {% if tabbar.center.state == 'continue' %}running{% endif %}">
+            <div class="tab tab-center {% if tabbar.center.state == 'continue' %}running{% endif %} {% if tabbar.center.active %}active{% endif %}">
                 {% if tabbar.center.state == 'start' %}
                 <form method="post" action="{{ tabbar.center.url }}">
                     {% csrf_token %}
@@ -14,7 +14,7 @@
                     </button>
                 </form>
                 {% elif tabbar.center.state == 'continue' %}
-                <a href="{{ tabbar.center.url }}" class="btn-center" aria-label="Continuar o treino em andamento">
+                <a href="{{ tabbar.center.url }}" class="btn-center" aria-label="Continuar o treino em andamento"{% if tabbar.center.active %} aria-current="page"{% endif %}>
                     <span class="circle"><i class="bi bi-stopwatch"></i></span>
                     <span class="label tab-timer" data-tabbar-timer="{{ tabbar.center.started_ms }}">{{ tabbar.center.label }}</span>
                 </a>
