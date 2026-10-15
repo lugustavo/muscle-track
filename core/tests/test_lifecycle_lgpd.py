@@ -473,3 +473,39 @@ class AdminReadOnlyTests(BaseTestCase):
         for model in ('studentevent', 'consentrecord'):
             self.assertEqual(self.client.get(f'/admin/core/{model}/').status_code, 200)
             self.assertEqual(self.client.get(f'/admin/core/{model}/add/').status_code, 403)
+
+
+class TrainerConsentStateTests(BaseTestCase):
+    """What the trainer records now becomes the current state, whatever date is typed."""
+
+    def setUp(self):
+        ConsentRecord.objects.filter(person=self.alice.person).delete()
+        self.person = self.alice.person
+        self.url = reverse('core:student_consent_record', kwargs={'pk': self.person.pk})
+        self.login(self.trainer)
+
+    def state(self):
+        return {kind: consent_module.is_granted(record)
+                for kind, record in consent_module.current_consents(Person.objects.get(pk=self.person.pk)).items()}
+
+    def test_today_with_a_later_decision_of_the_student_still_wins(self):
+        record_consent(self.person, 'photos', False)          # the student withdrew it a moment ago (at = now)
+        today = timezone.localdate().isoformat()              # the form's default date: today at 12:00
+        self.client.post(self.url, {'kinds': ['terms', 'health_data', 'photos'], 'date': today})
+        self.assertEqual(self.state(), {'terms': True, 'health_data': True, 'photos': True})
+
+    def test_an_old_paper_date_does_not_lose_to_a_newer_withdrawal_either(self):
+        record_consent(self.person, 'photos', False)
+        self.client.post(self.url, {'kinds': ['photos'], 'date': '2026-01-10'})
+        self.assertTrue(self.state()['photos'])
+        record_consent(self.person, 'photos', False)          # and a later withdrawal still wins over it
+        self.assertFalse(self.state()['photos'])
+
+    def test_form_shows_the_granted_ones_checked(self):
+        self.client.post(self.url, {'kinds': ['terms', 'photos'], 'date': timezone.localdate().isoformat()})
+        html = self.client.get(reverse('core:student_detail', kwargs={'pk': self.person.pk})).content.decode()
+        box = lambda kind: html[html.index(f'id="consent-{kind}"'):].split('>')[0]   # noqa: E731
+        self.assertIn('checked disabled', box('terms'))
+        self.assertIn('checked disabled', box('photos'))
+        self.assertNotIn('checked', box('health_data'))
+        self.assertIn('já concedido', html)

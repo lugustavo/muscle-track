@@ -20,9 +20,13 @@ DESCRIPTIONS = {
 
 
 def current_consents(person):
-    """{kind: latest ConsentRecord or None}."""
+    """{kind: latest ConsentRecord or None}.
+
+    "Latest" is the last one *recorded* (pk), not the one with the latest `at`: `at` is the day the consent was given
+    (a trainer may record a paper consent with an earlier date), and a decision registered now must not lose to an
+    older one just because its date is earlier."""
     latest = {}
-    for record in person.consents.all():  # ordered newest first
+    for record in person.consents.order_by('-pk'):
         latest.setdefault(record.kind, record)
     return {kind: latest.get(kind) for kind in ALL_KINDS}
 
