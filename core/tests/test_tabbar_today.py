@@ -141,19 +141,42 @@ class StudentBarTests(BaseTestCase):
         self.assertIn(f'href="{reverse("core:home")}" class="btn-center"', html)
         self.assertNotIn('workout_start', html)
 
-    def test_bar_is_absent_where_it_would_be_in_the_way(self):
-        session = open_session(self.alice_routine)
+    def test_workout_screen_has_the_bar_and_no_hamburger(self):
+        open_session(self.alice_routine, started_ago=timedelta(minutes=7))
         page = self.client.get(reverse('core:workout_execute', kwargs={'pk': self.alice_routine.pk}))
         self.assertEqual(page.status_code, 200)
-        self.assertEqual(tabbar_html(page), '')
-        self.assertNotIn('has-tabbar', page.content.decode())
-        record = Person.objects.get(pk=self.alice.person.pk)
+        html = tabbar_html(page)
+        text = page.content.decode()
+        self.assertIn('aria-label="Menu principal"', html)
+        self.assertIn('<body class="has-tabbar">', text)
+        self.assertIn('class="navbar-toggler d-none"', text)
+        # the central button is the active item, showing the running clock; no other item is lit
+        self.assertEqual(html.count('aria-current="page"'), 1)
+        self.assertIn('class="btn-center" aria-label="Continuar o treino em andamento" aria-current="page"', html)
+        self.assertIn('data-tabbar-timer', html)
+        self.assertNotIn('class="tab active"', html)
+        for label in ('Hoje', 'Treinos', 'Histórico', 'Perfil'):
+            self.assertIn(f'>{label}<', html)
+
+    def test_workout_screen_without_a_session_still_redirects(self):
+        response = self.client.get(reverse('core:workout_execute', kwargs={'pk': self.alice_routine.pk}))
+        self.assertRedirects(response, reverse('core:my_workouts'))
+
+    def test_consent_page_has_no_bar_and_no_hamburger(self):
         from core.models import ConsentRecord
-        ConsentRecord.objects.filter(person=record).delete()
+        ConsentRecord.objects.filter(person=Person.objects.get(pk=self.alice.person.pk)).delete()
         consent = self.client.get(reverse('core:consent'))
         self.assertEqual(consent.status_code, 200)
         self.assertEqual(tabbar_html(consent), '')
-        session.delete()
+        text = consent.content.decode()
+        self.assertIn('class="navbar-toggler d-none"', text)
+        self.assertNotIn('has-tabbar', text)
+
+    def test_rest_timer_bar_is_lifted_above_the_bar(self):
+        from pathlib import Path
+        css = (Path(__file__).resolve().parents[2] / 'static' / 'css' / 'tabbar.css').read_text()
+        self.assertIn('body.has-tabbar .rest-bar { bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));', css)
+        self.assertIn('body.has-tabbar.kbd-open .rest-bar { bottom: 0;', css)
 
     def test_extra_queries_do_not_grow_with_routines_and_sessions(self):
         def count():

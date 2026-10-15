@@ -1,4 +1,5 @@
 /* Bottom navigation bar (phones and small tablets). Hidden from the lg breakpoint up, where the top menu is used. */
+:root { --tabbar-h: 57px; }
 .tabbar {
     position: fixed;
     left: 0;
@@ -118,3 +119,11 @@ body.kbd-open .tabbar { display: none; }
 .week-dots .dot.today { color: var(--primary-color); font-weight: 700; }
 .today-stats div { text-align: center; }
 .today-stats .num { font-size: 1.4rem; font-weight: 700; line-height: 1.1; }
+
+/* Workout screen: the rest timer bar sits above the bottom bar, and drops back when the keyboard hides the bar */
+@media (max-width: 991.98px) {
+    /* extra padding: the raised central button overlaps the bottom edge of the rest bar */
+    body.has-tabbar .rest-bar { bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); padding-bottom: 1.6rem; }
+    body.has-tabbar.kbd-open .rest-bar { bottom: 0; padding-bottom: .75rem; }
+}
+.tabbar .tab-center.active .circle { box-shadow: 0 0 0 3px #fff, 0 0 0 5px currentColor, 0 3px 10px rgba(0, 0, 0, .25); }
