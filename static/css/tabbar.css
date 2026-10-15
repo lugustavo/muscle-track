@@ -127,3 +127,85 @@ body.kbd-open .tabbar { display: none; }
     body.has-tabbar.kbd-open .rest-bar { bottom: 0; padding-bottom: .75rem; }
 }
 .tabbar .tab-center.active .circle { box-shadow: 0 0 0 3px #fff, 0 0 0 5px currentColor, 0 3px 10px rgba(0, 0, 0, .25); }
+
+/* Trainer on a phone: floating "+" (create sheet), student file, agenda day strip, student rows */
+.fab {
+    position: fixed;
+    right: 1rem;
+    bottom: calc(var(--tabbar-h) + 1rem + env(safe-area-inset-bottom));
+    z-index: 1030;
+    width: 56px;
+    height: 56px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(255, 107, 107, .55);
+}
+.fab:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 3px; }
+body.kbd-open .fab { display: none; }
+@media (min-width: 992px) { .fab { display: none !important; } }
+
+.hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+
+@media (max-width: 991.98px) {
+    /* Student file */
+    .student-header-info h1 { font-size: 1.25rem; }
+    .stat-strip { display: flex; flex-wrap: nowrap; gap: .5rem; overflow-x: auto; margin: 0 -.75rem 1rem; padding: 0 .75rem .25rem; }
+    .stat-strip > div { flex: 0 0 auto; min-width: 7.5rem; width: auto; padding: 0; margin: 0; }
+    .stat-strip .card-body { padding: .5rem .75rem; }
+    .stat-strip h3 { font-size: 1.25rem !important; margin: 0 !important; }
+    .stat-strip i { display: none; }
+    .stat-strip p { font-size: .75rem; }
+    .tabs-sticky {
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+        background: var(--bs-body-bg, #fff);
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        white-space: nowrap;
+        margin-left: -.75rem;
+        margin-right: -.75rem;
+        padding: 0 .75rem;
+    }
+    .tabs-sticky .nav-link { white-space: nowrap; }
+
+    /* Agenda: one day at a time, picked in the strip */
+    .day-strip { display: flex; gap: .35rem; justify-content: space-between; }
+    .day-strip button {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: .4rem 0;
+        border: 1px solid #dee2e6;
+        border-radius: .6rem;
+        background: #fff;
+        font-size: .75rem;
+        line-height: 1.2;
+        color: #495057;
+        position: relative;
+    }
+    .day-strip button .num { display: block; font-size: 1.05rem; font-weight: 700; }
+    .day-strip button.today { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(255, 107, 107, .25); }
+    .day-strip button.selected { background: var(--primary-color); border-color: var(--primary-color); color: #fff; }
+    .day-strip button .has { display: block; width: 6px; height: 6px; margin: 2px auto 0; border-radius: 50%; background: transparent; }
+    .day-strip button.busy .has { background: var(--secondary-color); }
+    .day-strip button.selected.busy .has { background: #fff; }
+    .agenda-days > .day-pane:not(.selected) { display: none; }
+    .agenda-days .day-col .card-header { display: none; }
+}
+@media (min-width: 992px) {
+    .day-strip, .day-empty { display: none !important; }
+}
+.day-empty { text-align: center; padding: 1.5rem 0; }
+
+.student-row { display: flex; gap: .75rem; align-items: center; padding: .75rem 1rem; text-decoration: none; color: inherit; }
+.student-row img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; }
+.student-row .meta { min-width: 0; flex: 1 1 auto; }
+.student-row .meta .name { font-weight: 600; }
+.student-row .meta small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

@@ -13,7 +13,7 @@
                 <div>
                     <h2 class="mb-1"><i class="bi bi-people"></i> Alunos</h2>
                 </div>
-                <div>
+                <div class="d-none d-lg-block">
                     {% if user.is_staff %}
                     <a href="{% nav_url 'core:student_create' %}" class="btn btn-primary">
                         <i class="bi bi-plus-circle me-1"></i> Novo Aluno
@@ -24,8 +24,52 @@
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="card border-0 shadow-sm mb-4">
+    <!-- Filters (phone: search bar + filter sheet, see below) -->
+    <div class="d-lg-none mb-3" data-student-filters>
+        <form method="get" class="d-flex gap-2">
+            {% if selected_status %}<input type="hidden" name="status" value="{{ selected_status }}">{% endif %}
+            {% if selected_filter %}<input type="hidden" name="filtro" value="{{ selected_filter }}">{% endif %}
+            <input type="search" class="form-control" name="search" value="{{ search }}" placeholder="Nome, e-mail, telefone ou #ID..." aria-label="Pesquisar alunos">
+            <button type="button" class="btn btn-outline-secondary position-relative flex-shrink-0" data-bs-toggle="offcanvas" data-bs-target="#filterSheet" aria-controls="filterSheet" aria-label="Filtros">
+                <i class="bi bi-sliders"></i>
+                {% if active_filters %}<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" data-filter-count>{{ active_filters }}</span>{% endif %}
+            </button>
+        </form>
+    </div>
+    <div class="offcanvas offcanvas-bottom d-lg-none" tabindex="-1" id="filterSheet" aria-labelledby="filterSheetLabel" style="height: auto;">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="filterSheetLabel">Filtros</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+        </div>
+        <div class="offcanvas-body pt-0" style="padding-bottom: calc(1rem + env(safe-area-inset-bottom));">
+            <form method="get">
+                {% if search %}<input type="hidden" name="search" value="{{ search }}">{% endif %}
+                <div class="mb-3">
+                    <label for="m-status" class="form-label small text-muted">Status</label>
+                    <select class="form-select" id="m-status" name="status">
+                        <option value="">Todos</option>
+                        <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Ativos</option>
+                        <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Inativos</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="m-filtro" class="form-label small text-muted">Situação</label>
+                    <select class="form-select" id="m-filtro" name="filtro">
+                        <option value="">Todas</option>
+                        {% for key, label in filters.items %}
+                        <option value="{{ key }}" {% if selected_filter == key %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'core:student_list' %}" class="btn btn-outline-secondary flex-fill">Limpar</a>
+                    <button type="submit" class="btn btn-primary flex-fill">Aplicar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4 d-none d-lg-block">
         <div class="card-body">
             <form method="get" id="filterForm" class="row g-3 align-items-end">
                 <div class="col-md-4">
@@ -73,7 +117,7 @@
         <div>
             <span class="text-muted">{{ page.paginator.count }} aluno{{ page.paginator.count|pluralize }} encontrado{{ page.paginator.count|pluralize }}</span>
         </div>
-        <div class="btn-group" role="group">
+        <div class="btn-group d-none d-lg-inline-flex" role="group">
             <a href="?{% if base_qs %}{{ base_qs }}&{% endif %}view=grid"
                class="btn btn-sm {% if view_mode == 'grid' %}btn-primary{% else %}btn-outline-primary{% endif %}">
                 <i class="bi bi-grid-3x3-gap"></i> Grade
@@ -85,6 +129,29 @@
         </div>
     </div>
 
+    <!-- Phone: compact rows -->
+    <div class="list-group d-lg-none mb-3" data-student-rows>
+        {% for student in students %}
+        <a href="{% nav_url 'core:student_detail' student.pk %}" class="list-group-item list-group-item-action student-row">
+            <img src="{{ student.get_avatar_url }}" alt="" loading="lazy">
+            <span class="meta">
+                <span class="name d-block text-truncate">{{ student.person_name }}</span>
+                <span class="d-block">
+                    <span class="badge {% if student.status == 'active' %}bg-success{% elif student.status == 'trial' %}bg-info text-dark{% elif student.status == 'paused' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ student.get_status_display }}</span>
+                    {% if student.plan_status == 'expired' %}<span class="badge bg-danger">plano vencido</span>
+                    {% elif student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark">vence em {{ student.days_to_plan_expiry }}d</span>{% endif %}
+                </span>
+                <small class="text-muted">{% if student.phone %}{{ student.phone }}{% else %}{{ student.user.email }}{% endif %}</small>
+                <small class="text-muted">{% if student.last_workout_at %}{{ student.total_workouts }} treino{{ student.total_workouts|pluralize }} · último há {{ student.last_workout_at|timesince }}{% else %}Nenhum treino ainda{% endif %}</small>
+            </span>
+            <i class="bi bi-chevron-right text-muted"></i>
+        </a>
+        {% empty %}
+        <div class="list-group-item text-center text-muted py-4"><i class="bi bi-info-circle me-2"></i>Nenhum aluno encontrado.</div>
+        {% endfor %}
+    </div>
+
+    <div class="d-none d-lg-block">
     <!-- Grid View -->
     {% if view_mode == 'grid' %}
     <div class="row g-3">
@@ -260,6 +327,7 @@
         </div>
     </div>
     {% endif %}
+    </div>
 
     {% if page.has_other_pages %}
     <nav aria-label="Paginação" class="mt-4">
