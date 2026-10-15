@@ -8,4 +8,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         result = run()
-        self.stdout.write(f"{result['classes']} lembrete(s) de aula, {result['plans']} de plano.")
+        self.stdout.write(f"{result['classes']} lembrete(s) de aula, {result['plans']} de plano, "
+                          f"{result['packages']} pacote(s) com aviso.")

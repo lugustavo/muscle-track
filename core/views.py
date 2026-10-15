@@ -1905,10 +1905,13 @@ def notification_settings(request):
             _set_channel(request.user, person, pref, 'push', wants_push)
             if 'types' in request.POST:   # the kinds-of-notice switches (a marker, so a partial post never resets them)
                 pref.notify_changes = 'notify_changes' in request.POST
+                if request.user.is_staff:
+                    pref.notify_renewals = 'notify_renewals' in request.POST
                 if person is not None:
                     pref.notify_class_reminder = 'notify_class_reminder' in request.POST
                     pref.notify_plan_expiry = 'notify_plan_expiry' in request.POST
-                pref.save(update_fields=['notify_changes', 'notify_class_reminder', 'notify_plan_expiry'])
+                pref.save(update_fields=['notify_changes', 'notify_class_reminder', 'notify_plan_expiry',
+                                                 'notify_renewals'])
             messages.success(request, 'Preferências de notificação salvas.')
         return redirect('core:notification_settings')
     recent = list(request.user.notification_logs.all()[:5])

@@ -7,8 +7,10 @@ from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from core import reminders
-from core.models import Appointment, NotificationLog, NotificationPreference, ScheduleSlot
+from core import packages, reminders
+from decimal import Decimal
+
+from core.models import Appointment, NotificationLog, NotificationPreference, Package, ScheduleSlot
 
 from .base import BaseTestCase
 
@@ -184,7 +186,7 @@ class RunTests(BaseTestCase):
         result = reminders.run(NOW)
         self.assertEqual(result['classes'], 1)
         self.assertTrue(Appointment.objects.filter(person=self.alice.person, starts_at=starts(5)).exists())
-        self.assertEqual(reminders.run(NOW), {'classes': 0, 'plans': 0})
+        self.assertEqual(reminders.run(NOW), {'classes': 0, 'plans': 0, 'packages': 0})
 
     def test_command_prints_counts(self):
         out = StringIO()
@@ -227,4 +229,121 @@ class PreferenceSwitchTests(BaseTestCase):
         self.client.force_login(self.alice)
         page = self.client.get(reverse('core:notification_settings'))
         self.assertNotContains(page, 'name="notify_class_reminder"')
-        self.assertNotContains(page, 'name="notify_plan_expiry"')
+        self.assertContains(page, 'name="notify_plan_expiry"')   # still covers "classes running out"
+
+    def test_trainer_has_the_renewals_switch_and_the_student_does_not(self):
+        self.client.force_login(self.trainer)
+        self.assertContains(self.client.get(reverse('core:notification_settings')), 'name="notify_renewals"')
+        self.client.post(reverse('core:notification_settings'), {'types': '1', 'notify_changes': 'on'})
+        self.assertFalse(NotificationPreference.objects.get(user=self.trainer).notify_renewals)
+        self.client.force_login(self.alice)
+        self.assertNotContains(self.client.get(reverse('core:notification_settings')), 'name="notify_renewals"')
+
+
+TODAY = date(2026, 10, 20)
+
+
+def finished(person, count, days_ago_first=10):
+    """`count` attended classes, the first one `days_ago_first` days ago."""
+    for n in range(count):
+        day = TODAY - timedelta(days=days_ago_first - n)
+        Appointment.objects.create(person=person, status='attended',
+                                   starts_at=timezone.make_aware(datetime.combine(day, time(9))))
+    packages.sync(person, TODAY)
+
+
+@override_settings(**CONFIG)
+class PackageReminderTests(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.person = self.alice.person
+        turn_on(self.alice)
+        turn_on(self.trainer)
+        self.pack = Package.objects.create(name='Pacote 8', sessions=8, valid_days=60, pricing_mode='per_session',
+                                           price_per_session=Decimal('55'))
+        self.sold = packages.sell(self.person, self.pack)
+
+    def run_packages(self, today=TODAY):
+        return reminders.send_package_reminders(timezone.make_aware(datetime.combine(today, time(9))), today)
+
+    def subjects(self):
+        return sorted((m.to[0], m.subject) for m in mail.outbox)
+
+    def test_nothing_when_there_is_plenty_left(self):
+        finished(self.person, 3)
+        self.assertEqual(self.run_packages(), 0)
+        self.assertEqual(mail.outbox, [])
+
+    def test_running_low_tells_the_student_and_the_trainer_once(self):
+        finished(self.person, 6)   # 2 left
+        self.assertEqual(self.run_packages(), 1)
+        self.assertEqual(self.subjects(), [('alice@example.com', 'Seu pacote está acabando'),
+                                           ('trainer@example.com', '1 pacote para renovar')])
+        student = next(m for m in mail.outbox if m.to == ['alice@example.com'])
+        self.assertIn('Restam 2 aulas no seu pacote', student.body)
+        trainer = next(m for m in mail.outbox if m.to == ['trainer@example.com'])
+        self.assertIn('Alice: 2 aulas restantes', trainer.body)
+        self.assertEqual(self.run_packages(), 0)
+        self.assertEqual(len(mail.outbox), 2)
+        self.sold.refresh_from_db()
+        self.assertIsNotNone(self.sold.low_notified_at)
+
+    def test_one_class_left_wording(self):
+        finished(self.person, 7)
+        self.run_packages()
+        student = next(m for m in mail.outbox if m.to == ['alice@example.com'])
+        self.assertIn('Resta 1 aula no seu pacote', student.body)
+
+    def test_expiring_goes_to_the_trainer_only_and_once_per_deadline(self):
+        finished(self.person, 3, days_ago_first=55)   # deadline in 5 days
+        self.assertEqual(self.run_packages(), 1)
+        self.assertEqual(self.subjects(), [('trainer@example.com', '1 pacote para renovar')])
+        body = mail.outbox[0].body
+        self.assertIn('Alice: vence em 5 dias, 5 aulas restantes', body)
+        self.assertEqual(self.run_packages(TODAY + timedelta(days=1)), 0)
+        packages.extend(self.sold, 30, actor=self.trainer)   # a new deadline re-arms it
+        self.assertEqual(self.run_packages(TODAY + timedelta(days=60)), 1)
+
+    def test_expired_with_classes_left(self):
+        finished(self.person, 3, days_ago_first=70)
+        self.assertEqual(self.run_packages(), 1)
+        self.assertIn('Alice: pacote vencido, 5 aulas sem usar', mail.outbox[0].body)
+        self.assertEqual(self.run_packages(), 0)
+
+    def test_one_notice_lists_every_package(self):
+        bob_pack = packages.sell(self.bob.person, self.pack)
+        turn_on(self.bob)
+        finished(self.person, 7)
+        finished(self.bob.person, 6)
+        self.assertEqual(self.run_packages(), 2)
+        trainer = [m for m in mail.outbox if m.to == ['trainer@example.com']]
+        self.assertEqual(len(trainer), 1)
+        self.assertEqual(trainer[0].subject, '2 pacotes para renovar')
+        self.assertIn('Alice', trainer[0].body)
+        self.assertIn('Bob', trainer[0].body)
+        self.assertIsNotNone(bob_pack)
+
+    def test_not_started_done_cancelled_and_queued_are_left_alone(self):
+        self.assertEqual(self.run_packages(), 0)   # not started (8 left, no first class)
+        finished(self.person, 8)                   # done
+        self.assertEqual(self.run_packages(), 0)
+        queued = packages.sell(self.person, self.pack)
+        queued.sessions = 1
+        queued.save()
+        self.assertEqual(self.run_packages(), 0)   # current is the queued one: 1 class left but not started
+        packages.cancel_package(queued, actor=self.trainer)
+        self.assertEqual(self.run_packages(), 0)
+
+    def test_switches_decide_who_hears_about_it(self):
+        turn_on(self.alice, notify_plan_expiry=False)
+        turn_on(self.trainer, notify_renewals=False)
+        finished(self.person, 6)
+        self.assertEqual(self.run_packages(), 1)
+        self.assertEqual(mail.outbox, [])
+        self.sold.refresh_from_db()
+        self.assertIsNotNone(self.sold.low_notified_at)   # told is told: turning it on later does not replay the past
+
+    def test_run_includes_the_package_count(self):
+        finished(self.person, 6)
+        result = reminders.run(timezone.make_aware(datetime.combine(TODAY, time(9))))
+        self.assertEqual(result['packages'], 1)

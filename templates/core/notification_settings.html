@@ -45,16 +45,20 @@
                 <input class="form-check-input" type="checkbox" id="notify_changes" name="notify_changes" {% if pref.notify_changes %}checked{% endif %}>
                 <label class="form-check-label" for="notify_changes">{% if is_trainer %}Pedidos de remarcação e cancelamento dos alunos{% else %}Mudanças nas minhas aulas e respostas aos meus pedidos{% endif %}</label>
             </div>
+            {% if is_trainer %}<div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="notify_renewals" name="notify_renewals" {% if pref.notify_renewals %}checked{% endif %}>
+                <label class="form-check-label" for="notify_renewals">Pacotes de alunos acabando ou vencendo</label>
+            </div>{% endif %}
             {% if person %}
             {% if reminder_hours %}<div class="form-check mb-1">
                 <input class="form-check-input" type="checkbox" id="notify_class_reminder" name="notify_class_reminder" {% if pref.notify_class_reminder %}checked{% endif %}>
                 <label class="form-check-label" for="notify_class_reminder">Lembrete de aula (cerca de {{ reminder_hours }} hora{{ reminder_hours|pluralize }} antes)</label>
             </div>{% endif %}
-            {% if plan_days %}<div class="form-check mb-3">
+            <div class="form-check mb-3">
                 <input class="form-check-input" type="checkbox" id="notify_plan_expiry" name="notify_plan_expiry" {% if pref.notify_plan_expiry %}checked{% endif %}>
-                <label class="form-check-label" for="notify_plan_expiry">Aviso quando o meu plano estiver vencendo</label>
-            </div>{% else %}<div class="mb-2"></div>{% endif %}
-            {% else %}<div class="mb-3"></div>{% endif %}
+                <label class="form-check-label" for="notify_plan_expiry">Aviso quando o meu pacote estiver acabando ou vencendo</label>
+            </div>
+            {% endif %}
             <div class="small text-muted mb-3">Vale para os dois canais acima: só chega o que estiver marcado aqui e em um canal ligado.</div>
 
             <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Salvar</button>
