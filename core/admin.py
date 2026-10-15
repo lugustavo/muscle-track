@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     MuscleGroup, Person, Exercise, Routine, RoutineExercise,
     PersonRoutine, PersonRoutineExercise, WorkoutSession, SessionExercise, SessionSet,
-    Assessment, ProgressPhoto, StudentNote, StudentEvent, ConsentRecord, Plan, Payment, ScheduleSlot, Appointment,
+    Assessment, ProgressPhoto, StudentNote, StudentEvent, ConsentRecord, Package, StudentPackage, Payment, ScheduleSlot, Appointment,
 )
 
 
@@ -188,15 +188,20 @@ class ConsentRecordAdmin(ReadOnlyAdmin):
     list_filter = ['kind', 'granted', 'source']
 
 
-@admin.register(Plan)
-class PlanAdmin(admin.ModelAdmin):
-    list_display = ['name', 'months', 'sessions_per_week', 'price', 'is_active']
-    list_filter = ['is_active', 'months']
+@admin.register(Package)
+class PackageAdmin(admin.ModelAdmin):
+    list_display = ['name', 'sessions', 'valid_days', 'price_per_session', 'price_total', 'is_active']
+    list_filter = ['is_active']
+
+
+@admin.register(StudentPackage)
+class StudentPackageAdmin(ReadOnlyAdmin):
+    list_display = ['person', 'name', 'sessions', 'starts_on', 'sold_on']
 
 
 @admin.register(Payment)
 class PaymentAdmin(ReadOnlyAdmin):
-    list_display = ['person', 'paid_on', 'amount', 'method', 'period_end']
+    list_display = ['person', 'paid_on', 'amount', 'method', 'student_package']
     list_filter = ['method']
 
 

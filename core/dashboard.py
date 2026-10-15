@@ -5,6 +5,7 @@ from django.contrib.auth.hashers import UNUSABLE_PASSWORD_PREFIX
 from django.db.models import Exists, OuterRef, Q, Subquery
 from django.utils import timezone
 
+from . import packages
 from .agenda import ensure_appointments
 from .billing import charge_message, overdue_rows
 from .models import Appointment, Person, PersonRoutine, SessionExercise, StudentEvent, WorkoutSession
@@ -67,7 +68,7 @@ def overdue_payments():
     """Overdue students with the ready-to-send WhatsApp charge message."""
     rows = overdue_rows()
     for row in rows:
-        row['whatsapp'] = whatsapp_url(row['student'].phone, charge_message(row['student'], row['amount'], row['due']))
+        row['whatsapp'] = whatsapp_url(row['student'].phone, charge_message(row['student'], row['package'], row['amount']))
     return rows
 
 
@@ -117,11 +118,8 @@ def erasure_requests():
 
 
 def expiring_plans():
-    """Active students whose plan is expired or expires within EXPIRING_DAYS."""
-    limit = timezone.localdate() + timedelta(days=EXPIRING_DAYS)
-    return list(Person.objects.filter(
-        is_active=True, plan_expires_on__isnull=False, plan_expires_on__lte=limit
-    ).order_by('plan_expires_on'))
+    """Active students whose current package is expired, expiring soon or running out (see packages.renewals)."""
+    return packages.renewals(expiring_days=EXPIRING_DAYS)
 
 
 def ending_routines():

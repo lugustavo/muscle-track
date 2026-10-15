@@ -13,6 +13,13 @@
         {% if a.status == 'rescheduled' and a.rescheduled_to %}<div class="small text-muted" data-history="moved"><i class="bi bi-arrow-right-circle"></i> para {{ a.rescheduled_to.starts_at|date:"D d/m \à\s H:i" }}</div>{% endif %}
         {% if a.status == 'scheduled' and a.rescheduled_from %}<div class="small text-muted" data-history="from"><i class="bi bi-clock-history"></i> remarcada de {{ a.rescheduled_from.starts_at|date:"D d/m \à\s H:i" }}</div>{% endif %}
         {% if a.pk in conflicts %}<div class="small text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> Sobreposta a outra aula</div>{% endif %}
+        {% if a.status == 'cancelled' or a.status == 'missed' %}
+        <form method="post" action="{% nav_url 'core:appointment_counts' a.pk %}" class="small mt-1" data-package-count>
+            {% csrf_token %}
+            {% if a.counts_against_package %}<span class="badge bg-warning text-dark">desconta do pacote</span> <button name="counts" value="no" class="btn btn-link btn-sm p-0 align-baseline">Não descontar</button>
+            {% else %}<span class="badge bg-body-secondary text-body border">não desconta</span> <button name="counts" value="yes" class="btn btn-link btn-sm p-0 align-baseline">Descontar</button>{% endif %}
+        </form>
+        {% endif %}
         {% if a.status != 'rescheduled' %}
         <form method="post" action="{% nav_url 'core:appointment_status' a.pk %}" class="mt-1 d-flex flex-wrap gap-1">
             {% csrf_token %}

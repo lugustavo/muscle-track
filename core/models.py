@@ -61,8 +61,8 @@ class Person(models.Model):
     plan_reminder_for = models.DateField(null=True, blank=True)
     # Where the plan came from (a template, like Routine -> PersonRoutine). The values below are
     # copied to the student when the plan is assigned, so editing the template never changes them.
-    plan = models.ForeignKey('Plan', on_delete=models.SET_NULL, null=True, blank=True,
-                             related_name='students', verbose_name='Plano (modelo)')
+    plan = models.ForeignKey('Package', on_delete=models.SET_NULL, null=True, blank=True,
+                             related_name='students', verbose_name='Pacote atual (catálogo)')
     # Confidential commercial terms: only the trainer sees or edits them
     plan_price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
                                      validators=[MinValueValidator(0)], verbose_name='Valor negociado do período')
@@ -625,6 +625,7 @@ class StudentEvent(models.Model):
         PAYMENT = 'payment', 'Pagamento'
         DATA_EXPORT = 'data_export', 'Exportação de dados'
         ERASURE_REQUEST = 'erasure_request', 'Pedido de exclusão'
+        PACKAGE = 'package', 'Pacote'
 
     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='events', verbose_name='Aluno')
     actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+', verbose_name='Quem')
@@ -685,33 +686,97 @@ class ConsentRecord(models.Model):
         return f'{self.person_id} {self.kind} v{self.version} {"sim" if self.granted else "não"}'
 
 
-class Plan(models.Model):
-    """Plan template (catalog), reused for many students like Exercise and Routine."""
-    MONTH_CHOICES = [(1, 'Mensal'), (3, 'Trimestral'), (6, 'Semestral'), (12, 'Anual')]
+CENTS = Decimal('0.01')
+
+
+def compute_prices(mode, sessions, per_session=None, total=None):
+    """(price per class, total) from the one the trainer typed: `mode` is 'per_session' or 'total'.
+
+    Typing the price per class gives total = per class x classes; typing the total gives the price per class
+    (rounded to cents; the total itself is kept exactly as typed). Either may be None."""
+    sessions = int(sessions or 0)
+    if mode == 'total':
+        if total is None:
+            return None, None
+        total = Decimal(total).quantize(CENTS)
+        return (total / sessions).quantize(CENTS) if sessions else None, total
+    if per_session is None:
+        return None, None
+    per_session = Decimal(per_session).quantize(CENTS)
+    return per_session, per_session * sessions
+
+
+class Package(models.Model):
+    """Package of classes (catalog), sold to many students like Exercise and Routine are assigned.
+
+    A package is a number of classes to be taken within a number of days counted from the first class; the price is
+    typed either per class or as a total (the other one is calculated)."""
+    PRICING = [('per_session', 'Valor por aula'), ('total', 'Valor total')]
 
     name = models.CharField(max_length=100, unique=True, verbose_name='Nome')
     description = models.TextField(blank=True, verbose_name='Descrição')
-    months = models.PositiveSmallIntegerField(choices=MONTH_CHOICES, default=1, verbose_name='Periodicidade')
-    sessions_per_week = models.PositiveSmallIntegerField(
-        null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(14)],
-        verbose_name='Aulas por semana')
-    price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
-                                validators=[MinValueValidator(0)], verbose_name='Valor de tabela do período')
+    sessions = models.PositiveSmallIntegerField(
+        default=10, validators=[MinValueValidator(1), MaxValueValidator(200)], verbose_name='Aulas no pacote')
+    valid_days = models.PositiveSmallIntegerField(
+        default=60, validators=[MinValueValidator(1), MaxValueValidator(1000)],
+        verbose_name='Prazo (dias)', help_text='Conta a partir da primeira aula.')
+    pricing_mode = models.CharField(max_length=12, choices=PRICING, default='per_session', verbose_name='Como o valor é informado')
+    price_per_session = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
+                                            validators=[MinValueValidator(0)], verbose_name='Valor por aula')
+    price_total = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
+                                      validators=[MinValueValidator(0)], verbose_name='Valor total')
     is_active = models.BooleanField(default=True, verbose_name='Ativo')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'Plano'
-        verbose_name_plural = 'Planos'
+        verbose_name = 'Pacote'
+        verbose_name_plural = 'Pacotes'
         ordering = ['name']
+
+    def save(self, *args, **kwargs):
+        self.price_per_session, self.price_total = compute_prices(
+            self.pricing_mode, self.sessions, self.price_per_session, self.price_total)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
 
 
+class StudentPackage(models.Model):
+    """A package sold to one student: a copy of the numbers at the time of the sale (changing the catalog never
+    changes what was sold). The balance is not stored: it is counted from the classes linked to it (core/packages.py)."""
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='packages', verbose_name='Aluno')
+    package = models.ForeignKey(Package, on_delete=models.SET_NULL, null=True, blank=True, related_name='sold',
+                                verbose_name='Pacote do catálogo')
+    name = models.CharField(max_length=100, verbose_name='Nome')
+    sessions = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)], verbose_name='Aulas')
+    valid_days = models.PositiveSmallIntegerField(verbose_name='Prazo (dias)')
+    price_per_session = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
+                                            validators=[MinValueValidator(0)], verbose_name='Valor por aula')
+    price_total = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
+                                      validators=[MinValueValidator(0)], verbose_name='Valor total')
+    sold_on = models.DateField(default=timezone.localdate, verbose_name='Vendido em')
+    # The deadline counts from the first class (set by core/packages.sync from the first class that counts)
+    starts_on = models.DateField(null=True, blank=True, verbose_name='Primeira aula')
+    extension_days = models.PositiveSmallIntegerField(default=0, verbose_name='Dias de prorrogação')
+    frozen_days = models.PositiveSmallIntegerField(default=0, verbose_name='Dias congelado')
+    frozen_since = models.DateField(null=True, blank=True, verbose_name='Congelado desde')
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+    notes = models.CharField(max_length=200, blank=True, verbose_name='Observação')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Pacote do aluno'
+        verbose_name_plural = 'Pacotes dos alunos'
+        ordering = ['sold_on', 'pk']
+
+    def __str__(self):
+        return f'{self.name} ({self.person_id})'
+
+
 class Payment(models.Model):
-    """A payment received from a student, covering a period of the plan."""
+    """A payment received from a student for a package."""
 
     class Method(models.TextChoices):
         PIX = 'pix', 'Pix'
@@ -721,15 +786,18 @@ class Payment(models.Model):
         OTHER = 'other', 'Outro'
 
     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='payments', verbose_name='Aluno')
-    plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, null=True, blank=True, related_name='payments',
-                             verbose_name='Plano')
-    plan_name = models.CharField(max_length=100, blank=True, verbose_name='Plano')
+    # What was paid for: the package sold to the student (the catalog package and its name stay for old payments)
+    student_package = models.ForeignKey('StudentPackage', on_delete=models.SET_NULL, null=True, blank=True,
+                                        related_name='payments', verbose_name='Pacote')
+    plan = models.ForeignKey(Package, on_delete=models.SET_NULL, null=True, blank=True, related_name='payments',
+                             verbose_name='Pacote do catálogo')
+    plan_name = models.CharField(max_length=100, blank=True, verbose_name='Pacote')
     amount = models.DecimalField(max_digits=8, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))],
                                  verbose_name='Valor')
     paid_on = models.DateField(default=timezone.localdate, verbose_name='Data do pagamento')
     method = models.CharField(max_length=10, choices=Method.choices, default=Method.PIX, verbose_name='Forma')
-    period_start = models.DateField(verbose_name='Período de')
-    period_end = models.DateField(verbose_name='Período até')
+    period_start = models.DateField(null=True, blank=True, verbose_name='Período de')   # old plan payments only
+    period_end = models.DateField(null=True, blank=True, verbose_name='Período até')
     notes = models.CharField(max_length=200, blank=True, verbose_name='Observação')
     recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -796,6 +864,11 @@ class Appointment(models.Model):
     notes = models.CharField(max_length=200, blank=True, verbose_name='Observação')
     status_changed_at = models.DateTimeField(null=True, blank=True)
     # On the original class of a move: the class it became (lets "desfazer" put things back)
+    # The package this class was taken from (linked by core/packages.sync once the class counts)
+    package = models.ForeignKey('StudentPackage', on_delete=models.SET_NULL, null=True, blank=True,
+                                related_name='appointments')
+    cancelled_late = models.BooleanField(default=False)   # cancelled with less notice than allowed: the class counts
+    counts_override = models.BooleanField(null=True, blank=True)   # trainer's choice: True/False overrides the rule
     reminder_sent_at = models.DateTimeField(null=True, blank=True)   # core/reminders.py: the class reminder went out
     rescheduled_to = models.OneToOneField('self', on_delete=models.SET_NULL, null=True, blank=True,
                                           related_name='rescheduled_from')
@@ -813,6 +886,15 @@ class Appointment(models.Model):
     @property
     def ends_at(self):
         return self.starts_at + timedelta(minutes=self.duration_minutes)
+
+    @property
+    def counts_against_package(self):
+        """Does this class use up one class of the student's package? (see core/packages.py for the rules)"""
+        if self.counts_override is not None:
+            return self.counts_override
+        if self.status in (self.Status.ATTENDED, self.Status.MISSED):
+            return True
+        return self.status == self.Status.CANCELLED and self.cancelled_late
 
     def __str__(self):
         return f'{self.person_id} {self.starts_at:%d/%m/%Y %H:%M} {self.status}'

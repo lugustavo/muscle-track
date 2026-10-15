@@ -135,9 +135,9 @@
 </div>
 {% endif %}
 {% if student.plan_status == 'expired' %}
-<div class="alert alert-danger py-2"><i class="bi bi-calendar-x"></i> Plano vencido em {{ student.plan_expires_on|date:"d/m/Y" }}.</div>
+<div class="alert alert-danger py-2"><i class="bi bi-calendar-x"></i> Pacote vencido em {{ student.plan_expires_on|date:"d/m/Y" }}: prorrogue ou venda um novo.</div>
 {% elif student.plan_status == 'expiring' %}
-<div class="alert alert-warning py-2"><i class="bi bi-calendar-event"></i> O plano vence em {{ student.days_to_plan_expiry }} dia{{ student.days_to_plan_expiry|pluralize }} ({{ student.plan_expires_on|date:"d/m/Y" }}).</div>
+<div class="alert alert-warning py-2"><i class="bi bi-calendar-event"></i> O pacote vence em {{ student.days_to_plan_expiry }} dia{{ student.days_to_plan_expiry|pluralize }} ({{ student.plan_expires_on|date:"d/m/Y" }}).</div>
 {% endif %}
 
 <ul class="nav nav-tabs mb-4 tabs-sticky hide-scrollbar" id="studentTabs" role="tablist">

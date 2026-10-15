@@ -5,7 +5,7 @@ from django.utils import timezone
 from .recurrence import MAX_INTERVAL, MAX_OCCURRENCES, MAX_SPAN_DAYS, end_date
 from .validators import normalize_phone, normalize_state, normalize_zip_code, validate_birth_date, digits_only
 from .models import (
-    Appointment, Payment, Plan, ScheduleSlot,
+    Appointment, Payment, Package, ScheduleSlot, StudentPackage,
     Assessment, Exercise, Person, PersonRoutine, ProgressPhoto, Routine, RoutineExercise, StudentNote,
 )
 
@@ -132,51 +132,32 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
         return cleaned
 
 
-class ContractForm(forms.ModelForm):
-    """"Alterar plano": the contract agreed with one student (the catalog plan, its name, the agreed values, the expiry).
-
-    Vocabulary: **Plano** is the model of the catalog (Financeiro > Planos); **Contrato** is what is agreed with this student."""
-
-    class Meta:
-        model = Person
-        fields = ['plan', 'plan_name', 'plan_price', 'hourly_rate', 'plan_expires_on']
-        widgets = {
-            'plan': forms.RadioSelect,
-            'plan_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex.: Mensal 3x/semana'}),
-            'plan_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'placeholder': '0,00',
-                                                   'inputmode': 'decimal', 'data-no-draft': ''}),
-            'hourly_rate': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'placeholder': '0,00',
-                                                    'inputmode': 'decimal', 'data-no-draft': ''}),
-            'plan_expires_on': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
-        }
-        labels = {
-            'plan': 'Plano do catálogo',
-            'plan_name': 'Nome do contrato',
-            'plan_price': 'Valor do contrato por período (R$)',
-            'hourly_rate': 'Valor/hora do contrato (R$)',
-            'plan_expires_on': 'Vencimento do contrato',
-        }
+class SaleForm(forms.Form):
+    """"Vender pacote": which catalog package, the price agreed with this student (per class or total) and a note."""
+    package = forms.ModelChoiceField(queryset=Package.objects.none(), label='Pacote', empty_label=None,
+                                     widget=forms.RadioSelect)
+    pricing_mode = forms.ChoiceField(choices=Package.PRICING, initial='per_session', label='Como o valor é informado',
+                                     widget=forms.RadioSelect)
+    price_per_session = forms.DecimalField(
+        required=False, min_value=0, max_digits=8, decimal_places=2, label='Valor por aula',
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'inputmode': 'decimal', 'data-no-draft': ''}))
+    price_total = forms.DecimalField(
+        required=False, min_value=0, max_digits=8, decimal_places=2, label='Valor total',
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'inputmode': 'decimal', 'data-no-draft': ''}))
+    notes = forms.CharField(required=False, max_length=200, label='Observação',
+                            widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Only active plan templates can be chosen (plus the one the student already has)
-        self.fields['plan'].queryset = Plan.objects.filter(Q(is_active=True) | Q(pk=self.instance.plan_id))
-        self.fields['plan'].empty_label = None   # the "no plan" card is drawn by the template
-
-    def _copy_plan_values(self, cleaned):
-        """Assigning a plan copies its name and price to the student unless the trainer typed their own."""
-        plan = cleaned.get('plan')
-        if plan is None or plan.pk == self.instance.plan_id:
-            return
-        if 'plan_name' not in self.changed_data or not cleaned.get('plan_name'):
-            cleaned['plan_name'] = plan.name
-        if 'plan_price' not in self.changed_data or cleaned.get('plan_price') is None:
-            cleaned['plan_price'] = plan.price
+        self.fields['package'].queryset = Package.objects.filter(is_active=True).order_by('name')
 
     def clean(self):
         cleaned = super().clean()
-        if not self.errors:
-            self._copy_plan_values(cleaned)
+        if self.errors:
+            return cleaned
+        field = 'price_per_session' if cleaned['pricing_mode'] == 'per_session' else 'price_total'
+        if cleaned.get(field) is None:
+            cleaned[field] = None   # nothing typed: the catalog price is used
         return cleaned
 
 
@@ -353,47 +334,55 @@ class ConsentForm(forms.Form):
     photos = forms.BooleanField(required=False, label='')
 
 
-class PlanForm(forms.ModelForm):
+class PackageForm(forms.ModelForm):
+    """A package of the catalog: classes, deadline (counted from the first class) and the price, typed per class or total."""
+
     class Meta:
-        model = Plan
-        fields = ['name', 'description', 'months', 'sessions_per_week', 'price', 'is_active']
+        model = Package
+        fields = ['name', 'description', 'sessions', 'valid_days', 'pricing_mode', 'price_per_session', 'price_total', 'is_active']
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex.: Mensal 3x por semana'}),
-            'description': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
-            'months': forms.Select(attrs={'class': 'form-select'}),
-            'sessions_per_week': forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': '14'}),
-            'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex.: Pacote 10 aulas'}),
+            'description': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+            'sessions': forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': '200', 'inputmode': 'numeric'}),
+            'valid_days': forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': '1000', 'inputmode': 'numeric'}),
+            'pricing_mode': forms.RadioSelect,
+            'price_per_session': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'inputmode': 'decimal'}),
+            'price_total': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'inputmode': 'decimal'}),
         }
-        labels = {'price': 'Valor de tabela do período (R$)'}
-
-
-class PaymentForm(forms.ModelForm):
-    class Meta:
-        model = Payment
-        fields = ['plan', 'amount', 'paid_on', 'method', 'period_start', 'period_end', 'notes']
-        widgets = {
-            'plan': forms.Select(attrs={'class': 'form-select'}),
-            'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0.01'}),
-            'paid_on': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
-            'method': forms.Select(attrs={'class': 'form-select'}),
-            'period_start': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
-            'period_end': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
-            'notes': forms.TextInput(attrs={'class': 'form-control'}),
-        }
-        labels = {'amount': 'Valor (R$)'}
-
-    def __init__(self, *args, person=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['plan'].queryset = Plan.objects.filter(Q(is_active=True) | Q(pk=getattr(person, 'plan_id', None)))
-        self.fields['plan'].required = False
-        self.fields['plan'].empty_label = '— sem plano do catálogo —'
 
     def clean(self):
         cleaned = super().clean()
-        start, end = cleaned.get('period_start'), cleaned.get('period_end')
-        if start and end and end < start:
-            self.add_error('period_end', 'O fim do período não pode ser antes do início.')
+        if self.errors:
+            return cleaned
+        mode = cleaned.get('pricing_mode')
+        typed = cleaned.get('price_per_session' if mode == 'per_session' else 'price_total')
+        if typed is None:
+            self.add_error('price_per_session' if mode == 'per_session' else 'price_total', 'Informe o valor.')
         return cleaned
+
+
+class PaymentForm(forms.ModelForm):
+    """A payment for one of the student's packages (the amount starts as what is still to be paid)."""
+
+    class Meta:
+        model = Payment
+        fields = ['student_package', 'amount', 'paid_on', 'method', 'notes']
+        widgets = {
+            'student_package': forms.Select(attrs={'class': 'form-select'}),
+            'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0.01'}),
+            'paid_on': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
+            'method': forms.Select(attrs={'class': 'form-select'}),
+            'notes': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+        labels = {'amount': 'Valor', 'student_package': 'Pacote'}
+
+    def __init__(self, *args, person=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        field = self.fields['student_package']
+        field.queryset = StudentPackage.objects.filter(person=person, cancelled_at__isnull=True) if person else StudentPackage.objects.none()
+        field.required = False
+        field.empty_label = '— sem pacote —'
+        field.label_from_instance = lambda obj: f'{obj.name} ({obj.sold_on:%d/%m/%Y})'
 
 
 class RecurrenceMixin(forms.Form):

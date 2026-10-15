@@ -1,5 +1,5 @@
 """Audit trail helpers: who changed what in a student's file."""
-from .models import Plan, StudentEvent
+from .models import Package, StudentEvent
 
 # Sensitive free text: the history records THAT it changed, never the content.
 SENSITIVE_FIELDS = {'health_notes', 'notes', 'hourly_rate', 'plan_price'}  # also: negotiated money
@@ -38,7 +38,7 @@ def changed_fields(form):
         if name in SENSITIVE_FIELDS:
             changes[name] = [None, None]
         elif name == 'plan':
-            changes[name] = [Plan.objects.filter(pk=before).values_list('name', flat=True).first() or '',
+            changes[name] = [Package.objects.filter(pk=before).values_list('name', flat=True).first() or '',
                              after.name if after else '']
         elif name == 'avatar':
             changes[name] = ['', 'nova foto' if after else 'removida']

@@ -1,88 +1,37 @@
-"""Plans, payments and money rules. Pure functions where possible, so they are easy to test."""
+"""Payments and money rules. A payment is for a package sold to the student (the first class is when it is paid)."""
 import calendar
-from datetime import date, timedelta
+from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
+from . import packages
 from .history import log_event
-from .models import Payment, Person, StudentEvent
+from .models import Payment, StudentEvent
 
 CENTS = Decimal('0.01')
 
 
-def add_months(value, months):
-    """Same day N months later; clamps to the end of shorter months (31/01 + 1 = 28/02)."""
-    index = value.month - 1 + months
-    year, month = value.year + index // 12, index % 12 + 1
-    return date(year, month, min(value.day, calendar.monthrange(year, month)[1]))
-
-
-def period_end_for(start, months):
-    return add_months(start, months) - timedelta(days=1)
-
-
 def money(value):
-    """'R$ 1.234,50' (pt-BR) for display in messages and CSV."""
+    """'1.234,50 €' (or 'R$ 1.234,50', see CURRENCY_SYMBOL / CURRENCY_POSITION) for pages, messages and CSV."""
     if value is None:
         return ''
-    text = f'{Decimal(value).quantize(CENTS, ROUND_HALF_UP):,.2f}'
-    return 'R$ ' + text.replace(',', '#').replace('.', ',').replace('#', '.')
-
-
-def suggest_amount(person, plan=None):
-    """Amount to suggest for a payment. Always editable by the trainer.
-
-    1. the value negotiated with this student (only for the plan the student has);
-    2. hourly rate x sessions per week x weeks of the period (when both are known);
-    3. the template's table price."""
-    plan = plan or person.plan
-    if plan is None:
-        return person.plan_price
-    if person.plan_price is not None and person.plan_id == plan.pk:
-        return person.plan_price
-    if person.hourly_rate is not None and plan.sessions_per_week:
-        weeks = Decimal(52) * plan.months / 12
-        return (person.hourly_rate * plan.sessions_per_week * weeks).quantize(CENTS, ROUND_HALF_UP)
-    return plan.price
-
-
-def suggest_period(person, plan, paid_on):
-    """(start, end) of the period a payment made on `paid_on` should cover."""
-    months = plan.months if plan else 1
-    expires = person.plan_expires_on
-    start = expires + timedelta(days=1) if expires and expires >= paid_on else paid_on
-    return start, period_end_for(start, months)
-
-
-def recompute_expiry(person):
-    """After deleting a payment: expiry = latest period_end left. With none left, keep what is there."""
-    latest = person.payments.order_by('-period_end').values_list('period_end', flat=True).first()
-    if latest is not None and latest != person.plan_expires_on:
-        person.plan_expires_on = latest
-        person.save(update_fields=['plan_expires_on', 'updated_at'])
+    text = f'{Decimal(value).quantize(CENTS, ROUND_HALF_UP):,.2f}'.replace(',', '#').replace('.', ',').replace('#', '.')
+    symbol = settings.CURRENCY_SYMBOL
+    return f'{symbol} {text}' if settings.CURRENCY_POSITION == 'before' else f'{text} {symbol}'
 
 
 @transaction.atomic
-def register_payment(person, *, plan, amount, paid_on, method, period_start, period_end, notes='', actor=None):
+def register_payment(person, *, package, amount, paid_on, method, notes='', actor=None):
+    """Record a payment for `package` (a StudentPackage of this student, or None for a payment without one)."""
     payment = Payment.objects.create(
-        person=person, plan=plan, plan_name=(plan.name if plan else person.plan_name), amount=amount,
-        paid_on=paid_on, method=method, period_start=period_start, period_end=period_end, notes=notes,
+        person=person, student_package=package, plan=package.package if package else None,
+        plan_name=package.name if package else '', amount=amount, paid_on=paid_on, method=method, notes=notes,
         recorded_by=actor if getattr(actor, 'pk', None) else None)
-    fields = ['updated_at']
-    if plan is not None and person.plan_id != plan.pk:
-        person.plan = plan
-        person.plan_name = plan.name
-        fields += ['plan', 'plan_name']
-    # A late-registered older payment never shortens the plan
-    if person.plan_expires_on is None or period_end > person.plan_expires_on:
-        person.plan_expires_on = period_end
-        fields.append('plan_expires_on')
-    person.save(update_fields=fields)
-    log_event(person, StudentEvent.Kind.PAYMENT, actor,
-              f'Pagamento registrado ({payment.get_method_display()}), plano até {period_end:%d/%m/%Y}')
+    what = f' — {package.name}' if package else ''
+    log_event(person, StudentEvent.Kind.PAYMENT, actor, f'Pagamento registrado ({payment.get_method_display()}){what}')
     return payment
 
 
@@ -91,17 +40,14 @@ def delete_payment(payment, actor=None):
     person = payment.person
     label = f'{payment.paid_on:%d/%m/%Y} ({payment.get_method_display()})'
     payment.delete()
-    recompute_expiry(person)
     log_event(person, StudentEvent.Kind.PAYMENT, actor, f'Pagamento de {label} excluído')
 
 
 def overdue_rows(today=None):
-    """Active students whose plan expired, most late first, with what they owe."""
-    today = today or timezone.localdate()
-    rows = []
-    for person in Person.objects.filter(is_active=True, plan_expires_on__lt=today).select_related('plan', 'user'):
-        rows.append({'student': person, 'days': (today - person.plan_expires_on).days,
-                     'amount': suggest_amount(person), 'due': person.plan_expires_on})
+    """Packages whose first class already happened and are not fully paid, longest waiting first.
+
+    (Kept under the old name: the dashboard, the finance page and the bottom bar read it.)"""
+    rows = packages.pending_payments(today)
     rows.sort(key=lambda r: -r['days'])
     return rows
 
@@ -123,37 +69,34 @@ def parse_month(value, today=None):
 
 
 def month_summary(year, month):
+    """What came in during the month, by payment method, and what was sold (packages sold in the month)."""
+    from .models import StudentPackage
+
     first, last = month_bounds(year, month)
-    payments = list(Payment.objects.filter(paid_on__range=(first, last)).select_related('person'))
+    payments = list(Payment.objects.filter(paid_on__range=(first, last)).select_related('person', 'student_package'))
     by_method = {}
     for p in payments:
         entry = by_method.setdefault(p.method, {'label': p.get_method_display(), 'total': Decimal('0'), 'count': 0})
         entry['total'] += p.amount
         entry['count'] += 1
-    expected = Decimal('0')
-    expected_count = 0
-    unpriced = 0
-    for person in Person.objects.filter(is_active=True, plan_expires_on__range=(first, last)).select_related('plan'):
-        expected_count += 1
-        amount = suggest_amount(person)
-        if amount is None:
-            unpriced += 1
-        else:
-            expected += amount
+    sold = list(StudentPackage.objects.filter(sold_on__range=(first, last), cancelled_at__isnull=True))
     return {
         'payments': payments,
         'received': sum((p.amount for p in payments), Decimal('0')),
         'by_method': sorted(by_method.values(), key=lambda e: -e['total']),
-        'expected': expected, 'expected_count': expected_count, 'unpriced': unpriced,
+        'sold_count': len(sold),
+        'sold_total': sum((s.price_total or Decimal('0') for s in sold), Decimal('0')),
+        'sold_unpriced': sum(1 for s in sold if s.price_total is None),
     }
 
 
-def charge_message(person, amount, due):
+def charge_message(person, package, amount):
+    """The WhatsApp text asking for the payment of a package (paid at the first class)."""
     first = person.person_name.split()[0]
-    parts = [f'Olá, {first}! Passando para lembrar que o seu plano']
-    if person.plan_name:
-        parts.append(f'({person.plan_name})')
-    parts.append(f'venceu em {due:%d/%m/%Y}.' if due < timezone.localdate() else f'vence em {due:%d/%m/%Y}.')
+    parts = [f'Olá, {first}! Passando para lembrar do pagamento do pacote']
+    if package is not None:
+        parts[-1] += f' {package.name}'
+    parts[-1] += '.'
     if amount is not None:
         parts.append(f'Valor: {money(amount)}.')
     if settings.PIX_KEY:

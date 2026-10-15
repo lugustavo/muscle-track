@@ -1,35 +1,59 @@
 {% extends 'base.html' %}
 {% load navigation %}
+{% load static %}
 
 {% block title %}{{ title }} - Muscle Track{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-card-checklist"></i> {{ title }}</h1>
+    <h1><i class="bi bi-box-seam"></i> {{ title }}</h1>
     {% url 'core:plan_list' as back_default %}{% back_button back_default %}
 </div>
 
 <div class="row">
     <div class="col-lg-7">
-        <form method="post" class="card mb-4">
+        <form method="post" class="card mb-4" data-package-form>
             {% csrf_token %}
             <div class="card-body">
                 {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
-                {% for field in form %}
-                {% if field.name == 'is_active' %}
-                <div class="form-check mb-3">
-                    <input type="checkbox" name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-check-input" {% if field.value %}checked{% endif %}>
-                    <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }} <span class="text-muted small">(planos inativos não aparecem para escolher)</span></label>
-                </div>
-                {% else %}
                 <div class="mb-3">
-                    <label for="{{ field.id_for_label }}" class="form-label fw-bold">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}<div class="text-danger small">{{ field.errors|join:" " }}</div>{% endif %}
+                    <label for="{{ form.name.id_for_label }}" class="form-label fw-bold">{{ form.name.label }}</label>{{ form.name }}
+                    {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors|join:" " }}</div>{% endif %}
                 </div>
-                {% endif %}
-                {% endfor %}
-                <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Salvar plano</button>
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label for="{{ form.sessions.id_for_label }}" class="form-label fw-bold">{{ form.sessions.label }}</label>{{ form.sessions }}
+                        {% if form.sessions.errors %}<div class="text-danger small">{{ form.sessions.errors|join:" " }}</div>{% endif %}
+                    </div>
+                    <div class="col-6">
+                        <label for="{{ form.valid_days.id_for_label }}" class="form-label fw-bold">{{ form.valid_days.label }}</label>{{ form.valid_days }}
+                        {% if form.valid_days.errors %}<div class="text-danger small">{{ form.valid_days.errors|join:" " }}</div>{% endif %}
+                        <div class="form-text">{{ form.valid_days.help_text }}</div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="fw-bold mb-1">{{ form.pricing_mode.label }}</div>
+                    {% for radio in form.pricing_mode %}<div class="form-check form-check-inline">{{ radio.tag }} <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label></div>{% endfor %}
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label for="{{ form.price_per_session.id_for_label }}" class="form-label fw-bold"><i class="bi bi-lock"></i> {{ form.price_per_session.label }}</label>{{ form.price_per_session }}
+                        {% if form.price_per_session.errors %}<div class="text-danger small">{{ form.price_per_session.errors|join:" " }}</div>{% endif %}
+                    </div>
+                    <div class="col-6">
+                        <label for="{{ form.price_total.id_for_label }}" class="form-label fw-bold"><i class="bi bi-lock"></i> {{ form.price_total.label }}</label>{{ form.price_total }}
+                        {% if form.price_total.errors %}<div class="text-danger small">{{ form.price_total.errors|join:" " }}</div>{% endif %}
+                    </div>
+                    <div class="col-12 form-text mt-0">Digite um dos dois: o outro é calculado.</div>
+                </div>
+                <div class="mb-3">
+                    <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">{{ form.description.label }}</label>{{ form.description }}
+                </div>
+                <div class="form-check mb-3">
+                    <input type="checkbox" name="is_active" id="{{ form.is_active.id_for_label }}" class="form-check-input" {% if form.is_active.value %}checked{% endif %}>
+                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">{{ form.is_active.label }} <span class="text-muted small">(pacotes inativos não aparecem para vender)</span></label>
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Salvar pacote</button>
                 {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='bi-x-circle' %}
             </div>
         </form>
@@ -37,11 +61,16 @@
     <div class="col-lg-5">
         <div class="card border-0 bg-body-tertiary"><div class="card-body small">
             <ul class="mb-0">
-                <li><strong>Aulas por semana</strong> é usado para sugerir o valor quando o aluno tem valor/hora negociado (valor/hora × aulas × semanas do período).</li>
-                <li><strong>Valor de tabela</strong> é só o ponto de partida: cada aluno pode ter um valor negociado.</li>
-                {% if student_count %}<li>{{ student_count }} aluno{{ student_count|pluralize }} usa{{ student_count|pluralize:",m" }} este plano. Eles mantêm os valores que já têm.</li>{% endif %}
+                <li>O <strong>prazo</strong> começa a contar na <strong>primeira aula</strong> do pacote e pode ser prorrogado ou congelado depois, para cada aluno.</li>
+                <li>Cada aula dada (compareceu, faltou ou cancelada com menos de 24 h) desconta <strong>uma aula</strong> do pacote.</li>
+                <li>Os valores são só o ponto de partida: na venda, o preço pode ser ajustado para o aluno.</li>
+                {% if sold_count %}<li>{{ sold_count }} pacote{{ sold_count|pluralize }} já vendido{{ sold_count|pluralize }} a partir deste modelo. Eles mantêm os números da venda.</li>{% endif %}
             </ul>
         </div></div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/package-prices.js' %}"></script>
 {% endblock %}

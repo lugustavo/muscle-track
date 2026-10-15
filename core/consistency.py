@@ -6,7 +6,7 @@ from datetime import datetime, time, timedelta
 
 from django.utils import timezone
 
-from .models import Plan, WorkoutSession
+from .models import WorkoutSession
 
 MILESTONES = (10, 25, 50, 100, 200, 300, 500, 750, 1000)
 STREAK_LOOKBACK_WEEKS = 104
@@ -17,11 +17,7 @@ def monday_of(day):
 
 
 def effective_goal(person):
-    """Workouts per week: the plan's, else the student's own, else None (no goal)."""
-    if person.plan_id:
-        goal = Plan.objects.filter(pk=person.plan_id).values_list('sessions_per_week', flat=True).first()
-        if goal:
-            return goal
+    """Workouts per week: the student's own goal, else None (no goal). A package has no weekly rhythm."""
     return person.weekly_goal or None
 
 

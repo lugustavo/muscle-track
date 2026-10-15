@@ -27,8 +27,8 @@ from allauth.account.models import EmailAddress
 
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, trainer_dashboard
 from .forms import (
-    AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ClassRequestForm, ConsentForm, ContractForm, ExerciseForm, PaymentForm,
-    PersonForm, PersonRoutineForm, PlanForm, RepeatForm, ScheduleSlotForm,
+    AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ClassRequestForm, ConsentForm, SaleForm, ExerciseForm, PaymentForm,
+    PersonForm, PersonRoutineForm, PackageForm, RepeatForm, ScheduleSlotForm,
     ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
 )
 from .agenda import (
@@ -36,14 +36,10 @@ from .agenda import (
     MoveError, annotate_history, conflicting_ids, live_class_at, ensure_appointments, month_cells, move_appointment, overlap_names, parse_week,
     undo_move, view_range,
 )
-from .billing import (
-    charge_message, delete_payment, month_bounds, month_summary, overdue_rows, parse_month,
-    register_payment, suggest_amount, suggest_period,
-)
-from . import class_requests, notifications
+from .billing import charge_message, delete_payment, month_bounds, month_summary, overdue_rows, parse_month, register_payment
+from . import class_requests, notifications, packages
 from .consistency import celebrations
 from .calendar_feed import build_ics, feed_for_token, get_or_create_feed, mark_fetched, rotate
-from .contract import contract_card
 from .consent import (
     ALL_KINDS, CURRENT_VERSION as CONSENT_VERSION, DESCRIPTIONS as CONSENT_DESCRIPTIONS, REQUIRED_KINDS,
     current_consents, has_current_consent, is_granted, record_consent,
@@ -52,7 +48,7 @@ from .exports import build_export
 from .history import log_event, log_profile_edit
 from .invites import build_invite_url, get_user_from_invite, revoke_invites
 from .models import (
-    Appointment, AppointmentRequest, Assessment, CalendarFeed, NotificationPreference, PushSubscription, ConsentRecord, Exercise, MuscleGroup, Payment, Plan, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
+    Appointment, AppointmentRequest, Assessment, CalendarFeed, NotificationPreference, PushSubscription, ConsentRecord, Exercise, MuscleGroup, Payment, Package, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
     Routine, RoutineExercise, SessionExercise, SessionSet, StudentEvent, StudentNote, WorkoutSession,
 )
 from .navigation import after_save_url, back_label, safe_next_url
@@ -283,21 +279,17 @@ def accept_invite(request, uidb64, token):
 
 
 def _finance_agenda_context(student):
-    """Plan/payments and calendar data for the student's file (trainer area only)"""
+    """Package/payments and calendar data for the student's file (trainer area only)"""
     today = timezone.localdate()
-    payments = list(student.payments.all()[:50])
-    last_payment = payments[0] if payments else None
-    amount = suggest_amount(student)
-    owes = student.is_active and student.plan_expires_on and student.plan_expires_on < today
-    charge_url = whatsapp_url(student.phone, charge_message(student, amount, student.plan_expires_on)) \
-        if student.plan_expires_on and student.is_active and student.plan_status in ('expired', 'expiring') else ''
+    payments = list(student.payments.select_related('student_package')[:50])
+    pkg = packages.overview(student, today)
+    pending = next((r for r in pkg['rows'] if r['pending'] > 0 and r['starts_on']), None)
+    charge_url = whatsapp_url(student.phone, charge_message(student, pending['package'], pending['pending'])) \
+        if pending and student.is_active else ''
     return {
         'payments': payments,
-        'last_payment': last_payment,
-        'suggested_amount': amount,
+        'pkg': pkg,
         'charge_url': charge_url,
-        'contract': contract_card(student, last_payment, charge_url, today),
-        'owes': owes,
         'slots': list(student.slots.filter(is_active=True)),
         'upcoming': list(student.appointments.filter(
             starts_at__gte=timezone.now(), status=Appointment.Status.SCHEDULED)[:8]),
@@ -396,18 +388,51 @@ def student_detail(request, pk):
 
 
 @staff_required
-def student_contract_edit(request, pk):
-    """"Alterar plano": the contract of one student (catalog plan, agreed name and values, expiry), outside the sign-up form."""
+def student_package_sell(request, pk):
+    """"Vender pacote": sell a catalog package to the student, with the price agreed for them."""
     student = get_object_or_404(Person, pk=pk)
-    form = ContractForm(request.POST or None, instance=student)
+    form = SaleForm(request.POST or None, initial={'pricing_mode': 'per_session'})
     if request.method == 'POST' and form.is_valid():
-        with transaction.atomic():
-            person = form.save()
-            log_profile_edit(person, form, request.user)
-        messages.success(request, 'Contrato atualizado.')
+        data = form.cleaned_data
+        sold = packages.sell(student, data['package'], mode=data['pricing_mode'], price_per_session=data['price_per_session'],
+                             price_total=data['price_total'], notes=data['notes'], actor=request.user)
+        messages.success(request, f'Pacote vendido: {sold.name}. O prazo conta a partir da primeira aula.')
         return redirect(after_save_url(request, reverse('core:student_detail', kwargs={'pk': pk}), fragment='#tab-ficha'))
-    return render(request, 'core/student_contract_form.html', {
-        'form': form, 'student': student, 'plans': list(form.fields['plan'].queryset), 'title': 'Alterar plano'})
+    catalog = list(form.fields['package'].queryset)
+    return render(request, 'core/student_package_sell.html', {
+        'form': form, 'student': student, 'catalog': catalog, 'title': 'Vender pacote',
+        'overview': packages.overview(student)})
+
+
+@staff_required
+@require_POST
+def student_package_action(request, pk, package_pk):
+    """Freeze / unfreeze / extend / cancel one package of the student."""
+    student = get_object_or_404(Person, pk=pk)
+    package = get_object_or_404(student.packages, pk=package_pk)
+    action = request.POST.get('action')
+    try:
+        if action == 'freeze':
+            packages.freeze(package, request.user)
+            messages.success(request, 'Pacote congelado: o prazo para de contar até você descongelar.')
+        elif action == 'unfreeze':
+            packages.unfreeze(package, request.user)
+            messages.success(request, 'Pacote descongelado: os dias parados foram somados ao prazo.')
+        elif action == 'extend':
+            try:
+                days = int(request.POST.get('days', ''))
+            except ValueError:
+                raise packages.PackageError('Informe quantos dias de prorrogação.')
+            packages.extend(package, days, request.POST.get('note', ''), request.user)
+            messages.success(request, f'Pacote prorrogado em {days} dias.')
+        elif action == 'cancel':
+            packages.cancel_package(package, request.user)
+            messages.success(request, 'Pacote cancelado.')
+        else:
+            return HttpResponseBadRequest('Ação inválida')
+    except packages.PackageError as error:
+        messages.error(request, str(error))
+    return redirect(after_save_url(request, reverse('core:student_detail', kwargs={'pk': pk}), fragment='#tab-ficha'))
 
 
 @staff_required
@@ -624,7 +649,8 @@ def my_agenda(request, person):
         decided = [r for r in asked if r.status in (AppointmentRequest.Status.APPROVED, AppointmentRequest.Status.DECLINED)]
         appointment.last_answer = decided[-1] if decided else None
     return render(request, 'core/my_agenda.html', {
-        'title': 'Minha agenda', 'upcoming': upcoming, 'recent': recent, 'notice_hours': class_requests.notice_hours()})
+        'title': 'Minha agenda', 'upcoming': upcoming, 'recent': recent, 'notice_hours': class_requests.notice_hours(),
+        'package': packages.overview(person, today)['current']})
 
 
 @student_required
@@ -2172,20 +2198,20 @@ def _month_nav(year, month):
 
 @staff_required
 def finance(request):
-    """Money overview: received and expected in a month, who is overdue, the month's payments"""
+    """Money overview: received and sold in a month, what is still to be paid, packages to renew, the month's payments"""
     year, month = parse_month(request.GET.get('mes'))
     summary = month_summary(year, month)
-    overdue = overdue_rows()
-    for row in overdue:
-        row['whatsapp'] = whatsapp_url(row['student'].phone, charge_message(row['student'], row['amount'], row['due']))
+    pending = overdue_rows()
+    for row in pending:
+        row['whatsapp'] = whatsapp_url(row['student'].phone, charge_message(row['student'], row['package'], row['amount']))
     prev_month, next_month = _month_nav(year, month)
     return render(request, 'core/finance.html', {
         'month_value': f'{year}-{month:02d}', 'month_label': date(year, month, 1),
         'prev_month': prev_month, 'next_month': next_month,
         'is_current_month': (year, month) == (timezone.localdate().year, timezone.localdate().month),
-        'summary': summary, 'overdue': overdue,
-        'overdue_total': sum((r['amount'] or 0 for r in overdue), Decimal('0')),
-        'overdue_unpriced': sum(1 for r in overdue if r['amount'] is None),
+        'summary': summary, 'pending': pending,
+        'pending_total': sum((r['amount'] for r in pending), Decimal('0')),
+        'renewals': packages.renewals(),
     })
 
 
@@ -2198,20 +2224,20 @@ def finance_export(request):
     response['Content-Disposition'] = f'attachment; filename="pagamentos-{year}-{month:02d}.csv"'
     response.write('﻿')
     writer = csv.writer(response, delimiter=';')
-    writer.writerow(['Data', 'Aluno', 'Plano', 'Valor', 'Forma', 'Período de', 'Período até', 'Observação'])
-    for p in Payment.objects.filter(paid_on__range=(first, last)).select_related('person').order_by('paid_on', 'pk'):
-        writer.writerow([p.paid_on.strftime('%d/%m/%Y'), _csv_safe(p.person.person_name), _csv_safe(p.plan_name),
-                         f'{p.amount:.2f}'.replace('.', ','), p.get_method_display(),
-                         p.period_start.strftime('%d/%m/%Y'), p.period_end.strftime('%d/%m/%Y'), _csv_safe(p.notes)])
+    writer.writerow(['Data', 'Aluno', 'Pacote', 'Valor', 'Forma', 'Observação'])
+    for p in Payment.objects.filter(paid_on__range=(first, last)).select_related('person', 'student_package').order_by('paid_on', 'pk'):
+        writer.writerow([p.paid_on.strftime('%d/%m/%Y'), _csv_safe(p.person.person_name),
+                         _csv_safe(p.student_package.name if p.student_package else p.plan_name),
+                         f'{p.amount:.2f}'.replace('.', ','), p.get_method_display(), _csv_safe(p.notes)])
     return response
 
 
 @staff_required
 def plan_list(request):
-    """Plan templates, like the exercise catalog"""
+    """Package templates, like the exercise catalog"""
     search = request.GET.get('search', '').strip()
     status = request.GET.get('status', '')
-    plans = Plan.objects.annotate(student_count=Count('students'))
+    plans = Package.objects.annotate(sold_count=Count('sold'))
     if search:
         plans = plans.filter(Q(name__icontains=search) | Q(description__icontains=search))
     if status == 'inactive':
@@ -2224,52 +2250,50 @@ def plan_list(request):
 
 @staff_required
 def plan_create(request):
-    form = PlanForm(request.POST or None)
+    form = PackageForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         plan = form.save()
-        messages.success(request, f'Plano "{plan.name}" criado.')
+        messages.success(request, f'Pacote "{plan.name}" criado.')
         return redirect(after_save_url(request, reverse('core:plan_list'), forward_next=False))
-    return render(request, 'core/plan_form.html', {'form': form, 'title': 'Novo plano'})
+    return render(request, 'core/plan_form.html', {'form': form, 'title': 'Novo pacote'})
 
 
 @staff_required
 def plan_edit(request, pk):
-    plan = get_object_or_404(Plan, pk=pk)
-    form = PlanForm(request.POST or None, instance=plan)
+    plan = get_object_or_404(Package, pk=pk)
+    form = PackageForm(request.POST or None, instance=plan)
     if request.method == 'POST' and form.is_valid():
         form.save()
-        messages.success(request, 'Plano atualizado. Os alunos que já têm o plano mantêm os valores deles.')
+        messages.success(request, 'Pacote atualizado. Quem já comprou mantém os números da venda.')
         return redirect(after_save_url(request, reverse('core:plan_list'), forward_next=False))
     return render(request, 'core/plan_form.html', {
-        'form': form, 'title': 'Editar plano', 'student_count': plan.students.count()})
-
-
-def _payment_initial(student, plan, today):
-    start, end = suggest_period(student, plan, today)
-    return {'plan': plan, 'amount': suggest_amount(student, plan), 'paid_on': today,
-            'period_start': start, 'period_end': end}
+        'form': form, 'title': 'Editar pacote', 'sold_count': plan.sold.count()})
 
 
 @staff_required
 def payment_create(request, pk):
-    """Register a payment: suggests the amount and the period, both editable"""
-    student = get_object_or_404(Person.objects.select_related('plan'), pk=pk)
+    """Register a payment for one of the student's packages; the amount starts as what is still to be paid."""
+    student = get_object_or_404(Person, pk=pk)
     today = timezone.localdate()
     if request.method == 'POST':
         form = PaymentForm(request.POST, person=student)
         if form.is_valid():
             data = form.cleaned_data
-            register_payment(student, plan=data['plan'], amount=data['amount'], paid_on=data['paid_on'],
-                             method=data['method'], period_start=data['period_start'],
-                             period_end=data['period_end'], notes=data['notes'], actor=request.user)
-            messages.success(request, f'Pagamento registrado. Plano até {data["period_end"]:%d/%m/%Y}.')
+            register_payment(student, package=data['student_package'], amount=data['amount'], paid_on=data['paid_on'],
+                             method=data['method'], notes=data['notes'], actor=request.user)
+            messages.success(request, 'Pagamento registrado.')
             return redirect(_student_tab(request, student.pk, 'pagamentos'))
     else:
-        plan = student.plan
-        if request.GET.get('plan', '').isdigit():
-            plan = Plan.objects.filter(pk=int(request.GET['plan'])).first() or plan
-        form = PaymentForm(initial=_payment_initial(student, plan, today), person=student)
-    return render(request, 'core/payment_form.html', {'form': form, 'student': student})
+        overview = packages.overview(student, today)
+        target = next((r for r in overview['rows'] if r['pending'] > 0 and r['state'] != 'cancelled'), overview['current'])
+        initial = {'paid_on': today}
+        if request.GET.get('package', '').isdigit():
+            target = next((r for r in overview['rows'] if r['package'].pk == int(request.GET['package'])), target)
+        if target:
+            initial.update(student_package=target['package'], amount=target['pending'] or target['package'].price_total)
+        form = PaymentForm(initial=initial, person=student)
+    return render(request, 'core/payment_form.html', {'form': form, 'student': student,
+                                                       'overview': packages.overview(student, today)})
 
 
 @staff_required
@@ -2537,7 +2561,7 @@ def appointment_request_decide(request, pk):
 @staff_required
 @require_POST
 def appointment_status(request, pk):
-    appointment = get_object_or_404(Appointment, pk=pk)
+    appointment = get_object_or_404(Appointment.objects.select_related('person'), pk=pk)
     status = request.POST.get('status')
     allowed = (Appointment.Status.SCHEDULED, Appointment.Status.ATTENDED, Appointment.Status.MISSED,
                Appointment.Status.CANCELLED)
@@ -2549,9 +2573,32 @@ def appointment_status(request, pk):
         return redirect(safe_next_url(request, _agenda_url_for(timezone.localtime(appointment.starts_at).date())))
     appointment.status = status
     appointment.status_changed_at = timezone.now()
-    appointment.save(update_fields=['status', 'status_changed_at'])
+    # cancelling with less notice than allowed counts the class against the package (the trainer can undo that)
+    appointment.cancelled_late = status == Appointment.Status.CANCELLED and packages.late_cancel(appointment.starts_at)
+    appointment.counts_override = None
+    appointment.save(update_fields=['status', 'status_changed_at', 'cancelled_late', 'counts_override'])
+    packages.sync(appointment.person)
+    if appointment.cancelled_late:
+        messages.warning(request, f'Cancelada com menos de {settings.AGENDA_NOTICE_HOURS} h de antecedência: conta como aula dada '
+                                  'no pacote. Se não for para descontar, use "Não descontar".')
     if status == Appointment.Status.CANCELLED and not was_cancelled and appointment.starts_at > timezone.now():
         notifications.notify([appointment.person.user], notifications.class_cancelled(appointment))
+    return redirect(safe_next_url(request, _agenda_url_for(timezone.localtime(appointment.starts_at).date())))
+
+
+@staff_required
+@require_POST
+def appointment_counts(request, pk):
+    """"Descontar / Não descontar do pacote" for one class (an illness, a class the trainer cancelled...)."""
+    appointment = get_object_or_404(Appointment.objects.select_related('person'), pk=pk)
+    choice = request.POST.get('counts')
+    if choice not in ('yes', 'no', 'auto'):
+        return HttpResponseBadRequest('Opção inválida')
+    appointment.counts_override = {'yes': True, 'no': False, 'auto': None}[choice]
+    appointment.save(update_fields=['counts_override'])
+    packages.sync(appointment.person)
+    messages.success(request, {'yes': 'Esta aula vai ser descontada do pacote.', 'no': 'Esta aula não será descontada do pacote.',
+                               'auto': 'Esta aula segue a regra do pacote.'}[choice])
     return redirect(safe_next_url(request, _agenda_url_for(timezone.localtime(appointment.starts_at).date())))
 
 
@@ -2563,7 +2610,9 @@ def appointment_delete(request, pk):
     if appointment.slot_id:
         messages.warning(request, 'Aula de horário fixo: use "Cancelar" (excluir faria ela voltar).')
     else:
+        person = appointment.person
         appointment.delete()
+        packages.sync(person)
         messages.success(request, 'Aula removida.')
     return redirect(safe_next_url(request, _agenda_url_for(timezone.localtime(appointment.starts_at).date())))
 

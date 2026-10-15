@@ -258,11 +258,21 @@ class DashboardTests(BaseTestCase):
         Person.objects.filter(pk=self.bob.person.pk).update(is_active=False)
         self.assertEqual(inactive_students(), [])
 
-    def test_expiring_plans(self):
+    def test_expiring_packages(self):
+        from datetime import datetime, time
+
+        from core import packages
+        from core.models import Appointment, Package
         today = timezone.localdate()
-        Person.objects.filter(pk=self.alice.person.pk).update(plan_expires_on=today - timedelta(days=3))
-        Person.objects.filter(pk=self.bob.person.pk).update(plan_expires_on=today + timedelta(days=40))
-        self.assertEqual(expiring_plans(), [Person.objects.get(pk=self.alice.person.pk)])
+        pack = Package.objects.create(name='Pacote 10', sessions=10, valid_days=60, pricing_mode='per_session',
+                                      price_per_session=Decimal('50'))
+        for person, first_class_days_ago in ((self.alice.person, 70), (self.bob.person, 20)):
+            packages.sell(person, pack)
+            Appointment.objects.create(person=person, status='attended', starts_at=timezone.make_aware(
+                datetime.combine(today - timedelta(days=first_class_days_ago), time(9))))
+            packages.sync(person)
+        rows = expiring_plans()
+        self.assertEqual([(r['student'].pk, r['kind'], r['left']) for r in rows], [(self.alice.person.pk, 'expired', 9)])
 
     def test_comments_and_dashboard_page(self):
         session = WorkoutSession.objects.create(person_routine=self.alice_routine, notes='Ombro doeu')

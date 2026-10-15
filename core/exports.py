@@ -77,8 +77,13 @@ def build_data(person, include_internal_notes):
         'routines': routines,
         'sessions': sessions,
         'payments': [
-            {**_fields(p, ['paid_on', 'plan_name', 'amount', 'method', 'period_start', 'period_end', 'notes'])}
+            {**_fields(p, ['paid_on', 'plan_name', 'amount', 'method', 'notes'])}
             for p in person.payments.all()],
+        'packages': [
+            {**_fields(pk, ['name', 'sessions', 'valid_days', 'sold_on', 'starts_on', 'extension_days', 'frozen_days',
+                            'cancelled_at', 'notes']),
+             **({'price_per_session': pk.price_per_session, 'price_total': pk.price_total} if include_internal_notes else {})}
+            for pk in person.packages.all()],
         'schedule': {
             'weekly_slots': [_fields(sl, ['weekday', 'start_time', 'duration_minutes', 'is_active'])
                              for sl in person.slots.all()],

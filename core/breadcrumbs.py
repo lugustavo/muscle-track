@@ -129,7 +129,7 @@ def _finance():
 
 
 def _plans():
-    return ('Planos', reverse('core:plan_list'))
+    return ('Pacotes', reverse('core:plan_list'))
 
 
 def _agenda():
@@ -195,9 +195,9 @@ TRAILS = {
     'my_agenda': lambda request, ctx: [_home(), ('Minha agenda', None)],
     'my_agenda_request': lambda request, ctx: [_home(), ('Minha agenda', reverse('core:my_agenda')), ('Pedir remarcação', None)],
     'finance': lambda request, ctx: [_home(), ('Financeiro', None)],
-    'plan_list': lambda request, ctx: [_home(), _finance(), ('Planos', None)],
-    'plan_create': lambda request, ctx: [_home(), _finance(), _plans(), ('Novo plano', None)],
-    'plan_edit': lambda request, ctx: [_home(), _finance(), _plans(), ('Editar plano', None)],
+    'plan_list': lambda request, ctx: [_home(), _finance(), ('Pacotes', None)],
+    'plan_create': lambda request, ctx: [_home(), _finance(), _plans(), ('Novo pacote', None)],
+    'plan_edit': lambda request, ctx: [_home(), _finance(), _plans(), ('Editar pacote', None)],
     'payment_create': _student_page('Registrar pagamento'),
     'agenda': lambda request, ctx: [_home(), ('Agenda', None)],
     'appointment_create': lambda request, ctx: [_home(), _agenda(), ('Nova aula', None)],
@@ -209,7 +209,7 @@ TRAILS = {
     'student_invite': _student_page('Convite'),
     'student_delete': _student_page('Excluir'),
     'student_status': _student_page('Situação'),
-    'student_contract_edit': _student_page('Alterar plano'),
+    'student_package_sell': _student_page('Vender pacote'),
     'student_history': _student_page('Histórico'),
     'assessment_create': _assessment(None),
     'assessment_edit': _assessment(None),

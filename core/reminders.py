@@ -9,7 +9,7 @@ from django.conf import settings
 from django.db.models import F, Q
 from django.utils import timezone
 
-from . import notifications
+from . import notifications, packages
 from .agenda import ensure_appointments
 from .models import Appointment, Person
 
@@ -49,7 +49,9 @@ def send_plan_reminders(today):
     ).exclude(plan_reminder_for=F('plan_expires_on')).select_related('user')
     sent = 0
     for person in due:
-        notifications.notify([person.user], notifications.plan_expiring((person.plan_expires_on - today).days), sync=True)
+        current = packages.overview(person, today)['current']
+        notifications.notify([person.user], notifications.plan_expiring(
+            (person.plan_expires_on - today).days, current['left'] if current else None), sync=True)
         Person.objects.filter(pk=person.pk).update(plan_reminder_for=person.plan_expires_on)
         sent += 1
     return sent
