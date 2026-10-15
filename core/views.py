@@ -37,7 +37,7 @@ from .agenda import (
     undo_move, view_range,
 )
 from .billing import charge_message, delete_payment, month_bounds, month_summary, overdue_rows, parse_month, register_payment
-from . import class_requests, notifications, packages
+from . import class_requests, evolution, notifications, packages
 from .consistency import celebrations
 from .calendar_feed import build_ics, feed_for_token, get_or_create_feed, mark_fetched, rotate
 from .consent import (
@@ -351,27 +351,15 @@ def student_detail(request, pk):
             'sessions_count': sessions_count,
         })
 
-    assessments = list(student.assessments.prefetch_related('photos'))
-    for a in assessments:   # the photo strip: one slot per position, then any extra photos
-        by_angle = {p.angle: p for p in a.photos.all()}
-        a.photo_slots = [{'angle': angle.value, 'label': angle.label, 'photo': by_angle.get(angle.value)}
-                         for angle in ProgressPhoto.SEQUENCE]
-        a.other_photos = [p for p in a.photos.all() if p.angle not in {x.value for x in ProgressPhoto.SEQUENCE}]
-    chart_points = [
-        {
-            'date': a.date.strftime('%d/%m/%y'),
-            'weight': float(a.weight_kg) if a.weight_kg is not None else None,
-            'body_fat': float(a.body_fat_pct) if a.body_fat_pct is not None else None,
-            'waist': float(a.waist_cm) if a.waist_cm is not None else None,
-        }
-        for a in reversed(assessments)
-    ]
+    assessments = evolution.assessments_with_photos(student)
+    chart_points = evolution.chart_points(assessments)
 
     return render(request, 'core/student_detail.html', {
         'student': student,
         'assessments': assessments,
         'latest_assessment': assessments[0] if assessments else None,
-        'assessment_chart': chart_points if len(chart_points) >= 2 else [],
+        'assessment_chart': chart_points,
+        'can_compare': bool(evolution.comparable_angles(assessments)),
         'loose_photos': list(student.progress_photos.filter(assessment__isnull=True)),
         'photo_count': student.progress_photos.count(),
         'events': list(student.events.select_related('actor')[:100]),
@@ -669,6 +657,34 @@ def my_package(request, person):
     return render(request, 'core/my_package.html', {
         'title': 'Meu pacote', 'current': current, 'others': others, 'without_package': data['without_package'],
         'has_packages': bool(rows)})
+
+
+@student_required
+def my_evolution(request, person):
+    """The student's own assessments, chart and photos (read-only; the trainer's private notes are never shown)."""
+    assessments = evolution.assessments_with_photos(person)
+    return render(request, 'core/my_evolution.html', {
+        'title': 'Minha evolução', 'assessments': assessments, 'assessment_chart': evolution.chart_points(assessments),
+        'can_compare': bool(evolution.comparable_angles(assessments)),
+        'loose_photos': list(person.progress_photos.filter(assessment__isnull=True))})
+
+
+@student_required
+def my_evolution_compare(request, person):
+    data = evolution.compare(person, request.GET.get('angle'), request.GET.get('before'), request.GET.get('after'))
+    return render(request, 'core/photo_compare.html', {
+        'title': 'Comparar fotos', 'data': data, 'mine': True,
+        'form_url': reverse('core:my_evolution_compare'), 'back_url': reverse('core:my_evolution')})
+
+
+@staff_required
+def student_compare(request, pk):
+    student = get_object_or_404(Person, pk=pk)
+    data = evolution.compare(student, request.GET.get('angle'), request.GET.get('before'), request.GET.get('after'))
+    return render(request, 'core/photo_compare.html', {
+        'title': 'Comparar fotos', 'data': data, 'mine': False, 'student': student,
+        'form_url': reverse('core:student_compare', kwargs={'pk': student.pk}),
+        'back_url': reverse('core:student_detail', kwargs={'pk': student.pk}) + '#tab-avaliacoes'})
 
 
 @student_required
