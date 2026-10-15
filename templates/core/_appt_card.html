@@ -1,0 +1,29 @@
+{% load navigation %}
+{# One class: time, student, status and the quick buttons. Needs `a` and `conflicts`. #}
+<div class="card appt s-{{ a.status }} {% if a.pk in conflicts %}conflict{% endif %} mb-2">
+    <div class="card-body p-2">
+        <div class="d-flex justify-content-between">
+            <strong>{{ a.starts_at|time:"H:i" }}</strong>
+            <span class="badge {% if a.status == 'attended' %}bg-success{% elif a.status == 'missed' %}bg-danger{% elif a.status == 'scheduled' %}bg-body-secondary text-body border{% else %}bg-secondary{% endif %}">{{ a.get_status_display }}</span>
+        </div>
+        <a href="{% nav_url 'core:student_detail' a.person.pk %}" class="text-decoration-none d-block text-truncate">{{ a.person.person_name }}</a>
+        <small class="text-muted">{{ a.get_kind_display }} · {{ a.duration_minutes }} min</small>
+        {% if a.pk in conflicts %}<div class="small text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> Sobreposta a outra aula</div>{% endif %}
+        {% if a.status != 'rescheduled' %}
+        <form method="post" action="{% nav_url 'core:appointment_status' a.pk %}" class="mt-1 d-flex flex-wrap gap-1">
+            {% csrf_token %}
+            {% if a.status != 'attended' %}<button name="status" value="attended" class="btn btn-sm btn-outline-success" title="Compareceu"><i class="bi bi-check-lg"></i></button>{% endif %}
+            {% if a.status != 'missed' %}<button name="status" value="missed" class="btn btn-sm btn-outline-danger" title="Faltou"><i class="bi bi-x-lg"></i></button>{% endif %}
+            {% if a.status != 'cancelled' %}<button name="status" value="cancelled" class="btn btn-sm btn-outline-secondary" title="Cancelar"><i class="bi bi-slash-circle"></i></button>{% endif %}
+            {% if a.status != 'scheduled' %}<button name="status" value="scheduled" class="btn btn-sm btn-outline-secondary" title="Desfazer (voltar para marcada)"><i class="bi bi-arrow-counterclockwise"></i></button>{% endif %}
+            <a href="{% nav_url 'core:appointment_reschedule' a.pk %}" class="btn btn-sm btn-outline-primary" title="Remarcar"><i class="bi bi-arrow-repeat"></i></a>
+        </form>
+        {% if not a.slot_id %}
+        <form method="post" action="{% nav_url 'core:appointment_delete' a.pk %}" onsubmit="return confirm('Remover esta aula avulsa?');" class="mt-1">
+            {% csrf_token %}
+            <button class="btn btn-sm btn-link text-danger p-0 small">remover</button>
+        </form>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>

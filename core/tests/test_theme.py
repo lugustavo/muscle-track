@@ -16,7 +16,8 @@ FORBIDDEN_HEX = re.compile(r'#(?:fff|ffffff|f8f9fa|e9ecef|dee2e6|6c757d|495057|e
 ALLOWED_HEX = {
     ('static/css/tabbar.css', '#fff'),                      # white icon/text on the brand-colored circle, FAB and selected day
     ('templates/core/workout_execute.html', '#fff'),        # text on the always-dark rest bar and the green toast
-    ('templates/pwa/offline.html', '#fff'),                 # standalone page (no base.html), has its own dark rule
+    ('templates/pwa/offline.html', '#fff'),
+    ('templates/core/agenda.html', '#fff'),                 # white day number on the brand-colored "today" circle                 # standalone page (no base.html), has its own dark rule
 }
 
 
