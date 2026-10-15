@@ -288,6 +288,7 @@ def _finance_agenda_context(student):
     today = timezone.localdate()
     payments = list(student.payments.select_related('student_package')[:50])
     pkg = packages.overview(student, today)
+    plan = packages.schedule_plan(student, today)
     pending = next((r for r in pkg['rows'] if r['pending'] > 0 and r['starts_on']), None)
     charge_url = whatsapp_url(student.phone, charge_message(student, pending['package'], pending['pending'])) \
         if pending and student.is_active else ''
@@ -300,7 +301,8 @@ def _finance_agenda_context(student):
             starts_at__gte=timezone.now(), status=Appointment.Status.SCHEDULED)[:8]),
         'attendance': attendance_stats(student, 30, today),
         'weekdays': ScheduleSlot.WEEKDAYS,
-        'slot_form': ScheduleSlotForm(),
+        'slot_form': ScheduleSlotForm(plan=plan),
+        'slot_plan': plan,
     }
 
 
@@ -2693,7 +2695,7 @@ def appointment_delete(request, pk):
 @require_POST
 def slot_add(request, pk):
     student = get_object_or_404(Person, pk=pk)
-    form = ScheduleSlotForm(request.POST)
+    form = ScheduleSlotForm(request.POST, plan=packages.schedule_plan(student))
     if form.is_valid():
         data = form.cleaned_data
         today = timezone.localdate()

@@ -470,7 +470,10 @@ class RecurrenceMixin(forms.Form):
 
 
 class ScheduleSlotForm(RecurrenceMixin):
-    """New fixed time(s) for a student: one or more weekdays, repeating every N weeks."""
+    """New fixed time(s) for a student: one or more weekdays, repeating every N weeks.
+
+    With `plan` (packages.schedule_plan) the series can follow the student's package: it ends on the package's last
+    day or after the classes still to be marked, whichever comes first."""
     weekday = forms.TypedChoiceField(choices=ScheduleSlot.WEEKDAYS, coerce=int, required=False, label='Dia',
                                      widget=forms.Select(attrs={'class': 'form-select'}))
     weekdays = forms.TypedMultipleChoiceField(choices=ScheduleSlot.WEEKDAYS, coerce=int, required=False, label='Dias',
@@ -481,6 +484,19 @@ class ScheduleSlotForm(RecurrenceMixin):
         label='Duração (min)', min_value=10, max_value=480, initial=60,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '10', 'max': '480', 'step': '5'}))
 
+    def __init__(self, *args, plan=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.plan = plan
+        if plan is not None:
+            label = 'Acompanhar o pacote'
+            parts = []
+            if plan['ends_on']:
+                parts.append(f"até {plan['ends_on']:%d/%m/%Y}")
+            parts.append(f"{plan['to_schedule']} aula{'' if plan['to_schedule'] == 1 else 's'} a marcar")
+            self.fields['ends'].choices = (('package', f"{label} ({' ou '.join(parts)}, o que vier primeiro)"),) + self.ENDS
+            if not self.is_bound:
+                self.initial['ends'] = 'package'
+
     def clean(self):
         cleaned = super().clean()
         days = set(cleaned.get('weekdays') or [])
@@ -489,7 +505,23 @@ class ScheduleSlotForm(RecurrenceMixin):
         if not days:
             self.add_error('weekdays', 'Escolha pelo menos um dia da semana.')
         cleaned['all_weekdays'] = sorted(days)
+        if cleaned.get('ends') == 'package':
+            start = cleaned.get('starts_on') or timezone.localdate()
+            if self.plan is None:
+                self.add_error('ends', 'Este aluno não tem pacote em uso: escolha outra forma de terminar.')
+            elif self.plan['to_schedule'] <= 0:
+                self.add_error('ends', 'Todas as aulas que restam do pacote já estão marcadas.')
+            elif self.plan['ends_on'] and self.plan['ends_on'] < start:
+                self.add_error('ends', 'O pacote termina antes do início desta série.')
         return cleaned
+
+    def series_end(self, weekdays, start):
+        if self.cleaned_data['ends'] != 'package':
+            return super().series_end(weekdays, start)
+        last = end_date(start, weekdays, self.cleaned_data['interval_weeks'], 'after',
+                        ends_after=self.plan['to_schedule'])
+        ends_on = self.plan['ends_on']
+        return min(last, ends_on) if last and ends_on else (last or ends_on)
 
 
 class SlotEditForm(forms.Form):

@@ -18,6 +18,19 @@
             <li class="list-group-item text-muted">Nenhum horário fixo. Adicione abaixo (ex.: segunda 07:00).</li>
             {% endfor %}
         </ul>
+        {% if slot_plan %}
+        <div class="alert alert-info py-2 small" data-slot-package>
+            <i class="bi bi-box-seam"></i> <strong>{{ slot_plan.package.name }}</strong>:
+            restam <strong>{{ slot_plan.left }}</strong> aula{{ slot_plan.left|pluralize }}{% if slot_plan.scheduled %}, {{ slot_plan.scheduled }} já marcada{{ slot_plan.scheduled|pluralize }}{% endif %}
+            {% if slot_plan.ends_on %}· vale até {{ slot_plan.ends_on|date:"d/m/Y" }}{% elif not slot_plan.package.valid_days %}· sem prazo{% elif slot_plan.state == 'not_started' %}· o prazo começa na primeira aula{% endif %}.
+            {% if slot_plan.to_schedule %}O novo horário termina junto com o pacote ({{ slot_plan.to_schedule }} aula{{ slot_plan.to_schedule|pluralize }} a marcar).{% else %}Todas as aulas que restam já estão marcadas: só dá para criar um horário que termine em uma data ou depois de um número de aulas.{% endif %}
+        </div>
+        {% else %}
+        <div class="alert alert-warning py-2 small d-flex justify-content-between align-items-center gap-2" data-slot-no-package>
+            <span><i class="bi bi-box-seam"></i> Este aluno ainda não tem pacote em uso.</span>
+            <a href="{% nav_url 'core:student_package_sell' student.pk %}" class="btn btn-sm btn-warning text-nowrap">Vender pacote</a>
+        </div>
+        {% endif %}
         <form method="post" action="{% nav_url 'core:slot_add' student.pk %}" class="card card-body bg-body-tertiary" data-recurrence-form>
             {% csrf_token %}
             <div class="small fw-bold mb-2">Novo horário fixo</div>
@@ -26,7 +39,7 @@
                 <div class="col-6"><label class="form-label small mb-0" for="{{ slot_form.start_time.id_for_label }}">Horário</label>{{ slot_form.start_time }}</div>
                 <div class="col-6"><label class="form-label small mb-0" for="{{ slot_form.duration_minutes.id_for_label }}">Duração</label>{{ slot_form.duration_minutes }}</div>
             </div>
-            <details class="mb-2">
+            <details class="mb-2"{% if slot_plan %} open{% endif %}>
                 <summary class="small text-primary" style="cursor: pointer;">Repetição personalizada (a cada N semanas, início e fim)</summary>
                 <div class="mt-2">{% include 'core/_recurrence_options.html' with rec=slot_form with_start=True %}</div>
             </details>
