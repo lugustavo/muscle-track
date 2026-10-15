@@ -4,7 +4,8 @@ from datetime import datetime, time, timedelta
 from django.db.models import Avg, Count, Max, OuterRef, Q, Subquery
 from django.utils import timezone
 
-from .models import Plan, PersonRoutine, WorkoutSession
+from .consistency import effective_goal, motivation
+from .models import PersonRoutine, WorkoutSession
 
 # A session left open longer than this is closed by the workout views (see _close_if_stale)
 MAX_SESSION_MINUTES = 120
@@ -103,9 +104,8 @@ def student_today(request, person):
         state = 'empty'
 
     strip = week_strip(person, today)
-    goal = None
-    if person.plan_id:
-        goal = Plan.objects.filter(pk=person.plan_id).values_list('sessions_per_week', flat=True).first()
+    goal = effective_goal(person)
+    week_done = sum(1 for d in strip if d['done'])
 
     completed = WorkoutSession.objects.filter(person_routine__person=person, is_completed=True)
     stats = completed.aggregate(
@@ -116,7 +116,8 @@ def student_today(request, person):
     return {
         'state': state, 'first_name': person.person_name.split()[0] if person.person_name.strip() else '',
         'today': today, 'in_progress': in_progress, 'suggested': suggested, 'done_today': done_today,
-        'week': strip, 'week_done': sum(1 for d in strip if d['done']), 'week_goal': goal,
+        'week': strip, 'week_done': week_done, 'week_goal': goal,
+        'motivation': motivation(person, week_done, today),
         'total_workouts': stats['total'], 'recent_workouts': stats['recent'],
         'avg_duration': round(stats['avg'] or 0),
     }

@@ -31,7 +31,8 @@ def build_data(person, include_internal_notes):
     profile = _fields(person, [
         'person_name', 'address', 'city', 'state', 'zip_code', 'phone', 'birth_date', 'goal',
         'health_notes', 'emergency_contact_name', 'emergency_contact_phone', 'plan_name',
-        'plan_expires_on', 'status', 'status_reason', 'status_changed_at', 'created_at'])
+        'plan_expires_on', 'motivation_enabled', 'weekly_goal', 'status', 'status_reason', 'status_changed_at',
+        'created_at'])
     profile['email'] = person.user.email
     profile['last_login'] = person.user.last_login
     if include_internal_notes:

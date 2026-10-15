@@ -246,3 +246,13 @@ body.kbd-open .fab { display: none; }
     body.has-tabbar .form-actions { bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); }
     body.has-tabbar.kbd-open .form-actions { bottom: 0; }
 }
+
+/* Weekly goal ring on "Hoje" */
+.goal-ring { position: relative; width: 80px; height: 80px; flex: 0 0 auto; }
+.goal-ring .track { fill: none; stroke: var(--bs-border-color); stroke-width: 8; }
+.goal-ring .bar { fill: none; stroke: var(--secondary-color); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
+.goal-ring.complete .bar { stroke: var(--bs-success); }
+.goal-ring-text { position: absolute; inset: 0; display: flex; align-items: baseline; justify-content: center; padding-top: 26px; }
+.goal-ring-text .num { font-size: 1.5rem; font-weight: 700; line-height: 1; }
+.goal-ring-text .of { font-size: .8rem; color: var(--bs-secondary-color); }
+@media (prefers-reduced-motion: reduce) { .goal-ring .bar { transition: none; } }

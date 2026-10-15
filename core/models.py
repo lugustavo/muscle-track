@@ -82,6 +82,14 @@ class Person(models.Model):
     status_changed_at = models.DateTimeField(null=True, blank=True, verbose_name='Situação desde')
     is_active = models.BooleanField(default=True, verbose_name='Ativo')
     deactivated_at = models.DateTimeField(null=True, blank=True, editable=False, verbose_name='Inativado em')
+    # The student's own motivation settings (core/consistency.py): the ring, streak and milestones on "Hoje"
+    motivation_enabled = models.BooleanField(
+        default=True, verbose_name='Mostrar meta semanal, sequência e marcos',
+        help_text='Desligue se preferir ver só os treinos, sem metas.')
+    weekly_goal = models.PositiveSmallIntegerField(
+        null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(7)],
+        verbose_name='Minha meta de treinos por semana',
+        help_text='Usada quando o seu plano não define uma meta. De 1 a 7.')
     # Bumped to revoke invite links already handed out (see core/invites.py)
     invite_version = models.PositiveIntegerField(default=0, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
