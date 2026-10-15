@@ -1,4 +1,4 @@
-{% load navigation %}
+{% load navigation calendar_tags %}
 {# One class: time, student, status and the quick buttons. Needs `a` and `conflicts`. #}
 <div class="card appt s-{{ a.status }} {% if a.pk in conflicts %}conflict{% endif %} mb-2">
     <div class="card-body p-2">
@@ -17,6 +17,7 @@
             {% if a.status != 'cancelled' %}<button name="status" value="cancelled" class="btn btn-sm btn-outline-secondary" title="Cancelar"><i class="bi bi-slash-circle"></i></button>{% endif %}
             {% if a.status != 'scheduled' %}<button name="status" value="scheduled" class="btn btn-sm btn-outline-secondary" title="Desfazer (voltar para marcada)"><i class="bi bi-arrow-counterclockwise"></i></button>{% endif %}
             <a href="{% nav_url 'core:appointment_reschedule' a.pk %}" class="btn btn-sm btn-outline-primary" title="Remarcar"><i class="bi bi-arrow-repeat"></i></a>
+            <a href="{% google_event_url a %}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary" title="Adicionar esta aula ao Google Agenda"><i class="bi bi-google"></i><span class="visually-hidden">Adicionar ao Google Agenda</span></a>
         </form>
         {% if a.slot_id %}
         <div class="dropdown mt-1">

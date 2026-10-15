@@ -806,3 +806,26 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f'{self.person_id} {self.starts_at:%d/%m/%Y %H:%M} {self.status}'
+
+
+class CalendarFeed(models.Model):
+    """A private calendar link (iCalendar, .ics) for one account: the trainer's whole agenda, or a student's own classes.
+
+    Whoever has the link can read the classes it shows, so it is treated like a password: long random token,
+    one per account, and "generate a new link" invalidates the old one (see core/calendar_feed.py)."""
+    NAME_STYLES = [('first', 'Primeiro nome do aluno'), ('full', 'Nome completo do aluno'), ('none', 'Sem o nome do aluno')]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='calendar_feed')
+    token = models.CharField(max_length=64, unique=True, editable=False)
+    # Trainer's feed only: how a student appears in the title of the event
+    name_style = models.CharField(max_length=5, choices=NAME_STYLES, default='first', verbose_name='Nome do aluno no evento')
+    created_at = models.DateTimeField(auto_now_add=True)
+    rotated_at = models.DateTimeField(null=True, blank=True)
+    last_fetched_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Link de calendário'
+        verbose_name_plural = 'Links de calendário'
+
+    def __str__(self):
+        return f'Calendário de {self.user_id}'
