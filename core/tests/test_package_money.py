@@ -329,3 +329,67 @@ class PaymentMethodTests(BaseTestCase):
             self.assertEqual(Payment.objects.filter(method=method).first().get_method_display(), label)
         summary = billing.month_summary(2026, 5)
         self.assertEqual(sorted(m['label'] for m in summary['by_method']), ['MB Way', 'SPIN'])
+
+
+class ServiceReportTests(BaseTestCase):
+    """Classes given (realizado) and classes still owed (a executar), valued at the price per class of the package."""
+
+    def setUp(self):
+        from core import packages as pk
+        self.pk = pk
+        self.person = self.alice.person
+        self.pack = Package.objects.create(name='P10', sessions=10, valid_days=90, pricing_mode='per_session',
+                                           price_per_session=Decimal('50'))
+        self.sold = pk.sell(self.person, self.pack)
+
+    def klass(self, day, status='attended'):
+        return Appointment.objects.create(person=self.person, status=status,
+                                          starts_at=timezone.make_aware(datetime.combine(day, time(9))))
+
+    def test_given_and_owed(self):
+        from core.billing import service_report
+        for d in (date(2026, 3, 2), date(2026, 3, 9)):
+            self.klass(d)
+        self.klass(date(2026, 3, 16), 'missed')                    # consumed too
+        self.klass(date(2026, 3, 20), 'cancelled')                 # in time: free, not counted
+        self.klass(date(2026, 4, 6))                               # another month
+        self.pk.sync(self.person, date(2026, 4, 10))
+        report = service_report(2026, 3)
+        self.assertEqual((report['given_classes'], report['given_total']), (3, Decimal('150')))
+        self.assertEqual(report['given_rows'][0]['student'], self.person)
+        self.assertEqual((report['owed_classes'], report['owed_total']), (6, Decimal('300')))   # 10 - 4 used
+        self.assertEqual(service_report(2026, 4)['given_classes'], 1)
+        self.assertEqual(service_report(2026, 2)['given_classes'], 0)
+
+    def test_finished_and_cancelled_packages_owe_nothing(self):
+        from core.billing import service_report
+        for n in range(10):
+            self.klass(date(2026, 3, 1) + timedelta(days=n))
+        self.pk.sync(self.person, date(2026, 3, 20))
+        self.assertEqual(service_report(2026, 3)['owed_total'], Decimal('0'))
+        second = self.pk.sell(self.person, self.pack)
+        self.pk.cancel_package(second)
+        self.assertEqual(service_report(2026, 3)['owed_total'], Decimal('0'))
+
+    def test_package_without_price_is_counted_apart(self):
+        from core.billing import service_report
+        free = Package.objects.create(name='Livre', sessions=4, valid_days=30, pricing_mode='per_session')
+        self.sold.delete()
+        sold = self.pk.sell(self.person, free)
+        self.assertIsNone(sold.price_per_session)
+        self.klass(date(2026, 3, 2))
+        self.pk.sync(self.person, date(2026, 3, 10))
+        report = service_report(2026, 3)
+        self.assertEqual((report['given_total'], report['given_unpriced'], report['owed_unpriced']),
+                         (Decimal('0'), 1, 3))
+
+    def test_finance_page_shows_both_cards_with_values(self):
+        for d in (date(2026, 3, 2), date(2026, 3, 9)):
+            self.klass(d)
+        self.pk.sync(self.person, date(2026, 3, 20))
+        self.client.force_login(self.trainer)
+        page = self.client.get(reverse('core:finance'), {'mes': '2026-03'})
+        self.assertContains(page, 'data-service-report')
+        self.assertContains(page, '100,00 €')            # 2 classes x 50
+        self.assertContains(page, '400,00 €')            # 8 left x 50
+        self.assertContains(page, 'Alice')

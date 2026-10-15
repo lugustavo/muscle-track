@@ -36,7 +36,9 @@ from .agenda import (
     MoveError, annotate_history, conflicting_ids, live_class_at, ensure_appointments, month_cells, move_appointment, overlap_names, parse_week,
     undo_move, view_range,
 )
-from .billing import charge_message, delete_payment, month_bounds, month_summary, overdue_rows, parse_month, register_payment
+from .billing import (
+    charge_message, delete_payment, month_bounds, month_summary, overdue_rows, parse_month, register_payment, service_report,
+)
 from . import class_requests, evolution, notifications, packages
 from .consistency import celebrations
 from .calendar_feed import build_ics, feed_for_token, get_or_create_feed, mark_fetched, rotate
@@ -2268,7 +2270,7 @@ def finance(request):
         'is_current_month': (year, month) == (timezone.localdate().year, timezone.localdate().month),
         'summary': summary, 'pending': pending,
         'pending_total': sum((r['amount'] for r in pending), Decimal('0')),
-        'renewals': packages.renewals(),
+        'renewals': packages.renewals(), 'service': service_report(year, month),
     })
 
 
@@ -2445,10 +2447,11 @@ def agenda(request):
     elif view == 'mes':
         context.update({'weeks': month_cells(pivot, by_day, today, conflicts), 'month': pivot,
                         'weekday_letters': [label[:3] for _, label in ScheduleSlot.WEEKDAYS],
-                        # the month's classes below the grid, day by day (days outside the month are left out)
+                        # the month's classes below the grid, day by day: today and the days ahead only (days outside
+                        # the month and past days are left out)
                         'month_days': [{'date': d, 'is_today': d == today, 'items': by_day[d],
                                         'weekday': ScheduleSlot.WEEKDAYS[d.weekday()][1]}
-                                       for d in sorted(by_day) if (d.year, d.month) == (pivot.year, pivot.month)]})
+                                       for d in sorted(by_day) if d >= today and (d.year, d.month) == (pivot.year, pivot.month)]})
     else:
         # day and list: the same cards, day by day (the list skips days without classes)
         day = start

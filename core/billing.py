@@ -5,6 +5,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Count
 from django.utils import timezone
 
 from . import packages
@@ -87,6 +88,45 @@ def month_summary(year, month):
         'sold_count': len(sold),
         'sold_total': sum((s.price_total or Decimal('0') for s in sold), Decimal('0')),
         'sold_unpriced': sum(1 for s in sold if s.price_total is None),
+    }
+
+
+def service_report(year, month):
+    """Classes given in the month at the price per class of their package ("realizado"), and the classes still owed on
+    open packages with their value ("a executar", as of today). Packages without a price are counted apart.
+
+    Each row: student, classes, amount (given) or student, package, left, amount (owed)."""
+    from .models import Appointment, StudentPackage
+
+    first, last = month_bounds(year, month)
+    given, unpriced_given = {}, 0
+    for a in Appointment.objects.filter(
+            package__isnull=False, starts_at__date__range=(first, last)).select_related('package', 'person'):
+        price = a.package.price_per_session
+        if price is None:
+            unpriced_given += 1
+            continue
+        row = given.setdefault(a.person_id, {'student': a.person, 'classes': 0, 'amount': Decimal('0')})
+        row['classes'] += 1
+        row['amount'] += price
+    owed, unpriced_left = [], 0
+    for package in StudentPackage.objects.filter(cancelled_at__isnull=True).select_related('person').annotate(
+            n_used=Count('appointments')):
+        left = package.sessions - package.n_used
+        if left <= 0:
+            continue
+        if package.price_per_session is None:
+            unpriced_left += left
+            continue
+        owed.append({'student': package.person, 'package': package, 'left': left,
+                     'amount': package.price_per_session * left})
+    given_rows = sorted(given.values(), key=lambda r: (-r['amount'], r['student'].person_name))
+    owed.sort(key=lambda r: (-r['amount'], r['student'].person_name))
+    return {
+        'given_rows': given_rows, 'given_total': sum((r['amount'] for r in given_rows), Decimal('0')),
+        'given_classes': sum(r['classes'] for r in given_rows), 'given_unpriced': unpriced_given,
+        'owed_rows': owed, 'owed_total': sum((r['amount'] for r in owed), Decimal('0')),
+        'owed_classes': sum(r['left'] for r in owed), 'owed_unpriced': unpriced_left,
     }
 
 
