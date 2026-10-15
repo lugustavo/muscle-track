@@ -13,8 +13,8 @@
     .appt.s-cancelled, .appt.s-rescheduled { opacity: .55; }
     .appt.conflict { border-left-color: #fd7e14; background: var(--bs-warning-bg-subtle); }
 
-    .appt[draggable="true"] { cursor: grab; }
-    .appt.dragging { opacity: .4; }
+    .appt[draggable="true"], .month-chip[draggable="true"] { cursor: grab; }
+    .appt.dragging, .month-chip.dragging { opacity: .4; }
     .drop-ok { outline: 2px dashed var(--bs-primary); outline-offset: 2px; border-radius: .5rem; }
     .agenda-toast { position: fixed; left: 1rem; right: 1rem; bottom: 1rem; z-index: 1080; max-width: 28rem; margin: 0 auto; }
     @media (max-width: 991.98px) { .agenda-toast { bottom: calc(var(--tabbar-h, 57px) + 5rem + env(safe-area-inset-bottom)); } }
@@ -46,6 +46,30 @@
         <a href="{% nav_url 'core:appointment_create' %}" class="btn btn-primary d-none d-lg-inline-block"><i class="bi bi-plus-circle"></i> Nova aula</a>
     </div>
 </div>
+
+{% if pending_requests %}
+<div class="card border-warning mb-3" data-pending-requests>
+    <div class="card-header bg-warning-subtle fw-bold"><i class="bi bi-inbox"></i> Pedidos dos alunos ({{ pending_requests|length }})</div>
+    <ul class="list-group list-group-flush">
+        {% for r in pending_requests %}
+        <li class="list-group-item">
+            <div><a href="{% nav_url 'core:student_detail' r.appointment.person.pk %}" class="fw-bold text-decoration-none">{{ r.appointment.person.person_name }}</a>
+                · aula de {{ r.appointment.starts_at|date:"D, d/m \à\s H:i" }}</div>
+            <div class="small">
+                {% if r.kind == 'cancel' %}<span class="badge bg-secondary">Quer cancelar</span>{% else %}<span class="badge bg-primary">Quer remarcar</span> para <strong>{{ r.proposed_starts_at|date:"D, d/m \à\s H:i" }}</strong>{% endif %}
+                {% if r.message %}<em class="text-muted">“{{ r.message }}”</em>{% endif %}
+            </div>
+            <form method="post" action="{% url 'core:appointment_request_decide' r.pk %}" class="d-flex flex-wrap gap-2 mt-2">
+                {% csrf_token %}
+                <input type="text" name="note" maxlength="200" class="form-control form-control-sm" style="max-width: 16rem;" placeholder="Motivo, se recusar (opcional)" aria-label="Motivo, se recusar">
+                <button name="decision" value="approve" class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i> Aprovar</button>
+                <button name="decision" value="decline" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-lg"></i> Recusar</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
 
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3" data-agenda-toolbar>
     <div class="btn-group" role="group" aria-label="Tipo de vista" data-agenda-views>
@@ -104,14 +128,16 @@
     {% for week in weeks %}
     <div class="month-row" role="row">
         {% for cell in week %}
-        <a href="{% url 'core:agenda' %}?vista=dia&dia={{ cell.date|date:'Y-m-d' }}" role="gridcell"
+        <a href="{% url 'core:agenda' %}?vista=dia&dia={{ cell.date|date:'Y-m-d' }}" role="gridcell" data-agenda-day="{{ cell.date|date:'Y-m-d' }}"
            class="month-cell {% if not cell.in_month %}out{% endif %} {% if cell.is_today %}today{% endif %}"
            aria-label="{{ cell.date|date:'j \d\e F'|lower }}: {{ cell.live }} aula{{ cell.live|pluralize }}">
             <span class="num">{{ cell.date|date:"j" }}</span>
             {% if cell.live %}<span class="badge bg-primary month-count d-md-none">{{ cell.live }}</span>{% endif %}
             {% if cell.conflict %}<i class="bi bi-exclamation-triangle text-warning-emphasis small" title="Aulas sobrepostas"></i>{% endif %}
             <span class="d-none d-md-block">
-                {% for a in cell.items|slice:":3" %}<span class="month-chip s-{{ a.status }}">{{ a.starts_at|time:"H:i" }} {{ a.person.person_name }}</span>{% endfor %}
+                {% for a in cell.items|slice:":3" %}<span class="month-chip s-{{ a.status }}"
+                    {% if a.status == 'scheduled' %}draggable="true" data-appt-move="{% url 'core:appointment_move' a.pk %}" data-appt-person="{{ a.person.person_name }}"
+                    data-appt-date="{{ a.starts_at|date:'Y-m-d' }}" data-appt-time="{{ a.starts_at|time:'H:i' }}" data-appt-duration="{{ a.duration_minutes }}"{% endif %}>{{ a.starts_at|time:"H:i" }} {{ a.person.person_name }}</span>{% endfor %}
                 {% if cell.total > 3 %}<span class="small text-muted">+{{ cell.total|add:"-3" }}</span>{% endif %}
             </span>
         </a>
@@ -119,7 +145,7 @@
     </div>
     {% endfor %}
 </div>
-<p class="small text-muted mt-2 mb-0">Toque em um dia para ver as aulas dele.</p>
+<p class="small text-muted mt-2 mb-0">Toque em um dia para ver as aulas dele.<span class="d-none d-md-inline"> Arraste uma aula marcada para outro dia para mudá-la de lugar.</span></p>
 
 {% else %}
 <div data-agenda-view="{{ view }}">

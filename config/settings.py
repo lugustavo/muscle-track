@@ -222,6 +222,9 @@ PIX_KEY = config('PIX_KEY', default='')
 # Address shown as the place of every class in calendar apps (optional)
 CALENDAR_LOCATION = config('CALENDAR_LOCATION', default='')
 
+# How many hours before a class the student can still ask to move or cancel it from the app
+AGENDA_NOTICE_HOURS = config('AGENDA_NOTICE_HOURS', default=24, cast=int)
+
 # Site URL
 # Public address of the app, used to build invitation links. Leave empty to use
 # the address the trainer is browsing from.

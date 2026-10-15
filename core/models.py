@@ -811,6 +811,37 @@ class Appointment(models.Model):
         return f'{self.person_id} {self.starts_at:%d/%m/%Y %H:%M} {self.status}'
 
 
+class AppointmentRequest(models.Model):
+    """A student asking to move or cancel one of their classes; the trainer approves or declines (core/class_requests.py)."""
+
+    class Kind(models.TextChoices):
+        RESCHEDULE = 'reschedule', 'Remarcar'
+        CANCEL = 'cancel', 'Cancelar'
+
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Aguardando a personal'
+        APPROVED = 'approved', 'Aprovado'
+        DECLINED = 'declined', 'Recusado'
+        WITHDRAWN = 'withdrawn', 'Retirado'
+
+    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE, related_name='requests')
+    kind = models.CharField(max_length=10, choices=Kind.choices)
+    proposed_starts_at = models.DateTimeField(null=True, blank=True, verbose_name='Novo horário sugerido')
+    message = models.CharField(max_length=200, blank=True, verbose_name='Recado')
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
+    decided_at = models.DateTimeField(null=True, blank=True)
+    decision_note = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        ordering = ['created_at']
+        constraints = [models.UniqueConstraint(
+            fields=['appointment'], condition=models.Q(status='pending'), name='one_pending_request_per_appointment')]
+
+    def __str__(self):
+        return f'{self.appointment_id} {self.kind} {self.status}'
+
+
 class CalendarFeed(models.Model):
     """A private calendar link (iCalendar, .ics) for one account: the trainer's whole agenda, or a student's own classes.
 

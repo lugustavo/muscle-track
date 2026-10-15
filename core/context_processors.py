@@ -2,6 +2,7 @@
 from django.urls import reverse
 from django.utils import timezone
 
+from .class_requests import pending_for_trainer
 from .models import Appointment, Person, StudentEvent
 from .navigation import with_next
 from .today import open_row, rows_for, start_of_day, suggested_row
@@ -17,6 +18,7 @@ STAFF_SECTIONS = (
 )
 STUDENT_SECTIONS = (
     ('center', ('workout_execute',)),   # the running workout: the central button is the active one
+    ('hoje', ('my_agenda',)),   # reached from "Hoje"; the bar has no slot of its own for it
     ('treinos', ('my_workouts', 'workout_')),
     ('historico', ('my_history', 'my_exercise_progress')),
     ('perfil', ('my_profile', 'my_privacy', 'account_')),   # account_* = password, e-mail (allauth)
@@ -43,7 +45,8 @@ def _staff_badges():
     unmarked = Appointment.objects.filter(
         status=Appointment.Status.SCHEDULED, starts_at__gte=start_of_day(timezone.localdate()), starts_at__lt=now
     ).count()
-    return {'hoje': overdue + erasures, 'agenda': unmarked}
+    asked = pending_for_trainer().count()
+    return {'hoje': overdue + erasures, 'agenda': unmarked + asked}
 
 
 def _staff_bar(active):
