@@ -256,6 +256,3 @@ body.kbd-open .fab { display: none; }
 .goal-ring-text .num { font-size: 1.5rem; font-weight: 700; line-height: 1; }
 .goal-ring-text .of { font-size: .8rem; color: var(--bs-secondary-color); }
 @media (prefers-reduced-motion: reduce) { .goal-ring .bar { transition: none; } }
-
-/* "Contrato" card on the student's file: on phones the details sit behind "Ver contrato"; on desktop they are always shown */
-@media (min-width: 992px) { .contract-card .contract-more { display: block !important; height: auto !important; } }

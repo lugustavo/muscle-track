@@ -101,17 +101,19 @@ class ContractPageTests(BaseTestCase):
         self.person = self.alice.person
         self.url = reverse('core:student_detail', kwargs={'pk': self.person.pk})
 
-    def test_card_sits_above_the_tabs_once(self):
+    def test_card_lives_in_the_ficha_tab_once(self):
         html = self.client.get(self.url).content.decode()
         self.assertEqual(html.count('data-contract '), 1)
-        self.assertLess(html.index('data-contract '), html.index('id="studentTabs"'))
-        self.assertIn('Sem plano', html)
+        ficha = html[html.index('id="tab-ficha"'):html.index('id="tab-avaliacoes"')]
+        self.assertIn('data-contract ', ficha)
+        self.assertLess(html.index('id="studentTabs"'), html.index('data-contract '))   # not above the tabs
+        self.assertIn('Sem plano', ficha)
 
     def test_expired_contract_highlights_charging(self):
         Person.objects.filter(pk=self.person.pk).update(
             plan_name='Mensal', plan_expires_on=timezone.localdate() - timedelta(days=4), phone='(11) 98765-4321')
         html = self.client.get(self.url).content.decode()
-        card = html[html.index('data-contract '):html.index('id="contractMore"')]
+        card = html[html.index('data-contract '):html.index('data-contract-period')]
         self.assertIn('data-contract-state="expired"', card)
         self.assertIn('Vencido há 4 dias', card)
         self.assertLess(card.index('btn btn-success"><i class="bi bi-whatsapp"></i> Cobrar'), card.index('Registrar pagamento'))
@@ -140,7 +142,8 @@ class ContractPageTests(BaseTestCase):
         for old in ('Plano contratado', 'Plano (modelo)', 'Vencimento do plano', 'negociado'):
             self.assertNotIn(old, html)
 
-    def test_mobile_details_are_collapsible_and_always_open_on_desktop(self):
+    def test_details_are_always_visible(self):
         html = self.client.get(self.url).content.decode()
-        self.assertIn('data-bs-target="#contractMore"', html)
-        self.assertIn('class="collapse contract-more" id="contractMore"', html)
+        self.assertNotIn('contractMore', html)
+        for marker in ('data-contract-period', 'data-contract-classes', 'data-contract-money'):
+            self.assertIn(marker, html)

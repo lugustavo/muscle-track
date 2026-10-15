@@ -1,5 +1,5 @@
 {% load navigation %}
-{# "Contrato": what is agreed with this student. Plano = the catalog model; Contrato = this student's terms. #}
+{# "Contrato", in the Ficha tab: what is agreed with this student. Plano = the catalog model; Contrato = this student's terms. #}
 <div class="card contract-card mb-4 border-{{ contract.css }}" data-contract data-contract-state="{{ contract.status }}">
     <div class="card-body">
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
@@ -23,15 +23,12 @@
                 <a href="{% nav_url 'core:payment_create' student.pk %}" class="btn btn-success"><i class="bi bi-cash-coin"></i> Registrar pagamento</a>
                 {% if contract.charge_url %}<a href="{{ contract.charge_url }}" target="_blank" rel="noopener" class="btn btn-outline-success"><i class="bi bi-whatsapp"></i> Cobrar</a>{% endif %}
             {% endif %}
-            <button class="btn btn-outline-secondary d-lg-none ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#contractMore" aria-expanded="false" aria-controls="contractMore">
-                Ver contrato <i class="bi bi-chevron-down"></i>
-            </button>
         </div>
 
-        <div class="collapse contract-more" id="contractMore">
+        <div class="contract-more">
             <hr>
             <div class="row g-3">
-                <div class="col-lg-4" data-contract-period>
+                <div class="col-12" data-contract-period>
                     <div class="small text-muted mb-1">Período</div>
                     {% if contract.period %}
                         <div class="progress" style="height: 8px;" role="progressbar" aria-valuenow="{{ contract.period.percent }}" aria-valuemin="0" aria-valuemax="100" aria-label="Dias já usados do período">
@@ -42,7 +39,7 @@
                         <div class="small text-muted">Aparece depois do primeiro pagamento com vencimento.</div>
                     {% endif %}
                 </div>
-                <div class="col-lg-4" data-contract-classes>
+                <div class="col-12" data-contract-classes>
                     <div class="small text-muted mb-1">Aulas na semana</div>
                     {% if contract.classes_per_week %}
                         <div><strong>{{ contract.classes_done }}</strong> de {{ contract.classes_per_week }} <span class="text-muted small">(presenças marcadas na agenda)</span></div>
@@ -50,7 +47,7 @@
                         <div class="small text-muted">O plano não define aulas por semana.</div>
                     {% endif %}
                 </div>
-                <div class="col-lg-4" data-contract-money>
+                <div class="col-12" data-contract-money>
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <span class="small text-muted"><i class="bi bi-lock"></i> Valores (sigilosos)</span>
                         <button type="button" class="btn btn-link btn-sm p-0" data-contract-values-toggle aria-pressed="false">
