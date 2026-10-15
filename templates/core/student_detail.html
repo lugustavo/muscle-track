@@ -19,15 +19,19 @@
         align-items: center;
         gap: 1.5rem;
     }
+    @media (max-width: 991.98px) {
+        .student-avatar { width: 72px; height: 72px; border-width: 3px; }
+        .student-header-info { gap: .75rem; }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-start mb-4">
+<div class="d-flex justify-content-between align-items-start flex-wrap flex-lg-nowrap mb-3 mb-lg-4">
     <div class="student-header-info">
         <img src="{{ student.get_avatar_url }}" class="student-avatar" alt="{{ student.person_name }}">
         <div>
-            <h1 class="mb-1"><i class="bi bi-person-circle"></i> {{ student.person_name }}</h1>
+            <h1 class="mb-1"><i class="bi bi-person-circle d-none d-lg-inline"></i> {{ student.person_name }}</h1>
             <span class="badge {% if student.status == 'active' %}bg-success{% elif student.status == 'trial' %}bg-info text-dark{% elif student.status == 'paused' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ student.get_status_display }}</span>
             {% if not has_consent %}
                 <span class="badge bg-warning text-dark" title="Ainda não aceitou os termos de uso e de dados de saúde"><i class="bi bi-shield-exclamation"></i> Sem consentimento</span>
@@ -40,7 +44,7 @@
             {% endif %}
         </div>
     </div>
-    <div>
+    <div class="d-none d-lg-block">
         <a href="{% nav_url 'core:person_routine_create' %}&person={{ student.pk }}" class="btn btn-success">
             <i class="bi bi-plus-circle"></i> Atribuir Treino
         </a>
@@ -55,10 +59,27 @@
         </a>
         {% url 'core:student_list' as back_default %}{% back_button back_default %}
     </div>
+    <div class="d-lg-none d-flex gap-2 w-100 mt-3" data-student-actions>
+        <a href="{% nav_url 'core:person_routine_create' %}&person={{ student.pk }}" class="btn btn-success flex-grow-1">
+            <i class="bi bi-plus-circle"></i> Atribuir treino
+        </a>
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Mais ações">
+                <i class="bi bi-three-dots-vertical"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item py-2" href="{% nav_url 'core:student_edit' student.pk %}"><i class="bi bi-pencil me-2"></i>Editar</a></li>
+                <li><a class="dropdown-item py-2" href="{% nav_url 'core:student_invite' student.pk %}"><i class="bi bi-send me-2"></i>{% if student.user.has_usable_password %}Redefinir senha{% else %}Convite{% endif %}</a></li>
+                <li><a class="dropdown-item py-2" href="{% nav_url 'core:student_status' student.pk %}"><i class="bi bi-arrow-repeat me-2"></i>Alterar situação</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item py-2 text-danger" href="{% nav_url 'core:student_delete' student.pk %}"><i class="bi bi-trash me-2"></i>Excluir aluno</a></li>
+            </ul>
+        </div>
+    </div>
 </div>
 
 <!-- Estatísticas -->
-<div class="row mb-4">
+<div class="row mb-4 stat-strip">
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
@@ -115,7 +136,7 @@
 <div class="alert alert-warning py-2"><i class="bi bi-calendar-event"></i> O plano vence em {{ student.days_to_plan_expiry }} dia{{ student.days_to_plan_expiry|pluralize }} ({{ student.plan_expires_on|date:"d/m/Y" }}).</div>
 {% endif %}
 
-<ul class="nav nav-tabs mb-4" id="studentTabs" role="tablist">
+<ul class="nav nav-tabs mb-4 tabs-sticky hide-scrollbar" id="studentTabs" role="tablist">
     <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-treinos" type="button" role="tab"><i class="bi bi-lightning-charge"></i> Treinos</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-ficha" type="button" role="tab"><i class="bi bi-person-vcard"></i> Ficha</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-avaliacoes" type="button" role="tab"><i class="bi bi-rulers"></i> Avaliações <span class="badge bg-secondary">{{ assessments|length }}</span></button></li>
@@ -144,7 +165,7 @@
                     <div class="list-group">
                         {% for item in active_routines_with_stats %}
                         <div class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
                                 <div>
                                     <h6 class="mb-1">{{ item.person_routine.routine_name }}</h6>
                                     <small class="text-muted">
@@ -154,7 +175,7 @@
                                         {% endif %}
                                     </small>
                                 </div>
-                                <div class="d-flex gap-2">
+                                <div class="d-flex flex-wrap gap-2">
                                     {% if item.person_routine.routine_template %}
                                     <a href="{% nav_url 'core:routine_detail' item.person_routine.routine_template.pk %}" class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-eye"></i> Ver Template
@@ -289,6 +310,12 @@
     document.querySelectorAll('#studentTabs [data-bs-toggle="tab"]').forEach(function (btn) {
         btn.addEventListener('shown.bs.tab', function (e) {
             history.replaceState(null, '', e.target.getAttribute('data-bs-target'));
+            // On a phone the tabs scroll sideways: bring the active one to the middle
+            var bar = document.getElementById('studentTabs');
+            if (bar && bar.scrollWidth > bar.clientWidth) {
+                var tab = e.target.closest('.nav-item');
+                bar.scrollTo({left: tab.offsetLeft - (bar.clientWidth - tab.offsetWidth) / 2, behavior: 'smooth'});
+            }
         });
     });
 })();

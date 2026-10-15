@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from .models import Appointment, Person, StudentEvent
+from .navigation import with_next
 from .today import open_row, rows_for, start_of_day, suggested_row
 
 # Pages without the bar (and without the top hamburger either): the student must decide first
@@ -19,6 +20,10 @@ STUDENT_SECTIONS = (
     ('historico', ('my_history', 'my_exercise_progress')),
     ('perfil', ('my_profile', 'my_privacy', 'account_')),   # account_* = password, e-mail (allauth)
 )
+
+
+# Pages of the trainer area where the floating "+" button shows up (phones only)
+FAB_PAGES = {'home', 'student_list', 'student_detail', 'agenda', 'finance'}
 
 
 def _section(name, sections, home='hoje', fallback=''):
@@ -89,6 +94,34 @@ def _student_bar(request, person, active):
     return {'role': 'student', 'items': items, 'center': center}
 
 
+def _staff_fab(request, name):
+    """Items of the "Criar" sheet behind the floating "+": the page's own actions first, then the global ones."""
+    if name not in FAB_PAGES:
+        return None
+    here = request.get_full_path()
+
+    def item(label, icon, url_name, *args, extra=''):
+        return {'label': label, 'icon': icon, 'url': with_next(reverse(url_name, args=args or None), here) + extra}
+
+    items = []
+    pk = request.resolver_match.kwargs.get('pk')
+    if name == 'student_detail' and pk:
+        student = Person.objects.filter(pk=pk).values_list('person_name', flat=True).first()
+        if student is not None:
+            items += [
+                item('Registrar pagamento', 'bi-cash-coin', 'core:payment_create', pk),
+                item('Atribuir treino', 'bi-lightning-charge', 'core:person_routine_create', extra=f'&person={pk}'),
+                item(f'Nova aula para {student.split()[0]}', 'bi-calendar-plus', 'core:appointment_create', extra=f'&person={pk}'),
+                item('Nova avaliação', 'bi-rulers', 'core:assessment_create', pk),
+                item('Adicionar foto', 'bi-camera', 'core:photo_upload', pk),
+            ]
+    items += [
+        item('Novo aluno', 'bi-person-plus', 'core:student_create'),
+        item('Nova aula', 'bi-calendar-plus', 'core:appointment_create'),
+    ]
+    return items
+
+
 def app_nav(request):
     """`tabbar` is None when there is no bar (visitors, accounts without a student file, hidden pages)."""
     user = request.user
@@ -100,7 +133,7 @@ def app_nav(request):
         return {'tabbar': None, 'hide_topmenu': True}
     if user.is_staff or user.is_superuser:
         active = _section(name, STAFF_SECTIONS, fallback='mais' if name else '')
-        return {'tabbar': _staff_bar(active)}
+        return {'tabbar': _staff_bar(active), 'fab_items': _staff_fab(request, name)}
     try:
         person = user.person
     except Person.DoesNotExist:

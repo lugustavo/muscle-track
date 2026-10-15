@@ -180,6 +180,7 @@ def student_list(request):
         'filters': STUDENT_FILTERS,
         'base_qs': base_qs,
         'view_mode': view_mode,
+        'active_filters': bool(status) + bool(filter_name),
     })
 
     # Salvar view_mode no cookie
@@ -1981,6 +1982,19 @@ def payment_delete(request, pk):
 
 # ============= AGENDA =============
 
+def _agenda_selected_day(value, by_day, today):
+    """The day shown on a phone: ?dia= if it is in the week, else today, else the first day with classes, else Monday."""
+    try:
+        chosen = date.fromisoformat(value)
+    except (ValueError, TypeError):
+        chosen = None
+    if chosen in by_day:
+        return chosen
+    if today in by_day:
+        return today
+    return next((d for d in sorted(by_day) if by_day[d]), min(by_day))
+
+
 @staff_required
 def agenda(request):
     """The week: classes by day, with quick attendance buttons"""
@@ -1995,10 +2009,11 @@ def agenda(request):
     by_day = {monday + timedelta(days=i): [] for i in range(7)}
     for item in items:
         by_day[timezone.localtime(item.starts_at).date()].append(item)
-    days = [{'date': d, 'is_today': d == today, 'items': by_day[d],
+    selected = _agenda_selected_day(request.GET.get('dia'), by_day, today)
+    days = [{'date': d, 'is_today': d == today, 'items': by_day[d], 'is_selected': d == selected,
              'weekday': ScheduleSlot.WEEKDAYS[d.weekday()][1]} for d in sorted(by_day)]
     return render(request, 'core/agenda.html', {
-        'days': days, 'conflicts': conflicts, 'monday': monday, 'sunday': sunday,
+        'days': days, 'selected_day': selected, 'conflicts': conflicts, 'monday': monday, 'sunday': sunday,
         'prev_week': (monday - timedelta(days=7)).isoformat(), 'next_week': (monday + timedelta(days=7)).isoformat(),
         'is_current_week': monday == parse_week(None, today), 'statuses': Appointment.Status,
     })
@@ -2016,7 +2031,7 @@ def _warn_if_conflict(request, appointment):
 
 
 def _agenda_url_for(day):
-    return f"{reverse('core:agenda')}?semana={parse_week(day.isoformat()).isoformat()}"
+    return f"{reverse('core:agenda')}?semana={parse_week(day.isoformat()).isoformat()}&dia={day.isoformat()}"
 
 
 @staff_required
@@ -2025,6 +2040,10 @@ def appointment_create(request):
     initial = {'date': timezone.localdate(), 'time': time(7, 0)}
     if request.GET.get('person', '').isdigit():
         initial['person'] = int(request.GET['person'])
+    try:
+        initial['date'] = date.fromisoformat(request.GET.get('date', ''))
+    except ValueError:
+        pass
     form = AppointmentForm(request.POST or None, initial=initial)
     if request.method == 'POST' and form.is_valid():
         data = form.cleaned_data

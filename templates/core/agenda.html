@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load navigation %}
+{% load static %}
 
 {% block title %}Agenda - Muscle Track{% endblock %}
 
@@ -24,13 +25,23 @@
             <a href="?semana={{ next_week }}" class="btn btn-outline-secondary" title="Próxima semana"><i class="bi bi-chevron-right"></i></a>
             {% if not is_current_week %}<a href="{% url 'core:agenda' %}" class="btn btn-outline-primary">Hoje</a>{% endif %}
         </div>
-        <a href="{% nav_url 'core:appointment_create' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Nova aula</a>
+        <a href="{% nav_url 'core:appointment_create' %}" class="btn btn-primary d-none d-lg-inline-block"><i class="bi bi-plus-circle"></i> Nova aula</a>
     </div>
 </div>
 
-<div class="row g-3">
+<div class="day-strip mb-3" role="tablist" aria-label="Dias da semana" data-day-strip>
     {% for day in days %}
-    <div class="col-md-6 col-xl">
+    <button type="button" role="tab" data-day="{{ day.date|date:'Y-m-d' }}" aria-selected="{% if day.is_selected %}true{% else %}false{% endif %}"
+            class="{% if day.is_today %}today{% endif %} {% if day.is_selected %}selected{% endif %} {% if day.items %}busy{% endif %}">
+        {{ day.weekday|slice:":3" }}<span class="num">{{ day.date|date:"d" }}</span><span class="has"></span>
+        {% if day.items %}<span class="visually-hidden">{{ day.items|length }} aula{{ day.items|length|pluralize }}</span>{% endif %}
+    </button>
+    {% endfor %}
+</div>
+
+<div class="row g-3 agenda-days">
+    {% for day in days %}
+    <div class="col-md-6 col-xl day-pane {% if day.is_selected %}selected{% endif %}" data-day-pane="{{ day.date|date:'Y-m-d' }}">
         <div class="card h-100 day-col {% if day.is_today %}today{% endif %}">
             <div class="card-header {% if day.is_today %}bg-primary text-white{% endif %}">
                 <strong>{{ day.weekday }}</strong> <small>{{ day.date|date:"d/m" }}</small>
@@ -65,11 +76,19 @@
                     </div>
                 </div>
                 {% empty %}
-                <div class="text-muted small text-center py-2">—</div>
+                <div class="text-muted small text-center py-2 d-none d-lg-block">—</div>
+                <div class="day-empty text-muted">
+                    <p class="mb-2">Sem aulas em {{ day.date|date:"d/m" }}.</p>
+                    <a href="{% nav_url 'core:appointment_create' %}&date={{ day.date|date:'Y-m-d' }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus-circle"></i> Nova aula neste dia</a>
+                </div>
                 {% endfor %}
             </div>
         </div>
     </div>
     {% endfor %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/staff-mobile.js' %}"></script>
 {% endblock %}
