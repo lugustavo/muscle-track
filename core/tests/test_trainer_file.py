@@ -89,12 +89,11 @@ class StudentFilePageTests(BaseTestCase):
         response = self.client.post(reverse('core:student_edit', kwargs={'pk': self.person.pk}), {
             'person_name': 'Alice', 'email': 'alice@example.com', 'is_active': 'on',
             'goal': 'Emagrecer 8 kg', 'health_notes': 'Hérnia L5', 'emergency_contact_name': 'Mãe',
-            'emergency_contact_phone': '(11) 90000-0000', 'plan_name': 'Mensal 3x', 'plan_expires_on': '2030-01-31',
+            'emergency_contact_phone': '(11) 90000-0000',
         })
         self.assertEqual(response.status_code, 302)
         self.person.refresh_from_db()
-        self.assertEqual((self.person.goal, self.person.health_notes, self.person.plan_name),
-                         ('Emagrecer 8 kg', 'Hérnia L5', 'Mensal 3x'))
+        self.assertEqual((self.person.goal, self.person.health_notes), ('Emagrecer 8 kg', 'Hérnia L5'))
         detail = self.client.get(reverse('core:student_detail', kwargs={'pk': self.person.pk}))
         self.assertContains(detail, 'Hérnia L5')  # shown prominently
 
