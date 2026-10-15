@@ -41,7 +41,7 @@
 {% endblock %}
 
 {% block content %}
-<div id="workout" class="mx-auto" style="max-width: 720px;"
+<div id="workout" class="mx-auto" style="max-width: 720px;" data-workout-page
      data-csrf="{{ csrf_token }}"
      data-elapsed="{{ elapsed_seconds }}"
      data-paused="{{ active_session.is_paused|yesno:'true,false' }}"

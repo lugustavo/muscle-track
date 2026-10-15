@@ -15,12 +15,13 @@
     <script src="{% static 'js/theme.js' %}"></script>
 
     <!-- PWA -->
-    <link rel="manifest" href="{% url 'core:pwa_manifest' %}">
+    <link rel="manifest" href="{% url 'core:pwa_manifest' %}" crossorigin="use-credentials">
     <meta name="theme-color" content="#FF6B6B" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1d2733" media="(prefers-color-scheme: dark)">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Muscle Track">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
     <!-- Bootstrap 5 CSS -->
     <link href="{% static 'vendor/bootstrap/5.3.0/bootstrap.min.css' %}" rel="stylesheet">
@@ -136,6 +137,11 @@
         </div>
     </nav>
 
+    <!-- Offline notice (static/js/pwa.js shows it while the device has no connection) -->
+    <div class="offline-banner d-none" role="status" data-offline-banner>
+        <i class="bi bi-wifi-off"></i> <span data-offline-text>Sem conexão. Algumas telas só abrem quando a internet voltar.</span>
+    </div>
+
     <!-- Messages -->
     {% if messages %}
         <div class="container mt-3">
@@ -178,6 +184,7 @@
         }
     </script>
 
+    <script src="{% static 'js/pwa.js' %}"></script>
     {% if user.is_staff or user.is_superuser %}<script src="{% static 'js/search.js' %}"></script>{% endif %}
     {% block extra_js %}{% endblock %}
 </body>
