@@ -14,6 +14,8 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Count, F, Sum
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 from .history import log_event
@@ -263,4 +265,44 @@ def pending_payments(today=None):
         if pending > 0:
             rows.append({'student': package.person, 'package': package, 'amount': pending,
                          'days': (today - package.starts_on).days, 'due': package.starts_on})
+    return rows
+
+
+def pending_count():
+    """How many packages wait for a payment (one query: the bottom bar shows it on every page)."""
+    return StudentPackage.objects.filter(
+        cancelled_at__isnull=True, starts_on__isnull=False, person__is_active=True, price_total__gt=0
+    ).annotate(paid=Coalesce(Sum('payments__amount'), Decimal('0'))).filter(paid__lt=F('price_total')).count()
+
+
+def renewals(today=None, expiring_days=14):
+    """Active students whose current package needs attention: expired with classes left, expiring soon or running out.
+
+    Only the package being used counts (a queued one is not flagged). Each row: student, package, kind, left, ends_on."""
+    today = today or timezone.localdate()
+    rows = []
+    seen = set()
+    queryset = StudentPackage.objects.filter(
+        cancelled_at__isnull=True, person__is_active=True).select_related('person').annotate(
+        n_used=Count('appointments')).order_by('person_id', 'sold_on', 'pk')
+    for package in queryset:
+        if package.person_id in seen:
+            continue
+        s = state(package, package.n_used, today)
+        if s in ('done', 'cancelled'):
+            continue
+        seen.add(package.person_id)
+        left = package.sessions - package.n_used
+        end = ends_on(package, today)
+        kind = None
+        if s == 'expired':
+            kind = 'expired'
+        elif s == 'active' and (end - today).days <= expiring_days:
+            kind = 'expiring'
+        elif s in ('active', 'frozen') and left <= LOW_BALANCE:
+            kind = 'low'
+        if kind:
+            rows.append({'student': package.person, 'package': package, 'kind': kind, 'left': left, 'ends_on': end})
+    order = {'expired': 0, 'expiring': 1, 'low': 2}
+    rows.sort(key=lambda r: (order[r['kind']], r['ends_on'] or today))
     return rows

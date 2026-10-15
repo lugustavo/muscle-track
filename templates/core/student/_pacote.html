@@ -1,0 +1,115 @@
+{% load navigation money_tags %}
+{# "Pacote", in the Ficha tab: the package being used (classes left, deadline, payment) and the previous ones. Needs `pkg` (core.packages.overview). #}
+{% with cur=pkg.current %}
+<div class="card package-card mb-4 {% if cur %}border-{{ cur.css }}{% endif %}" data-package-card {% if cur %}data-package-state="{{ cur.state }}"{% else %}data-package-state="none"{% endif %}>
+    <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+            <div class="min-w-0">
+                <div class="text-muted small text-uppercase"><i class="bi bi-box-seam"></i> Pacote</div>
+                <div class="fs-5 fw-semibold text-break">{% if cur %}{{ cur.package.name }}{% else %}Sem pacote{% endif %}</div>
+            </div>
+            {% if cur %}<span class="badge fs-6 bg-{{ cur.css }}" data-package-label>{{ cur.label }}</span>{% endif %}
+        </div>
+
+        {% if cur %}
+        <div class="mt-3" data-package-balance>
+            <div class="d-flex justify-content-between align-items-baseline">
+                <span><strong class="fs-4">{{ cur.used }}</strong> de {{ cur.sessions }} aulas usadas</span>
+                <span class="text-muted small">{{ cur.left }} sobrando{% if pkg.scheduled %} · {{ pkg.scheduled }} agendada{{ pkg.scheduled|pluralize }}{% endif %}</span>
+            </div>
+            <div class="progress mt-1" style="height: 8px;" role="progressbar" aria-valuenow="{{ cur.percent }}" aria-valuemin="0" aria-valuemax="100" aria-label="Aulas usadas do pacote">
+                <div class="progress-bar {% if cur.state == 'expired' %}bg-danger{% elif cur.low %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ cur.percent }}%"></div>
+            </div>
+            {% if pkg.scheduled > cur.left %}<div class="small text-warning-emphasis mt-1" data-over-scheduled><i class="bi bi-exclamation-triangle"></i> Há mais aulas agendadas ({{ pkg.scheduled }}) do que aulas sobrando no pacote ({{ cur.left }}).</div>{% endif %}
+        </div>
+
+        <div class="small mt-3" data-package-dates>
+            {% if cur.starts_on %}
+                Primeira aula em <strong>{{ cur.starts_on|date:"d/m/Y" }}</strong> · vale até <strong>{{ cur.ends_on|date:"d/m/Y" }}</strong>
+                {% if cur.state == 'frozen' %}<span class="text-muted">(congelado desde {{ cur.package.frozen_since|date:"d/m" }}; o prazo para de contar)</span>
+                {% elif cur.state == 'expired' %}<span class="text-danger">(venceu há {{ cur.days_left|cut:"-" }} dia{{ cur.days_left|cut:"-"|pluralize }})</span>
+                {% elif cur.days_left is not None %}<span class="text-muted">(faltam {{ cur.days_left }} dia{{ cur.days_left|pluralize }})</span>{% endif %}
+                {% if cur.package.extension_days %}<div class="text-muted">Prorrogado em {{ cur.package.extension_days }} dia{{ cur.package.extension_days|pluralize }}.</div>{% endif %}
+            {% else %}
+                <span class="text-muted">O prazo de {{ cur.package.valid_days }} dias começa a contar na primeira aula.</span>
+            {% endif %}
+        </div>
+
+        {% if cur.state == 'expired' %}
+        <div class="alert alert-danger py-2 mt-3 mb-0 small" data-package-alert="expired"><i class="bi bi-calendar-x"></i> O prazo acabou e ainda sobram {{ cur.left }} aula{{ cur.left|pluralize }}. Prorrogue o pacote para o aluno poder usá-las.</div>
+        {% elif cur.low and cur.state != 'not_started' %}
+        <div class="alert alert-warning py-2 mt-3 mb-0 small" data-package-alert="low"><i class="bi bi-hourglass-split"></i> Restam {{ cur.left }} aula{{ cur.left|pluralize }}: hora de oferecer um novo pacote.</div>
+        {% endif %}
+
+        <div class="mt-3 small" data-package-payment>
+            {% if cur.pending > 0 %}
+                <i class="bi bi-cash-coin"></i> <span class="text-warning-emphasis fw-semibold">Pagamento em aberto: {{ cur.pending|money }}</span>
+                {% if cur.paid %}<span class="text-muted">(pago {{ cur.paid|money }} de {{ cur.package.price_total|money }})</span>{% endif %}
+            {% elif cur.package.price_total is not None %}
+                <i class="bi bi-check-circle text-success"></i> Pago ({{ cur.paid|money }})
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if pkg.without_package %}
+        <div class="alert alert-warning py-2 mt-3 mb-0 small" data-without-package><i class="bi bi-exclamation-triangle"></i> {{ pkg.without_package }} aula{{ pkg.without_package|pluralize }} dada{{ pkg.without_package|pluralize }} sem pacote para descontar. Venda um pacote novo.</div>
+        {% endif %}
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+            {% if cur and cur.pending > 0 %}
+                {% if charge_url %}<a href="{{ charge_url }}" target="_blank" rel="noopener" class="btn btn-success"><i class="bi bi-whatsapp"></i> Cobrar</a>{% endif %}
+                <a href="{% nav_url 'core:payment_create' student.pk %}" class="btn {% if charge_url %}btn-outline-success{% else %}btn-success{% endif %}"><i class="bi bi-cash-coin"></i> Registrar pagamento</a>
+            {% endif %}
+            <a href="{% nav_url 'core:student_package_sell' student.pk %}" class="btn {% if not cur or cur.low %}btn-primary{% else %}btn-outline-primary{% endif %}" data-package-sell><i class="bi bi-plus-circle"></i> {% if cur %}Vender novo pacote{% else %}Vender pacote{% endif %}</a>
+        </div>
+
+        {% if cur %}
+        <div class="contract-more">
+            <hr>
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#extend-{{ cur.package.pk }}"><i class="bi bi-calendar-plus"></i> Prorrogar</button>
+                {% if cur.state == 'frozen' %}
+                <form method="post" action="{% nav_url 'core:student_package_action' student.pk cur.package.pk %}">{% csrf_token %}<input type="hidden" name="action" value="unfreeze"><button class="btn btn-sm btn-outline-primary"><i class="bi bi-play-circle"></i> Descongelar</button></form>
+                {% elif cur.state == 'active' or cur.state == 'expired' %}
+                <form method="post" action="{% nav_url 'core:student_package_action' student.pk cur.package.pk %}">{% csrf_token %}<input type="hidden" name="action" value="freeze"><button class="btn btn-sm btn-outline-secondary" title="O prazo para de contar até o aluno voltar"><i class="bi bi-snow"></i> Congelar</button></form>
+                {% endif %}
+                <form method="post" action="{% nav_url 'core:student_package_action' student.pk cur.package.pk %}" onsubmit="return confirm('Cancelar este pacote? As aulas já dadas ficam sem pacote.');">{% csrf_token %}<input type="hidden" name="action" value="cancel"><button class="btn btn-sm btn-link text-danger">Cancelar pacote</button></form>
+            </div>
+            <div class="collapse mt-2" id="extend-{{ cur.package.pk }}">
+                <form method="post" action="{% nav_url 'core:student_package_action' student.pk cur.package.pk %}" class="row g-2 align-items-end">
+                    {% csrf_token %}<input type="hidden" name="action" value="extend">
+                    <div class="col-4"><label class="form-label small mb-0" for="extend-days">Dias a mais</label><input id="extend-days" name="days" type="number" min="1" max="365" value="14" class="form-control form-control-sm" required></div>
+                    <div class="col-8"><label class="form-label small mb-0" for="extend-note">Motivo (opcional)</label><input id="extend-note" name="note" maxlength="150" class="form-control form-control-sm" placeholder="Ex.: viagem, lesão"></div>
+                    <div class="col-12"><button class="btn btn-sm btn-primary">Prorrogar</button></div>
+                </form>
+            </div>
+
+            <div class="mt-3" data-package-money>
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="small text-muted"><i class="bi bi-lock"></i> Valores (sigilosos)</span>
+                    <button type="button" class="btn btn-link btn-sm p-0" data-contract-values-toggle aria-pressed="false"><i class="bi bi-eye"></i> <span>Mostrar</span></button>
+                </div>
+                <div data-contract-values hidden>
+                    {% if cur.package.price_total is not None %}<div>Total: <strong>{{ cur.package.price_total|money }}</strong>{% if cur.package.price_per_session is not None %} · {{ cur.package.price_per_session|money }} por aula{% endif %}</div>
+                    {% else %}<div class="small text-muted">Nenhum valor combinado.</div>{% endif %}
+                </div>
+                <div class="small text-muted" data-contract-values-hidden>Ocultos. O aluno nunca vê estes valores.</div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if pkg.rows|length > 1 or not cur and pkg.rows %}
+        <hr>
+        <div class="small text-uppercase text-muted mb-1">Pacotes anteriores</div>
+        <ul class="list-unstyled small mb-0" data-package-history>
+            {% for row in pkg.rows %}{% if row != cur %}
+            <li class="d-flex justify-content-between gap-2 py-1 border-top">
+                <span>{{ row.package.name }} <span class="text-muted">· {{ row.used }}/{{ row.sessions }} aulas{% if row.starts_on %} · {{ row.starts_on|date:"d/m/y" }}{% endif %}</span></span>
+                <span class="badge bg-secondary">{{ row.label }}</span>
+            </li>
+            {% endif %}{% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+{% endwith %}

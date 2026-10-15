@@ -2,6 +2,7 @@
 from django.urls import reverse
 from django.utils import timezone
 
+from . import packages
 from .class_requests import pending_for_trainer
 from .models import Appointment, Person, StudentEvent
 from .navigation import with_next
@@ -40,7 +41,8 @@ def _section(name, sections, home='hoje', fallback=''):
 
 def _staff_badges():
     now = timezone.now()
-    overdue = Person.objects.filter(is_active=True, plan_expires_on__lt=timezone.localdate()).count()
+    # a package that expired with classes left (to extend) + packages waiting for a payment
+    overdue = Person.objects.filter(is_active=True, plan_expires_on__lt=timezone.localdate()).count() + packages.pending_count()
     erasures = StudentEvent.objects.filter(kind=StudentEvent.Kind.ERASURE_REQUEST).values('person').distinct().count()
     unmarked = Appointment.objects.filter(
         status=Appointment.Status.SCHEDULED, starts_at__gte=start_of_day(timezone.localdate()), starts_at__lt=now
@@ -63,7 +65,7 @@ def _staff_bar(active):
     more = [
         {'label': 'Exercícios', 'icon': 'bi-activity', 'url': reverse('core:exercise_list')},
         {'label': 'Treinos', 'icon': 'bi-calendar-check', 'url': reverse('core:routine_list')},
-        {'label': 'Planos', 'icon': 'bi-card-checklist', 'url': reverse('core:plan_list')},
+        {'label': 'Pacotes', 'icon': 'bi-box-seam', 'url': reverse('core:plan_list')},
         {'label': 'Admin', 'icon': 'bi-gear', 'url': '/admin/'},
         {'label': 'Notificações', 'icon': 'bi-bell', 'url': reverse('core:notification_settings')},
         {'label': 'Alterar senha', 'icon': 'bi-key', 'url': reverse('account_change_password')},

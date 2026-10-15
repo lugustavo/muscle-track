@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load money_tags %}
 {% load navigation %}
 
 {% load static %}
@@ -130,15 +131,15 @@
     <div class="col-lg-6">
         <div class="card h-100 border-warning">
             <div class="card-header d-flex justify-content-between">
-                <strong><i class="bi bi-cash-coin text-warning"></i> Pagamentos em atraso</strong>
-                <span class="badge bg-warning text-dark">{{ dashboard.overdue_total }}{% if dashboard.overdue_amount %} · R$ {{ dashboard.overdue_amount|floatformat:2 }}{% endif %}</span>
+                <strong><i class="bi bi-cash-coin text-warning"></i> Pagamentos pendentes</strong>
+                <span class="badge bg-warning text-dark">{{ dashboard.overdue_total }}{% if dashboard.overdue_amount %} · {{ dashboard.overdue_amount|money }}{% endif %}</span>
             </div>
             <div class="list-group list-group-flush">
                 {% for row in dashboard.overdue %}
                 <div class="list-group-item d-flex justify-content-between align-items-center">
                     <a href="{% nav_url 'core:student_detail' row.student.pk %}" class="text-decoration-none">{{ row.student.person_name }}</a>
                     <span class="d-flex align-items-center gap-2">
-                        <small class="text-muted">{{ row.days }} dia{{ row.days|pluralize }}{% if row.amount %} · R$ {{ row.amount|floatformat:2 }}{% endif %}</small>
+                        <small class="text-muted">{{ row.package.name }} · {{ row.amount|money }}</small>
                         <a href="{{ row.whatsapp }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success" title="Cobrar pelo WhatsApp"><i class="bi bi-whatsapp"></i></a>
                     </span>
                 </div>
@@ -237,21 +238,23 @@
     <div class="col-lg-6">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between">
-                <strong><i class="bi bi-calendar-x text-warning"></i> Planos vencendo (14 dias)</strong>
+                <strong><i class="bi bi-calendar-x text-warning"></i> Pacotes para renovar</strong>
                 <span class="badge bg-warning text-dark">{{ dashboard.plans_total }}</span>
             </div>
-            <div class="list-group list-group-flush">
-                {% for student in dashboard.plans %}
-                <a href="{% nav_url 'core:student_detail' student.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                    <span>{{ student.person_name }}{% if student.plan_name %} <small class="text-muted">· {{ student.plan_name }}</small>{% endif %}</span>
-                    {% if student.plan_status == 'expired' %}
-                        <span class="badge bg-danger">venceu em {{ student.plan_expires_on|date:"d/m" }}</span>
+            <div class="list-group list-group-flush" data-renewals>
+                {% for row in dashboard.plans %}
+                <a href="{% nav_url 'core:student_detail' row.student.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <span>{{ row.student.person_name }} <small class="text-muted">· {{ row.package.name }}</small></span>
+                    {% if row.kind == 'expired' %}
+                        <span class="badge bg-danger">venceu, {{ row.left }} aula{{ row.left|pluralize }} sobrando</span>
+                    {% elif row.kind == 'expiring' %}
+                        <span class="badge bg-warning text-dark">vence {{ row.ends_on|date:"d/m" }}</span>
                     {% else %}
-                        <span class="badge bg-warning text-dark">vence {{ student.plan_expires_on|date:"d/m" }}</span>
+                        <span class="badge bg-warning text-dark">restam {{ row.left }} aula{{ row.left|pluralize }}</span>
                     {% endif %}
                 </a>
                 {% empty %}
-                <div class="list-group-item text-muted">Nenhum plano vencendo.</div>
+                <div class="list-group-item text-muted">Nenhum pacote precisando de atenção.</div>
                 {% endfor %}
             </div>
         </div>

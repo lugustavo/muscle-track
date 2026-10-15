@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load navigation %}
+{% load money_tags %}
 
 {% block title %}Registrar pagamento - {{ student.person_name }} - Muscle Track{% endblock %}
 
@@ -16,9 +17,9 @@
             <div class="card-body">
                 {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
                 <div class="mb-3">
-                    <label for="{{ form.plan.id_for_label }}" class="form-label fw-bold">{{ form.plan.label }}</label>
-                    {{ form.plan }}
-                    <div class="form-text">Ao trocar o plano a página recalcula o valor e o período sugeridos (você perde o que digitou).</div>
+                    <label for="{{ form.student_package.id_for_label }}" class="form-label fw-bold">{{ form.student_package.label }}</label>
+                    {{ form.student_package }}
+                    <div class="form-text">O pagamento é feito na primeira aula do pacote.</div>
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
@@ -30,20 +31,10 @@
                         <label for="{{ form.method.id_for_label }}" class="form-label fw-bold">{{ form.method.label }}</label>
                         {{ form.method }}
                     </div>
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-6 mb-3">
                         <label for="{{ form.paid_on.id_for_label }}" class="form-label fw-bold">{{ form.paid_on.label }}</label>
                         {{ form.paid_on }}
                         {% if form.paid_on.errors %}<div class="text-danger small">{{ form.paid_on.errors|join:" " }}</div>{% endif %}
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="{{ form.period_start.id_for_label }}" class="form-label fw-bold">{{ form.period_start.label }}</label>
-                        {{ form.period_start }}
-                        {% if form.period_start.errors %}<div class="text-danger small">{{ form.period_start.errors|join:" " }}</div>{% endif %}
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="{{ form.period_end.id_for_label }}" class="form-label fw-bold">{{ form.period_end.label }}</label>
-                        {{ form.period_end }}
-                        {% if form.period_end.errors %}<div class="text-danger small">{{ form.period_end.errors|join:" " }}</div>{% endif %}
                     </div>
                 </div>
                 <div class="mb-3">
@@ -57,16 +48,15 @@
     </div>
     <div class="col-lg-5">
         <div class="card border-0 bg-body-tertiary"><div class="card-body small">
-            <p class="mb-2">Plano atual: <strong>{{ student.plan_name|default:"—" }}</strong>{% if student.plan_expires_on %}, vence em {{ student.plan_expires_on|date:"d/m/Y" }}{% endif %}.</p>
-            <p class="mb-0">Ao salvar, o vencimento do plano passa para o fim do período pago (um pagamento atrasado nunca encurta o plano).</p>
+            {% for row in overview.rows %}{% if row.state != 'cancelled' %}
+            <p class="mb-2"><strong>{{ row.package.name }}</strong> ({{ row.sold_on|default:row.package.sold_on|date:"d/m/Y" }}):
+                {% if row.package.price_total is not None %}total {{ row.package.price_total|money }}, pago {{ row.paid|money }}{% if row.pending > 0 %}, <span class="text-warning-emphasis fw-semibold">em aberto {{ row.pending|money }}</span>{% endif %}
+                {% else %}sem valor definido{% endif %}.</p>
+            {% endif %}{% empty %}
+            <p class="mb-2">Este aluno ainda não tem pacote. <a href="{% url 'core:student_package_sell' student.pk %}">Vender um pacote</a>.</p>
+            {% endfor %}
+            <p class="mb-0 text-muted">O valor sugerido é o que falta pagar do pacote escolhido; você pode mudar.</p>
         </div></div>
     </div>
 </div>
-<script>
-document.getElementById('{{ form.plan.id_for_label }}').addEventListener('change', function () {
-    const url = new URL(window.location.href);
-    if (this.value) { url.searchParams.set('plan', this.value); } else { url.searchParams.delete('plan'); }
-    window.location.href = url.toString();
-});
-</script>
 {% endblock %}

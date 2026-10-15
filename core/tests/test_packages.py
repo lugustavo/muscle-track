@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from core import packages
-from core.models import Appointment, Package, StudentEvent, StudentPackage, compute_prices
+from core.models import Appointment, Package, StudentEvent, compute_prices
 
 from .base import BaseTestCase
 

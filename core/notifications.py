@@ -120,10 +120,11 @@ def class_reminder(appointment, now=None):
                    reverse('core:my_agenda'))
 
 
-def plan_expiring(days):
+def plan_expiring(days, left=None):
     when_ = 'hoje' if days == 0 else ('amanhã' if days == 1 else f'em {days} dias')
-    return Message('plan_expiry', 'Seu plano está vencendo', f'Seu plano vence {when_}. Fale com a sua personal para renovar.',
-                   reverse('core:my_profile'))
+    sessions = '' if left is None else f' Ainda {"resta" if left == 1 else "restam"} {left} aula{"" if left == 1 else "s"}.'
+    return Message('plan_expiry', 'Seu pacote está vencendo', f'Seu pacote vence {when_}.{sessions} Fale com a sua personal para combinar.',
+                   reverse('core:my_agenda'))
 
 
 def test_message():

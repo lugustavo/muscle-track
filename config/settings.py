@@ -236,6 +236,10 @@ PIX_KEY = config('PIX_KEY', default='')
 # Address shown as the place of every class in calendar apps (optional)
 CALENDAR_LOCATION = config('CALENDAR_LOCATION', default='')
 
+# Currency shown next to every amount (the trainer charges in euros); `after` or `before` the number
+CURRENCY_SYMBOL = config('CURRENCY_SYMBOL', default='€')
+CURRENCY_POSITION = config('CURRENCY_POSITION', default='before' if CURRENCY_SYMBOL == 'R$' else 'after')
+
 # How many hours before a class the student can still ask to move or cancel it from the app
 AGENDA_NOTICE_HOURS = config('AGENDA_NOTICE_HOURS', default=24, cast=int)
 

@@ -10,6 +10,23 @@
         <a href="{% url 'core:calendar_settings' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-google"></i> Google Agenda</a>
     </div>
 
+    {% if package %}
+    <div class="card mb-3" data-my-package>
+        <div class="card-body py-2">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+                <div><div class="small text-muted"><i class="bi bi-box-seam"></i> Meu pacote</div><strong>{{ package.package.name }}</strong></div>
+                <span class="badge bg-{{ package.css }}">{{ package.label }}</span>
+            </div>
+            <div class="d-flex justify-content-between small mt-2"><span><strong>{{ package.used }}</strong> de {{ package.sessions }} aulas usadas</span><span class="text-muted">{{ package.left }} sobrando</span></div>
+            <div class="progress mt-1" style="height: 6px;" role="progressbar" aria-valuenow="{{ package.percent }}" aria-valuemin="0" aria-valuemax="100" aria-label="Aulas usadas do pacote"><div class="progress-bar bg-success" style="width: {{ package.percent }}%"></div></div>
+            <div class="small text-muted mt-1">
+                {% if package.starts_on %}Vale até {{ package.ends_on|date:"d/m/Y" }}{% if package.state == 'frozen' %} (congelado){% elif package.state == 'expired' %} (prazo vencido: fale com a sua personal){% endif %}
+                {% else %}O prazo de {{ package.package.valid_days }} dias começa na sua primeira aula.{% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <h2 class="h6 text-uppercase text-muted">Próximas aulas</h2>
     {% for a in upcoming %}
     <div class="card mb-2 {% if a.status == 'rescheduled' %}opacity-75{% endif %}" data-my-class="{{ a.pk }}">
@@ -47,7 +64,7 @@
     {% empty %}
     <div class="card mb-2"><div class="card-body text-muted">Você não tem aulas marcadas nos próximos dias. Quando a sua personal marcar, elas aparecem aqui.</div></div>
     {% endfor %}
-    <p class="small text-muted">Pedidos pelo app: até {{ notice_hours }} hora{{ notice_hours|pluralize }} antes da aula. Depois disso, fale direto com a sua personal.</p>
+    <p class="small text-muted">Pedidos pelo app: até {{ notice_hours }} hora{{ notice_hours|pluralize }} antes da aula. Depois disso, fale direto com a sua personal. Faltar ou cancelar com menos de {{ notice_hours }} h conta como aula dada no pacote.</p>
 
     {% if recent %}
     <h2 class="h6 text-uppercase text-muted mt-4">Últimos 30 dias</h2>

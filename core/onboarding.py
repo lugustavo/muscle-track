@@ -23,8 +23,8 @@ def trainer_steps(here=None):
     steps = [
         {'key': 'exercises', 'title': 'Cadastre seus exercícios', 'hint': 'A biblioteca que você usa para montar os treinos.',
          'done': Exercise.objects.filter(is_active=True).exists(), 'url': link('core:exercise_create'), 'action': 'Novo exercício'},
-        {'key': 'plan', 'title': 'Crie um plano', 'hint': 'Modelo com periodicidade e valor, para usar com vários alunos.',
-         'done': Package.objects.exists(), 'url': link('core:plan_create'), 'action': 'Novo plano'},
+        {'key': 'plan', 'title': 'Crie um pacote', 'hint': 'Modelo com quantidade de aulas, prazo e valor, para vender a vários alunos.',
+         'done': Package.objects.exists(), 'url': link('core:plan_create'), 'action': 'Novo pacote'},
         {'key': 'routine', 'title': 'Monte um treino', 'hint': 'Um treino modelo com os exercícios, séries e repetições.',
          'done': Routine.objects.exists(), 'url': link('core:routine_create'), 'action': 'Novo treino'},
         {'key': 'student', 'title': 'Cadastre o primeiro aluno', 'hint': 'Nome e e-mail bastam; o resto pode vir depois.',
