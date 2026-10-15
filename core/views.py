@@ -654,6 +654,18 @@ def my_agenda(request, person):
 
 
 @student_required
+def my_package(request, person):
+    """The student's package summary: bought, done, cancelled, moved and the balance (no prices)."""
+    data = packages.summary(person)
+    rows = data['rows']
+    current = data['current']
+    others = [r for r in reversed(rows) if r is not current]
+    return render(request, 'core/my_package.html', {
+        'title': 'Meu pacote', 'current': current, 'others': others, 'without_package': data['without_package'],
+        'has_packages': bool(rows)})
+
+
+@student_required
 def my_agenda_request(request, person, pk):
     """Ask the trainer to move or cancel one class."""
     appointment = get_object_or_404(person.appointments.prefetch_related('requests'), pk=pk)

@@ -169,6 +169,40 @@ def overview(person, today=None):
     }
 
 
+def summary(person, today=None):
+    """The contract summary the student sees: for each package, what was bought, done, cancelled, moved and left.
+
+    Extends `overview` rows with `done` (attended), `missed`, `late_cancelled` (the last two use up a class),
+    `free_cancelled` (cancelled or missed without taking a class off), `rescheduled`, `upcoming` and the package's
+    `classes`. Classes outside the package are found by date: from its first class until the next package starts.
+    Never carries prices (students do not see them)."""
+    today = today or timezone.localdate()
+    now = timezone.now()
+    data = overview(person, today)
+    appointments = list(person.appointments.order_by('starts_at'))
+    rows = data['rows']
+    starts = [r['starts_on'] for r in rows]
+    for i, row in enumerate(rows):
+        package = row['package']
+        start = row['starts_on']
+        later = [d for d in starts[i + 1:] if d is not None]
+        stop = min(later) if later else None
+        mine = [a for a in appointments if a.package_id == package.pk]
+        window = [a for a in appointments if start is not None and timezone.localtime(a.starts_at).date() >= start
+                  and (stop is None or timezone.localtime(a.starts_at).date() < stop)]
+        row.update({
+            'classes': mine,
+            'done': sum(1 for a in mine if a.status == Appointment.Status.ATTENDED),
+            'missed': sum(1 for a in mine if a.status == Appointment.Status.MISSED),
+            'late_cancelled': sum(1 for a in mine if a.status == Appointment.Status.CANCELLED),
+            'free_cancelled': sum(1 for a in window if a.status in (Appointment.Status.CANCELLED, Appointment.Status.MISSED)
+                                  and not consumes(a)),
+            'rescheduled': sum(1 for a in window if a.status == Appointment.Status.RESCHEDULED),
+            'upcoming': sum(1 for a in window if a.status == Appointment.Status.SCHEDULED and a.starts_at >= now),
+        })
+    return data
+
+
 def _without_package(person):
     return sum(1 for a in person.appointments.filter(package__isnull=True).exclude(
         status__in=(Status.SCHEDULED, Status.RESCHEDULED)) if consumes(a))
