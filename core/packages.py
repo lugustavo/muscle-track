@@ -205,6 +205,24 @@ def summary(person, today=None):
     return data
 
 
+def schedule_plan(person, today=None):
+    """What a new fixed time should follow: the package in use, how many of its classes are still to be marked and
+    when it ends. None when the student has no package in use.
+
+    `to_schedule` = classes left - classes already marked ahead (never below 0); `ends_on` only while the package is
+    running with a deadline (not before the first class, not without deadline, not frozen or expired)."""
+    today = today or timezone.localdate()
+    data = overview(person, today)
+    current = data['current']
+    if current is None:
+        return None
+    return {
+        'row': current, 'package': current['package'], 'state': current['state'], 'left': current['left'],
+        'scheduled': data['scheduled'], 'to_schedule': max(current['left'] - data['scheduled'], 0),
+        'ends_on': current['ends_on'] if current['state'] == 'active' else None,
+    }
+
+
 def _without_package(person):
     return sum(1 for a in person.appointments.filter(package__isnull=True).exclude(
         status__in=(Status.SCHEDULED, Status.RESCHEDULED)) if consumes(a))
