@@ -10,6 +10,8 @@
         </div>
         <a href="{% nav_url 'core:student_detail' a.person.pk %}" class="text-decoration-none d-block text-truncate">{{ a.person.person_name }}</a>
         <small class="text-muted">{{ a.get_kind_display }} · {{ a.duration_minutes }} min</small>
+        {% if a.status == 'rescheduled' and a.rescheduled_to %}<div class="small text-muted" data-history="moved"><i class="bi bi-arrow-right-circle"></i> para {{ a.rescheduled_to.starts_at|date:"D d/m \à\s H:i" }}</div>{% endif %}
+        {% if a.status == 'scheduled' and a.rescheduled_from %}<div class="small text-muted" data-history="from"><i class="bi bi-clock-history"></i> remarcada de {{ a.rescheduled_from.starts_at|date:"D d/m \à\s H:i" }}</div>{% endif %}
         {% if a.pk in conflicts %}<div class="small text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> Sobreposta a outra aula</div>{% endif %}
         {% if a.status != 'rescheduled' %}
         <form method="post" action="{% nav_url 'core:appointment_status' a.pk %}" class="mt-1 d-flex flex-wrap gap-1">

@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta
 from django.db import transaction
 from django.utils import timezone
 
-from .models import Appointment, ScheduleSlot
+from .models import Appointment, AppointmentRequest, ScheduleSlot
 
 # How far back opening the calendar still fills in classes, so last week's attendance can be marked
 BACKFILL_DAYS = 14
@@ -147,6 +147,31 @@ def undo_move(new):
         original.status_changed_at = None
         original.save(update_fields=['status', 'status_changed_at'])
     return original
+
+
+def annotate_history(appointments):
+    """Attach what a class went through, for the student's page: `moved_to` (where a rescheduled class went),
+    `moved_from` (the class this one replaced) and `by_student` (the student asked for it and it was approved).
+
+    Expects `requests` and `rescheduled_from__requests` prefetched and `rescheduled_to` / `rescheduled_from` selected."""
+    Request = AppointmentRequest
+
+    def approved(appointment, kind):
+        return any(r.status == Request.Status.APPROVED and r.kind == kind for r in appointment.requests.all())
+
+    for a in appointments:
+        a.moved_to = a.rescheduled_to
+        try:
+            a.moved_from = a.rescheduled_from
+        except Appointment.DoesNotExist:
+            a.moved_from = None
+        if a.status == Appointment.Status.RESCHEDULED:
+            a.by_student = approved(a, Request.Kind.RESCHEDULE)
+        elif a.status == Appointment.Status.CANCELLED:
+            a.by_student = approved(a, Request.Kind.CANCEL)
+        else:
+            a.by_student = bool(a.moved_from and approved(a.moved_from, Request.Kind.RESCHEDULE))
+    return appointments
 
 
 def attendance_stats(person, days=30, today=None):

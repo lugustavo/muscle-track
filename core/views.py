@@ -33,7 +33,7 @@ from .forms import (
 )
 from .agenda import (
     DEFAULT_VIEW as DEFAULT_AGENDA_VIEW, LIST_DAYS, VIEWS as AGENDA_VIEWS, add_months, at, attendance_stats,
-    MoveError, conflicting_ids, live_class_at, ensure_appointments, month_cells, move_appointment, overlap_names, parse_week,
+    MoveError, annotate_history, conflicting_ids, live_class_at, ensure_appointments, month_cells, move_appointment, overlap_names, parse_week,
     undo_move, view_range,
 )
 from .billing import (
@@ -596,9 +596,12 @@ def my_agenda(request, person):
     now = timezone.now()
     today = timezone.localdate()
     ensure_appointments(today, today + timedelta(days=60), today)
-    mine = person.appointments.exclude(status=Appointment.Status.RESCHEDULED).prefetch_related('requests')
+    # rescheduled classes stay in the list (greyed, with where they went), so the student can see what happened
+    mine = person.appointments.select_related('rescheduled_to', 'rescheduled_from').prefetch_related(
+        'requests', 'rescheduled_from__requests')
     upcoming = list(mine.filter(starts_at__gte=now, starts_at__lt=at(today + timedelta(days=61), time.min)))
     recent = list(mine.filter(starts_at__lt=now, starts_at__gte=now - timedelta(days=30)).order_by('-starts_at'))
+    annotate_history(upcoming + recent)
     for appointment in upcoming + recent:
         asked = list(appointment.requests.all())
         appointment.block = class_requests.request_block(appointment, now)
@@ -2318,7 +2321,7 @@ def agenda(request):
     ensure_appointments(start, end, today)
     items = list(Appointment.objects.filter(
         starts_at__gte=at(start, time.min), starts_at__lt=at(end + timedelta(days=1), time.min)
-    ).select_related('person'))
+    ).select_related('person', 'rescheduled_to', 'rescheduled_from'))
     conflicts = conflicting_ids(items)
     by_day = {}
     for item in items:
