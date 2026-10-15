@@ -39,7 +39,7 @@ from .agenda import (
 from .billing import (
     charge_message, delete_payment, month_bounds, month_summary, overdue_rows, parse_month, register_payment, service_report,
 )
-from . import class_requests, evolution, notifications, packages
+from . import class_requests, evolution, intro, notifications, packages
 from .consistency import celebrations
 from .calendar_feed import build_ics, feed_for_token, get_or_create_feed, mark_fetched, rotate
 from .consent import (
@@ -79,6 +79,8 @@ def home(request):
         if person:
             context['is_student'] = True
             context['today'] = student_today(request, person)
+            context['show_intro'] = person.intro_seen_at is None
+            context['intro_steps'] = intro.STEPS
 
     return render(request, 'core/home.html', context)
 
@@ -647,6 +649,20 @@ def my_agenda(request, person):
     return render(request, 'core/my_agenda.html', {
         'title': 'Minha agenda', 'upcoming': upcoming, 'recent': recent, 'notice_hours': class_requests.notice_hours(),
         'package': packages.overview(person, today)['current']})
+
+
+@student_required
+def my_intro(request, person):
+    """"Como usar o app": the three first-access screens. A POST records that the student has seen them (the Hoje
+    screen sends it with fetch and wants no page back; the plain form goes to Hoje)."""
+    if request.method == 'POST':
+        if person.intro_seen_at is None:
+            person.intro_seen_at = timezone.now()
+            person.save(update_fields=['intro_seen_at'])
+        if request.headers.get('X-Requested-With') == 'fetch':
+            return HttpResponse(status=204)
+        return redirect('core:home')
+    return render(request, 'core/my_intro.html', {'title': 'Como usar o app', 'steps': intro.STEPS})
 
 
 @student_required

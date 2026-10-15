@@ -39,6 +39,8 @@ class Person(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='person')
     person_name = models.CharField(max_length=200, verbose_name='Nome')
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, validators=[validate_avatar_image], verbose_name='Foto de Perfil')
+    # When the student closed the first-access tour ("como usar o app"); None = still to be shown
+    intro_seen_at = models.DateTimeField(null=True, blank=True, editable=False)
     address = models.CharField(max_length=300, blank=True, verbose_name='Endereço')
     city = models.CharField(max_length=100, blank=True, verbose_name='Cidade')
     state = models.CharField(max_length=2, blank=True, verbose_name='Estado')

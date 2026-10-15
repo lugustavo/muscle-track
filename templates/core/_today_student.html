@@ -1,4 +1,4 @@
-{% load navigation %}
+{% load navigation static %}
 <div class="mx-auto" style="max-width: 560px;">
     <div class="mb-3">
         <h1 class="h3 mb-0">Oi{% if today.first_name %}, {{ today.first_name }}{% endif %}!</h1>
@@ -120,3 +120,33 @@
         </div>
     </div>
 </div>
+
+{% if show_intro %}
+<div class="modal fade" id="introTour" tabindex="-1" aria-labelledby="introTourLabel" aria-hidden="true" data-bs-backdrop="static"
+     data-intro-url="{% url 'core:my_intro' %}">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header border-0 pb-0">
+            <h2 class="modal-title h6 text-muted" id="introTourLabel">Como usar o app</h2>
+            <button type="button" class="btn btn-link btn-sm text-muted" data-intro-skip>Pular</button>
+        </div>
+        <div class="modal-body text-center px-4">
+            {% for step in intro_steps %}
+            <div data-intro-step="{{ forloop.counter }}" {% if not forloop.first %}hidden{% endif %}>
+                <i class="bi {{ step.icon }} text-primary" style="font-size: 3.5rem;"></i>
+                <h3 class="h4 mt-2">{{ step.title }}</h3>
+                <p class="text-muted mb-0">{{ step.text }}</p>
+            </div>
+            {% endfor %}
+            <div class="d-flex justify-content-center gap-2 mt-4" aria-hidden="true">
+                {% for step in intro_steps %}<span class="rounded-circle bg-secondary-subtle" data-intro-dot style="width: .5rem; height: .5rem;"></span>{% endfor %}
+            </div>
+        </div>
+        <div class="modal-footer border-0 justify-content-between">
+            {% csrf_token %}
+            <button type="button" class="btn btn-outline-secondary" data-intro-back>Voltar</button>
+            <button type="button" class="btn btn-primary" data-intro-next>Próximo</button>
+        </div>
+    </div></div>
+</div>
+<script src="{% static 'js/intro_tour.js' %}"></script>
+{% endif %}
