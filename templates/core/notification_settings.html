@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load navigation %}
+{% load static %}
+
+{% block title %}Notificações - Muscle Track{% endblock %}
+
+{% block content %}
+<div class="mx-auto" style="max-width: 640px;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0"><i class="bi bi-bell"></i> Notificações</h1>
+        {% if is_trainer %}{% url 'core:agenda' as back_default %}{% else %}{% url 'core:my_profile' as back_default %}{% endif %}{% back_button back_default %}
+    </div>
+    <p class="text-muted">
+        {% if is_trainer %}Receba um aviso quando um aluno pedir para remarcar ou cancelar uma aula.
+        {% else %}Receba um aviso quando sua personal remarcar ou cancelar uma aula e quando ela responder a um pedido seu.{% endif %}
+        Tudo começa <strong>desligado</strong>: você escolhe o que quer receber e pode desligar quando quiser. Os avisos não trazem dados de saúde nem valores.
+    </p>
+
+    <form method="post" class="card mb-3" data-notification-form>
+        {% csrf_token %}
+        <div class="card-body">
+            <div class="form-check form-switch mb-1">
+                <input class="form-check-input" type="checkbox" role="switch" id="email_enabled" name="email_enabled" {% if pref.email_enabled %}checked{% endif %}>
+                <label class="form-check-label fw-bold" for="email_enabled"><i class="bi bi-envelope"></i> Avisos por e-mail</label>
+            </div>
+            <div class="small text-muted ms-4 mb-3">
+                Enviados para <strong>{{ request.user.email|default:"(sem e-mail cadastrado)" }}</strong>.
+                {% if pref.email_at %}Ativado em {{ pref.email_at|date:"d/m/Y" }}.{% endif %}
+                {% if not email_ready %}<br><span class="text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> O envio de e-mail ainda não foi configurado no servidor.</span>{% endif %}
+            </div>
+
+            <div class="form-check form-switch mb-1">
+                <input class="form-check-input" type="checkbox" role="switch" id="push_enabled" name="push_enabled" {% if pref.push_enabled %}checked{% endif %} {% if not push_ready and not pref.push_enabled %}disabled{% endif %}>
+                <label class="form-check-label fw-bold" for="push_enabled"><i class="bi bi-phone-vibrate"></i> Avisos no aparelho (push)</label>
+            </div>
+            <div class="small text-muted ms-4 mb-3">
+                Aparecem como notificação do celular ou do computador, mesmo com o app fechado.
+                {% if pref.push_at %}Ativado em {{ pref.push_at|date:"d/m/Y" }}.{% endif %}
+                {% if not push_ready %}<br><span class="text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> Ainda não foi configurado no servidor.</span>{% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Salvar</button>
+        </div>
+    </form>
+
+    {% if push_ready %}
+    <div class="card mb-3" data-push-card data-public-key="{{ vapid_public_key }}" data-subscribe-url="{% url 'core:push_subscribe' %}">
+        <div class="card-header fw-bold">Aparelhos que recebem avisos</div>
+        <ul class="list-group list-group-flush">
+            {% for d in devices %}
+            <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+                <span class="small text-truncate" title="{{ d.device }}"><i class="bi bi-phone"></i> {{ d.device|default:"Aparelho"|truncatechars:60 }} <span class="text-muted">· desde {{ d.created_at|date:"d/m/Y" }}</span></span>
+                <form method="post" action="{% url 'core:push_unsubscribe' d.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-danger">Remover</button></form>
+            </li>
+            {% empty %}
+            <li class="list-group-item text-muted small">Nenhum aparelho ainda.</li>
+            {% endfor %}
+        </ul>
+        <div class="card-body">
+            <button type="button" class="btn btn-outline-primary" data-push-enable><i class="bi bi-bell"></i> Ativar neste aparelho</button>
+            <div class="small mt-2" data-push-status role="status"></div>
+            <div class="small text-muted mt-2">No iPhone, os avisos só funcionam depois de adicionar o app à tela de início (Compartilhar → Adicionar à Tela de Início).</div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if pref.email_enabled or pref.push_enabled %}
+    <div class="card mb-3">
+        <div class="card-body d-flex flex-wrap gap-2 align-items-center">
+            <strong class="me-2">Enviar um teste:</strong>
+            {% if pref.email_enabled %}<form method="post" action="{% url 'core:notification_test' %}">{% csrf_token %}<input type="hidden" name="channel" value="email"><button class="btn btn-sm btn-outline-secondary"><i class="bi bi-envelope"></i> E-mail</button></form>{% endif %}
+            {% if pref.push_enabled %}<form method="post" action="{% url 'core:notification_test' %}">{% csrf_token %}<input type="hidden" name="channel" value="push"><button class="btn btn-sm btn-outline-secondary"><i class="bi bi-phone-vibrate"></i> Aparelho</button></form>{% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if recent %}
+    <div class="card mb-3">
+        <div class="card-header fw-bold">Últimos envios</div>
+        <ul class="list-group list-group-flush small">
+            {% for log in recent %}
+            <li class="list-group-item d-flex justify-content-between">
+                <span>{{ log.created_at|date:"d/m H:i" }} · {% if log.channel == 'email' %}e-mail{% else %}aparelho{% endif %}</span>
+                <span class="{% if log.status == 'sent' %}text-success{% elif log.status == 'failed' %}text-danger{% else %}text-muted{% endif %}">{{ log.get_status_display }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/push.js' %}"></script>
+{% endblock %}

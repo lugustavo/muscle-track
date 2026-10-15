@@ -191,6 +191,7 @@ def _my_exercise_progress(request, ctx):
 TRAILS = {
     'calendar_settings': lambda request, ctx: [_home(), _agenda() if request.user.is_staff else ('Meu perfil', reverse('core:my_profile')), ('Google Agenda', None)],
     'search': lambda request, ctx: [_home(), ('Busca', None)],
+    'notification_settings': lambda request, ctx: [_home(), _agenda() if request.user.is_staff else ('Meu perfil', reverse('core:my_profile')), ('Notificações', None)],
     'my_agenda': lambda request, ctx: [_home(), ('Minha agenda', None)],
     'my_agenda_request': lambda request, ctx: [_home(), ('Minha agenda', reverse('core:my_agenda')), ('Pedir remarcação', None)],
     'finance': lambda request, ctx: [_home(), ('Financeiro', None)],

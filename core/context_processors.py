@@ -21,7 +21,7 @@ STUDENT_SECTIONS = (
     ('hoje', ('my_agenda',)),   # reached from "Hoje"; the bar has no slot of its own for it
     ('treinos', ('my_workouts', 'workout_')),
     ('historico', ('my_history', 'my_exercise_progress')),
-    ('perfil', ('my_profile', 'my_privacy', 'account_')),   # account_* = password, e-mail (allauth)
+    ('perfil', ('my_profile', 'my_privacy', 'notification_', 'account_')),   # account_* = password, e-mail (allauth)
 )
 
 
@@ -65,6 +65,7 @@ def _staff_bar(active):
         {'label': 'Treinos', 'icon': 'bi-calendar-check', 'url': reverse('core:routine_list')},
         {'label': 'Planos', 'icon': 'bi-card-checklist', 'url': reverse('core:plan_list')},
         {'label': 'Admin', 'icon': 'bi-gear', 'url': '/admin/'},
+        {'label': 'Notificações', 'icon': 'bi-bell', 'url': reverse('core:notification_settings')},
         {'label': 'Alterar senha', 'icon': 'bi-key', 'url': reverse('account_change_password')},
         {'label': 'Sair', 'icon': 'bi-box-arrow-right', 'url': reverse('account_logout')},
     ]

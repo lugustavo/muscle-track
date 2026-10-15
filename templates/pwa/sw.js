@@ -48,3 +48,32 @@ self.addEventListener('fetch', (event) => {
     );
   }
 });
+
+// Web push (core/notifications.py sends {title, body, url, tag})
+self.addEventListener('push', (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (e) { data = { body: event.data ? event.data.text() : '' }; }
+  event.waitUntil(self.registration.showNotification(data.title || 'Muscle Track', {
+    body: data.body || '',
+    icon: '/static/images/icon-192.png',
+    badge: '/static/images/icon-192.png',
+    tag: data.tag || undefined,
+    data: { url: data.url || '/' },
+  }));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = new URL((event.notification.data && event.notification.data.url) || '/', self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+      for (const client of windows) {
+        if ('focus' in client) {
+          if ('navigate' in client) client.navigate(target);
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(target);
+    })
+  );
+});

@@ -75,6 +75,10 @@ urlpatterns = [
     path('person-routines/<int:pk>/deactivate/', views.person_routine_deactivate, name='person_routine_deactivate'),
 
     # Student Area
+    path('notifications/', views.notification_settings, name='notification_settings'),
+    path('notifications/push/subscribe/', views.push_subscribe, name='push_subscribe'),
+    path('notifications/push/<int:pk>/remove/', views.push_unsubscribe, name='push_unsubscribe'),
+    path('notifications/test/', views.notification_test, name='notification_test'),
     path('my-agenda/', views.my_agenda, name='my_agenda'),
     path('my-agenda/<int:pk>/request/', views.my_agenda_request, name='my_agenda_request'),
     path('my-agenda/requests/<int:pk>/withdraw/', views.my_agenda_request_withdraw, name='my_agenda_request_withdraw'),
