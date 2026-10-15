@@ -28,7 +28,7 @@ from allauth.account.models import EmailAddress
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, trainer_dashboard
 from .forms import (
     AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ClassRequestForm, ConsentForm, SaleForm, ExerciseForm, PaymentForm,
-    PersonForm, PersonRoutineForm, PackageForm, RepeatForm, ScheduleSlotForm,
+    PersonForm, PersonRoutineForm, PackageForm, RepeatForm, ScheduleSlotForm, SlotEditForm,
     ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
 )
 from .agenda import (
@@ -53,7 +53,7 @@ from .models import (
 )
 from .navigation import after_save_url, back_label, safe_next_url, with_next
 from .onboarding import trainer_steps
-from .recurrence import create_series, describe, end_series_from
+from .recurrence import SeriesError, create_series, describe, edit_series, end_series_from
 from .permissions import is_trainer, staff_required, student_required
 from .search import apply_student_search, phone_digits, search_all
 from .today import MAX_SESSION_MINUTES, student_today, suggest_index
@@ -290,7 +290,7 @@ def _finance_agenda_context(student):
         'payments': payments,
         'pkg': pkg,
         'charge_url': charge_url,
-        'slots': list(student.slots.filter(is_active=True)),
+        'slots': list(student.slots.filter(is_active=True).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=timezone.localdate()))),
         'upcoming': list(student.appointments.filter(
             starts_at__gte=timezone.now(), status=Appointment.Status.SCHEDULED)[:8]),
         'attendance': attendance_stats(student, 30, today),
@@ -2444,7 +2444,11 @@ def agenda(request):
         })
     elif view == 'mes':
         context.update({'weeks': month_cells(pivot, by_day, today, conflicts), 'month': pivot,
-                        'weekday_letters': [label[:3] for _, label in ScheduleSlot.WEEKDAYS]})
+                        'weekday_letters': [label[:3] for _, label in ScheduleSlot.WEEKDAYS],
+                        # the month's classes below the grid, day by day (days outside the month are left out)
+                        'month_days': [{'date': d, 'is_today': d == today, 'items': by_day[d],
+                                        'weekday': ScheduleSlot.WEEKDAYS[d.weekday()][1]}
+                                       for d in sorted(by_day) if (d.year, d.month) == (pivot.year, pivot.month)]})
     else:
         # day and list: the same cards, day by day (the list skips days without classes)
         day = start
@@ -2706,6 +2710,30 @@ def appointment_series_end(request, pk):
         messages.success(request, f'Horário fixo encerrado: {slot.get_weekday_display()} às {slot.start_time:%H:%M} '
                                   f'deixa de repetir a partir desta aula ({gone}).')
     return redirect(safe_next_url(request, _agenda_url_for(timezone.localtime(appointment.starts_at).date())))
+
+
+@staff_required
+def slot_edit(request, pk):
+    """Change a fixed time (day, hour, length, end) from a date on; past classes keep the old time."""
+    slot = get_object_or_404(ScheduleSlot.objects.select_related('person'), pk=pk)
+    today = timezone.localdate()
+    form = SlotEditForm(request.POST or None, initial={
+        'weekday': slot.weekday, 'start_time': slot.start_time, 'duration_minutes': slot.duration_minutes,
+        'from_day': today, 'valid_until': slot.valid_until})
+    if request.method == 'POST' and form.is_valid():
+        data = form.cleaned_data
+        try:
+            current, removed = edit_series(slot, data['weekday'], data['start_time'], data['duration_minutes'],
+                                           data['valid_until'], data['from_day'])
+        except SeriesError as error:
+            form.add_error(None, str(error))
+        else:
+            ensure_appointments(today, today + timedelta(weeks=4), today)
+            messages.success(request, 'Horário fixo atualizado: ' + describe(
+                [current.weekday], current.start_time, current.interval_weeks, current.valid_until) + '.'
+                + (f' {removed} aula(s) marcada(s) foram recriadas no novo horário.' if removed else ''))
+            return redirect(_student_tab(request, slot.person_id, 'agenda'))
+    return render(request, 'core/slot_form.html', {'form': form, 'slot': slot, 'student': slot.person, 'title': 'Editar horário fixo'})
 
 
 @staff_required
