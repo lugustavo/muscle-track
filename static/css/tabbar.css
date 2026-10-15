@@ -158,12 +158,6 @@ body.kbd-open .fab { display: none; }
 @media (max-width: 991.98px) {
     /* Student file */
     .student-header-info h1 { font-size: 1.25rem; }
-    .stat-strip { display: flex; flex-wrap: nowrap; gap: .5rem; overflow-x: auto; margin: 0 -.75rem 1rem; padding: 0 .75rem .25rem; }
-    .stat-strip > div { flex: 0 0 auto; min-width: 7.5rem; width: auto; padding: 0; margin: 0; }
-    .stat-strip .card-body { padding: .5rem .75rem; }
-    .stat-strip h3 { font-size: 1.25rem !important; margin: 0 !important; }
-    .stat-strip i { display: none; }
-    .stat-strip p { font-size: .75rem; }
     .tabs-sticky {
         position: sticky;
         top: 0;

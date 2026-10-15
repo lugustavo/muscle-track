@@ -160,3 +160,13 @@ footer { background-color: var(--mt-nav-bg); color: white; padding: 1.5rem 0; ma
     text-align: center;
     font-size: .9rem;
 }
+
+/* Four counters in one row on a phone (student file): no icon, number over a short label */
+@media (max-width: 767.98px) {
+    .stat-tiles-4 .stat-tile .card-body { padding: .5rem .25rem; }
+    .stat-tiles-4 .stat-tile .stat-top { display: block; }
+    .stat-tiles-4 .stat-tile .stat-top .bi { display: none !important; }
+    .stat-tiles-4 .stat-tile .stat-top h3 { font-size: 1.3rem; }
+    .stat-tiles-4 .stat-tile .stat-top h3.stat-date { font-size: 1.05rem; padding-top: .15rem; }
+    .stat-tiles-4 .stat-tile p { font-size: .68rem; }
+}
