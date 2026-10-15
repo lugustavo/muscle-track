@@ -11,7 +11,7 @@
         height: 120px;
         object-fit: cover;
         border-radius: 50%;
-        border: 4px solid #fff;
+        border: 4px solid var(--bs-body-bg);
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     .student-header-info {
@@ -297,6 +297,7 @@
 
 {% block extra_js %}
 <script src="{% static 'vendor/chartjs/4.4.0/chart.umd.js' %}"></script>
+<script src="{% static 'js/chart-theme.js' %}"></script>
 <script>
 // Open the tab named in the URL hash (#tab-avaliacoes) and keep the hash in sync
 (function () {
@@ -330,7 +331,7 @@ if (dataEl) {
             datasets: [
                 {label: 'Peso (kg)', data: points.map(function (p) { return p.weight; }), borderColor: '#FF6B6B', yAxisID: 'y', spanGaps: true, tension: 0.25},
                 {label: '% gordura', data: points.map(function (p) { return p.body_fat; }), borderColor: '#4ECDC4', borderDash: [6, 4], yAxisID: 'y1', spanGaps: true, tension: 0.25},
-                {label: 'Cintura (cm)', data: points.map(function (p) { return p.waist; }), borderColor: '#2C3E50', yAxisID: 'y', spanGaps: true, tension: 0.25, hidden: true}
+                {label: 'Cintura (cm)', data: points.map(function (p) { return p.waist; }), borderColor: MTChartColor('#2C3E50', '#9db4cc'), mtColors: ['#2C3E50', '#9db4cc'], yAxisID: 'y', spanGaps: true, tension: 0.25, hidden: true}
             ]
         },
         options: {

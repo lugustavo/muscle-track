@@ -25,7 +25,7 @@
                     <div class="mb-3">
                         {{ form.person.label_tag }}
                         {% if selected_person %}
-                            <input type="text" class="form-control" value="{{ selected_person.person_name }}" readonly style="background-color: #e9ecef;">
+                            <input type="text" class="form-control" value="{{ selected_person.person_name }}" readonly style="background-color: var(--bs-secondary-bg);">
                             <input type="hidden" name="person" value="{{ selected_person.pk }}">
                             <!--<small class="form-text text-muted">
                                 <i class="bi bi-info-circle"></i> O aluno foi pré-selecionado e não pode ser alterado nesta tela.

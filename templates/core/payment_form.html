@@ -56,7 +56,7 @@
         </form>
     </div>
     <div class="col-lg-5">
-        <div class="card border-0 bg-light"><div class="card-body small">
+        <div class="card border-0 bg-body-tertiary"><div class="card-body small">
             <p class="mb-2">Plano atual: <strong>{{ student.plan_name|default:"—" }}</strong>{% if student.plan_expires_on %}, vence em {{ student.plan_expires_on|date:"d/m/Y" }}{% endif %}.</p>
             <p class="mb-0">Ao salvar, o vencimento do plano passa para o fim do período pago (um pagamento atrasado nunca encurta o plano).</p>
         </div></div>

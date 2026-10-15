@@ -8,11 +8,11 @@
 <style>
     .workout-header { position: sticky; top: 0; z-index: 20; }
     .set-grid { display: grid; grid-template-columns: 1.6rem 1.7fr 1fr 3.1rem 1.1rem; gap: .35rem; align-items: center; }
-    .set-grid .head { font-size: .65rem; text-transform: uppercase; color: #6c757d; white-space: nowrap; }
-    .set-num { font-weight: 600; text-align: center; color: #6c757d; }
+    .set-grid .head { font-size: .65rem; text-transform: uppercase; color: var(--bs-secondary-color); white-space: nowrap; }
+    .set-num { font-weight: 600; text-align: center; color: var(--bs-secondary-color); }
     .set-row .form-control { text-align: center; font-size: 1.1rem; min-height: 44px; padding-left: .25rem; padding-right: .25rem; }
     .set-row .set-done { min-height: 44px; font-size: 1.25rem; }
-    .set-done-row .form-control { background-color: #e9f7ef; }
+    .set-done-row .form-control { background-color: var(--bs-success-bg-subtle); }
     .weight-cell { display: flex; align-items: stretch; gap: 2px; min-width: 0; }
     .weight-cell .set-weight { min-width: 0; flex: 1 1 auto; }
     .weight-cell .step-btn { min-height: 44px; width: 30px; padding: 0; flex: 0 0 30px; font-size: 1.2rem; line-height: 1; }
@@ -20,9 +20,9 @@
     .exercise-thumb { width: 56px; height: 56px; object-fit: cover; border-radius: .5rem; }
     [data-exercise-card] { scroll-margin-top: 9.5rem; transition: box-shadow .2s; }
     [data-exercise-card].is-current { box-shadow: 0 0 0 2px var(--primary-color); }
-    .done-divider { display: flex; align-items: center; gap: .75rem; margin: 1.25rem 0 .75rem; color: #6c757d; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
-    .done-divider::before, .done-divider::after { content: ''; flex: 1; height: 1px; background: #dee2e6; }
-    .rest-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1030; background: #2C3E50; color: #fff;
+    .done-divider { display: flex; align-items: center; gap: .75rem; margin: 1.25rem 0 .75rem; color: var(--bs-secondary-color); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
+    .done-divider::before, .done-divider::after { content: ''; flex: 1; height: 1px; background: var(--bs-border-color); }
+    .rest-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1030; background: var(--mt-bar-bg); color: #fff;
                 padding: .75rem 1rem; box-shadow: 0 -4px 12px rgba(0,0,0,.25); }
     .rest-bar .progress { height: 6px; background: rgba(255,255,255,.2); }
     .rest-bar .progress-bar { background: var(--secondary-color); transition: width .25s linear; }

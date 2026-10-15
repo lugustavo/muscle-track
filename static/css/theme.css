@@ -1,0 +1,142 @@
+/* Design tokens and base styles. The brand colors live here (change them in one place); light and dark values below.
+   Bootstrap 5.3 switches its own components through data-bs-theme (set by static/js/theme.js). */
+:root {
+    --primary-color: #FF6B6B;
+    --primary-hover: #ee5a5a;
+    --secondary-color: #4ECDC4;
+    --dark-color: #2C3E50;
+    --mt-nav-bg: #2C3E50;
+    --mt-bar-bg: #2C3E50;
+    --mt-shadow: rgba(0, 0, 0, .1);
+    --mt-shadow-strong: rgba(0, 0, 0, .2);
+}
+[data-bs-theme="dark"] {
+    --primary-color: #FF7B7B;
+    --primary-hover: #ff9090;
+    --mt-nav-bg: #1d2733;
+    --mt-bar-bg: #131b24;
+    --mt-shadow: rgba(0, 0, 0, .5);
+    --mt-shadow-strong: rgba(0, 0, 0, .6);
+    --bs-body-bg: #151b23;
+    --bs-secondary-bg: #1e2630;
+    --bs-tertiary-bg: #1a212a;
+    --bs-border-color: #2f3946;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar-brand { font-weight: bold; font-size: 1.5rem; }
+.navbar-brand ~ .theme-menu .btn { border: 0; }
+
+.btn-primary {
+    --bs-btn-bg: var(--primary-color);
+    --bs-btn-border-color: var(--primary-color);
+    --bs-btn-hover-bg: var(--primary-hover);
+    --bs-btn-hover-border-color: var(--primary-hover);
+    --bs-btn-active-bg: var(--primary-hover);
+    --bs-btn-active-border-color: var(--primary-hover);
+    --bs-btn-disabled-bg: var(--primary-color);
+    --bs-btn-disabled-border-color: var(--primary-color);
+    --bs-btn-focus-shadow-rgb: 255, 107, 107;
+}
+a:focus-visible, button:focus-visible, .btn:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
+
+.breadcrumb-nav .breadcrumb { font-size: .9rem; margin-bottom: 1rem; }
+.main-content { flex: 1; padding-top: 2rem; padding-bottom: 2rem; }
+
+.exercise-card { transition: transform 0.2s; height: 100%; }
+.exercise-card:hover { transform: translateY(-5px); box-shadow: 0 4px 15px var(--mt-shadow-strong); }
+.exercise-thumbnail { width: 100%; height: 200px; object-fit: cover; }
+
+footer { background-color: var(--mt-nav-bg); color: white; padding: 1.5rem 0; margin-top: auto; }
+
+/* Theme selector in the top bar */
+.theme-menu .nav-link { color: rgba(255, 255, 255, .75); }
+.theme-menu .nav-link:hover, .theme-menu .nav-link:focus, .theme-menu .nav-link.show { color: #fff; }
+
+/* Dark mode: Bootstrap keeps the saturated semantic colors, which are too dim as text on a dark page (about 3.7:1).
+   Outline buttons and colored text use the lighter "emphasis" shade there; filled buttons and badges are unchanged. */
+[data-bs-theme="dark"] .btn-outline-primary {
+    --bs-btn-color: var(--bs-primary-text-emphasis);
+    --bs-btn-border-color: var(--bs-primary-text-emphasis);
+    --bs-btn-hover-color: #111;
+    --bs-btn-hover-bg: var(--bs-primary-text-emphasis);
+    --bs-btn-hover-border-color: var(--bs-primary-text-emphasis);
+    --bs-btn-active-color: #111;
+    --bs-btn-active-bg: var(--bs-primary-text-emphasis);
+    --bs-btn-active-border-color: var(--bs-primary-text-emphasis);
+    --bs-btn-disabled-color: var(--bs-primary-text-emphasis);
+    --bs-btn-disabled-border-color: var(--bs-primary-text-emphasis);
+}
+[data-bs-theme="dark"] .btn-outline-secondary {
+    --bs-btn-color: var(--bs-secondary-text-emphasis);
+    --bs-btn-border-color: var(--bs-secondary-text-emphasis);
+    --bs-btn-hover-color: #111;
+    --bs-btn-hover-bg: var(--bs-secondary-text-emphasis);
+    --bs-btn-hover-border-color: var(--bs-secondary-text-emphasis);
+    --bs-btn-active-color: #111;
+    --bs-btn-active-bg: var(--bs-secondary-text-emphasis);
+    --bs-btn-active-border-color: var(--bs-secondary-text-emphasis);
+    --bs-btn-disabled-color: var(--bs-secondary-text-emphasis);
+    --bs-btn-disabled-border-color: var(--bs-secondary-text-emphasis);
+}
+[data-bs-theme="dark"] .btn-outline-success {
+    --bs-btn-color: var(--bs-success-text-emphasis);
+    --bs-btn-border-color: var(--bs-success-text-emphasis);
+    --bs-btn-hover-color: #111;
+    --bs-btn-hover-bg: var(--bs-success-text-emphasis);
+    --bs-btn-hover-border-color: var(--bs-success-text-emphasis);
+    --bs-btn-active-color: #111;
+    --bs-btn-active-bg: var(--bs-success-text-emphasis);
+    --bs-btn-active-border-color: var(--bs-success-text-emphasis);
+    --bs-btn-disabled-color: var(--bs-success-text-emphasis);
+    --bs-btn-disabled-border-color: var(--bs-success-text-emphasis);
+}
+[data-bs-theme="dark"] .btn-outline-danger {
+    --bs-btn-color: var(--bs-danger-text-emphasis);
+    --bs-btn-border-color: var(--bs-danger-text-emphasis);
+    --bs-btn-hover-color: #111;
+    --bs-btn-hover-bg: var(--bs-danger-text-emphasis);
+    --bs-btn-hover-border-color: var(--bs-danger-text-emphasis);
+    --bs-btn-active-color: #111;
+    --bs-btn-active-bg: var(--bs-danger-text-emphasis);
+    --bs-btn-active-border-color: var(--bs-danger-text-emphasis);
+    --bs-btn-disabled-color: var(--bs-danger-text-emphasis);
+    --bs-btn-disabled-border-color: var(--bs-danger-text-emphasis);
+}
+[data-bs-theme="dark"] .btn-outline-warning {
+    --bs-btn-color: var(--bs-warning-text-emphasis);
+    --bs-btn-border-color: var(--bs-warning-text-emphasis);
+    --bs-btn-hover-color: #111;
+    --bs-btn-hover-bg: var(--bs-warning-text-emphasis);
+    --bs-btn-hover-border-color: var(--bs-warning-text-emphasis);
+    --bs-btn-active-color: #111;
+    --bs-btn-active-bg: var(--bs-warning-text-emphasis);
+    --bs-btn-active-border-color: var(--bs-warning-text-emphasis);
+    --bs-btn-disabled-color: var(--bs-warning-text-emphasis);
+    --bs-btn-disabled-border-color: var(--bs-warning-text-emphasis);
+}
+[data-bs-theme="dark"] .btn-outline-info {
+    --bs-btn-color: var(--bs-info-text-emphasis);
+    --bs-btn-border-color: var(--bs-info-text-emphasis);
+    --bs-btn-hover-color: #111;
+    --bs-btn-hover-bg: var(--bs-info-text-emphasis);
+    --bs-btn-hover-border-color: var(--bs-info-text-emphasis);
+    --bs-btn-active-color: #111;
+    --bs-btn-active-bg: var(--bs-info-text-emphasis);
+    --bs-btn-active-border-color: var(--bs-info-text-emphasis);
+    --bs-btn-disabled-color: var(--bs-info-text-emphasis);
+    --bs-btn-disabled-border-color: var(--bs-info-text-emphasis);
+}
+[data-bs-theme="dark"] .text-primary { color: var(--bs-primary-text-emphasis) !important; }
+[data-bs-theme="dark"] .text-secondary { color: var(--bs-secondary-text-emphasis) !important; }
+[data-bs-theme="dark"] .text-success { color: var(--bs-success-text-emphasis) !important; }
+[data-bs-theme="dark"] .text-danger { color: var(--bs-danger-text-emphasis) !important; }
+[data-bs-theme="dark"] .text-warning { color: var(--bs-warning-text-emphasis) !important; }
+[data-bs-theme="dark"] .text-info { color: var(--bs-info-text-emphasis) !important; }
+.theme-menu .dropdown-item.active { background-color: var(--primary-color); color: #fff; }

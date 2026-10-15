@@ -130,7 +130,7 @@
         <div class="col-lg-4">
             <!-- Resumo -->
             <div class="card mb-4 border-0 shadow-sm">
-                <div class="card-header bg-white">
+                <div class="card-header bg-body">
                     <h6 class="mb-0"><i class="bi bi-bar-chart"></i> Resumo do Treino</h6>
                 </div>
                 <div class="card-body">
@@ -154,7 +154,7 @@
 
             <!-- Dicas -->
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
+                <div class="card-header bg-body">
                     <h6 class="mb-0"><i class="bi bi-lightbulb"></i> Dicas</h6>
                 </div>
                 <div class="card-body">
@@ -497,7 +497,7 @@ function initializeSortable() {
         new Sortable(list, {
             animation: 150,
             handle: '.bi-grip-vertical',
-            ghostClass: 'bg-light',
+            ghostClass: 'bg-body-tertiary',
             onEnd: function(evt) {
                 // Reordenar array
                 const movedItem = selectedExercises.splice(evt.oldIndex, 1)[0];
