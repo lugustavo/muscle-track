@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load navigation static %}
+
+{% block title %}Minha evolução - Muscle Track{% endblock %}
+
+{% block content %}
+<div class="mx-auto" style="max-width: 720px;">
+    <div class="d-flex justify-content-between align-items-center mb-3 gap-2">
+        <h1 class="h3 mb-0"><i class="bi bi-rulers"></i> Minha evolução</h1>
+        {% if can_compare %}<a href="{% url 'core:my_evolution_compare' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-layout-split"></i> Comparar fotos</a>{% endif %}
+    </div>
+
+    {% if assessment_chart %}
+    <div class="card mb-3"><div class="card-body">
+        <h2 class="h6 card-title">Evolução</h2>
+        <div style="height: 240px;"><canvas id="assessmentChart"></canvas></div>
+    </div></div>
+    {{ assessment_chart|json_script:"assessment-chart-data" }}
+    {% endif %}
+
+    {% for a in assessments %}
+    <div class="card mb-3" data-my-assessment="{{ a.pk }}">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-baseline">
+                <strong class="fs-5">{{ a.date|date:"d/m/Y" }}</strong>
+                {% if a.bmi %}<span class="small text-muted">IMC {{ a.bmi }}</span>{% endif %}
+            </div>
+            <div class="row row-cols-3 g-2 text-center mt-1">
+                {% for label, value, unit in a.shown_measures %}
+                <div class="col"><div class="border rounded py-1"><div class="fw-bold">{{ value }}<small class="text-muted"> {{ unit }}</small></div><div class="small text-muted">{{ label }}</div></div></div>
+                {% endfor %}
+            </div>
+            {% if not a.shown_measures %}<div class="small text-muted mt-1">Sem medidas nesta avaliação.</div>{% endif %}
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                {% for slot in a.photo_slots %}{% if slot.photo %}
+                <a href="{% url 'core:photo_file' slot.photo.pk %}" target="_blank" rel="noopener" class="text-center text-decoration-none" style="width: 76px;">
+                    <img src="{% url 'core:photo_thumb' slot.photo.pk %}" loading="lazy" alt="{{ slot.label }} em {{ a.date|date:'d/m/Y' }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
+                    <div class="small text-muted lh-sm">{{ slot.label }}</div>
+                </a>
+                {% endif %}{% endfor %}
+                {% for photo in a.other_photos %}
+                <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener" class="text-center text-decoration-none" style="width: 76px;">
+                    <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="Foto de {{ a.date|date:'d/m/Y' }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
+                    <div class="small text-muted lh-sm">{{ photo.caption|default:photo.get_angle_display }}</div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card"><div class="card-body text-center text-muted py-4">
+        <i class="bi bi-rulers fs-1 d-block mb-2"></i>
+        Ainda não há avaliações registradas. Quando a sua personal fizer a primeira, as medidas e as fotos aparecem aqui.
+    </div></div>
+    {% endfor %}
+
+    {% if loose_photos %}
+    <h2 class="h6 text-uppercase text-muted mt-4">Outras fotos</h2>
+    <div class="d-flex flex-wrap gap-2">
+        {% for photo in loose_photos %}
+        <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener" class="text-center text-decoration-none" style="width: 76px;">
+            <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="Foto de {{ photo.date|date:'d/m/Y' }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
+            <div class="small text-muted lh-sm">{{ photo.date|date:"d/m/Y" }}</div>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <p class="small text-muted mt-3"><i class="bi bi-lock"></i> As fotos são privadas: só você e a sua personal conseguem abri-las.</p>
+</div>
+{% if assessment_chart %}
+<script src="{% static 'vendor/chartjs/4.4.0/chart.umd.js' %}"></script>
+<script src="{% static 'js/chart-theme.js' %}"></script>
+<script src="{% static 'js/assessment_chart.js' %}"></script>
+{% endif %}
+{% endblock %}
