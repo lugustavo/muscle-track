@@ -72,7 +72,7 @@ def build_data(person, include_internal_notes):
             _fields(a, ['date', 'weight_kg', 'height_cm', 'body_fat_pct', 'chest_cm', 'waist_cm', 'hip_cm',
                         'arm_cm', 'thigh_cm', 'notes']) for a in person.assessments.all()],
         'photos': [
-            {**_fields(p, ['date', 'caption']), 'file': f'fotos/{p.pk}{os.path.splitext(p.image.name)[1]}'}
+            {**_fields(p, ['date', 'caption', 'angle']), 'file': f'fotos/{p.pk}{os.path.splitext(p.image.name)[1]}'}
             for p in person.progress_photos.all()],
         'routines': routines,
         'sessions': sessions,

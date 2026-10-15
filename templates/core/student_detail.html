@@ -143,8 +143,7 @@
 <ul class="nav nav-tabs mb-4 tabs-sticky hide-scrollbar" id="studentTabs" role="tablist">
     <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-treinos" type="button" role="tab"><i class="bi bi-lightning-charge"></i> Treinos</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-ficha" type="button" role="tab"><i class="bi bi-person-vcard"></i> Ficha</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-avaliacoes" type="button" role="tab"><i class="bi bi-rulers"></i> Avaliações <span class="badge bg-secondary">{{ assessments|length }}</span></button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-fotos" type="button" role="tab"><i class="bi bi-images"></i> Fotos <span class="badge bg-secondary">{{ photos|length }}</span></button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-avaliacoes" type="button" role="tab"><i class="bi bi-rulers"></i> Avaliações <span class="badge bg-secondary">{{ assessments|length }}</span>{% if photo_count %} <i class="bi bi-camera text-muted" title="{{ photo_count }} foto{{ photo_count|pluralize }}"></i>{% endif %}</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-agenda" type="button" role="tab"><i class="bi bi-calendar-week"></i> Agenda</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pagamentos" type="button" role="tab"><i class="bi bi-cash-coin"></i> Pagamentos <span class="badge bg-secondary">{{ payments|length }}</span></button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-historico" type="button" role="tab"><i class="bi bi-clock-history"></i> Histórico</button></li>
@@ -258,7 +257,6 @@
 </div>
 <div class="tab-pane fade" id="tab-ficha" role="tabpanel">{% include 'core/student/_ficha.html' %}</div>
 <div class="tab-pane fade" id="tab-avaliacoes" role="tabpanel">{% include 'core/student/_avaliacoes.html' %}</div>
-<div class="tab-pane fade" id="tab-fotos" role="tabpanel">{% include 'core/student/_fotos.html' %}</div>
 <div class="tab-pane fade" id="tab-notas" role="tabpanel">{% include 'core/student/_notas.html' %}</div>
 <div class="tab-pane fade" id="tab-agenda" role="tabpanel">{% include 'core/student/_agenda.html' %}</div>
 <div class="tab-pane fade" id="tab-pagamentos" role="tabpanel">{% include 'core/student/_pagamentos.html' %}</div>
@@ -324,6 +322,7 @@
 (function () {
     function showFromHash() {
         var hash = window.location.hash;
+        if (hash === '#tab-fotos') hash = '#tab-avaliacoes';   // photos now live inside the assessments
         if (!hash) return;
         var btn = document.querySelector('[data-bs-target="' + hash + '"]');
         if (btn) bootstrap.Tab.getOrCreateInstance(btn).show();

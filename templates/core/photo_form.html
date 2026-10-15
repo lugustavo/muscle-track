@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load navigation %}
+{% load navigation static %}
 
 {% block title %}Adicionar foto - {{ student.person_name }}{% endblock %}
 
@@ -10,34 +10,63 @@
 {% endif %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1 class="h2"><i class="bi bi-camera"></i> Adicionar foto de progresso</h1>
+        <h1 class="h2"><i class="bi bi-camera"></i> Adicionar foto</h1>
         <div class="text-muted">{{ student.person_name }}</div>
     </div>
-    {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default fragment='#tab-fotos' %}
+    {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default fragment='#tab-avaliacoes' %}
 </div>
 
-<form method="post" enctype="multipart/form-data" class="row">
+<form method="post" enctype="multipart/form-data" class="row" data-photo-form>
     {% csrf_token %}
     <div class="col-lg-6">
         <div class="card mb-4">
             <div class="card-body">
-                <div class="mb-3">
-                    <label class="form-label fw-bold" for="{{ form.image.id_for_label }}">Foto</label>
-                    {{ form.image }} {% if form.image.errors %}<div class="text-danger small">{{ form.image.errors }}</div>{% endif %}
-                    <div class="form-text">JPG, PNG ou WebP. A foto é privada: só você e o aluno conseguem abrir.</div>
+                <div class="row g-2 mb-3">
+                    <div class="col-sm-7">
+                        <label class="form-label fw-bold" for="{{ form.assessment.id_for_label }}">Avaliação</label>
+                        {{ form.assessment }}{{ form.assessment.errors }}
+                    </div>
+                    <div class="col-sm-5">
+                        <label class="form-label fw-bold" for="{{ form.angle.id_for_label }}">Posição</label>
+                        {{ form.angle }}{{ form.angle.errors }}
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label fw-bold" for="{{ form.date.id_for_label }}">Data</label>
-                    {{ form.date }} {{ form.date.errors }}
+
+                <label class="form-label fw-bold" for="{{ form.image.id_for_label }}">Foto</label>
+                <div class="d-flex flex-wrap gap-2 mb-2" data-capture-buttons hidden>
+                    <button type="button" class="btn btn-primary" data-take><i class="bi bi-camera"></i> Tirar foto</button>
+                    <button type="button" class="btn btn-outline-secondary" data-gallery><i class="bi bi-images"></i> Escolher da galeria</button>
                 </div>
-                <div class="mb-3">
+                <div data-live hidden class="mb-2">
+                    <video playsinline muted class="w-100 rounded bg-body-secondary" style="max-height: 60vh;"></video>
+                    <div class="d-flex gap-2 mt-2">
+                        <button type="button" class="btn btn-success" data-shoot><i class="bi bi-record-circle"></i> Capturar</button>
+                        <button type="button" class="btn btn-outline-secondary" data-cancel-live>Cancelar</button>
+                    </div>
+                </div>
+                <div data-picked hidden class="mb-2">
+                    <img alt="Pré-visualização da foto" class="rounded border" style="max-height: 280px; max-width: 100%;">
+                </div>
+                <div data-capture-note class="form-text text-warning-emphasis" hidden></div>
+                {{ form.image }} {% if form.image.errors %}<div class="text-danger small">{{ form.image.errors }}</div>{% endif %}
+                <input type="file" accept="image/*" capture="environment" class="d-none" data-phone-camera>
+                <div class="form-text">JPG, PNG ou WebP. A foto é privada (só você e o aluno abrem) e é guardada sem localização nem dados do aparelho.</div>
+
+                <div class="mt-3">
                     <label class="form-label fw-bold" for="{{ form.caption.id_for_label }}">Legenda</label>
                     {{ form.caption }}
                 </div>
+                <div class="mt-3" data-loose-date{% if has_assessment %} hidden{% endif %}>
+                    <label class="form-label fw-bold" for="{{ form.date.id_for_label }}">Data</label>
+                    {{ form.date }} {{ form.date.errors }}
+                </div>
+                {{ form.non_field_errors }}
             </div>
         </div>
-        <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> Enviar foto</button>
-        {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='' fragment='#tab-fotos' %}
+        <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> Salvar foto</button>
+        <button type="submit" name="save_next" value="1" class="btn btn-outline-primary" data-save-next{% if not has_assessment %} hidden{% endif %}><i class="bi bi-arrow-right-circle"></i> Salvar e próxima posição</button>
+        {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='' fragment='#tab-avaliacoes' %}
     </div>
 </form>
+<script src="{% static 'js/photo_capture.js' %}"></script>
 {% endblock %}

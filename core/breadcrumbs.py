@@ -92,7 +92,7 @@ def _assessment(label):
 
 def _photo_upload(request, ctx):
     student = ctx['student']
-    return [_home(), _students(), _student(student), _student_tab(student, 'Fotos', 'fotos'),
+    return [_home(), _students(), _student(student), _student_tab(student, 'Avaliações', 'avaliacoes'),
             ('Adicionar foto', None)]
 
 

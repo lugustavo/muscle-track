@@ -197,7 +197,7 @@ class DefaultsWithoutNextTests(RichDataMixin, BaseTestCase):
         page = self.client.get(reverse('core:assessment_create', kwargs={'pk': self.pk}))
         self.assertIn('#tab-avaliacoes', page.content.decode())
         page = self.client.get(reverse('core:photo_upload', kwargs={'pk': self.pk}))
-        self.assertIn('#tab-fotos', page.content.decode())
+        self.assertIn('#tab-avaliacoes', page.content.decode())
 
     def test_labels_follow_the_destination(self):
         student = reverse('core:student_detail', kwargs={'pk': self.pk})

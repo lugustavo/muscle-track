@@ -83,7 +83,7 @@ class TrainerBreadcrumbTests(RichDataMixin, BaseTestCase):
              ['Início', 'Alunos', student, 'Avaliações', 'Nova avaliação']),
             (self.get('core:assessment_edit', pk=self.assessment.pk),
              ['Início', 'Alunos', student, 'Avaliações', 'Editar avaliação']),
-            (self.get('core:photo_upload', pk=self.pk), ['Início', 'Alunos', student, 'Fotos', 'Adicionar foto']),
+            (self.get('core:photo_upload', pk=self.pk), ['Início', 'Alunos', student, 'Avaliações', 'Adicionar foto']),
             (self.client.get(reverse('core:person_routine_create') + f'?person={self.pk}'),
              ['Início', 'Alunos', student, 'Atribuir treino']),
             (self.get('core:person_routine_create'), ['Início', 'Alunos', 'Atribuir treino']),
