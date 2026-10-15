@@ -310,3 +310,22 @@ class FinancePageTests(BaseTestCase):
         self.assertContains(home, 'data-renewals')
         self.assertIsNotNone(sold)
         self.assertIsNotNone(small)
+
+
+class PaymentMethodTests(BaseTestCase):
+    def test_mbway_and_spin_are_offered_and_recorded(self):
+        from core.models import Payment
+        sold = packages.sell(self.alice.person, make_package(per='50'))
+        self.login(self.trainer)
+        labels = [label for _, label in Payment.Method.choices]
+        for label in ('MB Way', 'SPIN'):
+            self.assertIn(label, labels)
+        page = self.client.get(reverse('core:payment_create', kwargs={'pk': self.alice.person.pk}))
+        self.assertContains(page, 'MB Way')
+        self.assertContains(page, 'SPIN')
+        for method, label in (('mbway', 'MB Way'), ('spin', 'SPIN')):
+            self.client.post(reverse('core:payment_create', kwargs={'pk': self.alice.person.pk}), {
+                'student_package': sold.pk, 'amount': '100.00', 'paid_on': '2026-05-10', 'method': method, 'notes': ''})
+            self.assertEqual(Payment.objects.filter(method=method).first().get_method_display(), label)
+        summary = billing.month_summary(2026, 5)
+        self.assertEqual(sorted(m['label'] for m in summary['by_method']), ['MB Way', 'SPIN'])
