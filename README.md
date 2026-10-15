@@ -14,6 +14,7 @@ App web **self-hosted** para personal trainers: cadastro de alunos, fichas de tr
 - **Barra de menu inferior no celular** — no celular e em tablets pequenos o menu fica no rodapé (aluno: Hoje · Treinos · **Treinar** · Histórico · Perfil; personal: Hoje · Alunos · Agenda · Financeiro · Mais), com selos de pendências para a personal; no desktop continua o menu do topo
 - **Tela "Hoje" do aluno** — o treino do dia com um botão grande para iniciar (ou continuar), a semana em 7 pontos com a meta do plano, e os números em uma linha; descartar um treino iniciado por engano
 - **Horários que se repetem** — a cada N semanas, vários dias de uma vez, com fim em uma data ou após N aulas; em "Nova aula" basta marcar "Repetir esta aula"; na agenda dá para encerrar a série a partir de uma aula ou remover o horário fixo inteiro
+- **Notificações por e-mail e aviso no aparelho** — tela Notificações para a personal e para cada aluno (tudo desligado até a pessoa ligar), avisos de pedido, resposta, aula remarcada/cancelada e remarcação desfeita, teste de envio e lista de aparelhos
 - **Agenda no Google Agenda (link)** — em Agenda → "Google Agenda" (personal) e Perfil → "Minhas aulas no Google Agenda" (aluno): link `.ics` privado e revogável, passo a passo para adicionar no Google, aviso de que o Google atualiza aos poucos, "última vez que o link foi buscado", e botão "Adicionar ao Google Agenda" em cada aula da personal; o aluno só recebe as próprias aulas
 - **Minha agenda (aluno)** — o aluno vê as próprias aulas e pede remarcação ou cancelamento dentro do prazo; a personal aprova ou recusa direto na Agenda
 - **Mover aula na agenda** — arrastar a aula para outro dia (computador) ou tocar em Mover para escolher dia, horário e duração (celular); aviso de sobreposição e botão Desfazer
@@ -117,7 +118,8 @@ Os dados vivem em volumes do Docker: `pgdata` (banco), `media` (fotos e mídia d
 | `AGENDA_NOTICE_HOURS` | Antecedência mínima, em horas, para o aluno pedir remarcação/cancelamento pelo app (padrão `24`; `0` = sem prazo) |
 | `CALENDAR_LOCATION` | Local das aulas que aparece no Google Agenda / Apple Calendar (opcional) |
 | `PIX_KEY` | Chave Pix incluída na mensagem de cobrança pelo WhatsApp (opcional) |
-| `EMAIL_*` | SMTP, só para o "esqueci minha senha" (opcional) |
+| `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` | Conta Gmail e **senha de app** para enviar e-mails (avisos e "esqueci minha senha"); sem isso os e-mails só vão para o log. Ver "Notificações" abaixo |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Chaves do aviso no aparelho (web push); gere com `docker compose exec web python manage.py generate_vapid_keys` |
 | `SITE_URL`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, `SECURE_HSTS_SECONDS` | Avançado: sobrescrevem os valores derivados de `DOMAIN` |
 
 ## Desenvolvimento local (sem Docker)
@@ -159,7 +161,7 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 
 ## Backlog
 - **Backup automático** (pg_dump diário + `media`, retenção e restauração testada; cópia fora do servidor) — a pasta `media` inclui as fotos de progresso, que são dados sensíveis
-- Configurar SMTP no servidor para o "esqueci minha senha" chegar por e-mail (hoje o caminho é a personal gerar um novo link)
+- ~~Configurar SMTP no servidor~~ *(feito: basta preencher `EMAIL_HOST_USER` e `EMAIL_HOST_PASSWORD` no `.env`; o "esqueci minha senha" também passa a chegar por e-mail)*
 - Revisar o texto da política de privacidade (`templates/core/privacy_policy.html`, é um modelo) com apoio jurídico; subir `CURRENT_VERSION` em `core/consent.py` quando o texto mudar
 - Cobrança automática com gateway (Pix/cartão)
 - Lembrete automático de plano vencendo, de aula e de reavaliação (depende das notificações abaixo)
@@ -173,18 +175,27 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 - ~~**Recorrência e várias datas (como no Google Agenda)**~~ *(feito)*: repetir a cada N semanas (1 a 8), vários dias da semana de uma vez, início e "termina: nunca / em uma data / após N aulas" (o "após N aulas" vira uma data final na criação), tanto no horário fixo da ficha do aluno quanto em **Nova aula → Repetir esta aula** (intervalo de datas = série com data final). Na agenda, em aulas de horário fixo: **só esta** (Cancelar/Remarcar), **esta e as próximas** (encerra a série daqui; aulas já marcadas ficam) e **todas** (remove o horário fixo); aulas canceladas não são geradas de novo. Falta: editar horário/duração de uma série existente (hoje: remover e criar de novo), recorrência mensal e exceções por data.
 - ~~**Arrastar e soltar**~~ *(feito)*: no computador, arrastar a aula marcada para outro dia (Semana, Dia e Lista; o horário é mantido); em qualquer aparelho, o botão **Mover** abre uma folha com dia, horário e duração (é o que serve no celular, onde arrastar não funciona). O efeito é o de "remarcar" (a original fica "Remarcada", a nova é criada), com aviso de sobreposição e **Desfazer** logo depois (enquanto a aula nova não foi alterada). Só aulas "Marcadas" se movem; as demais continuam pelo formulário de remarcar. Na vista **Mês** também dá para arrastar a aula para outro dia (computador). Falta: arrastar com o dedo e ajustar a duração arrastando a borda da aula.
 - ~~**Tipos de vista:** mês, semana, dia, previsão e lista~~ *(feito: Semana, Dia, Mês e Lista dos próximos 14 dias, com seletor, a escolha lembrada em cookie e a semana como padrão)*. Falta: vista de "previsão" por mais dias e ajuste de horário de trabalho na grade.
-- ~~**Visão do aluno**~~ *(feito)*: página **Minha agenda** (próximas aulas em 60 dias e as últimas de 30), link em "Hoje" (próxima aula), no menu e no perfil; o aluno **pede remarcação** (dia e horário que prefere) ou **cancelamento** de uma aula marcada, com recado opcional e podendo retirar o pedido; o prazo é `AGENDA_NOTICE_HOURS` (padrão 24 h; 0 = sem prazo) e, passado o prazo, a tela manda falar direto com a personal. A personal vê os **Pedidos dos alunos** no topo da Agenda (e no selo da aba Agenda), com **Aprovar** (faz a remarcação/cancelamento na hora; se o horário foi tomado, avisa e o pedido continua aberto) ou **Recusar** com motivo, que o aluno vê. Falta: avisar o aluno e a personal por notificação (depende das notificações abaixo), prazo configurável por aluno/plano e a personal propor outro horário ao recusar.
+- ~~**Visão do aluno**~~ *(feito)*: página **Minha agenda** (próximas aulas em 60 dias e as últimas de 30), link em "Hoje" (próxima aula), no menu e no perfil; o aluno **pede remarcação** (dia e horário que prefere) ou **cancelamento** de uma aula marcada, com recado opcional e podendo retirar o pedido; o prazo é `AGENDA_NOTICE_HOURS` (padrão 24 h; 0 = sem prazo) e, passado o prazo, a tela manda falar direto com a personal. A personal vê os **Pedidos dos alunos** no topo da Agenda (e no selo da aba Agenda), com **Aprovar** (faz a remarcação/cancelamento na hora; se o horário foi tomado, avisa e o pedido continua aberto) ou **Recusar** com motivo, que o aluno vê. Os avisos de pedido e de resposta já saem por e-mail/aparelho (ver Notificações). Falta: prazo configurável por aluno/plano e a personal propor outro horário ao recusar.
 - **Google Agenda:** ver a seção "Integração com o Google Agenda" abaixo (link `.ics` por pessoa e, depois, sincronização pela API).
 
-### Notificações dos alunos
-- **Quando avisar:** ao marcar falta, cancelamento ou remarcação na agenda; depois, lembrete de aula, vencimento do plano e reavaliação.
-- **Canais:** web push, Telegram e e-mail, só pelos que o aluno autorizou. Hoje não existe seção de notificações: criar **Notificações** no perfil do aluno, com liga/desliga por canal e por tipo de aviso.
-  - *Web push:* assinatura do navegador/PWA (chaves VAPID, `pywebpush`), aproveitando o service worker que já existe.
-  - *Telegram:* bot; o aluno vincula o próprio chat por um link ou código de uso único gerado no app.
-  - *E-mail:* precisa do SMTP configurado no servidor (já no backlog).
-- **LGPD:** cada canal é um consentimento próprio (versão e data, como em `core/consent.py`), revogável a qualquer momento; sem consentimento não se envia nada. Mensagens sem dados sensíveis (sem valores nem saúde).
-- **Infra:** envio assíncrono com tentativas e registro de entrega/falha, e o aviso registrado no histórico do aluno. Se nenhum canal estiver autorizado, a personal segue com o botão de WhatsApp que já existe.
-- *Ordem sugerida:* seção de notificações e consentimentos → e-mail (só depende de SMTP) → web push → Telegram.
+### Notificações
+**Feito (primeira entrega):** tela **Notificações** (menu da conta; no perfil do aluno) para a personal e para cada aluno. **Tudo começa desligado**; ligar um canal é o consentimento dele (data guardada; no aluno, também uma linha no histórico da ficha) e desligar retira (e esquece os aparelhos). Canais: **e-mail** (Gmail com senha de app) e **aviso no aparelho** (web push, com lista de aparelhos, "Remover" e botão "Enviar um teste"), mais "Últimos envios" na tela.
+- *Aluno recebe:* aula remarcada ou cancelada pela personal (inclui arrastar/Mover), remarcação **desfeita** e resposta ao pedido (aprovado ou recusado, com o motivo).
+- *Personal recebe:* pedido novo de remarcação/cancelamento de um aluno.
+- Os textos só dizem o quê e quando (nada de saúde, valores ou observações). O envio roda em segundo plano, com uma nova tentativa no e-mail, e cada tentativa fica registrada (tipo e resultado, nunca o texto); assinaturas expiradas são removidas sozinhas. Falta de configuração não quebra nada: o canal só aparece como "não configurado".
+- Marcar **falta** não envia aviso (de propósito: é um clique de rotina e um engano seria constrangedor); dá para ligar depois se quiserem.
+
+**Como configurar (servidor)**
+1. *E-mail:* na conta Google, ative a verificação em duas etapas e crie uma **senha de app** (Conta Google → Segurança → Senhas de app). No `.env`: `EMAIL_HOST_USER=conta@gmail.com` e `EMAIL_HOST_PASSWORD=<senha de app>` (o remetente passa a ser essa conta). O Gmail limita o envio diário (centenas de mensagens): sobra para uma academia pequena.
+2. *Aparelho (push):* `docker compose exec web python manage.py generate_vapid_keys`, copiar as três linhas para o `.env` (`VAPID_SUBJECT` com um `mailto:` seu) e `docker compose up -d`. Precisa de **HTTPS** (já tem pelo Caddy) e de `SITE_URL`/`DOMAIN` para os links. No iPhone só funciona com o app adicionado à tela de início (iOS 16.4 ou mais novo). Não troque as chaves depois: os aparelhos inscritos deixam de receber.
+3. Cada pessoa liga o que quiser em **Notificações** e usa "Enviar um teste".
+
+**Falta**
+- **Telegram** (bot; o aluno vincula o chat por um código de uso único), adiado.
+- **Lembretes automáticos** (aula de amanhã, plano vencendo, reavaliação): precisam de uma tarefa agendada (cron/serviço no compose) e de escolher o tipo de aviso por pessoa; hoje só há liga/desliga por canal.
+- Texto da política de privacidade citando os avisos e a versão do consentimento (não subi `CURRENT_VERSION` para não pedir de novo a todos os alunos: só se você pedir).
+- Lembrete na Agenda quando a personal ainda não ligou os avisos (hoje ela só descobre pelo menu).
+- Se o envio assíncrono (thread) ficar curto, trocar por uma fila (Celery/RQ).
 
 ### Integração com o Google Agenda (personal e alunos)
 *Pedido: a personal e cada aluno verem as aulas no próprio Google Agenda. **Decisões:** todos têm conta Google, então a integração é **só com o Google** (o link `.ics` também abre em Apple/Outlook, mas não é prioridade); o app terá HTTPS em produção (e já tem localmente pelo Caddy); **começamos pelo link.***

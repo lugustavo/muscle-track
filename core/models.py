@@ -842,6 +842,46 @@ class AppointmentRequest(models.Model):
         return f'{self.appointment_id} {self.kind} {self.status}'
 
 
+class NotificationPreference(models.Model):
+    """Which channels a person (student or trainer) allows for notifications. Everything starts off; turning a channel
+    on is the consent for it (`*_at` keeps when), turning it off withdraws it."""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='notification_preference')
+    email_enabled = models.BooleanField(default=False)
+    email_at = models.DateTimeField(null=True, blank=True)
+    push_enabled = models.BooleanField(default=False)
+    push_at = models.DateTimeField(null=True, blank=True)
+
+
+class PushSubscription(models.Model):
+    """One browser/phone that agreed to receive web push (the subscription the browser handed to the page)."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='push_subscriptions')
+    endpoint = models.TextField(unique=True)
+    p256dh = models.CharField(max_length=200)
+    auth = models.CharField(max_length=100)
+    device = models.CharField(max_length=120, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_success_at = models.DateTimeField(null=True, blank=True)
+
+
+class NotificationLog(models.Model):
+    """What was sent (or not) and how it went. Never holds the message text, only its kind."""
+
+    class Status(models.TextChoices):
+        SENT = 'sent', 'Enviada'
+        FAILED = 'failed', 'Falhou'
+        SKIPPED = 'skipped', 'Não enviada'
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notification_logs')
+    kind = models.CharField(max_length=30)
+    channel = models.CharField(max_length=10)
+    status = models.CharField(max_length=10, choices=Status.choices)
+    detail = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at', '-pk']
+
+
 class CalendarFeed(models.Model):
     """A private calendar link (iCalendar, .ics) for one account: the trainer's whole agenda, or a student's own classes.
 

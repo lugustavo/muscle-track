@@ -40,7 +40,7 @@ from .billing import (
     charge_message, delete_payment, month_bounds, month_summary, overdue_rows, parse_month,
     register_payment, suggest_amount, suggest_period,
 )
-from . import class_requests
+from . import class_requests, notifications
 from .consistency import celebrations
 from .calendar_feed import build_ics, feed_for_token, get_or_create_feed, mark_fetched, rotate
 from .contract import contract_card
@@ -52,7 +52,7 @@ from .exports import build_export
 from .history import log_event, log_profile_edit
 from .invites import build_invite_url, get_user_from_invite, revoke_invites
 from .models import (
-    Appointment, AppointmentRequest, Assessment, CalendarFeed, ConsentRecord, Exercise, MuscleGroup, Payment, Plan, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
+    Appointment, AppointmentRequest, Assessment, CalendarFeed, NotificationPreference, PushSubscription, ConsentRecord, Exercise, MuscleGroup, Payment, Plan, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
     Routine, RoutineExercise, SessionExercise, SessionSet, StudentEvent, StudentNote, WorkoutSession,
 )
 from .navigation import after_save_url, back_label, safe_next_url
@@ -622,10 +622,11 @@ def my_agenda_request(request, person, pk):
         data = form.cleaned_data
         proposed = at(data['date'], data['time']) if data['kind'] == 'reschedule' else None
         try:
-            class_requests.create_request(person, appointment, data['kind'], proposed, data['message'])
+            asked = class_requests.create_request(person, appointment, data['kind'], proposed, data['message'])
         except class_requests.RequestError as error:
             form.add_error(None, str(error))
         else:
+            notifications.notify(notifications.staff_users(), notifications.request_created(asked))
             messages.success(request, 'Pedido enviado. Assim que sua personal responder, a resposta aparece aqui.')
             return redirect('core:my_agenda')
     return render(request, 'core/my_agenda_request.html', {
@@ -1818,6 +1819,105 @@ def _calendar_owner(request):
     return 'student', person
 
 
+def _set_channel(user, person, pref, channel, enabled):
+    """Turn one channel on/off, keeping when (the consent) and, for a student, a line in the file's history."""
+    field = f'{channel}_enabled'
+    if getattr(pref, field) == enabled:
+        return
+    setattr(pref, field, enabled)
+    setattr(pref, f'{channel}_at', timezone.now() if enabled else None)
+    pref.save()
+    if channel == 'push' and not enabled:
+        user.push_subscriptions.all().delete()   # withdrawing also forgets the devices
+    if person is not None:
+        label = 'e-mail' if channel == 'email' else 'push (aparelho)'
+        StudentEvent.objects.create(
+            person=person, kind=StudentEvent.Kind.CONSENT, actor=user,
+            summary=f'{"Ativou" if enabled else "Desativou"} avisos por {label}',
+            changes={'channel': channel, 'granted': enabled})
+
+
+@login_required
+def notification_settings(request):
+    """Each person chooses whether to get notifications (e-mail, push on this device); everything starts off."""
+    person = getattr(request.user, 'person', None)   # None for the trainer; students go through the consent gate
+    if person is not None and not has_current_consent(person):
+        return redirect('core:consent')
+    pref, _ = NotificationPreference.objects.get_or_create(user=request.user)
+    if request.method == 'POST':
+        wants_email = 'email_enabled' in request.POST
+        wants_push = 'push_enabled' in request.POST
+        error = ''
+        if wants_email and not request.user.email:
+            error = 'Cadastre um e-mail na sua conta para receber avisos por e-mail.'
+        elif wants_email and not pref.email_enabled and not notifications.email_configured():
+            error = 'O envio de e-mail ainda não foi configurado no servidor.'
+        elif wants_push and not pref.push_enabled and not notifications.push_configured():
+            error = 'O aviso no aparelho ainda não foi configurado no servidor.'
+        if error:
+            messages.error(request, error)
+        else:
+            _set_channel(request.user, person, pref, 'email', wants_email)
+            _set_channel(request.user, person, pref, 'push', wants_push)
+            messages.success(request, 'Preferências de notificação salvas.')
+        return redirect('core:notification_settings')
+    recent = list(request.user.notification_logs.all()[:5])
+    return render(request, 'core/notification_settings.html', {
+        'title': 'Notificações', 'pref': pref, 'person': person, 'devices': list(request.user.push_subscriptions.all()),
+        'push_ready': notifications.push_configured(), 'email_ready': notifications.email_configured(),
+        'vapid_public_key': settings.VAPID_PUBLIC_KEY, 'recent': recent, 'is_trainer': request.user.is_staff,
+    })
+
+
+@login_required
+@require_POST
+def push_subscribe(request):
+    """The page hands over this browser's push subscription (JSON); it also means "yes, notify me here"."""
+    if not notifications.push_configured():
+        return JsonResponse({'ok': False, 'error': 'Aviso no aparelho não configurado no servidor.'}, status=400)
+    try:
+        body = json.loads(request.body.decode())
+        endpoint, keys = body['endpoint'], body['keys']
+        p256dh, auth = keys['p256dh'], keys['auth']
+        if not (isinstance(endpoint, str) and endpoint.startswith('https://') and len(endpoint) <= 2000
+                and isinstance(p256dh, str) and isinstance(auth, str) and len(p256dh) <= 200 and len(auth) <= 100):
+            raise ValueError
+    except (ValueError, KeyError, TypeError):
+        return JsonResponse({'ok': False, 'error': 'Assinatura inválida.'}, status=400)
+    PushSubscription.objects.update_or_create(endpoint=endpoint, defaults={
+        'user': request.user, 'p256dh': p256dh, 'auth': auth,
+        'device': (request.META.get('HTTP_USER_AGENT', '') or '')[:120]})
+    pref, _ = NotificationPreference.objects.get_or_create(user=request.user)
+    _set_channel(request.user, getattr(request.user, 'person', None), pref, 'push', True)
+    return JsonResponse({'ok': True})
+
+
+@login_required
+@require_POST
+def push_unsubscribe(request, pk):
+    get_object_or_404(PushSubscription, pk=pk, user=request.user).delete()
+    messages.success(request, 'Aparelho removido.')
+    return redirect('core:notification_settings')
+
+
+@login_required
+@require_POST
+def notification_test(request):
+    """Send a test on one channel so the person sees it works (only to themselves, only on a channel they enabled)."""
+    channel = request.POST.get('channel')
+    pref = NotificationPreference.objects.filter(user=request.user).first()
+    if channel not in ('email', 'push') or pref is None or not getattr(pref, f'{channel}_enabled'):
+        messages.error(request, 'Ative este canal antes de testar.')
+        return redirect('core:notification_settings')
+    notifications.deliver(request.user, notifications.test_message(), only=channel)
+    last = request.user.notification_logs.filter(channel=channel).first()
+    if last and last.status == 'sent':
+        messages.success(request, 'Teste enviado. Confira o e-mail.' if channel == 'email' else 'Teste enviado. Deve aparecer no aparelho em instantes.')
+    else:
+        messages.error(request, f'Não foi possível enviar: {last.detail if last else "sem detalhes"}.')
+    return redirect('core:notification_settings')
+
+
 @login_required
 def calendar_settings(request):
     """Where each person finds their own calendar link, how to add it to Google Agenda, and renews it."""
@@ -2327,6 +2427,7 @@ def appointment_reschedule(request, pk):
         except MoveError:
             form.add_error('time', 'Escolha outro horário: este aluno já tem aula neste.')
         else:
+            notifications.notify([appointment.person.user], notifications.class_moved(appointment, new))
             messages.success(request, 'Aula remarcada.')
             _warn_if_conflict(request, new)
             return redirect(after_save_url(request, _agenda_url_for(data['date']), forward_next=False))
@@ -2365,6 +2466,7 @@ def appointment_move(request, pk):
         new = move_appointment(appointment, at(day, clock), duration)
     except MoveError as error:
         return JsonResponse({'ok': False, 'error': str(error)}, status=400)
+    notifications.notify([appointment.person.user], notifications.class_moved(appointment, new))
     return _move_response(new)
 
 
@@ -2377,6 +2479,7 @@ def appointment_move_undo(request, pk):
         original = undo_move(new)
     except MoveError as error:
         return JsonResponse({'ok': False, 'error': str(error)}, status=400)
+    notifications.notify([new.person.user], notifications.move_undone(original))
     return JsonResponse({'ok': True, 'id': original.pk})
 
 
@@ -2390,12 +2493,14 @@ def appointment_request_decide(request, pk):
         return HttpResponseBadRequest('Decisão inválida')
     name = asked.appointment.person.person_name
     try:
+        note = request.POST.get('note', '').strip()[:200]
         if decision == 'approve':
             class_requests.approve(asked)
             messages.success(request, f'Pedido de {name} aprovado.')
         else:
-            class_requests.decline(asked, request.POST.get('note', ''))
+            class_requests.decline(asked, note)
             messages.success(request, f'Pedido de {name} recusado.')
+        notifications.notify([asked.appointment.person.user], notifications.request_answered(asked, note))
     except class_requests.RequestError as error:
         messages.error(request, str(error))
     return redirect(safe_next_url(request, reverse('core:agenda')))
@@ -2410,9 +2515,12 @@ def appointment_status(request, pk):
                Appointment.Status.CANCELLED)
     if status not in allowed or appointment.status == Appointment.Status.RESCHEDULED:
         return HttpResponseBadRequest('Situação inválida')
+    was_cancelled = appointment.status == Appointment.Status.CANCELLED
     appointment.status = status
     appointment.status_changed_at = timezone.now()
     appointment.save(update_fields=['status', 'status_changed_at'])
+    if status == Appointment.Status.CANCELLED and not was_cancelled and appointment.starts_at > timezone.now():
+        notifications.notify([appointment.person.user], notifications.class_cancelled(appointment))
     return redirect(safe_next_url(request, _agenda_url_for(timezone.localtime(appointment.starts_at).date())))
 
 
