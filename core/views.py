@@ -17,6 +17,7 @@ from django.db import transaction
 from django.db.models import Avg, Count, Exists, F, Max, OuterRef, Prefetch, Q, Subquery
 from django.db.models.functions import Coalesce
 from django.http import FileResponse, Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.templatetags.static import static
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
@@ -1720,8 +1721,43 @@ def routine_generate_ai(request):
 
 # ============= PWA =============
 
+def _manifest_shortcuts(user):
+    """Long-press shortcuts of the installed icon, by role (the manifest is fetched with the session cookie)."""
+    if not user.is_authenticated:
+        return []
+    icon = [{'src': static('images/icon-192.png'), 'sizes': '192x192', 'type': 'image/png'}]
+    if is_trainer(user):
+        items = (('Agenda', reverse('core:agenda')), ('Alunos', reverse('core:student_list')),
+                 ('Buscar', reverse('core:search')))
+    else:
+        items = (('Treinar agora', reverse('core:my_workouts')), ('Meu histórico', reverse('core:my_history')))
+    return [{'name': name, 'short_name': name, 'url': url, 'icons': icon} for name, url in items]
+
+
 def pwa_manifest(request):
-    return render(request, 'pwa/manifest.webmanifest', content_type='application/manifest+json')
+    manifest = {
+        'id': '/',
+        'name': 'Muscle Track',
+        'short_name': 'Muscle Track',
+        'description': 'Seus treinos, séries e cargas na palma da mão',
+        'start_url': '/',
+        'scope': '/',
+        'display': 'standalone',
+        'orientation': 'portrait',
+        'background_color': '#ffffff',
+        'theme_color': '#FF6B6B',
+        'lang': 'pt-BR',
+        'categories': ['health', 'fitness', 'lifestyle'],
+        'icons': [
+            {'src': static('images/icon-192.png'), 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any maskable'},
+            {'src': static('images/icon-512.png'), 'sizes': '512x512', 'type': 'image/png', 'purpose': 'any maskable'},
+        ],
+        'shortcuts': _manifest_shortcuts(request.user),
+    }
+    response = HttpResponse(json.dumps(manifest, ensure_ascii=False), content_type='application/manifest+json')
+    response['Cache-Control'] = 'private, no-cache'   # varies with who is logged in
+    response['Vary'] = 'Cookie'
+    return response
 
 
 def service_worker(request):
