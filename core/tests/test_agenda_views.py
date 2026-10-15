@@ -116,16 +116,23 @@ class AgendaViewsTests(BaseTestCase):
         self.assertIn('vista=dia&dia=2026-03-10', html)        # tapping a day opens it
         self.assertIn('month-chip s-missed', html)
 
+    def next_month(self, months=1):
+        year, month = self.today.year, self.today.month + months
+        year, month = year + (month - 1) // 12, (month - 1) % 12 + 1
+        return date(year, month, 1)
+
     def test_month_view_lists_the_classes_below_the_grid(self):
-        first = self.appt(date(2026, 3, 10), hour=8)
-        self.appt(date(2026, 3, 10), self.bob.person, hour=10, status='missed')
-        self.appt(date(2026, 3, 12), status='cancelled')
-        self.appt(date(2026, 4, 1))      # next month's day shown in the last grid row: not listed
-        response = self.client.get(self.url, {'vista': 'mes', 'mes': '2026-03'})
-        self.assertEqual([d['date'] for d in response.context['month_days']], [date(2026, 3, 10), date(2026, 3, 12)])
+        first = self.next_month()
+        later = first + timedelta(days=2)
+        first_class = self.appt(first, hour=8)
+        self.appt(first, self.bob.person, hour=10, status='missed')
+        self.appt(later, status='cancelled')
+        self.appt(self.next_month(2))       # another month's day: not listed
+        response = self.client.get(self.url, {'vista': 'mes', 'mes': first.strftime('%Y-%m')})
+        self.assertEqual([d['date'] for d in response.context['month_days']], [first, later])
         html = response.content.decode()
-        self.assertEqual(html.count('data-month-class='), 3)
         listed = html[html.index('data-month-list'):]
+        self.assertEqual(listed.count('data-month-class='), 3)
         self.assertIn('08:00', listed)
         self.assertIn('Alice', listed)
         self.assertIn('Bob', listed)
@@ -133,12 +140,36 @@ class AgendaViewsTests(BaseTestCase):
         link = reverse('core:student_detail', kwargs={'pk': self.alice.person.pk})
         self.assertIn(f'{link}?next=', listed)
         self.assertIn('#tab-agenda', listed)
-        self.assertIn(f'data-month-class="{first.pk}"', listed)
+        self.assertIn(f'data-month-class="{first_class.pk}"', listed)
         self.assertIn('Faltou', listed)
 
+    def test_month_list_never_shows_past_days(self):
+        yesterday = self.today - timedelta(days=1)
+        self.appt(yesterday, hour=6)
+        today_class = self.appt(self.today, hour=23)
+        tomorrow = self.today + timedelta(days=1)
+        self.appt(tomorrow, hour=7)
+        response = self.client.get(self.url, {'vista': 'mes', 'mes': self.today.strftime('%Y-%m')})
+        days = [d['date'] for d in response.context['month_days']]
+        self.assertNotIn(yesterday, days)
+        self.assertEqual(days[0], self.today)
+        html = response.content.decode()
+        self.assertIn(f'data-month-class="{today_class.pk}"', html)
+        if tomorrow.month == self.today.month:
+            self.assertIn(tomorrow, days)
+        self.assertTrue(all(d >= self.today for d in days))
+
+    def test_a_past_month_has_an_empty_list(self):
+        past = self.next_month(-2)
+        self.appt(past)
+        response = self.client.get(self.url, {'vista': 'mes', 'mes': past.strftime('%Y-%m')})
+        self.assertEqual(response.context['month_days'], [])
+        self.assertContains(response, 'Nenhuma aula de hoje em diante')
+        self.assertNotContains(response, 'data-month-class=')
+
     def test_month_without_classes_says_so(self):
-        response = self.client.get(self.url, {'vista': 'mes', 'mes': '2026-03'})
-        self.assertContains(response, 'Nenhuma aula neste mês.')
+        response = self.client.get(self.url, {'vista': 'mes', 'mes': self.next_month().strftime('%Y-%m')})
+        self.assertContains(response, 'Nenhuma aula de hoje em diante neste mês.')
 
     def test_month_navigation_links(self):
         response = self.client.get(self.url, {'vista': 'mes', 'mes': '2026-01'})

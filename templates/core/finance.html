@@ -33,6 +33,29 @@
     </div></div></div>
 </div>
 
+<div class="row g-3 mb-4" data-service-report>
+    <div class="col-md-6"><div class="card h-100">
+        <div class="card-body text-center">
+            <div class="text-muted small">Aulas dadas no mês (valor realizado)</div>
+            <div class="fs-3 fw-bold" data-given-total>{{ service.given_total|money }}</div>
+            <div class="small text-muted">{{ service.given_classes }} aula{{ service.given_classes|pluralize }} descontada{{ service.given_classes|pluralize }} dos pacotes{% if service.given_unpriced %} · {{ service.given_unpriced }} de pacote sem valor{% endif %}</div>
+        </div>
+        {% if service.given_rows %}<ul class="list-group list-group-flush small">
+            {% for r in service.given_rows %}<li class="list-group-item d-flex justify-content-between"><a href="{% nav_url 'core:student_detail' r.student.pk %}" class="text-decoration-none">{{ r.student.person_name }}</a><span class="text-muted">{{ r.classes }} aula{{ r.classes|pluralize }} · {{ r.amount|money }}</span></li>{% endfor %}
+        </ul>{% endif %}
+    </div></div>
+    <div class="col-md-6"><div class="card h-100">
+        <div class="card-body text-center">
+            <div class="text-muted small">Aulas a executar (pacotes em aberto, hoje)</div>
+            <div class="fs-3 fw-bold" data-owed-total>{{ service.owed_total|money }}</div>
+            <div class="small text-muted">{{ service.owed_classes }} aula{{ service.owed_classes|pluralize }} ainda não dada{{ service.owed_classes|pluralize }}{% if service.owed_unpriced %} · {{ service.owed_unpriced }} de pacote sem valor{% endif %}</div>
+        </div>
+        {% if service.owed_rows %}<ul class="list-group list-group-flush small">
+            {% for r in service.owed_rows %}<li class="list-group-item d-flex justify-content-between"><a href="{% nav_url 'core:student_detail' r.student.pk %}" class="text-decoration-none">{{ r.student.person_name }}</a><span class="text-muted">{{ r.left }} aula{{ r.left|pluralize }} · {{ r.amount|money }}</span></li>{% endfor %}
+        </ul>{% endif %}
+    </div></div>
+</div>
+
 <div class="row g-4">
     <div class="col-lg-6">
         <div class="card mb-4">

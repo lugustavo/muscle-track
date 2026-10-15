@@ -148,7 +148,7 @@
 <p class="small text-muted mt-2 mb-0">Toque em um dia para ver as aulas dele.<span class="d-none d-md-inline"> Arraste uma aula marcada para outro dia para mudá-la de lugar.</span></p>
 
 <div class="mt-4" data-month-list>
-    <h2 class="h6 text-uppercase text-muted mb-2">Aulas de {{ month|date:"F"|lower }}</h2>
+    <h2 class="h6 text-uppercase text-muted mb-2">Próximas aulas de {{ month|date:"F"|lower }}</h2>
     {% for day in month_days %}
     <section class="mb-3" data-month-day="{{ day.date|date:'Y-m-d' }}">
         <h3 class="small fw-bold mb-1 {% if day.is_today %}text-primary{% else %}text-muted{% endif %}">
@@ -167,7 +167,7 @@
         </div>
     </section>
     {% empty %}
-    <p class="text-muted">Nenhuma aula neste mês.</p>
+    <p class="text-muted">Nenhuma aula de hoje em diante neste mês.</p>
     {% endfor %}
 </div>
 
