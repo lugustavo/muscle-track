@@ -163,7 +163,7 @@ class PlanTemplateTests(BaseTestCase):
     def test_student_form_shows_the_plan_fields(self):
         self.login(self.trainer)
         page = self.client.get(reverse('core:student_edit', kwargs={'pk': self.person.pk}))
-        for text in ('Plano (modelo)', 'Valor negociado do período', 'Valor/hora negociado', 'Mensal 3x'):
+        for text in ('Plano do catálogo', 'Nome do contrato', 'Vencimento do contrato', 'Valor do contrato por período', 'Valor/hora do contrato', 'Mensal 3x'):
             self.assertContains(page, text)
 
 

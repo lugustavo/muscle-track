@@ -78,6 +78,8 @@
     </div>
 </div>
 
+{% include 'core/student/_contrato.html' %}
+
 <!-- Estatísticas -->
 <div class="row mb-4 stat-strip">
     <div class="col-md-3">
@@ -299,6 +301,22 @@
 <script src="{% static 'vendor/chartjs/4.4.0/chart.umd.js' %}"></script>
 <script src="{% static 'js/chart-theme.js' %}"></script>
 <script>
+// Contract values stay hidden until asked (the trainer may be showing the screen to the student)
+(function () {
+    var toggle = document.querySelector('[data-contract-values-toggle]');
+    if (!toggle) return;
+    toggle.addEventListener('click', function () {
+        var values = document.querySelector('[data-contract-values]');
+        var note = document.querySelector('[data-contract-values-hidden]');
+        var show = values.hidden;
+        values.hidden = !show;
+        note.hidden = show;
+        toggle.setAttribute('aria-pressed', show ? 'true' : 'false');
+        toggle.querySelector('span').textContent = show ? 'Ocultar' : 'Mostrar';
+        toggle.querySelector('i').className = 'bi ' + (show ? 'bi-eye-slash' : 'bi-eye');
+    });
+})();
+
 // Open the tab named in the URL hash (#tab-avaliacoes) and keep the hash in sync
 (function () {
     function showFromHash() {
