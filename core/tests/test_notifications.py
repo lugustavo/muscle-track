@@ -166,7 +166,7 @@ class DeliveryTests(BaseTestCase):
         self.assertEqual(sender.call_count, 2)
         log = NotificationLog.objects.get()
         self.assertEqual(log.status, 'failed')
-        self.assertIn('smtp down', log.detail)
+        self.assertIn('não foi possível conectar ao servidor de e-mail', log.detail)
 
     def test_no_address_is_skipped(self):
         turn_on(self.alice, email=True)
@@ -205,6 +205,53 @@ class DeliveryTests(BaseTestCase):
             notifications.notify([self.alice], self.message())
         self.assertTrue(PushSubscription.objects.exists())
         self.assertEqual(NotificationLog.objects.get().status, 'failed')
+
+    def test_push_connection_error_is_friendly_and_never_leaks_the_endpoint(self):
+        import requests
+        turn_on(self.alice, push=True)
+        subscribe(self.alice, 'https://fcm.googleapis.com/fcm/send/SECRET-TOKEN-123')
+        boom = requests.ConnectionError("HTTPSConnectionPool(host='fcm.googleapis.com', port=443): url: /fcm/send/SECRET-TOKEN-123")
+        with mock.patch('pywebpush.webpush', side_effect=boom):
+            notifications.notify([self.alice], self.message())
+        log = NotificationLog.objects.get()
+        self.assertEqual(log.status, 'failed')
+        self.assertIn('fcm.googleapis.com', log.detail)
+        self.assertNotIn('SECRET-TOKEN', log.detail)
+        self.client.force_login(self.alice)
+        mail.outbox.clear()
+        self.client.post(reverse('core:notification_test'), {'channel': 'push'}, follow=True)
+        page = self.client.get(reverse('core:notification_settings'))
+        self.assertNotContains(page, 'SECRET-TOKEN')
+
+    def test_other_push_errors_are_scrubbed(self):
+        turn_on(self.alice, push=True)
+        subscribe(self.alice, 'https://push.example.com/SECRET')
+        with mock.patch('pywebpush.webpush', side_effect=RuntimeError('failed at https://push.example.com/SECRET now')):
+            notifications.notify([self.alice], self.message())
+        self.assertNotIn('SECRET', NotificationLog.objects.get().detail)
+
+    def test_push_has_a_timeout(self):
+        turn_on(self.alice, push=True)
+        subscribe(self.alice)
+        with mock.patch('pywebpush.webpush') as sender:
+            notifications.notify([self.alice], self.message())
+        self.assertEqual(sender.call_args.kwargs['timeout'], 10)
+
+    def test_email_login_error_points_at_the_app_password(self):
+        import smtplib
+        turn_on(self.alice, email=True)
+        with mock.patch('core.notifications.send_mail', side_effect=smtplib.SMTPAuthenticationError(535, b'bad')):
+            notifications.notify([self.alice], self.message())
+        self.assertIn('senha de app', NotificationLog.objects.get().detail)
+
+    def test_device_names(self):
+        chrome_win = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36'
+        edge = chrome_win + ' Edg/120.0'
+        iphone = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
+        self.assertEqual(notifications.device_name(chrome_win), 'Chrome no Windows')
+        self.assertEqual(notifications.device_name(edge), 'Edge no Windows')
+        self.assertEqual(notifications.device_name(iphone), 'Safari no iPhone')
+        self.assertEqual(notifications.device_name(''), 'Navegador')
 
     def test_push_without_devices_or_server_keys_is_skipped(self):
         turn_on(self.alice, push=True)
@@ -327,3 +374,15 @@ class SetupTests(BaseTestCase):
         js = self.client.get('/sw.js').content.decode()
         self.assertIn("addEventListener('push'", js)
         self.assertIn("addEventListener('notificationclick'", js)
+
+
+@override_settings(**CONFIG)
+class DeviceLabelTests(BaseTestCase):
+    def test_old_rows_with_a_raw_user_agent_show_a_friendly_label(self):
+        sub = subscribe(self.alice)
+        sub.device = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36'
+        sub.save()
+        self.client.force_login(self.alice)
+        page = self.client.get(reverse('core:notification_settings'))
+        self.assertContains(page, 'Chrome no Windows')
+        self.assertNotContains(page, 'Mozilla/5.0')

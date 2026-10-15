@@ -49,7 +49,7 @@
         <ul class="list-group list-group-flush">
             {% for d in devices %}
             <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
-                <span class="small text-truncate" title="{{ d.device }}"><i class="bi bi-phone"></i> {{ d.device|default:"Aparelho"|truncatechars:60 }} <span class="text-muted">· desde {{ d.created_at|date:"d/m/Y" }}</span></span>
+                <span class="small text-truncate"><i class="bi bi-phone"></i> {{ d.label }} <span class="text-muted">· desde {{ d.created_at|date:"d/m/Y" }}</span></span>
                 <form method="post" action="{% url 'core:push_unsubscribe' d.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-danger">Remover</button></form>
             </li>
             {% empty %}
