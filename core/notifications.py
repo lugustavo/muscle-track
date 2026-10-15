@@ -28,7 +28,8 @@ Message = namedtuple('Message', 'kind title body path')
 KIND_FLAG = {
     'request_new': 'notify_changes', 'request_answered': 'notify_changes', 'class_moved': 'notify_changes',
     'class_cancelled': 'notify_changes', 'move_undone': 'notify_changes',
-    'class_reminder': 'notify_class_reminder', 'plan_expiry': 'notify_plan_expiry',
+    'class_reminder': 'notify_class_reminder', 'plan_expiry': 'notify_plan_expiry', 'package_low': 'notify_plan_expiry',
+    'package_attention': 'notify_renewals',
 }
 Status = NotificationLog.Status
 
@@ -125,6 +126,33 @@ def plan_expiring(days, left=None):
     sessions = '' if left is None else f' Ainda {"resta" if left == 1 else "restam"} {left} aula{"" if left == 1 else "s"}.'
     return Message('plan_expiry', 'Seu pacote está vencendo', f'Seu pacote vence {when_}.{sessions} Fale com a sua personal para combinar.',
                    reverse('core:my_agenda'))
+
+
+def package_low(left):
+    if left == 1:
+        text = 'Resta 1 aula no seu pacote. Fale com a sua personal para renovar.'
+    else:
+        text = f'Restam {left} aulas no seu pacote. Fale com a sua personal para renovar.'
+    return Message('package_low', 'Seu pacote está acabando', text, reverse('core:my_agenda'))
+
+
+def package_attention(rows, today):
+    """One notice to the trainer about every package that just needed attention (see packages.alerts)."""
+    lines = []
+    for r in rows:
+        name = r['student'].person_name
+        if r['expired']:
+            lines.append(f"{name}: pacote vencido, {r['left']} aula{'' if r['left'] == 1 else 's'} sem usar")
+        elif r['expiring']:
+            days = (r['ends_on'] - today).days
+            when_ = 'hoje' if days <= 0 else ('amanhã' if days == 1 else f'em {days} dias')
+            lines.append(f"{name}: vence {when_}, "
+                         f"{r['left']} aula{'' if r['left'] == 1 else 's'} restante{'' if r['left'] == 1 else 's'}")
+        else:
+            lines.append(f"{name}: {r['left']} aula{'' if r['left'] == 1 else 's'} restante{'' if r['left'] == 1 else 's'}")
+    title = ('1 pacote para renovar' if len(rows) == 1 else f'{len(rows)} pacotes para renovar')
+    shown = lines[:5] + ([f'e mais {len(lines) - 5}'] if len(lines) > 5 else [])
+    return Message('package_attention', title, '; '.join(shown) + '.', reverse('core:finance'))
 
 
 def test_message():

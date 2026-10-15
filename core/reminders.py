@@ -1,8 +1,8 @@
 """Automatic reminders, sent only to people who turned a channel on and kept that kind of reminder on.
 
 `run()` is idempotent and meant to be called every few minutes (management command `send_reminders`, run by the
-`scheduler` service of docker-compose): each class and each plan expiry is reminded once (`Appointment.reminder_sent_at`,
-`Person.plan_reminder_for`)."""
+`scheduler` service of docker-compose): each class, each plan expiry and each package alert is told once (`Appointment.reminder_sent_at`,
+`Person.plan_reminder_for`, `StudentPackage.low_notified_at` and friends)."""
 from datetime import timedelta
 
 from django.conf import settings
@@ -57,9 +57,26 @@ def send_plan_reminders(today):
     return sent
 
 
+def send_package_reminders(now, today):
+    """Packages running low or expiring, each told once (`packages.alerts`): the student hears when classes run low,
+    and the trainer gets one notice per run listing every package that needs renewing."""
+    rows = packages.alerts(today)
+    for row in rows:
+        if row['low']:
+            user = row['student'].user
+            if user is not None:
+                notifications.notify([user], notifications.package_low(row['left']), sync=True)
+    if rows:
+        notifications.notify(notifications.staff_users(), notifications.package_attention(rows, today), sync=True)
+    for row in rows:
+        packages.mark_alerted(row, now)
+    return len(rows)
+
+
 def run(now=None):
     """Create the classes of the next days (fixed times are generated lazily) and send what is due."""
     now = now or timezone.now()
     today = timezone.localdate(now)
     ensure_appointments(today, today + timedelta(days=3), today)
-    return {'classes': send_class_reminders(now), 'plans': send_plan_reminders(today)}
+    return {'classes': send_class_reminders(now), 'plans': send_plan_reminders(today),
+            'packages': send_package_reminders(now, today)}

@@ -271,12 +271,8 @@ def pending_count():
     ).annotate(paid=Coalesce(Sum('payments__amount'), Decimal('0'))).filter(paid__lt=F('price_total')).count()
 
 
-def renewals(today=None, expiring_days=14):
-    """Active students whose current package needs attention: expired with classes left, expiring soon or running out.
-
-    Only the package being used counts (a queued one is not flagged). Each row: student, package, kind, left, ends_on."""
-    today = today or timezone.localdate()
-    rows = []
+def _current_packages(today):
+    """The package each active student is using (a queued one is not): (package, state, left, ends_on)."""
     seen = set()
     queryset = StudentPackage.objects.filter(
         cancelled_at__isnull=True, person__is_active=True).select_related('person').annotate(
@@ -288,8 +284,16 @@ def renewals(today=None, expiring_days=14):
         if s in ('done', 'cancelled'):
             continue
         seen.add(package.person_id)
-        left = package.sessions - package.n_used
-        end = ends_on(package, today)
+        yield package, s, package.sessions - package.n_used, ends_on(package, today)
+
+
+def renewals(today=None, expiring_days=14):
+    """Active students whose current package needs attention: expired with classes left, expiring soon or running out.
+
+    Each row: student, package, kind, left, ends_on."""
+    today = today or timezone.localdate()
+    rows = []
+    for package, s, left, end in _current_packages(today):
         kind = None
         if s == 'expired':
             kind = 'expired'
@@ -302,3 +306,32 @@ def renewals(today=None, expiring_days=14):
     order = {'expired': 0, 'expiring': 1, 'low': 2}
     rows.sort(key=lambda r: (order[r['kind']], r['ends_on'] or today))
     return rows
+
+
+def alerts(today=None):
+    """What is new to tell about, each package once: running low (few classes left), about to expire, expired.
+
+    Compares with what was already told (`low_notified_at`, `expiring_notified_for`, `expired_notified_for`: the
+    deadline they were told about, so an extension re-arms them). Each row: student, package, left, ends_on, low,
+    expiring, expired (flags). Nothing is marked here: see `mark_alerted`."""
+    today = today or timezone.localdate()
+    rows = []
+    for package, s, left, end in _current_packages(today):
+        low = s in ('active', 'frozen') and left <= LOW_BALANCE and package.low_notified_at is None
+        expiring = s == 'active' and (end - today).days <= EXPIRING_DAYS and package.expiring_notified_for != end
+        expired = s == 'expired' and left > 0 and package.expired_notified_for != end
+        if low or expiring or expired:
+            rows.append({'student': package.person, 'package': package, 'left': left, 'ends_on': end,
+                         'low': low, 'expiring': expiring, 'expired': expired})
+    return rows
+
+
+def mark_alerted(row, now):
+    fields = {}
+    if row['low']:
+        fields['low_notified_at'] = now
+    if row['expiring']:
+        fields['expiring_notified_for'] = row['ends_on']
+    if row['expired']:
+        fields['expired_notified_for'] = row['ends_on']
+    StudentPackage.objects.filter(pk=row['package'].pk).update(**fields)

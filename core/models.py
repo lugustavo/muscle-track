@@ -765,6 +765,10 @@ class StudentPackage(models.Model):
     cancelled_at = models.DateTimeField(null=True, blank=True)
     notes = models.CharField(max_length=200, blank=True, verbose_name='Observação')
     created_at = models.DateTimeField(auto_now_add=True)
+    # What the reminders already told about this package (core/reminders.py): once each, and a new deadline re-arms them
+    low_notified_at = models.DateTimeField(null=True, blank=True)
+    expiring_notified_for = models.DateField(null=True, blank=True)
+    expired_notified_for = models.DateField(null=True, blank=True)
 
     class Meta:
         verbose_name = 'Pacote do aluno'
@@ -944,7 +948,8 @@ class NotificationPreference(models.Model):
     # What to be told about, once a channel is on (applies to both channels)
     notify_changes = models.BooleanField(default=True)          # class moved/cancelled, answers and requests
     notify_class_reminder = models.BooleanField(default=True)   # "your class is tomorrow"
-    notify_plan_expiry = models.BooleanField(default=True)      # "your plan expires in 3 days"
+    notify_plan_expiry = models.BooleanField(default=True)      # student: "your plan expires in 3 days", "2 classes left"
+    notify_renewals = models.BooleanField(default=True)         # trainer: packages running out or expiring
 
 
 class PushSubscription(models.Model):
