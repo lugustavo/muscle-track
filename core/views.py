@@ -33,7 +33,8 @@ from .forms import (
 )
 from .agenda import (
     DEFAULT_VIEW as DEFAULT_AGENDA_VIEW, LIST_DAYS, VIEWS as AGENDA_VIEWS, add_months, at, attendance_stats,
-    conflicting_ids, ensure_appointments, month_cells, parse_week, view_range,
+    MoveError, conflicting_ids, ensure_appointments, month_cells, move_appointment, overlap_names, parse_week,
+    undo_move, view_range,
 )
 from .billing import (
     charge_message, delete_payment, month_bounds, month_summary, overdue_rows, parse_month,
@@ -2196,14 +2197,9 @@ def agenda(request):
 
 
 def _warn_if_conflict(request, appointment):
-    clash = Appointment.objects.filter(
-        starts_at__lt=appointment.ends_at, starts_at__gte=appointment.starts_at - timedelta(minutes=480)
-    ).exclude(pk=appointment.pk).exclude(
-        status__in=(Appointment.Status.CANCELLED, Appointment.Status.RESCHEDULED)).select_related('person')
-    others = [a for a in clash if a.ends_at > appointment.starts_at]
-    if others:
-        names = ', '.join(sorted({a.person.person_name for a in others}))
-        messages.warning(request, f'Atenção: este horário se sobrepõe a outra aula ({names}).')
+    names = overlap_names(appointment)
+    if names:
+        messages.warning(request, f'Atenção: este horário se sobrepõe a outra aula ({", ".join(names)}).')
 
 
 def _agenda_url_for(day):
@@ -2270,21 +2266,62 @@ def appointment_reschedule(request, pk):
     if request.method == 'POST' and form.is_valid():
         data = form.cleaned_data
         starts = at(data['date'], data['time'])
-        if starts == appointment.starts_at or Appointment.objects.filter(person=appointment.person, starts_at=starts).exists():
+        try:
+            new = move_appointment(appointment, starts, data['duration_minutes'], data['kind'], data['notes'])
+        except MoveError:
             form.add_error('time', 'Escolha outro horário: este aluno já tem aula neste.')
         else:
-            with transaction.atomic():
-                new = Appointment.objects.create(
-                    person=appointment.person, starts_at=starts, duration_minutes=data['duration_minutes'],
-                    kind=data['kind'], notes=data['notes'])
-                appointment.status = Appointment.Status.RESCHEDULED
-                appointment.status_changed_at = timezone.now()
-                appointment.save(update_fields=['status', 'status_changed_at'])
             messages.success(request, 'Aula remarcada.')
             _warn_if_conflict(request, new)
             return redirect(after_save_url(request, _agenda_url_for(data['date']), forward_next=False))
     return render(request, 'core/appointment_form.html', {
         'form': form, 'title': 'Remarcar aula', 'appointment': appointment})
+
+
+def _move_response(new):
+    local = timezone.localtime(new.starts_at)
+    return JsonResponse({
+        'ok': True, 'id': new.pk, 'person': new.person.person_name,
+        'when': f'{local:%d/%m} às {local:%H:%M}', 'date': local.date().isoformat(),
+        'overlap': overlap_names(new),
+        'undo_url': reverse('core:appointment_move_undo', args=[new.pk]),
+    })
+
+
+@staff_required
+@require_POST
+def appointment_move(request, pk):
+    """Drag & drop / "Mover": reschedule a marked class to another day (and optionally time). JSON in, JSON out."""
+    appointment = get_object_or_404(Appointment.objects.select_related('person'), pk=pk)
+    if appointment.status != Appointment.Status.SCHEDULED:
+        return JsonResponse({'ok': False, 'error': 'Só aulas marcadas podem ser movidas.'}, status=400)
+    local = timezone.localtime(appointment.starts_at)
+    try:
+        day = date.fromisoformat(request.POST.get('date', ''))
+        clock = time.fromisoformat(request.POST['time']) if request.POST.get('time') else local.time().replace(
+            second=0, microsecond=0)
+        duration = int(request.POST['duration']) if request.POST.get('duration') else None
+    except (ValueError, TypeError):
+        return JsonResponse({'ok': False, 'error': 'Data ou horário inválido.'}, status=400)
+    if duration is not None and not 10 <= duration <= 480:
+        return JsonResponse({'ok': False, 'error': 'A duração deve ficar entre 10 e 480 minutos.'}, status=400)
+    try:
+        new = move_appointment(appointment, at(day, clock), duration)
+    except MoveError as error:
+        return JsonResponse({'ok': False, 'error': str(error)}, status=400)
+    return _move_response(new)
+
+
+@staff_required
+@require_POST
+def appointment_move_undo(request, pk):
+    """Undo a move: `pk` is the class created by it."""
+    new = get_object_or_404(Appointment.objects.select_related('person'), pk=pk)
+    try:
+        original = undo_move(new)
+    except MoveError as error:
+        return JsonResponse({'ok': False, 'error': str(error)}, status=400)
+    return JsonResponse({'ok': True, 'id': original.pk})
 
 
 @staff_required

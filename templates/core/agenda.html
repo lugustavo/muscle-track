@@ -13,6 +13,12 @@
     .appt.s-cancelled, .appt.s-rescheduled { opacity: .55; }
     .appt.conflict { border-left-color: #fd7e14; background: var(--bs-warning-bg-subtle); }
 
+    .appt[draggable="true"] { cursor: grab; }
+    .appt.dragging { opacity: .4; }
+    .drop-ok { outline: 2px dashed var(--bs-primary); outline-offset: 2px; border-radius: .5rem; }
+    .agenda-toast { position: fixed; left: 1rem; right: 1rem; bottom: 1rem; z-index: 1080; max-width: 28rem; margin: 0 auto; }
+    @media (max-width: 991.98px) { .agenda-toast { bottom: calc(var(--tabbar-h, 57px) + 5rem + env(safe-area-inset-bottom)); } }
+
     /* Month grid */
     .month-grid { border: 1px solid var(--bs-border-color); border-radius: .5rem; overflow: hidden; }
     .month-head, .month-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
@@ -137,8 +143,47 @@
     {% endfor %}
 </div>
 {% endif %}
+
+<div class="agenda-toast" data-agenda-toast hidden role="status" aria-live="polite">
+    <div class="toast show text-bg-dark w-100">
+        <div class="d-flex align-items-start gap-2 p-3">
+            <div class="flex-grow-1">
+                <div data-toast-text></div>
+                <div class="small text-warning mt-1" data-toast-warn hidden></div>
+            </div>
+            <button type="button" class="btn btn-sm btn-light" data-toast-undo hidden>Desfazer</button>
+            <button type="button" class="btn-close btn-close-white" data-toast-close aria-label="Fechar"></button>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="moveModal" tabindex="-1" aria-labelledby="moveModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" method="post" action="#">
+            {% csrf_token %}
+            <div class="modal-header">
+                <h2 class="modal-title h5" id="moveModalTitle">Mover aula de <span data-move-person></span></h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger py-2" data-move-error hidden role="alert"></div>
+                <div class="row g-2">
+                    <div class="col-12"><label class="form-label" for="move-date">Dia</label><input class="form-control" type="date" id="move-date" name="date" required></div>
+                    <div class="col-6"><label class="form-label" for="move-time">Horário</label><input class="form-control" type="time" id="move-time" name="time" required></div>
+                    <div class="col-6"><label class="form-label" for="move-duration">Duração (min)</label><input class="form-control" type="number" id="move-duration" name="duration" min="10" max="480" required></div>
+                </div>
+                <p class="small text-muted mt-3 mb-0">A aula atual fica como “Remarcada” e uma nova é marcada. Dá para desfazer logo depois. <a href="#" data-move-more>Mais opções (tipo, observação)</a></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-arrows-move"></i> Mover</button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'js/staff-mobile.js' %}"></script>
+<script src="{% static 'js/agenda-move.js' %}"></script>
 {% endblock %}

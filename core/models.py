@@ -793,6 +793,9 @@ class Appointment(models.Model):
                              related_name='appointments')
     notes = models.CharField(max_length=200, blank=True, verbose_name='Observação')
     status_changed_at = models.DateTimeField(null=True, blank=True)
+    # On the original class of a move: the class it became (lets "desfazer" put things back)
+    rescheduled_to = models.OneToOneField('self', on_delete=models.SET_NULL, null=True, blank=True,
+                                          related_name='rescheduled_from')
 
     class Meta:
         verbose_name = 'Aula'

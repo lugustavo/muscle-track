@@ -1,6 +1,7 @@
 """Calendar: generation of classes from fixed slots, the week / day / month / list views, conflicts and attendance."""
 from datetime import date, datetime, timedelta
 
+from django.db import transaction
 from django.utils import timezone
 
 from .models import Appointment, ScheduleSlot
@@ -80,6 +81,61 @@ def conflicting_ids(appointments):
         if previous is None or a.ends_at > previous.ends_at:
             previous = a
     return flagged
+
+
+def overlapping(appointment):
+    """Other live classes that overlap `appointment` (cancelled and rescheduled ones do not count)."""
+    clash = Appointment.objects.filter(
+        starts_at__lt=appointment.ends_at, starts_at__gte=appointment.starts_at - timedelta(minutes=480)
+    ).exclude(pk=appointment.pk).exclude(
+        status__in=(Appointment.Status.CANCELLED, Appointment.Status.RESCHEDULED)).select_related('person')
+    return [a for a in clash if a.ends_at > appointment.starts_at]
+
+
+def overlap_names(appointment):
+    return sorted({a.person.person_name for a in overlapping(appointment)})
+
+
+class MoveError(Exception):
+    """A move that cannot happen; the message is meant for the trainer."""
+
+
+def move_appointment(appointment, starts, duration_minutes=None, kind=None, notes=None):
+    """Reschedule: a new class at `starts`, the original becomes "Remarcada" and points to it (so it can be undone).
+
+    Returns the new class. Raises MoveError when the student already has a class at that time."""
+    if starts == appointment.starts_at:
+        raise MoveError('A aula já está neste horário.')
+    with transaction.atomic():
+        if Appointment.objects.filter(person=appointment.person, starts_at=starts).exists():
+            raise MoveError('Este aluno já tem aula neste horário.')
+        new = Appointment.objects.create(
+            person=appointment.person, starts_at=starts,
+            duration_minutes=duration_minutes or appointment.duration_minutes,
+            kind=kind or appointment.kind, notes=appointment.notes if notes is None else notes)
+        appointment.status = Appointment.Status.RESCHEDULED
+        appointment.status_changed_at = timezone.now()
+        appointment.rescheduled_to = new
+        appointment.save(update_fields=['status', 'status_changed_at', 'rescheduled_to'])
+    return new
+
+
+def undo_move(new):
+    """Take back a move: drop the new class and bring the original back as "Marcada". Returns the original.
+
+    Only while the new class is still untouched (marked, no attendance recorded)."""
+    with transaction.atomic():
+        original = Appointment.objects.select_for_update().filter(rescheduled_to=new).first()
+        if original is None:
+            raise MoveError('Esta aula não veio de uma remarcação.')
+        if new.status != Appointment.Status.SCHEDULED:
+            raise MoveError('A aula nova já foi alterada; não dá mais para desfazer.')
+        new.delete()  # the link on the database row is cleared by SET_NULL
+        original.rescheduled_to = None
+        original.status = Appointment.Status.SCHEDULED
+        original.status_changed_at = None
+        original.save(update_fields=['status', 'status_changed_at'])
+    return original
 
 
 def attendance_stats(person, days=30, today=None):
