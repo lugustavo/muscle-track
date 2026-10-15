@@ -204,6 +204,7 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 
 **Regras (da personal)**
 - Só existem **pacotes** (não há mensalidade): hoje dois, **8 aulas a 55 €** e **10 aulas a 50 €** por aula; o valor é digitado **por aula ou total** e o outro é calculado.
+- **Sem prazo** (caso especial): ao cadastrar o pacote, a caixa "Sem prazo (o pacote não vence)" abaixo do prazo desliga o prazo; esse pacote nunca vence nem aparece como "vencendo", não tem prorrogar/congelar, e continua avisando quando restam poucas aulas.
 - O prazo conta **a partir da primeira aula** (é quando o pagamento é feito); o pacote vale até *primeira aula + prazo + prorrogações + dias congelados*. Pagamento **à vista, nunca parcelado**, e em aula em grupo **só uma pessoa paga**.
 - **Desconta do pacote:** aula a que o aluno **compareceu**, **faltou**, ou que foi **cancelada com menos de 24 h** (`AGENDA_NOTICE_HOURS`). Cancelada com antecedência, remarcada ou só agendada **não desconta**. Atraso do aluno não muda nada: a aula é paga inteira, e não há aula de 30 min (cada aula vale **1**).
 - **Sobrou aula no fim do prazo:** o pacote é **prorrogado** (nunca zera sozinho: vira "vencido com aulas" e aparece em "Pacotes para renovar").

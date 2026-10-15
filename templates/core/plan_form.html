@@ -29,6 +29,10 @@
                         <label for="{{ form.valid_days.id_for_label }}" class="form-label fw-bold">{{ form.valid_days.label }}</label>{{ form.valid_days }}
                         {% if form.valid_days.errors %}<div class="text-danger small">{{ form.valid_days.errors|join:" " }}</div>{% endif %}
                         <div class="form-text">{{ form.valid_days.help_text }}</div>
+                        <div class="form-check mt-2">
+                            {{ form.no_deadline }}
+                            <label class="form-check-label" for="{{ form.no_deadline.id_for_label }}">{{ form.no_deadline.label }}</label>
+                        </div>
                     </div>
                 </div>
                 <div class="mb-3">
@@ -73,4 +77,14 @@
 
 {% block extra_js %}
 <script src="{% static 'js/package-prices.js' %}"></script>
+<script>
+(function () {
+    var box = document.getElementById('{{ form.no_deadline.id_for_label }}');
+    var days = document.getElementById('{{ form.valid_days.id_for_label }}');
+    if (!box || !days) return;
+    function sync() { days.disabled = box.checked; }
+    box.addEventListener('change', sync);
+    sync();
+})();
+</script>
 {% endblock %}

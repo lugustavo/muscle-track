@@ -49,8 +49,9 @@ def consumes(appointment):
 
 
 def ends_on(package, today=None):
-    """Last day of the package: first class + deadline + extensions + days frozen (None before the first class)."""
-    if package.starts_on is None:
+    """Last day of the package: first class + deadline + extensions + days frozen (None before the first class, and
+    always None for a package without deadline)."""
+    if package.starts_on is None or package.valid_days is None:   # not started, or a package without deadline
         return None
     today = today or timezone.localdate()
     frozen = package.frozen_days
@@ -70,7 +71,8 @@ def state(package, used, today=None):
         return 'frozen'
     if package.starts_on is None:
         return 'not_started'
-    return 'expired' if ends_on(package, today) < today else 'active'
+    end = ends_on(package, today)
+    return 'expired' if end is not None and end < today else 'active'
 
 
 def paid_amount(package):
@@ -265,6 +267,8 @@ def extend(package, days, note='', actor=None, today=None):
     if not 1 <= int(days) <= 365:
         raise PackageError('A prorrogação deve ser de 1 a 365 dias.')
     _open(package)
+    if package.valid_days is None:
+        raise PackageError('Este pacote não tem prazo: não há o que prorrogar.')
     package.extension_days += int(days)
     package.save(update_fields=['extension_days'])
     reason = f': {note.strip()[:150]}' if note.strip() else ''
@@ -331,7 +335,7 @@ def renewals(today=None, expiring_days=14):
         kind = None
         if s == 'expired':
             kind = 'expired'
-        elif s == 'active' and (end - today).days <= expiring_days:
+        elif s == 'active' and end is not None and (end - today).days <= expiring_days:
             kind = 'expiring'
         elif s in ('active', 'frozen') and left <= LOW_BALANCE:
             kind = 'low'
@@ -352,7 +356,8 @@ def alerts(today=None):
     rows = []
     for package, s, left, end in _current_packages(today):
         low = s in ('active', 'frozen') and left <= LOW_BALANCE and package.low_notified_at is None
-        expiring = s == 'active' and (end - today).days <= EXPIRING_DAYS and package.expiring_notified_for != end
+        expiring = (s == 'active' and end is not None and (end - today).days <= EXPIRING_DAYS
+                    and package.expiring_notified_for != end)
         expired = s == 'expired' and left > 0 and package.expired_notified_for != end
         if low or expiring or expired:
             rows.append({'student': package.person, 'package': package, 'left': left, 'ends_on': end,

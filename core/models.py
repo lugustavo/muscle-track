@@ -747,8 +747,9 @@ class Package(models.Model):
     description = models.TextField(blank=True, verbose_name='Descrição')
     sessions = models.PositiveSmallIntegerField(
         default=10, validators=[MinValueValidator(1), MaxValueValidator(200)], verbose_name='Aulas no pacote')
+    # None = no deadline (special packages); otherwise counted from the first class
     valid_days = models.PositiveSmallIntegerField(
-        default=60, validators=[MinValueValidator(1), MaxValueValidator(1000)],
+        default=60, null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(1000)],
         verbose_name='Prazo (dias)', help_text='Conta a partir da primeira aula.')
     pricing_mode = models.CharField(max_length=12, choices=PRICING, default='per_session', verbose_name='Como o valor é informado')
     price_per_session = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
@@ -781,7 +782,7 @@ class StudentPackage(models.Model):
                                 verbose_name='Pacote do catálogo')
     name = models.CharField(max_length=100, verbose_name='Nome')
     sessions = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)], verbose_name='Aulas')
-    valid_days = models.PositiveSmallIntegerField(verbose_name='Prazo (dias)')
+    valid_days = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name='Prazo (dias)')   # None: no deadline
     price_per_session = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
                                             validators=[MinValueValidator(0)], verbose_name='Valor por aula')
     price_total = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,

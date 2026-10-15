@@ -357,7 +357,16 @@ class ConsentForm(forms.Form):
 
 
 class PackageForm(forms.ModelForm):
-    """A package of the catalog: classes, deadline (counted from the first class) and the price, typed per class or total."""
+    """A package of the catalog: classes, deadline (counted from the first class) and the price, typed per class or total.
+
+    "Sem prazo" (a checkbox that is not a model field) is saved as an empty deadline: the package never expires."""
+    no_deadline = forms.BooleanField(required=False, label='Sem prazo (o pacote não vence)',
+                                     widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk and self.instance.valid_days is None:
+            self.initial['no_deadline'] = True
 
     class Meta:
         model = Package
@@ -374,6 +383,11 @@ class PackageForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
+        if cleaned.get('no_deadline'):
+            cleaned['valid_days'] = None
+            self.errors.pop('valid_days', None)
+        elif cleaned.get('valid_days') is None and 'valid_days' not in self.errors:
+            self.add_error('valid_days', 'Informe o prazo em dias ou marque "Sem prazo".')
         if self.errors:
             return cleaned
         mode = cleaned.get('pricing_mode')

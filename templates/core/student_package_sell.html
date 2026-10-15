@@ -49,7 +49,7 @@
                                {% if form.package.value|stringformat:"s" == p.pk|stringformat:"s" %}checked{% endif %}>
                         <span class="card"><span class="card-body py-2">
                             <strong class="d-block text-break">{{ p.name }}</strong>
-                            <span class="d-block small text-muted">{{ p.sessions }} aulas · {{ p.valid_days }} dias</span>
+                            <span class="d-block small text-muted">{{ p.sessions }} aulas · {% if p.valid_days %}{{ p.valid_days }} dias{% else %}sem prazo{% endif %}</span>
                             {% if p.price_per_session is not None %}<span class="d-block small"><i class="bi bi-lock"></i> {{ p.price_per_session|money }} por aula</span>{% endif %}
                         </span></span>
                     </label>
