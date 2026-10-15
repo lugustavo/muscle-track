@@ -77,9 +77,11 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
         }
         labels = {
             'notes': 'Anotações internas (o aluno não vê)',
-            'plan': 'Plano (modelo)',
-            'plan_price': 'Valor negociado do período (R$)',
-            'hourly_rate': 'Valor/hora negociado (R$)',
+            'plan': 'Plano do catálogo',
+            'plan_name': 'Nome do contrato',
+            'plan_expires_on': 'Vencimento do contrato',
+            'plan_price': 'Valor do contrato por período (R$)',
+            'hourly_rate': 'Valor/hora do contrato (R$)',
         }
 
     def __init__(self, *args, **kwargs):

@@ -8,7 +8,7 @@
     <h1><i class="bi bi-card-checklist"></i> Planos</h1>
     <a href="{% nav_url 'core:plan_create' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Novo plano</a>
 </div>
-<p class="text-muted">Modelos de plano: ao escolher um plano para o aluno, o nome e o valor são copiados e podem ser ajustados por aluno. Mudar o modelo depois não altera quem já tem o plano.</p>
+<p class="text-muted">Plano é o modelo do catálogo; contrato é o combinado com cada aluno. Ao escolher um plano para o aluno, o nome e o valor viram o contrato dele e podem ser ajustados. Mudar o modelo depois não altera quem já tem contrato.</p>
 
 <form method="get" class="row g-2 mb-4">
     <div class="col-md-5"><input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Buscar plano..."></div>

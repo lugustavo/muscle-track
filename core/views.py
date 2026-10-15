@@ -37,6 +37,7 @@ from .billing import (
     register_payment, suggest_amount, suggest_period,
 )
 from .consistency import celebrations
+from .contract import contract_card
 from .consent import (
     ALL_KINDS, CURRENT_VERSION as CONSENT_VERSION, DESCRIPTIONS as CONSENT_DESCRIPTIONS, REQUIRED_KINDS,
     current_consents, has_current_consent, is_granted, record_consent,
@@ -278,14 +279,17 @@ def _finance_agenda_context(student):
     """Plan/payments and calendar data for the student's file (trainer area only)"""
     today = timezone.localdate()
     payments = list(student.payments.all()[:50])
+    last_payment = payments[0] if payments else None
     amount = suggest_amount(student)
     owes = student.is_active and student.plan_expires_on and student.plan_expires_on < today
+    charge_url = whatsapp_url(student.phone, charge_message(student, amount, student.plan_expires_on)) \
+        if student.plan_expires_on and student.is_active and student.plan_status in ('expired', 'expiring') else ''
     return {
         'payments': payments,
-        'last_payment': payments[0] if payments else None,
+        'last_payment': last_payment,
         'suggested_amount': amount,
-        'charge_url': whatsapp_url(student.phone, charge_message(student, amount, student.plan_expires_on))
-        if student.plan_expires_on and student.is_active and student.plan_status in ('expired', 'expiring') else '',
+        'charge_url': charge_url,
+        'contract': contract_card(student, last_payment, charge_url, today),
         'owes': owes,
         'slots': list(student.slots.filter(is_active=True)),
         'upcoming': list(student.appointments.filter(
