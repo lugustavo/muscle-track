@@ -466,6 +466,28 @@ class RepeatForm(RecurrenceMixin):
         return cleaned
 
 
+class ClassRequestForm(forms.Form):
+    """The student's request to move or cancel one class (core/class_requests.py applies the rules)."""
+    kind = forms.ChoiceField(
+        choices=[('reschedule', 'Quero remarcar para outro dia/horário'), ('cancel', 'Não vou poder ir (cancelar esta aula)')],
+        initial='reschedule', label='O que você precisa?', widget=forms.RadioSelect)
+    date = forms.DateField(required=False, label='Dia que prefere', widget=forms.DateInput(
+        attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
+    time = forms.TimeField(required=False, label='Horário que prefere', widget=forms.TimeInput(
+        attrs={'type': 'time', 'class': 'form-control'}, format='%H:%M'))
+    message = forms.CharField(required=False, max_length=200, label='Recado para a personal (opcional)',
+                              widget=forms.TextInput(attrs={'class': 'form-control', 'maxlength': 200}))
+
+    def clean(self):
+        data = super().clean()
+        if data.get('kind') == 'reschedule':
+            if not data.get('date'):
+                self.add_error('date', 'Escolha o dia.')
+            if not data.get('time'):
+                self.add_error('time', 'Escolha o horário.')
+        return data
+
+
 class AppointmentForm(forms.Form):
     """A one-off class (trial, makeup...) or the new time of a rescheduled one."""
     person = forms.ModelChoiceField(

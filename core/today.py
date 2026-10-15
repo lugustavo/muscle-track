@@ -5,7 +5,7 @@ from django.db.models import Avg, Count, Max, OuterRef, Q, Subquery
 from django.utils import timezone
 
 from .consistency import effective_goal, motivation
-from .models import PersonRoutine, WorkoutSession
+from .models import Appointment, PersonRoutine, WorkoutSession
 
 # A session left open longer than this is closed by the workout views (see _close_if_stale)
 MAX_SESSION_MINUTES = 120
@@ -113,7 +113,10 @@ def student_today(request, person):
         recent=Count('pk', filter=Q(start_time__gte=now - timedelta(days=30))),
         avg=Avg('duration_minutes'),
     )
+    next_class = person.appointments.filter(
+        status=Appointment.Status.SCHEDULED, starts_at__gte=now).order_by('starts_at').first()
     return {
+        'next_class': next_class,
         'state': state, 'first_name': person.person_name.split()[0] if person.person_name.strip() else '',
         'today': today, 'in_progress': in_progress, 'suggested': suggested, 'done_today': done_today,
         'week': strip, 'week_done': week_done, 'week_goal': goal,

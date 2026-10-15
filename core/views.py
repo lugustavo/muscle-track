@@ -27,7 +27,7 @@ from allauth.account.models import EmailAddress
 
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, trainer_dashboard
 from .forms import (
-    AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ConsentForm, ExerciseForm, PaymentForm,
+    AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ClassRequestForm, ConsentForm, ExerciseForm, PaymentForm,
     PersonForm, PersonRoutineForm, PlanForm, RepeatForm, ScheduleSlotForm,
     ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
 )
@@ -40,6 +40,7 @@ from .billing import (
     charge_message, delete_payment, month_bounds, month_summary, overdue_rows, parse_month,
     register_payment, suggest_amount, suggest_period,
 )
+from . import class_requests
 from .consistency import celebrations
 from .calendar_feed import build_ics, feed_for_token, get_or_create_feed, mark_fetched, rotate
 from .contract import contract_card
@@ -51,7 +52,7 @@ from .exports import build_export
 from .history import log_event, log_profile_edit
 from .invites import build_invite_url, get_user_from_invite, revoke_invites
 from .models import (
-    Appointment, Assessment, CalendarFeed, ConsentRecord, Exercise, MuscleGroup, Payment, Plan, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
+    Appointment, AppointmentRequest, Assessment, CalendarFeed, ConsentRecord, Exercise, MuscleGroup, Payment, Plan, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
     Routine, RoutineExercise, SessionExercise, SessionSet, StudentEvent, StudentNote, WorkoutSession,
 )
 from .navigation import after_save_url, back_label, safe_next_url
@@ -587,6 +588,60 @@ def my_profile(request, person):
         'user_email': request.user.email,
         'person': person
     })
+
+
+@student_required
+def my_agenda(request, person):
+    """The student's own classes (next 60 days and the last 30), with the option to ask the trainer to move or cancel one."""
+    now = timezone.now()
+    today = timezone.localdate()
+    ensure_appointments(today, today + timedelta(days=60), today)
+    mine = person.appointments.exclude(status=Appointment.Status.RESCHEDULED).prefetch_related('requests')
+    upcoming = list(mine.filter(starts_at__gte=now, starts_at__lt=at(today + timedelta(days=61), time.min)))
+    recent = list(mine.filter(starts_at__lt=now, starts_at__gte=now - timedelta(days=30)).order_by('-starts_at'))
+    for appointment in upcoming + recent:
+        asked = list(appointment.requests.all())
+        appointment.block = class_requests.request_block(appointment, now)
+        appointment.open_request = next((r for r in asked if r.status == AppointmentRequest.Status.PENDING), None)
+        decided = [r for r in asked if r.status in (AppointmentRequest.Status.APPROVED, AppointmentRequest.Status.DECLINED)]
+        appointment.last_answer = decided[-1] if decided else None
+    return render(request, 'core/my_agenda.html', {
+        'title': 'Minha agenda', 'upcoming': upcoming, 'recent': recent, 'notice_hours': class_requests.notice_hours()})
+
+
+@student_required
+def my_agenda_request(request, person, pk):
+    """Ask the trainer to move or cancel one class."""
+    appointment = get_object_or_404(person.appointments.prefetch_related('requests'), pk=pk)
+    block = class_requests.request_block(appointment)
+    form = ClassRequestForm(request.POST or None)
+    if block and request.method == 'POST':
+        messages.error(request, block)
+        return redirect('core:my_agenda')
+    if request.method == 'POST' and not block and form.is_valid():
+        data = form.cleaned_data
+        proposed = at(data['date'], data['time']) if data['kind'] == 'reschedule' else None
+        try:
+            class_requests.create_request(person, appointment, data['kind'], proposed, data['message'])
+        except class_requests.RequestError as error:
+            form.add_error(None, str(error))
+        else:
+            messages.success(request, 'Pedido enviado. Assim que sua personal responder, a resposta aparece aqui.')
+            return redirect('core:my_agenda')
+    return render(request, 'core/my_agenda_request.html', {
+        'form': form, 'appointment': appointment, 'blocked': block, 'title': 'Pedir remarcação ou cancelamento'})
+
+
+@student_required
+@require_POST
+def my_agenda_request_withdraw(request, person, pk):
+    asked = get_object_or_404(AppointmentRequest.objects.select_related('appointment'), pk=pk, appointment__person=person)
+    try:
+        class_requests.withdraw(person, asked)
+        messages.success(request, 'Pedido retirado.')
+    except class_requests.RequestError as error:
+        messages.error(request, str(error))
+    return redirect('core:my_agenda')
 
 
 # ============= EXERCISE VIEWS =============
@@ -2166,6 +2221,7 @@ def agenda(request):
         'range_start': start, 'range_end': end, 'pivot': pivot,
         'prev_url': prev_url, 'next_url': next_url, 'today_url': today_url, 'is_current': is_current,
         'view_links': [(key, label, _agenda_url(vista=key), key == view) for key, label in AGENDA_VIEW_LABELS],
+        'pending_requests': list(class_requests.pending_for_trainer()),
     }
     if view == 'semana':
         days_map = {start + timedelta(days=i): by_day.get(start + timedelta(days=i), []) for i in range(7)}
@@ -2322,6 +2378,27 @@ def appointment_move_undo(request, pk):
     except MoveError as error:
         return JsonResponse({'ok': False, 'error': str(error)}, status=400)
     return JsonResponse({'ok': True, 'id': original.pk})
+
+
+@staff_required
+@require_POST
+def appointment_request_decide(request, pk):
+    """The trainer answers a student's request: approve (does what was asked) or decline (with an optional reason)."""
+    asked = get_object_or_404(AppointmentRequest.objects.select_related('appointment__person'), pk=pk)
+    decision = request.POST.get('decision')
+    if decision not in ('approve', 'decline'):
+        return HttpResponseBadRequest('Decisão inválida')
+    name = asked.appointment.person.person_name
+    try:
+        if decision == 'approve':
+            class_requests.approve(asked)
+            messages.success(request, f'Pedido de {name} aprovado.')
+        else:
+            class_requests.decline(asked, request.POST.get('note', ''))
+            messages.success(request, f'Pedido de {name} recusado.')
+    except class_requests.RequestError as error:
+        messages.error(request, str(error))
+    return redirect(safe_next_url(request, reverse('core:agenda')))
 
 
 @staff_required

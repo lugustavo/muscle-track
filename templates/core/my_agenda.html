@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load navigation %}
+
+{% block title %}Minha agenda - Muscle Track{% endblock %}
+
+{% block content %}
+<div class="mx-auto" style="max-width: 560px;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0"><i class="bi bi-calendar-week"></i> Minha agenda</h1>
+        <a href="{% url 'core:calendar_settings' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-google"></i> Google Agenda</a>
+    </div>
+
+    <h2 class="h6 text-uppercase text-muted">Próximas aulas</h2>
+    {% for a in upcoming %}
+    <div class="card mb-2" data-my-class="{{ a.pk }}">
+        <div class="card-body py-2">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+                <div>
+                    <strong>{{ a.starts_at|date:"l, j \d\e F"|lower|capfirst }}</strong>
+                    <div class="text-muted">{{ a.starts_at|time:"H:i" }} · {{ a.duration_minutes }} min</div>
+                </div>
+                <span class="badge {% if a.status == 'cancelled' %}bg-secondary{% else %}bg-body-secondary text-body border{% endif %}">{{ a.get_status_display }}</span>
+            </div>
+            {% if a.status == 'scheduled' %}
+                {% if a.open_request %}
+                <div class="alert alert-info py-2 small mt-2 mb-0" data-open-request>
+                    <i class="bi bi-hourglass-split"></i>
+                    {% if a.open_request.kind == 'cancel' %}Você pediu para <strong>cancelar</strong> esta aula.{% else %}Você pediu para remarcar para <strong>{{ a.open_request.proposed_starts_at|date:"D, d/m \à\s H:i" }}</strong>.{% endif %}
+                    {% if a.open_request.message %}<em>“{{ a.open_request.message }}”</em>{% endif %}
+                    Aguardando a sua personal.
+                    <form method="post" action="{% url 'core:my_agenda_request_withdraw' a.open_request.pk %}" class="d-inline">
+                        {% csrf_token %}<button class="btn btn-link btn-sm p-0 align-baseline">Retirar pedido</button>
+                    </form>
+                </div>
+                {% elif a.block %}
+                <div class="small text-muted mt-2" data-request-block>{{ a.block }}</div>
+                {% else %}
+                <a href="{% url 'core:my_agenda_request' a.pk %}" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-arrow-repeat"></i> Pedir remarcação ou cancelamento</a>
+                {% endif %}
+                {% if a.last_answer and a.last_answer.status == 'declined' and not a.open_request %}
+                <div class="small text-warning-emphasis mt-2" data-declined><i class="bi bi-x-circle"></i> Sua personal recusou o último pedido{% if a.last_answer.decision_note %}: “{{ a.last_answer.decision_note }}”{% else %}.{% endif %}</div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="card mb-2"><div class="card-body text-muted">Você não tem aulas marcadas nos próximos dias. Quando a sua personal marcar, elas aparecem aqui.</div></div>
+    {% endfor %}
+    <p class="small text-muted">Pedidos pelo app: até {{ notice_hours }} hora{{ notice_hours|pluralize }} antes da aula. Depois disso, fale direto com a sua personal.</p>
+
+    {% if recent %}
+    <h2 class="h6 text-uppercase text-muted mt-4">Últimos 30 dias</h2>
+    <ul class="list-group mb-3">
+        {% for a in recent %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>{{ a.starts_at|date:"D, d/m" }} · {{ a.starts_at|time:"H:i" }}</span>
+            <span class="badge {% if a.status == 'attended' %}bg-success{% elif a.status == 'missed' %}bg-danger{% elif a.status == 'cancelled' %}bg-secondary{% else %}bg-body-secondary text-body border{% endif %}">{{ a.get_status_display }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endblock %}

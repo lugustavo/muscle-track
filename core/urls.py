@@ -47,6 +47,7 @@ urlpatterns = [
     path('calendar/feed/<slug:token>.ics', views.calendar_feed, name='calendar_feed'),
     path('agenda/new/', views.appointment_create, name='appointment_create'),
     path('appointments/<int:pk>/reschedule/', views.appointment_reschedule, name='appointment_reschedule'),
+    path('appointment-requests/<int:pk>/decide/', views.appointment_request_decide, name='appointment_request_decide'),
     path('appointments/<int:pk>/move/', views.appointment_move, name='appointment_move'),
     path('appointments/<int:pk>/move/undo/', views.appointment_move_undo, name='appointment_move_undo'),
     path('appointments/<int:pk>/status/', views.appointment_status, name='appointment_status'),
@@ -74,6 +75,9 @@ urlpatterns = [
     path('person-routines/<int:pk>/deactivate/', views.person_routine_deactivate, name='person_routine_deactivate'),
 
     # Student Area
+    path('my-agenda/', views.my_agenda, name='my_agenda'),
+    path('my-agenda/<int:pk>/request/', views.my_agenda_request, name='my_agenda_request'),
+    path('my-agenda/requests/<int:pk>/withdraw/', views.my_agenda_request_withdraw, name='my_agenda_request_withdraw'),
     path('my-profile/', views.my_profile, name='my_profile'),
     path('my-privacy/', views.my_privacy, name='my_privacy'),
     path('my-privacy/export/', views.my_export, name='my_export'),
