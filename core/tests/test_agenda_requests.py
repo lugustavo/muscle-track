@@ -264,3 +264,11 @@ class TrainerPagesTests(RequestBase):
         self.assertContains(page, f'data-agenda-day="{day.isoformat()}"')
         self.assertContains(page, 'draggable="true" data-appt-move')
         self.assertContains(page, 'month-chip s-scheduled')
+
+
+class ProfileMenuTests(RequestBase):
+    def test_profile_lists_the_account_shortcuts(self):
+        self.client.force_login(self.alice)
+        page = self.client.get(reverse('core:my_profile'))
+        for name in ('my_agenda', 'notification_settings', 'calendar_settings', 'my_privacy'):
+            self.assertContains(page, f'href="{reverse("core:" + name)}" class="list-group-item')
