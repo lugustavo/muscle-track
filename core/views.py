@@ -371,7 +371,8 @@ def student_detail(request, pk):
                      for kind, record in current_consents(student).items()],
         'has_consent': has_current_consent(student),
         'erasure_requested': student.events.filter(kind=StudentEvent.Kind.ERASURE_REQUEST).exists(),
-        'consent_kinds': [(kind, ConsentRecord.Kind(kind).label) for kind in ALL_KINDS],
+        'consent_kinds': [(kind, ConsentRecord.Kind(kind).label, is_granted(record))
+                          for kind, record in current_consents(student).items()],
         'today': timezone.localdate(),
         **_finance_agenda_context(student),
         'notes': list(student.trainer_notes.select_related('author')),

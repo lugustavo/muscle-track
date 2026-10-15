@@ -51,10 +51,10 @@
                 <form method="post" action="{% nav_url 'core:student_consent_record' student.pk %}">
                     {% csrf_token %}
                     <div class="small fw-bold mb-1">Registrar consentimento dado fora do app (papel, WhatsApp)</div>
-                    {% for kind, label in consent_kinds %}
+                    {% for kind, label, granted in consent_kinds %}
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input" name="kinds" value="{{ kind }}" id="consent-{{ kind }}">
-                        <label class="form-check-label small" for="consent-{{ kind }}">{{ label }}</label>
+                        <input type="checkbox" class="form-check-input" name="kinds" value="{{ kind }}" id="consent-{{ kind }}"{% if granted %} checked disabled{% endif %}>
+                        <label class="form-check-label small" for="consent-{{ kind }}">{{ label }}{% if granted %} <span class="text-success">· já concedido</span>{% endif %}</label>
                     </div>
                     {% endfor %}
                     <div class="mt-2"><label class="form-label small mb-0" for="consent-date">Data</label>
