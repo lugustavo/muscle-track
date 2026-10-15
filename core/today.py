@@ -6,9 +6,7 @@ from django.utils import timezone
 
 from .consistency import effective_goal, motivation
 from .models import Appointment, PersonRoutine, WorkoutSession
-
-# A session left open longer than this is closed by the workout views (see _close_if_stale)
-MAX_SESSION_MINUTES = 120
+from .workout_sessions import MAX_SESSION_MINUTES, close_stale  # noqa: F401  (MAX_SESSION_MINUTES is read from here by the tests)
 
 WEEKDAY_LETTERS = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D']
 
@@ -46,6 +44,7 @@ def routine_rows(person, now=None):
 def rows_for(request, person):
     """routine_rows cached on the request, so the bottom bar and the page share one query."""
     if getattr(request, '_today_rows', None) is None:
+        close_stale(person)   # an idle workout is not "in progress": end it before the screens read the state
         request._today_rows = routine_rows(person)
     return request._today_rows
 

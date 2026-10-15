@@ -135,14 +135,18 @@ class Person(models.Model):
         if status != previous:
             self.status_changed_at = now
         self.is_active = status in self.OPEN_STATUSES
+        sessions_closed = 0
         if self.is_active:
             self.deactivated_at = None
         else:
             if self.deactivated_at is None:
                 self.deactivated_at = now
-            # A student without access no longer has upcoming classes on the calendar
+            # A student without access no longer has upcoming classes on the calendar...
             Appointment.objects.filter(person=self, status=Appointment.Status.SCHEDULED,
                                        starts_at__gt=now).delete()
+            # ...nor a workout left running (kept with what was done, or dropped when nothing was logged)
+            from .workout_sessions import close_open
+            sessions_closed = close_open(self, now)
         self.save(update_fields=['status', 'status_reason', 'status_changed_at', 'is_active',
                                  'deactivated_at', 'updated_at'])
         User.objects.filter(pk=self.user_id).update(is_active=self.is_active)
@@ -151,7 +155,8 @@ class Person(models.Model):
             person=self, actor=actor, kind=StudentEvent.Kind.STATUS,
             summary=f'Situação: {labels[previous]} → {labels[status]}' if status != previous
             else 'Motivo da situação atualizado',
-            changes={'status': [previous, status], 'reason': reason})
+            changes={'status': [previous, status], 'reason': reason,
+                     **({'sessions_closed': sessions_closed} if sessions_closed else {})})
         return True
 
     PLAN_EXPIRING_DAYS = 14
@@ -504,6 +509,8 @@ class SessionSet(models.Model):
     reps = models.PositiveIntegerField(null=True, blank=True, verbose_name='Repetições')
     is_done = models.BooleanField(default=False, verbose_name='Feita')
     completed_at = models.DateTimeField(null=True, blank=True, verbose_name='Completada em')
+    # Last time anything about the set changed: the sign of life of a running workout (core/workout_sessions.py)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
     class Meta:
         verbose_name = 'Série'

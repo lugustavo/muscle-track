@@ -59,6 +59,7 @@ from .recurrence import SeriesError, create_series, describe, edit_series, end_s
 from .permissions import is_trainer, staff_required, student_required
 from .search import apply_student_search, phone_digits, search_all
 from .today import MAX_SESSION_MINUTES, student_today, suggest_index
+from .workout_sessions import close_if_stale
 from .workout_summary import session_summary
 from .whatsapp import whatsapp_url
 
@@ -1247,19 +1248,9 @@ def person_routine_deactivate(request, pk):
 
 
 def _close_if_stale(session):
-    """Close a session that has been open longer than MAX_SESSION_MINUTES.
-
-    An abandoned session is closed at its cap, not "now", so a forgotten
-    workout does not end up recorded as an 8-hour training.
-    Returns True when the session was closed.
-    """
-    if not session:
-        return False
-    limit = session.start_time + timedelta(minutes=MAX_SESSION_MINUTES)
-    if timezone.now() > limit:
-        session.end_session(at=limit)
-        return True
-    return False
+    """End a running session that is idle or has run too long (core/workout_sessions.py: closed at its last sign of
+    life, or dropped when nothing was logged). Returns True when it is gone from the running ones."""
+    return close_if_stale(session)
 
 
 def _chart_points(sessions, with_workout_name=False):

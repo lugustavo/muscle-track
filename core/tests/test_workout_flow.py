@@ -146,12 +146,26 @@ class WorkoutFlowTests(WorkoutTestMixin, BaseTestCase):
         session.refresh_from_db()
         self.assertFalse(session.is_completed)
 
-    def test_stale_session_is_closed_at_its_cap_and_replaced(self):
+    def test_stale_session_with_nothing_logged_is_dropped_and_replaced(self):
         self.start()
+        first = WorkoutSession.objects.get()
         WorkoutSession.objects.update(start_time=timezone.now() - timedelta(hours=8))
         self.start()
+        self.assertFalse(WorkoutSession.objects.filter(pk=first.pk).exists())   # not recorded as an 8 h "training"
+        self.assertEqual(WorkoutSession.objects.filter(is_completed=False).count(), 1)
+        self.assertEqual(WorkoutSession.objects.filter(is_completed=True).count(), 0)
+
+    def test_stale_session_with_sets_is_closed_where_the_student_stopped(self):
+        session, _ = self.begin()
+        done = SessionSet.objects.filter(session_exercise__session=session).first()
+        post_json(self.client, self.set_url(done), {'done': True, 'weight': '20', 'reps': 10})
+        stopped = timezone.now() - timedelta(hours=7)
+        WorkoutSession.objects.update(start_time=stopped - timedelta(minutes=20))
+        SessionSet.objects.filter(session_exercise__session=session).update(updated_at=stopped - timedelta(minutes=20))
+        SessionSet.objects.filter(pk=done.pk).update(completed_at=stopped, updated_at=stopped)
+        self.start()
         old = WorkoutSession.objects.get(is_completed=True)
-        self.assertEqual(old.duration_minutes, 120)  # capped, not 480
+        self.assertEqual(old.duration_minutes, 20)  # until the last set, not 120 and not 440
         self.assertEqual(WorkoutSession.objects.filter(is_completed=False).count(), 1)
 
     def test_cannot_update_after_session_ended(self):
