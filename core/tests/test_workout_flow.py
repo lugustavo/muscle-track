@@ -115,7 +115,7 @@ class WorkoutFlowTests(WorkoutTestMixin, BaseTestCase):
         self.assertEqual(log.notes, 'ombro incomodou')
 
         response = self.client.post(reverse('core:workout_end', kwargs={'pk': session.pk}), {'notes': 'Treino pesado'})
-        self.assertRedirects(response, reverse('core:my_workouts'))
+        self.assertRedirects(response, reverse('core:workout_summary', kwargs={'pk': session.pk}))
         session.refresh_from_db()
         self.assertTrue(session.is_completed)
         self.assertEqual(session.notes, 'Treino pesado')

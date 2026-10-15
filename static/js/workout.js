@@ -23,6 +23,23 @@
     return v === '' ? null : v;
   }
 
+  // ---------- preferences (kept on this device) ----------
+  var PREFS_KEY = 'mt-prefs-v1';
+  var prefs = { sound: true, vibrate: true };
+  try { Object.assign(prefs, JSON.parse(localStorage.getItem(PREFS_KEY) || '{}')); } catch (e) { /* defaults */ }
+  function savePrefs() {
+    try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) { /* storage blocked */ }
+  }
+  var prefSound = $('#prefSound'), prefVibrate = $('#prefVibrate');
+  if (prefSound) {
+    prefSound.checked = !!prefs.sound;
+    prefSound.addEventListener('change', function () { prefs.sound = prefSound.checked; savePrefs(); });
+  }
+  if (prefVibrate) {
+    prefVibrate.checked = !!prefs.vibrate;
+    prefVibrate.addEventListener('change', function () { prefs.vibrate = prefVibrate.checked; savePrefs(); });
+  }
+
   // ---------- session timer ----------
   var timerEl = $('#timer');
   var pauseBtn = $('#pauseBtn');
@@ -170,7 +187,7 @@
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
   }
   function beep() {
-    if (!audioCtx) return;
+    if (!audioCtx || !prefs.sound) return;
     [0, 0.25, 0.5].forEach(function (offset) {
       var osc = audioCtx.createOscillator();
       var gain = audioCtx.createGain();
@@ -192,7 +209,7 @@
     if (left <= 0) {
       hideRest();
       beep();
-      if (navigator.vibrate) navigator.vibrate([250, 120, 250]);
+      if (prefs.vibrate && navigator.vibrate) navigator.vibrate([250, 120, 250]);
       return;
     }
     restTime.textContent = fmtMS(left);
@@ -258,6 +275,96 @@
     if (userAction && complete && !wasComplete) $('.exercise-body', card).classList.add('d-none');
     if (userAction && !complete && wasComplete) $('.exercise-body', card).classList.remove('d-none');
     updateFinishHint();
+    updateProgress();
+    if (userAction && complete !== wasComplete) reorderQueue(true, card, complete);
+  }
+
+  // ---------- focus mode: queue order, current exercise and progress ----------
+  var queueEl = $('#queue');
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function cards() { return $$('[data-exercise-card]', queueEl); }
+  function isComplete(card) { return card.dataset.complete === 'true'; }
+
+  function updateProgress() {
+    var all = cards();
+    var doneExercises = all.filter(isComplete).length;
+    var rows = $$('.set-row');
+    var doneSets = rows.filter(function (r) { return r.dataset.done === 'true'; }).length;
+    var label = $('#progressExercises');
+    if (label) {
+      label.innerHTML = all.length && doneExercises === all.length
+        ? 'Todos os exercícios concluídos'
+        : 'Exercício <strong id="progressCurrent">' + Math.min(doneExercises + 1, all.length) + '</strong> de ' + all.length;
+    }
+    var setsEl = $('#progressSetsDone');
+    if (setsEl) setsEl.textContent = doneSets;
+    var pct = rows.length ? Math.round(100 * doneSets / rows.length) : 0;
+    var bar = $('#progressBar');
+    if (bar) { bar.style.width = pct + '%'; bar.parentNode.setAttribute('aria-valuenow', pct); }
+    var firstPending = all.filter(function (c) { return !isComplete(c); })[0];
+    all.forEach(function (c) { c.classList.toggle('is-current', c === firstPending); });
+  }
+
+  function placeDivider() {
+    var divider = $('#doneDivider');
+    var firstDone = cards().filter(isComplete)[0];
+    if (!firstDone) { if (divider) divider.remove(); return; }
+    if (!divider) {
+      divider = document.createElement('div');
+      divider.id = 'doneDivider';
+      divider.className = 'done-divider';
+      divider.innerHTML = '<span>Concluídos</span>';
+    }
+    queueEl.insertBefore(divider, firstDone);
+  }
+
+  // Pending exercises first, then the finished ones; the trainer's order inside each group.
+  function reorderQueue(animate, changed, becameComplete) {
+    var all = cards();
+    var sorted = all.slice().sort(function (a, b) {
+      var ca = isComplete(a) ? 1 : 0, cb = isComplete(b) ? 1 : 0;
+      return ca - cb || (parseInt(a.dataset.order, 10) - parseInt(b.dataset.order, 10));
+    });
+    var tops = {};
+    if (animate && !reduceMotion) all.forEach(function (c, i) { tops[i] = c.getBoundingClientRect().top; });
+    var before = all.slice();
+    sorted.forEach(function (c) { queueEl.appendChild(c); });
+    placeDivider();
+    if (animate && !reduceMotion) {
+      sorted.forEach(function (c) {
+        var old = tops[before.indexOf(c)];
+        var delta = old - c.getBoundingClientRect().top;
+        if (!delta) return;
+        c.style.transition = 'none';
+        c.style.transform = 'translateY(' + delta + 'px)';
+        c.getBoundingClientRect(); // flush
+        c.style.transition = 'transform .35s ease';
+        c.style.transform = '';
+        setTimeout(function () { c.style.transition = ''; }, 400);
+      });
+    }
+    updateProgress();
+    if (!changed) return;
+    var next = sorted.filter(function (c) { return !isComplete(c); })[0];
+    // scroll only after the cards finished sliding, so the positions are the final ones
+    var wait = animate && !reduceMotion ? 380 : 0;
+    var behavior = reduceMotion ? 'auto' : 'smooth';
+    setTimeout(function () {
+      if (becameComplete) {
+        if (next) {
+          $('.exercise-body', next).classList.remove('d-none');
+          showToast('Próximo: ' + next.dataset.name);
+          next.scrollIntoView({ block: 'start', behavior: behavior });
+        } else {
+          showToast('Todos os exercícios concluídos!');
+          var finish = $('#finishForm');
+          if (finish) finish.scrollIntoView({ block: 'center', behavior: behavior });
+        }
+      } else {
+        changed.scrollIntoView({ block: 'center', behavior: behavior });
+      }
+    }, wait);
   }
 
   function pendingSets() {
@@ -272,6 +379,30 @@
     hint.classList.toggle('text-success', pending === 0);
   }
 
+  // - / + next to the weight: one step of 2.5 kg (starts from the last time's weight when empty)
+  var WEIGHT_STEP = 2.5;
+  function fmtWeight(n) { return String(Math.round(n * 100) / 100); }
+  function fireChange(input) { input.dispatchEvent(new Event('change', { bubbles: true })); }
+  function stepWeight(row, direction) {
+    var input = $('.set-weight', row);
+    var current = toNumber(input.value);
+    if (current === null) {
+      var last = toNumber(row.closest('[data-exercise-card]').dataset.last || '');
+      current = last !== null ? last : 0;
+      if (last !== null && direction > 0) { input.value = fmtWeight(current); fireChange(input); return; }
+    }
+    input.value = fmtWeight(Math.max(0, current + direction * WEIGHT_STEP));
+    fireChange(input);
+  }
+  // The next set of the same exercise starts with the weight just used, when it has none yet
+  function copyWeightToNext(row) {
+    var next = row.nextElementSibling;
+    while (next && !next.classList.contains('set-row')) next = next.nextElementSibling;
+    if (!next || next.dataset.done === 'true') return;
+    var from = $('.set-weight', row), to = $('.set-weight', next);
+    if (to.value.trim() === '' && from.value.trim() !== '') { to.value = from.value; fireChange(to); }
+  }
+
   function sendSet(row, extra) {
     var body = {
       weight: readInput($('.set-weight', row)),
@@ -284,6 +415,12 @@
   root.addEventListener('click', function (e) {
     ensureAudio();
 
+    var stepBtn = e.target.closest('.step-btn');
+    if (stepBtn) {
+      stepWeight(stepBtn.closest('.set-row'), parseInt(stepBtn.dataset.step, 10));
+      return;
+    }
+
     var doneBtn = e.target.closest('.set-done');
     if (doneBtn) {
       var row = doneBtn.closest('.set-row');
@@ -294,6 +431,7 @@
       sendSet(row, { done: nowDone });
       refreshCard(card, true);
       if (nowDone) {
+        copyWeightToNext(row);
         if (isRecord) showToast('🏆 Novo recorde de carga!');
         if (pendingSets() > 0) startRest(parseInt(card.dataset.rest, 10));
         else hideRest();
@@ -322,6 +460,12 @@
 
   $$('.set-row').forEach(refreshRow);
   $$('[data-exercise-card]').forEach(function (c) { refreshCard(c, false); });
+  reorderQueue(false);
+
+  // The "Treino iniciado!" notice goes away by itself
+  $$('.alert-dismissible').forEach(function (el) {
+    setTimeout(function () { el.classList.remove('show'); setTimeout(function () { el.remove(); }, 200); }, 3000);
+  });
 
   // ---------- finish ----------
   var finishForm = $('#finishForm');
