@@ -78,47 +78,51 @@
     </div>
 </div>
 
-<!-- Estatísticas -->
-<div class="row mb-4 stat-strip">
-    <div class="col-md-3">
-        <div class="card text-center">
+<!-- Estatísticas: 4 blocos pequenos em uma linha no celular, cartões grandes no desktop -->
+<div class="row g-2 g-md-3 mb-3 mb-md-4 stat-tiles-4">
+    <div class="col-3">
+        <div class="card text-center stat-tile h-100">
             <div class="card-body">
-                <i class="bi bi-calendar-check fs-1 text-primary"></i>
-                <h3 class="mt-2">{{ total_sessions }}</h3>
-                <p class="text-muted mb-0">Sessões Completadas</p>
+                <div class="stat-top">
+                    <i class="bi bi-calendar-check fs-1 text-primary"></i>
+                    <h3 class="mt-2">{{ total_sessions }}</h3>
+                </div>
+                <p class="text-muted mb-0"><span class="d-none d-md-inline">Sessões Completadas</span><span class="d-md-none">Sessões</span></p>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-center">
+    <div class="col-3">
+        <div class="card text-center stat-tile h-100">
             <div class="card-body">
-                <i class="bi bi-graph-up fs-1 text-success"></i>
-                <h3 class="mt-2">{{ sessions_last_month }}</h3>
-                <p class="text-muted mb-0">Treinos (30 dias)</p>
+                <div class="stat-top">
+                    <i class="bi bi-graph-up fs-1 text-success"></i>
+                    <h3 class="mt-2">{{ sessions_last_month }}</h3>
+                </div>
+                <p class="text-muted mb-0"><span class="d-none d-md-inline">Treinos (30 dias)</span><span class="d-md-none">30 dias</span></p>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-center">
+    <div class="col-3">
+        <div class="card text-center stat-tile h-100">
             <div class="card-body">
-                <i class="bi bi-clock fs-1 text-info"></i>
-                <h3 class="mt-2">{% if avg_duration %}{{ avg_duration|floatformat:0 }}min{% else %}-{% endif %}</h3>
-                <p class="text-muted mb-0">Duração Média</p>
+                <div class="stat-top">
+                    <i class="bi bi-clock fs-1 text-info"></i>
+                    <h3 class="mt-2">{% if avg_duration %}{{ avg_duration|floatformat:0 }}<small class="fs-6">min</small>{% else %}-{% endif %}</h3>
+                </div>
+                <p class="text-muted mb-0"><span class="d-none d-md-inline">Duração Média</span><span class="d-md-none">Duração</span></p>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-center">
+    <div class="col-3">
+        <div class="card text-center stat-tile h-100">
             <div class="card-body">
-                <i class="bi bi-calendar-event fs-1 text-warning"></i>
-                <h3 class="mt-2" style="font-size: 1.2rem;">
-                    {% if last_session %}
-                        {{ last_session.start_time|date:"d/m/Y" }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </h3>
-                <p class="text-muted mb-0">Última Sessão</p>
+                <div class="stat-top">
+                    <i class="bi bi-calendar-event fs-1 text-warning"></i>
+                    <h3 class="mt-2 stat-date">
+                        {% if last_session %}<span class="d-none d-md-inline">{{ last_session.start_time|date:"d/m/Y" }}</span><span class="d-md-none">{{ last_session.start_time|date:"d/m" }}</span>{% else %}-{% endif %}
+                    </h3>
+                </div>
+                <p class="text-muted mb-0"><span class="d-none d-md-inline">Última Sessão</span><span class="d-md-none">Última</span></p>
             </div>
         </div>
     </div>
@@ -194,7 +198,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="d-flex gap-3">
+                            <div class="d-flex flex-wrap gap-2">
                                 <span class="badge bg-info">{{ item.exercise_count }} exercício{{ item.exercise_count|pluralize }}</span>
                                 <span class="badge bg-success">{{ item.sessions_count }} sessõe{{ item.sessions_count|pluralize:"s,s" }} completas</span>
                                 <span class="badge bg-secondary">{{ item.person_routine.difficulty_level|capfirst }}</span>

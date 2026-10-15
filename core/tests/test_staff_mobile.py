@@ -19,7 +19,7 @@ class StudentFileMobileTests(BaseTestCase):
     def test_header_has_one_main_button_and_an_actions_menu(self):
         html = self.client.get(self.url).content.decode()
         mobile = html[html.index('data-student-actions'):]
-        mobile = mobile[:mobile.index('<!-- Estatísticas -->')]
+        mobile = mobile[:mobile.index('<!-- Estatísticas')]
         self.assertIn('Atribuir treino', mobile)
         self.assertIn('dropdown-menu', mobile)
         for label in ('Editar', 'Redefinir senha', 'Alterar situação', 'Excluir aluno'):
@@ -28,9 +28,11 @@ class StudentFileMobileTests(BaseTestCase):
         # the desktop buttons are still there, only for large screens
         self.assertIn('d-none d-lg-block', html)
 
-    def test_stats_and_tabs_are_scrollable_strips(self):
+    def test_counters_are_four_small_tiles_and_tabs_scroll(self):
         html = self.client.get(self.url).content.decode()
-        self.assertIn('stat-strip', html)
+        self.assertIn('stat-tiles-4', html)
+        self.assertEqual(html.count('class="col-3"'), 4)
+        self.assertNotIn('stat-strip', html)
         self.assertIn('tabs-sticky', html)
         tabs = html[html.index('id="studentTabs"'):html.index('class="tab-content"')]
         self.assertEqual(tabs.count('data-bs-toggle="tab"'), 8)
