@@ -44,14 +44,9 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
         model = Person
         fields = ['person_name', 'email', 'avatar', 'address', 'city', 'state', 'zip_code',
                   'phone', 'birth_date', 'notes', 'goal', 'health_notes', 'emergency_contact_name',
-                  'emergency_contact_phone', 'plan', 'plan_name', 'plan_price', 'hourly_rate', 'plan_expires_on',
-                  'status']
+                  'emergency_contact_phone', 'status']
         widgets = {
             'birth_date': forms.DateInput(
-                attrs={'type': 'date', 'class': 'form-control'},
-                format='%Y-%m-%d'
-            ),
-            'plan_expires_on': forms.DateInput(
                 attrs={'type': 'date', 'class': 'form-control'},
                 format='%Y-%m-%d'
             ),
@@ -62,12 +57,6 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
             'emergency_contact_name': forms.TextInput(attrs={'class': 'form-control'}),
             'emergency_contact_phone': forms.TextInput(attrs={
                 'class': 'form-control', 'inputmode': 'tel', 'autocomplete': 'off', 'data-mask': 'phone'}),
-            'plan_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex.: Mensal 3x/semana'}),
-            'plan': forms.Select(attrs={'class': 'form-select'}),
-            'plan_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'placeholder': '0,00',
-                                                   'inputmode': 'decimal', 'data-no-draft': ''}),
-            'hourly_rate': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'placeholder': '0,00',
-                                                    'inputmode': 'decimal', 'data-no-draft': ''}),
             'notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'person_name': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.TextInput(attrs={'class': 'form-control'}),
@@ -79,20 +68,11 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
         }
         labels = {
             'notes': 'Anotações internas (o aluno não vê)',
-            'plan': 'Plano do catálogo',
-            'plan_name': 'Nome do contrato',
-            'plan_expires_on': 'Vencimento do contrato',
-            'plan_price': 'Valor do contrato por período (R$)',
-            'hourly_rate': 'Valor/hora do contrato (R$)',
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.duplicates = []
-        # Only active plan templates can be chosen (plus the one the student already has)
-        plans = Plan.objects.filter(Q(is_active=True) | Q(pk=self.instance.plan_id))
-        self.fields['plan'].queryset = plans
-        self.fields['plan'].empty_label = '— sem plano do catálogo —'
         if self.instance.pk:
             # Changing the lifecycle goes through "Alterar situação" (history + reason)
             del self.fields['status']
@@ -140,6 +120,49 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
                     found[p.pk] = (p, 'mesmo telefone')
         return list(found.values())
 
+    def clean(self):
+        cleaned = super().clean()
+        if self.errors:
+            return cleaned
+        self.duplicates = self._find_duplicates()
+        if self.duplicates and not cleaned.get('confirm_duplicate'):
+            raise forms.ValidationError(
+                'Já existe aluno com dados parecidos (veja abaixo). '
+                'Se for outra pessoa, marque a confirmação e salve de novo.')
+        return cleaned
+
+
+class ContractForm(forms.ModelForm):
+    """"Alterar plano": the contract agreed with one student (the catalog plan, its name, the agreed values, the expiry).
+
+    Vocabulary: **Plano** is the model of the catalog (Financeiro > Planos); **Contrato** is what is agreed with this student."""
+
+    class Meta:
+        model = Person
+        fields = ['plan', 'plan_name', 'plan_price', 'hourly_rate', 'plan_expires_on']
+        widgets = {
+            'plan': forms.RadioSelect,
+            'plan_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex.: Mensal 3x/semana'}),
+            'plan_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'placeholder': '0,00',
+                                                   'inputmode': 'decimal', 'data-no-draft': ''}),
+            'hourly_rate': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'placeholder': '0,00',
+                                                    'inputmode': 'decimal', 'data-no-draft': ''}),
+            'plan_expires_on': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
+        }
+        labels = {
+            'plan': 'Plano do catálogo',
+            'plan_name': 'Nome do contrato',
+            'plan_price': 'Valor do contrato por período (R$)',
+            'hourly_rate': 'Valor/hora do contrato (R$)',
+            'plan_expires_on': 'Vencimento do contrato',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Only active plan templates can be chosen (plus the one the student already has)
+        self.fields['plan'].queryset = Plan.objects.filter(Q(is_active=True) | Q(pk=self.instance.plan_id))
+        self.fields['plan'].empty_label = None   # the "no plan" card is drawn by the template
+
     def _copy_plan_values(self, cleaned):
         """Assigning a plan copies its name and price to the student unless the trainer typed their own."""
         plan = cleaned.get('plan')
@@ -152,14 +175,8 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
-        if self.errors:
-            return cleaned
-        self._copy_plan_values(cleaned)
-        self.duplicates = self._find_duplicates()
-        if self.duplicates and not cleaned.get('confirm_duplicate'):
-            raise forms.ValidationError(
-                'Já existe aluno com dados parecidos (veja abaixo). '
-                'Se for outra pessoa, marque a confirmação e salve de novo.')
+        if not self.errors:
+            self._copy_plan_values(cleaned)
         return cleaned
 
 

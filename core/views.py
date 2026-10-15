@@ -27,7 +27,7 @@ from allauth.account.models import EmailAddress
 
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, trainer_dashboard
 from .forms import (
-    AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ClassRequestForm, ConsentForm, ExerciseForm, PaymentForm,
+    AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ClassRequestForm, ConsentForm, ContractForm, ExerciseForm, PaymentForm,
     PersonForm, PersonRoutineForm, PlanForm, RepeatForm, ScheduleSlotForm,
     ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
 )
@@ -393,6 +393,21 @@ def student_detail(request, pk):
         'sessions_last_month': sessions_last_month,
         'avg_duration': avg_duration,
     })
+
+
+@staff_required
+def student_contract_edit(request, pk):
+    """"Alterar plano": the contract of one student (catalog plan, agreed name and values, expiry), outside the sign-up form."""
+    student = get_object_or_404(Person, pk=pk)
+    form = ContractForm(request.POST or None, instance=student)
+    if request.method == 'POST' and form.is_valid():
+        with transaction.atomic():
+            person = form.save()
+            log_profile_edit(person, form, request.user)
+        messages.success(request, 'Contrato atualizado.')
+        return redirect(after_save_url(request, reverse('core:student_detail', kwargs={'pk': pk}), fragment='#tab-ficha'))
+    return render(request, 'core/student_contract_form.html', {
+        'form': form, 'student': student, 'plans': list(form.fields['plan'].queryset), 'title': 'Alterar plano'})
 
 
 @staff_required
