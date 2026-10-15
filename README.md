@@ -119,6 +119,7 @@ Os dados vivem em volumes do Docker: `pgdata` (banco), `media` (fotos e mídia d
 | `CALENDAR_LOCATION` | Local das aulas que aparece no Google Agenda / Apple Calendar (opcional) |
 | `PIX_KEY` | Chave Pix incluída na mensagem de cobrança pelo WhatsApp (opcional) |
 | `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` | Conta Gmail e **senha de app** para enviar e-mails (avisos e "esqueci minha senha"); sem isso os e-mails só vão para o log. Ver "Notificações" abaixo |
+| `WEB_DNS_1`, `WEB_DNS_2` | DNS usados pelo container do app (padrão `1.1.1.1` e `8.8.8.8`), para o app alcançar Gmail, serviços de push e IA mesmo com filtro de DNS na rede (opcional) |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Chaves do aviso no aparelho (web push); gere com `docker compose exec web python manage.py generate_vapid_keys` |
 | `SITE_URL`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, `SECURE_HSTS_SECONDS` | Avançado: sobrescrevem os valores derivados de `DOMAIN` |
 
@@ -189,7 +190,7 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 1. *E-mail:* na conta Google, ative a verificação em duas etapas e crie uma **senha de app** (Conta Google → Segurança → Senhas de app). No `.env`: `EMAIL_HOST_USER=conta@gmail.com` e `EMAIL_HOST_PASSWORD=<senha de app>` (o remetente passa a ser essa conta). O Gmail limita o envio diário (centenas de mensagens): sobra para uma academia pequena.
 2. *Aparelho (push):* `docker compose exec web python manage.py generate_vapid_keys`, copiar as três linhas para o `.env` (`VAPID_SUBJECT` com um `mailto:` seu) e `docker compose up -d`. Precisa de **HTTPS** (já tem pelo Caddy) e de `SITE_URL`/`DOMAIN` para os links. No iPhone só funciona com o app adicionado à tela de início (iOS 16.4 ou mais novo). Não troque as chaves depois: os aparelhos inscritos deixam de receber.
 3. Cada pessoa liga o que quiser em **Notificações** e usa "Enviar um teste".
-4. *Se o teste falhar* com "o servidor não conseguiu abrir conexão com fcm.googleapis.com" (ou outro serviço de push do navegador), o servidor está sem saída para a internet na porta 443: confira DNS, firewall e proxy do Docker (`docker compose exec web python -c "import requests; print(requests.get('https://fcm.googleapis.com').status_code)"` deve responder, mesmo que com 404; atrás de proxy, defina `HTTPS_PROXY` no `.env`). Com "o servidor de e-mail recusou o login", refaça a senha de app.
+4. *Se o teste falhar* com "o servidor não conseguiu abrir conexão com fcm.googleapis.com" (ou outro serviço de push do navegador), o servidor está sem saída para a internet na porta 443: confira DNS, firewall e proxy do Docker. Se o DNS devolver `0.0.0.0` para o domínio, um filtro de DNS (Pi-hole, AdGuard, roteador) está bloqueando: libere o domínio ou deixe o app usar os DNS públicos, que já são o padrão no `docker-compose.yml` (`WEB_DNS_1`/`WEB_DNS_2` no `.env` trocam) (`docker compose exec web python -c "import requests; print(requests.get('https://fcm.googleapis.com').status_code)"` deve responder, mesmo que com 404; atrás de proxy, defina `HTTPS_PROXY` no `.env`). Com "o servidor de e-mail recusou o login", refaça a senha de app.
 
 **Falta**
 - **Telegram** (bot; o aluno vincula o chat por um código de uso único), adiado.

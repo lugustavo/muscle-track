@@ -24,6 +24,12 @@ services:
     build: .
     restart: unless-stopped
     env_file: .env
+    # DNS públicos para o app sair para a internet (e-mail, aviso no aparelho, IA) mesmo que o DNS da rede
+    # bloqueie domínios do Google. Os nomes internos (db) continuam resolvidos pelo Docker. Para usar o DNS
+    # da própria rede, defina WEB_DNS_1 e WEB_DNS_2 no .env com os endereços dele.
+    dns:
+      - ${WEB_DNS_1:-1.1.1.1}
+      - ${WEB_DNS_2:-8.8.8.8}
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-muscle_track}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-muscle_track}
     depends_on:
