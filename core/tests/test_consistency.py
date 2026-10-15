@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from core import consistency as c
-from core.models import Person, Plan
+from core.models import Person, Package
 
 from .base import BaseTestCase
 from .test_tabbar_today import finish
@@ -74,7 +74,7 @@ class GoalTests(BaseTestCase):
         self.assertIsNone(c.effective_goal(person))
         person.weekly_goal = 2
         self.assertEqual(c.effective_goal(person), 2)
-        plan = Plan.objects.create(name='Mensal 4x', sessions_per_week=4)
+        plan = Package.objects.create(name='Mensal 4x', sessions_per_week=4)
         person.plan = plan
         self.assertEqual(c.effective_goal(person), 4)
         plan.sessions_per_week = None

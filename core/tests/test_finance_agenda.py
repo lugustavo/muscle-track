@@ -16,7 +16,7 @@ from core.agenda import (
     BACKFILL_DAYS, at, attendance_stats, conflicting_ids, ensure_appointments, parse_week, week_start,
 )
 from core.forms import ContractForm
-from core.models import Appointment, Payment, Person, Plan, ScheduleSlot
+from core.models import Appointment, Payment, Person, Package, ScheduleSlot
 
 from .base import BaseTestCase
 
@@ -25,7 +25,7 @@ PRICE = '91.77'
 
 
 def make_plan(name='Mensal 3x', months=1, price='300.00', spw=3, **extra):
-    return Plan.objects.create(name=name, months=months, price=Decimal(price), sessions_per_week=spw, **extra)
+    return Package.objects.create(name=name, months=months, price=Decimal(price), sessions_per_week=spw, **extra)
 
 
 class BillingRulesTests(BaseTestCase):
@@ -144,7 +144,7 @@ class PlanTemplateTests(BaseTestCase):
         self.login(self.trainer)
         response = self.client.post(reverse('core:plan_create'), {'name': 'Trimestral', 'months': 3, 'price': '800', 'is_active': 'on'})
         self.assertRedirects(response, reverse('core:plan_list'))
-        plan = Plan.objects.get(name='Trimestral')
+        plan = Package.objects.get(name='Trimestral')
         self.assertContains(self.client.get(reverse('core:plan_list')), 'Trimestral')
         # duplicate names and bad prices are rejected
         bad = self.client.post(reverse('core:plan_create'), {'name': 'Trimestral', 'months': 3})
@@ -155,7 +155,7 @@ class PlanTemplateTests(BaseTestCase):
         self.client.post(reverse('core:plan_edit', kwargs={'pk': plan.pk}), {'name': 'Trimestral', 'months': 3, 'price': '800'})
         self.assertNotContains(self.client.get(reverse('core:plan_list')), 'Trimestral')
         self.assertContains(self.client.get(reverse('core:plan_list'), {'status': 'inactive'}), 'Trimestral')
-        self.assertTrue(Plan.objects.filter(pk=plan.pk).exists())
+        self.assertTrue(Package.objects.filter(pk=plan.pk).exists())
 
     def test_contract_page_shows_the_plan_fields(self):
         self.login(self.trainer)

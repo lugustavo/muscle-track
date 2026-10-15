@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.urls import reverse
 
-from core.models import Exercise, Person, PersonRoutine, Plan, Routine
+from core.models import Exercise, Person, PersonRoutine, Package, Routine
 from core.onboarding import trainer_steps
 
 from .base import BaseTestCase
@@ -15,7 +15,7 @@ class FirstStepsTests(BaseTestCase):
         Person.objects.all().delete()
         User.objects.filter(is_staff=False).delete()
         Routine.objects.all().delete()
-        Plan.objects.all().delete()
+        Package.objects.all().delete()
         Exercise.objects.all().delete()
 
     def test_empty_system_is_zero_of_six(self):
@@ -31,7 +31,7 @@ class FirstStepsTests(BaseTestCase):
         group = self.group
         exercise = Exercise.objects.create(exercise_name='Agachamento', muscle_group=group)
         self.assertEqual(done(), {'exercises'})
-        Plan.objects.create(name='Mensal')
+        Package.objects.create(name='Mensal')
         self.assertEqual(done(), {'exercises', 'plan'})
         Routine.objects.create(routine_name='Modelo')
         self.assertEqual(done(), {'exercises', 'plan', 'routine'})
@@ -78,7 +78,7 @@ class FirstStepsCardTests(BaseTestCase):
         self.assertContains(response, 'data-onboarding')
         self.assertContains(response, 'Primeiros passos')
         self.assertContains(response, 'data-onboarding-dismiss')
-        Plan.objects.create(name='Mensal')
+        Package.objects.create(name='Mensal')
         response = self.client.get(reverse('core:home'))
         self.assertIsNone(response.context['onboarding'])
         self.assertNotContains(response, 'data-onboarding')

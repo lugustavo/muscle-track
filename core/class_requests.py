@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
+from . import packages
 from .agenda import MoveError, move_appointment
 from .models import Appointment, AppointmentRequest
 
@@ -96,7 +97,9 @@ def approve(request_obj):
         if request_obj.kind == Kind.CANCEL:
             appointment.status = Appointment.Status.CANCELLED
             appointment.status_changed_at = timezone.now()
-            appointment.save(update_fields=['status', 'status_changed_at'])
+            appointment.cancelled_late = packages.late_cancel(appointment.starts_at)
+            appointment.save(update_fields=['status', 'status_changed_at', 'cancelled_late'])
+            packages.sync(appointment.person)
         else:
             try:
                 move_appointment(appointment, request_obj.proposed_starts_at)

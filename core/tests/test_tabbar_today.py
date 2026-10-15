@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from core.models import (
-    Appointment, PersonRoutine, PersonRoutineExercise, Person, Plan, SessionExercise, SessionSet, StudentEvent,
+    Appointment, PersonRoutine, PersonRoutineExercise, Person, Package, SessionExercise, SessionSet, StudentEvent,
     WorkoutSession,
 )
 from core.today import (
@@ -273,7 +273,7 @@ class StaffBarTests(BaseTestCase):
     def test_badges(self):
         response, html = self.bar()
         self.assertNotIn('tab-badge', html)
-        plan = Plan.objects.create(name='Mensal', months=1, price=Decimal('100'))
+        plan = Package.objects.create(name='Mensal', months=1, price=Decimal('100'))
         Person.objects.filter(pk=self.alice.person.pk).update(plan=plan, plan_expires_on=self.today - timedelta(days=3))
         StudentEvent.objects.create(person=self.bob.person, kind='erasure_request', summary='x')
         StudentEvent.objects.create(person=self.bob.person, kind='erasure_request', summary='again')  # one student, one badge
@@ -392,7 +392,7 @@ class TodayScreenTests(BaseTestCase):
         today = timezone.localdate()
         finish(self.alice_routine)
         self.assertRegex(self.page().content.decode(), r'1 treino\s*</small>')
-        plan = Plan.objects.create(name='3x', months=1, sessions_per_week=3)
+        plan = Package.objects.create(name='3x', months=1, sessions_per_week=3)
         Person.objects.filter(pk=self.person.pk).update(plan=plan)
         response = self.page()
         self.assertContains(response, '1 de 3 treinos')

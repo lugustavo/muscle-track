@@ -51,6 +51,7 @@ urlpatterns = [
     path('appointment-requests/<int:pk>/decide/', views.appointment_request_decide, name='appointment_request_decide'),
     path('appointments/<int:pk>/move/', views.appointment_move, name='appointment_move'),
     path('appointments/<int:pk>/move/undo/', views.appointment_move_undo, name='appointment_move_undo'),
+    path('appointments/<int:pk>/counts/', views.appointment_counts, name='appointment_counts'),
     path('appointments/<int:pk>/status/', views.appointment_status, name='appointment_status'),
     path('appointments/<int:pk>/delete/', views.appointment_delete, name='appointment_delete'),
     path('students/<int:pk>/slots/add/', views.slot_add, name='slot_add'),

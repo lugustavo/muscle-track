@@ -5,7 +5,7 @@ from django.utils import timezone
 from .recurrence import MAX_INTERVAL, MAX_OCCURRENCES, MAX_SPAN_DAYS, end_date
 from .validators import normalize_phone, normalize_state, normalize_zip_code, validate_birth_date, digits_only
 from .models import (
-    Appointment, Payment, Plan, ScheduleSlot,
+    Appointment, Payment, Package, ScheduleSlot,
     Assessment, Exercise, Person, PersonRoutine, ProgressPhoto, Routine, RoutineExercise, StudentNote,
 )
 
@@ -160,7 +160,7 @@ class ContractForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Only active plan templates can be chosen (plus the one the student already has)
-        self.fields['plan'].queryset = Plan.objects.filter(Q(is_active=True) | Q(pk=self.instance.plan_id))
+        self.fields['plan'].queryset = Package.objects.filter(Q(is_active=True) | Q(pk=self.instance.plan_id))
         self.fields['plan'].empty_label = None   # the "no plan" card is drawn by the template
 
     def _copy_plan_values(self, cleaned):
@@ -353,18 +353,31 @@ class ConsentForm(forms.Form):
     photos = forms.BooleanField(required=False, label='')
 
 
-class PlanForm(forms.ModelForm):
+class PackageForm(forms.ModelForm):
+    """A package of the catalog: classes, deadline (counted from the first class) and the price, typed per class or total."""
+
     class Meta:
-        model = Plan
-        fields = ['name', 'description', 'months', 'sessions_per_week', 'price', 'is_active']
+        model = Package
+        fields = ['name', 'description', 'sessions', 'valid_days', 'pricing_mode', 'price_per_session', 'price_total', 'is_active']
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex.: Mensal 3x por semana'}),
-            'description': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
-            'months': forms.Select(attrs={'class': 'form-select'}),
-            'sessions_per_week': forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': '14'}),
-            'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex.: Pacote 10 aulas'}),
+            'description': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+            'sessions': forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': '200', 'inputmode': 'numeric'}),
+            'valid_days': forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': '1000', 'inputmode': 'numeric'}),
+            'pricing_mode': forms.RadioSelect,
+            'price_per_session': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'inputmode': 'decimal'}),
+            'price_total': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'inputmode': 'decimal'}),
         }
-        labels = {'price': 'Valor de tabela do período (R$)'}
+
+    def clean(self):
+        cleaned = super().clean()
+        if self.errors:
+            return cleaned
+        mode = cleaned.get('pricing_mode')
+        typed = cleaned.get('price_per_session' if mode == 'per_session' else 'price_total')
+        if typed is None:
+            self.add_error('price_per_session' if mode == 'per_session' else 'price_total', 'Informe o valor.')
+        return cleaned
 
 
 class PaymentForm(forms.ModelForm):
@@ -384,7 +397,7 @@ class PaymentForm(forms.ModelForm):
 
     def __init__(self, *args, person=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['plan'].queryset = Plan.objects.filter(Q(is_active=True) | Q(pk=getattr(person, 'plan_id', None)))
+        self.fields['plan'].queryset = Package.objects.filter(Q(is_active=True) | Q(pk=getattr(person, 'plan_id', None)))
         self.fields['plan'].required = False
         self.fields['plan'].empty_label = '— sem plano do catálogo —'
 

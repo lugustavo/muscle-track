@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from core.contract import contract_card
-from core.models import Appointment, Payment, Person, Plan
+from core.models import Appointment, Payment, Person, Package
 
 from .base import BaseTestCase
 
@@ -61,7 +61,7 @@ class ContractCardTests(BaseTestCase):
         self.assertIsNone(self.card(plan_expires_on=TODAY - timedelta(days=90))['period'])   # starts after it ends
 
     def test_classes_this_week_only_counts_attended_ones_of_the_week(self):
-        plan = Plan.objects.create(name='Mensal 3x', sessions_per_week=3)
+        plan = Package.objects.create(name='Mensal 3x', sessions_per_week=3)
         self.assertIsNone(self.card()['classes_done'])
         card = self.card(plan=plan)
         self.assertEqual((card['classes_per_week'], card['classes_done']), (3, 0))
@@ -75,7 +75,7 @@ class ContractCardTests(BaseTestCase):
         self.assertEqual(self.card()['classes_done'], 2)
 
     def test_value_against_the_catalog_price(self):
-        plan = Plan.objects.create(name='Mensal', price=Decimal('200'))
+        plan = Package.objects.create(name='Mensal', price=Decimal('200'))
         self.assertEqual(self.card(plan=plan, plan_price=Decimal('180'))['against_table'], {'percent': 10, 'direction': 'below'})
         self.assertEqual(self.card(plan_price=Decimal('250'))['against_table'], {'percent': 25, 'direction': 'above'})
         self.assertEqual(self.card(plan_price=Decimal('200'))['against_table'], {'percent': 0, 'direction': 'same'})
@@ -161,7 +161,7 @@ class ContractEditPageTests(BaseTestCase):
 
     def setUp(self):
         self.person = self.alice.person
-        self.plan = Plan.objects.create(name='Mensal 3x', months=1, sessions_per_week=3, price=Decimal('300.00'))
+        self.plan = Package.objects.create(name='Mensal 3x', months=1, sessions_per_week=3, price=Decimal('300.00'))
         self.url = reverse('core:student_contract_edit', kwargs={'pk': self.person.pk})
         self.client.force_login(self.trainer)
 
@@ -209,7 +209,7 @@ class ContractEditPageTests(BaseTestCase):
         self.assertIsNone(self.person.plan_price)
 
     def test_inactive_current_plan_stays_selectable(self):
-        old = Plan.objects.create(name='Antigo', is_active=False)
+        old = Package.objects.create(name='Antigo', is_active=False)
         self.person.plan = old
         self.person.save()
         page = self.client.get(self.url)
