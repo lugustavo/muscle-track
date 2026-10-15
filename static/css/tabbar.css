@@ -149,6 +149,8 @@ body.kbd-open .tabbar { display: none; }
 .fab:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 3px; }
 body.kbd-open .fab { display: none; }
 @media (min-width: 992px) { .fab { display: none !important; } }
+/* room under the content so the floating button never covers the last buttons */
+@media (max-width: 991.98px) { body.has-fab .main-content { padding-bottom: calc(8.5rem + env(safe-area-inset-bottom)); } }
 
 .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 .hide-scrollbar::-webkit-scrollbar { display: none; }

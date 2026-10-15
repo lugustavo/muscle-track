@@ -201,7 +201,7 @@ class StudentBarTests(BaseTestCase):
     def test_layout_classes_for_small_screens(self):
         page = self.client.get(reverse('core:home')).content.decode()
         self.assertIn('viewport-fit=cover', page)
-        self.assertIn('<body class="has-tabbar">', page)
+        self.assertRegex(page, r'<body class="has-tabbar[^"]*">')
         self.assertIn('class="navbar-toggler d-none"', page)       # the bar replaces the hamburger
         self.assertIn('<footer class="d-none d-lg-block">', page)  # no footer on phones
         self.assertIn('css/tabbar.css', page)
@@ -301,7 +301,7 @@ class StaffBarTests(BaseTestCase):
 
     def test_layout_for_the_trainer(self):
         page = self.client.get(reverse('core:finance')).content.decode()
-        self.assertIn('<body class="has-tabbar">', page)
+        self.assertRegex(page, r'<body class="has-tabbar[^"]*">')
         self.assertIn('navbar-toggler d-none', page)
         self.assertIn('<footer class="d-none d-lg-block">', page)
 

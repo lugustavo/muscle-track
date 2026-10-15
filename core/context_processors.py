@@ -10,6 +10,7 @@ from .today import open_row, rows_for, start_of_day, suggested_row
 HIDDEN_ON = {'consent'}
 
 STAFF_SECTIONS = (
+    ('busca', ('search',)),   # no bottom-bar item: none is shown as active
     ('alunos', ('student_', 'assessment_', 'photo_', 'note_', 'person_routine_', 'session_detail', 'invite')),
     ('agenda', ('agenda', 'appointment_', 'slot_')),
     ('financeiro', ('finance', 'payment_', 'plan_')),

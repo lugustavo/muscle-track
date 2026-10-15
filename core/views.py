@@ -14,8 +14,8 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Avg, Count, Exists, F, Max, OuterRef, Prefetch, Q, Subquery, Value
-from django.db.models.functions import Coalesce, Replace
+from django.db.models import Avg, Count, Exists, F, Max, OuterRef, Prefetch, Q, Subquery
+from django.db.models.functions import Coalesce
 from django.http import FileResponse, Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -47,10 +47,11 @@ from .models import (
     Routine, RoutineExercise, SessionExercise, SessionSet, StudentEvent, StudentNote, WorkoutSession,
 )
 from .navigation import after_save_url, back_label, safe_next_url
+from .onboarding import trainer_steps
 from .permissions import is_trainer, staff_required, student_required
+from .search import apply_student_search, phone_digits, search_all
 from .today import MAX_SESSION_MINUTES, student_today, suggest_index
 from .workout_summary import session_summary
-from .validators import digits_only
 from .whatsapp import whatsapp_url
 
 logger = logging.getLogger(__name__)
@@ -63,6 +64,8 @@ def home(request):
 
     if is_trainer(user):
         context['dashboard'] = trainer_dashboard()
+        onboarding = trainer_steps(request.get_full_path())
+        context['onboarding'] = None if onboarding['complete'] else onboarding
     elif user.is_authenticated:
         person = Person.objects.filter(user=user).first()
         if person:
@@ -70,6 +73,27 @@ def home(request):
             context['today'] = student_today(request, person)
 
     return render(request, 'core/home.html', context)
+
+
+# ============= SEARCH =============
+
+@staff_required
+def search(request):
+    """Global search results: students, exercises and routines."""
+    result = search_all(request.GET.get('q', ''), limit=20)
+    return render(request, 'core/search.html', {
+        'result': result, 'q': result['query'],
+        'found': sum(g['total'] for g in result['groups']),
+    })
+
+
+@staff_required
+def search_suggest(request):
+    """The same search for the live box: a few items per group, as JSON (the browser inserts them as text)."""
+    result = search_all(request.GET.get('q', ''), limit=5)
+    response = JsonResponse({'query': result['query'], 'groups': result['groups']})
+    response['Cache-Control'] = 'no-store'
+    return response
 
 
 # ============= STUDENT VIEWS =============
@@ -88,12 +112,6 @@ STUDENT_FILTERS = {
 }
 
 
-def _phone_digits(expr):
-    for ch in '()-+. ':
-        expr = Replace(expr, Value(ch), Value(''))
-    return expr
-
-
 def _students_queryset():
     """Students with the list statistics computed in the same query (no per-row queries)."""
     sessions = WorkoutSession.objects.filter(person_routine__person=OuterRef('pk'), is_completed=True)
@@ -103,24 +121,8 @@ def _students_queryset():
         last_workout_at=Subquery(last_workout),
         total_workouts=Coalesce(Subquery(total), 0),
         has_routine=Exists(PersonRoutine.objects.filter(person=OuterRef('pk'), is_active=True)),
-        phone_digits=_phone_digits(F('phone')),
+        phone_digits=phone_digits(F('phone')),
     )
-
-
-def _apply_student_search(students, search):
-    search = search.strip()
-    if not search:
-        return students
-    if search.startswith('#') and search[1:].isdigit():
-        return students.filter(pk=int(search[1:]))
-    query = (Q(person_name__icontains=search) | Q(user__email__icontains=search)
-             | Q(phone__icontains=search))
-    digits = digits_only(search)
-    if len(digits) >= 3:
-        query |= Q(phone_digits__icontains=digits)
-        if digits.startswith('55') and len(digits) >= 5:
-            query |= Q(phone_digits__icontains=digits[2:])  # typed with the country code
-    return students.filter(query)
 
 
 def _apply_student_filter(students, name):
@@ -158,7 +160,7 @@ def student_list(request):
         filter_name = ''
     view_mode = request.GET.get('view', request.COOKIES.get('student_view_mode', 'grid'))
 
-    students = _apply_student_search(_students_queryset(), search)
+    students = apply_student_search(_students_queryset(), search)
     if status == 'active':
         students = students.filter(is_active=True)
     elif status == 'inactive':
