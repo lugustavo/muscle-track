@@ -1,6 +1,8 @@
 {% load navigation calendar_tags %}
 {# One class: time, student, status and the quick buttons. Needs `a` and `conflicts`. #}
-<div class="card appt s-{{ a.status }} {% if a.pk in conflicts %}conflict{% endif %} mb-2">
+<div class="card appt s-{{ a.status }} {% if a.pk in conflicts %}conflict{% endif %} mb-2"
+     {% if a.status == 'scheduled' %}draggable="true" data-appt-move="{% url 'core:appointment_move' a.pk %}" data-appt-person="{{ a.person.person_name }}"
+     data-appt-date="{{ a.starts_at|date:'Y-m-d' }}" data-appt-time="{{ a.starts_at|time:'H:i' }}" data-appt-duration="{{ a.duration_minutes }}"{% endif %}>
     <div class="card-body p-2">
         <div class="d-flex justify-content-between">
             <strong>{{ a.starts_at|time:"H:i" }}</strong>
@@ -16,7 +18,7 @@
             {% if a.status != 'missed' %}<button name="status" value="missed" class="btn btn-sm btn-outline-danger" title="Faltou"><i class="bi bi-x-lg"></i></button>{% endif %}
             {% if a.status != 'cancelled' %}<button name="status" value="cancelled" class="btn btn-sm btn-outline-secondary" title="Cancelar"><i class="bi bi-slash-circle"></i></button>{% endif %}
             {% if a.status != 'scheduled' %}<button name="status" value="scheduled" class="btn btn-sm btn-outline-secondary" title="Desfazer (voltar para marcada)"><i class="bi bi-arrow-counterclockwise"></i></button>{% endif %}
-            <a href="{% nav_url 'core:appointment_reschedule' a.pk %}" class="btn btn-sm btn-outline-primary" title="Remarcar"><i class="bi bi-arrow-repeat"></i></a>
+            <a href="{% nav_url 'core:appointment_reschedule' a.pk %}" class="btn btn-sm btn-outline-primary" title="{% if a.status == 'scheduled' %}Mover para outro dia ou horário{% else %}Remarcar{% endif %}" {% if a.status == 'scheduled' %}data-appt-move-open{% endif %}><i class="bi {% if a.status == 'scheduled' %}bi-arrows-move{% else %}bi-arrow-repeat{% endif %}"></i><span class="visually-hidden">{% if a.status == 'scheduled' %}Mover{% else %}Remarcar{% endif %}</span></a>
             <a href="{% google_event_url a %}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary" title="Adicionar esta aula ao Google Agenda"><i class="bi bi-google"></i><span class="visually-hidden">Adicionar ao Google Agenda</span></a>
         </form>
         {% if a.slot_id %}
