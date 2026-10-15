@@ -31,7 +31,10 @@ from .forms import (
     PersonForm, PersonRoutineForm, PlanForm, ScheduleSlotForm,
     ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
 )
-from .agenda import at, attendance_stats, conflicting_ids, ensure_appointments, parse_week
+from .agenda import (
+    DEFAULT_VIEW as DEFAULT_AGENDA_VIEW, LIST_DAYS, VIEWS as AGENDA_VIEWS, add_months, at, attendance_stats,
+    conflicting_ids, ensure_appointments, month_cells, parse_week, view_range,
+)
 from .billing import (
     charge_message, delete_payment, month_bounds, month_summary, overdue_rows, parse_month,
     register_payment, suggest_amount, suggest_period,
@@ -2039,28 +2042,85 @@ def _agenda_selected_day(value, by_day, today):
     return next((d for d in sorted(by_day) if by_day[d]), min(by_day))
 
 
+AGENDA_VIEW_LABELS = (('semana', 'Semana'), ('dia', 'Dia'), ('mes', 'Mês'), ('lista', 'Lista'))
+
+
+def _agenda_url(**params):
+    return f"{reverse('core:agenda')}?{urlencode(params)}"
+
+
+def _agenda_nav(view, pivot, today):
+    """(previous url, next url, "today" url, is the current period) of a view."""
+    if view == 'mes':
+        return (_agenda_url(vista='mes', mes=add_months(pivot, -1).strftime('%Y-%m')),
+                _agenda_url(vista='mes', mes=add_months(pivot, 1).strftime('%Y-%m')),
+                _agenda_url(vista='mes'), pivot == today.replace(day=1))
+    if view == 'dia':
+        return (_agenda_url(vista='dia', dia=(pivot - timedelta(days=1)).isoformat()),
+                _agenda_url(vista='dia', dia=(pivot + timedelta(days=1)).isoformat()),
+                _agenda_url(vista='dia'), pivot == today)
+    if view == 'lista':
+        return (_agenda_url(vista='lista', inicio=(pivot - timedelta(days=LIST_DAYS)).isoformat()),
+                _agenda_url(vista='lista', inicio=(pivot + timedelta(days=LIST_DAYS)).isoformat()),
+                _agenda_url(vista='lista'), pivot == today)
+    return (_agenda_url(vista='semana', semana=(pivot - timedelta(days=7)).isoformat()),
+            _agenda_url(vista='semana', semana=(pivot + timedelta(days=7)).isoformat()),
+            _agenda_url(vista='semana'), pivot == parse_week(None, today))
+
+
 @staff_required
 def agenda(request):
-    """The week: classes by day, with quick attendance buttons"""
+    """The calendar in four views (week, day, month, list); the choice is remembered in a cookie.
+
+    Classes are shown with quick attendance buttons; the week is the default."""
     today = timezone.localdate()
-    monday = parse_week(request.GET.get('semana'), today)
-    sunday = monday + timedelta(days=6)
-    ensure_appointments(monday, sunday, today)
+    requested = request.GET.get('vista')
+    remembered = request.COOKIES.get('agenda_vista')
+    view = requested if requested in AGENDA_VIEWS else (remembered if remembered in AGENDA_VIEWS else DEFAULT_AGENDA_VIEW)
+    view, start, end, pivot = view_range(view, request.GET, today)
+    ensure_appointments(start, end, today)
     items = list(Appointment.objects.filter(
-        starts_at__gte=at(monday, time.min), starts_at__lt=at(sunday + timedelta(days=1), time.min)
+        starts_at__gte=at(start, time.min), starts_at__lt=at(end + timedelta(days=1), time.min)
     ).select_related('person'))
     conflicts = conflicting_ids(items)
-    by_day = {monday + timedelta(days=i): [] for i in range(7)}
+    by_day = {}
     for item in items:
-        by_day[timezone.localtime(item.starts_at).date()].append(item)
-    selected = _agenda_selected_day(request.GET.get('dia'), by_day, today)
-    days = [{'date': d, 'is_today': d == today, 'items': by_day[d], 'is_selected': d == selected,
-             'weekday': ScheduleSlot.WEEKDAYS[d.weekday()][1]} for d in sorted(by_day)]
-    return render(request, 'core/agenda.html', {
-        'days': days, 'selected_day': selected, 'conflicts': conflicts, 'monday': monday, 'sunday': sunday,
-        'prev_week': (monday - timedelta(days=7)).isoformat(), 'next_week': (monday + timedelta(days=7)).isoformat(),
-        'is_current_week': monday == parse_week(None, today), 'statuses': Appointment.Status,
-    })
+        by_day.setdefault(timezone.localtime(item.starts_at).date(), []).append(item)
+
+    prev_url, next_url, today_url, is_current = _agenda_nav(view, pivot, today)
+    context = {
+        'view': view, 'conflicts': conflicts, 'statuses': Appointment.Status,
+        'range_start': start, 'range_end': end, 'pivot': pivot,
+        'prev_url': prev_url, 'next_url': next_url, 'today_url': today_url, 'is_current': is_current,
+        'view_links': [(key, label, _agenda_url(vista=key), key == view) for key, label in AGENDA_VIEW_LABELS],
+    }
+    if view == 'semana':
+        days_map = {start + timedelta(days=i): by_day.get(start + timedelta(days=i), []) for i in range(7)}
+        selected = _agenda_selected_day(request.GET.get('dia'), days_map, today)
+        context.update({
+            'days': [{'date': d, 'is_today': d == today, 'items': days_map[d], 'is_selected': d == selected,
+                      'weekday': ScheduleSlot.WEEKDAYS[d.weekday()][1]} for d in sorted(days_map)],
+            'selected_day': selected, 'monday': start, 'sunday': end,
+            'prev_week': (start - timedelta(days=7)).isoformat(), 'next_week': (start + timedelta(days=7)).isoformat(),
+            'is_current_week': is_current,
+        })
+    elif view == 'mes':
+        context.update({'weeks': month_cells(pivot, by_day, today, conflicts), 'month': pivot,
+                        'weekday_letters': [label[:3] for _, label in ScheduleSlot.WEEKDAYS]})
+    else:
+        # day and list: the same cards, day by day (the list skips days without classes)
+        day = start
+        days = []
+        while day <= end:
+            if view == 'dia' or by_day.get(day):
+                days.append({'date': day, 'is_today': day == today, 'items': by_day.get(day, []),
+                             'weekday': ScheduleSlot.WEEKDAYS[day.weekday()][1]})
+            day += timedelta(days=1)
+        context['days'] = days
+    response = render(request, 'core/agenda.html', context)
+    if requested in AGENDA_VIEWS:
+        response.set_cookie('agenda_vista', requested, max_age=31536000, samesite='Lax')
+    return response
 
 
 def _warn_if_conflict(request, appointment):

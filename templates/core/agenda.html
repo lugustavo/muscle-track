@@ -12,23 +12,51 @@
     .appt.s-missed { border-left-color: #dc3545; }
     .appt.s-cancelled, .appt.s-rescheduled { opacity: .55; }
     .appt.conflict { border-left-color: #fd7e14; background: var(--bs-warning-bg-subtle); }
+
+    /* Month grid */
+    .month-grid { border: 1px solid var(--bs-border-color); border-radius: .5rem; overflow: hidden; }
+    .month-head, .month-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    .month-head div { padding: .35rem 0; text-align: center; font-size: .75rem; text-transform: uppercase; color: var(--bs-secondary-color); background: var(--bs-tertiary-bg); }
+    .month-cell { display: block; min-height: 3.6rem; padding: .25rem .3rem; border-top: 1px solid var(--bs-border-color); border-left: 1px solid var(--bs-border-color); color: inherit; text-decoration: none; position: relative; }
+    .month-row .month-cell:first-child { border-left: 0; }
+    .month-cell:hover { background: var(--bs-tertiary-bg); }
+    .month-cell.out { opacity: .45; }
+    .month-cell .num { font-weight: 600; font-size: .85rem; }
+    .month-cell.today .num { background: var(--primary-color); color: #fff; border-radius: 50%; display: inline-block; min-width: 1.5rem; height: 1.5rem; line-height: 1.5rem; text-align: center; }
+    .month-chip { display: block; font-size: .72rem; line-height: 1.25; padding: 0 .25rem; margin-top: 2px; border-left: 3px solid #adb5bd; background: var(--bs-secondary-bg); border-radius: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .month-chip.s-attended { border-left-color: #198754; }
+    .month-chip.s-missed { border-left-color: #dc3545; }
+    .month-chip.s-cancelled, .month-chip.s-rescheduled { opacity: .55; text-decoration: line-through; }
+    .month-count { position: absolute; right: .3rem; top: .3rem; }
+    @media (max-width: 767.98px) { .month-cell { min-height: 3rem; padding: .2rem; text-align: center; } .month-count { position: static; display: block; margin-top: 2px; } }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
     <h1 class="mb-0"><i class="bi bi-calendar-week"></i> Agenda</h1>
-    <div class="d-flex gap-2 flex-wrap">
-        <div class="btn-group">
-            <a href="?semana={{ prev_week }}" class="btn btn-outline-secondary" title="Semana anterior"><i class="bi bi-chevron-left"></i></a>
-            <span class="btn disabled bg-body-tertiary text-body fw-bold">{{ monday|date:"d/m" }} a {{ sunday|date:"d/m/Y" }}</span>
-            <a href="?semana={{ next_week }}" class="btn btn-outline-secondary" title="Próxima semana"><i class="bi bi-chevron-right"></i></a>
-            {% if not is_current_week %}<a href="{% url 'core:agenda' %}" class="btn btn-outline-primary">Hoje</a>{% endif %}
-        </div>
-        <a href="{% nav_url 'core:appointment_create' %}" class="btn btn-primary d-none d-lg-inline-block"><i class="bi bi-plus-circle"></i> Nova aula</a>
+    <a href="{% nav_url 'core:appointment_create' %}" class="btn btn-primary d-none d-lg-inline-block"><i class="bi bi-plus-circle"></i> Nova aula</a>
+</div>
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3" data-agenda-toolbar>
+    <div class="btn-group" role="group" aria-label="Tipo de vista" data-agenda-views>
+        {% for key, label, url, active in view_links %}
+        <a href="{{ url }}" class="btn btn-sm {% if active %}btn-primary{% else %}btn-outline-primary{% endif %}" {% if active %}aria-current="true"{% endif %} data-view="{{ key }}">{{ label }}</a>
+        {% endfor %}
+    </div>
+    <div class="btn-group">
+        <a href="{{ prev_url }}" class="btn btn-outline-secondary" title="Anterior"><i class="bi bi-chevron-left"></i><span class="visually-hidden">Anterior</span></a>
+        <span class="btn disabled bg-body-tertiary text-body fw-bold" data-agenda-title>
+            {% if view == 'mes' %}{{ month|date:"F \d\e Y"|capfirst }}
+            {% elif view == 'dia' %}{{ pivot|date:"l, j \d\e F"|lower|capfirst }}
+            {% else %}{{ range_start|date:"d/m" }} a {{ range_end|date:"d/m/Y" }}{% endif %}
+        </span>
+        <a href="{{ next_url }}" class="btn btn-outline-secondary" title="Próximo"><i class="bi bi-chevron-right"></i><span class="visually-hidden">Próximo</span></a>
+        {% if not is_current %}<a href="{{ today_url }}" class="btn btn-outline-primary">Hoje</a>{% endif %}
     </div>
 </div>
 
+{% if view == 'semana' %}
 <div class="day-strip mb-3" role="tablist" aria-label="Dias da semana" data-day-strip>
     {% for day in days %}
     <button type="button" role="tab" data-day="{{ day.date|date:'Y-m-d' }}" aria-selected="{% if day.is_selected %}true{% else %}false{% endif %}"
@@ -39,7 +67,7 @@
     {% endfor %}
 </div>
 
-<div class="row g-3 agenda-days">
+<div class="row g-3 agenda-days" data-agenda-view="semana">
     {% for day in days %}
     <div class="col-md-6 col-xl day-pane {% if day.is_selected %}selected{% endif %}" data-day-pane="{{ day.date|date:'Y-m-d' }}">
         <div class="card h-100 day-col {% if day.is_today %}today{% endif %}">
@@ -47,34 +75,7 @@
                 <strong>{{ day.weekday }}</strong> <small>{{ day.date|date:"d/m" }}</small>
             </div>
             <div class="card-body p-2">
-                {% for a in day.items %}
-                <div class="card appt s-{{ a.status }} {% if a.pk in conflicts %}conflict{% endif %} mb-2">
-                    <div class="card-body p-2">
-                        <div class="d-flex justify-content-between">
-                            <strong>{{ a.starts_at|time:"H:i" }}</strong>
-                            <span class="badge {% if a.status == 'attended' %}bg-success{% elif a.status == 'missed' %}bg-danger{% elif a.status == 'scheduled' %}bg-body-secondary text-body border{% else %}bg-secondary{% endif %}">{{ a.get_status_display }}</span>
-                        </div>
-                        <a href="{% nav_url 'core:student_detail' a.person.pk %}" class="text-decoration-none d-block text-truncate">{{ a.person.person_name }}</a>
-                        <small class="text-muted">{{ a.get_kind_display }} · {{ a.duration_minutes }} min</small>
-                        {% if a.pk in conflicts %}<div class="small text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> Sobreposta a outra aula</div>{% endif %}
-                        {% if a.status != 'rescheduled' %}
-                        <form method="post" action="{% nav_url 'core:appointment_status' a.pk %}" class="mt-1 d-flex flex-wrap gap-1">
-                            {% csrf_token %}
-                            {% if a.status != 'attended' %}<button name="status" value="attended" class="btn btn-sm btn-outline-success" title="Compareceu"><i class="bi bi-check-lg"></i></button>{% endif %}
-                            {% if a.status != 'missed' %}<button name="status" value="missed" class="btn btn-sm btn-outline-danger" title="Faltou"><i class="bi bi-x-lg"></i></button>{% endif %}
-                            {% if a.status != 'cancelled' %}<button name="status" value="cancelled" class="btn btn-sm btn-outline-secondary" title="Cancelar"><i class="bi bi-slash-circle"></i></button>{% endif %}
-                            {% if a.status != 'scheduled' %}<button name="status" value="scheduled" class="btn btn-sm btn-outline-secondary" title="Desfazer (voltar para marcada)"><i class="bi bi-arrow-counterclockwise"></i></button>{% endif %}
-                            <a href="{% nav_url 'core:appointment_reschedule' a.pk %}" class="btn btn-sm btn-outline-primary" title="Remarcar"><i class="bi bi-arrow-repeat"></i></a>
-                        </form>
-                        {% if not a.slot_id %}
-                        <form method="post" action="{% nav_url 'core:appointment_delete' a.pk %}" onsubmit="return confirm('Remover esta aula avulsa?');" class="mt-1">
-                            {% csrf_token %}
-                            <button class="btn btn-sm btn-link text-danger p-0 small">remover</button>
-                        </form>
-                        {% endif %}
-                        {% endif %}
-                    </div>
-                </div>
+                {% for a in day.items %}{% include 'core/_appt_card.html' %}
                 {% empty %}
                 <div class="text-muted small text-center py-2 d-none d-lg-block">—</div>
                 <div class="day-empty text-muted">
@@ -87,6 +88,52 @@
     </div>
     {% endfor %}
 </div>
+
+{% elif view == 'mes' %}
+<div class="month-grid" role="grid" aria-label="{{ month|date:'F \d\e Y' }}" data-agenda-view="mes">
+    <div class="month-head" role="row">{% for letter in weekday_letters %}<div role="columnheader">{{ letter }}</div>{% endfor %}</div>
+    {% for week in weeks %}
+    <div class="month-row" role="row">
+        {% for cell in week %}
+        <a href="{% url 'core:agenda' %}?vista=dia&dia={{ cell.date|date:'Y-m-d' }}" role="gridcell"
+           class="month-cell {% if not cell.in_month %}out{% endif %} {% if cell.is_today %}today{% endif %}"
+           aria-label="{{ cell.date|date:'j \d\e F'|lower }}: {{ cell.live }} aula{{ cell.live|pluralize }}">
+            <span class="num">{{ cell.date|date:"j" }}</span>
+            {% if cell.live %}<span class="badge bg-primary month-count d-md-none">{{ cell.live }}</span>{% endif %}
+            {% if cell.conflict %}<i class="bi bi-exclamation-triangle text-warning-emphasis small" title="Aulas sobrepostas"></i>{% endif %}
+            <span class="d-none d-md-block">
+                {% for a in cell.items|slice:":3" %}<span class="month-chip s-{{ a.status }}">{{ a.starts_at|time:"H:i" }} {{ a.person.person_name }}</span>{% endfor %}
+                {% if cell.total > 3 %}<span class="small text-muted">+{{ cell.total|add:"-3" }}</span>{% endif %}
+            </span>
+        </a>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+<p class="small text-muted mt-2 mb-0">Toque em um dia para ver as aulas dele.</p>
+
+{% else %}
+<div data-agenda-view="{{ view }}">
+    {% for day in days %}
+    <section class="mb-4" data-agenda-day="{{ day.date|date:'Y-m-d' }}">
+        <h2 class="h6 text-uppercase text-muted mb-2 {% if day.is_today %}text-primary{% endif %}">
+            {{ day.weekday }}, {{ day.date|date:"j \d\e F"|lower }}{% if day.is_today %} · hoje{% endif %}
+        </h2>
+        <div class="row g-2">
+            {% for a in day.items %}<div class="col-md-6 col-xl-4">{% include 'core/_appt_card.html' %}</div>
+            {% empty %}
+            <div class="col-12 text-muted">
+                <p class="mb-2">Sem aulas neste dia.</p>
+                <a href="{% nav_url 'core:appointment_create' %}&date={{ day.date|date:'Y-m-d' }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus-circle"></i> Nova aula neste dia</a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% empty %}
+    <div class="alert alert-info" data-agenda-empty><i class="bi bi-info-circle"></i> Nenhuma aula entre {{ range_start|date:"d/m" }} e {{ range_end|date:"d/m" }}. Use as setas para ver outros dias.</div>
+    {% endfor %}
+</div>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}
