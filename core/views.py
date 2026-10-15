@@ -49,6 +49,7 @@ from .models import (
 from .navigation import after_save_url, back_label, safe_next_url
 from .permissions import is_trainer, staff_required, student_required
 from .today import MAX_SESSION_MINUTES, student_today, suggest_index
+from .workout_summary import session_summary
 from .validators import digits_only
 from .whatsapp import whatsapp_url
 
@@ -1285,6 +1286,17 @@ def workout_execute(request, pk, person):
             'record': records.get(prx.exercise_id),
         })
 
+    # Focus mode: finished exercises go to the end of the queue (the trainer's order inside each group)
+    for item in exercises:
+        item['complete'] = bool(item['sets']) and item['done_count'] == len(item['sets'])
+    exercises.sort(key=lambda item: (item['complete'], item['prx'].order, item['prx'].pk))
+    first_pending = next((i for i, item in enumerate(exercises) if not item['complete']), None)
+    for i, item in enumerate(exercises):
+        # open the current exercise and any that is already in progress; the rest start collapsed
+        item['expanded'] = not item['complete'] and (i == first_pending or item['done_count'] > 0)
+    sets_total = sum(len(item['sets']) for item in exercises)
+    sets_done = sum(item['done_count'] for item in exercises)
+
     stale_in = max(0, int((active_session.start_time + timedelta(minutes=MAX_SESSION_MINUTES)
                            - timezone.now()).total_seconds()))
     return render(request, 'core/workout_execute.html', {
@@ -1293,7 +1305,12 @@ def workout_execute(request, pk, person):
         'exercises': exercises,
         'elapsed_seconds': active_session.elapsed_seconds(),
         'stale_in_seconds': stale_in,
-        'all_done': all(e['done_count'] == len(e['sets']) for e in exercises) if exercises else False,
+        'all_done': all(e['complete'] for e in exercises) if exercises else False,
+        'exercise_total': len(exercises),
+        'exercises_done': sum(1 for e in exercises if e['complete']),
+        'sets_total': sets_total,
+        'sets_done': sets_done,
+        'sets_percent': round(100 * sets_done / sets_total) if sets_total else 0,
     })
 
 
@@ -1306,8 +1323,17 @@ def workout_end(request, pk, person):
         session.notes = request.POST.get('notes', '').strip()[:2000]
         session.save(update_fields=['notes'])
     session.end_session()
-    messages.success(request, f'Treino concluído! Duração: {session.duration_minutes} minutos')
-    return redirect('core:my_workouts')
+    return redirect('core:workout_summary', pk=session.pk)
+
+
+@student_required(consent_gate=False)
+def workout_summary(request, pk, person):
+    """What the student just did: duration, volume, records and the comparison with last time"""
+    session = get_object_or_404(
+        WorkoutSession.objects.select_related('person_routine'),
+        pk=pk, person_routine__person=person, is_completed=True)
+    return render(request, 'core/workout_summary.html', {
+        'session': session, 'routine': session.person_routine, 'summary': session_summary(session)})
 
 
 @student_required(consent_gate=False)

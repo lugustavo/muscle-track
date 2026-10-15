@@ -232,6 +232,7 @@ TRAILS = {
 NO_BREADCRUMB = {
     'home',                 # the root
     'workout_execute',      # focused workout screen (sticky header with the timer)
+    'workout_summary',      # what you just did: a focused screen right after the workout
     'accept_invite',        # public invitation page
     'consent',              # first-access screen, the student must decide before using the app
     'privacy_policy',       # public text page

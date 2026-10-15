@@ -7,21 +7,36 @@
 {% block extra_css %}
 <style>
     .workout-header { position: sticky; top: 0; z-index: 20; }
-    .set-grid { display: grid; grid-template-columns: 2rem 1fr 1fr 3.25rem 1.5rem; gap: .5rem; align-items: center; }
-    .set-grid .head { font-size: .75rem; text-transform: uppercase; color: #6c757d; }
+    .set-grid { display: grid; grid-template-columns: 1.6rem 1.7fr 1fr 3.1rem 1.1rem; gap: .35rem; align-items: center; }
+    .set-grid .head { font-size: .65rem; text-transform: uppercase; color: #6c757d; white-space: nowrap; }
     .set-num { font-weight: 600; text-align: center; color: #6c757d; }
-    .set-row .form-control { text-align: center; font-size: 1.1rem; min-height: 44px; }
+    .set-row .form-control { text-align: center; font-size: 1.1rem; min-height: 44px; padding-left: .25rem; padding-right: .25rem; }
     .set-row .set-done { min-height: 44px; font-size: 1.25rem; }
     .set-done-row .form-control { background-color: #e9f7ef; }
+    .weight-cell { display: flex; align-items: stretch; gap: 2px; min-width: 0; }
+    .weight-cell .set-weight { min-width: 0; flex: 1 1 auto; }
+    .weight-cell .step-btn { min-height: 44px; width: 30px; padding: 0; flex: 0 0 30px; font-size: 1.2rem; line-height: 1; }
     .exercise-header { cursor: pointer; }
     .exercise-thumb { width: 56px; height: 56px; object-fit: cover; border-radius: .5rem; }
+    [data-exercise-card] { scroll-margin-top: 9.5rem; transition: box-shadow .2s; }
+    [data-exercise-card].is-current { box-shadow: 0 0 0 2px var(--primary-color); }
+    .done-divider { display: flex; align-items: center; gap: .75rem; margin: 1.25rem 0 .75rem; color: #6c757d; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
+    .done-divider::before, .done-divider::after { content: ''; flex: 1; height: 1px; background: #dee2e6; }
     .rest-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1030; background: #2C3E50; color: #fff;
                 padding: .75rem 1rem; box-shadow: 0 -4px 12px rgba(0,0,0,.25); }
     .rest-bar .progress { height: 6px; background: rgba(255,255,255,.2); }
     .rest-bar .progress-bar { background: var(--secondary-color); transition: width .25s linear; }
-    .toast-lite { position: fixed; top: 4.5rem; left: 50%; transform: translateX(-50%); z-index: 1040;
+    .toast-lite { position: fixed; bottom: 9.5rem; left: 50%; transform: translateX(-50%); z-index: 1040;
                   background: #198754; color: #fff; padding: .6rem 1.2rem; border-radius: 2rem;
-                  box-shadow: 0 4px 12px rgba(0,0,0,.3); font-weight: 600; }
+                  box-shadow: 0 4px 12px rgba(0,0,0,.3); font-weight: 600; max-width: 92vw; text-align: center; }
+    /* Focus mode on small screens: the site's top menu gives way to the workout header */
+    @media (max-width: 991.98px) {
+        body > .navbar { display: none; }
+        body.has-tabbar .main-content { padding-top: .5rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        [data-exercise-card] { transition: none; }
+    }
 </style>
 {% endblock %}
 
@@ -36,25 +51,53 @@
      data-resume-url="{% url 'core:workout_resume' active_session.pk %}">
 
     <div class="card workout-header mb-3 shadow-sm">
-        <div class="card-body py-2 d-flex justify-content-between align-items-center gap-2">
-            <div class="text-truncate">
-                <div class="fw-bold text-truncate"><i class="bi bi-fire text-danger"></i> {{ person_routine.routine_name }}</div>
-                <span id="syncState" class="badge bg-success-subtle text-success-emphasis"><i class="bi bi-cloud-check"></i> Salvo</span>
+        <div class="card-body py-2">
+            <div class="d-flex justify-content-between align-items-center gap-2">
+                <div class="text-truncate">
+                    <div class="fw-bold text-truncate"><i class="bi bi-fire text-danger"></i> {{ person_routine.routine_name }}</div>
+                    <span id="syncState" class="badge bg-success-subtle text-success-emphasis"><i class="bi bi-cloud-check"></i> Salvo</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span id="timer" class="fs-4 fw-bold font-monospace">00:00:00</span>
+                    <button type="button" id="pauseBtn" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pause-fill"></i> Pausar</button>
+                    <div class="dropdown">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-label="Preferências do treino" aria-expanded="false"><i class="bi bi-gear"></i></button>
+                        <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 15rem;">
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" role="switch" id="prefSound" checked>
+                                <label class="form-check-label" for="prefSound">Som no fim do descanso</label>
+                            </div>
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" role="switch" id="prefVibrate" checked>
+                                <label class="form-check-label" for="prefVibrate">Vibração</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="d-flex align-items-center gap-2">
-                <span id="timer" class="fs-4 fw-bold font-monospace">00:00:00</span>
-                <button type="button" id="pauseBtn" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pause-fill"></i> Pausar</button>
+            <div class="d-flex justify-content-between small text-muted mt-2">
+                <span id="progressExercises" data-total="{{ exercise_total }}">
+                    {% if all_done %}Todos os exercícios concluídos{% else %}Exercício <strong id="progressCurrent">{{ exercises_done|add:1 }}</strong> de {{ exercise_total }}{% endif %}
+                </span>
+                <span id="progressSets"><span id="progressSetsDone">{{ sets_done }}</span>/{{ sets_total }} séries</span>
+            </div>
+            <div class="progress mt-1" style="height: 4px;" role="progressbar" aria-label="Séries feitas" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ sets_percent }}">
+                <div id="progressBar" class="progress-bar bg-success" style="width: {{ sets_percent }}%"></div>
             </div>
         </div>
     </div>
 
     <div id="toast" class="toast-lite d-none" role="status"></div>
 
+    <div id="queue">
     {% for e in exercises %}
-    <div class="card mb-3 {% if e.log.is_completed %}border-success{% endif %}" data-exercise-card
+    {% ifchanged e.complete %}{% if e.complete %}<div id="doneDivider" class="done-divider"><span>Concluídos</span></div>{% endif %}{% endifchanged %}
+    <div class="card mb-3 {% if e.complete %}border-success{% endif %}" data-exercise-card
+         data-order="{{ e.prx.order }}" data-name="{{ e.prx.exercise.exercise_name }}"
          data-rest="{{ e.prx.rest_seconds }}"
          data-record="{% if e.record is not None %}{{ e.record|unlocalize }}{% endif %}"
-         data-complete="{{ e.log.is_completed|yesno:'true,false' }}">
+         data-last="{% if e.previous_weight is not None %}{{ e.previous_weight|unlocalize }}{% endif %}"
+         data-complete="{{ e.complete|yesno:'true,false' }}">
         <div class="card-body">
             <div class="exercise-header d-flex align-items-center gap-3">
                 {% if e.prx.exercise.thumbnail %}
@@ -65,12 +108,12 @@
                     <small class="text-muted">{{ e.prx.sets }} × {{ e.prx.reps }}{% if e.prx.rest_seconds %} · descanso {{ e.prx.rest_seconds }}s{% endif %}</small>
                 </div>
                 <div class="text-end">
-                    <span class="badge bg-success complete-badge {% if not e.log.is_completed %}d-none{% endif %}"><i class="bi bi-check-circle"></i> Feito</span>
+                    <span class="badge bg-success complete-badge {% if not e.complete %}d-none{% endif %}"><i class="bi bi-check-circle"></i> Feito</span>
                     <div class="small text-muted"><span data-progress>{{ e.done_count }}/{{ e.sets|length }}</span> séries</div>
                 </div>
             </div>
 
-            <div class="exercise-body mt-3 {% if e.log.is_completed %}d-none{% endif %}">
+            <div class="exercise-body mt-3 {% if not e.expanded %}d-none{% endif %}">
                 {% if e.prx.notes %}
                 <div class="alert alert-info py-2 small mb-2"><i class="bi bi-chat-left-text"></i> {{ e.prx.notes }}</div>
                 {% endif %}
@@ -96,8 +139,12 @@
                 {% for s in e.sets %}
                 <div class="set-grid set-row mb-2" data-url="{% url 'core:workout_set_update' s.pk %}" data-done="{{ s.is_done|yesno:'true,false' }}">
                     <span class="set-num">{{ s.number }}</span>
-                    <input type="number" inputmode="decimal" step="0.5" min="0" max="9999" class="form-control set-weight"
-                           {% if s.weight is not None %}value="{{ s.weight|unlocalize }}"{% endif %} placeholder="kg" aria-label="Carga da série {{ s.number }}">
+                    <div class="weight-cell">
+                        <button type="button" class="btn btn-outline-secondary step-btn" data-step="-1" aria-label="Diminuir a carga da série {{ s.number }}">−</button>
+                        <input type="number" inputmode="decimal" step="0.5" min="0" max="9999" class="form-control set-weight"
+                               {% if s.weight is not None %}value="{{ s.weight|unlocalize }}"{% endif %} placeholder="kg" aria-label="Carga da série {{ s.number }}">
+                        <button type="button" class="btn btn-outline-secondary step-btn" data-step="1" aria-label="Aumentar a carga da série {{ s.number }}">+</button>
+                    </div>
                     <input type="number" inputmode="numeric" step="1" min="0" max="999" class="form-control set-reps"
                            {% if s.reps is not None %}value="{{ s.reps }}"{% endif %} placeholder="reps" aria-label="Repetições da série {{ s.number }}">
                     <button type="button" class="btn btn-outline-secondary set-done" aria-label="Marcar série {{ s.number }} como feita"><i class="bi bi-check-lg"></i></button>
@@ -114,6 +161,7 @@
     {% empty %}
     <div class="alert alert-info">Este treino ainda não tem exercícios. Fale com a sua personal trainer.</div>
     {% endfor %}
+    </div>
 
     <form id="finishForm" method="post" action="{% url 'core:workout_end' active_session.pk %}" class="card mb-4">
         {% csrf_token %}
