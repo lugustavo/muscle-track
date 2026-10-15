@@ -1,0 +1,8 @@
+{# Weekday checkboxes as pills. `field` is a multiple-choice bound field. #}
+<div class="d-flex flex-wrap gap-1" role="group" aria-label="{{ field.label }}">
+    {% for cb in field %}
+    <input type="checkbox" class="btn-check" name="{{ cb.data.name }}" value="{{ cb.data.value }}" id="{{ cb.id_for_label }}" {% if cb.data.selected %}checked{% endif %}>
+    <label class="btn btn-outline-primary btn-sm" for="{{ cb.id_for_label }}">{{ cb.choice_label|slice:":3" }}</label>
+    {% endfor %}
+</div>
+{% if field.errors %}<div class="text-danger small mt-1">{{ field.errors|join:" " }}</div>{% endif %}

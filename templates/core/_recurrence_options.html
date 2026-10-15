@@ -1,0 +1,28 @@
+{# Repeat options: every N weeks, start, how it ends. `rec` is a RecurrenceMixin form; `with_start` shows "Começa em". #}
+<div class="row g-3" data-recurrence>
+    <div class="col-sm-6">
+        <label class="form-label small mb-1" for="{{ rec.interval_weeks.id_for_label }}">Repete a cada (semanas)</label>
+        {{ rec.interval_weeks }}
+        {% if rec.interval_weeks.errors %}<div class="text-danger small">{{ rec.interval_weeks.errors|join:" " }}</div>{% endif %}
+    </div>
+    {% if with_start %}
+    <div class="col-sm-6">
+        <label class="form-label small mb-1" for="{{ rec.starts_on.id_for_label }}">Começa em</label>
+        {{ rec.starts_on }}
+        {% if rec.starts_on.errors %}<div class="text-danger small">{{ rec.starts_on.errors|join:" " }}</div>{% endif %}
+    </div>
+    {% endif %}
+    <div class="col-12">
+        <div class="form-label small mb-1">Termina</div>
+        {% for radio in rec.ends %}
+        <div class="form-check d-flex align-items-center gap-2 mb-1">
+            <input class="form-check-input mt-0" type="radio" name="{{ radio.data.name }}" value="{{ radio.data.value }}" id="{{ radio.id_for_label }}"
+                   {% if radio.data.selected or not rec.ends.value and radio.data.value == 'never' %}checked{% endif %} data-ends-choice>
+            <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+            {% if radio.data.value == 'on' %}<span data-ends-on class="ms-1">{{ rec.ends_on }}</span>{% endif %}
+            {% if radio.data.value == 'after' %}<span data-ends-after class="ms-1" style="width: 6rem;">{{ rec.ends_after }}</span>{% endif %}
+        </div>
+        {% endfor %}
+        {% for field in rec %}{% if field.name == 'ends_on' or field.name == 'ends_after' or field.name == 'ends' %}{% if field.errors %}<div class="text-danger small">{{ field.errors|join:" " }}</div>{% endif %}{% endif %}{% endfor %}
+    </div>
+</div>

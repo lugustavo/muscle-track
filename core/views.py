@@ -28,7 +28,7 @@ from allauth.account.models import EmailAddress
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, trainer_dashboard
 from .forms import (
     AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ConsentForm, ExerciseForm, PaymentForm,
-    PersonForm, PersonRoutineForm, PlanForm, ScheduleSlotForm,
+    PersonForm, PersonRoutineForm, PlanForm, RepeatForm, ScheduleSlotForm,
     ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
 )
 from .agenda import (
@@ -54,6 +54,7 @@ from .models import (
 )
 from .navigation import after_save_url, back_label, safe_next_url
 from .onboarding import trainer_steps
+from .recurrence import create_series, describe, end_series_from
 from .permissions import is_trainer, staff_required, student_required
 from .search import apply_student_search, phone_digits, search_all
 from .today import MAX_SESSION_MINUTES, student_today, suggest_index
@@ -2140,7 +2141,7 @@ def _agenda_url_for(day):
 
 @staff_required
 def appointment_create(request):
-    """One-off class: trial, makeup..."""
+    """A class: one-off (trial, makeup...) or, with "Repetir", a repeating fixed time (every N weeks, several days)."""
     initial = {'date': timezone.localdate(), 'time': time(7, 0)}
     if request.GET.get('person', '').isdigit():
         initial['person'] = int(request.GET['person'])
@@ -2149,19 +2150,40 @@ def appointment_create(request):
     except ValueError:
         pass
     form = AppointmentForm(request.POST or None, initial=initial)
+    repeat = RepeatForm(request.POST or None, prefix='rep')
     if request.method == 'POST' and form.is_valid():
         data = form.cleaned_data
-        starts = at(data['date'], data['time'])
-        if Appointment.objects.filter(person=data['person'], starts_at=starts).exists():
-            form.add_error('time', 'Este aluno já tem uma aula neste horário.')
-        else:
-            appointment = Appointment.objects.create(
-                person=data['person'], starts_at=starts, duration_minutes=data['duration_minutes'],
-                kind=data['kind'], notes=data['notes'])
-            messages.success(request, 'Aula marcada.')
-            _warn_if_conflict(request, appointment)
-            return redirect(after_save_url(request, _agenda_url_for(data['date']), forward_next=False))
-    return render(request, 'core/appointment_form.html', {'form': form, 'title': 'Nova aula'})
+        repeat.start_hint = data['date']
+        if repeat.is_valid():
+            if repeat.cleaned_data['enabled']:
+                if data['kind'] != Appointment.Kind.REGULAR:
+                    form.add_error('kind', 'Só aulas do tipo "Aula" podem se repetir.')
+                else:
+                    return _create_series_from_form(request, data, repeat)
+            else:
+                starts = at(data['date'], data['time'])
+                if Appointment.objects.filter(person=data['person'], starts_at=starts).exists():
+                    form.add_error('time', 'Este aluno já tem uma aula neste horário.')
+                else:
+                    appointment = Appointment.objects.create(
+                        person=data['person'], starts_at=starts, duration_minutes=data['duration_minutes'],
+                        kind=data['kind'], notes=data['notes'])
+                    messages.success(request, 'Aula marcada.')
+                    _warn_if_conflict(request, appointment)
+                    return redirect(after_save_url(request, _agenda_url_for(data['date']), forward_next=False))
+    return render(request, 'core/appointment_form.html', {'form': form, 'repeat': repeat, 'title': 'Nova aula'})
+
+
+def _create_series_from_form(request, data, repeat):
+    start = data['date']
+    cleaned = repeat.cleaned_data
+    weekdays = cleaned['weekdays']
+    until = repeat.series_end(weekdays, start)
+    create_series(data['person'], weekdays, data['time'], data['duration_minutes'], start, cleaned['interval_weeks'], until)
+    today = timezone.localdate()
+    ensure_appointments(max(start, today), max(start, today) + timedelta(weeks=4), today)
+    messages.success(request, 'Aulas repetidas criadas: ' + describe(weekdays, data['time'], cleaned['interval_weeks'], until) + '.')
+    return redirect(after_save_url(request, _agenda_url_for(start), forward_next=False))
 
 
 @staff_required
@@ -2228,19 +2250,32 @@ def slot_add(request, pk):
     student = get_object_or_404(Person, pk=pk)
     form = ScheduleSlotForm(request.POST)
     if form.is_valid():
-        slot, created = ScheduleSlot.objects.get_or_create(
-            person=student, weekday=form.cleaned_data['weekday'], start_time=form.cleaned_data['start_time'],
-            defaults={'duration_minutes': form.cleaned_data['duration_minutes']})
-        if not created:
-            slot.duration_minutes = form.cleaned_data['duration_minutes']
-            slot.is_active = True
-            slot.save()
+        data = form.cleaned_data
         today = timezone.localdate()
+        start = data.get('starts_on') or today
+        weekdays = data['all_weekdays']
+        until = form.series_end(weekdays, start)
+        create_series(student, weekdays, data['start_time'], data['duration_minutes'], start, data['interval_weeks'], until)
         ensure_appointments(today, today + timedelta(weeks=4), today)
-        messages.success(request, f'Horário fixo: {slot}.')
+        messages.success(request, 'Horário fixo: ' + describe(weekdays, data['start_time'], data['interval_weeks'], until) + '.')
     else:
         messages.error(request, 'Horário inválido: ' + ' '.join(e for errs in form.errors.values() for e in errs))
     return redirect(_student_tab(request, student.pk, 'agenda'))
+
+
+@staff_required
+@require_POST
+def appointment_series_end(request, pk):
+    """"This class and the following ones": stop the fixed time from this class on."""
+    appointment = get_object_or_404(Appointment.objects.select_related('slot', 'person'), pk=pk)
+    if appointment.slot_id is None:
+        messages.warning(request, 'Esta aula não faz parte de um horário fixo.')
+    else:
+        slot, removed = end_series_from(appointment)
+        gone = '1 aula marcada saiu da agenda' if removed == 1 else f'{removed} aulas marcadas saíram da agenda'
+        messages.success(request, f'Horário fixo encerrado: {slot.get_weekday_display()} às {slot.start_time:%H:%M} '
+                                  f'deixa de repetir a partir desta aula ({gone}).')
+    return redirect(safe_next_url(request, _agenda_url_for(timezone.localtime(appointment.starts_at).date())))
 
 
 @staff_required
@@ -2252,4 +2287,7 @@ def slot_delete(request, pk):
         slot.appointments.filter(status=Appointment.Status.SCHEDULED, starts_at__gt=timezone.now()).delete()
         slot.delete()  # past classes stay (their slot link is cleared)
     messages.success(request, 'Horário fixo removido. As aulas futuras dele saíram da agenda.')
+    back = safe_next_url(request, '')
+    if back.startswith(reverse('core:agenda')):   # removed from a calendar card: stay on the calendar
+        return redirect(back)
     return redirect(_student_tab(request, person_id, 'agenda'))

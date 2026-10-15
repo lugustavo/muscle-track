@@ -22,6 +22,12 @@ def parse_week(value, today=None):
         return week_start(today)
 
 
+def on_week_cycle(day, valid_from, interval_weeks):
+    """True when `day` falls in a week of the cycle that starts at the week of `valid_from` (1 = every week)."""
+    weeks = (week_start(day) - week_start(valid_from)).days // 7
+    return weeks >= 0 and weeks % max(interval_weeks, 1) == 0
+
+
 def at(day, clock):
     return timezone.make_aware(datetime.combine(day, clock))
 
@@ -48,6 +54,8 @@ def ensure_appointments(start, end, today=None):
             if slot.weekday != day.weekday() or day < slot.valid_from:
                 continue
             if slot.valid_until and day > slot.valid_until:
+                continue
+            if not on_week_cycle(day, slot.valid_from, slot.interval_weeks):
                 continue
             starts = at(day, slot.start_time)
             if (slot.person_id, starts) not in existing:
