@@ -169,6 +169,7 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 - **Arrastar e soltar:** mover a aula para outro dia ou horário direto na grade (e ajustar a duração), com o efeito de "remarcar" (a original fica remarcada, a nova é criada), aviso de sobreposição e desfazer. Tem que funcionar bem no celular.
 - ~~**Tipos de vista:** mês, semana, dia, previsão e lista~~ *(feito: Semana, Dia, Mês e Lista dos próximos 14 dias, com seletor, a escolha lembrada em cookie e a semana como padrão)*. Falta: vista de "previsão" por mais dias e ajuste de horário de trabalho na grade.
 - **Visão do aluno:** o aluno ver a própria agenda e pedir remarcação (a personal aprova), com prazo de cancelamento.
+- **Google Agenda:** ver a seção "Integração com o Google Agenda" abaixo (link `.ics` por pessoa e, depois, sincronização pela API).
 
 ### Notificações dos alunos
 - **Quando avisar:** ao marcar falta, cancelamento ou remarcação na agenda; depois, lembrete de aula, vencimento do plano e reavaliação.
@@ -179,6 +180,35 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 - **LGPD:** cada canal é um consentimento próprio (versão e data, como em `core/consent.py`), revogável a qualquer momento; sem consentimento não se envia nada. Mensagens sem dados sensíveis (sem valores nem saúde).
 - **Infra:** envio assíncrono com tentativas e registro de entrega/falha, e o aviso registrado no histórico do aluno. Se nenhum canal estiver autorizado, a personal segue com o botão de WhatsApp que já existe.
 - *Ordem sugerida:* seção de notificações e consentimentos → e-mail (só depende de SMTP) → web push → Telegram.
+
+### Integração com o Google Agenda (personal e alunos)
+*Pedido: a personal e cada aluno verem as aulas no próprio Google Agenda. Vale o mesmo para Apple Calendar e Outlook quando der.*
+
+**Duas formas, da mais simples para a mais completa**
+- **1. Assinatura por link (arquivo `.ics`), sem login no Google.** O app publica um calendário em formato iCalendar numa URL secreta; a pessoa cola em Google Agenda → "Outros calendários" → "Por URL" (ou toca no link no celular).
+  - *Personal:* todas as aulas (com o aluno no título). *Aluno:* **só as próprias aulas**, nunca dados de outros alunos.
+  - Link com **token longo e revogável** (gerar de novo derruba o antigo), um por pessoa, guardado como hash; mostrar na ficha/perfil com "copiar" e "gerar outro".
+  - Extra barato: botão **"Adicionar ao Google Agenda"** em cada aula, com o link de modelo `calendar.google.com/calendar/render?action=TEMPLATE&text=...&dates=...` e um `.ics` avulso (serve no iPhone).
+  - *Limite conhecido:* o Google atualiza calendários assinados por URL de tempo em tempo (de horas até cerca de um dia), então remarcações demoram a aparecer. Dizer isso na tela.
+  - Repetição: usar `RRULE` (`FREQ=WEEKLY;INTERVAL=N;BYDAY=...;UNTIL=...`) para os horários fixos que já temos (intervalo e data final existem), com `EXDATE` para aulas canceladas/remarcadas, ou um evento por aula (mais simples, sem exceções).
+  - Servidor: uma view que gera o `.ics` na hora (sem dependência nova: o formato é texto), `UID` estável por aula para o Google atualizar em vez de duplicar, fuso `America/Sao_Paulo` ou UTC com `Z`.
+- **2. Sincronização de verdade pela API do Google Calendar (OAuth).** Cada pessoa conecta a própria conta Google e o app **cria, muda e cancela os eventos** quando a aula é marcada, remarcada ou cancelada (quase em tempo real).
+  - *Escopo mínimo:* um **calendário dedicado "Muscle Track"** criado pelo app (escopo `calendar.app.created`), sem acesso ao resto da agenda da pessoa. Evitar `calendar` completo.
+  - *Passos para o dono do servidor:* projeto no Google Cloud, tela de consentimento OAuth (em modo de teste vale até 100 usuários; escopos sensíveis pedem verificação do Google), `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` no `.env`, URI de retorno em HTTPS no domínio do app (o Caddy já dá HTTPS).
+  - *Tokens:* guardar o *refresh token* **criptografado** (chave no `.env`), com botão "Desconectar" que apaga os tokens e, se a pessoa quiser, os eventos criados.
+  - *Sincronização:* gravar o `id` do evento do Google em cada aula; mudar uma aula dispara a atualização depois de gravar (`on_commit`), com **nova tentativa e registro de falha** (comando de manutenção para reenviar o que falhou, como no resto do app). Primeira conexão: enviar as aulas dos próximos meses.
+  - *Só ida (app → Google)* no começo. **Volta (Google → app)** só se houver demanda real: muda o desenho (conflitos, quem vence) e exige receber *webhooks* (`events.watch`).
+- **Ordem sugerida:** (1) link `.ics` + botão "Adicionar ao Google Agenda" para a personal e para o aluno → (2) conectar a conta Google da **personal** (API, só ida) → (3) conectar a conta do **aluno**.
+
+**Privacidade e LGPD (vale para as duas formas)**
+- Saem dados do servidor para terceiros (Google): atualizar a política de privacidade e pedir **consentimento próprio** do aluno para a integração (como os canais de notificação em `core/consent.py`), revogável a qualquer momento; revogar apaga os eventos criados.
+- **O que vai no evento:** título e local mínimos. Aluno recebe "Aula com *nome da personal*" (e local/endereço da academia, se existir). Personal escolhe como o aluno aparece no Google dela: nome completo, só o primeiro nome ou "Aula 07:00" (padrão mais discreto). **Nunca** saúde, anotações internas, valores nem telefone.
+- Link `.ics` é uma credencial: quem tem o link vê as aulas. Tratar como senha (não aparece em logs, revogável, `no-store`, `X-Robots-Tag: noindex`).
+
+**Depende de / combina com**
+- **Visão do aluno** (a agenda do aluno precisa existir para o feed dele) e **notificações** (o lembrete do Google Agenda cobre "lembrete de aula" sem canal próprio, mas falta/cancelamento continuam passando pelo aviso do app).
+- **Recorrência** já feita: o feed e a API usam intervalo, dias e data final dos horários fixos.
+- Perguntas para decidir antes de começar: a personal e os alunos têm conta Google (e preferem Apple/Outlook)? Há HTTPS público para o OAuth? Quer só o link `.ics` no começo (sem Google Cloud) ou já a API?
 
 ### Ficha do aluno — plano e contrato (UX)
 *Em `students/<id>/` a informação do plano está espalhada e com nomes que se confundem.*
