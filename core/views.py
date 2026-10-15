@@ -1862,8 +1862,11 @@ def notification_settings(request):
             messages.success(request, 'Preferências de notificação salvas.')
         return redirect('core:notification_settings')
     recent = list(request.user.notification_logs.all()[:5])
+    devices = list(request.user.push_subscriptions.all())
+    for d in devices:   # rows saved before the friendly names hold the raw User-Agent
+        d.label = notifications.device_name(d.device) if 'Mozilla/' in d.device else (d.device or 'Aparelho')
     return render(request, 'core/notification_settings.html', {
-        'title': 'Notificações', 'pref': pref, 'person': person, 'devices': list(request.user.push_subscriptions.all()),
+        'title': 'Notificações', 'pref': pref, 'person': person, 'devices': devices,
         'push_ready': notifications.push_configured(), 'email_ready': notifications.email_configured(),
         'vapid_public_key': settings.VAPID_PUBLIC_KEY, 'recent': recent, 'is_trainer': request.user.is_staff,
     })
@@ -1886,7 +1889,7 @@ def push_subscribe(request):
         return JsonResponse({'ok': False, 'error': 'Assinatura inválida.'}, status=400)
     PushSubscription.objects.update_or_create(endpoint=endpoint, defaults={
         'user': request.user, 'p256dh': p256dh, 'auth': auth,
-        'device': (request.META.get('HTTP_USER_AGENT', '') or '')[:120]})
+        'device': notifications.device_name(request.META.get('HTTP_USER_AGENT', ''))})
     pref, _ = NotificationPreference.objects.get_or_create(user=request.user)
     _set_channel(request.user, getattr(request.user, 'person', None), pref, 'push', True)
     return JsonResponse({'ok': True})

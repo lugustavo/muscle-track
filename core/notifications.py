@@ -4,8 +4,11 @@
 the action that caused it) and every attempt is written to NotificationLog (kind and result, never the text)."""
 import json
 import logging
+import re
+import smtplib
 import threading
 from collections import namedtuple
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -40,6 +43,17 @@ def when(moment):
     """'qui 15/10 às 07:00' in the local time zone."""
     local = timezone.localtime(moment)
     return f"{formats.date_format(local, 'D d/m')} às {formats.date_format(local, 'H:i')}"
+
+
+def device_name(user_agent):
+    """'Chrome no Windows' from a User-Agent string (good enough to tell devices apart in the list)."""
+    ua = user_agent or ''
+    browser = next((name for key, name in (('Edg/', 'Edge'), ('OPR/', 'Opera'), ('SamsungBrowser', 'Samsung Internet'),
+                                           ('Firefox/', 'Firefox'), ('CriOS', 'Chrome'), ('Chrome/', 'Chrome'),
+                                           ('Safari/', 'Safari')) if key in ua), 'Navegador')
+    system = next((name for key, name in (('iPhone', 'iPhone'), ('iPad', 'iPad'), ('Android', 'Android'),
+                                          ('Windows', 'Windows'), ('Mac OS X', 'Mac'), ('Linux', 'Linux')) if key in ua), '')
+    return f'{browser} no {system}' if system else browser
 
 
 def staff_users():
@@ -85,6 +99,30 @@ def move_undone(original):
 def test_message():
     return Message('test', 'Teste de notificação', 'Tudo certo: este aparelho recebe os avisos do Muscle Track.',
                    reverse('core:notification_settings'))
+
+
+# --- errors: short, in Portuguese, and never with a push endpoint (it works like a password) ------------
+
+def _scrub(text):
+    return re.sub(r'https?://\S+', '<endereço>', str(text))[:150]
+
+
+def _email_error(exc):
+    if isinstance(exc, smtplib.SMTPAuthenticationError):
+        return 'o servidor de e-mail recusou o login: confira EMAIL_HOST_USER e a senha de app (EMAIL_HOST_PASSWORD)'
+    if isinstance(exc, (smtplib.SMTPConnectError, ConnectionError, TimeoutError, OSError)):
+        return f'não foi possível conectar ao servidor de e-mail ({settings.EMAIL_HOST}:{settings.EMAIL_PORT}); confira a rede do servidor e o EMAIL_HOST'
+    return f'{type(exc).__name__}: {_scrub(exc)}'
+
+
+def _push_error(exc, endpoint):
+    import requests
+
+    if isinstance(exc, (requests.ConnectionError, requests.Timeout)):
+        host = urlparse(endpoint).hostname or 'serviço de push'
+        return (f'o servidor não conseguiu abrir conexão com {host} (porta 443); '
+                'confira se ele tem acesso à internet, DNS e proxy (HTTPS_PROXY)')
+    return f'{type(exc).__name__}: {_scrub(exc)}'
 
 
 # --- delivery ------------------------------------------------------------------------------------------------
@@ -142,7 +180,7 @@ def _send_email(user, message):
             send_mail(message.title, body, None, [user.email], fail_silently=False)
             return _log(user, message, 'email', Status.SENT)
         except Exception as exc:
-            error = f'{type(exc).__name__}: {exc}'
+            error = _email_error(exc)
     logger.warning('e-mail notification failed for user %s: %s', user.pk, error)
     _log(user, message, 'email', Status.FAILED, error)
 
@@ -160,18 +198,20 @@ def _send_push(user, message):
     for sub in subscriptions:
         try:
             webpush({'endpoint': sub.endpoint, 'keys': {'p256dh': sub.p256dh, 'auth': sub.auth}}, data=payload,
-                    vapid_private_key=settings.VAPID_PRIVATE_KEY, vapid_claims={'sub': subject}, ttl=86400)
+                    vapid_private_key=settings.VAPID_PRIVATE_KEY, vapid_claims={'sub': subject}, ttl=86400, timeout=10)
         except WebPushException as exc:
             status = getattr(getattr(exc, 'response', None), 'status_code', None)
             if status in (404, 410):   # the browser dropped this subscription
                 sub.delete()
                 _log(user, message, 'push', Status.SKIPPED, 'aparelho removido (assinatura expirada)')
             else:
-                logger.warning('push failed for user %s: %s', user.pk, exc)
-                _log(user, message, 'push', Status.FAILED, f'{type(exc).__name__}: {exc}')
+                error = _push_error(exc, sub.endpoint)
+                logger.warning('push failed for user %s: %s', user.pk, error)
+                _log(user, message, 'push', Status.FAILED, error)
         except Exception as exc:
-            logger.warning('push failed for user %s: %s', user.pk, exc)
-            _log(user, message, 'push', Status.FAILED, f'{type(exc).__name__}: {exc}')
+            error = _push_error(exc, sub.endpoint)
+            logger.warning('push failed for user %s: %s', user.pk, error)
+            _log(user, message, 'push', Status.FAILED, error)
         else:
             sub.last_success_at = timezone.now()
             sub.save(update_fields=['last_success_at'])
