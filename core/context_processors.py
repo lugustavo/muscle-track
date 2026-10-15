@@ -17,7 +17,7 @@ STUDENT_SECTIONS = (
     ('center', ('workout_execute',)),   # the running workout: the central button is the active one
     ('treinos', ('my_workouts', 'workout_')),
     ('historico', ('my_history', 'my_exercise_progress')),
-    ('perfil', ('my_profile', 'my_privacy')),
+    ('perfil', ('my_profile', 'my_privacy', 'account_')),   # account_* = password, e-mail (allauth)
 )
 
 
