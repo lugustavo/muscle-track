@@ -45,7 +45,7 @@
                         <img id="avatarPreview"
                              src="{% if form.instance.avatar %}{{ form.instance.avatar.url }}{% else %}{% static 'images/default-avatar.svg' %}{% endif %}"
                              class="rounded-circle shadow-sm mb-3"
-                             style="width: 150px; height: 150px; object-fit: cover; border: 4px solid #e9ecef;"
+                             style="width: 150px; height: 150px; object-fit: cover; border: 4px solid var(--bs-border-color);"
                              alt="Avatar">
                     </div>
                     <div class="mb-2">
@@ -333,7 +333,7 @@
     <div class="col-lg-4">
         <!-- Resumo -->
         <div class="card mb-4 border-0 shadow-sm">
-            <div class="card-header bg-white">
+            <div class="card-header bg-body">
                 <h6 class="mb-0"><i class="bi bi-info-circle"></i> Informações</h6>
             </div>
             <div class="card-body">
@@ -385,7 +385,7 @@
 
         <!-- Dicas -->
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white">
+            <div class="card-header bg-body">
                 <h6 class="mb-0"><i class="bi bi-lightbulb"></i> Dicas</h6>
             </div>
             <div class="card-body">

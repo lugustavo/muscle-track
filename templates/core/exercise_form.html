@@ -234,7 +234,7 @@
     <div class="col-lg-4">
         <!-- Preview da Mídia -->
         <div class="card mb-4 border-0 shadow-sm">
-            <div class="card-header bg-white">
+            <div class="card-header bg-body">
                 <h6 class="mb-0"><i class="bi bi-eye"></i> Preview da Mídia</h6>
             </div>
             <div class="card-body">
@@ -250,7 +250,7 @@
                              alt="Preview"
                              onerror="this.src='{% static 'images/no-image.svg' %}'">
                     {% else %}
-                        <div class="bg-light p-5 rounded">
+                        <div class="bg-body-tertiary p-5 rounded">
                             <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
                             <p class="text-muted mt-3 mb-0">Nenhuma imagem</p>
                         </div>
@@ -262,7 +262,7 @@
         <!-- Informações do Registro -->
         {% if form.instance.pk %}
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white">
+            <div class="card-header bg-body">
                 <h6 class="mb-0"><i class="bi bi-info-circle"></i> Informações do Registro</h6>
             </div>
             <div class="card-body">

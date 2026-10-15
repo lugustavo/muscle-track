@@ -7,7 +7,7 @@
         <div class="card mb-2">
             <div class="card-body py-2">
                 <div class="d-flex justify-content-between flex-wrap">
-                    <span><span class="badge bg-light text-dark border">{{ event.get_kind_display }}</span> {{ event.summary }}</span>
+                    <span><span class="badge bg-body-secondary text-body border">{{ event.get_kind_display }}</span> {{ event.summary }}</span>
                     <small class="text-muted">{{ event.at|date:"d/m/Y H:i" }}{% if event.actor %} · {{ event.actor.email }}{% endif %}</small>
                 </div>
                 {% if event.kind == 'profile_edit' and event.changes %}

@@ -75,7 +75,7 @@
                 {% for a in dashboard.classes %}
                 <a href="{% nav_url 'core:student_detail' a.person.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                     <span><strong>{{ a.starts_at|time:"H:i" }}</strong> {{ a.person.person_name }}</span>
-                    <span class="badge {% if a.status == 'attended' %}bg-success{% elif a.status == 'missed' %}bg-danger{% else %}bg-light text-dark border{% endif %}">{{ a.get_status_display }}</span>
+                    <span class="badge {% if a.status == 'attended' %}bg-success{% elif a.status == 'missed' %}bg-danger{% else %}bg-body-secondary text-body border{% endif %}">{{ a.get_status_display }}</span>
                 </a>
                 {% empty %}
                 <div class="list-group-item text-muted">Nenhuma aula marcada para hoje.</div>

@@ -98,14 +98,14 @@
 <!-- Treinos Mais Realizados -->
 {% if sessions_by_routine %}
 <div class="card mb-4 border-0 shadow-sm">
-    <div class="card-header bg-white">
+    <div class="card-header bg-body">
         <h5 class="mb-0"><i class="bi bi-trophy-fill text-warning"></i> Treinos Mais Realizados</h5>
     </div>
     <div class="card-body">
         <div class="row">
             {% for routine in sessions_by_routine|slice:":3" %}
             <div class="col-md-4">
-                <div class="card bg-light mb-3 mb-md-0">
+                <div class="card bg-body-tertiary mb-3 mb-md-0">
                     <div class="card-body">
                         <h6 class="card-title">{{ routine.person_routine__routine_name }}</h6>
                         <div class="d-flex justify-content-between">
@@ -129,7 +129,7 @@
 
 <!-- Gráfico de Evolução -->
 <div class="card mb-4 border-0 shadow-sm">
-    <div class="card-header bg-white">
+    <div class="card-header bg-body">
         <h5 class="mb-0"><i class="bi bi-bar-chart-line"></i> Evolução dos Treinos</h5>
     </div>
     <div class="card-body">
@@ -139,7 +139,7 @@
 
 <!-- Histórico de Sessões -->
 <div class="card mb-4 border-0 shadow-sm">
-    <div class="card-header bg-white">
+    <div class="card-header bg-body">
         <h5 class="mb-0"><i class="bi bi-clock-history"></i> Histórico de Sessões</h5>
     </div>
     <div class="card-body">
@@ -194,6 +194,7 @@
 </div>
 
 <script src="{% static 'vendor/chartjs/4.4.0/chart.umd.js' %}"></script>
+<script src="{% static 'js/chart-theme.js' %}"></script>
 <script>
 const chartData = {{ chart_data|safe }};
 

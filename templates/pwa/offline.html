@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#FF6B6B">
+    <meta name="theme-color" content="#FF6B6B" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1d2733" media="(prefers-color-scheme: dark)">
+    <meta name="color-scheme" content="light dark">
     <title>Sem conexão - Muscle Track</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; align-items: center;
                justify-content: center; text-align: center; margin: 0; padding: 1rem; color: #2C3E50; }
         h1 { color: #FF6B6B; }
+        @media (prefers-color-scheme: dark) { body { background: #151b23; color: #e6edf3; } h1 { color: #FF7B7B; } }
         button { background: #FF6B6B; color: #fff; border: 0; border-radius: .5rem; padding: .75rem 1.5rem; font-size: 1rem; }
     </style>
 </head>

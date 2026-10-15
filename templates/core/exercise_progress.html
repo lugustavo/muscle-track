@@ -47,7 +47,7 @@
                         <td>{{ h.log.session.start_time|date:"d/m/Y" }}</td>
                         <td>
                             {% for s in h.sets %}
-                                <span class="badge bg-light text-dark border me-1">{% if s.weight is not None %}{{ s.weight }}kg{% else %}-{% endif %} × {% if s.reps is not None %}{{ s.reps }}{% else %}-{% endif %}</span>
+                                <span class="badge bg-body-secondary text-body border me-1">{% if s.weight is not None %}{{ s.weight }}kg{% else %}-{% endif %} × {% if s.reps is not None %}{{ s.reps }}{% else %}-{% endif %}</span>
                             {% empty %}
                                 <span class="text-muted">{{ h.log.weight_used }} kg</span>
                             {% endfor %}
@@ -68,6 +68,7 @@
 {% block extra_js %}
 {% if sessions_count %}
 <script src="{% static 'vendor/chartjs/4.4.0/chart.umd.js' %}"></script>
+<script src="{% static 'js/chart-theme.js' %}"></script>
 <script>
 const points = JSON.parse(document.getElementById('chart-data').textContent);
 new Chart(document.getElementById('progressChart'), {

@@ -8,8 +8,8 @@
     z-index: 1035;
     display: flex;
     align-items: stretch;
-    background: #fff;
-    border-top: 1px solid rgba(0, 0, 0, .12);
+    background: var(--bs-body-bg);
+    border-top: 1px solid var(--bs-border-color);
     box-shadow: 0 -2px 10px rgba(0, 0, 0, .06);
     padding-bottom: env(safe-area-inset-bottom);
 }
@@ -30,7 +30,7 @@ body.kbd-open .tabbar { display: none; }
     padding: 6px 2px;
     background: none;
     border: 0;
-    color: #6c757d;
+    color: var(--bs-secondary-color);
     text-decoration: none;
     font-size: .7rem;
     line-height: 1.1;
@@ -103,13 +103,13 @@ body.kbd-open .tabbar { display: none; }
 /* "Hoje" screen */
 .today-hero .btn-start { min-height: 56px; font-size: 1.15rem; }
 .week-dots { display: flex; justify-content: space-between; gap: .25rem; }
-.week-dots .dot { flex: 1; text-align: center; font-size: .75rem; color: #6c757d; }
+.week-dots .dot { flex: 1; text-align: center; font-size: .75rem; color: var(--bs-secondary-color); }
 .week-dots .dot .dot-mark {
     width: 32px;
     height: 32px;
     margin: 0 auto .25rem;
     border-radius: 50%;
-    border: 2px solid #dee2e6;
+    border: 2px solid var(--bs-border-color);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -126,7 +126,7 @@ body.kbd-open .tabbar { display: none; }
     body.has-tabbar .rest-bar { bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); padding-bottom: 1.6rem; }
     body.has-tabbar.kbd-open .rest-bar { bottom: 0; padding-bottom: .75rem; }
 }
-.tabbar .tab-center.active .circle { box-shadow: 0 0 0 3px #fff, 0 0 0 5px currentColor, 0 3px 10px rgba(0, 0, 0, .25); }
+.tabbar .tab-center.active .circle { box-shadow: 0 0 0 3px var(--bs-body-bg), 0 0 0 5px currentColor, 0 3px 10px rgba(0, 0, 0, .25); }
 
 /* Trainer on a phone: floating "+" (create sheet), student file, agenda day strip, student rows */
 .fab {
@@ -166,7 +166,7 @@ body.kbd-open .fab { display: none; }
         position: sticky;
         top: 0;
         z-index: 1020;
-        background: var(--bs-body-bg, #fff);
+        background: var(--bs-body-bg);
         flex-wrap: nowrap;
         overflow-x: auto;
         white-space: nowrap;
@@ -182,12 +182,12 @@ body.kbd-open .fab { display: none; }
         flex: 1 1 0;
         min-width: 0;
         padding: .4rem 0;
-        border: 1px solid #dee2e6;
+        border: 1px solid var(--bs-border-color);
         border-radius: .6rem;
-        background: #fff;
+        background: var(--bs-body-bg);
         font-size: .75rem;
         line-height: 1.2;
-        color: #495057;
+        color: var(--bs-body-color);
         position: relative;
     }
     .day-strip button .num { display: block; font-size: 1.05rem; font-weight: 700; }

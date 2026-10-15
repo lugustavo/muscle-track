@@ -11,7 +11,7 @@
     .appt.s-attended { border-left-color: #198754; }
     .appt.s-missed { border-left-color: #dc3545; }
     .appt.s-cancelled, .appt.s-rescheduled { opacity: .55; }
-    .appt.conflict { border-left-color: #fd7e14; background: #fff8f0; }
+    .appt.conflict { border-left-color: #fd7e14; background: var(--bs-warning-bg-subtle); }
 </style>
 {% endblock %}
 
@@ -21,7 +21,7 @@
     <div class="d-flex gap-2 flex-wrap">
         <div class="btn-group">
             <a href="?semana={{ prev_week }}" class="btn btn-outline-secondary" title="Semana anterior"><i class="bi bi-chevron-left"></i></a>
-            <span class="btn btn-light disabled text-dark fw-bold">{{ monday|date:"d/m" }} a {{ sunday|date:"d/m/Y" }}</span>
+            <span class="btn disabled bg-body-tertiary text-body fw-bold">{{ monday|date:"d/m" }} a {{ sunday|date:"d/m/Y" }}</span>
             <a href="?semana={{ next_week }}" class="btn btn-outline-secondary" title="Próxima semana"><i class="bi bi-chevron-right"></i></a>
             {% if not is_current_week %}<a href="{% url 'core:agenda' %}" class="btn btn-outline-primary">Hoje</a>{% endif %}
         </div>
@@ -52,7 +52,7 @@
                     <div class="card-body p-2">
                         <div class="d-flex justify-content-between">
                             <strong>{{ a.starts_at|time:"H:i" }}</strong>
-                            <span class="badge {% if a.status == 'attended' %}bg-success{% elif a.status == 'missed' %}bg-danger{% elif a.status == 'scheduled' %}bg-light text-dark border{% else %}bg-secondary{% endif %}">{{ a.get_status_display }}</span>
+                            <span class="badge {% if a.status == 'attended' %}bg-success{% elif a.status == 'missed' %}bg-danger{% elif a.status == 'scheduled' %}bg-body-secondary text-body border{% else %}bg-secondary{% endif %}">{{ a.get_status_display }}</span>
                         </div>
                         <a href="{% nav_url 'core:student_detail' a.person.pk %}" class="text-decoration-none d-block text-truncate">{{ a.person.person_name }}</a>
                         <small class="text-muted">{{ a.get_kind_display }} · {{ a.duration_minutes }} min</small>

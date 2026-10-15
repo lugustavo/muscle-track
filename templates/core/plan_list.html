@@ -25,7 +25,7 @@
 <div class="row g-3">
     {% for plan in plans %}
     <div class="col-md-6 col-lg-4">
-        <div class="card h-100 {% if not plan.is_active %}border-secondary bg-light{% endif %}">
+        <div class="card h-100 {% if not plan.is_active %}border-secondary bg-body-tertiary{% endif %}">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h5 class="card-title mb-1">{{ plan.name }}</h5>

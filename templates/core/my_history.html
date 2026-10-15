@@ -55,7 +55,7 @@
         <!-- Estatísticas Resumidas -->
         <div class="row mt-4">
             <div class="col-md-4">
-                <div class="card bg-light">
+                <div class="card bg-body-tertiary">
                     <div class="card-body text-center">
                         <h3 class="text-primary">{{ completed_sessions.count }}</h3>
                         <p class="mb-0">Total de Treinos</p>
@@ -63,7 +63,7 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card bg-light">
+                <div class="card bg-body-tertiary">
                     <div class="card-body text-center">
                         <h3 class="text-success">
                             {% widthratio completed_sessions|length 1 7 %}
@@ -73,7 +73,7 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card bg-light">
+                <div class="card bg-body-tertiary">
                     <div class="card-body text-center">
                         <h3 class="text-info">
                             {{ person.routines.count }}
@@ -131,6 +131,7 @@
 </div>
 
 <script src="{% static 'vendor/chartjs/4.4.0/chart.umd.js' %}"></script>
+<script src="{% static 'js/chart-theme.js' %}"></script>
 <script>
 // Dados do gráfico vindos do backend
 const chartData = {{ chart_data|safe }};

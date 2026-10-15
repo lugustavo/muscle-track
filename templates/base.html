@@ -11,9 +11,13 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon.svg' %}">
     <link rel="apple-touch-icon" href="{% static 'images/icon-192.png' %}">
 
+    <!-- Color theme: before any CSS so the page never flashes -->
+    <script src="{% static 'js/theme.js' %}"></script>
+
     <!-- PWA -->
     <link rel="manifest" href="{% url 'core:pwa_manifest' %}">
-    <meta name="theme-color" content="#FF6B6B">
+    <meta name="theme-color" content="#FF6B6B" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1d2733" media="(prefers-color-scheme: dark)">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Muscle Track">
@@ -21,82 +25,21 @@
     <!-- Bootstrap 5 CSS -->
     <link href="{% static 'vendor/bootstrap/5.3.0/bootstrap.min.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/1.11.0/bootstrap-icons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
     <link rel="stylesheet" href="{% static 'css/tabbar.css' %}">
 
-    <style>
-        :root {
-            --primary-color: #FF6B6B;
-            --secondary-color: #4ECDC4;
-            --dark-color: #2C3E50;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.5rem;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-
-        .btn-primary:hover {
-            background-color: #ee5a5a;
-            border-color: #ee5a5a;
-        }
-
-        .breadcrumb-nav .breadcrumb {
-            font-size: .9rem;
-            margin-bottom: 1rem;
-        }
-
-        .main-content {
-            flex: 1;
-            padding-top: 2rem;
-            padding-bottom: 2rem;
-        }
-
-        .exercise-card {
-            transition: transform 0.2s;
-            height: 100%;
-        }
-
-        .exercise-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .exercise-thumbnail {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        footer {
-            background-color: var(--dark-color);
-            color: white;
-            padding: 1.5rem 0;
-            margin-top: auto;
-        }
-    </style>
 
     {% block extra_css %}{% endblock %}
 </head>
 <body class="{% if tabbar %}has-tabbar{% endif %}">
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--dark-color);">
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--mt-nav-bg);">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{% url 'core:home' %}">
                 <img src="{% static 'images/favicon.svg' %}" alt="Muscle Track" width="32" height="32" class="me-2">
                 Muscle Track
             </a>
+            {% include 'includes/_theme_menu.html' %}
             <button class="navbar-toggler{% if tabbar or hide_topmenu %} d-none{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
