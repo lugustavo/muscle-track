@@ -12,15 +12,16 @@
 
     <h2 class="h6 text-uppercase text-muted">Próximas aulas</h2>
     {% for a in upcoming %}
-    <div class="card mb-2" data-my-class="{{ a.pk }}">
+    <div class="card mb-2 {% if a.status == 'rescheduled' %}opacity-75{% endif %}" data-my-class="{{ a.pk }}">
         <div class="card-body py-2">
             <div class="d-flex justify-content-between align-items-start gap-2">
                 <div>
                     <strong>{{ a.starts_at|date:"l, j \d\e F"|lower|capfirst }}</strong>
                     <div class="text-muted">{{ a.starts_at|time:"H:i" }} · {{ a.duration_minutes }} min</div>
                 </div>
-                <span class="badge {% if a.status == 'cancelled' %}bg-secondary{% else %}bg-body-secondary text-body border{% endif %}">{{ a.get_status_display }}</span>
+                <span class="badge {% if a.status == 'cancelled' or a.status == 'rescheduled' %}bg-secondary{% else %}bg-body-secondary text-body border{% endif %}">{{ a.get_status_display }}</span>
             </div>
+            {% include 'core/_class_history.html' %}
             {% if a.status == 'scheduled' %}
                 {% if a.open_request %}
                 <div class="alert alert-info py-2 small mt-2 mb-0" data-open-request>
@@ -53,8 +54,11 @@
     <ul class="list-group mb-3">
         {% for a in recent %}
         <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span>{{ a.starts_at|date:"D, d/m" }} · {{ a.starts_at|time:"H:i" }}</span>
-            <span class="badge {% if a.status == 'attended' %}bg-success{% elif a.status == 'missed' %}bg-danger{% elif a.status == 'cancelled' %}bg-secondary{% else %}bg-body-secondary text-body border{% endif %}">{{ a.get_status_display }}</span>
+            <span>
+                {{ a.starts_at|date:"D, d/m" }} · {{ a.starts_at|time:"H:i" }}
+                {% include 'core/_class_history.html' with compact=True %}
+            </span>
+            <span class="badge {% if a.status == 'attended' %}bg-success{% elif a.status == 'missed' %}bg-danger{% elif a.status == 'cancelled' or a.status == 'rescheduled' %}bg-secondary{% else %}bg-body-secondary text-body border{% endif %}">{{ a.get_status_display }}</span>
         </li>
         {% endfor %}
     </ul>

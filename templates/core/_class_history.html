@@ -1,0 +1,16 @@
+{# What happened to a class, for the student. Needs `a` (see core.agenda.annotate_history). `compact` = list row. #}
+{% if a.status == 'rescheduled' and a.moved_to %}
+<div class="small {% if compact %}text-muted{% else %}mt-2{% endif %}" data-history="moved">
+    <i class="bi bi-arrow-right-circle"></i> Remarcada para <strong>{{ a.moved_to.starts_at|date:"D, d/m \à\s H:i" }}</strong>{% if a.status_changed_at %}
+    <span class="text-muted">· em {{ a.status_changed_at|date:"d/m \à\s H:i" }}, {% if a.by_student %}a seu pedido{% else %}pela sua personal{% endif %}</span>{% endif %}
+</div>
+{% elif a.status == 'cancelled' and a.status_changed_at %}
+<div class="small {% if compact %}text-muted{% else %}mt-2{% endif %}" data-history="cancelled">
+    <i class="bi bi-slash-circle"></i> Cancelada em {{ a.status_changed_at|date:"d/m \à\s H:i" }}, {% if a.by_student %}a seu pedido{% else %}pela sua personal{% endif %}
+</div>
+{% elif a.moved_from %}
+<div class="small {% if compact %}text-muted{% else %}mt-2 text-body-secondary{% endif %}" data-history="from">
+    <i class="bi bi-clock-history"></i> Remarcada de <strong>{{ a.moved_from.starts_at|date:"D, d/m \à\s H:i" }}</strong>{% if a.moved_from.status_changed_at %}
+    <span class="text-muted">· em {{ a.moved_from.status_changed_at|date:"d/m \à\s H:i" }}, {% if a.by_student %}a seu pedido{% else %}pela sua personal{% endif %}</span>{% endif %}
+</div>
+{% endif %}

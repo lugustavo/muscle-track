@@ -272,3 +272,85 @@ class ProfileMenuTests(RequestBase):
         page = self.client.get(reverse('core:my_profile'))
         for name in ('my_agenda', 'notification_settings', 'calendar_settings', 'my_privacy'):
             self.assertContains(page, f'href="{reverse("core:" + name)}" class="list-group-item')
+
+
+class HistoryTests(RequestBase):
+    """The student can see what happened to a class: moved (to when, when, by whom) or cancelled."""
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.alice)
+
+    def page(self):
+        return self.client.get(reverse('core:my_agenda')).content.decode()
+
+    def test_moved_class_stays_in_the_list_with_where_it_went(self):
+        from core.agenda import move_appointment
+        new = move_appointment(self.appt, future(5, 10))
+        html = self.page()
+        self.assertEqual(html.count('data-my-class='), 2)   # the old time stays, greyed
+        self.assertIn('data-history="moved"', html)
+        self.assertIn('Remarcada para', html)
+        self.assertIn('pela sua personal', html)
+        self.assertIn('data-history="from"', html)   # the new class says where it came from
+        self.assertIn(f'data-my-class="{new.pk}"', html)
+
+    def test_moved_class_has_no_request_buttons(self):
+        from core.agenda import move_appointment
+        move_appointment(self.appt, future(5, 10))
+        html = self.page()
+        self.assertNotIn(reverse('core:my_agenda_request', kwargs={'pk': self.appt.pk}), html)
+
+    def test_move_asked_by_the_student_says_so(self):
+        asked = class_requests.create_request(self.person, self.appt, 'reschedule', future(5, 10))
+        class_requests.approve(asked)
+        html = self.page()
+        self.assertIn('a seu pedido', html)
+        self.assertNotIn('pela sua personal', html)
+
+    def test_cancelled_class_says_when_and_by_whom(self):
+        trainer_cancelled = Appointment.objects.create(
+            person=self.person, starts_at=future(6), status='cancelled', status_changed_at=timezone.now())
+        asked_cancel = Appointment.objects.create(person=self.person, starts_at=future(7))
+        class_requests.approve(class_requests.create_request(self.person, asked_cancel, 'cancel'))
+        html = self.page()
+        self.assertIn('data-history="cancelled"', html)
+        self.assertEqual(html.count('Cancelada em'), 2)
+        self.assertIn('pela sua personal', html)
+        self.assertIn('a seu pedido', html)
+        self.assertIsNotNone(trainer_cancelled.pk)
+
+    def test_past_moves_show_in_the_last_30_days(self):
+        from core.agenda import move_appointment
+        old = Appointment.objects.create(person=self.person, starts_at=timezone.now() - timedelta(days=3))
+        move_appointment(old, timezone.now() + timedelta(days=9))
+        self.assertIn('Remarcada para', self.page())
+
+    def test_other_students_history_never_shows(self):
+        from core.agenda import move_appointment
+        bob_class = Appointment.objects.create(person=self.bob.person, starts_at=future(4))
+        move_appointment(bob_class, future(6))
+        self.assertNotIn('data-history=', self.page())
+
+    def test_query_count_stays_flat_with_history(self):
+        from core.agenda import move_appointment
+
+        def count():
+            with CaptureQueriesContext(connection) as ctx:
+                self.client.get(reverse('core:my_agenda'))
+            return len(ctx)
+        move_appointment(Appointment.objects.create(person=self.person, starts_at=future(9)), future(29))
+        base = count()   # one move is enough to run every prefetch once
+        for day in range(10, 18):
+            move_appointment(Appointment.objects.create(person=self.person, starts_at=future(day)), future(day + 20))
+        self.assertEqual(count(), base)
+
+    def test_trainer_card_shows_the_link_between_the_two(self):
+        from core.agenda import move_appointment
+        new = move_appointment(self.appt, future(5, 10))
+        self.client.force_login(self.trainer)
+        day = timezone.localtime(self.appt.starts_at).date().isoformat()
+        html = self.client.get(reverse('core:agenda'), {'vista': 'lista', 'dia': day}).content.decode()
+        self.assertIn('data-history="moved"', html)
+        self.assertIn('data-history="from"', html)
+        self.assertIsNotNone(new.pk)
