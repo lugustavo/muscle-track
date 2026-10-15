@@ -804,7 +804,11 @@ class Appointment(models.Model):
         verbose_name = 'Aula'
         verbose_name_plural = 'Aulas'
         ordering = ['starts_at']
-        constraints = [models.UniqueConstraint(fields=['person', 'starts_at'], name='unique_appointment')]
+        # One live class per student and time. Cancelled and rescheduled rows stay as history, so a class can be
+        # moved back to a time it left, or a new one created where one was cancelled.
+        constraints = [models.UniqueConstraint(
+            fields=['person', 'starts_at'], condition=~models.Q(status__in=['cancelled', 'rescheduled']),
+            name='unique_live_appointment')]
 
     @property
     def ends_at(self):

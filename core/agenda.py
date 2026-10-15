@@ -96,6 +96,15 @@ def overlap_names(appointment):
     return sorted({a.person.person_name for a in overlapping(appointment)})
 
 
+def live_class_at(person, starts, exclude=None):
+    """Another class of this student at exactly `starts` that still counts (not cancelled, not rescheduled)."""
+    queryset = Appointment.objects.filter(person=person, starts_at=starts).exclude(
+        status__in=(Appointment.Status.CANCELLED, Appointment.Status.RESCHEDULED))
+    if exclude is not None:
+        queryset = queryset.exclude(pk=exclude.pk)
+    return queryset.first()
+
+
 class MoveError(Exception):
     """A move that cannot happen; the message is meant for the trainer."""
 
@@ -107,7 +116,7 @@ def move_appointment(appointment, starts, duration_minutes=None, kind=None, note
     if starts == appointment.starts_at:
         raise MoveError('A aula já está neste horário.')
     with transaction.atomic():
-        if Appointment.objects.filter(person=appointment.person, starts_at=starts).exists():
+        if live_class_at(appointment.person, starts) is not None:
             raise MoveError('Este aluno já tem aula neste horário.')
         new = Appointment.objects.create(
             person=appointment.person, starts_at=starts,
@@ -130,6 +139,8 @@ def undo_move(new):
             raise MoveError('Esta aula não veio de uma remarcação.')
         if new.status != Appointment.Status.SCHEDULED:
             raise MoveError('A aula nova já foi alterada; não dá mais para desfazer.')
+        if live_class_at(original.person, original.starts_at, exclude=new) is not None:
+            raise MoveError('O aluno já tem outra aula no horário original; não dá mais para desfazer.')
         new.delete()  # the link on the database row is cleared by SET_NULL
         original.rescheduled_to = None
         original.status = Appointment.Status.SCHEDULED

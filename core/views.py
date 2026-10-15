@@ -33,7 +33,7 @@ from .forms import (
 )
 from .agenda import (
     DEFAULT_VIEW as DEFAULT_AGENDA_VIEW, LIST_DAYS, VIEWS as AGENDA_VIEWS, add_months, at, attendance_stats,
-    MoveError, conflicting_ids, ensure_appointments, month_cells, move_appointment, overlap_names, parse_week,
+    MoveError, conflicting_ids, live_class_at, ensure_appointments, month_cells, move_appointment, overlap_names, parse_week,
     undo_move, view_range,
 )
 from .billing import (
@@ -2395,7 +2395,7 @@ def appointment_create(request):
                     return _create_series_from_form(request, data, repeat)
             else:
                 starts = at(data['date'], data['time'])
-                if Appointment.objects.filter(person=data['person'], starts_at=starts).exists():
+                if live_class_at(data['person'], starts) is not None:
                     form.add_error('time', 'Este aluno já tem uma aula neste horário.')
                 else:
                     appointment = Appointment.objects.create(
@@ -2526,6 +2526,9 @@ def appointment_status(request, pk):
     if status not in allowed or appointment.status == Appointment.Status.RESCHEDULED:
         return HttpResponseBadRequest('Situação inválida')
     was_cancelled = appointment.status == Appointment.Status.CANCELLED
+    if status != Appointment.Status.CANCELLED and live_class_at(appointment.person_id, appointment.starts_at, exclude=appointment):
+        messages.error(request, 'Este aluno já tem outra aula neste horário; remova ou cancele uma delas antes.')
+        return redirect(safe_next_url(request, _agenda_url_for(timezone.localtime(appointment.starts_at).date())))
     appointment.status = status
     appointment.status_changed_at = timezone.now()
     appointment.save(update_fields=['status', 'status_changed_at'])
