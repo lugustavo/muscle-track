@@ -160,3 +160,86 @@ class AgendaMarkupTests(MoveBase):
         self.assertNotContains(page, 'draggable="true" data-appt-move')
         self.assertNotContains(page, 'data-appt-move-open')
         self.assertContains(page, reverse('core:appointment_reschedule', kwargs={'pk': self.appt.pk}))
+
+
+class MoveBackTests(MoveBase):
+    """A class moved away can be moved back: the leftover "Remarcada" row at that time must not count."""
+
+    def test_move_back_to_the_time_it_left(self):
+        sat = when(DAY + timedelta(days=1))
+        first = move_appointment(self.appt, sat)
+        back = move_appointment(first, self.appt.starts_at)
+        self.assertEqual((back.status, back.starts_at), ('scheduled', when(DAY)))
+        first.refresh_from_db()
+        self.appt.refresh_from_db()
+        self.assertEqual((first.status, first.rescheduled_to), ('rescheduled', back))
+        self.assertEqual(self.appt.status, 'rescheduled')   # the history row stays
+        live = Appointment.objects.filter(person=self.alice.person).exclude(status__in=('rescheduled', 'cancelled'))
+        self.assertEqual(list(live), [back])
+
+    def test_move_back_with_the_drag_endpoint_and_undo_it(self):
+        body = self.move(date='2026-10-21').json()
+        self.assertTrue(body['ok'])
+        saturday = Appointment.objects.get(pk=body['id'])
+        again = self.client.post(reverse('core:appointment_move', kwargs={'pk': saturday.pk}), {'date': '2026-10-20'})
+        self.assertEqual(again.status_code, 200)
+        self.assertTrue(again.json()['ok'])
+        undo = self.client.post(again.json()['undo_url'])
+        self.assertTrue(undo.json()['ok'])
+        saturday.refresh_from_db()
+        self.assertEqual(saturday.status, 'scheduled')   # back to where it was before the second move
+        live = Appointment.objects.filter(person=self.alice.person, status='scheduled')
+        self.assertEqual(list(live), [saturday])
+
+    def test_two_live_classes_at_the_same_time_are_still_impossible(self):
+        from django.db import IntegrityError, transaction
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Appointment.objects.create(person=self.alice.person, starts_at=self.appt.starts_at)
+        self.assertEqual(move_appointment(self.appt, when(DAY + timedelta(days=1))).status, 'scheduled')
+        with self.assertRaises(MoveError):   # a live class of the same student at the target is still refused
+            move_appointment(Appointment.objects.create(person=self.alice.person, starts_at=when(DAY, 15)),
+                             when(DAY + timedelta(days=1)))
+
+    def test_new_class_where_one_was_cancelled(self):
+        self.appt.status = 'cancelled'
+        self.appt.save()
+        response = self.client.post(reverse('core:appointment_create'), {
+            'person': self.alice.person.pk, 'date': '2026-10-20', 'time': '09:00', 'duration_minutes': 60,
+            'kind': 'regular', 'notes': ''})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Appointment.objects.filter(person=self.alice.person, starts_at=self.appt.starts_at).count(), 2)
+
+    def test_reopening_a_cancelled_class_is_refused_when_the_time_was_retaken(self):
+        self.appt.status = 'cancelled'
+        self.appt.save()
+        taken = Appointment.objects.create(person=self.alice.person, starts_at=self.appt.starts_at)
+        url = reverse('core:appointment_status', kwargs={'pk': self.appt.pk})
+        self.client.post(url, {'status': 'scheduled'})
+        self.appt.refresh_from_db()
+        self.assertEqual(self.appt.status, 'cancelled')
+        taken.delete()
+        self.client.post(url, {'status': 'scheduled'})
+        self.appt.refresh_from_db()
+        self.assertEqual(self.appt.status, 'scheduled')
+
+    def test_undo_is_refused_when_the_original_time_was_retaken(self):
+        new = move_appointment(self.appt, when(DAY + timedelta(days=1)))
+        Appointment.objects.create(person=self.alice.person, starts_at=self.appt.starts_at)
+        with self.assertRaises(MoveError):
+            undo_move(new)
+        new.refresh_from_db()
+        self.assertEqual(new.status, 'scheduled')
+
+    def test_fixed_slot_class_is_not_regenerated_after_moving_away_and_back(self):
+        from core.agenda import ensure_appointments
+        from core.models import ScheduleSlot
+        ScheduleSlot.objects.create(person=self.alice.person, weekday=1, start_time=time(9, 0), valid_from=DAY - timedelta(days=7))
+        self.appt.delete()
+        ensure_appointments(DAY, DAY, today=DAY)
+        generated = Appointment.objects.get(person=self.alice.person, starts_at=when(DAY))
+        away = move_appointment(generated, when(DAY + timedelta(days=1)))
+        ensure_appointments(DAY, DAY, today=DAY)
+        move_appointment(away, when(DAY))
+        ensure_appointments(DAY, DAY, today=DAY)
+        live = Appointment.objects.filter(person=self.alice.person, starts_at=when(DAY), status='scheduled')
+        self.assertEqual(live.count(), 1)
