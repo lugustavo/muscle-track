@@ -781,6 +781,8 @@ class Payment(models.Model):
     class Method(models.TextChoices):
         PIX = 'pix', 'Pix'
         CASH = 'cash', 'Dinheiro'
+        MBWAY = 'mbway', 'MB Way'
+        SPIN = 'spin', 'SPIN'
         CARD = 'card', 'Cartão'
         TRANSFER = 'transfer', 'Transferência'
         OTHER = 'other', 'Outro'

@@ -219,7 +219,7 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 **Falta**
 - Lembrete "restam 2 aulas" para o aluno e para a personal; relatório de aulas dadas × valor por aula (*realizado* × *a executar*).
 - Passar a venda/prorrogação para uma folha lateral; editar o início do prazo à mão; dividir um pacote entre duas pessoas (hoje: o outro aluno tem a aula marcada com "Não descontar").
-- Forma de pagamento típica daqui (hoje: Pix, Dinheiro, Cartão, Transferência, Outro) e um modelo de contrato/termos do pacote para o aluno (CDC: prazo de validade claro).
+- ~~Forma de pagamento típica daqui~~ *(feito: **MB Way** e **SPIN** entraram na lista, que agora é Pix, Dinheiro, MB Way, SPIN, Cartão, Transferência e Outro)* e um modelo de contrato/termos do pacote para o aluno (CDC: prazo de validade claro).
 - Remover os campos de plano da ficha (`Person`) quando todos os alunos tiverem pacote.
 
 ### Notificações
