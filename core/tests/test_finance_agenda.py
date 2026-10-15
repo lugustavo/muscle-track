@@ -15,7 +15,7 @@ from core import billing
 from core.agenda import (
     BACKFILL_DAYS, at, attendance_stats, conflicting_ids, ensure_appointments, parse_week, week_start,
 )
-from core.forms import PersonForm
+from core.forms import ContractForm
 from core.models import Appointment, Payment, Person, Plan, ScheduleSlot
 
 from .base import BaseTestCase
@@ -83,9 +83,7 @@ class PlanTemplateTests(BaseTestCase):
         self.person = self.alice.person
 
     def form(self, **extra):
-        data = {'person_name': 'Alice', 'email': self.alice.email}
-        data.update(extra)
-        return PersonForm(data, instance=self.person)
+        return ContractForm(dict(extra), instance=self.person)
 
     def assign(self, **extra):
         form = self.form(plan=self.plan.pk, **extra)
@@ -115,16 +113,15 @@ class PlanTemplateTests(BaseTestCase):
         form = self.form(plan=self.plan.pk, plan_price='250.00')
         form.is_valid()
         form.save()
-        again = PersonForm({'person_name': 'Alice', 'email': self.alice.email, 'plan': self.plan.pk,
-                            'plan_price': '250.00'}, instance=Person.objects.get(pk=self.person.pk))
+        again = ContractForm({'plan': self.plan.pk, 'plan_price': '250.00'}, instance=Person.objects.get(pk=self.person.pk))
         self.assertTrue(again.is_valid(), again.errors)
         self.assertEqual(again.save().plan_price, Decimal('250.00'))
 
     def test_inactive_plans_are_not_offered_but_the_current_one_stays(self):
         inactive = make_plan(name='Antigo', is_active=False)
-        self.assertNotIn(inactive, PersonForm(instance=self.person).fields['plan'].queryset)
+        self.assertNotIn(inactive, ContractForm(instance=self.person).fields['plan'].queryset)
         self.person.plan = inactive
-        self.assertIn(inactive, PersonForm(instance=self.person).fields['plan'].queryset)
+        self.assertIn(inactive, ContractForm(instance=self.person).fields['plan'].queryset)
 
     def test_deleting_a_template_keeps_the_student_values(self):
         self.assign()
@@ -160,9 +157,9 @@ class PlanTemplateTests(BaseTestCase):
         self.assertContains(self.client.get(reverse('core:plan_list'), {'status': 'inactive'}), 'Trimestral')
         self.assertTrue(Plan.objects.filter(pk=plan.pk).exists())
 
-    def test_student_form_shows_the_plan_fields(self):
+    def test_contract_page_shows_the_plan_fields(self):
         self.login(self.trainer)
-        page = self.client.get(reverse('core:student_edit', kwargs={'pk': self.person.pk}))
+        page = self.client.get(reverse('core:student_contract_edit', kwargs={'pk': self.person.pk}))
         for text in ('Plano do catálogo', 'Nome do contrato', 'Vencimento do contrato', 'Valor do contrato por período', 'Valor/hora do contrato', 'Mensal 3x'):
             self.assertContains(page, text)
 
@@ -217,8 +214,8 @@ class ConfidentialityTests(BaseTestCase):
 
     def test_history_records_that_they_changed_but_not_the_values(self):
         self.login(self.trainer)
-        self.client.post(reverse('core:student_edit', kwargs={'pk': self.person.pk}), {
-            'person_name': 'Alice', 'email': self.alice.email, 'hourly_rate': '200.00', 'plan_price': '150.00'})
+        self.client.post(reverse('core:student_contract_edit', kwargs={'pk': self.person.pk}), {
+            'hourly_rate': '200.00', 'plan_price': '150.00'})
         event = self.person.events.get(kind='profile_edit')
         self.assertEqual(event.changes['hourly_rate'], [None, None])
         self.assertEqual(event.changes['plan_price'], [None, None])

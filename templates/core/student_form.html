@@ -234,12 +234,12 @@
             <!-- Ficha da personal -->
             <div class="card mb-4 border-0 shadow-sm form-section">
                 <div class="card-header bg-primary text-white p-0">
-                    <button type="button" class="section-toggle" data-bs-toggle="collapse" data-bs-target="#sec-ficha" aria-controls="sec-ficha" aria-expanded="{% if form.goal.errors or form.health_notes.errors or form.emergency_contact_name.errors or form.emergency_contact_phone.errors or form.plan.errors or form.plan_name.errors or form.plan_expires_on.errors or form.plan_price.errors or form.hourly_rate.errors %}true{% else %}false{% endif %}">
+                    <button type="button" class="section-toggle" data-bs-toggle="collapse" data-bs-target="#sec-ficha" aria-controls="sec-ficha" aria-expanded="{% if form.goal.errors or form.health_notes.errors or form.emergency_contact_name.errors or form.emergency_contact_phone.errors %}true{% else %}false{% endif %}">
                         <h5 class="mb-0"><i class="bi bi-person-vcard"></i> Ficha da personal</h5>
                         <i class="bi bi-chevron-down section-chevron" aria-hidden="true"></i>
                     </button>
                 </div>
-                <div class="collapse section-collapse{% if form.goal.errors or form.health_notes.errors or form.emergency_contact_name.errors or form.emergency_contact_phone.errors or form.plan.errors or form.plan_name.errors or form.plan_expires_on.errors or form.plan_price.errors or form.hourly_rate.errors %} show{% endif %}" id="sec-ficha">
+                <div class="collapse section-collapse{% if form.goal.errors or form.health_notes.errors or form.emergency_contact_name.errors or form.emergency_contact_phone.errors %} show{% endif %}" id="sec-ficha">
                 <div class="card-body">
                     <div class="mb-3">
                         <label for="{{ form.goal.id_for_label }}" class="form-label fw-bold">Objetivo</label>
@@ -266,40 +266,10 @@
                         {% if form.emergency_contact_phone.errors %}<div class="text-danger small">{{ form.emergency_contact_phone.errors }}</div>{% endif %}
                     </div>
                         </div>
-                        <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="{{ form.plan.id_for_label }}" class="form-label fw-bold">{{ form.plan.label }}</label>
-                        {{ form.plan }}
-                        {% if form.plan.errors %}<div class="text-danger small">{{ form.plan.errors }}</div>{% endif %}
-                        <div class="form-text">Ao escolher um plano do catálogo, o nome e o valor viram o contrato deste aluno (você pode ajustar). <a href="{% url 'core:plan_list' %}" target="_blank" rel="noopener">Gerenciar planos</a></div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.plan_name.id_for_label }}" class="form-label fw-bold">{{ form.plan_name.label }}</label>
-                        {{ form.plan_name }}
-                        {% if form.plan_name.errors %}<div class="text-danger small">{{ form.plan_name.errors }}</div>{% endif %}
-                    </div>
-                        </div>
-                        <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="{{ form.plan_expires_on.id_for_label }}" class="form-label fw-bold">{{ form.plan_expires_on.label }}</label>
-                        {{ form.plan_expires_on }}
-                        {% if form.plan_expires_on.errors %}<div class="text-danger small">{{ form.plan_expires_on.errors }}</div>{% endif %}
-                    </div>
-                        </div>
-                        <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="{{ form.plan_price.id_for_label }}" class="form-label fw-bold"><i class="bi bi-lock"></i> {{ form.plan_price.label }}</label>
-                        {{ form.plan_price }}
-                        {% if form.plan_price.errors %}<div class="text-danger small">{{ form.plan_price.errors }}</div>{% endif %}
-                    </div>
-                        </div>
-                        <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="{{ form.hourly_rate.id_for_label }}" class="form-label fw-bold"><i class="bi bi-lock"></i> {{ form.hourly_rate.label }}</label>
-                        {{ form.hourly_rate }}
-                        {% if form.hourly_rate.errors %}<div class="text-danger small">{{ form.hourly_rate.errors }}</div>{% endif %}
-                        <div class="form-text">Sigiloso: só você vê. Sugere o valor do pagamento (valor/hora × aulas por semana do plano).</div>
-                    </div>
+                        <div class="col-12 small text-muted" data-contract-hint>
+                            <i class="bi bi-file-earmark-text"></i>
+                            {% if form.instance.pk %}O plano e os valores combinados ficam em <a href="{% url 'core:student_contract_edit' form.instance.pk %}">Alterar plano</a>.
+                            {% else %}O plano e os valores combinados são definidos depois de cadastrar, na ficha do aluno (<strong>Definir plano</strong>).{% endif %}
                         </div>
                     </div>
                 </div>

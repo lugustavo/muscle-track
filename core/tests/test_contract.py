@@ -135,15 +135,98 @@ class ContractPageTests(BaseTestCase):
         html = self.client.get(self.url).content.decode()
         self.assertNotIn('<i class="bi bi-credit-card"></i> Plano</strong>', html)
 
-    def test_vocabulary_in_the_form(self):
-        html = self.client.get(reverse('core:student_edit', kwargs={'pk': self.person.pk})).content.decode()
+    def test_vocabulary_in_the_contract_form(self):
+        html = self.client.get(reverse('core:student_contract_edit', kwargs={'pk': self.person.pk})).content.decode()
         for text in ('Plano do catálogo', 'Nome do contrato', 'Vencimento do contrato'):
             self.assertIn(text, html)
         for old in ('Plano contratado', 'Plano (modelo)', 'Vencimento do plano', 'negociado'):
             self.assertNotIn(old, html)
+
+    def test_sign_up_form_no_longer_holds_the_plan_fields(self):
+        html = self.client.get(reverse('core:student_edit', kwargs={'pk': self.person.pk})).content.decode()
+        for name in ('plan', 'plan_name', 'plan_price', 'hourly_rate', 'plan_expires_on'):
+            self.assertNotIn(f'name="{name}"', html)
+        self.assertIn('data-contract-hint', html)
+        self.assertIn(reverse('core:student_contract_edit', kwargs={'pk': self.person.pk}), html)
 
     def test_details_are_always_visible(self):
         html = self.client.get(self.url).content.decode()
         self.assertNotIn('contractMore', html)
         for marker in ('data-contract-period', 'data-contract-classes', 'data-contract-money'):
             self.assertIn(marker, html)
+
+
+class ContractEditPageTests(BaseTestCase):
+    """"Alterar plano": the contract edited outside the sign-up form, with history and without leaking values."""
+
+    def setUp(self):
+        self.person = self.alice.person
+        self.plan = Plan.objects.create(name='Mensal 3x', months=1, sessions_per_week=3, price=Decimal('300.00'))
+        self.url = reverse('core:student_contract_edit', kwargs={'pk': self.person.pk})
+        self.client.force_login(self.trainer)
+
+    def test_only_the_trainer_opens_it(self):
+        self.client.logout()
+        self.assertEqual(self.client.get(self.url).status_code, 302)
+        self.client.force_login(self.alice)
+        self.assertEqual(self.client.get(self.url).status_code, 403)
+        self.assertEqual(self.client.post(self.url, {'plan': self.plan.pk}).status_code, 403)
+
+    def test_page_offers_the_plans_and_the_steps(self):
+        page = self.client.get(self.url)
+        for text in ('Escolha o plano', 'Ajuste para este aluno', 'Vencimento', 'Sem plano do catálogo', 'Mensal 3x'):
+            self.assertContains(page, text)
+        self.assertContains(page, 'js/contract-form.js')
+        self.assertContains(page, 'data-add-months="3"')
+
+    def test_choosing_a_plan_copies_name_and_price_and_logs_the_change(self):
+        response = self.client.post(self.url, {'plan': self.plan.pk, 'plan_expires_on': '2030-02-15', 'hourly_rate': '80.00'})
+        self.assertRedirects(response, reverse('core:student_detail', kwargs={'pk': self.person.pk}) + '#tab-ficha',
+                             fetch_redirect_response=False)
+        self.person.refresh_from_db()
+        self.assertEqual((self.person.plan, self.person.plan_name, self.person.plan_price, self.person.hourly_rate),
+                         (self.plan, 'Mensal 3x', Decimal('300.00'), Decimal('80.00')))
+        self.assertEqual(self.person.plan_expires_on, date(2030, 2, 15))
+        event = self.person.events.get(kind='profile_edit')
+        self.assertEqual(event.changes['plan'], ['', 'Mensal 3x'])
+        self.assertEqual(event.changes['plan_price'], [None, None])      # amounts: only "changed", never the value
+        self.assertEqual(event.changes['hourly_rate'], [None, None])
+        self.assertNotIn('300', str(event.changes))
+
+    def test_typed_values_win_and_no_plan_is_allowed(self):
+        self.client.post(self.url, {'plan': self.plan.pk, 'plan_name': 'Combo da Alice', 'plan_price': '250.00'})
+        self.person.refresh_from_db()
+        self.assertEqual((self.person.plan_name, self.person.plan_price), ('Combo da Alice', Decimal('250.00')))
+        self.client.post(self.url, {'plan': '', 'plan_name': 'Avulso', 'plan_price': '250.00'})
+        self.person.refresh_from_db()
+        self.assertIsNone(self.person.plan)
+        self.assertEqual(self.person.plan_name, 'Avulso')
+
+    def test_invalid_values_show_errors(self):
+        response = self.client.post(self.url, {'plan': '', 'plan_price': '-5'})
+        self.assertEqual(response.status_code, 200)
+        self.person.refresh_from_db()
+        self.assertIsNone(self.person.plan_price)
+
+    def test_inactive_current_plan_stays_selectable(self):
+        old = Plan.objects.create(name='Antigo', is_active=False)
+        self.person.plan = old
+        self.person.save()
+        page = self.client.get(self.url)
+        self.assertContains(page, 'Antigo')
+        self.assertContains(page, 'inativo')
+
+    def test_card_links_to_it(self):
+        page = self.client.get(reverse('core:student_detail', kwargs={'pk': self.person.pk}))
+        self.assertContains(page, self.url)
+        self.assertContains(page, 'Definir plano')   # no plan yet: the primary action
+        self.person.plan_name = 'Combo'
+        self.person.save()
+        page = self.client.get(reverse('core:student_detail', kwargs={'pk': self.person.pk}))
+        self.assertContains(page, 'Alterar plano')
+        self.assertNotContains(page, 'Definir plano')
+
+    def test_new_student_can_be_created_without_a_plan(self):
+        from .test_student_corrections import new_student_data
+        response = self.client.post(reverse('core:student_create'), new_student_data())
+        self.assertEqual(response.status_code, 302)

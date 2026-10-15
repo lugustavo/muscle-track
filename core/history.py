@@ -22,9 +22,12 @@ def _plain(value):
 
 
 def changed_fields(form):
-    """{field: [before, after]} for the fields of a bound, valid form that really changed."""
+    """{field: [before, after]} for the fields of a bound, valid form that really changed.
+
+    Compares the cleaned values (not only the posted ones), so a value the form filled in itself (the contract copying
+    the plan's name and price) is recorded too."""
     changes = {}
-    for name in form.changed_data:
+    for name in form.cleaned_data:
         if name in ('confirm_duplicate', 'status'):
             continue
         field = form.fields[name]
