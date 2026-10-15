@@ -211,3 +211,38 @@ body.kbd-open .fab { display: none; }
 .student-row .meta { min-width: 0; flex: 1 1 auto; }
 .student-row .meta .name { font-weight: 600; }
 .student-row .meta small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Long forms on a phone: collapsible sections and a save bar that stays on screen */
+.form-section .section-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    padding: .5rem 1rem;
+    background: none;
+    border: 0;
+    color: inherit;
+    text-align: left;
+}
+.form-section .section-toggle[aria-expanded="true"] .section-chevron { transform: rotate(180deg); }
+.form-section .section-chevron { transition: transform .2s; }
+@media (min-width: 992px) {
+    /* desktop: everything stays open, the header is only a title */
+    .form-section .section-collapse { display: block !important; height: auto !important; }
+    .form-section .section-toggle { pointer-events: none; padding-top: .5rem; padding-bottom: .5rem; }
+    .form-section .section-chevron { display: none; }
+}
+@media (max-width: 991.98px) {
+    .form-actions {
+        position: sticky;
+        bottom: 0;
+        z-index: 1020;
+        margin: 0 -.75rem;
+        padding: .75rem;
+        background: var(--bs-body-bg);
+        border-top: 1px solid var(--bs-border-color);
+    }
+    body.has-tabbar .form-actions { bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); }
+    body.has-tabbar.kbd-open .form-actions { bottom: 0; }
+}
