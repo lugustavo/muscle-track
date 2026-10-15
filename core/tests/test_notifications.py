@@ -43,7 +43,8 @@ class SettingsPageTests(BaseTestCase):
             self.assertEqual(page.status_code, 200)
             self.assertFalse(page.context['pref'].email_enabled)
             self.assertFalse(page.context['pref'].push_enabled)
-            self.assertNotContains(page, 'checked')
+            self.assertNotContains(page, 'name="email_enabled" checked')
+            self.assertNotContains(page, 'name="push_enabled" checked')
 
     def test_student_needs_consent_first(self):
         self.alice.person.consents.all().delete()

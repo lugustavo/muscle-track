@@ -22,6 +22,7 @@ services:
 
   web:
     build: .
+    image: muscle-track-app
     restart: unless-stopped
     env_file: .env
     # DNS públicos para o app sair para a internet (e-mail, aviso no aparelho, IA) mesmo que o DNS da rede
@@ -43,6 +44,23 @@ services:
       timeout: 5s
       retries: 3
       start_period: 40s
+
+  # Lembretes automáticos (aula, plano vencendo): roda `send_reminders` a cada 10 minutos. Mesma imagem do web;
+  # espera o web ficar saudável (as migrações rodam lá) e não passa pelo entrypoint.
+  scheduler:
+    image: muscle-track-app
+    restart: unless-stopped
+    env_file: .env
+    dns:
+      - ${WEB_DNS_1:-1.1.1.1}
+      - ${WEB_DNS_2:-8.8.8.8}
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-muscle_track}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-muscle_track}
+    depends_on:
+      web:
+        condition: service_healthy
+    entrypoint: []
+    command: ["sh", "-c", "while true; do python manage.py send_reminders || true; sleep 600; done"]
 
   caddy:
     image: caddy:2-alpine

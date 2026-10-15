@@ -57,6 +57,8 @@ class Person(models.Model):
     emergency_contact_phone = models.CharField(max_length=20, blank=True, verbose_name='Telefone de emergência')
     plan_name = models.CharField(max_length=100, blank=True, verbose_name='Plano contratado')
     plan_expires_on = models.DateField(null=True, blank=True, verbose_name='Vencimento do plano')
+    # The expiry date a "plan is expiring" reminder was already sent for (a renewal changes the date, so it re-arms)
+    plan_reminder_for = models.DateField(null=True, blank=True)
     # Where the plan came from (a template, like Routine -> PersonRoutine). The values below are
     # copied to the student when the plan is assigned, so editing the template never changes them.
     plan = models.ForeignKey('Plan', on_delete=models.SET_NULL, null=True, blank=True,
@@ -794,6 +796,7 @@ class Appointment(models.Model):
     notes = models.CharField(max_length=200, blank=True, verbose_name='Observação')
     status_changed_at = models.DateTimeField(null=True, blank=True)
     # On the original class of a move: the class it became (lets "desfazer" put things back)
+    reminder_sent_at = models.DateTimeField(null=True, blank=True)   # core/reminders.py: the class reminder went out
     rescheduled_to = models.OneToOneField('self', on_delete=models.SET_NULL, null=True, blank=True,
                                           related_name='rescheduled_from')
 
@@ -850,6 +853,10 @@ class NotificationPreference(models.Model):
     email_at = models.DateTimeField(null=True, blank=True)
     push_enabled = models.BooleanField(default=False)
     push_at = models.DateTimeField(null=True, blank=True)
+    # What to be told about, once a channel is on (applies to both channels)
+    notify_changes = models.BooleanField(default=True)          # class moved/cancelled, answers and requests
+    notify_class_reminder = models.BooleanField(default=True)   # "your class is tomorrow"
+    notify_plan_expiry = models.BooleanField(default=True)      # "your plan expires in 3 days"
 
 
 class PushSubscription(models.Model):
