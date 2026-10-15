@@ -24,7 +24,9 @@
         </div>
 
         <div class="small mt-3" data-package-dates>
-            {% if cur.starts_on %}
+            {% if not cur.package.valid_days %}
+                <span class="text-muted">Pacote <strong>sem prazo</strong>: não vence, vale até usar todas as aulas.</span>{% if cur.starts_on %} Primeira aula em <strong>{{ cur.starts_on|date:"d/m/Y" }}</strong>.{% endif %}
+            {% elif cur.starts_on %}
                 Primeira aula em <strong>{{ cur.starts_on|date:"d/m/Y" }}</strong> · vale até <strong>{{ cur.ends_on|date:"d/m/Y" }}</strong>
                 {% if cur.state == 'frozen' %}<span class="text-muted">(congelado desde {{ cur.package.frozen_since|date:"d/m" }}; o prazo para de contar)</span>
                 {% elif cur.state == 'expired' %}<span class="text-danger">(venceu há {{ cur.days_left|cut:"-" }} dia{{ cur.days_left|cut:"-"|pluralize }})</span>
@@ -67,22 +69,22 @@
         <div class="contract-more">
             <hr>
             <div class="d-flex flex-wrap gap-2">
-                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#extend-{{ cur.package.pk }}"><i class="bi bi-calendar-plus"></i> Prorrogar</button>
+                {% if cur.package.valid_days %}<button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#extend-{{ cur.package.pk }}"><i class="bi bi-calendar-plus"></i> Prorrogar</button>{% endif %}
                 {% if cur.state == 'frozen' %}
                 <form method="post" action="{% nav_url 'core:student_package_action' student.pk cur.package.pk %}">{% csrf_token %}<input type="hidden" name="action" value="unfreeze"><button class="btn btn-sm btn-outline-primary"><i class="bi bi-play-circle"></i> Descongelar</button></form>
-                {% elif cur.state == 'active' or cur.state == 'expired' %}
+                {% elif cur.package.valid_days and cur.state == 'active' or cur.package.valid_days and cur.state == 'expired' %}
                 <form method="post" action="{% nav_url 'core:student_package_action' student.pk cur.package.pk %}">{% csrf_token %}<input type="hidden" name="action" value="freeze"><button class="btn btn-sm btn-outline-secondary" title="O prazo para de contar até o aluno voltar"><i class="bi bi-snow"></i> Congelar</button></form>
                 {% endif %}
                 <form method="post" action="{% nav_url 'core:student_package_action' student.pk cur.package.pk %}" onsubmit="return confirm('Cancelar este pacote? As aulas já dadas ficam sem pacote.');">{% csrf_token %}<input type="hidden" name="action" value="cancel"><button class="btn btn-sm btn-link text-danger">Cancelar pacote</button></form>
             </div>
-            <div class="collapse mt-2" id="extend-{{ cur.package.pk }}">
+            {% if cur.package.valid_days %}<div class="collapse mt-2" id="extend-{{ cur.package.pk }}">
                 <form method="post" action="{% nav_url 'core:student_package_action' student.pk cur.package.pk %}" class="row g-2 align-items-end">
                     {% csrf_token %}<input type="hidden" name="action" value="extend">
                     <div class="col-4"><label class="form-label small mb-0" for="extend-days">Dias a mais</label><input id="extend-days" name="days" type="number" min="1" max="365" value="14" class="form-control form-control-sm" required></div>
                     <div class="col-8"><label class="form-label small mb-0" for="extend-note">Motivo (opcional)</label><input id="extend-note" name="note" maxlength="150" class="form-control form-control-sm" placeholder="Ex.: viagem, lesão"></div>
                     <div class="col-12"><button class="btn btn-sm btn-primary">Prorrogar</button></div>
                 </form>
-            </div>
+            </div>{% endif %}
 
             <div class="mt-3" data-package-money>
                 <div class="d-flex justify-content-between align-items-center mb-1">

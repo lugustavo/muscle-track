@@ -25,7 +25,8 @@
             {% if p.late_cancelled %}<li>{{ p.late_cancelled }} cancelamento{{ p.late_cancelled|pluralize }} em cima da hora (descontado{{ p.late_cancelled|pluralize }} do pacote).</li>{% endif %}
             {% if p.free_cancelled %}<li>{{ p.free_cancelled }} cancelamento{{ p.free_cancelled|pluralize }} sem desconto.</li>{% endif %}
             <li>
-                {% if p.starts_on %}Primeira aula em {{ p.starts_on|date:"d/m/Y" }}; vale até <strong>{{ p.ends_on|date:"d/m/Y" }}</strong>{% if p.state == 'active' and p.days_left is not None %} ({% if p.days_left <= 0 %}vence hoje{% elif p.days_left == 1 %}falta 1 dia{% else %}faltam {{ p.days_left }} dias{% endif %}){% elif p.state == 'frozen' %} (congelado até você voltar){% elif p.state == 'expired' %} (prazo vencido: fale com a sua personal){% endif %}.
+                {% if not p.package.valid_days %}Pacote sem prazo: vale até usar todas as aulas.
+                {% elif p.starts_on %}Primeira aula em {{ p.starts_on|date:"d/m/Y" }}; vale até <strong>{{ p.ends_on|date:"d/m/Y" }}</strong>{% if p.state == 'active' and p.days_left is not None %} ({% if p.days_left <= 0 %}vence hoje{% elif p.days_left == 1 %}falta 1 dia{% else %}faltam {{ p.days_left }} dias{% endif %}){% elif p.state == 'frozen' %} (congelado até você voltar){% elif p.state == 'expired' %} (prazo vencido: fale com a sua personal){% endif %}.
                 {% else %}O prazo de {{ p.package.valid_days }} dias começa na primeira aula.{% endif %}
             </li>
             {% if p.package.extension_days %}<li>Prorrogado em {{ p.package.extension_days }} dia{{ p.package.extension_days|pluralize }}.</li>{% endif %}

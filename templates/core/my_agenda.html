@@ -20,7 +20,8 @@
             <div class="d-flex justify-content-between small mt-2"><span><strong>{{ package.used }}</strong> de {{ package.sessions }} aulas usadas</span><span class="text-muted">{{ package.left }} sobrando</span></div>
             <div class="progress mt-1" style="height: 6px;" role="progressbar" aria-valuenow="{{ package.percent }}" aria-valuemin="0" aria-valuemax="100" aria-label="Aulas usadas do pacote"><div class="progress-bar bg-success" style="width: {{ package.percent }}%"></div></div>
             <div class="small text-muted mt-1">
-                {% if package.starts_on %}Vale até {{ package.ends_on|date:"d/m/Y" }}{% if package.state == 'frozen' %} (congelado){% elif package.state == 'expired' %} (prazo vencido: fale com a sua personal){% endif %}
+                {% if not package.package.valid_days %}Pacote sem prazo: vale até você usar todas as aulas.
+                {% elif package.starts_on %}Vale até {{ package.ends_on|date:"d/m/Y" }}{% if package.state == 'frozen' %} (congelado){% elif package.state == 'expired' %} (prazo vencido: fale com a sua personal){% endif %}
                 {% else %}O prazo de {{ package.package.valid_days }} dias começa na sua primeira aula.{% endif %}
             </div>
         </div>
