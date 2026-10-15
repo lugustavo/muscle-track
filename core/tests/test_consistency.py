@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from core import consistency as c
-from core.models import Person, Plan, WorkoutSession
+from core.models import Person, Plan
 
 from .base import BaseTestCase
 from .test_tabbar_today import finish
