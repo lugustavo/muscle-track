@@ -85,6 +85,7 @@ urlpatterns = [
     path('notifications/test/', views.notification_test, name='notification_test'),
     path('my-agenda/', views.my_agenda, name='my_agenda'),
     path('my-package/', views.my_package, name='my_package'),
+    path('my-intro/', views.my_intro, name='my_intro'),
     path('my-evolution/', views.my_evolution, name='my_evolution'),
     path('my-evolution/compare/', views.my_evolution_compare, name='my_evolution_compare'),
     path('students/<int:pk>/compare/', views.student_compare, name='student_compare'),
