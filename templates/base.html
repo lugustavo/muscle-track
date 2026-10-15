@@ -125,6 +125,11 @@
                                 <li><a class="dropdown-item" href="{% url 'core:notification_settings' %}">
                                     <i class="bi bi-bell"></i> Notificações
                                 </a></li>
+                                {% if not user.is_staff %}
+                                <li><a class="dropdown-item" href="{% url 'core:my_package' %}">
+                                    <i class="bi bi-box-seam"></i> Meu pacote
+                                </a></li>
+                                {% endif %}
                                 <li><a class="dropdown-item" href="{% url 'account_change_password' %}">
                                     <i class="bi bi-key"></i> Alterar senha
                                 </a></li>

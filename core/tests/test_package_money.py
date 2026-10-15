@@ -58,7 +58,7 @@ class ConfidentialityTests(BaseTestCase):
 
     def test_student_pages_never_show_the_prices(self):
         self.login(self.alice)
-        for name in ('core:home', 'core:my_profile', 'core:my_privacy', 'core:my_workouts', 'core:my_history', 'core:my_agenda'):
+        for name in ('core:home', 'core:my_profile', 'core:my_privacy', 'core:my_workouts', 'core:my_history', 'core:my_agenda', 'core:my_package'):
             response = self.client.get(reverse(name))
             self.assertEqual(response.status_code, 200, name)
             self.assertHidden(response)

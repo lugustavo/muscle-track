@@ -83,6 +83,7 @@ urlpatterns = [
     path('notifications/push/<int:pk>/remove/', views.push_unsubscribe, name='push_unsubscribe'),
     path('notifications/test/', views.notification_test, name='notification_test'),
     path('my-agenda/', views.my_agenda, name='my_agenda'),
+    path('my-package/', views.my_package, name='my_package'),
     path('my-agenda/<int:pk>/request/', views.my_agenda_request, name='my_agenda_request'),
     path('my-agenda/requests/<int:pk>/withdraw/', views.my_agenda_request_withdraw, name='my_agenda_request_withdraw'),
     path('my-profile/', views.my_profile, name='my_profile'),
