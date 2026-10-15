@@ -13,16 +13,16 @@
 {% if sessions_count %}
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-4">
-        <div class="card text-center h-100"><div class="card-body">
-            <i class="bi bi-trophy-fill fs-1 text-warning"></i>
-            <h3 class="mt-2">{{ record_log.weight_used }} kg</h3>
+        <div class="card text-center h-100 stat-tile"><div class="card-body">
+            <div class="stat-top"><i class="bi bi-trophy-fill fs-1 text-warning"></i>
+            <h3 class="mt-2">{{ record_log.weight_used }} kg</h3></div>
             <p class="text-muted mb-0">Recorde de carga · {{ record_log.session.start_time|date:"d/m/Y" }}</p>
         </div></div>
     </div>
     <div class="col-6 col-md-4">
-        <div class="card text-center h-100"><div class="card-body">
-            <i class="bi bi-calendar-check fs-1 text-primary"></i>
-            <h3 class="mt-2">{{ sessions_count }}</h3>
+        <div class="card text-center h-100 stat-tile"><div class="card-body">
+            <div class="stat-top"><i class="bi bi-calendar-check fs-1 text-primary"></i>
+            <h3 class="mt-2">{{ sessions_count }}</h3></div>
             <p class="text-muted mb-0">Treinos com este exercício</p>
         </div></div>
     </div>

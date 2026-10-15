@@ -191,3 +191,20 @@ class StudentListMobileTests(BaseTestCase):
         with CaptureQueriesContext(connection) as many:
             self.client.get(self.url)
         self.assertLessEqual(len(many), len(few) + 1)
+
+
+class ExerciseDetailMobileTests(BaseTestCase):
+    def test_counters_are_compact_tiles_two_per_row_on_phones(self):
+        self.login(self.trainer)
+        html = self.client.get(reverse('core:exercise_detail', kwargs={'pk': self.supino.pk})).content.decode()
+        self.assertEqual(html.count('stat-tile'), 4)
+        self.assertEqual(html.count('class="col-6 col-md-3"'), 4)
+        self.assertEqual(html.count('class="stat-top"'), 4)
+        # picture first on phones, after the text on larger screens
+        self.assertIn('col-md-4 order-1 order-md-2', html)
+        self.assertIn('col-md-8 order-2 order-md-1', html)
+
+    def test_empty_picture_placeholder_is_hidden_on_phones(self):
+        self.login(self.trainer)
+        html = self.client.get(reverse('core:exercise_detail', kwargs={'pk': self.supino.pk})).content.decode()
+        self.assertIn('order-md-2 mb-3 mb-md-0 d-none d-md-block', html)   # no image: placeholder only on desktop
