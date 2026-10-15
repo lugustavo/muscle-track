@@ -288,13 +288,35 @@ class AssessmentForm(forms.ModelForm):
 
 
 class ProgressPhotoForm(forms.ModelForm):
+    """One photo, usually for a position of an assessment; the date follows the assessment when there is one."""
+
+    def __init__(self, *args, student=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['assessment'].queryset = student.assessments.all() if student else Assessment.objects.none()
+        self.fields['assessment'].empty_label = 'Foto avulsa (sem avaliação)'
+        self.fields['assessment'].label_from_instance = lambda a: f'Avaliação de {a.date:%d/%m/%Y}'
+        self.fields['date'].required = False
+        self.fields['angle'].required = False
+
+    def clean(self):
+        data = super().clean()
+        data['angle'] = data.get('angle') or ProgressPhoto.Angle.OTHER
+        assessment = data.get('assessment')
+        if assessment:
+            data['date'] = assessment.date
+        elif not data.get('date'):
+            data['date'] = timezone.localdate()
+        return data
+
     class Meta:
         model = ProgressPhoto
-        fields = ['date', 'image', 'caption']
+        fields = ['assessment', 'angle', 'date', 'image', 'caption']
         widgets = {
+            'assessment': forms.Select(attrs={'class': 'form-select'}),
+            'angle': forms.Select(attrs={'class': 'form-select'}),
             'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
             'image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
-            'caption': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex.: frente, perfil, costas'}),
+            'caption': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Opcional'}),
         }
 
 

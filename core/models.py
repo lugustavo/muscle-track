@@ -562,8 +562,25 @@ def progress_photo_path(instance, filename):
 
 
 class ProgressPhoto(models.Model):
-    """Private progress photo of a student; only served to the trainer and the student"""
+    """Private progress photo of a student; only served to the trainer and the student.
+
+    A photo belongs to an assessment (one per position: front, left, right, back); photos without one are loose
+    (the ones sent before assessments held photos, or "other" positions)."""
+
+    class Angle(models.TextChoices):
+        FRONT = 'front', 'Frente'
+        LEFT = 'left', 'Lado esquerdo'
+        RIGHT = 'right', 'Lado direito'
+        BACK = 'back', 'Costas'
+        OTHER = 'other', 'Outra'
+
+    # The standard sequence shown in every assessment, in this order
+    SEQUENCE = (Angle.FRONT, Angle.LEFT, Angle.RIGHT, Angle.BACK)
+
     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='progress_photos', verbose_name='Aluno')
+    assessment = models.ForeignKey('Assessment', on_delete=models.SET_NULL, null=True, blank=True,
+                                   related_name='photos', verbose_name='Avaliação')
+    angle = models.CharField(max_length=10, choices=Angle.choices, default=Angle.OTHER, verbose_name='Posição')
     date = models.DateField(default=timezone.localdate, verbose_name='Data')
     image = models.ImageField(upload_to=progress_photo_path, validators=[validate_photo_image], verbose_name='Foto')
     thumbnail = models.ImageField(upload_to=progress_photo_path, blank=True, editable=False, verbose_name='Miniatura')
@@ -579,11 +596,24 @@ class ProgressPhoto(models.Model):
         return f'{self.person.person_name} - {self.date:%d/%m/%Y}'
 
     THUMBNAIL_SIZE = (480, 480)
+    MAX_SIZE = (2000, 2000)
 
     def save(self, *args, **kwargs):
+        if self.image and not self.image._committed:   # a new upload: keep only the pixels (no EXIF, no GPS)
+            self.image.save(f'{uuid.uuid4().hex}.jpg', self._clean_image(), save=False)
         if self.image and not self.thumbnail:
             self.thumbnail.save(f'{uuid.uuid4().hex}.jpg', self._make_thumbnail(), save=False)
         super().save(*args, **kwargs)
+
+    def _clean_image(self):
+        """Re-encode as a JPEG of a sensible size: drops every metadata block (location, device) and fixes the rotation."""
+        self.image.seek(0)
+        with Image.open(self.image) as img:
+            img = ImageOps.exif_transpose(img).convert('RGB')
+            img.thumbnail(self.MAX_SIZE)
+            buffer = io.BytesIO()
+            img.save(buffer, 'JPEG', quality=88, optimize=True)
+        return ContentFile(buffer.getvalue())
 
     def _make_thumbnail(self):
         self.image.seek(0)

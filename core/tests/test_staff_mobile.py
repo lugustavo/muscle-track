@@ -35,7 +35,7 @@ class StudentFileMobileTests(BaseTestCase):
         self.assertNotIn('stat-strip', html)
         self.assertIn('tabs-sticky', html)
         tabs = html[html.index('id="studentTabs"'):html.index('class="tab-content"')]
-        self.assertEqual(tabs.count('data-bs-toggle="tab"'), 8)
+        self.assertEqual(tabs.count('data-bs-toggle="tab"'), 7)
 
 
 class AgendaDayTests(BaseTestCase):

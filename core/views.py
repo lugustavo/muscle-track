@@ -51,7 +51,7 @@ from .models import (
     Appointment, AppointmentRequest, Assessment, CalendarFeed, NotificationPreference, PushSubscription, ConsentRecord, Exercise, MuscleGroup, Payment, Package, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
     Routine, RoutineExercise, SessionExercise, SessionSet, StudentEvent, StudentNote, WorkoutSession,
 )
-from .navigation import after_save_url, back_label, safe_next_url
+from .navigation import after_save_url, back_label, safe_next_url, with_next
 from .onboarding import trainer_steps
 from .recurrence import create_series, describe, end_series_from
 from .permissions import is_trainer, staff_required, student_required
@@ -351,7 +351,12 @@ def student_detail(request, pk):
             'sessions_count': sessions_count,
         })
 
-    assessments = list(student.assessments.all())
+    assessments = list(student.assessments.prefetch_related('photos'))
+    for a in assessments:   # the photo strip: one slot per position, then any extra photos
+        by_angle = {p.angle: p for p in a.photos.all()}
+        a.photo_slots = [{'angle': angle.value, 'label': angle.label, 'photo': by_angle.get(angle.value)}
+                         for angle in ProgressPhoto.SEQUENCE]
+        a.other_photos = [p for p in a.photos.all() if p.angle not in {x.value for x in ProgressPhoto.SEQUENCE}]
     chart_points = [
         {
             'date': a.date.strftime('%d/%m/%y'),
@@ -367,7 +372,8 @@ def student_detail(request, pk):
         'assessments': assessments,
         'latest_assessment': assessments[0] if assessments else None,
         'assessment_chart': chart_points if len(chart_points) >= 2 else [],
-        'photos': list(student.progress_photos.all()),
+        'loose_photos': list(student.progress_photos.filter(assessment__isnull=True)),
+        'photo_count': student.progress_photos.count(),
         'events': list(student.events.select_related('actor')[:100]),
         'consents': [(ConsentRecord.Kind(kind).label, record, is_granted(record), kind in REQUIRED_KINDS)
                      for kind, record in current_consents(student).items()],
@@ -2133,16 +2139,36 @@ def assessment_delete(request, pk):
 
 @staff_required
 def photo_upload(request, pk):
+    """Add a photo, normally to one position of an assessment (`?assessment=<id>&angle=front`); "save and next"
+    walks through the positions that are still empty."""
     student = get_object_or_404(Person, pk=pk)
-    form = ProgressPhotoForm(request.POST or None, request.FILES or None)
+    initial = {}
+    wanted = student.assessments.filter(pk=request.GET.get('assessment') or 0).first()
+    if wanted:
+        initial['assessment'] = wanted
+    if request.GET.get('angle') in ProgressPhoto.Angle.values:
+        initial['angle'] = request.GET['angle']
+    form = ProgressPhotoForm(request.POST or None, request.FILES or None, student=student, initial=initial)
     if request.method == 'POST' and form.is_valid():
         photo = form.save(commit=False)
         photo.person = student
         photo.save()
+        if photo.assessment_id and photo.angle != ProgressPhoto.Angle.OTHER:   # a new photo replaces the old one of that position
+            photo.assessment.photos.filter(angle=photo.angle).exclude(pk=photo.pk).delete()
         messages.success(request, 'Foto adicionada.')
-        return redirect(_student_tab(request, student.pk, 'fotos'))
+        if 'save_next' in request.POST and photo.assessment_id:
+            taken = set(photo.assessment.photos.values_list('angle', flat=True))
+            missing = [a for a in ProgressPhoto.SEQUENCE if a not in taken]
+            if missing:
+                target = f"{reverse('core:photo_upload', kwargs={'pk': student.pk})}?assessment={photo.assessment_id}&angle={missing[0]}"
+                came_from = request.GET.get('next')
+                return redirect(with_next(target, came_from) if came_from else target)
+        return redirect(_student_tab(request, student.pk, 'avaliacoes'))
     photos_consent = is_granted(current_consents(student)[ConsentRecord.Kind.PHOTOS])
-    return render(request, 'core/photo_form.html', {'form': form, 'student': student, 'photos_consent': photos_consent})
+    chosen = form['assessment'].value()
+    return render(request, 'core/photo_form.html', {
+        'form': form, 'student': student, 'photos_consent': photos_consent,
+        'sequence': [(a.value, a.label) for a in ProgressPhoto.SEQUENCE], 'has_assessment': bool(chosen)})
 
 
 @staff_required
@@ -2152,7 +2178,7 @@ def photo_delete(request, pk):
     person_id = photo.person_id
     photo.delete()
     messages.success(request, 'Foto removida.')
-    return redirect(_student_tab(request, person_id, 'fotos'))
+    return redirect(_student_tab(request, person_id, 'avaliacoes'))
 
 
 @login_required

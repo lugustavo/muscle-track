@@ -3,6 +3,7 @@
     <h5 class="mb-0"><i class="bi bi-rulers"></i> Avaliações físicas</h5>
     <a href="{% nav_url 'core:assessment_create' student.pk %}" class="btn btn-success"><i class="bi bi-plus-circle"></i> Nova avaliação</a>
 </div>
+<p class="text-muted small"><i class="bi bi-lock"></i> Cada avaliação tem as fotos das posições (frente, lados e costas). As fotos são privadas: só você e o próprio aluno conseguem abrir.</p>
 
 {% if assessment_chart %}
 <div class="card mb-4">
@@ -46,6 +47,43 @@
                         </form>
                     </td>
                 </tr>
+                <tr data-photo-strip="{{ a.pk }}">
+                    <td colspan="11" class="bg-body-tertiary py-2">
+                        <div class="d-flex flex-wrap gap-2 align-items-start">
+                            {% for slot in a.photo_slots %}
+                            <div class="text-center" style="width: 84px;" data-angle="{{ slot.angle }}">
+                                {% if slot.photo %}
+                                <a href="{% url 'core:photo_file' slot.photo.pk %}" target="_blank" rel="noopener" title="Abrir foto: {{ slot.label }}">
+                                    <img src="{% url 'core:photo_thumb' slot.photo.pk %}" loading="lazy" alt="{{ slot.label }} em {{ a.date|date:'d/m/Y' }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
+                                </a>
+                                {% else %}
+                                <a href="{% nav_url 'core:photo_upload' student.pk %}&amp;assessment={{ a.pk }}&amp;angle={{ slot.angle }}" class="d-flex flex-column align-items-center justify-content-center rounded border border-2 border-dashed text-muted text-decoration-none w-100" style="aspect-ratio: 3/4;" title="Adicionar foto: {{ slot.label }}">
+                                    <i class="bi bi-plus-lg fs-5"></i>
+                                </a>
+                                {% endif %}
+                                <div class="small text-muted lh-sm mt-1">{{ slot.label }}</div>
+                                {% if slot.photo %}
+                                <form method="post" action="{% nav_url 'core:photo_delete' slot.photo.pk %}" class="d-inline" onsubmit="return confirm('Remover esta foto?');">
+                                    {% csrf_token %}
+                                    <button class="btn btn-link btn-sm text-danger p-0" title="Remover foto"><i class="bi bi-trash"></i></button>
+                                </form>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                            {% for photo in a.other_photos %}
+                            <div class="text-center" style="width: 84px;">
+                                <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener"><img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="Foto de {{ a.date|date:'d/m/Y' }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;"></a>
+                                <div class="small text-muted lh-sm mt-1">{{ photo.caption|default:photo.get_angle_display }}</div>
+                                <form method="post" action="{% nav_url 'core:photo_delete' photo.pk %}" class="d-inline" onsubmit="return confirm('Remover esta foto?');">
+                                    {% csrf_token %}
+                                    <button class="btn btn-link btn-sm text-danger p-0" title="Remover foto"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                            {% endfor %}
+                            <a href="{% nav_url 'core:photo_upload' student.pk %}&amp;assessment={{ a.pk }}&amp;angle=other" class="btn btn-sm btn-outline-secondary ms-auto" title="Adicionar outra foto a esta avaliação"><i class="bi bi-camera"></i> Foto</a>
+                        </div>
+                    </td>
+                </tr>
             {% endfor %}
             </tbody>
         </table>
@@ -55,3 +93,31 @@
 {% else %}
 <div class="alert alert-info"><i class="bi bi-info-circle"></i> Nenhuma avaliação registrada ainda.</div>
 {% endif %}
+
+{% if loose_photos %}
+<h6 class="mt-4"><i class="bi bi-images"></i> Fotos avulsas</h6>
+<p class="text-muted small">Fotos sem avaliação ligada (enviadas antes de as fotos ficarem dentro das avaliações).</p>
+<div class="row g-3" data-loose-photos>
+    {% for photo in loose_photos %}
+    <div class="col-4 col-md-3 col-lg-2">
+        <div class="card h-100">
+            <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener">
+                <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" class="card-img-top" alt="Foto de {{ photo.date|date:'d/m/Y' }}" style="aspect-ratio: 3/4; object-fit: cover;">
+            </a>
+            <div class="card-body py-1 small">
+                <div class="fw-bold">{{ photo.date|date:"d/m/Y" }}</div>
+                {% if photo.angle != 'other' %}<div class="text-muted">{{ photo.get_angle_display }}</div>{% endif %}
+                {% if photo.caption %}<div class="text-muted">{{ photo.caption }}</div>{% endif %}
+            </div>
+            <div class="card-footer bg-transparent py-1 text-end">
+                <form method="post" action="{% nav_url 'core:photo_delete' photo.pk %}" class="d-inline" onsubmit="return confirm('Remover esta foto?');">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-danger" title="Remover"><i class="bi bi-trash"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+<div class="mt-3"><a href="{% nav_url 'core:photo_upload' student.pk %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-camera"></i> Adicionar foto avulsa</a></div>
