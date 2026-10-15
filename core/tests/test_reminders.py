@@ -127,7 +127,7 @@ class PlanReminderTests(BaseTestCase):
     def test_reminder_inside_the_window_once(self):
         self.expires(3)
         self.assertEqual(reminders.send_plan_reminders(self.TODAY), 1)
-        self.assertEqual(mail.outbox[0].subject, 'Seu plano está vencendo')
+        self.assertEqual(mail.outbox[0].subject, 'Seu pacote está vencendo')
         self.assertIn('vence em 3 dias', mail.outbox[0].body)
         self.assertEqual(reminders.send_plan_reminders(self.TODAY), 0)
         self.assertEqual(reminders.send_plan_reminders(self.TODAY + timedelta(days=1)), 0)

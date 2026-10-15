@@ -273,7 +273,7 @@ class StaffBarTests(BaseTestCase):
     def test_badges(self):
         response, html = self.bar()
         self.assertNotIn('tab-badge', html)
-        plan = Package.objects.create(name='Mensal', months=1, price=Decimal('100'))
+        plan = Package.objects.create(name='Pacote 10', sessions=10, valid_days=60, price_total=Decimal('100'))
         Person.objects.filter(pk=self.alice.person.pk).update(plan=plan, plan_expires_on=self.today - timedelta(days=3))
         StudentEvent.objects.create(person=self.bob.person, kind='erasure_request', summary='x')
         StudentEvent.objects.create(person=self.bob.person, kind='erasure_request', summary='again')  # one student, one badge
@@ -388,12 +388,11 @@ class TodayScreenTests(BaseTestCase):
         done = [d['done'] for d in week_strip(self.person, today)]
         self.assertEqual(done, [True, False, False, False, False, False, False])
 
-    def test_week_goal_comes_from_the_plan(self):
+    def test_week_goal_comes_from_the_student(self):
         today = timezone.localdate()
         finish(self.alice_routine)
         self.assertRegex(self.page().content.decode(), r'1 treino\s*</small>')
-        plan = Package.objects.create(name='3x', months=1, sessions_per_week=3)
-        Person.objects.filter(pk=self.person.pk).update(plan=plan)
+        Person.objects.filter(pk=self.person.pk).update(weekly_goal=3)
         response = self.page()
         self.assertContains(response, '1 de 3 treinos')
         self.assertEqual(response.context['today']['week_goal'], 3)

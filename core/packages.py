@@ -44,12 +44,8 @@ def late_cancel(starts_at, now=None):
 
 
 def consumes(appointment):
-    """Does this class count against a package?"""
-    if appointment.counts_override is not None:
-        return appointment.counts_override
-    if appointment.status in (Status.ATTENDED, Status.MISSED):
-        return True
-    return appointment.status == Status.CANCELLED and appointment.cancelled_late
+    """Does this class count against a package? (the rule lives on the model so templates can use it too)"""
+    return appointment.counts_against_package
 
 
 def ends_on(package, today=None):

@@ -887,6 +887,15 @@ class Appointment(models.Model):
     def ends_at(self):
         return self.starts_at + timedelta(minutes=self.duration_minutes)
 
+    @property
+    def counts_against_package(self):
+        """Does this class use up one class of the student's package? (see core/packages.py for the rules)"""
+        if self.counts_override is not None:
+            return self.counts_override
+        if self.status in (self.Status.ATTENDED, self.Status.MISSED):
+            return True
+        return self.status == self.Status.CANCELLED and self.cancelled_late
+
     def __str__(self):
         return f'{self.person_id} {self.starts_at:%d/%m/%Y %H:%M} {self.status}'
 

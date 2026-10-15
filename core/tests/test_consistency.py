@@ -69,17 +69,15 @@ class StreakTests(BaseTestCase):
 
 
 class GoalTests(BaseTestCase):
-    def test_goal_comes_from_the_plan_then_from_the_student(self):
+    def test_goal_is_the_students_own(self):
         person = self.alice.person
         self.assertIsNone(c.effective_goal(person))
         person.weekly_goal = 2
         self.assertEqual(c.effective_goal(person), 2)
-        plan = Package.objects.create(name='Mensal 4x', sessions_per_week=4)
-        person.plan = plan
-        self.assertEqual(c.effective_goal(person), 4)
-        plan.sessions_per_week = None
-        plan.save()
-        self.assertEqual(c.effective_goal(person), 2)
+        # a package has no weekly rhythm: owning one never sets a goal
+        person.plan = Package.objects.create(name='Pacote 10', sessions=10, valid_days=60)
+        person.weekly_goal = None
+        self.assertIsNone(c.effective_goal(person))
 
 
 class MotivationScreenTests(BaseTestCase):
