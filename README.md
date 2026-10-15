@@ -169,7 +169,7 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 - Cobrança automática com gateway (Pix/cartão)
 - Lembrete automático de plano vencendo, de aula e de reavaliação (depende das notificações abaixo)
 - Metas com prazo e lembrete de reavaliação, marcação do aniversário, importação/exportação de alunos em CSV
-- Aluno ver as próprias avaliações e fotos de progresso; comparação lado a lado de fotos
+- Aluno ver as próprias avaliações e fotos de progresso; comparação lado a lado de fotos (ver "Avaliações com fotos" abaixo)
 - Séries por tempo/técnicas (drop-set, bi-set), periodização
 - Monitoramento/alertas e logs centralizados
 - Servir `media/` direto pelo Caddy
@@ -180,6 +180,22 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 - ~~**Tipos de vista:** mês, semana, dia, previsão e lista~~ *(feito: Semana, Dia, Mês e Lista dos próximos 14 dias, com seletor, a escolha lembrada em cookie e a semana como padrão)*. Falta: vista de "previsão" por mais dias e ajuste de horário de trabalho na grade.
 - ~~**Visão do aluno**~~ *(feito)*: página **Minha agenda** (próximas aulas em 60 dias e as últimas de 30; **o histórico de cada aula fica visível**: remarcada para quando, em que dia e hora, a seu pedido ou pela personal; a aula nova diz de onde veio; cancelada diz quando e por quem), link em "Hoje" (próxima aula), no menu e no perfil; o aluno **pede remarcação** (dia e horário que prefere) ou **cancelamento** de uma aula marcada, com recado opcional e podendo retirar o pedido; o prazo é `AGENDA_NOTICE_HOURS` (padrão 24 h; 0 = sem prazo) e, passado o prazo, a tela manda falar direto com a personal. A personal vê os **Pedidos dos alunos** no topo da Agenda (e no selo da aba Agenda), com **Aprovar** (faz a remarcação/cancelamento na hora; se o horário foi tomado, avisa e o pedido continua aberto) ou **Recusar** com motivo, que o aluno vê. Os avisos de pedido e de resposta já saem por e-mail/aparelho (ver Notificações). Falta: prazo configurável por aluno/plano e a personal propor outro horário ao recusar.
 - **Google Agenda:** ver a seção "Integração com o Google Agenda" abaixo (link `.ics` por pessoa e, depois, sincronização pela API).
+
+### Avaliações com fotos (fotos dentro da avaliação, captura pela câmera)
+*Pedido: na página do aluno, a seção **Fotos** passa a ficar **dentro de Avaliações**: cada avaliação tem uma sequência de fotos (exemplo: frente, lado esquerdo, lado direito e costas). E o botão **Adicionar foto** deve **detectar a câmera do dispositivo** e, se não existir, pedir o envio de fotos da galeria.*
+
+**Como está hoje:** a aba **Fotos** é separada: cada foto é avulsa (data, legenda, miniatura), sem ligação com a avaliação do mesmo dia e sem posição. O envio é um formulário de arquivo comum.
+
+**Proposta**
+- **Modelo:** `ProgressPhoto` ganha `assessment` (avaliação a que pertence) e `angle` (frente, lado esquerdo, lado direito, costas, outro); a data passa a vir da avaliação. *Migração das fotos antigas:* ligar cada foto à avaliação do mesmo dia quando houver; as demais ficam como "fotos avulsas" (sem posição), visíveis na mesma tela, para não perder nada.
+- **Tela:** a aba **Avaliações** lista cada avaliação com as medidas e, abaixo, uma faixa com as 4 posições (miniatura quando há foto; posição vazia mostra "+" e o nome). Tocar numa miniatura abre a foto grande; a aba **Fotos** deixa de existir (o endereço antigo redireciona). Fica natural a **comparação lado a lado** (mesma posição em avaliações diferentes), que já estava no backlog.
+- **Captura (o botão "Adicionar foto"):**
+  - No celular, `<input type="file" accept="image/*" capture="environment">` abre a câmera nativa (traseira; a frontal por escolha) e, sem câmera ou sem permissão, o mesmo botão abre a galeria.
+  - No computador, detectar com `navigator.mediaDevices.enumerateDevices()` se existe câmera; se sim, mostrar a pré-visualização ao vivo (`getUserMedia`) com "Tirar foto"; se não houver câmera, o navegador não tiver a API ou a permissão for negada, cair para **"Escolher da galeria/arquivos"** com uma explicação curta.
+  - **Modo sequência:** uma tela por posição (frente → lado esquerdo → lado direito → costas) com "Tirar", "Escolher da galeria" e "Pular"; as fotos sobem uma a uma, e dá para tirar só as que faltam depois.
+  - Exige HTTPS para a câmera do navegador (já existe pelo Caddy). Foto da câmera frontal é salva sem espelhar.
+- **Privacidade e LGPD:** continua exigindo o consentimento de fotos do aluno (opcional) e servindo os arquivos só à personal e ao próprio aluno; **remover os metadados (EXIF/GPS)** ao salvar; reduzir o tamanho no navegador antes de enviar (fotos de celular passam de 5 MB); o aluno ver as próprias fotos já está no backlog.
+- **Perguntas para a personal antes de começar:** as 4 posições são sempre essas, ou ela quer poder mudar a lista (ex.: perfil 45°, lateral com braços para cima)? Foto sem avaliação ainda deve existir (ex.: foto rápida no treino)? O aluno também pode tirar as próprias fotos pelo celular dele?
 
 ### Notificações
 **Feito (primeira entrega):** tela **Notificações** (menu da conta; no perfil do aluno) para a personal e para cada aluno. **Tudo começa desligado**; ligar um canal é o consentimento dele (data guardada; no aluno, também uma linha no histórico da ficha) e desligar retira (e esquece os aparelhos). Canais: **e-mail** (Gmail com senha de app) e **aviso no aparelho** (web push, com lista de aparelhos, "Remover" e botão "Enviar um teste"), mais "Últimos envios" na tela.
