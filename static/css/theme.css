@@ -141,3 +141,12 @@ footer { background-color: var(--mt-nav-bg); color: white; padding: 1.5rem 0; ma
 [data-bs-theme="dark"] .text-warning { color: var(--bs-warning-text-emphasis) !important; }
 [data-bs-theme="dark"] .text-info { color: var(--bs-info-text-emphasis) !important; }
 .theme-menu .dropdown-item.active { background-color: var(--primary-color); color: #fff; }
+
+/* Counter tiles (icon + number + label): compact on phones, roomy from md up */
+@media (max-width: 767.98px) {
+    .stat-tile .card-body { padding: .6rem .75rem; }
+    .stat-tile .stat-top { display: flex; align-items: center; justify-content: center; gap: .5rem; }
+    .stat-tile .stat-top .bi { font-size: 1.25rem !important; }
+    .stat-tile .stat-top h3 { font-size: 1.4rem; margin: 0 !important; }
+    .stat-tile p { font-size: .75rem; line-height: 1.2; margin-top: .15rem; }
+}
