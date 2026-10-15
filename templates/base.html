@@ -31,7 +31,7 @@
 
     {% block extra_css %}{% endblock %}
 </head>
-<body class="{% if tabbar %}has-tabbar{% endif %}">
+<body class="{% if tabbar %}has-tabbar{% endif %}{% if fab_items %} has-fab{% endif %}">
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--mt-nav-bg);">
         <div class="container">
@@ -39,7 +39,10 @@
                 <img src="{% static 'images/favicon.svg' %}" alt="Muscle Track" width="32" height="32" class="me-2">
                 Muscle Track
             </a>
-            {% include 'includes/_theme_menu.html' %}
+            <div class="d-flex align-items-center ms-auto ms-lg-2 order-lg-last me-2 me-lg-0">
+                {% if user.is_staff or user.is_superuser %}{% include 'includes/_search_box.html' %}{% endif %}
+                {% include 'includes/_theme_menu.html' %}
+            </div>
             <button class="navbar-toggler{% if tabbar or hide_topmenu %} d-none{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -162,6 +165,7 @@
     </footer>
 
     {% include 'includes/_tabbar.html' %}
+    {% if user.is_staff or user.is_superuser %}{% include 'includes/_search_sheet.html' %}{% endif %}
 
     <!-- Bootstrap 5 JS -->
     <script src="{% static 'vendor/bootstrap/5.3.0/bootstrap.bundle.min.js' %}"></script>
@@ -174,6 +178,7 @@
         }
     </script>
 
+    {% if user.is_staff or user.is_superuser %}<script src="{% static 'js/search.js' %}"></script>{% endif %}
     {% block extra_js %}{% endblock %}
 </body>
 </html>

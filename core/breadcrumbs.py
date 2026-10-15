@@ -189,6 +189,7 @@ def _my_exercise_progress(request, ctx):
 
 
 TRAILS = {
+    'search': lambda request, ctx: [_home(), ('Busca', None)],
     'finance': lambda request, ctx: [_home(), ('Financeiro', None)],
     'plan_list': lambda request, ctx: [_home(), _finance(), ('Planos', None)],
     'plan_create': lambda request, ctx: [_home(), _finance(), _plans(), ('Novo plano', None)],
