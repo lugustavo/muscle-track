@@ -191,6 +191,10 @@ VAPID_PUBLIC_KEY = config('VAPID_PUBLIC_KEY', default='')
 VAPID_PRIVATE_KEY = config('VAPID_PRIVATE_KEY', default='')
 VAPID_SUBJECT = config('VAPID_SUBJECT', default='')   # mailto: or https: contact for the push services
 NOTIFICATIONS_ASYNC = config('NOTIFICATIONS_ASYNC', default=True, cast=bool)   # send from a background thread
+# Automatic reminders (python manage.py send_reminders, run by the `scheduler` service): hours before a class (0 = off)
+# and days before the plan expires (0 = off)
+REMINDER_CLASS_HOURS = config('REMINDER_CLASS_HOURS', default=24, cast=int)
+REMINDER_PLAN_DAYS = config('REMINDER_PLAN_DAYS', default=3, cast=int)
 
 # Django-allauth settings
 ACCOUNT_ADAPTER = 'core.adapters.AccountAdapter'

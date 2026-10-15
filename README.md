@@ -14,6 +14,7 @@ App web **self-hosted** para personal trainers: cadastro de alunos, fichas de tr
 - **Barra de menu inferior no celular** — no celular e em tablets pequenos o menu fica no rodapé (aluno: Hoje · Treinos · **Treinar** · Histórico · Perfil; personal: Hoje · Alunos · Agenda · Financeiro · Mais), com selos de pendências para a personal; no desktop continua o menu do topo
 - **Tela "Hoje" do aluno** — o treino do dia com um botão grande para iniciar (ou continuar), a semana em 7 pontos com a meta do plano, e os números em uma linha; descartar um treino iniciado por engano
 - **Horários que se repetem** — a cada N semanas, vários dias de uma vez, com fim em uma data ou após N aulas; em "Nova aula" basta marcar "Repetir esta aula"; na agenda dá para encerrar a série a partir de uma aula ou remover o horário fixo inteiro
+- **Lembretes automáticos** — lembrete de aula (~24 h antes) e de plano vencendo (3 dias antes), uma vez cada, só para quem ligou o canal e o tipo
 - **Notificações por e-mail e aviso no aparelho** — tela Notificações para a personal e para cada aluno (tudo desligado até a pessoa ligar), avisos de pedido, resposta, aula remarcada/cancelada e remarcação desfeita, teste de envio e lista de aparelhos
 - **Agenda no Google Agenda (link)** — em Agenda → "Google Agenda" (personal) e Perfil → "Minhas aulas no Google Agenda" (aluno): link `.ics` privado e revogável, passo a passo para adicionar no Google, aviso de que o Google atualiza aos poucos, "última vez que o link foi buscado", e botão "Adicionar ao Google Agenda" em cada aula da personal; o aluno só recebe as próprias aulas
 - **Minha agenda (aluno)** — o aluno vê as próprias aulas e pede remarcação ou cancelamento dentro do prazo; a personal aprova ou recusa direto na Agenda
@@ -120,6 +121,7 @@ Os dados vivem em volumes do Docker: `pgdata` (banco), `media` (fotos e mídia d
 | `PIX_KEY` | Chave Pix incluída na mensagem de cobrança pelo WhatsApp (opcional) |
 | `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` | Conta Gmail e **senha de app** para enviar e-mails (avisos e "esqueci minha senha"); sem isso os e-mails só vão para o log. Ver "Notificações" abaixo |
 | `WEB_DNS_1`, `WEB_DNS_2` | DNS usados pelo container do app (padrão `1.1.1.1` e `8.8.8.8`), para o app alcançar Gmail, serviços de push e IA mesmo com filtro de DNS na rede (opcional) |
+| `REMINDER_CLASS_HOURS`, `REMINDER_PLAN_DAYS` | Lembretes automáticos: horas antes da aula (padrão `24`) e dias antes do plano vencer (padrão `3`); `0` desliga o lembrete |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Chaves do aviso no aparelho (web push); gere com `docker compose exec web python manage.py generate_vapid_keys` |
 | `SITE_URL`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, `SECURE_HSTS_SECONDS` | Avançado: sobrescrevem os valores derivados de `DOMAIN` |
 
@@ -184,6 +186,7 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 - *Aluno recebe:* aula remarcada ou cancelada pela personal (inclui arrastar/Mover), remarcação **desfeita** e resposta ao pedido (aprovado ou recusado, com o motivo).
 - *Personal recebe:* pedido novo de remarcação/cancelamento de um aluno.
 - Os textos só dizem o quê e quando (nada de saúde, valores ou observações). O envio roda em segundo plano, com uma nova tentativa no e-mail, e cada tentativa fica registrada (tipo e resultado, nunca o texto); assinaturas expiradas são removidas sozinhas. Falta de configuração não quebra nada: o canal só aparece como "não configurado".
+- **Lembretes automáticos** (serviço `scheduler` do compose, que roda `python manage.py send_reminders` a cada 10 minutos, idempotente: cada aula e cada vencimento é lembrado **uma vez**): **lembrete de aula** (~24 h antes, "Sua aula é amanhã às 07:00"; aulas de horário fixo são geradas pelo próprio comando) e **plano vencendo** (3 dias antes, sem valores; uma renovação rearma o aviso). Chegam só a quem ligou um canal **e** deixou marcado o tipo ("Quero receber" na tela Notificações, marcados por padrão depois que o canal é ligado); aula remarcada ganha novo lembrete no novo horário.
 - Marcar **falta** não envia aviso (de propósito: é um clique de rotina e um engano seria constrangedor); dá para ligar depois se quiserem.
 
 **Como configurar (servidor)**
@@ -194,7 +197,7 @@ Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests
 
 **Falta**
 - **Telegram** (bot; o aluno vincula o chat por um código de uso único), adiado.
-- **Lembretes automáticos** (aula de amanhã, plano vencendo, reavaliação): precisam de uma tarefa agendada (cron/serviço no compose) e de escolher o tipo de aviso por pessoa; hoje só há liga/desliga por canal.
+- **Lembrete de reavaliação** (ainda não há prazo de reavaliação no cadastro), horário silencioso (hoje o lembrete sai na mesma hora do dia da aula) e um resumo diário da agenda para a personal.
 - Texto da política de privacidade citando os avisos e a versão do consentimento (não subi `CURRENT_VERSION` para não pedir de novo a todos os alunos: só se você pedir).
 - Lembrete na Agenda quando a personal ainda não ligou os avisos (hoje ela só descobre pelo menu).
 - Se o envio assíncrono (thread) ficar curto, trocar por uma fila (Celery/RQ).

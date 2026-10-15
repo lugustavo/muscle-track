@@ -23,6 +23,13 @@ from .models import NotificationLog, NotificationPreference
 logger = logging.getLogger(__name__)
 
 Message = namedtuple('Message', 'kind title body path')
+
+# Which per-type switch (NotificationPreference) a kind of message obeys; kinds not listed (the test) always go
+KIND_FLAG = {
+    'request_new': 'notify_changes', 'request_answered': 'notify_changes', 'class_moved': 'notify_changes',
+    'class_cancelled': 'notify_changes', 'move_undone': 'notify_changes',
+    'class_reminder': 'notify_class_reminder', 'plan_expiry': 'notify_plan_expiry',
+}
 Status = NotificationLog.Status
 
 
@@ -96,6 +103,29 @@ def move_undone(original):
                    reverse('core:my_agenda'))
 
 
+def day_word(moment, now=None):
+    """'hoje', 'amanhã' or 'qui 15/10', by the local calendar date (relative to `now`)."""
+    local = timezone.localtime(moment).date()
+    today = timezone.localdate(now)
+    if local == today:
+        return 'hoje'
+    if (local - today).days == 1:
+        return 'amanhã'
+    return formats.date_format(local, 'D d/m')
+
+
+def class_reminder(appointment, now=None):
+    clock = formats.date_format(timezone.localtime(appointment.starts_at), 'H:i')
+    return Message('class_reminder', 'Lembrete de aula', f'Sua aula é {day_word(appointment.starts_at, now)} às {clock}.',
+                   reverse('core:my_agenda'))
+
+
+def plan_expiring(days):
+    when_ = 'hoje' if days == 0 else ('amanhã' if days == 1 else f'em {days} dias')
+    return Message('plan_expiry', 'Seu plano está vencendo', f'Seu plano vence {when_}. Fale com a sua personal para renovar.',
+                   reverse('core:my_profile'))
+
+
 def test_message():
     return Message('test', 'Teste de notificação', 'Tudo certo: este aparelho recebe os avisos do Muscle Track.',
                    reverse('core:notification_settings'))
@@ -127,14 +157,18 @@ def _push_error(exc, endpoint):
 
 # --- delivery ------------------------------------------------------------------------------------------------
 
-def notify(users, message):
-    """Send `message` to each user on the channels they enabled. Returns without waiting when running async."""
-    ids = list(NotificationPreference.objects.filter(
+def notify(users, message, sync=False):
+    """Send `message` to each user on the channels they enabled (and for the kinds they want). Returns without
+    waiting when running async; `sync=True` (the reminders command) always sends inline."""
+    prefs = NotificationPreference.objects.filter(
         user__in=[u for u in users if u is not None], user__is_active=True).filter(
-        Q(email_enabled=True) | Q(push_enabled=True)).values_list('user_id', flat=True))
+        Q(email_enabled=True) | Q(push_enabled=True))
+    if message.kind in KIND_FLAG:
+        prefs = prefs.filter(**{KIND_FLAG[message.kind]: True})
+    ids = list(prefs.values_list('user_id', flat=True))
     if not ids:
         return
-    if settings.NOTIFICATIONS_ASYNC:
+    if settings.NOTIFICATIONS_ASYNC and not sync:
         threading.Thread(target=_run, args=(ids, message, True), daemon=True).start()
     else:
         _run(ids, message, False)
