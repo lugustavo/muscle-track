@@ -164,8 +164,9 @@ class StudentProfileForm(ContactValidationMixin, forms.ModelForm):
     class Meta:
         model = Person
         fields = ['person_name', 'avatar', 'address', 'city', 'state', 'zip_code',
-                  'phone', 'birth_date']
+                  'phone', 'birth_date', 'motivation_enabled', 'weekly_goal']
         widgets = {
+            'weekly_goal': forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': '7', 'inputmode': 'numeric'}),
             'birth_date': forms.DateInput(
                 attrs={'type': 'date', 'class': 'form-control'},
                 format='%Y-%m-%d'

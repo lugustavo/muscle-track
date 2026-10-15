@@ -36,6 +36,7 @@ from .billing import (
     charge_message, delete_payment, month_bounds, month_summary, overdue_rows, parse_month,
     register_payment, suggest_amount, suggest_period,
 )
+from .consistency import celebrations
 from .consent import (
     ALL_KINDS, CURRENT_VERSION as CONSENT_VERSION, DESCRIPTIONS as CONSENT_DESCRIPTIONS, REQUIRED_KINDS,
     current_consents, has_current_consent, is_granted, record_consent,
@@ -1337,7 +1338,8 @@ def workout_summary(request, pk, person):
         WorkoutSession.objects.select_related('person_routine'),
         pk=pk, person_routine__person=person, is_completed=True)
     return render(request, 'core/workout_summary.html', {
-        'session': session, 'routine': session.person_routine, 'summary': session_summary(session)})
+        'session': session, 'routine': session.person_routine, 'summary': session_summary(session),
+        'celebrations': celebrations(person, session)})
 
 
 @student_required(consent_gate=False)
