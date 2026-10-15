@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.utils import timezone
+from .recurrence import MAX_INTERVAL, MAX_OCCURRENCES, MAX_SPAN_DAYS, end_date
 from .validators import normalize_phone, normalize_state, normalize_zip_code, validate_birth_date, digits_only
 from .models import (
     Appointment, Payment, Plan, ScheduleSlot,
@@ -377,15 +379,91 @@ class PaymentForm(forms.ModelForm):
         return cleaned
 
 
-class ScheduleSlotForm(forms.ModelForm):
-    class Meta:
-        model = ScheduleSlot
-        fields = ['weekday', 'start_time', 'duration_minutes']
-        widgets = {
-            'weekday': forms.Select(attrs={'class': 'form-select'}),
-            'start_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}, format='%H:%M'),
-            'duration_minutes': forms.NumberInput(attrs={'class': 'form-control', 'min': '10', 'max': '480', 'step': '5'}),
-        }
+class RecurrenceMixin(forms.Form):
+    """Repeat every N weeks, from a start date, ending never / on a date / after N classes."""
+    ENDS = (('never', 'Nunca'), ('on', 'Em uma data'), ('after', 'Após um número de aulas'))
+
+    interval_weeks = forms.IntegerField(
+        label='Repete a cada (semanas)', min_value=1, max_value=MAX_INTERVAL, initial=1, required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': str(MAX_INTERVAL), 'inputmode': 'numeric'}))
+    starts_on = forms.DateField(
+        label='Começa em', required=False,
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
+    ends = forms.ChoiceField(label='Termina', choices=ENDS, initial='never', required=False, widget=forms.RadioSelect)
+    ends_on = forms.DateField(
+        label='Termina em', required=False,
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
+    ends_after = forms.IntegerField(
+        label='Número de aulas', min_value=1, max_value=MAX_OCCURRENCES, required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': str(MAX_OCCURRENCES), 'inputmode': 'numeric'}))
+
+    def __init__(self, *args, start_hint=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.start_hint = start_hint   # the day the series starts when the form has no "starts on" of its own
+
+    def clean_interval_weeks(self):
+        return self.cleaned_data.get('interval_weeks') or 1
+
+    def clean(self):
+        cleaned = super().clean()
+        ends = cleaned.get('ends') or 'never'
+        cleaned['ends'] = ends
+        start = cleaned.get('starts_on') or self.start_hint or timezone.localdate()
+        if ends == 'on':
+            if not cleaned.get('ends_on'):
+                self.add_error('ends_on', 'Informe a data final.')
+            elif cleaned['ends_on'] < start:
+                self.add_error('ends_on', 'A data final não pode ser antes do início.')
+            elif (cleaned['ends_on'] - start).days > MAX_SPAN_DAYS:
+                self.add_error('ends_on', 'A série pode durar no máximo 3 anos. Use "Nunca" para uma série sem fim.')
+        elif ends == 'after' and not cleaned.get('ends_after'):
+            self.add_error('ends_after', 'Informe quantas aulas.')
+        return cleaned
+
+    def series_end(self, weekdays, start):
+        """Last day of the series for the chosen ending (None = never)."""
+        cleaned = self.cleaned_data
+        return end_date(start, weekdays, cleaned['interval_weeks'], cleaned['ends'], cleaned.get('ends_on'),
+                        cleaned.get('ends_after'))
+
+
+class ScheduleSlotForm(RecurrenceMixin):
+    """New fixed time(s) for a student: one or more weekdays, repeating every N weeks."""
+    weekday = forms.TypedChoiceField(choices=ScheduleSlot.WEEKDAYS, coerce=int, required=False, label='Dia',
+                                     widget=forms.Select(attrs={'class': 'form-select'}))
+    weekdays = forms.TypedMultipleChoiceField(choices=ScheduleSlot.WEEKDAYS, coerce=int, required=False, label='Dias',
+                                              widget=forms.CheckboxSelectMultiple)
+    start_time = forms.TimeField(label='Horário',
+                                 widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}, format='%H:%M'))
+    duration_minutes = forms.IntegerField(
+        label='Duração (min)', min_value=10, max_value=480, initial=60,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '10', 'max': '480', 'step': '5'}))
+
+    def clean(self):
+        cleaned = super().clean()
+        days = set(cleaned.get('weekdays') or [])
+        if cleaned.get('weekday') not in (None, ''):
+            days.add(cleaned['weekday'])
+        if not days:
+            self.add_error('weekdays', 'Escolha pelo menos um dia da semana.')
+        cleaned['all_weekdays'] = sorted(days)
+        return cleaned
+
+
+class RepeatForm(RecurrenceMixin):
+    """The "Repeat" part of a new class: only used when `enabled` is ticked."""
+    enabled = forms.BooleanField(required=False, label='Repetir esta aula',
+                                 widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+    weekdays = forms.TypedMultipleChoiceField(choices=ScheduleSlot.WEEKDAYS, coerce=int, required=False, label='Nos dias',
+                                              widget=forms.CheckboxSelectMultiple)
+
+    def clean(self):
+        if not self.cleaned_data.get('enabled'):
+            return self.cleaned_data   # nothing to validate: it is a single class
+        cleaned = super().clean()
+        if not cleaned.get('weekdays'):
+            self.add_error('weekdays', 'Escolha pelo menos um dia da semana.')
+        return cleaned
 
 
 class AppointmentForm(forms.Form):

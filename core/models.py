@@ -753,6 +753,9 @@ class ScheduleSlot(models.Model):
     is_active = models.BooleanField(default=True, verbose_name='Ativo')
     valid_from = models.DateField(default=timezone.localdate, verbose_name='Vale a partir de')
     valid_until = models.DateField(null=True, blank=True, verbose_name='Vale até')
+    # Repeats every N weeks, counted from the week of `valid_from` (1 = every week)
+    interval_weeks = models.PositiveSmallIntegerField(
+        default=1, validators=[MinValueValidator(1), MaxValueValidator(8)], verbose_name='Repete a cada (semanas)')
 
     class Meta:
         verbose_name = 'Horário fixo'

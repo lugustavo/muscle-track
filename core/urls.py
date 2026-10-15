@@ -47,6 +47,7 @@ urlpatterns = [
     path('appointments/<int:pk>/delete/', views.appointment_delete, name='appointment_delete'),
     path('students/<int:pk>/slots/add/', views.slot_add, name='slot_add'),
     path('slots/<int:pk>/delete/', views.slot_delete, name='slot_delete'),
+    path('appointments/<int:pk>/end-series/', views.appointment_series_end, name='appointment_series_end'),
 
     # Exercises
     path('exercises/', views.exercise_list, name='exercise_list'),

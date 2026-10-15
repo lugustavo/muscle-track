@@ -18,6 +18,26 @@
             {% if a.status != 'scheduled' %}<button name="status" value="scheduled" class="btn btn-sm btn-outline-secondary" title="Desfazer (voltar para marcada)"><i class="bi bi-arrow-counterclockwise"></i></button>{% endif %}
             <a href="{% nav_url 'core:appointment_reschedule' a.pk %}" class="btn btn-sm btn-outline-primary" title="Remarcar"><i class="bi bi-arrow-repeat"></i></a>
         </form>
+        {% if a.slot_id %}
+        <div class="dropdown mt-1">
+            <button type="button" class="btn btn-sm btn-link p-0 small" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-arrow-repeat"></i> Horário fixo</button>
+            <ul class="dropdown-menu">
+                <li><span class="dropdown-item-text small text-muted">Só esta aula: use Cancelar ou Remarcar.</span></li>
+                <li>
+                    <form method="post" action="{% nav_url 'core:appointment_series_end' a.pk %}" onsubmit="return confirm('Esta e as próximas aulas deste horário saem da agenda. As já marcadas (compareceu, faltou...) ficam. Continuar?');">
+                        {% csrf_token %}
+                        <button class="dropdown-item">Esta e as próximas deixam de repetir</button>
+                    </form>
+                </li>
+                <li>
+                    <form method="post" action="{% nav_url 'core:slot_delete' a.slot_id %}" onsubmit="return confirm('Remover o horário fixo inteiro? Todas as aulas futuras dele saem da agenda.');">
+                        {% csrf_token %}
+                        <button class="dropdown-item text-danger">Todas: remover o horário fixo</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+        {% endif %}
         {% if not a.slot_id %}
         <form method="post" action="{% nav_url 'core:appointment_delete' a.pk %}" onsubmit="return confirm('Remover esta aula avulsa?');" class="mt-1">
             {% csrf_token %}
