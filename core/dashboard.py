@@ -10,6 +10,7 @@ from .agenda import ensure_appointments
 from .billing import charge_message, overdue_rows
 from .models import Appointment, Person, PersonRoutine, SessionExercise, StudentEvent, WorkoutSession
 from .whatsapp import whatsapp_url
+from .whatsapp_messages import Kind, current_text, render
 
 INACTIVE_DAYS = 7
 EXPIRING_DAYS = 14
@@ -67,8 +68,10 @@ def pending_invites(now=None):
 def overdue_payments():
     """Overdue students with the ready-to-send WhatsApp charge message."""
     rows = overdue_rows()
+    text = current_text(Kind.CHARGE)
     for row in rows:
-        row['whatsapp'] = whatsapp_url(row['student'].phone, charge_message(row['student'], row['package'], row['amount']))
+        row['whatsapp'] = whatsapp_url(row['student'].phone,
+                                       charge_message(row['student'], row['package'], row['amount'], text))
     return rows
 
 
@@ -86,10 +89,11 @@ def recent_misses(days=7, now=None):
     """Missed classes of the last `days` days, with a ready WhatsApp message."""
     now = now or timezone.now()
     rows = []
+    template = current_text(Kind.MISSED)
     for a in Appointment.objects.filter(status=Appointment.Status.MISSED, starts_at__gte=now - timedelta(days=days),
                                         person__is_active=True).select_related('person').order_by('-starts_at'):
-        first = a.person.person_name.split()[0]
-        text = f'Oi, {first}! Sentimos sua falta na aula de {timezone.localtime(a.starts_at):%d/%m}. Vamos remarcar? 💪'
+        text = render(Kind.MISSED, {'nome': a.person.person_name.split()[0],
+                                    'data': f'{timezone.localtime(a.starts_at):%d/%m}'}, template)
         rows.append({'appointment': a, 'student': a.person, 'whatsapp': whatsapp_url(a.person.phone, text)})
     return rows
 

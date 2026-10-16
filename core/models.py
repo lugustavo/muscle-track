@@ -997,6 +997,23 @@ class NotificationPreference(models.Model):
     notify_renewals = models.BooleanField(default=True)         # trainer: packages running out or expiring
 
 
+class WhatsAppTemplate(models.Model):
+    """The trainer's own text for one of the WhatsApp messages (core/whatsapp_messages.py); no row = the default text."""
+
+    class Kind(models.TextChoices):
+        CHARGE = 'charge', 'Cobrança de pacote'
+        MISSED = 'missed', 'Aula que o aluno faltou'
+        INVITE = 'invite', 'Convite de acesso'
+
+    kind = models.CharField(max_length=10, choices=Kind.choices, unique=True)
+    text = models.TextField(max_length=1000)
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
+
+    def __str__(self):
+        return self.get_kind_display()
+
+
 class PushSubscription(models.Model):
     """One browser/phone that agreed to receive web push (the subscription the browser handed to the page)."""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='push_subscriptions')
