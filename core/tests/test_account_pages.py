@@ -80,6 +80,6 @@ class AccountPagesLookLikeTheApp(BaseTestCase):
         self.assertAppLayout(self.client.get(reverse('account_inactive')))
 
     def test_login_and_logout_keep_their_own_templates(self):
-        self.assertContains(self.client.get(reverse('account_login')), 'Bem-vindo de volta')
+        self.assertContains(self.client.get(reverse('account_login')), 'A mesma entrada serve')
         self.login(self.alice)
         self.assertEqual(self.client.get(reverse('account_logout')).status_code, 200)

@@ -1,0 +1,35 @@
+/* Visitor landing page and login screen. Colors: Bootstrap theme variables + the brand tokens of theme.css. */
+:root { --lp-violet: #764ba2; --lp-indigo: #667eea; }
+.lp-hero {
+    border-radius: 1.75rem; padding: clamp(1.25rem, 4vw, 3rem); margin-top: .5rem;
+    background:
+        radial-gradient(900px 380px at 85% -10%, rgba(118, 75, 162, .26), transparent 60%),
+        radial-gradient(700px 320px at 0% 0%, rgba(255, 107, 107, .22), transparent 55%),
+        var(--bs-tertiary-bg);
+    border: 1px solid var(--bs-border-color);
+}
+.lp-hero h1 { font-weight: 800; letter-spacing: -.02em; line-height: 1.08; font-size: clamp(2rem, 5.2vw, 3.25rem); }
+.lp-hero h1 .lp-accent { background: linear-gradient(90deg, var(--primary-color), var(--lp-violet)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lp-pill { display: inline-flex; align-items: center; gap: .4rem; padding: .25rem .75rem; border-radius: 999px; font-size: .82rem; background: var(--bs-body-bg); border: 1px solid var(--bs-border-color); }
+.lp-brand { font-weight: 700; letter-spacing: .02em; color: var(--primary-color); }
+.lp-card { border: 1px solid var(--bs-border-color); border-radius: 1.4rem; background: var(--bs-body-bg); box-shadow: 0 18px 40px var(--mt-shadow); }
+.lp-sso { display: flex; align-items: center; justify-content: center; gap: .6rem; width: 100%; padding: .65rem 1rem; border: 1px solid var(--bs-border-color); border-radius: .8rem; background: var(--bs-body-bg); color: var(--bs-body-color); font-weight: 600; }
+.lp-sso:hover, .lp-sso:focus-visible { background: var(--bs-tertiary-bg); color: var(--bs-body-color); }
+.lp-divider { display: flex; align-items: center; gap: .8rem; color: var(--bs-secondary-color); font-size: .8rem; margin: 1rem 0; }
+.lp-divider::before, .lp-divider::after { content: ""; flex: 1; border-top: 1px solid var(--bs-border-color); }
+.lp-feature { border: 1px solid var(--bs-border-color); border-radius: 1.2rem; padding: 1.4rem; height: 100%; background: var(--bs-body-bg); }
+.lp-feature h3 { font-size: 1.15rem; }
+.lp-feature li { display: flex; gap: .6rem; align-items: flex-start; margin-bottom: .55rem; }
+.lp-feature li .bi { color: var(--primary-color); margin-top: .15rem; }
+.lp-ico { width: 46px; height: 46px; border-radius: .9rem; display: grid; place-items: center; font-size: 1.3rem; color: var(--bs-white); margin-bottom: .8rem; background: linear-gradient(135deg, var(--primary-color), var(--lp-violet)); }
+.lp-ico.alt { background: linear-gradient(135deg, var(--lp-indigo), var(--lp-violet)); }
+.lp-step { display: flex; gap: .9rem; align-items: flex-start; }
+.lp-step .lp-n { flex: 0 0 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center; background: var(--primary-color); color: var(--bs-white); font-weight: 700; }
+/* the little phone in the student block */
+.lp-phone { width: 250px; border-radius: 2.2rem; padding: 10px; margin-inline: auto; background: linear-gradient(160deg, var(--lp-indigo), var(--lp-violet)); box-shadow: 0 26px 50px var(--mt-shadow-strong); }
+.lp-phone .lp-screen { background: var(--bs-body-bg); border-radius: 1.7rem; padding: 1rem .85rem; }
+.lp-mini { border: 1px solid var(--bs-border-color); border-radius: .9rem; padding: .6rem .75rem; background: var(--bs-body-bg); margin-bottom: .5rem; }
+.lp-timer { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1.5rem; }
+/* login screen */
+.lp-login-wrap { max-width: 440px; margin-inline: auto; }
+@media (max-width: 575.98px) { .lp-hero { border-radius: 1.25rem; } }

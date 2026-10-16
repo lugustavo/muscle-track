@@ -1,5 +1,7 @@
-"""The bottom navigation bar: items per role, the active one, badges and the central workout button."""
-from django.urls import reverse
+"""Template context: the bottom navigation bar (items per role, the active one, badges, the central workout button)
+and the branding / single sign-on options every page shares."""
+from django.conf import settings
+from django.urls import NoReverseMatch, reverse
 from django.utils import timezone
 
 from . import packages
@@ -22,7 +24,7 @@ STUDENT_SECTIONS = (
     ('hoje', ('my_agenda',)),   # reached from "Hoje"; the bar has no slot of its own for it
     ('treinos', ('my_workouts', 'workout_')),
     ('historico', ('my_history', 'my_exercise_progress')),
-    ('perfil', ('my_profile', 'my_privacy', 'notification_', 'account_')),   # account_* = password, e-mail (allauth)
+    ('perfil', ('my_profile', 'my_privacy', 'notification_', 'account_', 'socialaccount_')),   # account_* = password, e-mail (allauth)
 )
 
 
@@ -70,6 +72,10 @@ def _staff_bar(active):
         {'label': 'Admin', 'icon': 'bi-gear', 'url': '/admin/'},
         {'label': 'Notificações', 'icon': 'bi-bell', 'url': reverse('core:notification_settings')},
         {'label': 'Alterar senha', 'icon': 'bi-key', 'url': reverse('account_change_password')},
+    ]
+    if settings.SSO_PROVIDERS:
+        more.append({'label': 'Contas conectadas', 'icon': 'bi-link-45deg', 'url': reverse('socialaccount_connections')})
+    more += [
         {'label': 'Sair', 'icon': 'bi-box-arrow-right', 'url': reverse('account_logout')},
     ]
     return {'role': 'staff', 'items': items, 'more': more, 'more_active': active == 'mais'}
@@ -147,3 +153,19 @@ def app_nav(request):
     except Person.DoesNotExist:
         return {'tabbar': None}
     return {'tabbar': _student_bar(request, person, _section(name, STUDENT_SECTIONS))}
+
+
+APP_NAME = 'Muscle Track'
+
+
+def branding(request):
+    """The name shown in the header, footer and landing page (STUDIO_NAME or "Muscle Track"), and the single sign-on
+    providers that are configured (none: no button, no divider)."""
+    providers = []
+    for provider in settings.SSO_PROVIDERS:
+        try:
+            providers.append({**provider, 'url': reverse(provider['login_url_name'])})
+        except NoReverseMatch:
+            continue
+    return {'brand_name': settings.STUDIO_NAME or APP_NAME, 'studio_name': settings.STUDIO_NAME,
+            'app_name': APP_NAME, 'sso_providers': providers}

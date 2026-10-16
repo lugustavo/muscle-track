@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>{% block title %}Muscle Track{% endblock %}</title>
+    <title>{% block title %}{{ brand_name }}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Gestão para personal trainers: alunos, treinos, agenda, pacotes e pagamentos, com o aluno por dentro de tudo.{% endblock %}">
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
@@ -20,7 +21,7 @@
     <meta name="theme-color" content="#1d2733" media="(prefers-color-scheme: dark)">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Muscle Track">
+    <meta name="apple-mobile-web-app-title" content="{{ brand_name }}">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
     <!-- Bootstrap 5 CSS -->
@@ -37,8 +38,8 @@
     <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--mt-nav-bg);">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{% url 'core:home' %}">
-                <img src="{% static 'images/favicon.svg' %}" alt="Muscle Track" width="32" height="32" class="me-2">
-                Muscle Track
+                <img src="{% static 'images/favicon.svg' %}" alt="" width="32" height="32" class="me-2">
+                {{ brand_name }}
             </a>
             <div class="d-flex align-items-center ms-auto ms-lg-2 order-lg-last me-2 me-lg-0">
                 {% if user.is_staff or user.is_superuser %}{% include 'includes/_search_box.html' %}{% endif %}
@@ -136,6 +137,9 @@
                                 <li><a class="dropdown-item" href="{% url 'account_change_password' %}">
                                     <i class="bi bi-key"></i> Alterar senha
                                 </a></li>
+                                {% if sso_providers %}<li><a class="dropdown-item" href="{% url 'socialaccount_connections' %}" data-connections-link>
+                                    <i class="bi bi-link-45deg"></i> Contas conectadas
+                                </a></li>{% endif %}
                                 <li><a class="dropdown-item" href="{% url 'account_logout' %}">
                                     <i class="bi bi-box-arrow-right"></i> Sair
                                 </a></li>
@@ -181,7 +185,7 @@
     <!-- Footer -->
     <footer{% if tabbar %} class="d-none d-lg-block"{% endif %}>
         <div class="container text-center">
-            <p class="mb-0">&copy; 2025 Muscle Track - Sistema de Gerenciamento de Treinos
+            <p class="mb-0">&copy; {% now "Y" %} {{ brand_name }}{% if studio_name %} · feito com {{ app_name }}{% else %} - Gestão para personal trainers{% endif %}
                 · <a href="{% url 'core:privacy_policy' %}" class="text-white-50">Privacidade</a></p>
         </div>
     </footer>

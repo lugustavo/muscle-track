@@ -84,6 +84,8 @@ def home(request):
             context['show_intro'] = person.intro_seen_at is None
             context['intro_steps'] = intro.STEPS
 
+    if not user.is_authenticated:
+        return render(request, 'core/landing.html', context)
     return render(request, 'core/home.html', context)
 
 
@@ -2332,12 +2334,25 @@ def _manifest_shortcuts(user):
     return [{'name': name, 'short_name': name, 'url': url, 'icons': icon} for name, url in items]
 
 
+def _short_name(name, limit=14):
+    """The label under the home screen icon: the whole name when it fits, else as many whole words as fit."""
+    if len(name) <= limit:
+        return name
+    short = ''
+    for word in name.split():
+        candidate = f'{short} {word}'.strip()
+        if len(candidate) > limit:
+            break
+        short = candidate
+    return short or name[:limit]
+
+
 def pwa_manifest(request):
     manifest = {
         'id': '/',
-        'name': 'Muscle Track',
-        'short_name': 'Muscle Track',
-        'description': 'Seus treinos, séries e cargas na palma da mão',
+        'name': settings.STUDIO_NAME or 'Muscle Track',
+        'short_name': _short_name(settings.STUDIO_NAME or 'Muscle Track'),
+        'description': 'Gestão para personal trainers, com o aluno por dentro de treinos, evolução e aulas',
         'start_url': '/',
         'scope': '/',
         'display': 'standalone',
