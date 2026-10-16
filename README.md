@@ -151,6 +151,8 @@ Bootstrap, ícones, Chart.js e SortableJS são servidos localmente de `static/ve
 
 **Breadcrumbs** (hierarquia; o Voltar é o histórico): ficam num registro único, `core/breadcrumbs.py` (`TRAILS`), montado a partir do nome da URL e dos objetos que a view já colocou no contexto — sem consultas extras e sem mudar as views. Tela nova = uma função no registro (ou entrada em `NO_BREADCRUMB`); um teste falha se uma rota nova não estiver em nenhum dos dois. Rótulos iguais aos do menu (Alunos, Exercícios, Treinos).
 
+**Botões de ação em listas** (editar, remover, progresso) são **só ícones**, no computador e no celular: o nome fica em um `<span class="visually-hidden">` (leitores de tela) e no `title` (dica); use a classe `btn-icon` (alvo de toque maior no celular). Botões de criar ("Adicionar", "Aula avulsa") mantêm o texto. Linhas com ações que aparecem ao deslizar: `swipe-rows` (ver Agenda).
+
 Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests/test_navigation_global.py` percorre todos os links com `next=` e confere o botão de voltar de cada página.
 
 ## Segurança — o que já está coberto
