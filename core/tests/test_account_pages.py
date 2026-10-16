@@ -22,7 +22,7 @@ class AccountPagesLookLikeTheApp(BaseTestCase):
         text = self.assertAppLayout(self.client.get(reverse('account_change_password')))
         self.assertIn('form-control', text)
         self.assertIn('btn btn-primary', text)
-        self.assertIn(f'href="{reverse("core:my_profile")}" class="btn btn-sm btn-outline-secondary"', text)
+        self.assertIn(f'href="{reverse("core:my_profile")}" class="btn btn-sm btn-outline-secondary btn-back-compact"', text)
         self.assertIn('Voltar ao perfil', text)
 
     def test_trainer_back_link_goes_to_the_dashboard(self):
