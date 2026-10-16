@@ -69,13 +69,14 @@
         <div class="contract-more">
             <hr>
             <div class="d-flex flex-wrap gap-2">
+                <a href="{% nav_url 'core:student_package_edit' student.pk cur.package.pk %}" class="btn btn-sm btn-outline-secondary" data-package-edit><i class="bi bi-pencil-square"></i> Editar</a>
                 {% if cur.package.valid_days %}<button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#extend-{{ cur.package.pk }}"><i class="bi bi-calendar-plus"></i> Prorrogar</button>{% endif %}
                 {% if cur.state == 'frozen' %}
                 <form method="post" action="{% nav_url 'core:student_package_action' student.pk cur.package.pk %}">{% csrf_token %}<input type="hidden" name="action" value="unfreeze"><button class="btn btn-sm btn-outline-primary"><i class="bi bi-play-circle"></i> Descongelar</button></form>
                 {% elif cur.package.valid_days and cur.state == 'active' or cur.package.valid_days and cur.state == 'expired' %}
                 <form method="post" action="{% nav_url 'core:student_package_action' student.pk cur.package.pk %}">{% csrf_token %}<input type="hidden" name="action" value="freeze"><button class="btn btn-sm btn-outline-secondary" title="O prazo para de contar até o aluno voltar"><i class="bi bi-snow"></i> Congelar</button></form>
                 {% endif %}
-                <form method="post" action="{% nav_url 'core:student_package_action' student.pk cur.package.pk %}" onsubmit="return confirm('Cancelar este pacote? As aulas já dadas ficam sem pacote.');">{% csrf_token %}<input type="hidden" name="action" value="cancel"><button class="btn btn-sm btn-link text-danger">Cancelar pacote</button></form>
+                <a href="{% nav_url 'core:student_package_cancel' student.pk cur.package.pk %}" class="btn btn-sm btn-link text-danger" data-package-cancel>Cancelar com devolução</a>
             </div>
             {% if cur.package.valid_days %}<div class="collapse mt-2" id="extend-{{ cur.package.pk }}">
                 <form method="post" action="{% nav_url 'core:student_package_action' student.pk cur.package.pk %}" class="row g-2 align-items-end">
@@ -107,7 +108,10 @@
             {% for row in pkg.rows %}{% if row != cur %}
             <li class="d-flex justify-content-between gap-2 py-1 border-top">
                 <span>{{ row.package.name }} <span class="text-muted">· {{ row.used }}/{{ row.sessions }} aulas{% if row.starts_on %} · {{ row.starts_on|date:"d/m/y" }}{% endif %}</span></span>
-                <span class="badge bg-secondary">{{ row.label }}</span>
+                <span class="d-flex align-items-center gap-2">
+                    {% if row.state != 'cancelled' %}<a href="{% nav_url 'core:student_package_edit' student.pk row.package.pk %}" class="small" title="Editar este pacote"><i class="bi bi-pencil-square"></i><span class="visually-hidden">Editar {{ row.package.name }}</span></a>{% endif %}
+                    <span class="badge bg-secondary">{{ row.label }}</span>
+                </span>
             </li>
             {% endif %}{% endfor %}
         </ul>

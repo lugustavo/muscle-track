@@ -15,7 +15,7 @@ STAFF_SECTIONS = (
     ('busca', ('search',)),   # no bottom-bar item: none is shown as active
     ('alunos', ('student_', 'assessment_', 'photo_', 'note_', 'person_routine_', 'session_detail', 'invite')),
     ('agenda', ('agenda', 'appointment_', 'slot_')),
-    ('financeiro', ('finance', 'payment_', 'plan_')),
+    ('financeiro', ('finance', 'payment_', 'plan_', 'refund')),
 )
 STUDENT_SECTIONS = (
     ('center', ('workout_execute',)),   # the running workout: the central button is the active one

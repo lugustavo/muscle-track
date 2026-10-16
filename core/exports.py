@@ -79,6 +79,9 @@ def build_data(person, include_internal_notes):
         'payments': [
             {**_fields(p, ['paid_on', 'plan_name', 'amount', 'method', 'notes'])}
             for p in person.payments.all()],
+        'refunds': [
+            {**_fields(r, ['refunded_on', 'kind', 'amount', 'method', 'reason', 'voided_at'])}
+            for r in person.refunds.all()],
         'packages': [
             {**_fields(pk, ['name', 'sessions', 'valid_days', 'sold_on', 'starts_on', 'extension_days', 'frozen_days',
                             'cancelled_at', 'notes']),

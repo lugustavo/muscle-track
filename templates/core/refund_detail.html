@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load navigation money_tags %}
+
+{% block title %}Devolução - {{ student.person_name }} - Muscle Track{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 gap-2">
+    <div class="min-w-0">
+        <h1 class="h3 mb-0"><i class="bi bi-arrow-counterclockwise"></i> {{ refund.get_kind_display }}</h1>
+        <div class="text-muted">{{ student.person_name }}</div>
+    </div>
+    {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default fragment='#tab-pagamentos' %}
+</div>
+
+<div class="mx-auto" style="max-width: 640px;">
+    <div class="card mb-3" data-refund-summary>
+        <div class="card-body">
+            {% if refund.is_voided %}<div class="alert alert-secondary py-2 small" data-voided><i class="bi bi-slash-circle"></i> Anulada em {{ refund.voided_at|date:"d/m/Y" }}: {{ refund.voided_reason }}. Continua registrada, mas não conta.</div>{% endif %}
+            <div class="d-flex justify-content-between align-items-baseline">
+                <span class="text-muted">{{ refund.refunded_on|date:"d/m/Y" }} · {{ refund.get_method_display }}</span>
+                <strong class="fs-4 {% if refund.is_voided %}text-decoration-line-through text-muted{% endif %}">{{ refund.amount|money }}</strong>
+            </div>
+            {% if refund.student_package %}<div class="small text-muted">{{ refund.student_package.name }}</div>{% endif %}
+            {% if refund.reason %}<div class="small mt-1">Motivo: {{ refund.reason }}</div>{% endif %}
+            <hr>
+            <div class="small text-uppercase text-muted mb-1">Resumo para o aluno</div>
+            <pre class="mb-0 small" style="white-space: pre-wrap; font-family: inherit;" data-summary-text>{{ summary_text }}</pre>
+        </div>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        {% if whatsapp %}<a href="{{ whatsapp }}" target="_blank" rel="noopener" class="btn btn-success"><i class="bi bi-whatsapp"></i> Enviar o resumo</a>{% else %}<span class="small text-muted">Sem telefone cadastrado para enviar pelo WhatsApp: copie o texto acima.</span>{% endif %}
+        <a href="{% url 'core:finance_refunds' %}" class="btn btn-outline-secondary">Devoluções e ajustes</a>
+    </div>
+</div>
+{% endblock %}
