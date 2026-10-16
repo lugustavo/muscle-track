@@ -41,8 +41,8 @@ def _section(name, sections, home='hoje', fallback=''):
 
 def _staff_badges():
     now = timezone.now()
-    # a package that expired with classes left (to extend) + packages waiting for a payment
-    overdue = Person.objects.filter(is_active=True, plan_expires_on__lt=timezone.localdate()).count() + packages.pending_count()
+    # a package that expired with classes left (to extend) + packages waiting for a payment + money to give back
+    overdue = Person.objects.filter(is_active=True, plan_expires_on__lt=timezone.localdate()).count() + packages.pending_count() + packages.refund_due_count()
     erasures = StudentEvent.objects.filter(kind=StudentEvent.Kind.ERASURE_REQUEST).values('person').distinct().count()
     unmarked = Appointment.objects.filter(
         status=Appointment.Status.SCHEDULED, starts_at__gte=start_of_day(timezone.localdate()), starts_at__lt=now

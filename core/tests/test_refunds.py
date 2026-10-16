@@ -520,3 +520,86 @@ class OverpaidTests(RefundBase):
         html = self.client.get(reverse('core:my_package')).content.decode()
         self.assertNotIn('pago a mais', html.lower())
         self.assertNotIn('50,00', html)
+
+
+class ShownWithThePendingPaymentsTests(BaseTestCase):
+    """Differences created by editing a package show up in the dashboard and the finance page, not only in the file."""
+
+    def setUp(self):
+        self.person = self.alice.person
+        self.sold = packages.sell(self.person, make_package('Pacote 12', 12))           # 12 x 50 = 600, no class yet
+        billing.register_payment(self.person, package=self.sold, amount=D('600'), paid_on=timezone.localdate(), method='pix')
+        self.login(self.trainer)
+
+    def edit(self, per):
+        refunds.edit_package(self.sold, self.trainer, name='Pacote 12', sessions=12, valid_days=60,
+                             pricing_mode='per_session', price_per_session=D(per), price_total=None)
+
+    def test_raising_the_price_after_paying_makes_the_difference_pending_before_any_class(self):
+        self.assertEqual(billing.overdue_rows(), [])
+        self.edit('55')                                                                   # 660, paid 600
+        rows = billing.overdue_rows()
+        self.assertEqual([(r['student'], r['amount'], r['paid'], r['partial']) for r in rows],
+                         [(self.person, D('60.00'), D('600'), True)])
+        self.assertEqual(packages.pending_count(), 1)
+
+    def test_a_package_never_paid_and_not_started_is_still_not_pending(self):
+        packages.sell(self.bob.person, make_package('Outro', 4))
+        self.assertEqual([r['student'] for r in billing.overdue_rows()], [])
+
+    def test_dashboard_lists_the_partial_payment_with_what_was_paid(self):
+        self.edit('55')
+        html = self.client.get(reverse('core:home')).content.decode()
+        self.assertIn('Pagamentos pendentes', html)
+        self.assertIn('pago 600,00', html)
+
+    def test_finance_lists_it_as_a_pending_payment(self):
+        self.edit('55')
+        response = self.client.get(reverse('core:finance'))
+        self.assertEqual(response.context['pending_total'], D('60.00'))
+        self.assertContains(response, 'valor do pacote alterado')
+
+    def test_lowering_the_price_shows_the_refund_with_a_minus_sign_in_the_dashboard(self):
+        self.edit('45')                                                                   # 540, paid 600: 60 to give back
+        html = self.client.get(reverse('core:home')).content.decode()
+        self.assertIn('data-refund-due', html)
+        self.assertIn('data-refunds-due-badge', html)
+        self.assertIn('− 60,00', html)
+
+    def test_and_in_the_finance_summary_with_the_balance(self):
+        self.edit('45')
+        response = self.client.get(reverse('core:finance'))
+        self.assertEqual((response.context['refunds_due_total'], response.context['balance_total']), (D('60.00'), D('-60.00')))
+        html = response.content.decode()
+        self.assertIn('data-refund-due', html)
+        self.assertIn('data-balance-line', html)
+        self.assertNotIn('Nenhum pagamento pendente', html)
+
+    def test_pending_and_refund_are_netted_in_the_balance(self):
+        other = packages.sell(self.bob.person, make_package('Pacote 4', 4))
+        billing.register_payment(self.bob.person, package=other, amount=D('100'), paid_on=timezone.localdate(), method='pix')
+        refunds.edit_package(other, self.trainer, name='Pacote 4', sessions=4, valid_days=60, pricing_mode='per_session',
+                             price_per_session=D('50'), price_total=None)               # 200, paid 100: 100 missing
+        self.edit('45')                                                                   # 60 to give back
+        response = self.client.get(reverse('core:finance'))
+        self.assertEqual(response.context['balance_total'], D('40.00'))
+
+    def test_refund_due_count_matches_the_list(self):
+        self.assertEqual(packages.refund_due_count(), 0)
+        self.edit('45')
+        self.assertEqual((packages.refund_due_count(), len(refunds.awaiting_refund())), (1, 1))
+        packages.cancel_package(self.sold)
+        self.sold.refresh_from_db()
+        self.assertEqual(packages.refund_due_count(), len(refunds.awaiting_refund()))
+
+    def test_bottom_bar_badge_counts_money_to_give_back(self):
+        from core.context_processors import _staff_badges
+        before = _staff_badges()['hoje']
+        self.edit('45')
+        self.assertEqual(_staff_badges()['hoje'], before + 1)
+
+    def test_giving_it_back_clears_the_dashboard_and_finance(self):
+        self.edit('45')
+        refunds.register_refund(self.person, amount=D('60'), method='cash', package=self.sold)
+        self.assertNotIn('data-refund-due', self.client.get(reverse('core:home')).content.decode())
+        self.assertNotIn('data-refund-due', self.client.get(reverse('core:finance')).content.decode())

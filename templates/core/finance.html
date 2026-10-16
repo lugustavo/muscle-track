@@ -32,7 +32,8 @@
     <div class="col-md-4"><div class="card text-center h-100 {% if pending %}border-warning{% endif %}"><div class="card-body">
         <div class="text-muted small">A receber agora</div>
         <div class="fs-2 fw-bold {% if pending %}text-warning-emphasis{% endif %}">{{ pending_total|money }}</div>
-        <div class="small text-muted">{{ pending|length }} pacote{{ pending|length|pluralize }} com a primeira aula dada e sem pagamento completo</div>
+        <div class="small text-muted">{{ pending|length }} pacote{{ pending|length|pluralize }} sem pagamento completo (primeira aula dada ou valor alterado)</div>
+        {% if refunds_due %}<div class="small text-muted" data-balance-line>− {{ refunds_due_total|money }} a devolver · saldo <strong>{{ balance_total|money }}</strong></div>{% endif %}
     </div></div></div>
 </div>
 
@@ -68,16 +69,27 @@
                 <div class="list-group-item d-flex justify-content-between align-items-center">
                     <span>
                         <a href="{% nav_url 'core:student_detail' row.student.pk %}" class="text-decoration-none fw-semibold">{{ row.student.person_name }}</a><br>
-                        <small class="text-muted">{{ row.package.name }} · primeira aula em {{ row.due|date:"d/m/Y" }} · {{ row.days }} dia{{ row.days|pluralize }} · {{ row.amount|money }}</small>
+                        {% if row.partial %}<small class="text-muted">{{ row.package.name }} · pago {{ row.paid|money }}, valor do pacote alterado · falta {{ row.amount|money }}</small>
+                        {% else %}<small class="text-muted">{{ row.package.name }} · primeira aula em {{ row.due|date:"d/m/Y" }} · {{ row.days }} dia{{ row.days|pluralize }} · {{ row.amount|money }}</small>{% endif %}
                     </span>
                     <span class="d-flex gap-1">
                         <a href="{{ row.whatsapp }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success" title="Cobrar pelo WhatsApp"><i class="bi bi-whatsapp"></i></a>
                         <a href="{% nav_url 'core:payment_create' row.student.pk %}?package={{ row.package.pk }}" class="btn btn-sm btn-success">Registrar</a>
                     </span>
                 </div>
-                {% empty %}
-                <div class="list-group-item text-success"><i class="bi bi-check-circle"></i> Nenhum pagamento pendente.</div>
                 {% endfor %}
+                {% for row in refunds_due %}
+                <div class="list-group-item d-flex justify-content-between align-items-center bg-info-subtle" data-refund-due>
+                    <span>
+                        <a href="{% nav_url 'core:student_detail' row.student.pk %}" class="text-decoration-none fw-semibold">{{ row.student.person_name }}</a><br>
+                        <small class="text-muted">{{ row.package.name }} · {% if row.kind == 'overpaid' %}pago a mais{% else %}pacote cancelado{% endif %} · <strong class="text-body">− {{ row.quote.suggested|money }}</strong> a devolver</small>
+                    </span>
+                    <a href="{% nav_url 'core:refund_create' row.student.pk %}&package={{ row.package.pk }}" class="btn btn-sm btn-outline-secondary">Devolver</a>
+                </div>
+                {% endfor %}
+                {% if not pending and not refunds_due %}
+                <div class="list-group-item text-success"><i class="bi bi-check-circle"></i> Nenhum pagamento pendente.</div>
+                {% endif %}
             </div>
         </div>
 

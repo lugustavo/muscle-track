@@ -2534,13 +2534,16 @@ def finance(request):
     for row in pending:
         row['whatsapp'] = whatsapp_url(row['student'].phone,
                                        charge_message(row['student'], row['package'], row['amount'], charge_text))
+    refunds_due = refunds.awaiting_refund()
     prev_month, next_month = _month_nav(year, month)
     return render(request, 'core/finance.html', {
         'month_value': f'{year}-{month:02d}', 'month_label': date(year, month, 1),
         'prev_month': prev_month, 'next_month': next_month,
         'is_current_month': (year, month) == (timezone.localdate().year, timezone.localdate().month),
-        'summary': summary, 'pending': pending,
+        'summary': summary, 'pending': pending, 'refunds_due': refunds_due,
+        'refunds_due_total': sum((r['quote']['suggested'] for r in refunds_due), Decimal('0')),
         'pending_total': sum((r['amount'] for r in pending), Decimal('0')),
+        'balance_total': sum((r['amount'] for r in pending), Decimal('0')) - sum((r['quote']['suggested'] for r in refunds_due), Decimal('0')),
         'renewals': packages.renewals(), 'service': service_report(year, month),
         'refund_totals': _refund_totals(year, month, summary),
     })
