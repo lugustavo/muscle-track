@@ -107,9 +107,27 @@ class FixedTimeRowTests(RowBase):
         html = self.page()
         self.assertEqual(html.count('<span class="swipe-label">Editar</span>'), 3)    # 2 classes + 1 fixed time
         self.assertEqual(html.count('<span class="swipe-label">Remover</span>'), 3)
-        self.assertEqual(html.count('title="Editar"'), 3)
+        self.assertEqual((html.count('data-class-edit'), html.count('data-slot-edit')), (2, 1))
+        self.assertEqual(html.count('swipe-edit" title="Editar"'), 3)
         self.assertNotIn('btn-outline-danger swipe-remove', html)
 
     def test_no_hint_without_fixed_times(self):
         self.slot.delete()
         self.assertNotIn('Deslize o horário', self.page())
+
+
+class ActiveWorkoutButtonsTests(RowBase):
+    """Treinos ativos: icon-only buttons, with the name kept for screen readers and as a tooltip."""
+
+    def test_buttons_are_icons_with_a_hidden_name(self):
+        from core.models import PersonRoutine
+        routine = PersonRoutine.objects.create(person=self.person, routine_name='Treino X', routine_template=self.template)
+        html = self.page()
+        for action, name in (('template', 'Ver template'), ('progress', 'Progresso'), ('edit', 'Editar'), ('remove', 'Remover')):
+            piece = html[html.index(f'data-routine-action="{action}"'):]
+            piece = piece[:piece.index('</a>' if action != 'remove' else '</button>')]
+            self.assertIn(f'<span class="visually-hidden">{name}</span>', piece, action)
+            self.assertIn('btn-icon', html[html.rindex('<', 0, html.index(f'data-routine-action="{action}"')):html.index(f'data-routine-action="{action}"')])
+        self.assertIn(reverse('core:person_routine_edit', kwargs={'pk': routine.pk}), html)
+        self.assertIn(f'data-bs-target="#deactivateModal{routine.pk}"', html)      # the remove modal still opens
+        self.assertNotIn('Ver Template', html)                                      # the old visible labels are gone
