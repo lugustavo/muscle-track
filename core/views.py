@@ -55,7 +55,7 @@ from .models import (
 )
 from .navigation import after_save_url, back_label, safe_next_url, with_next
 from .onboarding import trainer_steps
-from .package_schedule import MAX_SKIPS, FillError, build_preview, fill_series, top_up
+from .package_schedule import MAX_SKIPS, FillError, build_preview, continue_from, fill_series, previous_pattern, top_up
 from .recurrence import SeriesError, create_series, describe, edit_series, end_series_from
 from .permissions import is_trainer, staff_required, student_required
 from .search import apply_student_search, phone_digits, search_all
@@ -291,6 +291,15 @@ def _finance_agenda_context(student):
     pending = next((r for r in pkg['rows'] if r['pending'] > 0 and r['starts_on']), None)
     charge_url = whatsapp_url(student.phone, charge_message(student, pending['package'], pending['pending'])) \
         if pending and student.is_active else ''
+    has_series = bool(plan and student.slots.filter(package=plan['package'], is_active=True).exists())
+    fill_initial = {'starts_on': today, 'duration_minutes': 60, 'interval_weeks': 1}
+    pattern = None
+    if plan and plan['to_schedule'] and not has_series:   # a renewal: offer the same days and time as before
+        pattern = previous_pattern(student)
+        if pattern:
+            fill_initial.update(weekdays=pattern['weekdays'], start_time=pattern['start_time'],
+                                duration_minutes=pattern['duration'], interval_weeks=pattern['interval'],
+                                starts_on=continue_from(student, today))
     return {
         'payments': payments,
         'pkg': pkg,
@@ -301,8 +310,9 @@ def _finance_agenda_context(student):
         'attendance': attendance_stats(student, 30, today),
         'weekdays': ScheduleSlot.WEEKDAYS,
         'slot_form': ScheduleSlotForm(plan=plan),
-        'fill_form': SlotFillForm(initial={'starts_on': today, 'duration_minutes': 60, 'interval_weeks': 1}),
-        'has_package_series': bool(plan and student.slots.filter(package=plan['package'], is_active=True).exists()),
+        'fill_form': SlotFillForm(initial=fill_initial),
+        'fill_pattern': pattern,
+        'has_package_series': has_series,
         'slot_plan': plan,
     }
 
@@ -394,17 +404,22 @@ def student_detail(request, pk):
 def student_package_sell(request, pk):
     """"Vender pacote": sell a catalog package to the student, with the price agreed for them."""
     student = get_object_or_404(Person, pk=pk)
-    form = SaleForm(request.POST or None, initial={'pricing_mode': 'per_session'})
+    pattern = previous_pattern(student)
+    form = SaleForm(request.POST or None, initial={'pricing_mode': 'per_session', 'continue_schedule': True})
     if request.method == 'POST' and form.is_valid():
         data = form.cleaned_data
         sold = packages.sell(student, data['package'], mode=data['pricing_mode'], price_per_session=data['price_per_session'],
                              price_total=data['price_total'], notes=data['notes'], actor=request.user)
         messages.success(request, f'Pacote vendido: {sold.name}. O prazo conta a partir da primeira aula.')
+        if data.get('continue_schedule') and pattern:
+            messages.info(request, f"Confira as aulas na prévia (mesmo horário de antes: {pattern['label']}) e confirme em "
+                                   '"Preencher agenda".')
+            return redirect(_student_tab(request, pk, 'agenda'))
         return redirect(after_save_url(request, reverse('core:student_detail', kwargs={'pk': pk}), fragment='#tab-ficha'))
     catalog = list(form.fields['package'].queryset)
     return render(request, 'core/student_package_sell.html', {
         'form': form, 'student': student, 'catalog': catalog, 'title': 'Vender pacote',
-        'overview': packages.overview(student)})
+        'overview': packages.overview(student), 'pattern': pattern})
 
 
 @staff_required

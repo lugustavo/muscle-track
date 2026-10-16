@@ -206,22 +206,26 @@ def summary(person, today=None):
 
 
 def schedule_plan(person, today=None):
-    """What a new fixed time should follow: the package in use, how many of its classes are still to be marked and
-    when it ends. None when the student has no package in use.
+    """What a new fixed time should follow: the packages in use, how many of their classes are still to be marked and
+    when the last one ends. None when the student has no package in use.
 
-    `to_schedule` = classes left - classes already marked ahead (never below 0); `ends_on` only while the package is
-    running with a deadline (not before the first class, not without deadline, not frozen or expired)."""
+    `to_schedule` = classes left in every open package - classes already marked ahead (never below 0), so a renewal
+    (a new package bought while the old one still has classes marked) asks for the new package's classes too.
+    `package` is the last open one (the series ends up tied to it); `ends_on` only while that package is running with a
+    deadline (not before the first class, not without deadline, not frozen or expired)."""
     today = today or timezone.localdate()
     data = overview(person, today)
-    current = data['current']
-    if current is None:
+    open_rows = [r for r in data['rows'] if r['state'] in OPEN_STATES]
+    if not open_rows:
         return None
+    current, last = open_rows[0], open_rows[-1]
+    left = sum(r['left'] for r in open_rows)
     # every class still marked "Marcada" will use the package, whether it is ahead or waiting to be given an outcome
     marked = person.appointments.filter(status=Status.SCHEDULED).count()
     return {
-        'row': current, 'package': current['package'], 'state': current['state'], 'left': current['left'],
-        'scheduled': marked, 'to_schedule': max(current['left'] - marked, 0),
-        'ends_on': current['ends_on'] if current['state'] == 'active' else None,
+        'row': current, 'package': last['package'], 'name': ' + '.join(r['package'].name for r in open_rows),
+        'state': last['state'], 'left': left, 'scheduled': marked, 'to_schedule': max(left - marked, 0),
+        'ends_on': last['ends_on'] if last['state'] == 'active' else None,
     }
 
 

@@ -24,7 +24,7 @@
         {% if slots %}<p class="small text-muted mt-n2 mb-3 d-md-none"><i class="bi bi-arrow-left-right"></i> Deslize o horário para a esquerda para editar ou remover.</p>{% endif %}
         {% if slot_plan %}
         <div class="alert alert-info py-2 small" data-slot-package>
-            <i class="bi bi-box-seam"></i> <strong>{{ slot_plan.package.name }}</strong>:
+            <i class="bi bi-box-seam"></i> <strong>{{ slot_plan.name }}</strong>:
             restam <strong>{{ slot_plan.left }}</strong> aula{{ slot_plan.left|pluralize }}{% if slot_plan.scheduled %}, {{ slot_plan.scheduled }} já marcada{{ slot_plan.scheduled|pluralize }}{% endif %}
             {% if slot_plan.ends_on %}· vale até {{ slot_plan.ends_on|date:"d/m/Y" }}{% elif not slot_plan.package.valid_days %}· sem prazo{% elif slot_plan.state == 'not_started' %}· o prazo começa na primeira aula{% endif %}.
             {% if slot_plan.to_schedule %}Faltam marcar <strong>{{ slot_plan.to_schedule }}</strong>.{% else %}<i class="bi bi-check-circle"></i> Todas as aulas do pacote já estão marcadas.{% endif %}
@@ -40,6 +40,7 @@
               data-slot-fill data-preview-url="{% url 'core:slot_preview' student.pk %}">
             {% csrf_token %}
             <div class="small fw-bold mb-2">Preencher a agenda do pacote</div>
+            {% if fill_pattern %}<div class="small text-muted mb-2" data-fill-continue><i class="bi bi-arrow-repeat"></i> Mesmo horário de antes: <strong>{{ fill_pattern.label }}</strong>, a partir do dia seguinte à última aula marcada. Confira a prévia e confirme.</div>{% endif %}
             <div class="mb-2">{% include 'core/_weekday_pills.html' with field=fill_form.weekdays %}</div>
             <div class="row g-2 mb-2">
                 <div class="col-6"><label class="form-label small mb-0" for="{{ fill_form.starts_on.id_for_label }}">Primeira aula</label>{{ fill_form.starts_on }}</div>
