@@ -28,7 +28,7 @@ from allauth.account.models import EmailAddress
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, trainer_dashboard
 from .forms import (
     AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ClassRequestForm, ConsentForm, SaleForm, ExerciseForm, PaymentForm,
-    HolidayForm, MyPhotoForm, PersonForm, PersonRoutineForm, PackageForm, RepeatForm, ScheduleSlotForm, SlotEditForm, SlotFillForm,
+    CancelPackageForm, HolidayForm, MyPhotoForm, PackageEditForm, PersonForm, RefundForm, PersonRoutineForm, PackageForm, RepeatForm, ScheduleSlotForm, SlotEditForm, SlotFillForm,
     ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
 )
 from .agenda import (
@@ -37,9 +37,9 @@ from .agenda import (
     undo_move, view_range,
 )
 from .billing import (
-    charge_message, delete_payment, month_bounds, month_summary, overdue_rows, parse_month, register_payment, service_report,
+    charge_message, delete_payment, money, month_bounds, month_summary, overdue_rows, parse_month, register_payment, service_report,
 )
-from . import class_requests, evolution, holidays, intro, notifications, packages, whatsapp_messages
+from . import class_requests, evolution, holidays, intro, notifications, packages, refunds, whatsapp_messages
 from .consistency import celebrations
 from .calendar_feed import build_ics, feed_for_token, get_or_create_feed, mark_fetched, rotate
 from .consent import (
@@ -50,7 +50,7 @@ from .exports import build_export
 from .history import log_event, log_profile_edit
 from .invites import build_invite_url, get_user_from_invite, revoke_invites
 from .models import (
-    Appointment, AppointmentRequest, Assessment, CalendarFeed, Holiday, NotificationPreference, PushSubscription, WhatsAppTemplate, ConsentRecord, Exercise, MuscleGroup, Payment, Package, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
+    Appointment, AppointmentRequest, Assessment, CalendarFeed, Holiday, Refund, NotificationPreference, PushSubscription, WhatsAppTemplate, ConsentRecord, Exercise, MuscleGroup, Payment, Package, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
     Routine, RoutineExercise, SessionExercise, SessionSet, StudentEvent, StudentNote, WorkoutSession,
 )
 from .navigation import after_save_url, back_label, safe_next_url, with_next
@@ -285,7 +285,8 @@ def accept_invite(request, uidb64, token):
 def _finance_agenda_context(student):
     """Package/payments and calendar data for the student's file (trainer area only)"""
     today = timezone.localdate()
-    payments = list(student.payments.select_related('student_package')[:50])
+    payments = list(student.payments.select_related('student_package').prefetch_related('refunds')[:50])
+    student_refunds = list(student.refunds.select_related('student_package'))
     pkg = packages.overview(student, today)
     plan = packages.schedule_plan(student, today)
     pending = next((r for r in pkg['rows'] if r['pending'] > 0 and r['starts_on']), None)
@@ -302,6 +303,7 @@ def _finance_agenda_context(student):
                                 starts_on=continue_from(student, today))
     return {
         'payments': payments,
+        'refund_rows': student_refunds,
         'pkg': pkg,
         'charge_url': charge_url,
         'slots': list(student.slots.filter(is_active=True).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=timezone.localdate()))),
@@ -451,6 +453,148 @@ def student_package_action(request, pk, package_pk):
     except packages.PackageError as error:
         messages.error(request, str(error))
     return redirect(after_save_url(request, reverse('core:student_detail', kwargs={'pk': pk}), fragment='#tab-ficha'))
+
+
+@staff_required
+def student_package_edit(request, pk, package_pk):
+    """Change a package already sold: name, classes, deadline, agreed price (never fewer classes than were given)."""
+    student = get_object_or_404(Person, pk=pk)
+    package = get_object_or_404(student.packages, pk=package_pk)
+    form = PackageEditForm.for_package(package, request.POST or None)
+    if package.cancelled_at:
+        messages.warning(request, 'Um pacote cancelado não pode ser editado.')
+        return redirect(_student_tab(request, pk, 'ficha'))
+    if request.method == 'POST' and form.is_valid():
+        data = form.cleaned_data
+        try:
+            changed = refunds.edit_package(
+                package, request.user, name=data['name'], sessions=data['sessions'], valid_days=data['valid_days'],
+                pricing_mode=data['pricing_mode'], price_per_session=data['price_per_session'],
+                price_total=data['price_total'], notes=data['notes'])
+        except refunds.RefundError as error:
+            form.add_error(None, str(error))
+        else:
+            messages.success(request, 'Pacote atualizado.' if changed else 'Nada mudou.')
+            return redirect(_student_tab(request, pk, 'ficha'))
+    overview = packages.overview(student)
+    row = next((r for r in overview['rows'] if r['package'].pk == package.pk), None)
+    return render(request, 'core/student_package_edit.html', {
+        'form': form, 'student': student, 'package': package, 'row': row, 'title': 'Editar pacote'})
+
+
+@staff_required
+def student_package_cancel(request, pk, package_pk):
+    """Cancel a package with the refund worked out: paid - classes given x price per class - fee."""
+    student = get_object_or_404(Person, pk=pk)
+    package = get_object_or_404(student.packages.prefetch_related('payments', 'refunds'), pk=package_pk)
+    if package.cancelled_at:
+        messages.warning(request, 'Este pacote já foi cancelado.')
+        return redirect(_student_tab(request, pk, 'ficha'))
+    today = timezone.localdate()
+    fee_source = request.POST if request.method == 'POST' else request.GET
+    try:
+        fee = Decimal(fee_source.get('fee') or '0')
+        if fee < 0:
+            fee = Decimal('0')
+    except (InvalidOperation, ValueError):
+        fee = Decimal('0')
+    quote = refunds.cancellation_quote(package, fee)
+    form = CancelPackageForm(request.POST or None, initial={
+        'fee': fee or None, 'amount': quote['suggested'], 'refunded_on': today,
+        'remove_future': student.appointments.filter(status=Appointment.Status.SCHEDULED, starts_at__gte=timezone.now()).exists()})
+    if request.method == 'POST' and form.is_valid():
+        data = form.cleaned_data
+        try:
+            result = refunds.cancel_with_refund(
+                package, request.user, amount=data['amount'] or Decimal('0'), method=data['method'],
+                refunded_on=data['refunded_on'], reason=data['reason'], fee=data['fee'] or Decimal('0'),
+                remove_future=data['remove_future'])
+        except refunds.RefundError as error:
+            form.add_error(None, str(error))
+        else:
+            text = 'Pacote cancelado.'
+            if result['removed']:
+                text += f" {result['removed']} aula{'' if result['removed'] == 1 else 's'} marcada{'' if result['removed'] == 1 else 's'} saiu da agenda."
+            messages.success(request, text)
+            if result['refund']:
+                return redirect(reverse('core:refund_detail', kwargs={'pk': result['refund'].pk}))
+            return redirect(_student_tab(request, pk, 'ficha'))
+    return render(request, 'core/student_package_cancel.html', {
+        'form': form, 'student': student, 'package': package, 'quote': quote, 'fee': fee, 'title': 'Cancelar pacote',
+        'future': student.appointments.filter(status=Appointment.Status.SCHEDULED, starts_at__gte=timezone.now()).count()})
+
+
+@staff_required
+def refund_create(request, pk):
+    """Give money back, or undo a payment entered wrongly (the payment itself is never edited or deleted)."""
+    student = get_object_or_404(Person, pk=pk)
+    today = timezone.localdate()
+    initial = {'refunded_on': today}
+    payment = student.payments.select_related('student_package').filter(pk=request.GET.get('payment') or 0).first()
+    if payment:
+        initial.update(payment=payment, student_package=payment.student_package, amount=refunds.payment_balance(payment))
+    elif request.GET.get('package', '').isdigit():
+        package = student.packages.filter(pk=request.GET['package']).first()
+        if package:
+            initial.update(student_package=package, amount=refunds.cancellation_quote(package)['suggested'] or None)
+    form = RefundForm(request.POST or None, person=student, initial=initial)
+    if request.method == 'POST' and form.is_valid():
+        data = form.cleaned_data
+        try:
+            refund = refunds.register_refund(
+                student, amount=data['amount'], method=data['method'], refunded_on=data['refunded_on'],
+                reason=data['reason'], kind=data['kind'], package=data['student_package'], payment=data['payment'],
+                actor=request.user)
+        except refunds.RefundError as error:
+            form.add_error(None, str(error))
+        else:
+            messages.success(request, f'{refund.get_kind_display()} registrada.')
+            return redirect(_student_tab(request, student.pk, 'pagamentos'))
+    return render(request, 'core/refund_form.html', {'form': form, 'student': student, 'title': 'Devolver ou estornar'})
+
+
+@staff_required
+def refund_detail(request, pk):
+    """One refund with the calculation in words, ready to send to the student."""
+    refund = get_object_or_404(Refund.objects.select_related('person', 'student_package', 'payment'), pk=pk)
+    text = refund.summary or f'Devolução de {money(refund.amount)}' + (f' ({refund.reason})' if refund.reason else '')
+    message = f'Olá, {refund.person.person_name.split()[0]}! Segue o resumo da devolução:\n{text}\nForma: {refund.get_method_display()}.'
+    return render(request, 'core/refund_detail.html', {
+        'refund': refund, 'student': refund.person, 'title': 'Devolução', 'summary_text': text,
+        'whatsapp': whatsapp_url(refund.person.phone, message) if refund.person.phone else ''})
+
+
+@staff_required
+@require_POST
+def refund_void(request, pk):
+    refund = get_object_or_404(Refund, pk=pk)
+    try:
+        refunds.void_refund(refund, request.POST.get('reason', ''), request.user)
+        packages.sync(refund.person)
+        messages.success(request, 'Devolução anulada: continua registrada, mas não conta mais.')
+    except refunds.RefundError as error:
+        messages.error(request, str(error))
+    return redirect(after_save_url(request, reverse('core:finance_refunds'), forward_next=False))
+
+
+@staff_required
+def finance_refunds(request):
+    """Financeiro → Devoluções e ajustes: money given back, wrong entries undone, and what is still to give back."""
+    year, month = parse_month(request.GET.get('mes'))
+    first, last = month_bounds(year, month)
+    rows, refunded, reversed_total = refunds.month_refunds(first, last)
+    summary = month_summary(year, month)
+    prev_month, next_month = _month_nav(year, month)
+    student_filter = request.GET.get('aluno', '').strip()
+    if student_filter:
+        rows = [r for r in rows if student_filter.lower() in r.person.person_name.lower()]
+    return render(request, 'core/finance_refunds.html', {
+        'month_value': f'{year}-{month:02d}', 'month_label': date(year, month, 1),
+        'prev_month': prev_month, 'next_month': next_month,
+        'is_current_month': (year, month) == (timezone.localdate().year, timezone.localdate().month),
+        'rows': rows, 'refunded': refunded, 'reversed': reversed_total, 'received': summary['received'],
+        'net': summary['received'] - refunded - reversed_total, 'search': student_filter,
+        'awaiting': refunds.awaiting_refund()})
 
 
 @staff_required
@@ -2386,7 +2530,18 @@ def finance(request):
         'summary': summary, 'pending': pending,
         'pending_total': sum((r['amount'] for r in pending), Decimal('0')),
         'renewals': packages.renewals(), 'service': service_report(year, month),
+        'refund_totals': _refund_totals(year, month, summary),
     })
+
+
+def _refund_totals(year, month, summary):
+    """What went back in the month and the net received, for the line under "Recebido no mês" (None: nothing went back)."""
+    first, last = month_bounds(year, month)
+    _rows, refunded, reversed_total = refunds.month_refunds(first, last)
+    given_back = refunded + reversed_total
+    if not given_back:
+        return None
+    return {'given_back': given_back, 'net': summary['received'] - given_back}
 
 
 @staff_required
@@ -2403,6 +2558,12 @@ def finance_export(request):
         writer.writerow([p.paid_on.strftime('%d/%m/%Y'), _csv_safe(p.person.person_name),
                          _csv_safe(p.student_package.name if p.student_package else p.plan_name),
                          f'{p.amount:.2f}'.replace('.', ','), p.get_method_display(), _csv_safe(p.notes)])
+    for r in Refund.objects.filter(refunded_on__range=(first, last), voided_at__isnull=True).select_related(
+            'person', 'student_package').order_by('refunded_on', 'pk'):
+        writer.writerow([r.refunded_on.strftime('%d/%m/%Y'), _csv_safe(r.person.person_name),
+                         _csv_safe(r.student_package.name if r.student_package else ''),
+                         '-' + f'{r.amount:.2f}'.replace('.', ','), f'{r.get_kind_display()} ({r.get_method_display()})',
+                         _csv_safe(r.reason)])
     return response
 
 

@@ -14,12 +14,12 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Count, F, Sum
+from django.db.models import Count, DecimalField, F, OuterRef, Subquery, Sum
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 from .history import log_event
-from .models import Appointment, StudentEvent, StudentPackage, compute_prices
+from .models import Appointment, Payment, Refund, StudentEvent, StudentPackage, compute_prices
 
 Status = Appointment.Status
 
@@ -75,8 +75,14 @@ def state(package, used, today=None):
     return 'expired' if end is not None and end < today else 'active'
 
 
+def refunded_amount(package):
+    """Money given back for the package (refunds and reversals that were not voided)."""
+    return sum((r.amount for r in package.refunds.all() if r.voided_at is None), Decimal('0'))
+
+
 def paid_amount(package):
-    return sum((p.amount for p in package.payments.all()), Decimal('0'))
+    """What the student really paid for the package: the payments minus what was given back."""
+    return sum((p.amount for p in package.payments.all()), Decimal('0')) - refunded_amount(package)
 
 
 def pending_amount(package):
@@ -147,7 +153,7 @@ def overview(person, today=None):
     used), `scheduled` (marked classes still to happen) and `without_package` (classes given that no package covers)."""
     today = today or timezone.localdate()
     now = timezone.now()
-    packages = list(person.packages.prefetch_related('payments').order_by('sold_on', 'pk'))
+    packages = list(person.packages.prefetch_related('payments', 'refunds').order_by('sold_on', 'pk'))
     used = {p.pk: p.appointments.count() for p in packages}
     rows = []
     for package in packages:
@@ -305,8 +311,9 @@ def extend(package, days, note='', actor=None, today=None):
 def cancel_package(package, actor=None):
     if package.cancelled_at:
         raise PackageError('Este pacote já foi cancelado.')
+    package.used_at_cancel = package.appointments.count()   # the classes are re-linked once it stops counting
     package.cancelled_at = timezone.now()
-    package.save(update_fields=['cancelled_at'])
+    package.save(update_fields=['cancelled_at', 'used_at_cancel'])
     log_event(package.person, StudentEvent.Kind.PACKAGE, actor, f'Pacote cancelado: {package.name}', {'package': package.pk})
     sync(package.person)
 
@@ -317,7 +324,7 @@ def pending_payments(today=None):
     rows = []
     packages = StudentPackage.objects.filter(
         cancelled_at__isnull=True, starts_on__isnull=False, person__is_active=True
-    ).select_related('person').prefetch_related('payments').order_by('starts_on')
+    ).select_related('person').prefetch_related('payments', 'refunds').order_by('starts_on')
     for package in packages:
         pending = pending_amount(package)
         if pending > 0:
@@ -328,9 +335,15 @@ def pending_payments(today=None):
 
 def pending_count():
     """How many packages wait for a payment (one query: the bottom bar shows it on every page)."""
+    paid = Coalesce(Subquery(Payment.objects.filter(student_package=OuterRef('pk')).order_by().values('student_package')
+                             .annotate(t=Sum('amount')).values('t')), Decimal('0'),
+                    output_field=DecimalField())
+    given_back = Coalesce(Subquery(Refund.objects.filter(student_package=OuterRef('pk'), voided_at__isnull=True)
+                                   .order_by().values('student_package').annotate(t=Sum('amount')).values('t')),
+                          Decimal('0'), output_field=DecimalField())
     return StudentPackage.objects.filter(
         cancelled_at__isnull=True, starts_on__isnull=False, person__is_active=True, price_total__gt=0
-    ).annotate(paid=Coalesce(Sum('payments__amount'), Decimal('0'))).filter(paid__lt=F('price_total')).count()
+    ).annotate(net=paid - given_back).filter(net__lt=F('price_total')).count()
 
 
 def _current_packages(today):

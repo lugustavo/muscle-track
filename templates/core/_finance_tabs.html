@@ -1,0 +1,4 @@
+<ul class="nav nav-tabs mb-3" data-finance-tabs>
+    <li class="nav-item"><a class="nav-link {% if active == 'summary' %}active{% endif %}" href="{% url 'core:finance' %}{% if month %}?mes={{ month }}{% endif %}"{% if active == 'summary' %} aria-current="page"{% endif %}><i class="bi bi-graph-up"></i> Resumo e pagamentos</a></li>
+    <li class="nav-item"><a class="nav-link {% if active == 'refunds' %}active{% endif %}" href="{% url 'core:finance_refunds' %}{% if month %}?mes={{ month }}{% endif %}"{% if active == 'refunds' %} aria-current="page"{% endif %}><i class="bi bi-arrow-counterclockwise"></i> Devoluções e ajustes</a></li>
+</ul>

@@ -27,6 +27,7 @@ BACK_LABELS = {
     'agenda': 'Voltar à agenda',
     'agenda_holidays': 'Voltar aos feriados',
     'finance': 'Voltar ao financeiro',
+    'finance_refunds': 'Voltar às devoluções',
     'plan_list': 'Voltar aos planos',
     'exercise_list': 'Voltar aos exercícios',
     'exercise_detail': 'Voltar ao exercício',

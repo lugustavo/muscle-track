@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django import forms
 from django.contrib.auth.models import User
 from django.db.models import Q
@@ -5,7 +7,7 @@ from django.utils import timezone
 from .recurrence import MAX_INTERVAL, MAX_OCCURRENCES, MAX_SPAN_DAYS, end_date
 from .validators import normalize_phone, normalize_state, normalize_zip_code, validate_birth_date, digits_only
 from .models import (
-    Appointment, Holiday, Payment, Package, ScheduleSlot, StudentPackage,
+    Appointment, Holiday, Payment, Package, Refund, ScheduleSlot, StudentPackage,
     Assessment, Exercise, Person, PersonRoutine, ProgressPhoto, Routine, RoutineExercise, StudentNote,
 )
 
@@ -669,3 +671,89 @@ class HolidayForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': 'form-control', 'maxlength': '80', 'placeholder': 'Ex.: São João, estúdio fechado'}),
         }
         error_messages = {'date': {'unique': 'Este dia já está na lista.'}}
+
+
+MONEY_ATTRS = {'class': 'form-control', 'step': '0.01', 'min': '0', 'inputmode': 'decimal', 'data-no-draft': ''}
+
+
+class PackageEditForm(forms.Form):
+    """Change a package already sold to a student (the numbers of the sale, not the catalog)."""
+    name = forms.CharField(max_length=100, label='Nome', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    sessions = forms.IntegerField(min_value=1, max_value=200, label='Aulas',
+                                  widget=forms.NumberInput(attrs={'class': 'form-control', 'inputmode': 'numeric'}))
+    valid_days = forms.IntegerField(required=False, min_value=1, max_value=1000, label='Prazo (dias)',
+                                    widget=forms.NumberInput(attrs={'class': 'form-control', 'inputmode': 'numeric'}))
+    no_deadline = forms.BooleanField(required=False, label='Sem prazo (o pacote não vence)',
+                                     widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+    pricing_mode = forms.ChoiceField(choices=Package.PRICING, initial='per_session', label='Como o valor é informado',
+                                     widget=forms.RadioSelect)
+    price_per_session = forms.DecimalField(required=False, min_value=0, max_digits=8, decimal_places=2,
+                                           label='Valor por aula', widget=forms.NumberInput(attrs=MONEY_ATTRS))
+    price_total = forms.DecimalField(required=False, min_value=0, max_digits=8, decimal_places=2,
+                                     label='Valor total', widget=forms.NumberInput(attrs=MONEY_ATTRS))
+    notes = forms.CharField(required=False, max_length=200, label='Observação',
+                            widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+    @classmethod
+    def for_package(cls, package, data=None):
+        initial = {'name': package.name, 'sessions': package.sessions, 'valid_days': package.valid_days,
+                   'no_deadline': package.valid_days is None, 'pricing_mode': 'per_session',
+                   'price_per_session': package.price_per_session, 'price_total': package.price_total,
+                   'notes': package.notes}
+        return cls(data, initial=initial)
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get('no_deadline'):
+            cleaned['valid_days'] = None
+            self.errors.pop('valid_days', None)
+        elif cleaned.get('valid_days') is None and 'valid_days' not in self.errors:
+            self.add_error('valid_days', 'Informe o prazo em dias ou marque "Sem prazo".')
+        return cleaned
+
+
+class RefundForm(forms.Form):
+    """Give money back (or undo a payment entered wrongly) against one of the student's payments."""
+    payment = forms.ModelChoiceField(queryset=Payment.objects.none(), required=False, label='Pagamento',
+                                     empty_label='— escolher o pacote abaixo —',
+                                     widget=forms.Select(attrs={'class': 'form-select'}))
+    student_package = forms.ModelChoiceField(queryset=StudentPackage.objects.none(), required=False, label='Pacote',
+                                             empty_label='—', widget=forms.Select(attrs={'class': 'form-select'}))
+    kind = forms.ChoiceField(choices=Refund.Kind.choices, initial=Refund.Kind.REFUND, label='Tipo',
+                             widget=forms.RadioSelect)
+    amount = forms.DecimalField(min_value=Decimal('0.01'), max_digits=8, decimal_places=2, label='Valor',
+                                widget=forms.NumberInput(attrs={**MONEY_ATTRS, 'min': '0.01'}))
+    method = forms.ChoiceField(choices=Payment.Method.choices, initial=Payment.Method.TRANSFER, label='Forma de devolução',
+                               widget=forms.Select(attrs={'class': 'form-select'}))
+    refunded_on = forms.DateField(label='Data', widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
+    reason = forms.CharField(required=False, max_length=200, label='Motivo',
+                             widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex.: pacote cancelado, valor lançado errado'}))
+
+    def __init__(self, *args, person, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.person = person
+        self.fields['payment'].queryset = person.payments.select_related('student_package')
+        self.fields['payment'].label_from_instance = lambda p: f'{p.paid_on:%d/%m/%Y} · {p.get_method_display()} · {p.amount}'
+        self.fields['student_package'].queryset = person.packages.all()
+        self.fields['student_package'].label_from_instance = lambda p: f'{p.name} ({p.sold_on:%d/%m/%Y})'
+
+    def clean(self):
+        cleaned = super().clean()
+        if not cleaned.get('payment') and not cleaned.get('student_package') and not self.errors:
+            self.add_error('payment', 'Escolha o pagamento ou o pacote a que a devolução se refere.')
+        return cleaned
+
+
+class CancelPackageForm(forms.Form):
+    """Cancel a package: the agreed fee, how much goes back (it starts as the calculated amount), how and why."""
+    fee = forms.DecimalField(required=False, min_value=0, max_digits=8, decimal_places=2, label='Taxa ou multa combinada',
+                             widget=forms.NumberInput(attrs=MONEY_ATTRS))
+    amount = forms.DecimalField(required=False, min_value=0, max_digits=8, decimal_places=2, label='Valor a devolver',
+                                widget=forms.NumberInput(attrs=MONEY_ATTRS))
+    method = forms.ChoiceField(choices=Payment.Method.choices, initial=Payment.Method.TRANSFER, label='Forma de devolução',
+                               widget=forms.Select(attrs={'class': 'form-select'}))
+    refunded_on = forms.DateField(label='Data da devolução', widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
+    reason = forms.CharField(required=False, max_length=200, label='Motivo',
+                             widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex.: o aluno mudou de cidade'}))
+    remove_future = forms.BooleanField(required=False, label='Tirar da agenda as aulas marcadas daqui para a frente',
+                                       widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))

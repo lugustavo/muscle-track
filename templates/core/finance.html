@@ -15,11 +15,14 @@
     </div>
 </div>
 
+{% include 'core/_finance_tabs.html' with active='summary' month=month_value %}
+
 <div class="row g-3 mb-4">
     <div class="col-md-4"><div class="card text-center h-100"><div class="card-body">
         <div class="text-muted small">Recebido no mês</div>
         <div class="fs-2 fw-bold text-success">{{ summary.received|money }}</div>
         <div class="small text-muted">{{ summary.payments|length }} pagamento{{ summary.payments|length|pluralize }}</div>
+        {% if refund_totals %}<div class="small text-muted" data-refund-line>− {{ refund_totals.given_back|money }} devolvidos · líquido <strong>{{ refund_totals.net|money }}</strong> · <a href="{% url 'core:finance_refunds' %}?mes={{ month_value }}">ver</a></div>{% endif %}
     </div></div></div>
     <div class="col-md-4"><div class="card text-center h-100"><div class="card-body">
         <div class="text-muted small">Pacotes vendidos no mês</div>

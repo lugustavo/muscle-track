@@ -804,6 +804,8 @@ class StudentPackage(models.Model):
     frozen_days = models.PositiveSmallIntegerField(default=0, verbose_name='Dias congelado')
     frozen_since = models.DateField(null=True, blank=True, verbose_name='Congelado desde')
     cancelled_at = models.DateTimeField(null=True, blank=True)
+    used_at_cancel = models.PositiveSmallIntegerField(null=True, blank=True)   # classes given when it was cancelled
+    cancel_fee = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)   # fee kept when it was cancelled
     notes = models.CharField(max_length=200, blank=True, verbose_name='Observação')
     created_at = models.DateTimeField(auto_now_add=True)
     # What the reminders already told about this package (core/reminders.py): once each, and a new deadline re-arms them
@@ -856,6 +858,47 @@ class Payment(models.Model):
 
     def __str__(self):
         return f'{self.person_id} {self.paid_on:%d/%m/%Y} {self.amount}'
+
+
+class Refund(models.Model):
+    """Money that went back to the student (`refund`) or a payment entered wrongly that is undone (`reversal`).
+
+    Payments are never edited or deleted to fix money: a refund is a new entry, linked to the payment and the package,
+    and the totals are summed from the entries. A wrong refund is voided (kept, with the reason), never removed."""
+
+    class Kind(models.TextChoices):
+        REFUND = 'refund', 'Devolução'
+        REVERSAL = 'reversal', 'Estorno (lançamento errado)'
+
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='refunds', verbose_name='Aluno')
+    student_package = models.ForeignKey('StudentPackage', on_delete=models.SET_NULL, null=True, blank=True,
+                                        related_name='refunds', verbose_name='Pacote')
+    payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, null=True, blank=True, related_name='refunds',
+                                verbose_name='Pagamento')
+    kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.REFUND, verbose_name='Tipo')
+    amount = models.DecimalField(max_digits=8, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))],
+                                 verbose_name='Valor')
+    refunded_on = models.DateField(default=timezone.localdate, verbose_name='Data')
+    method = models.CharField(max_length=10, choices=Payment.Method.choices, default=Payment.Method.TRANSFER,
+                              verbose_name='Forma de devolução')
+    reason = models.CharField(max_length=200, blank=True, verbose_name='Motivo')
+    summary = models.TextField(blank=True, verbose_name='Resumo do cálculo')   # what was paid, given, discounted
+    recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
+    created_at = models.DateTimeField(auto_now_add=True)
+    voided_at = models.DateTimeField(null=True, blank=True)
+    voided_reason = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        verbose_name = 'Devolução'
+        verbose_name_plural = 'Devoluções'
+        ordering = ['-refunded_on', '-pk']
+
+    @property
+    def is_voided(self):
+        return self.voided_at is not None
+
+    def __str__(self):
+        return f'{self.person_id} {self.refunded_on:%d/%m/%Y} -{self.amount}'
 
 
 class ScheduleSlot(models.Model):
