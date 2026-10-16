@@ -8,7 +8,7 @@ from core.models import Appointment, ScheduleSlot
 from .base import BaseTestCase
 
 
-class ClassRowTests(BaseTestCase):
+class RowBase(BaseTestCase):
     def setUp(self):
         self.person = self.alice.person
         self.client.force_login(self.trainer)
@@ -23,9 +23,11 @@ class ClassRowTests(BaseTestCase):
     def url(self, name, a):
         return reverse(f'core:{name}', kwargs={'pk': a.pk})
 
+
+class ClassRowTests(RowBase):
     def test_each_upcoming_class_has_edit_and_remove(self):
         html = self.page()
-        self.assertEqual(html.count('data-swipe-row'), 2)
+        self.assertEqual(html.count('data-swipe-row data-class='), 2)
         for a in (self.fixed, self.single):
             self.assertIn(f'data-class="{a.pk}"', html)
             self.assertIn(self.url('appointment_reschedule', a), html)
@@ -89,3 +91,25 @@ class ClassRowTests(BaseTestCase):
             'notes': ''})
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['Location'], student + '#tab-agenda')
+
+
+class FixedTimeRowTests(RowBase):
+    """The fixed times list uses the same rows: icons on a computer, swipe on a phone."""
+
+    def test_fixed_time_rows_have_edit_and_remove(self):
+        html = self.page()
+        self.assertIn(f'data-swipe-row data-slot="{self.slot.pk}"', html)
+        self.assertIn(reverse('core:slot_edit', kwargs={'pk': self.slot.pk}), html)
+        self.assertIn(reverse('core:slot_delete', kwargs={'pk': self.slot.pk}), html)
+        self.assertIn('Deslize o horário para a esquerda', html)
+
+    def test_actions_are_icons_with_a_name_for_screen_readers_and_tooltips(self):
+        html = self.page()
+        self.assertEqual(html.count('<span class="swipe-label">Editar</span>'), 3)    # 2 classes + 1 fixed time
+        self.assertEqual(html.count('<span class="swipe-label">Remover</span>'), 3)
+        self.assertEqual(html.count('title="Editar"'), 3)
+        self.assertNotIn('btn-outline-danger swipe-remove', html)
+
+    def test_no_hint_without_fixed_times(self):
+        self.slot.delete()
+        self.assertNotIn('Deslize o horário', self.page())
