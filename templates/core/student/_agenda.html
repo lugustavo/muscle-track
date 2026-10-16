@@ -53,6 +53,7 @@
                     <div class="col-6"><label class="form-label small mb-0" for="{{ fill_form.interval_weeks.id_for_label }}">Repete a cada (semanas)</label>{{ fill_form.interval_weeks }}</div>
                 </div>
             </details>
+            <div class="small mb-2"><a href="{% nav_url 'core:agenda_holidays' %}" class="text-decoration-none"><i class="bi bi-flag"></i> Feriados que ficam sem aula</a></div>
             <div data-fill-preview class="mb-2" aria-live="polite"><span class="small text-muted">Escolha os dias e o horário: o fim é calculado pelas aulas que faltam marcar ({{ slot_plan.to_schedule }}).</span></div>
             <button class="btn btn-primary" data-fill-submit><i class="bi bi-calendar-check"></i> Preencher agenda ({{ slot_plan.to_schedule }} aula{{ slot_plan.to_schedule|pluralize }})</button>
         </form>

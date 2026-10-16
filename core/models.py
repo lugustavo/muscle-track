@@ -1014,6 +1014,20 @@ class WhatsAppTemplate(models.Model):
         return self.get_kind_display()
 
 
+class Holiday(models.Model):
+    """A day with no classes that the trainer added (a local holiday, a day the studio is closed). The national holidays
+    are computed in core/holidays.py."""
+    date = models.DateField(unique=True)
+    name = models.CharField(max_length=80)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['date']
+
+    def __str__(self):
+        return f'{self.date:%d/%m/%Y} {self.name}'
+
+
 class PushSubscription(models.Model):
     """One browser/phone that agreed to receive web push (the subscription the browser handed to the page)."""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='push_subscriptions')

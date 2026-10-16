@@ -66,6 +66,7 @@ def _staff_bar(active):
         {'label': 'Exercícios', 'icon': 'bi-activity', 'url': reverse('core:exercise_list')},
         {'label': 'Treinos', 'icon': 'bi-calendar-check', 'url': reverse('core:routine_list')},
         {'label': 'Pacotes', 'icon': 'bi-box-seam', 'url': reverse('core:plan_list')},
+        {'label': 'Feriados', 'icon': 'bi-flag', 'url': reverse('core:agenda_holidays')},
         {'label': 'Admin', 'icon': 'bi-gear', 'url': '/admin/'},
         {'label': 'Notificações', 'icon': 'bi-bell', 'url': reverse('core:notification_settings')},
         {'label': 'Alterar senha', 'icon': 'bi-key', 'url': reverse('account_change_password')},

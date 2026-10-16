@@ -206,6 +206,7 @@ TRAILS = {
     'plan_edit': lambda request, ctx: [_home(), _finance(), _plans(), ('Editar pacote', None)],
     'payment_create': _student_page('Registrar pagamento'),
     'agenda': lambda request, ctx: [_home(), ('Agenda', None)],
+    'agenda_holidays': lambda request, ctx: [_home(), _agenda(), ('Feriados', None)],
     'appointment_create': lambda request, ctx: [_home(), _agenda(), ('Nova aula', None)],
     'appointment_reschedule': lambda request, ctx: [_home(), _agenda(), ('Remarcar aula', None)],
     'student_list': _student_list,

@@ -11,11 +11,13 @@ from datetime import time, timedelta
 from django.db import transaction
 from django.utils import timezone
 
+from . import holidays
 from .agenda import at, on_week_cycle
 from .models import Appointment, ScheduleSlot
 from .recurrence import occurrence_dates
 
 MAX_SKIPS = 60
+HORIZON_DAYS = 3 * 366   # how far ahead holidays are looked up
 DEAD = (Appointment.Status.CANCELLED, Appointment.Status.RESCHEDULED)
 
 
@@ -70,25 +72,28 @@ def _deadline(plan, first_day):
     return None
 
 
-def build_preview(person, plan, weekdays, start, start_time, duration=60, interval=1, skip=()):
+def build_preview(person, plan, weekdays, start, start_time, duration=60, interval=1, skip=(), keep=()):
     """The dates a fill would create.
 
-    Returns rows (every date looked at, in order: state 'new', 'skipped' by the trainer or 'exists' = the student
-    already has a class then), the new dates, the last day, and warnings (past the package's end, overlap with another
-    student's class)."""
+    Returns rows (every date looked at, in order: state 'new', 'skipped' by the trainer, 'holiday' = a national or own
+    holiday (skipped by itself unless the trainer put the day in `keep`) or 'exists' = the student already has a class
+    then), the new dates, the last day, and warnings (past the package's end, overlap with another student's class)."""
     wanted = plan['to_schedule']
-    skip = set(skip)
+    skip, keep = set(skip), set(keep)
     live = _live_starts(person, start)
+    off = holidays.between(start, start + timedelta(days=HORIZON_DAYS))
     rows, new = [], []
     if wanted > 0 and weekdays:
-        for day in occurrence_dates(start, set(weekdays), interval, limit=wanted + len(skip) + len(live)):
+        for day in occurrence_dates(start, set(weekdays), interval, limit=wanted + len(skip) + len(live) + len(off)):
             starts = at(day, start_time)
             if day in skip:
                 rows.append({'date': day, 'state': 'skipped'})
+            elif day in off and day not in keep:
+                rows.append({'date': day, 'state': 'holiday', 'holiday': off[day]})
             elif starts in live:
                 rows.append({'date': day, 'state': 'exists'})
             else:
-                rows.append({'date': day, 'state': 'new'})
+                rows.append({'date': day, 'state': 'new', **({'holiday': off[day], 'kept': True} if day in off else {})})
                 new.append(day)
                 if len(new) == wanted:
                     break
@@ -114,14 +119,15 @@ def build_preview(person, plan, weekdays, start, start_time, duration=60, interv
 
 
 @transaction.atomic
-def fill_series(person, plan, weekdays, start, start_time, duration=60, interval=1, skip=(), now=None):
+def fill_series(person, plan, weekdays, start, start_time, duration=60, interval=1, skip=(), keep=(), now=None):
     """Create the fixed times and all the classes the package still needs. Returns {'created', 'last', 'slots'}."""
-    preview = build_preview(person, plan, weekdays, start, start_time, duration, interval, skip)
+    preview = build_preview(person, plan, weekdays, start, start_time, duration, interval, skip, keep)
     if not preview['new_dates']:
         raise FillError('Não há aulas a marcar: o pacote já está completo ou todas as datas foram puladas.')
     first, last = preview['new_dates'][0], preview['last']
     package = plan['package']
-    skipped = sorted(d.isoformat() for d in set(skip) if first <= d <= last)
+    skipped = sorted(r['date'].isoformat() for r in preview['rows']
+                     if r['state'] in ('skipped', 'holiday') and first <= r['date'] <= last)
     labels = dict(ScheduleSlot.WEEKDAYS)
     slots = {}
     for weekday in sorted({d.weekday() for d in preview['new_dates']}):
@@ -161,12 +167,13 @@ def top_up(person, plan, now=None):
     if last_live is not None:
         start = max(start, timezone.localtime(last_live.starts_at).date() + timedelta(days=1))
     live = _live_starts(person, start)
-    new, day, limit = [], start, start + timedelta(days=3 * 366)
+    off = holidays.between(start, start + timedelta(days=HORIZON_DAYS))
+    new, day, limit = [], start, start + timedelta(days=HORIZON_DAYS)
     while len(new) < wanted and day <= limit:
         for slot in sorted(slots, key=lambda s: s.start_time):
             if slot.weekday != day.weekday() or not on_week_cycle(day, slot.valid_from, slot.interval_weeks):
                 continue
-            if day.isoformat() in (slot.skipped_dates or []) or at(day, slot.start_time) in live:
+            if day in off or day.isoformat() in (slot.skipped_dates or []) or at(day, slot.start_time) in live:
                 continue
             new.append((day, slot))
             if len(new) == wanted:

@@ -42,6 +42,7 @@
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
     <h1 class="mb-0"><i class="bi bi-calendar-week"></i> Agenda</h1>
     <div class="d-flex gap-2">
+        <a href="{% nav_url 'core:agenda_holidays' %}" class="btn btn-outline-secondary btn-icon" title="Feriados"><i class="bi bi-flag"></i><span class="visually-hidden">Feriados</span></a>
         <a href="{% url 'core:calendar_settings' %}" class="btn btn-outline-secondary" title="Ver a agenda no Google Agenda"><i class="bi bi-google"></i><span class="d-none d-sm-inline"> Google Agenda</span></a>
         <a href="{% nav_url 'core:appointment_create' %}" class="btn btn-primary d-none d-lg-inline-block"><i class="bi bi-plus-circle"></i> Nova aula</a>
     </div>

@@ -5,7 +5,7 @@ from django.utils import timezone
 from .recurrence import MAX_INTERVAL, MAX_OCCURRENCES, MAX_SPAN_DAYS, end_date
 from .validators import normalize_phone, normalize_state, normalize_zip_code, validate_birth_date, digits_only
 from .models import (
-    Appointment, Payment, Package, ScheduleSlot, StudentPackage,
+    Appointment, Holiday, Payment, Package, ScheduleSlot, StudentPackage,
     Assessment, Exercise, Person, PersonRoutine, ProgressPhoto, Routine, RoutineExercise, StudentNote,
 )
 
@@ -622,3 +622,16 @@ class AppointmentForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['person'].queryset = Person.objects.filter(is_active=True).order_by('person_name')
+
+
+class HolidayForm(forms.ModelForm):
+    """A day with no classes the trainer adds (local holiday, studio closed)."""
+    class Meta:
+        model = Holiday
+        fields = ['date', 'name']
+        labels = {'date': 'Dia', 'name': 'Nome'}
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'maxlength': '80', 'placeholder': 'Ex.: São João, estúdio fechado'}),
+        }
+        error_messages = {'date': {'unique': 'Este dia já está na lista.'}}
