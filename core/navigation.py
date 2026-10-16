@@ -37,6 +37,7 @@ BACK_LABELS = {
     'my_workouts': 'Voltar aos treinos',
     'workout_execute': 'Voltar ao treino em andamento',
     'my_history': 'Voltar ao histórico',
+    'my_evolution': 'Voltar à minha evolução',
     'exercise_progress': 'Voltar à evolução do exercício',
 }
 

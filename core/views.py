@@ -28,7 +28,7 @@ from allauth.account.models import EmailAddress
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, trainer_dashboard
 from .forms import (
     AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ClassRequestForm, ConsentForm, SaleForm, ExerciseForm, PaymentForm,
-    HolidayForm, PersonForm, PersonRoutineForm, PackageForm, RepeatForm, ScheduleSlotForm, SlotEditForm, SlotFillForm,
+    HolidayForm, MyPhotoForm, PersonForm, PersonRoutineForm, PackageForm, RepeatForm, ScheduleSlotForm, SlotEditForm, SlotFillForm,
     ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
 )
 from .agenda import (
@@ -613,7 +613,7 @@ def my_consent_photos(request, person):
     granted = request.POST.get('granted') == '1'
     record_consent(person, ConsentRecord.Kind.PHOTOS, granted, actor=request.user)
     messages.success(request, 'Preferência de fotos atualizada.')
-    return redirect('core:my_privacy')
+    return redirect(safe_next_url(request, reverse('core:my_privacy')))
 
 
 @student_required(consent_gate=False)
@@ -704,7 +704,43 @@ def my_evolution(request, person):
     return render(request, 'core/my_evolution.html', {
         'title': 'Minha evolução', 'assessments': assessments, 'assessment_chart': evolution.chart_points(assessments),
         'can_compare': bool(evolution.comparable_angles(assessments)),
+        'photos_consent': _photos_consent(person),
         'loose_photos': list(person.progress_photos.filter(assessment__isnull=True))})
+
+
+def _photos_consent(person):
+    return is_granted(current_consents(person)[ConsentRecord.Kind.PHOTOS])
+
+
+@student_required
+def my_photo_upload(request, person):
+    """The student adds a progress photo herself (camera or gallery). Needs her photo consent; it is a loose photo that
+    the trainer sees marked "enviada pelo aluno"."""
+    consent = _photos_consent(person)
+    form = MyPhotoForm(request.POST or None, request.FILES or None, person=person)
+    if request.method == 'POST' and not consent:
+        messages.error(request, 'Autorize o registro de fotos para enviar.')
+        return redirect(request.get_full_path())
+    if request.method == 'POST' and form.is_valid():
+        photo = form.save(commit=False)
+        photo.person = person
+        photo.uploaded_by_student = True
+        photo.save()
+        messages.success(request, 'Foto enviada. Só você e a sua personal conseguem vê-la.')
+        return redirect(after_save_url(request, reverse('core:my_evolution')))
+    return render(request, 'core/my_photo_form.html', {
+        'form': form, 'photos_consent': consent, 'title': 'Enviar foto',
+        'back_default': reverse('core:my_evolution')})
+
+
+@student_required
+@require_POST
+def my_photo_delete(request, person, pk):
+    """The student removes a photo she sent herself (the trainer's own photos are never hers to delete)."""
+    photo = get_object_or_404(person.progress_photos.filter(uploaded_by_student=True), pk=pk)
+    photo.delete()
+    messages.success(request, 'Foto removida.')
+    return redirect(after_save_url(request, reverse('core:my_evolution')))
 
 
 @student_required
