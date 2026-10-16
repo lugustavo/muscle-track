@@ -206,10 +206,21 @@ def edit_package(package, actor=None, *, name, sessions, valid_days, pricing_mod
     return changed
 
 
-def awaiting_refund():
-    """Packages cancelled from now on (the classes given are known) that still hold money: paid more than the classes given and nothing (or not enough) given back.
+def overpaid_text(package, amount):
+    """The words for a refund of what was paid above the price, to send to the student."""
+    return '\n'.join([
+        f'Pacote: {package.name}',
+        f'Valor combinado: {money(package.price_total)}',
+        f'Pago: {money(packages.paid_amount(package))}',
+        f'Valor devolvido (diferença): {money(amount)}'])
 
-    Each row: student, package, quote (with `suggested`). Only rows where something would be due are listed."""
+
+def awaiting_refund():
+    """Money that should go back and has not: packages cancelled from now on (the classes given are known) that still
+    hold more than the classes given, and open packages paid above their price (e.g. the price was lowered).
+
+    Each row: student, package, quote (with `suggested`), kind ('cancelled' or 'overpaid'). Only rows where something is
+    due are listed."""
     from .models import StudentPackage
 
     rows = []
@@ -217,7 +228,14 @@ def awaiting_refund():
             'person').prefetch_related('payments', 'refunds'):
         quote = cancellation_quote(package)
         if quote['suggested'] > 0:
-            rows.append({'student': package.person, 'package': package, 'quote': quote})
+            rows.append({'student': package.person, 'package': package, 'quote': quote, 'kind': 'cancelled'})
+    for package in StudentPackage.objects.filter(cancelled_at__isnull=True, price_total__isnull=False).select_related(
+            'person').prefetch_related('payments', 'refunds'):
+        extra = packages.overpaid_amount(package)
+        if extra > 0:
+            quote = {'paid': packages.paid_amount(package), 'used': package.appointments.count(), 'suggested': extra,
+                     'price': package.price_total}
+            rows.append({'student': package.person, 'package': package, 'quote': quote, 'kind': 'overpaid'})
     rows.sort(key=lambda r: (-r['quote']['suggested'], r['student'].person_name))
     return rows
 

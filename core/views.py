@@ -475,6 +475,10 @@ def student_package_edit(request, pk, package_pk):
             form.add_error(None, str(error))
         else:
             messages.success(request, 'Pacote atualizado.' if changed else 'Nada mudou.')
+            package.refresh_from_db()
+            extra = packages.overpaid_amount(package)
+            if extra:
+                messages.warning(request, f'O novo valor ficou {money(extra)} abaixo do que já foi pago: há essa diferença a devolver (Financeiro → Devoluções e ajustes).')
             return redirect(_student_tab(request, pk, 'ficha'))
     overview = packages.overview(student)
     row = next((r for r in overview['rows'] if r['package'].pk == package.pk), None)
@@ -536,19 +540,27 @@ def refund_create(request, pk):
     elif request.GET.get('package', '').isdigit():
         package = student.packages.filter(pk=request.GET['package']).first()
         if package:
-            initial.update(student_package=package, amount=refunds.cancellation_quote(package)['suggested'] or None)
+            extra = packages.overpaid_amount(package)
+            initial.update(student_package=package, amount=(extra or refunds.cancellation_quote(package)['suggested']) or None)
+            if extra:
+                initial['reason'] = 'Valor do pacote reduzido: pago a mais'
     form = RefundForm(request.POST or None, person=student, initial=initial)
     if request.method == 'POST' and form.is_valid():
         data = form.cleaned_data
+        package = data['student_package'] or (data['payment'].student_package if data['payment'] else None)
+        extra = packages.overpaid_amount(package) if package else Decimal('0')
+        summary = refunds.overpaid_text(package, data['amount']) if extra and data['kind'] == Refund.Kind.REFUND else ''
         try:
             refund = refunds.register_refund(
                 student, amount=data['amount'], method=data['method'], refunded_on=data['refunded_on'],
                 reason=data['reason'], kind=data['kind'], package=data['student_package'], payment=data['payment'],
-                actor=request.user)
+                summary=summary, actor=request.user)
         except refunds.RefundError as error:
             form.add_error(None, str(error))
         else:
             messages.success(request, f'{refund.get_kind_display()} registrada.')
+            if refund.summary:
+                return redirect(reverse('core:refund_detail', kwargs={'pk': refund.pk}))
             return redirect(_student_tab(request, student.pk, 'pagamentos'))
     return render(request, 'core/refund_form.html', {'form': form, 'student': student, 'title': 'Devolver ou estornar'})
 
