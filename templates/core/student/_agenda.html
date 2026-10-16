@@ -4,20 +4,24 @@
         <h5 class="mb-3"><i class="bi bi-calendar-week"></i> Horários fixos</h5>
         <ul class="list-group mb-3">
             {% for slot in slots %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span><strong>{{ slot.get_weekday_display }}</strong> às {{ slot.start_time|time:"H:i" }} <small class="text-muted">({{ slot.duration_minutes }} min){% if slot.interval_weeks > 1 %} · a cada {{ slot.interval_weeks }} semanas{% endif %}{% if slot.valid_until %} · até {{ slot.valid_until|date:"d/m/Y" }}{% endif %}</small></span>
-                <span class="text-nowrap">
-                <a href="{% nav_url 'core:slot_edit' slot.pk %}" class="btn btn-sm btn-link p-0 me-2" title="Editar"><i class="bi bi-pencil"></i></a>
-                <form method="post" action="{% nav_url 'core:slot_delete' slot.pk %}" class="d-inline" onsubmit="return confirm('Remover este horário? As aulas futuras dele saem da agenda.');">
-                    {% csrf_token %}
-                    <button class="btn btn-sm btn-link text-danger p-0" title="Remover"><i class="bi bi-trash"></i></button>
-                </form>
-                </span>
+            <li class="list-group-item p-0 swipe-row" data-swipe-row data-slot="{{ slot.pk }}">
+                <div class="swipe-content px-3 py-2">
+                    <strong>{{ slot.get_weekday_display }}</strong> às {{ slot.start_time|time:"H:i" }} <small class="text-muted">({{ slot.duration_minutes }} min){% if slot.interval_weeks > 1 %} · a cada {{ slot.interval_weeks }} semanas{% endif %}{% if slot.valid_until %} · até {{ slot.valid_until|date:"d/m/Y" }}{% endif %}</small>
+                </div>
+                <div class="swipe-actions">
+                    <a href="{% nav_url 'core:slot_edit' slot.pk %}" class="btn btn-sm btn-link swipe-edit" title="Editar" data-slot-edit>
+                        <i class="bi bi-pencil"></i><span class="swipe-label">Editar</span></a>
+                    <form method="post" action="{% nav_url 'core:slot_delete' slot.pk %}" onsubmit="return confirm('Remover este horário? As aulas futuras dele saem da agenda.');">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-link swipe-remove" title="Remover" data-slot-remove><i class="bi bi-trash"></i><span class="swipe-label">Remover</span></button>
+                    </form>
+                </div>
             </li>
             {% empty %}
             <li class="list-group-item text-muted">Nenhum horário fixo. Adicione abaixo (ex.: segunda 07:00).</li>
             {% endfor %}
         </ul>
+        {% if slots %}<p class="small text-muted mt-n2 mb-3 d-md-none"><i class="bi bi-arrow-left-right"></i> Deslize o horário para a esquerda para editar ou remover.</p>{% endif %}
         {% if slot_plan %}
         <div class="alert alert-info py-2 small" data-slot-package>
             <i class="bi bi-box-seam"></i> <strong>{{ slot_plan.package.name }}</strong>:
@@ -97,12 +101,12 @@
                     <small class="text-muted">{{ a.get_kind_display }}</small>
                 </div>
                 <div class="swipe-actions">
-                    <a href="{% nav_url 'core:appointment_reschedule' a.pk %}" class="btn btn-sm btn-outline-secondary swipe-edit" data-class-edit>
-                        <i class="bi bi-pencil"></i><span>Editar</span></a>
+                    <a href="{% nav_url 'core:appointment_reschedule' a.pk %}" class="btn btn-sm btn-link swipe-edit" title="Editar" data-class-edit>
+                        <i class="bi bi-pencil"></i><span class="swipe-label">Editar</span></a>
                     <form method="post" action="{% nav_url 'core:appointment_remove' a.pk %}"
                           onsubmit="return confirm('{% if a.slot_id %}Remover esta aula? Ela sai da agenda e não desconta do pacote; o horário fixo continua nas próximas.{% else %}Remover esta aula avulsa?{% endif %}');">
                         {% csrf_token %}
-                        <button class="btn btn-sm btn-outline-danger swipe-remove" data-class-remove><i class="bi bi-trash"></i><span>Remover</span></button>
+                        <button class="btn btn-sm btn-link swipe-remove" title="Remover" data-class-remove><i class="bi bi-trash"></i><span class="swipe-label">Remover</span></button>
                     </form>
                 </div>
             </li>
