@@ -116,6 +116,10 @@ Os dados vivem em volumes do Docker: `pgdata` (banco), `media` (fotos e mídia d
 | `ALLOW_PUBLIC_SIGNUP` | `False` (padrão): só entra quem foi convidado |
 | `OPENAI_API_KEY`, `OPENAI_MODEL` | Geração de treino com IA (opcional) |
 | `PRIVACY_CONTROLLER_NAME`, `PRIVACY_CONTACT_EMAIL` | Nome e e-mail do responsável pelos dados, exibidos na política de privacidade |
+| `STUDIO_NAME` | Nome do estúdio ou da personal (ex.: `Studio da Ana`): aparece no topo, na landing, no rodapé, no título e no nome do app instalado. Vazio = "Muscle Track" |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Ativa o botão **Continuar com Google** (só aparece com as duas chaves). Ver "Entrar com Google, Facebook e X" |
+| `FACEBOOK_CLIENT_ID` / `FACEBOOK_CLIENT_SECRET` | Ativa **Continuar com Facebook** (ID e chave secreta do app) |
+| `X_CLIENT_ID` / `X_CLIENT_SECRET` | Ativa **Continuar com X** (OAuth 2.0 do app no X Developer Portal) |
 | `AGENDA_NOTICE_HOURS` | Antecedência mínima, em horas, para o aluno pedir remarcação/cancelamento pelo app (padrão `24`; `0` = sem prazo) |
 | `HOLIDAYS_REGION` | Feriados nacionais que o preenchimento da agenda pula: `PT` (padrão), `BR` ou vazio para nenhum; os dias próprios da personal ficam em Agenda → Feriados |
 | `CALENDAR_LOCATION` | Local das aulas que aparece no Google Agenda / Apple Calendar (opcional) |
@@ -157,6 +161,21 @@ Bootstrap, ícones, Chart.js e SortableJS são servidos localmente de `static/ve
 **Botão Voltar compacto:** todo `{% back_button url %}` com texto "Voltar ao …" gerado mostra só a seta no celular (botões com texto próprio, como "Cancelar", mantêm o texto; `compact=True` força) (o nome fica para leitores de tela e no `title`) e o texto completo a partir de `md`; usado em **Progresso do Treino** e **Detalhes da Sessão**, onde os quatro cartões de estatística (`metric-tile`) também ficam em grade 2×2 no celular.
 
 Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests/test_navigation_global.py` percorre todos os links com `next=` e confere o botão de voltar de cada página.
+
+## Entrar com Google, Facebook e X (opcional)
+
+Cada botão só existe quando as duas chaves do provedor estão no `.env` (sem elas, nada aparece, nem o separador "ou com e-mail"). Depois de preencher, `docker compose up -d --build` (as tabelas do `allauth.socialaccount` entram pela migração).
+
+**Endereços de retorno** (cadastre no painel de cada provedor; troque `SEU-DOMINIO` por `DOMAIN`):
+- Google: `https://SEU-DOMINIO/accounts/google/login/callback/`
+- Facebook: `https://SEU-DOMINIO/accounts/facebook/login/callback/`
+- X: `https://SEU-DOMINIO/accounts/twitter_oauth2/login/callback/`
+
+**Regras (o app é só por convite):**
+- O SSO **nunca cria conta**: só entra quem já tem acesso. Sem acesso, o login volta com "peça um convite à sua personal".
+- **Google** liga sozinho à conta existente quando o Google confirma o e-mail e ele bate com o do aluno (ou da personal).
+- **Facebook e X** não garantem e-mail confiável: a pessoa entra uma vez com e-mail e senha e conecta a conta em **Contas conectadas** (menu da conta, ou Perfil no celular); depois o botão funciona. Isso impede que alguém assuma a conta de outra pessoa.
+- Os tokens do provedor não são guardados (só a identidade). Desconectar uma conta também fica em *Contas conectadas*.
 
 ## Segurança — o que já está coberto
 - Área da personal restrita a contas `is_staff`; cada aluno só enxerga e altera os **próprios** treinos e sessões

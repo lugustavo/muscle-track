@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ brand_name }} - Gestão para personal trainers, com o aluno por dentro{% endblock %}
+
+{% block meta_description %}Gestão para personal trainers: alunos, treinos, agenda, pacotes e pagamentos num só lugar, e cada aluno acompanha o próprio treino, a evolução e as aulas pelo celular.{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/landing.css' %}">{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+<section class="lp-hero" data-landing-hero>
+    <div class="row align-items-center g-4 g-lg-5">
+        <div class="col-lg-7">
+            {% if studio_name %}<div class="lp-brand mb-2" data-studio-name><i class="bi bi-lightning-charge-fill"></i> {{ studio_name }}</div>{% endif %}
+            <span class="lp-pill mb-3"><i class="bi bi-shield-check text-success"></i> Acesso por convite da sua personal</span>
+            <h1 class="mb-3">Sua rotina de personal, <span class="lp-accent">organizada.</span> Seus alunos, sempre por dentro.</h1>
+            <p class="lead text-body-secondary mb-4">Controle fichas de treino, aulas e pacotes, e deixe cada aluno acompanhar o próprio treino, a evolução e a agenda.</p>
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                <a href="#entrar" class="btn btn-primary btn-lg px-4 d-lg-none"><i class="bi bi-box-arrow-in-right"></i> Entrar</a>
+                <a href="#como" class="btn btn-outline-secondary btn-lg">Como funciona</a>
+            </div>
+            <div class="d-flex flex-wrap gap-3 text-body-secondary small">
+                <span><i class="bi bi-phone"></i> Instala como app</span>
+                <span><i class="bi bi-moon-stars"></i> Modo escuro</span>
+                <span><i class="bi bi-lock"></i> Dados privados (LGPD)</span>
+            </div>
+        </div>
+        <div class="col-lg-5" id="entrar">
+            {% include 'includes/_login_card.html' with next='' %}
+        </div>
+    </div>
+</section>
+
+<section class="py-5" id="como">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">Uma ferramenta para a personal, um app para o aluno</h2>
+        <p class="text-body-secondary mb-0">Os dois lados enxergam a mesma informação, cada um do seu jeito.</p>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="lp-feature" data-for="trainer">
+                <div class="lp-ico"><i class="bi bi-person-workspace"></i></div>
+                <h3>Para a personal</h3>
+                <ul class="list-unstyled mb-0">
+                    <li><i class="bi bi-check2-circle"></i> <span>Painel “Hoje”: quem precisa de atenção, faltas e pagamentos pendentes</span></li>
+                    <li><i class="bi bi-check2-circle"></i> <span>Fichas de treino, modelos e exercícios com vídeo</span></li>
+                    <li><i class="bi bi-check2-circle"></i> <span>Agenda com horários fixos, feriados e remarcação</span></li>
+                    <li><i class="bi bi-check2-circle"></i> <span>Pacotes de aulas, pagamentos e devoluções</span></li>
+                    <li><i class="bi bi-check2-circle"></i> <span>Avaliações com medidas e fotos, e lembretes por WhatsApp</span></li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="lp-feature" data-for="student">
+                <div class="lp-ico alt"><i class="bi bi-phone"></i></div>
+                <h3>Para o aluno</h3>
+                <ul class="list-unstyled mb-0">
+                    <li><i class="bi bi-check2-circle"></i> <span>Treino do dia com cronômetro, séries e cargas</span></li>
+                    <li><i class="bi bi-check2-circle"></i> <span>Minha evolução: medidas, gráficos e fotos lado a lado</span></li>
+                    <li><i class="bi bi-check2-circle"></i> <span>Agenda e pedido de remarcação em um toque</span></li>
+                    <li><i class="bi bi-check2-circle"></i> <span>Meu pacote: aulas feitas, restantes e validade</span></li>
+                    <li><i class="bi bi-check2-circle"></i> <span>Lembretes de aula e de pacote acabando</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-4 py-md-5">
+    <div class="row g-4 align-items-center">
+        <div class="col-lg-5 d-none d-md-block">
+            <div class="lp-phone" aria-hidden="true"><div class="lp-screen">
+                <div class="small text-body-secondary">Hoje</div>
+                <div class="fw-bold fs-5 mb-2">Treino B · Costas e bíceps</div>
+                <div class="lp-mini d-flex justify-content-between align-items-center"><div><div class="small text-body-secondary">Tempo</div><div class="lp-timer">24:18</div></div><span class="badge text-bg-success">Em andamento</span></div>
+                <div class="lp-mini"><div class="d-flex justify-content-between"><strong>Remada curvada</strong><i class="bi bi-check-circle-fill text-success"></i></div><div class="small text-body-secondary">4 × 10 · 30 kg</div></div>
+                <div class="lp-mini"><div class="d-flex justify-content-between"><strong>Puxada frontal</strong><span class="small">3/4</span></div><div class="small text-body-secondary">4 × 12 · 45 kg</div></div>
+                <div class="lp-mini mb-0"><div class="d-flex justify-content-between"><strong>Rosca direta</strong><span class="small text-body-secondary">0/3</span></div><div class="small text-body-secondary">3 × 12 · 12 kg</div></div>
+            </div></div>
+        </div>
+        <div class="col-lg-7">
+            <h2 class="fw-bold">Como começar</h2>
+            <p class="text-body-secondary">O acesso é criado pela personal trainer, por isso não há cadastro aberto.</p>
+            <div class="d-grid gap-3">
+                <div class="lp-step"><span class="lp-n">1</span><div><strong>A personal cadastra o aluno</strong><div class="small text-body-secondary">Ficha, treino, agenda e pacote ficam prontos antes do primeiro acesso.</div></div></div>
+                <div class="lp-step"><span class="lp-n">2</span><div><strong>O aluno recebe o convite e cria a senha</strong><div class="small text-body-secondary">Pelo WhatsApp ou e-mail.{% if sso_providers %} Depois, pode entrar também com {% for p in sso_providers %}{{ p.name }}{% if not forloop.last %}{% if forloop.revcounter == 2 %} ou {% else %}, {% endif %}{% endif %}{% endfor %}.{% endif %}</div></div></div>
+                <div class="lp-step"><span class="lp-n">3</span><div><strong>Os dois acompanham tudo</strong><div class="small text-body-secondary">Instale na tela inicial do celular e abra o treino do dia em um toque.</div></div></div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

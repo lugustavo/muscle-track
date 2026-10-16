@@ -1,0 +1,18 @@
+{# "Continue with ..." buttons: one POST form per configured provider (settings.SSO_PROVIDERS); nothing when none is. #}
+{% if sso_providers %}
+<div class="d-grid gap-2" data-sso-buttons>
+    {% for p in sso_providers %}
+    <form method="post" action="{{ p.url }}">
+        {% csrf_token %}
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+        <button type="submit" class="lp-sso" data-sso="{{ p.id }}">
+            {% if p.id == 'google' %}<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.5-4.1 7-10.2 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 010-9.4l-7.9-6.1a24 24 0 000 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 12-2.1 16-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
+            {% elif p.id == 'facebook' %}<i class="bi bi-facebook" style="color:#1877F2" aria-hidden="true"></i>
+            {% else %}<i class="bi bi-twitter-x" aria-hidden="true"></i>{% endif %}
+            Continuar com {{ p.name }}
+        </button>
+    </form>
+    {% endfor %}
+</div>
+<div class="lp-divider" data-sso-divider>ou com e-mail</div>
+{% endif %}

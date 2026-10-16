@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     # Third party apps
     'allauth',
     'allauth.account',
+    'allauth.socialaccount',
     'crispy_forms',
     'crispy_bootstrap5',
     'django_select2',
@@ -96,6 +97,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.app_nav',
+                'core.context_processors.branding',
             ],
         },
     },
@@ -206,6 +208,29 @@ ACCOUNT_EMAIL_VERIFICATION = config('ACCOUNT_EMAIL_VERIFICATION', default='optio
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True  # Login automático após confirmação (se acontecer)
 LOGIN_REDIRECT_URL = '/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+
+# Name shown in the header, the landing page and the installed app (empty = "Muscle Track")
+STUDIO_NAME = config('STUDIO_NAME', default='').strip()
+
+# Single sign-on: a provider only exists (button, URLs, app) when both of its keys are in the environment.
+# The app is invite-only: SSO never creates an account, it only signs in someone whose account already exists
+# (see core.adapters.SocialAccountAdapter).
+SOCIALACCOUNT_ADAPTER = 'core.adapters.SocialAccountAdapter'
+SOCIALACCOUNT_STORE_TOKENS = False        # we only need to know who it is, not to act on their behalf
+SOCIALACCOUNT_AUTO_SIGNUP = False
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = False
+SOCIALACCOUNT_PROVIDERS = {}
+SSO_PROVIDERS = []                        # what the login screens offer: [{'id', 'name', 'login_url_name'}]
+for _id, _app, _name, _env, _extra in (
+        ('google', 'allauth.socialaccount.providers.google', 'Google', 'GOOGLE', {'SCOPE': ['profile', 'email']}),
+        ('facebook', 'allauth.socialaccount.providers.facebook', 'Facebook', 'FACEBOOK',
+         {'METHOD': 'oauth2', 'SCOPE': ['email', 'public_profile']}),
+        ('twitter_oauth2', 'allauth.socialaccount.providers.twitter_oauth2', 'X', 'X', {})):
+    _client_id, _secret = config(f'{_env}_CLIENT_ID', default='').strip(), config(f'{_env}_CLIENT_SECRET', default='').strip()
+    if _client_id and _secret:
+        INSTALLED_APPS.append(_app)
+        SOCIALACCOUNT_PROVIDERS[_id] = {**_extra, 'APP': {'client_id': _client_id, 'secret': _secret, 'key': ''}}
+        SSO_PROVIDERS.append({'id': _id, 'name': _name, 'login_url_name': f'{_id}_login'})
 
 # Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"

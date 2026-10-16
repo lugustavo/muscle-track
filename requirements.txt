@@ -1,7 +1,7 @@
 Django==5.2.18
 python-decouple==3.8
 Pillow==12.3.0
-django-allauth==65.11.2
+django-allauth[socialaccount]==65.11.2
 openai==1.109.1
 django-crispy-forms==2.4
 crispy-bootstrap5==2025.6
