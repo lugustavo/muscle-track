@@ -39,7 +39,7 @@ from .agenda import (
 from .billing import (
     charge_message, delete_payment, month_bounds, month_summary, overdue_rows, parse_month, register_payment, service_report,
 )
-from . import class_requests, evolution, intro, notifications, packages
+from . import class_requests, evolution, intro, notifications, packages, whatsapp_messages
 from .consistency import celebrations
 from .calendar_feed import build_ics, feed_for_token, get_or_create_feed, mark_fetched, rotate
 from .consent import (
@@ -50,7 +50,7 @@ from .exports import build_export
 from .history import log_event, log_profile_edit
 from .invites import build_invite_url, get_user_from_invite, revoke_invites
 from .models import (
-    Appointment, AppointmentRequest, Assessment, CalendarFeed, NotificationPreference, PushSubscription, ConsentRecord, Exercise, MuscleGroup, Payment, Package, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
+    Appointment, AppointmentRequest, Assessment, CalendarFeed, NotificationPreference, PushSubscription, WhatsAppTemplate, ConsentRecord, Exercise, MuscleGroup, Payment, Package, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
     Routine, RoutineExercise, SessionExercise, SessionSet, StudentEvent, StudentNote, WorkoutSession,
 )
 from .navigation import after_save_url, back_label, safe_next_url, with_next
@@ -245,10 +245,8 @@ def student_invite(request, pk):
         return redirect(request.get_full_path())
     invite_url = build_invite_url(request, student.user)
 
-    whatsapp_text = (
-        f'Olá, {student.person_name.split()[0]}! Seu acesso ao Muscle Track está pronto. '
-        f'Crie sua senha por este link (válido por 7 dias): {invite_url}'
-    )
+    whatsapp_text = whatsapp_messages.render(
+        whatsapp_messages.Kind.INVITE, {'nome': student.person_name.split()[0], 'link': invite_url})
 
     return render(request, 'core/student_invite.html', {
         'student': student,
@@ -1930,6 +1928,56 @@ def _set_channel(user, person, pref, channel, enabled):
             changes={'channel': channel, 'granted': enabled})
 
 
+def _whatsapp_cards():
+    """What the "Mensagens" tab shows for each editable WhatsApp text."""
+    saved = {t.kind: t for t in WhatsAppTemplate.objects.all()}
+    cards = []
+    for kind in WhatsAppTemplate.Kind:
+        text = saved[kind.value].text if kind.value in saved else whatsapp_messages.DEFAULTS[kind]
+        label, when = whatsapp_messages.LABELS[kind]
+        cards.append({
+            'kind': kind.value, 'label': label, 'when': when, 'text': text, 'customized': kind.value in saved,
+            'variables': whatsapp_messages.VARIABLES[kind], 'required': whatsapp_messages.REQUIRED.get(kind, ()),
+            'preview': whatsapp_messages.render(kind, whatsapp_messages.SAMPLE, text),
+            'save_url': reverse('core:whatsapp_template_save', kwargs={'kind': kind.value}),
+            'preview_url': reverse('core:whatsapp_template_preview', kwargs={'kind': kind.value}),
+            'max_length': whatsapp_messages.MAX_LENGTH,
+        })
+    return cards
+
+
+@staff_required
+@require_POST
+def whatsapp_template_save(request, kind):
+    """Save the trainer's text for one WhatsApp message, or go back to the default one."""
+    if kind not in WhatsAppTemplate.Kind.values:
+        raise Http404
+    if request.POST.get('action') == 'reset':
+        WhatsAppTemplate.objects.filter(kind=kind).delete()
+        messages.success(request, 'Texto padrão restaurado.')
+    else:
+        text = request.POST.get('text', '').strip()
+        errors = whatsapp_messages.problems(kind, text)
+        if errors:
+            messages.error(request, 'Texto não salvo: ' + ' '.join(errors))
+        else:
+            WhatsAppTemplate.objects.update_or_create(kind=kind, defaults={'text': text, 'updated_by': request.user})
+            messages.success(request, 'Mensagem salva.')
+    return redirect(reverse('core:notification_settings') + '#tab-mensagens')
+
+
+@staff_required
+def whatsapp_template_preview(request, kind):
+    """The message as it would go, with an example student (for the live preview while the trainer types)."""
+    if kind not in WhatsAppTemplate.Kind.values:
+        raise Http404
+    text = request.GET.get('text', '')
+    response = JsonResponse({'text': whatsapp_messages.render(kind, whatsapp_messages.SAMPLE, text),
+                             'errors': whatsapp_messages.problems(kind, text)})
+    response['Cache-Control'] = 'no-store'
+    return response
+
+
 @login_required
 def notification_settings(request):
     """Each person chooses whether to get notifications (e-mail, push on this device); everything starts off."""
@@ -1972,6 +2020,7 @@ def notification_settings(request):
         'push_ready': notifications.push_configured(), 'email_ready': notifications.email_configured(),
         'reminder_hours': settings.REMINDER_CLASS_HOURS, 'plan_days': settings.REMINDER_PLAN_DAYS,
         'vapid_public_key': settings.VAPID_PUBLIC_KEY, 'recent': recent, 'is_trainer': request.user.is_staff,
+        'wa_templates': _whatsapp_cards() if request.user.is_staff else [],
     })
 
 
@@ -2274,8 +2323,10 @@ def finance(request):
     year, month = parse_month(request.GET.get('mes'))
     summary = month_summary(year, month)
     pending = overdue_rows()
+    charge_text = whatsapp_messages.current_text(whatsapp_messages.Kind.CHARGE)
     for row in pending:
-        row['whatsapp'] = whatsapp_url(row['student'].phone, charge_message(row['student'], row['package'], row['amount']))
+        row['whatsapp'] = whatsapp_url(row['student'].phone,
+                                       charge_message(row['student'], row['package'], row['amount'], charge_text))
     prev_month, next_month = _month_nav(year, month)
     return render(request, 'core/finance.html', {
         'month_value': f'{year}-{month:02d}', 'month_label': date(year, month, 1),

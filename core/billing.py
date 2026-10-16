@@ -130,16 +130,11 @@ def service_report(year, month):
     }
 
 
-def charge_message(person, package, amount):
-    """The WhatsApp text asking for the payment of a package (paid at the first class)."""
-    first = person.person_name.split()[0]
-    parts = [f'Olá, {first}! Passando para lembrar do pagamento do pacote']
-    if package is not None:
-        parts[-1] += f' {package.name}'
-    parts[-1] += '.'
-    if amount is not None:
-        parts.append(f'Valor: {money(amount)}.')
-    if settings.PIX_KEY:
-        parts.append(f'Chave Pix: {settings.PIX_KEY}')
-    parts.append('Qualquer dúvida é só falar. 💪')
-    return ' '.join(parts)
+def charge_message(person, package, amount, text=None):
+    """The WhatsApp text asking for the payment of a package (paid at the first class). Lists pass the trainer's
+    `text` (whatsapp_messages.current_text) once, instead of reading it for every row."""
+    from .whatsapp_messages import Kind, render
+
+    return render(Kind.CHARGE, {
+        'nome': person.person_name.split()[0], 'pacote': package.name if package is not None else '',
+        'valor': money(amount) if amount is not None else '', 'pix': settings.PIX_KEY}, text)
