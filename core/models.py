@@ -594,6 +594,7 @@ class ProgressPhoto(models.Model):
     image = models.ImageField(upload_to=progress_photo_path, validators=[validate_photo_image], verbose_name='Foto')
     thumbnail = models.ImageField(upload_to=progress_photo_path, blank=True, editable=False, verbose_name='Miniatura')
     caption = models.CharField(max_length=200, blank=True, verbose_name='Legenda')
+    uploaded_by_student = models.BooleanField(default=False, editable=False, verbose_name='Enviada pelo aluno')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

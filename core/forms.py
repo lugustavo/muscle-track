@@ -322,6 +322,40 @@ class ProgressPhotoForm(forms.ModelForm):
         }
 
 
+class MyPhotoForm(forms.ModelForm):
+    """A photo the student sends herself: always a loose one (no assessment), with the position and the day."""
+    MAX_PHOTOS = 60   # per student: keeps the disk safe from a runaway upload loop
+
+    def __init__(self, *args, person=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.person = person
+        self.fields['date'].required = False
+        self.fields['angle'].required = False
+        self.fields['angle'].choices = [(a.value, a.label) for a in ProgressPhoto.SEQUENCE] + [('other', 'Outra')]
+
+    def clean(self):
+        data = super().clean()
+        data['angle'] = data.get('angle') or ProgressPhoto.Angle.OTHER
+        today = timezone.localdate()
+        if not data.get('date'):
+            data['date'] = today
+        elif data['date'] > today:
+            self.add_error('date', 'A data não pode ser no futuro.')
+        if self.person is not None and self.person.progress_photos.filter(uploaded_by_student=True).count() >= self.MAX_PHOTOS:
+            raise forms.ValidationError(f'Você já enviou {self.MAX_PHOTOS} fotos: remova algumas para enviar outras.')
+        return data
+
+    class Meta:
+        model = ProgressPhoto
+        fields = ['angle', 'date', 'image', 'caption']
+        widgets = {
+            'angle': forms.Select(attrs={'class': 'form-select'}),
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
+            'image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+            'caption': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Opcional'}),
+        }
+
+
 class StudentNoteForm(forms.ModelForm):
     class Meta:
         model = StudentNote

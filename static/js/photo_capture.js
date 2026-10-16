@@ -131,13 +131,13 @@
     window.addEventListener('pagehide', stopLive);
 
     // The date only matters for loose photos; "save and next" only makes sense inside an assessment
-    var assessment = form.querySelector('select[name=assessment]');
+    var assessment = form.querySelector('select[name=assessment]');   // the student's own form has none
     function syncAssessment() {
         var has = !!assessment.value;
         form.querySelector('[data-loose-date]').hidden = has;
         form.querySelector('[data-save-next]').hidden = !has;
     }
-    assessment.addEventListener('change', syncAssessment);
+    if (assessment) assessment.addEventListener('change', syncAssessment);
 
     if (coarse) {
         ready(true);   // a phone/tablet always has a camera app; without one the same input opens the gallery
