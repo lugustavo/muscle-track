@@ -25,6 +25,31 @@ class ProgressPageMobileTests(BaseTestCase):
         self.assertIn('title="Voltar ao aluno"', html)
 
 
+class SessionDetailMobileTests(BaseTestCase):
+    def setUp(self):
+        from core.models import WorkoutSession
+        session = WorkoutSession.objects.create(person_routine=self.alice_routine)
+        session.end_session()
+        self.url = reverse('core:session_detail', kwargs={'pk': session.pk})
+        self.login(self.trainer)
+
+    def test_back_button_is_icon_only_on_phones_but_keeps_its_name(self):
+        html = self.client.get(self.url, {'next': '/'}).content.decode()
+        self.assertIn('btn-back-compact', html)
+        self.assertIn('<span class="back-label"> Voltar ao painel</span>', html)
+        self.assertIn('title="Voltar ao painel"', html)
+
+    def test_student_sees_it_too(self):
+        self.login(self.alice)
+        html = self.client.get(self.url).content.decode()
+        self.assertIn('<span class="back-label"> Voltar ao histórico</span>', html)
+
+    def test_titles_shrink_on_phones(self):
+        html = self.client.get(self.url).content.decode()
+        self.assertIn('page-title-lg', html)
+        self.assertEqual(html.count('card-title-lg'), 2)
+
+
 class BackButtonTagTests(BaseTestCase):
     def render(self, args):
         request = RequestFactory().get('/')
