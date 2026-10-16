@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from core.consent import ALL_KINDS, record_consent
 from core.models import (
@@ -8,6 +8,7 @@ from core.models import (
 )
 
 
+@override_settings(HOLIDAYS_REGION='')   # no national holidays unless a test asks for them (dates are relative to today)
 class BaseTestCase(TestCase):
     """Shared fixtures: one trainer, two students, one routine each."""
 

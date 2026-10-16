@@ -25,6 +25,7 @@ BACK_LABELS = {
     'student_history': 'Voltar ao histórico do aluno',
     'student_invite': 'Voltar ao convite',
     'agenda': 'Voltar à agenda',
+    'agenda_holidays': 'Voltar aos feriados',
     'finance': 'Voltar ao financeiro',
     'plan_list': 'Voltar aos planos',
     'exercise_list': 'Voltar aos exercícios',

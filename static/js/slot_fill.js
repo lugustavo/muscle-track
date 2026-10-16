@@ -8,16 +8,18 @@
     var button = form.querySelector('[data-fill-submit]');
     var url = form.getAttribute('data-preview-url');
     var skip = new Set();
+    var keep = new Set();   // holidays the trainer ticked back on
     var timer = null, controller = null;
     var idleLabel = button.innerHTML;
 
     function params() {
         var data = new URLSearchParams();
         new FormData(form).forEach(function (value, key) {
-            if (key === 'csrfmiddlewaretoken' || key === 'skip') return;
+            if (key === 'csrfmiddlewaretoken' || key === 'skip' || key === 'keep') return;
             data.append(key, value);
         });
         skip.forEach(function (day) { data.append('skip', day); });
+        keep.forEach(function (day) { data.append('keep', day); });
         return data;
     }
 
@@ -51,19 +53,25 @@
             if (target.checked) skip.delete(target.getAttribute('data-skip-date'));
             else skip.add(target.getAttribute('data-skip-date'));
         }
+        if (target.matches && target.matches('[data-keep-date]')) {
+            if (target.checked) keep.add(target.getAttribute('data-keep-date'));
+            else keep.delete(target.getAttribute('data-keep-date'));
+        }
         later();
     });
     form.addEventListener('input', function (event) {
         if (event.target.type === 'time' || event.target.type === 'date' || event.target.type === 'number') later();
     });
     form.addEventListener('submit', function () {
-        form.querySelectorAll('input[name="skip"]').forEach(function (el) { el.remove(); });
-        skip.forEach(function (day) {
-            var input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'skip';
-            input.value = day;
-            form.appendChild(input);
+        form.querySelectorAll('input[name="skip"], input[name="keep"]').forEach(function (el) { el.remove(); });
+        [['skip', skip], ['keep', keep]].forEach(function (pair) {
+            pair[1].forEach(function (day) {
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = pair[0];
+                input.value = day;
+                form.appendChild(input);
+            });
         });
     });
     later();

@@ -11,19 +11,24 @@
         {% for row in preview.rows %}
         <li class="list-group-item py-1 d-flex justify-content-between align-items-center gap-2" data-preview-row="{{ row.date|date:'Y-m-d' }}" data-state="{{ row.state }}">
             <label class="d-flex gap-2 align-items-center mb-0 {% if row.state != 'new' %}text-muted{% endif %}">
+                {% if row.state == 'holiday' or row.kept %}
+                <input type="checkbox" class="form-check-input mt-0" data-keep-date="{{ row.date|date:'Y-m-d' }}"{% if row.kept %} checked{% endif %} aria-label="Dar aula mesmo assim em {{ row.date|date:'d/m' }} ({{ row.holiday }})">
+                {% else %}
                 <input type="checkbox" class="form-check-input mt-0" data-skip-date="{{ row.date|date:'Y-m-d' }}" {% if row.state == 'new' %}checked{% endif %}{% if row.state == 'exists' %} disabled{% endif %} aria-label="Marcar aula de {{ row.date|date:'d/m' }}">
+                {% endif %}
                 <span {% if row.state != 'new' %}class="text-decoration-line-through"{% endif %}>{{ row.date|date:"D d/m" }}{% if start_time %} · {{ start_time|time:"H:i" }}{% endif %}</span>
             </label>
             <span class="text-end">
                 {% if row.state == 'exists' %}<span class="badge bg-secondary">já tem aula</span>{% endif %}
                 {% if row.state == 'skipped' %}<span class="badge bg-secondary">sem aula</span>{% endif %}
+                {% if row.state == 'holiday' or row.kept %}<span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" title="Feriado: sem aula (marque para dar aula mesmo assim)"><i class="bi bi-flag"></i> {{ row.holiday }}</span>{% endif %}
                 {% if row.beyond %}<span class="badge bg-warning text-dark" title="Depois da validade do pacote">depois da validade</span>{% endif %}
                 {% if row.overlap %}<span class="badge bg-warning text-dark" title="Sobrepõe a aula de {{ row.overlap|join:', ' }}">sobrepõe {{ row.overlap|join:", " }}</span>{% endif %}
             </span>
         </li>
         {% endfor %}
     </ul>
-    <div class="form-text">Desmarque os dias sem aula (feriado, viagem): a próxima data entra no lugar.</div>
+    <div class="form-text">Os feriados já ficam de fora. Desmarque outros dias sem aula (viagem, folga): a próxima data entra no lugar.</div>
     {% if preview.short %}<div class="small text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> Só deu para marcar {{ preview.count }} de {{ preview.wanted }} aulas com essas escolhas.</div>{% endif %}
     {% if preview.beyond %}<div class="small text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> {{ preview.beyond }} aula{{ preview.beyond|pluralize }} depois de {{ preview.deadline|date:"d/m/Y" }}, fim da validade do pacote. Prorrogue o pacote ou mude as datas.</div>{% endif %}
 </div>

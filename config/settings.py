@@ -243,6 +243,10 @@ CURRENCY_POSITION = config('CURRENCY_POSITION', default='before' if CURRENCY_SYM
 # How many hours before a class the student can still ask to move or cancel it from the app
 AGENDA_NOTICE_HOURS = config('AGENDA_NOTICE_HOURS', default=24, cast=int)
 
+# National holidays that "Preencher a agenda" skips by itself: PT (Portugal), BR (Brasil) or empty for none.
+# The trainer's own days are added in Agenda -> Feriados.
+HOLIDAYS_REGION = config('HOLIDAYS_REGION', default='PT').strip().upper()
+
 # Site URL
 # Public address of the app, used to build invitation links. Leave empty to use
 # the address the trainer is browsing from.

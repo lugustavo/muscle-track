@@ -28,7 +28,7 @@ from allauth.account.models import EmailAddress
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, trainer_dashboard
 from .forms import (
     AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ClassRequestForm, ConsentForm, SaleForm, ExerciseForm, PaymentForm,
-    PersonForm, PersonRoutineForm, PackageForm, RepeatForm, ScheduleSlotForm, SlotEditForm, SlotFillForm,
+    HolidayForm, PersonForm, PersonRoutineForm, PackageForm, RepeatForm, ScheduleSlotForm, SlotEditForm, SlotFillForm,
     ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
 )
 from .agenda import (
@@ -39,7 +39,7 @@ from .agenda import (
 from .billing import (
     charge_message, delete_payment, month_bounds, month_summary, overdue_rows, parse_month, register_payment, service_report,
 )
-from . import class_requests, evolution, intro, notifications, packages, whatsapp_messages
+from . import class_requests, evolution, holidays, intro, notifications, packages, whatsapp_messages
 from .consistency import celebrations
 from .calendar_feed import build_ics, feed_for_token, get_or_create_feed, mark_fetched, rotate
 from .consent import (
@@ -50,7 +50,7 @@ from .exports import build_export
 from .history import log_event, log_profile_edit
 from .invites import build_invite_url, get_user_from_invite, revoke_invites
 from .models import (
-    Appointment, AppointmentRequest, Assessment, CalendarFeed, NotificationPreference, PushSubscription, WhatsAppTemplate, ConsentRecord, Exercise, MuscleGroup, Payment, Package, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
+    Appointment, AppointmentRequest, Assessment, CalendarFeed, Holiday, NotificationPreference, PushSubscription, WhatsAppTemplate, ConsentRecord, Exercise, MuscleGroup, Payment, Package, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
     Routine, RoutineExercise, SessionExercise, SessionSet, StudentEvent, StudentNote, WorkoutSession,
 )
 from .navigation import after_save_url, back_label, safe_next_url, with_next
@@ -2845,7 +2845,8 @@ def slot_preview(request, pk):
     if plan is not None and form.is_valid():
         data = form.cleaned_data
         preview = build_preview(student, plan, data['weekdays'], data['starts_on'], data['start_time'],
-                                data['duration_minutes'], data['interval_weeks'], _skip_dates(request.GET.getlist('skip')))
+                                data['duration_minutes'], data['interval_weeks'], _skip_dates(request.GET.getlist('skip')),
+                                _skip_dates(request.GET.getlist('keep')))
     response = render(request, 'core/student/_slot_preview.html', {
         'preview': preview, 'plan': plan, 'start_time': form.cleaned_data.get('start_time') if preview else None})
     response['Cache-Control'] = 'no-store'
@@ -2867,7 +2868,8 @@ def slot_fill(request, pk):
         data = form.cleaned_data
         try:
             result = fill_series(student, plan, data['weekdays'], data['starts_on'], data['start_time'],
-                                 data['duration_minutes'], data['interval_weeks'], _skip_dates(request.POST.getlist('skip')))
+                                 data['duration_minutes'], data['interval_weeks'], _skip_dates(request.POST.getlist('skip')),
+                                 _skip_dates(request.POST.getlist('keep')))
         except FillError as error:
             messages.error(request, str(error))
         else:
@@ -2938,3 +2940,37 @@ def slot_delete(request, pk):
     if back.startswith(reverse('core:agenda')):   # removed from a calendar card: stay on the calendar
         return redirect(back)
     return redirect(_student_tab(request, person_id, 'agenda'))
+
+
+@staff_required
+def agenda_holidays(request):
+    """Days "Preencher a agenda" leaves without class: the national holidays (computed) and the trainer's own."""
+    today = timezone.localdate()
+    year_end = today + timedelta(days=365)
+    national = sorted((day, name) for day, name in
+                      {d: n for y in (today.year, year_end.year) for d, n in holidays.national(y).items()}.items()
+                      if today <= day <= year_end)
+    return render(request, 'core/agenda_holidays.html', {
+        'national': national, 'region': settings.HOLIDAYS_REGION, 'own': Holiday.objects.filter(date__gte=today),
+        'past': Holiday.objects.filter(date__lt=today).order_by('-date')[:10], 'form': HolidayForm()})
+
+
+@staff_required
+@require_POST
+def agenda_holiday_add(request):
+    form = HolidayForm(request.POST)
+    if form.is_valid():
+        holiday = form.save()
+        messages.success(request, f'{holiday.name} ({holiday.date:%d/%m/%Y}) entrou na lista: o app não marca aula nesse dia ao preencher a agenda.')
+    else:
+        messages.error(request, 'Feriado não salvo: ' + ' '.join(e for errs in form.errors.values() for e in errs))
+    return redirect(after_save_url(request, reverse('core:agenda_holidays')))
+
+
+@staff_required
+@require_POST
+def agenda_holiday_delete(request, pk):
+    holiday = get_object_or_404(Holiday, pk=pk)
+    holiday.delete()
+    messages.success(request, f'{holiday.name} saiu da lista.')
+    return redirect(after_save_url(request, reverse('core:agenda_holidays')))
