@@ -64,3 +64,17 @@ class BackButtonTagTests(BaseTestCase):
     def test_compact_needs_an_icon(self):
         self.assertIn('btn-back-compact', self.render('compact=True'))
         self.assertNotIn('btn-back-compact', self.render('compact=True icon=""'))
+
+
+class DropdownStackingTests(BaseTestCase):
+    """The student file's "more actions" menu must open above the sticky tabs on phones."""
+
+    def test_dropdown_menu_is_above_sticky_tabs_and_below_the_tabbar(self):
+        import re
+        from pathlib import Path
+        css = (Path(__file__).resolve().parents[2] / 'static' / 'css' / 'tabbar.css').read_text()
+        z = lambda selector: int(re.search(re.escape(selector) + r'\s*\{[^}]*?z-index:\s*(\d+)', css).group(1))
+        sticky = int(re.search(r'\.tabs-sticky\s*\{[^}]*?z-index:\s*(\d+)', css).group(1))
+        menu = z('.dropdown-menu')
+        self.assertGreater(menu, sticky)
+        self.assertLess(menu, z('.fab'))
