@@ -172,6 +172,10 @@ body.kbd-open .fab { display: none; }
     }
     .tabs-sticky .nav-link { white-space: nowrap; }
 
+    /* Open menus must sit above the sticky tabs (Bootstrap's default 1000 hid them behind the tabs),
+       but below the bottom bar and the floating button */
+    .dropdown-menu { z-index: 1025; }
+
     /* Agenda: one day at a time, picked in the strip */
     .day-strip { display: flex; gap: .35rem; justify-content: space-between; }
     .day-strip button {
