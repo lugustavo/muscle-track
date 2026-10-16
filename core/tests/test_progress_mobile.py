@@ -56,10 +56,16 @@ class BackButtonTagTests(BaseTestCase):
         tpl = Template('{% load navigation %}{% back_button "/x/" ' + args + ' %}')
         return tpl.render(Context({'request': request}))
 
-    def test_default_is_unchanged(self):
+    def test_derived_voltar_label_is_icon_only_on_phones(self):
         out = self.render('')
+        self.assertIn('btn-back-compact', out)
+        self.assertIn('class="back-label"', out)
+
+    def test_explicit_label_such_as_cancelar_keeps_its_text(self):
+        out = self.render('label="Cancelar" icon="bi-x-circle"')
         self.assertNotIn('btn-back-compact', out)
         self.assertNotIn('back-label', out)
+        self.assertIn('compact', self.render('label="Cancelar" compact=True'))
 
     def test_compact_needs_an_icon(self):
         self.assertIn('btn-back-compact', self.render('compact=True'))
@@ -78,3 +84,15 @@ class DropdownStackingTests(BaseTestCase):
         menu = z('.dropdown-menu')
         self.assertGreater(menu, sticky)
         self.assertLess(menu, z('.fab'))
+
+
+class NoHandWrittenBackLinksTests(BaseTestCase):
+    """Every "Voltar" arrow button goes through _back_button.html (icon-only on phones)."""
+
+    def test_no_template_hand_writes_a_back_arrow_button(self):
+        from pathlib import Path
+        root = Path(__file__).resolve().parents[2] / 'templates'
+        allowed = {'_back_button.html', 'logout.html'}   # logout: a "Cancelar" form button
+        offenders = [str(f.relative_to(root)) for f in root.rglob('*.html')
+                     if f.name not in allowed and 'bi-arrow-left"></i>' in f.read_text()]
+        self.assertEqual(offenders, [])

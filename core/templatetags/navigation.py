@@ -21,11 +21,15 @@ def back_href(context, default_url):
 
 
 @register.inclusion_tag('core/_back_button.html', takes_context=True)
-def back_button(context, default_url, label=None, css='btn btn-secondary', icon='bi-arrow-left', fragment='', compact=False):
+def back_button(context, default_url, label=None, css='btn btn-secondary', icon='bi-arrow-left', fragment='', compact=None):
     """A Back/Cancel button; the label is derived from the destination unless given.
 
-    compact=True shows only the icon on phones (the label stays for screen readers).
+    On phones only the icon is shown (the label stays for screen readers and in `title`).
+    compact defaults to on for derived "Voltar ..." labels; an explicit label such as
+    "Cancelar" (a form button, not navigation chrome) keeps its text unless compact=True.
     """
+    if compact is None:
+        compact = label is None
     url = safe_next_url(context['request'], default_url) + fragment
     return {'url': url, 'label': label or back_label(url), 'css': css, 'icon': icon,
             'compact': compact and bool(icon)}

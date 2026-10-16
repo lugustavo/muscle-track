@@ -10,7 +10,7 @@
             <h1 class="h3 mb-0"><i class="bi bi-layout-split"></i> Comparar fotos</h1>
             {% if student %}<div class="text-muted">{{ student.person_name }}</div>{% endif %}
         </div>
-        <a href="{{ back_url }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+        {% include 'core/_back_button.html' with url=back_url label='Voltar' css='btn btn-sm btn-outline-secondary' icon='bi-arrow-left' compact=True %}
     </div>
 
     {% if not data.angles %}
