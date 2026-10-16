@@ -1,0 +1,32 @@
+/* A list row with actions: on a computer the buttons sit at the right of the row; on a phone they wait off to the
+   right and appear when the row is swiped to the left (a horizontal scroller with snap points: the browser does the
+   gesture, the momentum and the vertical scrolling of the page; the buttons stay reachable with the keyboard). */
+.swipe-row { overflow: hidden; }
+.swipe-content { min-width: 0; }
+.swipe-actions { display: flex; }
+.swipe-actions form { margin: 0; display: flex; }
+.swipe-actions .btn { display: inline-flex; align-items: center; gap: .35rem; white-space: nowrap; }
+
+@media (min-width: 768px) {
+    .swipe-row { display: flex; align-items: center; justify-content: space-between; }
+    .swipe-content { flex: 1 1 auto; }
+    .swipe-actions { flex: 0 0 auto; gap: .35rem; padding: 0 .75rem 0 0; }
+}
+
+@media (max-width: 767.98px) {
+    .swipe-row {
+        display: flex; overflow-x: auto; overflow-y: hidden;
+        scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
+        scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    }
+    .swipe-row::-webkit-scrollbar { display: none; }
+    .swipe-content { flex: 0 0 100%; scroll-snap-align: start; }
+    .swipe-actions { flex: 0 0 auto; scroll-snap-align: end; }
+    .swipe-actions .btn {
+        flex-direction: column; justify-content: center; gap: .1rem; width: 4.75rem; height: 100%;
+        border-radius: 0; font-size: .75rem;
+    }
+    .swipe-actions .swipe-edit { background-color: var(--bs-secondary); border-color: var(--bs-secondary); color: var(--bs-white); }
+    .swipe-actions .swipe-remove { background-color: var(--bs-danger); border-color: var(--bs-danger); color: var(--bs-white); }
+    .swipe-actions .btn i { font-size: 1.1rem; }
+}

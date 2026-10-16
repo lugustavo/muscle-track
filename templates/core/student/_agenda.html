@@ -89,13 +89,30 @@
             <strong>Próximas aulas</strong>
             <a href="{% nav_url 'core:appointment_create' %}&person={{ student.pk }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-circle"></i> Aula avulsa</a>
         </div>
-        <ul class="list-group">
+        <ul class="list-group" data-upcoming-classes>
             {% for a in upcoming %}
-            <li class="list-group-item d-flex justify-content-between"><span>{{ a.starts_at|date:"D d/m" }} às {{ a.starts_at|time:"H:i" }}</span><small class="text-muted">{{ a.get_kind_display }}</small></li>
+            <li class="list-group-item p-0 swipe-row" data-swipe-row data-class="{{ a.pk }}">
+                <div class="swipe-content d-flex justify-content-between align-items-center px-3 py-2">
+                    <span>{{ a.starts_at|date:"D d/m" }} às {{ a.starts_at|time:"H:i" }}</span>
+                    <small class="text-muted">{{ a.get_kind_display }}</small>
+                </div>
+                <div class="swipe-actions">
+                    <a href="{% nav_url 'core:appointment_reschedule' a.pk %}" class="btn btn-sm btn-outline-secondary swipe-edit" data-class-edit>
+                        <i class="bi bi-pencil"></i><span>Editar</span></a>
+                    <form method="post" action="{% nav_url 'core:appointment_remove' a.pk %}"
+                          onsubmit="return confirm('{% if a.slot_id %}Remover esta aula? Ela sai da agenda e não desconta do pacote; o horário fixo continua nas próximas.{% else %}Remover esta aula avulsa?{% endif %}');">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-outline-danger swipe-remove" data-class-remove><i class="bi bi-trash"></i><span>Remover</span></button>
+                    </form>
+                </div>
+            </li>
             {% empty %}
             <li class="list-group-item text-muted">Nenhuma aula marcada.</li>
             {% endfor %}
         </ul>
+        {% if upcoming %}<p class="small text-muted mt-1 mb-0 d-md-none"><i class="bi bi-arrow-left-right"></i> Deslize a aula para a esquerda para editar ou remover.</p>{% endif %}
     </div>
 </div>
 <script src="{% static 'js/slot_fill.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/swipe-rows.css' %}">
+<script src="{% static 'js/swipe-rows.js' %}"></script>

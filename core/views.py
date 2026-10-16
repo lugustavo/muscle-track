@@ -2559,6 +2559,9 @@ def appointment_reschedule(request, pk):
             notifications.notify([appointment.person.user], notifications.class_moved(appointment, new))
             messages.success(request, 'Aula remarcada.')
             _warn_if_conflict(request, new)
+            came_from = safe_next_url(request, '')
+            if came_from.startswith('/students/'):   # edited from the student's file: go back to it
+                return redirect(came_from + '#tab-agenda')
             return redirect(after_save_url(request, _agenda_url_for(data['date']), forward_next=False))
     return render(request, 'core/appointment_form.html', {
         'form': form, 'title': 'Remarcar aula', 'appointment': appointment})
@@ -2692,6 +2695,33 @@ def appointment_delete(request, pk):
         packages.sync(person)
         messages.success(request, 'Aula removida.')
     return redirect(safe_next_url(request, _agenda_url_for(timezone.localtime(appointment.starts_at).date())))
+
+
+@staff_required
+@require_POST
+def appointment_remove(request, pk):
+    """"Remover" on the student's file: a one-off class is deleted; a class of a fixed time is cancelled without
+    discount (deleting it would only make the calendar generate it again)."""
+    appointment = get_object_or_404(Appointment.objects.select_related('person'), pk=pk)
+    person = appointment.person
+    if appointment.status != Appointment.Status.SCHEDULED:
+        messages.warning(request, 'Só aulas marcadas podem ser removidas por aqui.')
+    elif appointment.slot_id is None:
+        appointment.delete()
+        packages.sync(person)
+        messages.success(request, 'Aula removida.')
+    else:
+        ahead = appointment.starts_at > timezone.now()
+        appointment.status = Appointment.Status.CANCELLED
+        appointment.status_changed_at = timezone.now()
+        appointment.cancelled_late = False
+        appointment.counts_override = False        # the trainer took it off the calendar: nothing is charged
+        appointment.save(update_fields=['status', 'status_changed_at', 'cancelled_late', 'counts_override'])
+        packages.sync(person)
+        if ahead:
+            notifications.notify([person.user], notifications.class_cancelled(appointment))
+        messages.success(request, 'Aula removida da agenda, sem descontar do pacote. O horário fixo continua nas próximas.')
+    return redirect(_student_tab(request, person.pk, 'agenda'))
 
 
 @staff_required
