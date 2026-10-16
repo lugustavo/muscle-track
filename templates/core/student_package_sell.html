@@ -87,6 +87,18 @@
         </div>
     </section>
 
+    {% if pattern %}
+    <section class="card mb-3" data-continue-schedule>
+        <div class="card-body">
+            <div class="form-check">
+                {{ form.continue_schedule }}
+                <label class="form-check-label fw-bold" for="{{ form.continue_schedule.id_for_label }}">Continuar o mesmo horário</label>
+            </div>
+            <div class="form-text">{{ student.person_name }} vinha em <strong>{{ pattern.label }}</strong>. Depois de vender, a agenda abre com esse horário já preenchido, a partir do dia seguinte à última aula marcada: você confere as datas (e desmarca feriados) e confirma.</div>
+        </div>
+    </section>
+    {% endif %}
+
     <div class="form-actions d-flex gap-2">
         <button type="submit" class="btn btn-primary" {% if not catalog %}disabled{% endif %}><i class="bi bi-check-circle"></i> Vender pacote</button>
         {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='bi-x-circle' %}

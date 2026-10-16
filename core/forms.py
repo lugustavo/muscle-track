@@ -146,6 +146,8 @@ class SaleForm(forms.Form):
         widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'inputmode': 'decimal', 'data-no-draft': ''}))
     notes = forms.CharField(required=False, max_length=200, label='Observação',
                             widget=forms.TextInput(attrs={'class': 'form-control'}))
+    continue_schedule = forms.BooleanField(required=False, label='Continuar o mesmo horário',
+                                          widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
