@@ -14,7 +14,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Count, DecimalField, F, OuterRef, Subquery, Sum
+from django.db.models import Count, DecimalField, F, OuterRef, Q, Subquery, Sum
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
@@ -327,31 +327,60 @@ def cancel_package(package, actor=None):
 
 
 def pending_payments(today=None):
-    """Packages whose first class already happened and are not fully paid, oldest first: what to charge."""
+    """Packages that are not fully paid and should be charged, oldest first: the first class already happened, or part
+    of the price was already paid (e.g. the price went up after the payment, before any class).
+
+    Each row: student, package, amount (what is missing), paid, days (since `due`), due (the first class, else the last
+    payment) and `partial` (True when charged before the first class)."""
     today = today or timezone.localdate()
     rows = []
     packages = StudentPackage.objects.filter(
-        cancelled_at__isnull=True, starts_on__isnull=False, person__is_active=True
-    ).select_related('person').prefetch_related('payments', 'refunds').order_by('starts_on')
+        cancelled_at__isnull=True, person__is_active=True, price_total__gt=0
+    ).filter(Q(starts_on__isnull=False) | Q(payments__isnull=False)).distinct().select_related('person').prefetch_related(
+        'payments', 'refunds')
     for package in packages:
         pending = pending_amount(package)
-        if pending > 0:
-            rows.append({'student': package.person, 'package': package, 'amount': pending,
-                         'days': (today - package.starts_on).days, 'due': package.starts_on})
+        if pending <= 0:
+            continue
+        paid = paid_amount(package)
+        if package.starts_on:
+            due, partial = package.starts_on, False
+        else:
+            if paid <= 0:
+                continue
+            due, partial = max(p.paid_on for p in package.payments.all()), True
+        rows.append({'student': package.person, 'package': package, 'amount': pending, 'paid': paid,
+                     'days': max((today - due).days, 0), 'due': due, 'partial': partial})
+    rows.sort(key=lambda r: r['due'])
     return rows
 
 
 def pending_count():
     """How many packages wait for a payment (one query: the bottom bar shows it on every page)."""
     paid = Coalesce(Subquery(Payment.objects.filter(student_package=OuterRef('pk')).order_by().values('student_package')
-                             .annotate(t=Sum('amount')).values('t')), Decimal('0'),
-                    output_field=DecimalField())
+                             .annotate(t=Sum('amount')).values('t')), Decimal('0'), output_field=DecimalField())
     given_back = Coalesce(Subquery(Refund.objects.filter(student_package=OuterRef('pk'), voided_at__isnull=True)
                                    .order_by().values('student_package').annotate(t=Sum('amount')).values('t')),
                           Decimal('0'), output_field=DecimalField())
     return StudentPackage.objects.filter(
-        cancelled_at__isnull=True, starts_on__isnull=False, person__is_active=True, price_total__gt=0
-    ).annotate(net=paid - given_back).filter(net__lt=F('price_total')).count()
+        cancelled_at__isnull=True, person__is_active=True, price_total__gt=0
+    ).annotate(net=paid - given_back).filter(Q(starts_on__isnull=False) | Q(net__gt=0)).filter(net__lt=F('price_total')).count()
+
+
+def refund_due_count():
+    """How many packages have money to give back (cheap enough for the bottom bar): paid above the price, or cancelled
+    with more paid than the classes given."""
+    from .refunds import cancellation_quote
+
+    paid = Coalesce(Subquery(Payment.objects.filter(student_package=OuterRef('pk')).order_by().values('student_package')
+                             .annotate(t=Sum('amount')).values('t')), Decimal('0'), output_field=DecimalField())
+    given_back = Coalesce(Subquery(Refund.objects.filter(student_package=OuterRef('pk'), voided_at__isnull=True)
+                                   .order_by().values('student_package').annotate(t=Sum('amount')).values('t')),
+                          Decimal('0'), output_field=DecimalField())
+    candidates = StudentPackage.objects.annotate(net=paid - given_back).filter(
+        Q(cancelled_at__isnull=True, price_total__isnull=False, net__gt=F('price_total'))
+        | Q(cancelled_at__isnull=False, used_at_cancel__isnull=False, net__gt=0))      # one query: it runs on every page
+    return sum(1 for package in candidates if not package.cancelled_at or cancellation_quote(package)['suggested'] > 0)
 
 
 def _current_packages(today):

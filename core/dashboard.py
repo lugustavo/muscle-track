@@ -5,7 +5,7 @@ from django.contrib.auth.hashers import UNUSABLE_PASSWORD_PREFIX
 from django.db.models import Exists, OuterRef, Q, Subquery
 from django.utils import timezone
 
-from . import packages
+from . import packages, refunds
 from .agenda import ensure_appointments
 from .billing import charge_message, overdue_rows
 from .models import Appointment, Person, PersonRoutine, SessionExercise, StudentEvent, WorkoutSession
@@ -172,6 +172,7 @@ def trainer_dashboard():
     invites = pending_invites(now)
     trials = long_trials(now)
     overdue = overdue_payments()
+    refunds_due = refunds.awaiting_refund()
     today_classes = todays_appointments()
     misses = recent_misses(now=now)
     erasures = erasure_requests()
@@ -185,6 +186,9 @@ def trainer_dashboard():
         'overdue': overdue[:LIST_LIMIT], 'overdue_total': len(overdue),
         'overdue_more': max(0, len(overdue) - LIST_LIMIT),
         'overdue_amount': sum((r['amount'] or 0 for r in overdue), 0),
+        'refunds_due': refunds_due[:LIST_LIMIT], 'refunds_due_total': len(refunds_due),
+        'refunds_due_more': max(0, len(refunds_due) - LIST_LIMIT),
+        'refunds_due_amount': sum((r['quote']['suggested'] for r in refunds_due), 0),
         'classes': today_classes, 'misses': misses[:LIST_LIMIT], 'misses_total': len(misses),
         'trials': trials[:LIST_LIMIT], 'trials_total': len(trials),
         'erasures': erasures, 'erasures_total': len(erasures),

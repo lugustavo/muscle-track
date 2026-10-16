@@ -127,25 +127,40 @@
         </div>
     </div>
 
-    {% if dashboard.overdue_total %}
+    {% if dashboard.overdue_total or dashboard.refunds_due_total %}
     <div class="col-lg-6">
         <div class="card h-100 border-warning">
             <div class="card-header d-flex justify-content-between">
                 <strong><i class="bi bi-cash-coin text-warning"></i> Pagamentos pendentes</strong>
-                <span class="badge bg-warning text-dark">{{ dashboard.overdue_total }}{% if dashboard.overdue_amount %} · {{ dashboard.overdue_amount|money }}{% endif %}</span>
+                <span class="d-flex gap-1">
+                    {% if dashboard.overdue_total %}<span class="badge bg-warning text-dark">{{ dashboard.overdue_total }}{% if dashboard.overdue_amount %} · {{ dashboard.overdue_amount|money }}{% endif %}</span>{% endif %}
+                    {% if dashboard.refunds_due_total %}<span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" data-refunds-due-badge title="A devolver">{{ dashboard.refunds_due_total }} · − {{ dashboard.refunds_due_amount|money }}</span>{% endif %}
+                </span>
             </div>
             <div class="list-group list-group-flush">
                 {% for row in dashboard.overdue %}
                 <div class="list-group-item d-flex justify-content-between align-items-center">
                     <a href="{% nav_url 'core:student_detail' row.student.pk %}" class="text-decoration-none">{{ row.student.person_name }}</a>
                     <span class="d-flex align-items-center gap-2">
-                        <small class="text-muted">{{ row.package.name }} · {{ row.amount|money }}</small>
+                        <small class="text-muted">{{ row.package.name }} · {{ row.amount|money }}{% if row.partial %} (pago {{ row.paid|money }}){% endif %}</small>
                         <a href="{{ row.whatsapp }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success" title="Cobrar pelo WhatsApp"><i class="bi bi-whatsapp"></i></a>
                     </span>
                 </div>
                 {% endfor %}
                 {% if dashboard.overdue_more %}
                 <a href="{% url 'core:finance' %}" class="list-group-item list-group-item-action text-muted small">e mais {{ dashboard.overdue_more }} — veja o financeiro</a>
+                {% endif %}
+                {% for row in dashboard.refunds_due %}
+                <div class="list-group-item d-flex justify-content-between align-items-center bg-info-subtle" data-refund-due>
+                    <a href="{% nav_url 'core:student_detail' row.student.pk %}" class="text-decoration-none">{{ row.student.person_name }}</a>
+                    <span class="d-flex align-items-center gap-2">
+                        <small class="text-muted">{{ row.package.name }} · <strong class="text-body">− {{ row.quote.suggested|money }}</strong> a devolver</small>
+                        <a href="{% nav_url 'core:refund_create' row.student.pk %}&package={{ row.package.pk }}" class="btn btn-sm btn-outline-secondary" title="Devolver"><i class="bi bi-arrow-counterclockwise"></i><span class="visually-hidden">Devolver</span></a>
+                    </span>
+                </div>
+                {% endfor %}
+                {% if dashboard.refunds_due_more %}
+                <a href="{% url 'core:finance_refunds' %}" class="list-group-item list-group-item-action text-muted small">e mais {{ dashboard.refunds_due_more }} a devolver — veja o financeiro</a>
                 {% endif %}
             </div>
         </div>
