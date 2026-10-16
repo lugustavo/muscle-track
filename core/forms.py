@@ -524,6 +524,32 @@ class ScheduleSlotForm(RecurrenceMixin):
         return min(last, ends_on) if last and ends_on else (last or ends_on)
 
 
+class SlotFillForm(forms.Form):
+    """Fill the agenda from the student's package: weekdays, first day and time (the end date is calculated)."""
+    weekdays = forms.TypedMultipleChoiceField(choices=ScheduleSlot.WEEKDAYS, coerce=int, required=True, label='Dias da semana',
+                                              widget=forms.CheckboxSelectMultiple,
+                                              error_messages={'required': 'Escolha pelo menos um dia da semana.'})
+    starts_on = forms.DateField(label='Primeira aula', required=False,
+                                widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
+    start_time = forms.TimeField(label='Horário',
+                                 widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}, format='%H:%M'))
+    duration_minutes = forms.IntegerField(
+        label='Duração (min)', min_value=10, max_value=480, initial=60, required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '10', 'max': '480', 'step': '5'}))
+    interval_weeks = forms.IntegerField(
+        label='Repete a cada (semanas)', min_value=1, max_value=MAX_INTERVAL, initial=1, required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': str(MAX_INTERVAL)}))
+
+    def clean_duration_minutes(self):
+        return self.cleaned_data.get('duration_minutes') or 60
+
+    def clean_interval_weeks(self):
+        return self.cleaned_data.get('interval_weeks') or 1
+
+    def clean_starts_on(self):
+        return self.cleaned_data.get('starts_on') or timezone.localdate()
+
+
 class SlotEditForm(forms.Form):
     """Change a fixed time from a date on (core/recurrence.edit_series)."""
     weekday = forms.TypedChoiceField(choices=ScheduleSlot.WEEKDAYS, coerce=int, label='Dia da semana',

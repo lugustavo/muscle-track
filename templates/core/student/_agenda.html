@@ -1,4 +1,4 @@
-{% load navigation %}
+{% load navigation static %}
 <div class="row g-4">
     <div class="col-lg-6">
         <h5 class="mb-3"><i class="bi bi-calendar-week"></i> Horários fixos</h5>
@@ -23,14 +23,43 @@
             <i class="bi bi-box-seam"></i> <strong>{{ slot_plan.package.name }}</strong>:
             restam <strong>{{ slot_plan.left }}</strong> aula{{ slot_plan.left|pluralize }}{% if slot_plan.scheduled %}, {{ slot_plan.scheduled }} já marcada{{ slot_plan.scheduled|pluralize }}{% endif %}
             {% if slot_plan.ends_on %}· vale até {{ slot_plan.ends_on|date:"d/m/Y" }}{% elif not slot_plan.package.valid_days %}· sem prazo{% elif slot_plan.state == 'not_started' %}· o prazo começa na primeira aula{% endif %}.
-            {% if slot_plan.to_schedule %}O novo horário termina junto com o pacote ({{ slot_plan.to_schedule }} aula{{ slot_plan.to_schedule|pluralize }} a marcar).{% else %}Todas as aulas que restam já estão marcadas: só dá para criar um horário que termine em uma data ou depois de um número de aulas.{% endif %}
+            {% if slot_plan.to_schedule %}Faltam marcar <strong>{{ slot_plan.to_schedule }}</strong>.{% else %}<i class="bi bi-check-circle"></i> Todas as aulas do pacote já estão marcadas.{% endif %}
+            {% if slot_plan.to_schedule and has_package_series %}
+            <form method="post" action="{% nav_url 'core:slot_topup' student.pk %}" class="d-inline" data-slot-topup>
+                {% csrf_token %}
+                <button class="btn btn-sm btn-primary ms-1">Marcar mais {{ slot_plan.to_schedule }}</button>
+            </form>
+            {% endif %}
         </div>
+        {% if slot_plan.to_schedule %}
+        <form method="post" action="{% nav_url 'core:slot_fill' student.pk %}" class="card card-body bg-body-tertiary mb-3"
+              data-slot-fill data-preview-url="{% url 'core:slot_preview' student.pk %}">
+            {% csrf_token %}
+            <div class="small fw-bold mb-2">Preencher a agenda do pacote</div>
+            <div class="mb-2">{% include 'core/_weekday_pills.html' with field=fill_form.weekdays %}</div>
+            <div class="row g-2 mb-2">
+                <div class="col-6"><label class="form-label small mb-0" for="{{ fill_form.starts_on.id_for_label }}">Primeira aula</label>{{ fill_form.starts_on }}</div>
+                <div class="col-6"><label class="form-label small mb-0" for="{{ fill_form.start_time.id_for_label }}">Horário</label>{{ fill_form.start_time }}</div>
+            </div>
+            <details class="mb-2">
+                <summary class="small text-primary" style="cursor: pointer;">Avançado (duração, repetição)</summary>
+                <div class="row g-2 mt-1">
+                    <div class="col-6"><label class="form-label small mb-0" for="{{ fill_form.duration_minutes.id_for_label }}">Duração (min)</label>{{ fill_form.duration_minutes }}</div>
+                    <div class="col-6"><label class="form-label small mb-0" for="{{ fill_form.interval_weeks.id_for_label }}">Repete a cada (semanas)</label>{{ fill_form.interval_weeks }}</div>
+                </div>
+            </details>
+            <div data-fill-preview class="mb-2" aria-live="polite"><span class="small text-muted">Escolha os dias e o horário: o fim é calculado pelas aulas que faltam marcar ({{ slot_plan.to_schedule }}).</span></div>
+            <button class="btn btn-primary" data-fill-submit><i class="bi bi-calendar-check"></i> Preencher agenda ({{ slot_plan.to_schedule }} aula{{ slot_plan.to_schedule|pluralize }})</button>
+        </form>
+        {% endif %}
         {% else %}
         <div class="alert alert-warning py-2 small d-flex justify-content-between align-items-center gap-2" data-slot-no-package>
-            <span><i class="bi bi-box-seam"></i> Este aluno ainda não tem pacote em uso.</span>
+            <span><i class="bi bi-box-seam"></i> Este aluno ainda não tem pacote em uso: venda um para preencher a agenda pelas aulas dele.</span>
             <a href="{% nav_url 'core:student_package_sell' student.pk %}" class="btn btn-sm btn-warning text-nowrap">Vender pacote</a>
         </div>
         {% endif %}
+        <details class="mb-2" data-slot-advanced{% if not slot_plan %} open{% endif %}>
+            <summary class="small text-primary mb-2" style="cursor: pointer;">Avançado: horário sem pacote ou repetição personalizada</summary>
         <form method="post" action="{% nav_url 'core:slot_add' student.pk %}" class="card card-body bg-body-tertiary" data-recurrence-form>
             {% csrf_token %}
             <div class="small fw-bold mb-2">Novo horário fixo</div>
@@ -45,6 +74,7 @@
             </details>
             <button class="btn btn-primary"><i class="bi bi-plus-lg"></i> Adicionar horário</button>
         </form>
+        </details>
         {% if not student.is_active %}<p class="small text-muted mt-2">Aluno sem acesso: não gera aulas na agenda enquanto estiver {{ student.get_status_display|lower }}.</p>{% endif %}
     </div>
 
@@ -68,3 +98,4 @@
         </ul>
     </div>
 </div>
+<script src="{% static 'js/slot_fill.js' %}"></script>

@@ -28,7 +28,7 @@ from allauth.account.models import EmailAddress
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, trainer_dashboard
 from .forms import (
     AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ClassRequestForm, ConsentForm, SaleForm, ExerciseForm, PaymentForm,
-    PersonForm, PersonRoutineForm, PackageForm, RepeatForm, ScheduleSlotForm, SlotEditForm,
+    PersonForm, PersonRoutineForm, PackageForm, RepeatForm, ScheduleSlotForm, SlotEditForm, SlotFillForm,
     ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
 )
 from .agenda import (
@@ -55,6 +55,7 @@ from .models import (
 )
 from .navigation import after_save_url, back_label, safe_next_url, with_next
 from .onboarding import trainer_steps
+from .package_schedule import MAX_SKIPS, FillError, build_preview, fill_series, top_up
 from .recurrence import SeriesError, create_series, describe, edit_series, end_series_from
 from .permissions import is_trainer, staff_required, student_required
 from .search import apply_student_search, phone_digits, search_all
@@ -302,6 +303,8 @@ def _finance_agenda_context(student):
         'attendance': attendance_stats(student, 30, today),
         'weekdays': ScheduleSlot.WEEKDAYS,
         'slot_form': ScheduleSlotForm(plan=plan),
+        'fill_form': SlotFillForm(initial={'starts_on': today, 'duration_minutes': 60, 'interval_weeks': 1}),
+        'has_package_series': bool(plan and student.slots.filter(package=plan['package'], is_active=True).exists()),
         'slot_plan': plan,
     }
 
@@ -2723,6 +2726,83 @@ def appointment_series_end(request, pk):
         messages.success(request, f'Horário fixo encerrado: {slot.get_weekday_display()} às {slot.start_time:%H:%M} '
                                   f'deixa de repetir a partir desta aula ({gone}).')
     return redirect(safe_next_url(request, _agenda_url_for(timezone.localtime(appointment.starts_at).date())))
+
+
+def _skip_dates(values):
+    """ISO dates the trainer unticked in the preview (bad values are ignored)."""
+    found = set()
+    for value in list(values)[:MAX_SKIPS]:
+        try:
+            found.add(date.fromisoformat(value))
+        except ValueError:
+            continue
+    return found
+
+
+@staff_required
+def slot_preview(request, pk):
+    """The dates "Preencher a agenda" would create, as an HTML fragment for the form (every change refreshes it)."""
+    student = get_object_or_404(Person, pk=pk)
+    plan = packages.schedule_plan(student)
+    form = SlotFillForm(request.GET)
+    preview = None
+    if plan is not None and form.is_valid():
+        data = form.cleaned_data
+        preview = build_preview(student, plan, data['weekdays'], data['starts_on'], data['start_time'],
+                                data['duration_minutes'], data['interval_weeks'], _skip_dates(request.GET.getlist('skip')))
+    response = render(request, 'core/student/_slot_preview.html', {
+        'preview': preview, 'plan': plan, 'start_time': form.cleaned_data.get('start_time') if preview else None})
+    response['Cache-Control'] = 'no-store'
+    return response
+
+
+@staff_required
+@require_POST
+def slot_fill(request, pk):
+    """Create the fixed times and every class the package still needs (the end date is calculated)."""
+    student = get_object_or_404(Person, pk=pk)
+    plan = packages.schedule_plan(student)
+    form = SlotFillForm(request.POST)
+    if plan is None:
+        messages.error(request, 'Este aluno não tem pacote em uso. Venda um pacote primeiro.')
+    elif not form.is_valid():
+        messages.error(request, 'Horário inválido: ' + ' '.join(e for errs in form.errors.values() for e in errs))
+    else:
+        data = form.cleaned_data
+        try:
+            result = fill_series(student, plan, data['weekdays'], data['starts_on'], data['start_time'],
+                                 data['duration_minutes'], data['interval_weeks'], _skip_dates(request.POST.getlist('skip')))
+        except FillError as error:
+            messages.error(request, str(error))
+        else:
+            n = result['created']
+            text = f"{n} aula{'' if n == 1 else 's'} marcada{'' if n == 1 else 's'}, até {result['last']:%d/%m/%Y}."
+            if result['preview']['beyond']:
+                text += ' Atenção: parte das aulas passa da validade do pacote; prorrogue-o se for preciso.'
+            if result['preview']['overlaps']:
+                text += ' Atenção: alguma aula se sobrepõe à de outro aluno (veja na agenda).'
+            messages.success(request, text)
+    return redirect(_student_tab(request, student.pk, 'agenda'))
+
+
+@staff_required
+@require_POST
+def slot_topup(request, pk):
+    """Mark the classes the package is missing at the end of its series."""
+    student = get_object_or_404(Person, pk=pk)
+    plan = packages.schedule_plan(student)
+    if plan is None:
+        messages.error(request, 'Este aluno não tem pacote em uso.')
+    else:
+        try:
+            result = top_up(student, plan)
+        except FillError as error:
+            messages.error(request, str(error))
+        else:
+            n = result['created']
+            messages.success(request, f"{n} aula{'' if n == 1 else 's'} a mais marcada{'' if n == 1 else 's'}, "
+                                      f"até {result['last']:%d/%m/%Y}.")
+    return redirect(_student_tab(request, student.pk, 'agenda'))
 
 
 @staff_required
