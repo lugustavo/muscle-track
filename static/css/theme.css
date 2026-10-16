@@ -176,3 +176,27 @@ footer { background-color: var(--mt-nav-bg); color: white; padding: 1.5rem 0; ma
 @media (max-width: 767.98px) {
     .btn-icon { min-width: 2.75rem; min-height: 2.5rem; }   /* a comfortable touch target */
 }
+
+/* Back button that shows only the arrow on phones (label stays readable by screen readers) */
+@media (max-width: 767.98px) {
+    .btn-back-compact { min-width: 2.75rem; min-height: 2.5rem; padding-inline: .5rem; }
+    .btn-back-compact .back-label {
+        position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important;
+        margin: -1px !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important;
+        white-space: nowrap !important; border: 0 !important;
+    }
+}
+
+/* Compact statistic tiles: 2x2 on phones, one row from md up */
+.card-body.metric-tile { padding: .6rem .5rem; }
+.metric-tile .metric-icon { font-size: 1.25rem; line-height: 1; }
+.metric-tile .metric-value { font-size: 1.35rem; font-weight: 600; line-height: 1.2; margin: .15rem 0 0; }
+.metric-tile .metric-label { font-size: .75rem; margin: 0; }
+@media (min-width: 768px) {
+    .card-body.metric-tile { padding: 1rem; }
+    .metric-tile .metric-icon { font-size: 2rem; }
+    .metric-tile .metric-value { font-size: 2rem; margin-top: .5rem; }
+    .metric-tile .metric-label { font-size: 1rem; }
+}
+@media (min-width: 768px) { .page-title-lg { font-size: calc(1.375rem + 1.5vw); } }
+@media (min-width: 1200px) { .page-title-lg { font-size: 2.5rem; } }

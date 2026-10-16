@@ -5,13 +5,13 @@
 {% block title %}Progresso - {{ person_routine.routine_name }} - Muscle Track{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1><i class="bi bi-bar-chart-line"></i> Progresso do Treino</h1>
-        <h4 class="text-muted mb-0">{{ person_routine.routine_name }}</h4>
+<div class="d-flex justify-content-between align-items-start gap-2 mb-3 mb-md-4">
+    <div class="min-w-0">
+        <h1 class="h4 page-title-lg mb-1"><i class="bi bi-bar-chart-line"></i> Progresso do Treino</h1>
+        <h2 class="h5 text-muted mb-0">{{ person_routine.routine_name }}</h2>
         <small class="text-muted">Aluno: <a href="{% nav_url 'core:student_detail' student.pk %}" class="text-decoration-none">{{ student.person_name }}</a></small>
     </div>
-    {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default %}
+    {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default compact=True %}
 </div>
 
 <!-- Informações do Treino -->
@@ -59,40 +59,40 @@
 </div>
 
 <!-- Estatísticas do Progresso -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-                <i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"></i>
-                <h2 class="mt-2 mb-0">{{ total_sessions }}</h2>
-                <p class="text-muted mb-0">Sessões Concluídas</p>
+<div class="row row-cols-2 row-cols-md-4 g-2 g-md-3 mb-4">
+    <div class="col">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body metric-tile text-center">
+                <i class="bi bi-check-circle-fill text-success metric-icon"></i>
+                <p class="metric-value">{{ total_sessions }}</p>
+                <p class="metric-label text-muted">Sessões Concluídas</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-                <i class="bi bi-calendar-check text-primary" style="font-size: 2rem;"></i>
-                <h2 class="mt-2 mb-0">{{ sessions_last_month }}</h2>
-                <p class="text-muted mb-0">Último Mês</p>
+    <div class="col">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body metric-tile text-center">
+                <i class="bi bi-calendar-check text-primary metric-icon"></i>
+                <p class="metric-value">{{ sessions_last_month }}</p>
+                <p class="metric-label text-muted">Último Mês</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-                <i class="bi bi-clock-history text-info" style="font-size: 2rem;"></i>
-                <h2 class="mt-2 mb-0">{{ avg_duration }}</h2>
-                <p class="text-muted mb-0">Duração Média (min)</p>
+    <div class="col">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body metric-tile text-center">
+                <i class="bi bi-clock-history text-info metric-icon"></i>
+                <p class="metric-value">{{ avg_duration }}</p>
+                <p class="metric-label text-muted">Duração Média (min)</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-                <i class="bi bi-percent text-warning" style="font-size: 2rem;"></i>
-                <h2 class="mt-2 mb-0">{{ completion_rate }}%</h2>
-                <p class="text-muted mb-0">Taxa de Conclusão</p>
+    <div class="col">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body metric-tile text-center">
+                <i class="bi bi-percent text-warning metric-icon"></i>
+                <p class="metric-value">{{ completion_rate }}%</p>
+                <p class="metric-label text-muted">Taxa de Conclusão</p>
             </div>
         </div>
     </div>
