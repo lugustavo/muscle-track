@@ -157,5 +157,5 @@ def edit_series(slot, weekday, start_time, duration_minutes, valid_until, from_d
     slot.save(update_fields=['valid_until'])
     new = ScheduleSlot.objects.create(
         person=slot.person, weekday=weekday, start_time=start_time, duration_minutes=duration_minutes,
-        valid_from=first, valid_until=valid_until, interval_weeks=slot.interval_weeks)
+        valid_from=first, valid_until=valid_until, interval_weeks=slot.interval_weeks, package=slot.package)
     return new, removed

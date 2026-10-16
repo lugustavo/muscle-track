@@ -216,9 +216,11 @@ def schedule_plan(person, today=None):
     current = data['current']
     if current is None:
         return None
+    # every class still marked "Marcada" will use the package, whether it is ahead or waiting to be given an outcome
+    marked = person.appointments.filter(status=Status.SCHEDULED).count()
     return {
         'row': current, 'package': current['package'], 'state': current['state'], 'left': current['left'],
-        'scheduled': data['scheduled'], 'to_schedule': max(current['left'] - data['scheduled'], 0),
+        'scheduled': marked, 'to_schedule': max(current['left'] - marked, 0),
         'ends_on': current['ends_on'] if current['state'] == 'active' else None,
     }
 

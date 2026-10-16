@@ -58,6 +58,8 @@ def ensure_appointments(start, end, today=None):
                 continue
             if not on_week_cycle(day, slot.valid_from, slot.interval_weeks):
                 continue
+            if slot.skipped_dates and day.isoformat() in slot.skipped_dates:
+                continue
             starts = at(day, slot.start_time)
             if (slot.person_id, starts) not in existing:
                 new.append(Appointment(person_id=slot.person_id, starts_at=starts, slot=slot,

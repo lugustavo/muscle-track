@@ -872,6 +872,11 @@ class ScheduleSlot(models.Model):
     # Repeats every N weeks, counted from the week of `valid_from` (1 = every week)
     interval_weeks = models.PositiveSmallIntegerField(
         default=1, validators=[MinValueValidator(1), MaxValueValidator(8)], verbose_name='Repete a cada (semanas)')
+    # The package this series fills (core/package_schedule.py): "mark more classes" and renewals follow it
+    package = models.ForeignKey('StudentPackage', on_delete=models.SET_NULL, null=True, blank=True,
+                                related_name='slots', verbose_name='Pacote')
+    # Days (ISO dates) with no class inside the series, e.g. a holiday: the calendar never generates them
+    skipped_dates = models.JSONField(default=list, blank=True)
 
     class Meta:
         verbose_name = 'Horário fixo'
