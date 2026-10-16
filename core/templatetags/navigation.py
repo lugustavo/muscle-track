@@ -21,10 +21,14 @@ def back_href(context, default_url):
 
 
 @register.inclusion_tag('core/_back_button.html', takes_context=True)
-def back_button(context, default_url, label=None, css='btn btn-secondary', icon='bi-arrow-left', fragment=''):
-    """A Back/Cancel button; the label is derived from the destination unless given."""
+def back_button(context, default_url, label=None, css='btn btn-secondary', icon='bi-arrow-left', fragment='', compact=False):
+    """A Back/Cancel button; the label is derived from the destination unless given.
+
+    compact=True shows only the icon on phones (the label stays for screen readers).
+    """
     url = safe_next_url(context['request'], default_url) + fragment
-    return {'url': url, 'label': label or back_label(url), 'css': css, 'icon': icon}
+    return {'url': url, 'label': label or back_label(url), 'css': css, 'icon': icon,
+            'compact': compact and bool(icon)}
 
 
 @register.inclusion_tag('core/_breadcrumbs.html', takes_context=True)

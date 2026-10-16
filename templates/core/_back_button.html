@@ -1,1 +1,1 @@
-<a href="{{ url }}" class="{{ css }}" data-nav-back>{% if icon %}<i class="bi {{ icon }}"></i> {% endif %}{{ label }}</a>
+<a href="{{ url }}" class="{{ css }}{% if compact %} btn-back-compact{% endif %}" data-nav-back{% if compact %} title="{{ label }}"{% endif %}>{% if icon %}<i class="bi {{ icon }}"></i>{% if not compact %} {% endif %}{% endif %}{% if compact %}<span class="back-label"> {{ label }}</span>{% else %}{{ label }}{% endif %}</a>

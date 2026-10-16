@@ -153,6 +153,8 @@ Bootstrap, ícones, Chart.js e SortableJS são servidos localmente de `static/ve
 
 **Botões de ação em listas** (editar, remover, progresso) são **só ícones**, no computador e no celular: o nome fica em um `<span class="visually-hidden">` (leitores de tela) e no `title` (dica); use a classe `btn-icon` (alvo de toque maior no celular). Botões de criar ("Adicionar", "Aula avulsa") mantêm o texto. Linhas com ações que aparecem ao deslizar: `swipe-rows` (ver Agenda).
 
+**Botão Voltar compacto:** `{% back_button url compact=True %}` mostra só a seta no celular (o nome fica para leitores de tela e no `title`) e o texto completo a partir de `md`; usado em **Progresso do Treino**, onde os quatro cartões de estatística (`metric-tile`) também ficam em grade 2×2 no celular.
+
 Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests/test_navigation_global.py` percorre todos os links com `next=` e confere o botão de voltar de cada página.
 
 ## Segurança — o que já está coberto
