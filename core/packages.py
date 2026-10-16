@@ -85,6 +85,14 @@ def paid_amount(package):
     return sum((p.amount for p in package.payments.all()), Decimal('0')) - refunded_amount(package)
 
 
+def overpaid_amount(package):
+    """What was paid above the package's price (e.g. the price was lowered after paying): money owed back. 0 without
+    a price and for a cancelled package (the cancellation quote handles that one)."""
+    if package.price_total is None or package.cancelled_at:
+        return Decimal('0')
+    return max(paid_amount(package) - package.price_total, Decimal('0'))
+
+
 def pending_amount(package):
     """What is still to be received for the package (0 when it has no price)."""
     if package.price_total is None:
@@ -166,7 +174,7 @@ def overview(person, today=None):
             'percent': round(100 * min(used[package.pk], total) / total) if total else 0,
             'starts_on': package.starts_on, 'ends_on': end,
             'days_left': (end - today).days if end and s in ('active', 'expired') else None,
-            'paid': paid_amount(package), 'pending': pending_amount(package),
+            'paid': paid_amount(package), 'pending': pending_amount(package), 'overpaid': overpaid_amount(package),
             'low': s in ('active', 'not_started', 'frozen') and 0 < total - used[package.pk] <= LOW_BALANCE,
         })
     current = next((r for r in rows if r['state'] in OPEN_STATES), None)

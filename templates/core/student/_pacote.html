@@ -50,6 +50,10 @@
             {% elif cur.package.price_total is not None %}
                 <i class="bi bi-check-circle text-success"></i> Pago ({{ cur.paid|money }})
             {% endif %}
+            {% if cur.overpaid > 0 %}
+                <div class="mt-1" data-package-overpaid><i class="bi bi-arrow-counterclockwise text-warning-emphasis"></i> <span class="text-warning-emphasis fw-semibold">Pago a mais: {{ cur.overpaid|money }}</span>
+                    <a href="{% nav_url 'core:refund_create' student.pk %}&package={{ cur.package.pk }}" class="btn btn-sm btn-warning ms-1">Devolver</a></div>
+            {% endif %}
         </div>
         {% endif %}
 

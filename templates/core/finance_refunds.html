@@ -31,12 +31,13 @@
 
 {% if awaiting %}
 <div class="card border-warning mb-4" data-awaiting-refund>
-    <div class="card-header bg-warning-subtle"><strong><i class="bi bi-hourglass-split"></i> A devolver</strong> <span class="small text-muted">· pacotes cancelados em que o pago passa das aulas dadas</span></div>
+    <div class="card-header bg-warning-subtle"><strong><i class="bi bi-hourglass-split"></i> A devolver</strong> <span class="small text-muted">· pacotes cancelados em que o pago passa das aulas dadas e pacotes pagos acima do valor</span></div>
     <div class="list-group list-group-flush">
         {% for row in awaiting %}
         <div class="list-group-item d-flex justify-content-between align-items-center gap-2">
             <span><a href="{% nav_url 'core:student_detail' row.student.pk %}" class="text-decoration-none fw-semibold">{{ row.student.person_name }}</a><br>
-                <small class="text-muted">{{ row.package.name }} · pago {{ row.quote.paid|money }} · {{ row.quote.used }} aula{{ row.quote.used|pluralize }} dada{{ row.quote.used|pluralize }}</small></span>
+                {% if row.kind == 'overpaid' %}<small class="text-muted">{{ row.package.name }} · valor do pacote {{ row.quote.price|money }} · pago {{ row.quote.paid|money }} <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">pago a mais</span></small>
+                {% else %}<small class="text-muted">{{ row.package.name }} · cancelado · pago {{ row.quote.paid|money }} · {{ row.quote.used }} aula{{ row.quote.used|pluralize }} dada{{ row.quote.used|pluralize }}</small>{% endif %}</span>
             <span class="d-flex align-items-center gap-2"><strong>{{ row.quote.suggested|money }}</strong>
                 <a href="{% nav_url 'core:refund_create' row.student.pk %}&package={{ row.package.pk }}" class="btn btn-sm btn-warning">Devolver</a></span>
         </div>

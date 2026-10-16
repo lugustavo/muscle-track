@@ -449,3 +449,74 @@ class KeptFeeTests(RefundBase):
         refunds.cancel_with_refund(self.sold, self.trainer, amount=D('0'), fee=D('20'))
         rows = refunds.awaiting_refund()
         self.assertEqual(rows[0]['quote']['suggested'], D('330.00'))
+
+
+class OverpaidTests(RefundBase):
+    """The price of a package already paid is lowered: the difference is money owed back."""
+
+    def lower(self, per='45'):
+        return refunds.edit_package(self.sold, self.trainer, name='Pacote 10', sessions=10, valid_days=60,
+                                    pricing_mode='per_session', price_per_session=D(per), price_total=None)
+
+    def test_nothing_is_owed_while_the_price_matches_what_was_paid(self):
+        self.assertEqual(packages.overpaid_amount(self.sold), D('0'))
+        self.assertEqual(refunds.awaiting_refund(), [])
+
+    def test_lowering_the_price_makes_the_difference_owed(self):
+        self.lower('45')                                           # 10 x 45 = 450, paid 500
+        self.sold.refresh_from_db()
+        self.assertEqual(packages.overpaid_amount(self.sold), D('50.00'))
+        row = packages.overview(self.person)['rows'][0]
+        self.assertEqual((row['overpaid'], row['pending']), (D('50.00'), D('0')))
+        rows = refunds.awaiting_refund()
+        self.assertEqual([(r['kind'], r['quote']['suggested']) for r in rows], [('overpaid', D('50.00'))])
+
+    def test_giving_it_back_clears_the_row(self):
+        self.lower('45')
+        refunds.register_refund(self.person, amount=D('50'), method='cash', package=self.sold)
+        self.sold.refresh_from_db()
+        self.assertEqual(packages.overpaid_amount(self.sold), D('0'))
+        self.assertEqual(refunds.awaiting_refund(), [])
+        self.assertEqual(packages.overview(self.person)['rows'][0]['pending'], D('0'))
+
+    def test_a_cancelled_package_is_not_listed_as_overpaid(self):
+        self.lower('45')
+        packages.cancel_package(self.sold)
+        self.sold.refresh_from_db()
+        self.assertEqual(packages.overpaid_amount(self.sold), D('0'))
+
+    def test_the_edit_screen_warns_about_the_difference(self):
+        self.login(self.trainer)
+        url = reverse('core:student_package_edit', kwargs={'pk': self.person.pk, 'package_pk': self.sold.pk})
+        response = self.client.post(url, {'name': 'Pacote 10', 'sessions': 10, 'valid_days': 60, 'pricing_mode': 'per_session',
+                                          'price_per_session': '45'}, follow=True)
+        self.assertContains(response, 'a devolver')
+        self.assertContains(response, 'data-package-overpaid')
+
+    def test_finance_tab_lists_it_with_a_button_that_prefills_the_form(self):
+        self.lower('45')
+        self.login(self.trainer)
+        html = self.client.get(reverse('core:finance_refunds')).content.decode()
+        self.assertIn('data-awaiting-refund', html)
+        self.assertIn('pago a mais', html)
+        form = self.client.get(reverse('core:refund_create', kwargs={'pk': self.person.pk}), {'package': self.sold.pk})
+        self.assertEqual(form.context['form'].initial['amount'], D('50.00'))
+        self.assertIn('pago a mais', form.context['form'].initial['reason'])
+
+    def test_refunding_it_goes_to_the_summary_with_the_calculation(self):
+        self.lower('45')
+        self.login(self.trainer)
+        response = self.client.post(reverse('core:refund_create', kwargs={'pk': self.person.pk}), {
+            'student_package': self.sold.pk, 'kind': 'refund', 'amount': '50', 'method': 'mbway',
+            'refunded_on': timezone.localdate().isoformat(), 'reason': 'ajuste'})
+        refund = Refund.objects.get()
+        self.assertRedirects(response, reverse('core:refund_detail', kwargs={'pk': refund.pk}))
+        self.assertIn('Valor combinado', refund.summary)
+        self.assertIn('diferença', refund.summary)
+
+    def test_student_never_sees_it(self):
+        self.lower('45')
+        self.login(self.alice)
+        html = self.client.get(reverse('core:my_package')).content.decode()
+        self.assertNotIn('pago a mais', html.lower())
+        self.assertNotIn('50,00', html)
