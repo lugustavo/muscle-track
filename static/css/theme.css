@@ -200,3 +200,5 @@ footer { background-color: var(--mt-nav-bg); color: white; padding: 1.5rem 0; ma
 }
 @media (min-width: 768px) { .page-title-lg { font-size: calc(1.375rem + 1.5vw); } }
 @media (min-width: 1200px) { .page-title-lg { font-size: 2.5rem; } }
+@media (min-width: 768px) { .card-title-lg { font-size: calc(1.3rem + .6vw); } }
+@media (min-width: 1200px) { .card-title-lg { font-size: 1.75rem; } }

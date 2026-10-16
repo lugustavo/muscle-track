@@ -16,7 +16,7 @@ class SessionBackNavigationTests(BaseTestCase):
     def test_from_dashboard_goes_back_to_dashboard(self):
         response = self.client.get(self.url + '?next=/')
         self.assertEqual((response.context['back_url'], response.context['back_label']), ('/', 'Voltar ao painel'))
-        self.assertContains(response, 'href="/" class="btn btn-secondary"')
+        self.assertContains(response, 'href="/" class="btn btn-secondary btn-back-compact"')
 
     def test_from_routine_progress_goes_back_there(self):
         response = self.client.get(self.url, {'next': self.progress})
