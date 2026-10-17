@@ -23,12 +23,13 @@ from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import dateformat, timezone, translation
 from django.utils.translation import gettext as _, gettext_lazy as _l, ngettext
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_safe
 
 from allauth.account.models import EmailAddress
 
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, trainer_dashboard
-from . import photo_positions
+from . import photo_positions, telegram
 from .i18n import short_date
 from .forms import (
     AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ClassRequestForm, ConsentForm, SaleForm, ExerciseForm, PaymentForm,
@@ -2131,21 +2132,7 @@ def _calendar_owner(request):
 
 
 def _set_channel(user, person, pref, channel, enabled):
-    """Turn one channel on/off, keeping when (the consent) and, for a student, a line in the file's history."""
-    field = f'{channel}_enabled'
-    if getattr(pref, field) == enabled:
-        return
-    setattr(pref, field, enabled)
-    setattr(pref, f'{channel}_at', timezone.now() if enabled else None)
-    pref.save()
-    if channel == 'push' and not enabled:
-        user.push_subscriptions.all().delete()   # withdrawing also forgets the devices
-    if person is not None:
-        label = _('e-mail') if channel == 'email' else _('push (aparelho)')
-        StudentEvent.objects.create(
-            person=person, kind=StudentEvent.Kind.CONSENT, actor=user,
-            summary=(_('Ativou avisos por %(label)s') if enabled else _('Desativou avisos por %(label)s')) % {'label': label},
-            changes={'channel': channel, 'granted': enabled})
+    notifications.set_channel(user, person, pref, channel, enabled)
 
 
 def _whatsapp_cards():
@@ -2205,6 +2192,9 @@ def notification_settings(request):
     if person is not None and not has_current_consent(person):
         return redirect('core:consent')
     pref, _created = NotificationPreference.objects.get_or_create(user=request.user)
+    if request.method == 'POST' and 'telegram' in request.POST:
+        _telegram_action(request, person, pref)
+        return redirect('core:notification_settings')
     if request.method == 'POST':
         wants_email = 'email_enabled' in request.POST
         wants_push = 'push_enabled' in request.POST
@@ -2238,10 +2228,42 @@ def notification_settings(request):
     return render(request, 'core/notification_settings.html', {
         'title': _('Notificações'), 'pref': pref, 'person': person, 'devices': devices,
         'push_ready': notifications.push_configured(), 'email_ready': notifications.email_configured(),
+        'telegram_ready': telegram.configured(),
+        'telegram_link': telegram.link_url(telegram.active_code(pref)) if telegram.active_code(pref) else '',
         'reminder_hours': settings.REMINDER_CLASS_HOURS, 'plan_days': settings.REMINDER_PLAN_DAYS,
         'vapid_public_key': settings.VAPID_PUBLIC_KEY, 'recent': recent, 'is_trainer': request.user.is_staff,
         'wa_templates': _whatsapp_cards() if request.user.is_staff else [],
     })
+
+
+def _telegram_action(request, person, pref):
+    """"Ligar o Telegram" makes a one-time code (the link that opens the bot carries it); "Desligar" forgets the chat."""
+    action = request.POST.get('telegram')
+    if action == 'link':
+        if not telegram.configured():
+            messages.error(request, _('O Telegram ainda não foi configurado no servidor.'))
+        else:
+            telegram.new_code(pref)
+    elif action == 'unlink':
+        _set_channel(request.user, person, pref, 'telegram', False)
+        messages.success(request, _('Telegram desligado.'))
+
+
+@csrf_exempt
+@require_POST
+def telegram_webhook(request):
+    """Where Telegram delivers what people send the bot. Only Telegram knows the secret it sends back in a header."""
+    if not telegram.configured() or not telegram.valid_secret(request.headers.get('X-Telegram-Bot-Api-Secret-Token')):
+        return HttpResponse(status=403)
+    try:
+        update = json.loads(request.body[:65536].decode())
+    except ValueError:
+        return HttpResponse(status=400)
+    try:
+        telegram.handle_update(update)
+    except Exception:   # answer 200 anyway: Telegram would resend the same update for ever
+        logger.exception('telegram update failed')
+    return JsonResponse({'ok': True})
 
 
 @login_required
@@ -2281,14 +2303,15 @@ def notification_test(request):
     """Send a test on one channel so the person sees it works (only to themselves, only on a channel they enabled)."""
     channel = request.POST.get('channel')
     pref = NotificationPreference.objects.filter(user=request.user).first()
-    if channel not in ('email', 'push') or pref is None or not getattr(pref, f'{channel}_enabled'):
+    if channel not in ('email', 'push', 'telegram') or pref is None or not getattr(pref, f'{channel}_enabled'):
         messages.error(request, _('Ative este canal antes de testar.'))
         return redirect('core:notification_settings')
     notifications.deliver(request.user, notifications.test_message(), only=channel)
     last = request.user.notification_logs.filter(channel=channel).first()
     if last and last.status == 'sent':
-        messages.success(request, _('Teste enviado. Confira o e-mail.') if channel == 'email'
-                         else _('Teste enviado. Deve aparecer no aparelho em instantes.'))
+        messages.success(request, {'email': _('Teste enviado. Confira o e-mail.'),
+                                   'telegram': _('Teste enviado. Confira o Telegram.')}.get(
+            channel, _('Teste enviado. Deve aparecer no aparelho em instantes.')))
     else:
         messages.error(request, _('Não foi possível enviar: %(detail)s.') % {'detail': last.detail if last else _('sem detalhes')})
     return redirect('core:notification_settings')

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 14:25-0300\n"
+"POT-Creation-Date: 2026-10-17 14:41-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1800,6 +1800,20 @@ msgstr ""
 "the server couldn't open a connection to %(host)s (port 443); check that it "
 "has internet access, DNS and proxy (HTTPS_PROXY)"
 
+msgid "e-mail"
+msgstr "email"
+
+msgid "push (aparelho)"
+msgstr "push (device)"
+
+#, python-format
+msgid "Ativou avisos por %(label)s"
+msgstr "Enabled alerts via %(label)s"
+
+#, python-format
+msgid "Desativou avisos por %(label)s"
+msgstr "Turned off %(label)s notifications"
+
 msgid "sem e-mail cadastrado"
 msgstr "no email on file"
 
@@ -1821,6 +1835,22 @@ msgid ""
 msgstr ""
 "You are receiving this notice because you turned on email notifications. To "
 "stop, turn them off under Notifications in the app."
+
+msgid ""
+"o servidor não conseguiu abrir conexão com api.telegram.org (porta 443); "
+"confira se ele tem acesso à internet, DNS e proxy (HTTPS_PROXY)"
+msgstr ""
+"the server could not open a connection to api.telegram.org (port 443); check"
+" that it has internet access, DNS and proxy (HTTPS_PROXY)"
+
+msgid "Telegram não configurado no servidor"
+msgstr "Telegram is not set up on the server"
+
+msgid "chat do Telegram não ligado"
+msgstr "Telegram chat not linked"
+
+msgid "chat removido (o bot foi bloqueado); aviso desligado"
+msgstr "chat removed (the bot was blocked); notifications turned off"
 
 msgid "web push não configurado no servidor"
 msgstr "web push is not set up on the server"
@@ -2120,6 +2150,39 @@ msgstr "Amount refunded (difference): %(amount)s"
 
 msgid "Inativo"
 msgstr "Inactive"
+
+#, python-format
+msgid ""
+"Olá! Para receber os avisos do %(brand)s aqui, abra Notificações no app e "
+"toque em \"Ligar o Telegram\"."
+msgstr ""
+"Hi! To receive %(brand)s notifications here, open Notifications in the app "
+"and tap \"Link Telegram\"."
+
+msgid ""
+"Esse código não vale mais. Volte ao app, abra Notificações e toque em "
+"\"Ligar o Telegram\" de novo."
+msgstr ""
+"This code is no longer valid. Go back to the app, open Notifications and tap"
+" \"Link Telegram\" again."
+
+#, python-format
+msgid ""
+"Pronto! Você vai receber aqui os avisos do %(brand)s. Para parar, envie "
+"/stop ou desligue no app."
+msgstr ""
+"Done! You will receive %(brand)s notifications here. To stop, send /stop or "
+"turn it off in the app."
+
+msgid "Este chat não está ligado a nenhuma conta."
+msgstr "This chat is not linked to any account."
+
+msgid ""
+"Avisos desligados. Para voltar, toque em \"Ligar o Telegram\" nas "
+"Notificações do app."
+msgstr ""
+"Notifications turned off. To get them back, tap \"Link Telegram\" in the "
+"app's Notifications."
 
 #, python-format
 msgid "%(minutes)s min"
@@ -2471,20 +2534,6 @@ msgstr "Error generating workout: %(error)s"
 msgid "Gerar Treino com IA"
 msgstr "Generate Workout with AI"
 
-msgid "e-mail"
-msgstr "email"
-
-msgid "push (aparelho)"
-msgstr "push (device)"
-
-#, python-format
-msgid "Ativou avisos por %(label)s"
-msgstr "Enabled alerts via %(label)s"
-
-#, python-format
-msgid "Desativou avisos por %(label)s"
-msgstr "Turned off %(label)s notifications"
-
 msgid "Texto padrão restaurado."
 msgstr "Default text restored."
 
@@ -2510,6 +2559,12 @@ msgstr "Notification preferences saved."
 msgid "Aparelho"
 msgstr "Device"
 
+msgid "O Telegram ainda não foi configurado no servidor."
+msgstr "Telegram has not been set up on the server yet."
+
+msgid "Telegram desligado."
+msgstr "Telegram turned off."
+
 msgid "Aviso no aparelho não configurado no servidor."
 msgstr "Device notifications are not configured on the server."
 
@@ -2524,6 +2579,9 @@ msgstr "Enable this channel before testing."
 
 msgid "Teste enviado. Confira o e-mail."
 msgstr "Test sent. Check your email."
+
+msgid "Teste enviado. Confira o Telegram."
+msgstr "Test sent. Check Telegram."
 
 msgid "Teste enviado. Deve aparecer no aparelho em instantes."
 msgstr "Test sent. It should show up on the device shortly."
@@ -3163,13 +3221,11 @@ msgstr "(late)"
 msgid "Seu mês"
 msgstr "Your month"
 
-#| msgid "treinos"
 msgid "treino"
 msgid_plural "treinos"
 msgstr[0] "workout"
 msgstr[1] "workouts"
 
-#| msgid "Editar treino"
 msgid "dia treinado"
 msgid_plural "dias treinados"
 msgstr[0] "day trained"
@@ -3181,13 +3237,10 @@ msgstr[0] "class done"
 msgstr[1] "classes done"
 
 #, python-format
-#| msgid "Pacotes vendidos no mês"
 msgid "Dias treinados no mês: %(n)s"
 msgstr "Days trained this month: %(n)s"
 
 #, python-format
-#| msgid "%(n)d aula a mais marcada, até %(date)s."
-#| msgid_plural "%(n)d aulas a mais marcadas, até %(date)s."
 msgid "%(n)s aula ainda marcada neste mês."
 msgid_plural "%(n)s aulas ainda marcadas neste mês."
 msgstr[0] "%(n)s class still scheduled this month."
@@ -3665,6 +3718,10 @@ msgstr ""
 
 msgid "Situação do link"
 msgstr "Link status"
+
+#| msgid "d/m H:i"
+msgid "d/m/Y H:i"
+msgstr "m/d/Y g:i A"
 
 #, python-format
 msgid ""
@@ -4337,6 +4394,9 @@ msgstr "and %(refunds_due_more)s refund due — see finances"
 
 msgid "Faltas dos últimos 7 dias"
 msgstr "Absences in the last 7 days"
+
+msgid "d/m H:i"
+msgstr "m/d g:i A"
 
 msgid "Mensagem pelo WhatsApp"
 msgstr "WhatsApp message"
@@ -5090,11 +5150,11 @@ msgid "Aviso quando o meu pacote estiver acabando ou vencendo"
 msgstr "Notify me when my package is running out or expiring"
 
 msgid ""
-"Vale para os dois canais acima: só chega o que estiver marcado aqui e em um "
-"canal ligado."
+"Vale para todos os canais: só chega o que estiver marcado aqui e em um canal"
+" ligado."
 msgstr ""
-"Applies to both channels above: you only receive what is checked here and on"
-" an enabled channel."
+"Applies to all channels: you only get what is checked here and on a channel "
+"that is on."
 
 msgid "Aparelhos que recebem avisos"
 msgstr "Devices that receive alerts"
@@ -5116,11 +5176,50 @@ msgstr ""
 "On iPhone, notifications only work after you add the app to your Home Screen"
 " (Share → Add to Home Screen)."
 
+msgid "Avisos no Telegram"
+msgstr "Telegram notifications"
+
+#, python-format
+msgid ""
+"Ligado em %(telegram_at)s. Os mesmos avisos chegam na conversa com o bot; "
+"para parar, desligue aqui ou envie /stop no Telegram."
+msgstr ""
+"Linked on %(telegram_at)s. The same notifications arrive in the chat with "
+"the bot; to stop, turn it off here or send /stop in Telegram."
+
+msgid "Desligar o Telegram"
+msgstr "Turn off Telegram"
+
+msgid ""
+"Abra o Telegram pelo botão, toque em Iniciar (Start) e volte aqui. O código "
+"vale 15 minutos e só serve uma vez."
+msgstr ""
+"Open Telegram with the button, tap Start and come back here. The code is "
+"valid for 15 minutes and works only once."
+
+msgid "Abrir o Telegram"
+msgstr "Open Telegram"
+
+msgid "Já iniciei no Telegram"
+msgstr "I have started it in Telegram"
+
+msgid ""
+"Receba os mesmos avisos em uma conversa com o bot do Telegram. Você liga com"
+" um código de uso único; o app não guarda seu telefone, só o número da "
+"conversa."
+msgstr ""
+"Get the same notifications in a chat with the Telegram bot. You link it with"
+" a one-time code; the app does not store your phone number, only the chat "
+"number."
+
+msgid "Ligar o Telegram"
+msgstr "Link Telegram"
+
 msgid "Enviar um teste:"
 msgstr "Send a test:"
 
 msgid "Últimos envios"
-msgstr "Latest uploads"
+msgstr "Latest sends"
 
 msgid "aparelho"
 msgstr "device"
@@ -7035,6 +7134,10 @@ msgstr "Total workouts"
 #, python-format
 msgid "%(active_routines)s Ativos"
 msgstr "%(active_routines)s Active"
+
+#| msgid "d/m H:i"
+msgid "d/m/Y - H:i"
+msgstr "m/d/Y - g:i A"
 
 msgid "Nenhuma sessão concluída ainda"
 msgstr "No completed sessions yet"

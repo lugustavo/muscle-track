@@ -1099,6 +1099,12 @@ class NotificationPreference(models.Model):
     email_at = models.DateTimeField(null=True, blank=True)
     push_enabled = models.BooleanField(default=False)
     push_at = models.DateTimeField(null=True, blank=True)
+    # Telegram: the chat the bot writes to (known once the person sent the one-time code to the bot, see core/telegram.py)
+    telegram_enabled = models.BooleanField(default=False)
+    telegram_at = models.DateTimeField(null=True, blank=True)
+    telegram_chat_id = models.BigIntegerField(null=True, blank=True, unique=True)
+    telegram_code = models.CharField(max_length=40, blank=True, default='', db_index=True)
+    telegram_code_expires = models.DateTimeField(null=True, blank=True)
     # What to be told about, once a channel is on (applies to both channels)
     notify_changes = models.BooleanField(default=True)          # class moved/cancelled, answers and requests
     notify_class_reminder = models.BooleanField(default=True)   # "your class is tomorrow"
@@ -1161,7 +1167,7 @@ class NotificationLog(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notification_logs')
     kind = models.CharField(max_length=30)
-    channel = models.CharField(max_length=10)
+    channel = models.CharField(max_length=10)   # email, push or telegram
     status = models.CharField(max_length=10, choices=Status.choices)
     detail = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

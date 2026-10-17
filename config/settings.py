@@ -195,6 +195,11 @@ EMAIL_BACKEND = config('EMAIL_BACKEND', default=(
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER or 'noreply@muscle-track.com')
 
 # Notifications (core/notifications.py). Web push needs a VAPID key pair: `python manage.py generate_vapid_keys`
+# Telegram (optional): the bot made with @BotFather, its @username (for the link that opens the chat) and a secret that
+# Telegram sends back with every update, so only Telegram can call the webhook
+TELEGRAM_BOT_TOKEN = config('TELEGRAM_BOT_TOKEN', default='')
+TELEGRAM_BOT_USERNAME = config('TELEGRAM_BOT_USERNAME', default='').lstrip('@')
+TELEGRAM_WEBHOOK_SECRET = config('TELEGRAM_WEBHOOK_SECRET', default='')
 VAPID_PUBLIC_KEY = config('VAPID_PUBLIC_KEY', default='')
 VAPID_PRIVATE_KEY = config('VAPID_PRIVATE_KEY', default='')
 VAPID_SUBJECT = config('VAPID_SUBJECT', default='')   # mailto: or https: contact for the push services

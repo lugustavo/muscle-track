@@ -39,7 +39,7 @@ def leaks(text):
     return sorted(found)
 
 
-@override_settings(MEDIA_ROOT=MEDIA)
+@override_settings(MEDIA_ROOT=MEDIA, TELEGRAM_BOT_TOKEN='t', TELEGRAM_BOT_USERNAME='bot', TELEGRAM_WEBHOOK_SECRET='s')
 class EnglishPagesTests(RichDataMixin, BaseTestCase):
     maxDiff = None
 
@@ -92,6 +92,18 @@ class EnglishPagesTests(RichDataMixin, BaseTestCase):
             reverse('core:photo_link', kwargs={'pk': self.link_photo.pk}), reverse('core:photo_positions'),
             reverse('core:notification_settings'), reverse('core:notification_settings') + '?tab=whatsapp',
         ])
+
+    def test_notification_page_in_every_telegram_state(self):
+        from django.utils import timezone
+        from core.models import NotificationPreference
+        self.client.force_login(self.alice)
+        url = reverse('core:notification_settings')
+        self.check([url])
+        self.client.post(url, {'telegram': 'link'})
+        self.check([url])
+        NotificationPreference.objects.filter(user=self.alice).update(
+            telegram_enabled=True, telegram_chat_id=7, telegram_at=timezone.now())
+        self.check([url])
 
     def test_student_pages(self):
         self.login(self.alice)
