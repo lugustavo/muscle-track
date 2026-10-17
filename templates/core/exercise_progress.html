@@ -17,7 +17,7 @@
         <div class="card text-center h-100 stat-tile"><div class="card-body">
             <div class="stat-top"><i class="bi bi-trophy-fill fs-1 text-warning"></i>
             <h3 class="mt-2">{% blocktrans trimmed with weight_used=record_log.weight_used %}{{ weight_used }} kg{% endblocktrans %}</h3></div>
-            <p class="text-muted mb-0">{% blocktrans trimmed with start_time=record_log.session.start_time|date:"d/m/Y" %}Recorde de carga · {{ start_time }}{% endblocktrans %}</p>
+            <p class="text-muted mb-0">{% blocktrans trimmed with start_time=record_log.session.start_time|date:_('d/m/Y') %}Recorde de carga · {{ start_time }}{% endblocktrans %}</p>
         </div></div>
     </div>
     <div class="col-6 col-md-4">
@@ -45,7 +45,7 @@
                 <tbody>
                 {% for h in history %}
                     <tr>
-                        <td>{{ h.log.session.start_time|date:"d/m/Y" }}</td>
+                        <td>{{ h.log.session.start_time|date:_('d/m/Y') }}</td>
                         <td>
                             {% for s in h.sets %}
                                 <span class="badge bg-body-secondary text-body border me-1">{% if s.weight is not None %}{% blocktrans trimmed with weight=s.weight %}{{ weight }}kg{% endblocktrans %}{% else %}-{% endif %} × {% if s.reps is not None %}{{ s.reps }}{% else %}-{% endif %}</span>

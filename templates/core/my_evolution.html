@@ -26,7 +26,7 @@
     <div class="card mb-3" data-my-assessment="{{ a.pk }}">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-baseline">
-                <strong class="fs-5">{{ a.date|date:"d/m/Y" }}</strong>
+                <strong class="fs-5">{{ a.date|date:_('d/m/Y') }}</strong>
                 {% if a.bmi %}<span class="small text-muted">{% blocktrans trimmed with bmi=a.bmi %}IMC {{ bmi }}{% endblocktrans %}</span>{% endif %}
             </div>
             <div class="row row-cols-3 g-2 text-center mt-1">
@@ -38,13 +38,13 @@
             <div class="d-flex flex-wrap gap-2 mt-3">
                 {% for slot in a.photo_slots %}{% if slot.photo %}
                 <a href="{% url 'core:photo_file' slot.photo.pk %}" target="_blank" rel="noopener" class="text-center text-decoration-none" style="width: 76px;">
-                    <img src="{% url 'core:photo_thumb' slot.photo.pk %}" loading="lazy" alt="{{ slot.label }} em {{ a.date|date:'d/m/Y' }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
+                    <img src="{% url 'core:photo_thumb' slot.photo.pk %}" loading="lazy" alt="{{ slot.label }} em {{ a.date|date:_('d/m/Y') }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
                     <div class="small text-muted lh-sm">{{ slot.label }}</div>
                 </a>
                 {% endif %}{% endfor %}
                 {% for photo in a.other_photos %}
                 <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener" class="text-center text-decoration-none" style="width: 76px;">
-                    <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="Foto de {{ a.date|date:'d/m/Y' }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
+                    <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="Foto de {{ a.date|date:_('d/m/Y') }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
                     <div class="small text-muted lh-sm">{{ photo.caption|default:photo.get_angle_display }}</div>
                 </a>
                 {% endfor %}
@@ -64,13 +64,13 @@
         {% for photo in loose_photos %}
         <div class="text-center" style="width: 76px;" data-loose-photo="{{ photo.pk }}">
             <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener" class="text-decoration-none">
-                <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="Foto de {{ photo.date|date:'d/m/Y' }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
-                <div class="small text-muted lh-sm">{{ photo.date|date:"d/m/Y" }}{% if photo.angle != 'other' %}<br>{{ photo.get_angle_display }}{% endif %}</div>
+                <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="Foto de {{ photo.date|date:_('d/m/Y') }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
+                <div class="small text-muted lh-sm">{{ photo.date|date:_('d/m/Y') }}{% if photo.angle != 'other' %}<br>{{ photo.get_angle_display }}{% endif %}</div>
             </a>
             {% if photo.uploaded_by_student %}
             <form method="post" action="{% nav_url 'core:my_photo_delete' photo.pk %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta foto?" %}{% endfilter %}');">
                 {% csrf_token %}
-                <button class="btn btn-link btn-sm text-danger p-0" title="{% trans "Remover" %}"><i class="bi bi-trash"></i><span class="visually-hidden">{% blocktrans trimmed with date=photo.date|date:'d/m/Y' %}Remover a foto de {{ date }}{% endblocktrans %}</span></button>
+                <button class="btn btn-link btn-sm text-danger p-0" title="{% trans "Remover" %}"><i class="bi bi-trash"></i><span class="visually-hidden">{% blocktrans trimmed with date=photo.date|date:_('d/m/Y') %}Remover a foto de {{ date }}{% endblocktrans %}</span></button>
             </form>
             {% endif %}
         </div>

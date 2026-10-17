@@ -26,7 +26,7 @@
                 <tbody>
                     {% for session in completed_sessions %}
                     <tr>
-                        <td>{{ session.start_time|date:"d/m/Y" }}</td>
+                        <td>{{ session.start_time|date:_('d/m/Y') }}</td>
                         <td>
                             <strong>{{ session.person_routine.routine_name }}</strong>
                             <br>
@@ -110,7 +110,7 @@
                         <td><a href="{% nav_url 'core:my_exercise_progress' r.person_routine_exercise__exercise_id %}" class="text-decoration-none">{{ r.person_routine_exercise__exercise__exercise_name }}</a></td>
                         <td class="text-end"><strong>{% blocktrans trimmed with best=r.best %}{{ best }} kg{% endblocktrans %}</strong></td>
                         <td class="text-end">{{ r.sessions }}</td>
-                        <td class="text-end">{{ r.last|date:"d/m/Y" }}</td>
+                        <td class="text-end">{{ r.last|date:_('d/m/Y') }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

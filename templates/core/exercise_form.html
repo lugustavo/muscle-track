@@ -273,13 +273,13 @@
                         <strong>#{{ pk }}</strong>{% endblocktrans %}
                     </li>
                     <li class="mb-2">
-                        {% blocktrans trimmed with created_at=form.instance.created_at|date:"d/m/Y" %}<small class="text-muted d-block">Criado em</small>
+                        {% blocktrans trimmed with created_at=form.instance.created_at|date:_('d/m/Y') %}<small class="text-muted d-block">Criado em</small>
                         <strong>{{ created_at }}</strong>{% endblocktrans %}
                         <br>
                         <small class="text-muted">{{ form.instance.created_at|date:"H:i" }}</small>
                     </li>
                     <li>
-                        {% blocktrans trimmed with updated_at=form.instance.updated_at|date:"d/m/Y" %}<small class="text-muted d-block">Última atualização</small>
+                        {% blocktrans trimmed with updated_at=form.instance.updated_at|date:_('d/m/Y') %}<small class="text-muted d-block">Última atualização</small>
                         <strong>{{ updated_at }}</strong>{% endblocktrans %}
                         <br>
                         <small class="text-muted">{{ form.instance.updated_at|date:"H:i" }}</small>

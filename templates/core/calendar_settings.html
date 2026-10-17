@@ -36,7 +36,7 @@
             <ol class="mb-3">
                 <li>{% blocktrans trimmed %}Abra <strong>Adicionar agenda por URL</strong> no Google Agenda (botão abaixo; é no computador, o celular usa as agendas da mesma conta).{% endblocktrans %}</li>
                 <li>{% blocktrans trimmed %}Cole o link no campo <strong>URL da agenda</strong> e clique em <strong>Adicionar agenda</strong>.{% endblocktrans %}</li>
-                <li>{% trans "Pronto: a agenda \"" %}{% if role == 'trainer' %}{% trans "Muscle Track · Agenda" %}{% else %}{% trans "Minhas aulas" %}{% endif %}{% trans "\" aparece em \"Outras agendas\" e no app do celular." %}</li>
+                <li>{% trans 'Pronto: a agenda "' %}{% if role == 'trainer' %}{% trans "Muscle Track · Agenda" %}{% else %}{% trans "Minhas aulas" %}{% endif %}{% trans '" aparece em "Outras agendas" e no app do celular.' %}</li>
             </ol>
             <div class="d-flex flex-wrap gap-2">
                 <a class="btn btn-outline-primary" href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl" target="_blank" rel="noopener"><i class="bi bi-google"></i> {% trans "Abrir o Google Agenda" %}</a>

@@ -25,7 +25,7 @@
                     {% blocktrans trimmed with estimated_duration=today.suggested.routine.estimated_duration count exercise_count=today.suggested.exercise_count %}{{ exercise_count }} exercício
                     · cerca de {{ estimated_duration }} min{% plural %}{{ exercise_count }} exercícios
                     · cerca de {{ estimated_duration }} min{% endblocktrans %}
-                    {% if today.suggested.last_done %}<br><small>{% blocktrans trimmed with last_done=today.suggested.last_done|date:"d/m" %}Último: {{ last_done }}{% endblocktrans %}</small>{% endif %}
+                    {% if today.suggested.last_done %}<br><small>{% blocktrans trimmed with last_done=today.suggested.last_done|date:_('d/m') %}Último: {{ last_done }}{% endblocktrans %}</small>{% endif %}
                 </p>
                 <form method="post" action="{% url 'core:workout_start' today.suggested.routine.pk %}">
                     {% csrf_token %}

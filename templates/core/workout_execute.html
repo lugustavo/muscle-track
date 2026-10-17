@@ -121,7 +121,7 @@
 
                 <div class="small text-muted mb-2">
                     {% if e.previous_weight is not None %}
-                    <span class="me-3"><i class="bi bi-clock-history"></i> {% blocktrans trimmed with previous_weight=e.previous_weight|unlocalize %}Última vez: <strong>{{ previous_weight }} kg</strong>{% endblocktrans %}{% if e.previous_date %} ({{ e.previous_date|date:"d/m" }}){% endif %}</span>
+                    <span class="me-3"><i class="bi bi-clock-history"></i> {% blocktrans trimmed with previous_weight=e.previous_weight|unlocalize %}Última vez: <strong>{{ previous_weight }} kg</strong>{% endblocktrans %}{% if e.previous_date %} ({{ e.previous_date|date:_('d/m') }}){% endif %}</span>
                     {% endif %}
                     {% if e.record is not None %}
                     <a href="{% nav_url 'core:my_exercise_progress' e.prx.exercise.pk %}" class="me-3 text-decoration-none"><i class="bi bi-trophy"></i> {% blocktrans trimmed with record=e.record|unlocalize %}Recorde: <strong>{{ record }} kg</strong>{% endblocktrans %}</a>

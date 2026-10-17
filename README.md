@@ -172,9 +172,10 @@ O app fala **português (Brasil)** e **inglês**. O idioma é escolhido assim:
 Datas, nomes de mês/dia e valores seguem o idioma (`1.234,50 €` em português, `€1,234.50` em inglês). O que a personal digita (nomes, observações, textos de WhatsApp personalizados) não é traduzido. O histórico da ficha guarda os eventos no idioma de quem os gerou.
 
 **Para quem mexe no código** (português é o idioma de origem; o inglês é o catálogo):
-- Textos novos: `{% trans "Texto" %}` / `{% blocktrans trimmed %}` nos templates, `gettext` (`_`) nas views e `gettext_lazy` em modelos, forms e constantes; `gettext()` nos scripts (`/jsi18n/` é carregado em toda página). Nunca use f-string com texto traduzível: `_('Olá, %(nome)s') % {'nome': x}`.
+- Textos novos: `{% trans "Texto" %}` / `{% blocktrans trimmed %}` nos templates, `gettext` (`_`) nas views e `gettext_lazy` em modelos, forms e constantes; `gettext()` nos scripts (`/jsi18n/` é carregado em toda página). Nunca use f-string com texto traduzível: `_('Olá, %(nome)s') % {'nome': x}`. Formatos de data que mudam por idioma entram no catálogo: `{{ d|date:_('d/m/Y') }}` (em inglês vira `m/d/Y`). Para exibir uma opção de campo use `get_xxx_display`, nunca o valor cru.
 - Catálogo: `python tools/i18n_catalog.py extract` (precisa do pacote `gettext`), preencher `locale/en/LC_MESSAGES/django.po` e `djangojs.po`, `python tools/i18n_catalog.py check` e `python manage.py compilemessages`. Os `.mo` compilados ficam no repositório (a imagem Docker não precisa do `gettext`).
-- Um teste falha se houver entrada sem tradução, com placeholder ou tag HTML diferente, ou se o `.mo` estiver diferente do `.po`.
+- Um teste falha se houver entrada sem tradução, com placeholder ou tag HTML diferente, ou se o `.mo` estiver diferente do `.po`. Outro abre as páginas principais em inglês e falha se sobrar texto em português à mostra (use dados de teste sem acento).
+- O texto de um aluno novo (convite por WhatsApp) sai no idioma padrão (português) até ele ter um idioma salvo; depois disso, no idioma dele.
 - Novo idioma: incluir em `LANGUAGES` (`config/settings.py`), gerar o catálogo com `makemessages -l xx` e traduzir.
 
 ## Entrar com Google, Facebook e X (opcional)

@@ -81,7 +81,7 @@ def search_all(query, limit=8):
         'key': 'exercises', 'label': _('Exercícios'), 'icon': 'bi-activity', 'total': exercises.count() if len(rows) == limit else len(rows),
         'more_url': reverse('core:exercise_list') + more,
         'items': [{
-            'title': e.exercise_name, 'subtitle': e.muscle_group.name, 'badge': '',
+            'title': e.exercise_name, 'subtitle': e.muscle_group.label, 'badge': '',
             'url': reverse('core:exercise_detail', kwargs={'pk': e.pk}),
         } for e in rows],
     })

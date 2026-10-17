@@ -22,7 +22,7 @@
             <div class="progress mt-1" style="height: 6px;" role="progressbar" aria-valuenow="{{ package.percent }}" aria-valuemin="0" aria-valuemax="100" aria-label="{% trans "Aulas usadas do pacote" %}"><div class="progress-bar bg-success" style="width: {{ package.percent }}%"></div></div>
             <div class="small text-muted mt-1">
                 {% if not package.package.valid_days %}{% trans "Pacote sem prazo: vale até você usar todas as aulas." %}
-                {% elif package.starts_on %}{% blocktrans trimmed with ends_on=package.ends_on|date:"d/m/Y" %}Vale até {{ ends_on }}{% endblocktrans %}{% if package.state == 'frozen' %} {% trans "(congelado)" %}{% elif package.state == 'expired' %} {% trans "(prazo vencido: fale com a sua personal)" %}{% endif %}
+                {% elif package.starts_on %}{% blocktrans trimmed with ends_on=package.ends_on|date:_('d/m/Y') %}Vale até {{ ends_on }}{% endblocktrans %}{% if package.state == 'frozen' %} {% trans "(congelado)" %}{% elif package.state == 'expired' %} {% trans "(prazo vencido: fale com a sua personal)" %}{% endif %}
                 {% else %}{% blocktrans trimmed with valid_days=package.package.valid_days %}O prazo de {{ valid_days }} dias começa na sua primeira aula.{% endblocktrans %}{% endif %}
             </div>
         </div>
@@ -74,7 +74,7 @@
         {% for a in recent %}
         <li class="list-group-item d-flex justify-content-between align-items-center">
             <span>
-                {{ a.starts_at|date:"D, d/m" }} · {{ a.starts_at|time:"H:i" }}
+                {{ a.starts_at|date:_('D, d/m') }} · {{ a.starts_at|time:"H:i" }}
                 {% include 'core/_class_history.html' with compact=True %}
             </span>
             <span class="badge {% if a.status == 'attended' %}bg-success{% elif a.status == 'missed' %}bg-danger{% elif a.status == 'cancelled' or a.status == 'rescheduled' %}bg-secondary{% else %}bg-body-secondary text-body border{% endif %}">{{ a.get_status_display }}</span>

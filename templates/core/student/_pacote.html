@@ -26,10 +26,10 @@
 
         <div class="small mt-3" data-package-dates>
             {% if not cur.package.valid_days %}
-                <span class="text-muted">{% blocktrans trimmed %}Pacote <strong>sem prazo</strong>: não vence, vale até usar todas as aulas.{% endblocktrans %}</span>{% if cur.starts_on %} {% blocktrans trimmed with starts_on=cur.starts_on|date:"d/m/Y" %}Primeira aula em <strong>{{ starts_on }}</strong>.{% endblocktrans %}{% endif %}
+                <span class="text-muted">{% blocktrans trimmed %}Pacote <strong>sem prazo</strong>: não vence, vale até usar todas as aulas.{% endblocktrans %}</span>{% if cur.starts_on %} {% blocktrans trimmed with starts_on=cur.starts_on|date:_('d/m/Y') %}Primeira aula em <strong>{{ starts_on }}</strong>.{% endblocktrans %}{% endif %}
             {% elif cur.starts_on %}
-                {% blocktrans trimmed with starts_on=cur.starts_on|date:"d/m/Y" ends_on=cur.ends_on|date:"d/m/Y" %}Primeira aula em <strong>{{ starts_on }}</strong> · vale até <strong>{{ ends_on }}</strong>{% endblocktrans %}
-                {% if cur.state == 'frozen' %}<span class="text-muted">{% blocktrans trimmed with frozen_since=cur.package.frozen_since|date:"d/m" %}(congelado desde {{ frozen_since }}; o prazo para de contar){% endblocktrans %}</span>
+                {% blocktrans trimmed with starts_on=cur.starts_on|date:_('d/m/Y') ends_on=cur.ends_on|date:_('d/m/Y') %}Primeira aula em <strong>{{ starts_on }}</strong> · vale até <strong>{{ ends_on }}</strong>{% endblocktrans %}
+                {% if cur.state == 'frozen' %}<span class="text-muted">{% blocktrans trimmed with frozen_since=cur.package.frozen_since|date:_('d/m') %}(congelado desde {{ frozen_since }}; o prazo para de contar){% endblocktrans %}</span>
                 {% elif cur.state == 'expired' %}<span class="text-danger">{% blocktrans trimmed count days_left=cur.days_left|cut:"-"|add:0 %}(venceu há {{ days_left }} dia){% plural %}(venceu há {{ days_left }} dias){% endblocktrans %}</span>
                 {% elif cur.days_left is not None %}<span class="text-muted">{% blocktrans trimmed count days_left=cur.days_left %}(faltam {{ days_left }} dia){% plural %}(faltam {{ days_left }} dias){% endblocktrans %}</span>{% endif %}
                 {% if cur.package.extension_days %}<div class="text-muted">{% blocktrans trimmed count extension_days=cur.package.extension_days %}Prorrogado em {{ extension_days }} dia.{% plural %}Prorrogado em {{ extension_days }} dias.{% endblocktrans %}</div>{% endif %}
@@ -112,7 +112,7 @@
         <ul class="list-unstyled small mb-0" data-package-history>
             {% for row in pkg.rows %}{% if row != cur %}
             <li class="d-flex justify-content-between gap-2 py-1 border-top">
-                <span>{{ row.package.name }} <span class="text-muted">{% blocktrans trimmed with used=row.used sessions=row.sessions %}· {{ used }}/{{ sessions }} aulas{% endblocktrans %}{% if row.starts_on %} · {{ row.starts_on|date:"d/m/y" }}{% endif %}</span></span>
+                <span>{{ row.package.name }} <span class="text-muted">{% blocktrans trimmed with used=row.used sessions=row.sessions %}· {{ used }}/{{ sessions }} aulas{% endblocktrans %}{% if row.starts_on %} · {{ row.starts_on|date:_('d/m/y') }}{% endif %}</span></span>
                 <span class="d-flex align-items-center gap-2">
                     {% if row.state != 'cancelled' %}<a href="{% nav_url 'core:student_package_edit' student.pk row.package.pk %}" class="small" title="{% trans "Editar este pacote" %}"><i class="bi bi-pencil-square"></i><span class="visually-hidden">{% blocktrans trimmed with name=row.package.name %}Editar {{ name }}{% endblocktrans %}</span></a>{% endif %}
                     <span class="badge bg-secondary">{{ row.label }}</span>

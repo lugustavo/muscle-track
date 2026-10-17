@@ -3,7 +3,8 @@ from datetime import datetime, time, timedelta
 
 from django.contrib.auth.hashers import UNUSABLE_PASSWORD_PREFIX
 from django.db.models import Exists, OuterRef, Q, Subquery
-from django.utils import timezone, translation
+from django.utils import dateformat, timezone, translation
+from django.utils.translation import gettext as _
 
 from . import packages, refunds
 from .agenda import ensure_appointments
@@ -95,7 +96,7 @@ def recent_misses(days=7, now=None):
             'person__user__notification_preference').order_by('-starts_at'):
         with translation.override(language_of(a.person)):   # the message goes to the student, in their language
             text = render(Kind.MISSED, {'nome': a.person.person_name.split()[0],
-                                        'data': f'{timezone.localtime(a.starts_at):%d/%m}'}, template)
+                                        'data': dateformat.format(timezone.localtime(a.starts_at), _('d/m'))}, template)
         rows.append({'appointment': a, 'student': a.person, 'whatsapp': whatsapp_url(a.person.phone, text)})
     return rows
 

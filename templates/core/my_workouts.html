@@ -17,7 +17,7 @@
                 <span class="badge bg-primary mb-2"><i class="bi bi-star-fill"></i> {% trans "Treino de hoje" %}</span>
                 {% endif %}
                 {% if item.last_done and not item.active_session %}
-                <div class="text-muted small mb-2"><i class="bi bi-calendar-check"></i> {% blocktrans trimmed with last_done=item.last_done|date:"d/m" %}Último: {{ last_done }}{% endblocktrans %}</div>
+                <div class="text-muted small mb-2"><i class="bi bi-calendar-check"></i> {% blocktrans trimmed with last_done=item.last_done|date:_('d/m') %}Último: {{ last_done }}{% endblocktrans %}</div>
                 {% endif %}
                 {% if item.active_session %}
                 <div class="alert alert-warning py-2 px-3 mb-3" role="alert">

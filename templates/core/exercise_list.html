@@ -72,7 +72,7 @@
                     <option value="">{% trans "Todos os grupos" %}</option>
                     {% for muscle_group in muscle_groups %}
                         <option value="{{ muscle_group.id }}" {% if selected_muscle_group == muscle_group.id|stringformat:"s" %}selected{% endif %}>
-                            {{ muscle_group.name }}
+                            {{ muscle_group.label }}
                         </option>
                     {% endfor %}
                 </select>
@@ -102,8 +102,8 @@
         {% if search %}
             {% blocktrans trimmed %}para "<strong>{{ search }}</strong>"{% endblocktrans %}
         {% endif %}
-        {% if selected_muscle_group %}
-            {% blocktrans trimmed with selected_muscle_group=selected_muscle_group|title %}no grupo <strong>{{ selected_muscle_group }}</strong>{% endblocktrans %}
+        {% if selected_muscle_group_label %}
+            {% blocktrans trimmed with selected_muscle_group=selected_muscle_group_label %}no grupo <strong>{{ selected_muscle_group }}</strong>{% endblocktrans %}
         {% endif %}
     </small>
 </div>
@@ -124,7 +124,7 @@
             <div class="card-body">
                 <h5 class="card-title">{{ exercise.exercise_name }}</h5>
                 <div class="mb-2">
-                    <span class="badge bg-secondary">{{ exercise.muscle_group.name }}</span>
+                    <span class="badge bg-secondary">{{ exercise.muscle_group.label }}</span>
                     <span class="badge bg-info">{{ exercise.default_sets }}x{{ exercise.default_reps }}</span>
                 </div>
                 <p class="card-text text-muted small">{{ exercise.description|truncatewords:15 }}</p>
@@ -167,7 +167,7 @@
             <div class="exercise-info">
                 <h5 class="mb-1">{{ exercise.exercise_name }}</h5>
                 <div class="mb-2">
-                    <span class="badge bg-secondary">{{ exercise.muscle_group.name }}</span>
+                    <span class="badge bg-secondary">{{ exercise.muscle_group.label }}</span>
                     <span class="badge bg-info">{% blocktrans trimmed with default_sets=exercise.default_sets default_reps=exercise.default_reps %}{{ default_sets }} séries x {{ default_reps }} reps{% endblocktrans %}</span>
                 </div>
                 <p class="text-muted small mb-0">{{ exercise.description|truncatewords:25 }}</p>

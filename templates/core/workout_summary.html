@@ -9,7 +9,7 @@
     <div class="text-center mb-4">
         <div class="display-4"><i class="bi bi-check-circle-fill text-success"></i></div>
         <h1 class="h3 mt-2 mb-1">{% trans "Treino concluído!" %}</h1>
-        <div class="text-muted">{{ routine.routine_name }} · {{ session.start_time|date:"d/m/Y" }}</div>
+        <div class="text-muted">{{ routine.routine_name }} · {{ session.start_time|date:_('d/m/Y') }}</div>
     </div>
 
     {% for item in celebrations %}
@@ -50,7 +50,7 @@
 
     {% if summary.comparison %}
     <div class="card mb-3">
-        <div class="card-header">{% blocktrans trimmed with date=summary.comparison.date|date:"d/m" %}<strong>Comparado com o último treino</strong> <small class="text-muted">({{ date }})</small>{% endblocktrans %}</div>
+        <div class="card-header">{% blocktrans trimmed with date=summary.comparison.date|date:_('d/m') %}<strong>Comparado com o último treino</strong> <small class="text-muted">({{ date }})</small>{% endblocktrans %}</div>
         <ul class="list-group list-group-flush">
             <li class="list-group-item d-flex justify-content-between">
                 <span>{% trans "Volume levantado" %}</span>

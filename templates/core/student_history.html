@@ -159,7 +159,7 @@
                 <tbody>
                     {% for session in completed_sessions %}
                     <tr>
-                        <td>{{ session.start_time|date:"d/m/Y" }}</td>
+                        <td>{{ session.start_time|date:_('d/m/Y') }}</td>
                         <td>
                             <strong>{{ session.person_routine.routine_name }}</strong>
                             <br>

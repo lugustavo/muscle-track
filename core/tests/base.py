@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
+from django.utils import translation
 
 from core.consent import ALL_KINDS, record_consent
 from core.models import (
@@ -11,6 +12,11 @@ from core.models import (
 @override_settings(HOLIDAYS_REGION='')   # no national holidays unless a test asks for them (dates are relative to today)
 class BaseTestCase(TestCase):
     """Shared fixtures: one trainer, two students, one routine each."""
+
+    def setUp(self):
+        super().setUp()
+        translation.activate('pt-br')   # a request in another language must not leak into the next test
+        self.addCleanup(translation.deactivate)
 
     @classmethod
     def setUpTestData(cls):

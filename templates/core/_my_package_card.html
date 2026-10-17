@@ -4,7 +4,7 @@
         <div class="d-flex justify-content-between align-items-start gap-2">
             <div>
                 <strong class="fs-5">{{ p.package.name }}</strong>
-                <div class="small text-muted">{% blocktrans trimmed with sold_on=p.package.sold_on|date:"d/m/Y" %}Comprado em {{ sold_on }}{% endblocktrans %}</div>
+                <div class="small text-muted">{% blocktrans trimmed with sold_on=p.package.sold_on|date:_('d/m/Y') %}Comprado em {{ sold_on }}{% endblocktrans %}</div>
             </div>
             <span class="badge bg-{{ p.css }}">{{ p.label }}</span>
         </div>
@@ -27,7 +27,7 @@
             {% if p.free_cancelled %}<li>{% blocktrans trimmed count free_cancelled=p.free_cancelled %}{{ free_cancelled }} cancelamento sem desconto.{% plural %}{{ free_cancelled }} cancelamentos sem desconto.{% endblocktrans %}</li>{% endif %}
             <li>
                 {% if not p.package.valid_days %}{% trans "Pacote sem prazo: vale até usar todas as aulas." %}
-                {% elif p.starts_on %}{% blocktrans trimmed with starts_on=p.starts_on|date:"d/m/Y" ends_on=p.ends_on|date:"d/m/Y" %}Primeira aula em {{ starts_on }}; vale até <strong>{{ ends_on }}</strong>{% endblocktrans %}{% if p.state == 'active' and p.days_left is not None %} ({% if p.days_left <= 0 %}{% trans "vence hoje" %}{% elif p.days_left == 1 %}{% trans "falta 1 dia" %}{% else %}{% blocktrans trimmed with days_left=p.days_left %}faltam {{ days_left }} dias{% endblocktrans %}{% endif %}){% elif p.state == 'frozen' %} {% trans "(congelado até você voltar)" %}{% elif p.state == 'expired' %} {% trans "(prazo vencido: fale com a sua personal)" %}{% endif %}.
+                {% elif p.starts_on %}{% blocktrans trimmed with starts_on=p.starts_on|date:_('d/m/Y') ends_on=p.ends_on|date:_('d/m/Y') %}Primeira aula em {{ starts_on }}; vale até <strong>{{ ends_on }}</strong>{% endblocktrans %}{% if p.state == 'active' and p.days_left is not None %} ({% if p.days_left <= 0 %}{% trans "vence hoje" %}{% elif p.days_left == 1 %}{% trans "falta 1 dia" %}{% else %}{% blocktrans trimmed with days_left=p.days_left %}faltam {{ days_left }} dias{% endblocktrans %}{% endif %}){% elif p.state == 'frozen' %} {% trans "(congelado até você voltar)" %}{% elif p.state == 'expired' %} {% trans "(prazo vencido: fale com a sua personal)" %}{% endif %}.
                 {% else %}{% blocktrans trimmed with valid_days=p.package.valid_days %}O prazo de {{ valid_days }} dias começa na primeira aula.{% endblocktrans %}{% endif %}
             </li>
             {% if p.package.extension_days %}<li>{% blocktrans trimmed count extension_days=p.package.extension_days %}Prorrogado em {{ extension_days }} dia.{% plural %}Prorrogado em {{ extension_days }} dias.{% endblocktrans %}</li>{% endif %}
@@ -39,7 +39,7 @@
             <ul class="list-group list-group-flush mt-1">
                 {% for a in p.classes %}
                 <li class="list-group-item px-0 py-1 d-flex justify-content-between small">
-                    <span>{{ a.starts_at|date:"d/m/Y" }} · {{ a.starts_at|time:"H:i" }}</span>
+                    <span>{{ a.starts_at|date:_('d/m/Y') }} · {{ a.starts_at|time:"H:i" }}</span>
                     <span class="text-muted">{{ a.get_status_display }}{% if a.status == 'cancelled' %} {% trans "(tarde)" %}{% endif %}</span>
                 </li>
                 {% endfor %}

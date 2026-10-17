@@ -7,17 +7,17 @@
 <div class="small text-warning-emphasis" data-preview data-count="0"><i class="bi bi-exclamation-triangle"></i> {% trans "Nenhuma data disponível com essas escolhas." %}</div>
 {% else %}
 <div data-preview data-count="{{ preview.count }}" data-last="{{ preview.last|date:'Y-m-d' }}">
-    <div class="small mb-1">{% blocktrans trimmed with last=preview.last|date:"D d/m/Y" count count=preview.count %}<strong>{{ count }}</strong> aula · a última é <strong>{{ last }}</strong>{% plural %}<strong>{{ count }}</strong> aulas · a última é <strong>{{ last }}</strong>{% endblocktrans %}</div>
+    <div class="small mb-1">{% blocktrans trimmed with last=preview.last|date:_('D d/m/Y') count count=preview.count %}<strong>{{ count }}</strong> aula · a última é <strong>{{ last }}</strong>{% plural %}<strong>{{ count }}</strong> aulas · a última é <strong>{{ last }}</strong>{% endblocktrans %}</div>
     <ul class="list-group list-group-flush small border rounded mb-2" style="max-height: 14rem; overflow-y: auto;">
         {% for row in preview.rows %}
         <li class="list-group-item py-1 d-flex justify-content-between align-items-center gap-2" data-preview-row="{{ row.date|date:'Y-m-d' }}" data-state="{{ row.state }}">
             <label class="d-flex gap-2 align-items-center mb-0 {% if row.state != 'new' %}text-muted{% endif %}">
                 {% if row.state == 'holiday' or row.kept %}
-                <input type="checkbox" class="form-check-input mt-0" data-keep-date="{{ row.date|date:'Y-m-d' }}"{% if row.kept %} checked{% endif %} aria-label="Dar aula mesmo assim em {{ row.date|date:'d/m' }} ({{ row.holiday }})">
+                <input type="checkbox" class="form-check-input mt-0" data-keep-date="{{ row.date|date:'Y-m-d' }}"{% if row.kept %} checked{% endif %} aria-label="Dar aula mesmo assim em {{ row.date|date:_('d/m') }} ({{ row.holiday }})">
                 {% else %}
-                <input type="checkbox" class="form-check-input mt-0" data-skip-date="{{ row.date|date:'Y-m-d' }}" {% if row.state == 'new' %}checked{% endif %}{% if row.state == 'exists' %} disabled{% endif %} aria-label="Marcar aula de {{ row.date|date:'d/m' }}">
+                <input type="checkbox" class="form-check-input mt-0" data-skip-date="{{ row.date|date:'Y-m-d' }}" {% if row.state == 'new' %}checked{% endif %}{% if row.state == 'exists' %} disabled{% endif %} aria-label="Marcar aula de {{ row.date|date:_('d/m') }}">
                 {% endif %}
-                <span {% if row.state != 'new' %}class="text-decoration-line-through"{% endif %}>{{ row.date|date:"D d/m" }}{% if start_time %} · {{ start_time|time:"H:i" }}{% endif %}</span>
+                <span {% if row.state != 'new' %}class="text-decoration-line-through"{% endif %}>{{ row.date|date:_('D d/m') }}{% if start_time %} · {{ start_time|time:"H:i" }}{% endif %}</span>
             </label>
             <span class="text-end">
                 {% if row.state == 'exists' %}<span class="badge bg-secondary">{% trans "já tem aula" %}</span>{% endif %}
@@ -31,6 +31,6 @@
     </ul>
     <div class="form-text">{% trans "Os feriados já ficam de fora. Desmarque outros dias sem aula (viagem, folga): a próxima data entra no lugar." %}</div>
     {% if preview.short %}<div class="small text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> {% blocktrans trimmed with count=preview.count wanted=preview.wanted %}Só deu para marcar {{ count }} de {{ wanted }} aulas com essas escolhas.{% endblocktrans %}</div>{% endif %}
-    {% if preview.beyond %}<div class="small text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> {% blocktrans trimmed with deadline=preview.deadline|date:"d/m/Y" count beyond=preview.beyond %}{{ beyond }} aula depois de {{ deadline }}, fim da validade do pacote. Prorrogue o pacote ou mude as datas.{% plural %}{{ beyond }} aulas depois de {{ deadline }}, fim da validade do pacote. Prorrogue o pacote ou mude as datas.{% endblocktrans %}</div>{% endif %}
+    {% if preview.beyond %}<div class="small text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> {% blocktrans trimmed with deadline=preview.deadline|date:_('d/m/Y') count beyond=preview.beyond %}{{ beyond }} aula depois de {{ deadline }}, fim da validade do pacote. Prorrogue o pacote ou mude as datas.{% plural %}{{ beyond }} aulas depois de {{ deadline }}, fim da validade do pacote. Prorrogue o pacote ou mude as datas.{% endblocktrans %}</div>{% endif %}
 </div>
 {% endif %}

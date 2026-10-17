@@ -20,7 +20,7 @@ from django.http import FileResponse, Http404, HttpResponse, HttpResponseBadRequ
 from django.templatetags.static import static
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils import timezone, translation
+from django.utils import dateformat, timezone, translation
 from django.utils.translation import gettext as _, gettext_lazy as _l, ngettext
 from django.views.decorators.http import require_POST, require_safe
 
@@ -990,6 +990,7 @@ def exercise_list(request):
         'muscle_groups': muscle_groups,
         'search': search,
         'selected_muscle_group': muscle_group,
+        'selected_muscle_group_label': next((g.label for g in muscle_groups if str(g.pk) == str(muscle_group)), ''),
         'view_mode': view_mode
     })
 
@@ -1203,6 +1204,7 @@ def routine_list(request):
         'routines': routines,
         'search': search,
         'selected_difficulty': difficulty,
+        'selected_difficulty_label': dict(Routine._meta.get_field('difficulty_level').choices).get(difficulty, ''),
         'selected_status': status,
         'view_mode': view_mode,
         'difficulty_choices': Routine._meta.get_field('difficulty_level').choices
@@ -1486,7 +1488,7 @@ def _chart_points(sessions, with_workout_name=False):
     for session in sessions:
         avg = averages.get(session.pk)
         point = {
-            'date': session.start_time.strftime('%d/%m'),
+            'date': dateformat.format(timezone.localtime(session.start_time), _('d/m')),
             'duration': session.duration_minutes or 0,
             'avg_weight': round(float(avg), 1) if avg else 0,
         }
@@ -1886,7 +1888,7 @@ def my_exercise_progress(request, exercise_pk, person):
         weight_used__isnull=False,
     ).select_related('session').prefetch_related('sets').order_by('session__start_time'))
 
-    points = [{'date': log.session.start_time.strftime('%d/%m/%y'), 'weight': float(log.weight_used)}
+    points = [{'date': dateformat.format(timezone.localtime(log.session.start_time), _('d/m/y')), 'weight': float(log.weight_used)}
               for log in logs]
     record_log = max(logs, key=lambda l: (l.weight_used, l.session.start_time), default=None)
     history = []
@@ -1918,7 +1920,7 @@ def api_exercises_list(request):
             'id': exercise.pk,
             'name': exercise.exercise_name,
             'muscle_group_id': exercise.muscle_group.id,
-            'muscle_group_display': exercise.muscle_group.name,
+            'muscle_group_display': exercise.muscle_group.label,
             'default_sets': exercise.default_sets,
             'default_reps': exercise.default_reps,
             'thumbnail': thumbnail_url

@@ -14,7 +14,7 @@
     <div class="col-lg-7">
         <div class="card mb-4">
             <div class="card-body">
-                <p>{% blocktrans trimmed with get_status_display=student.get_status_display %}Situação atual: <strong>{{ get_status_display }}</strong>{% endblocktrans %}{% if student.status_changed_at %} <span class="text-muted">{% blocktrans trimmed with status_changed_at=student.status_changed_at|date:"d/m/Y" %}desde {{ status_changed_at }}{% endblocktrans %}</span>{% endif %}</p>
+                <p>{% blocktrans trimmed with get_status_display=student.get_status_display %}Situação atual: <strong>{{ get_status_display }}</strong>{% endblocktrans %}{% if student.status_changed_at %} <span class="text-muted">{% blocktrans trimmed with status_changed_at=student.status_changed_at|date:_('d/m/Y') %}desde {{ status_changed_at }}{% endblocktrans %}</span>{% endif %}</p>
                 <form method="post">
                     {% csrf_token %}
                     <div class="mb-3">

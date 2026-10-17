@@ -16,7 +16,7 @@
                 {% for kind, label, record, granted, required in consents %}
                 <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
                     <span>{{ label }}{% if required %} <small class="text-muted">{% trans "(obrigatório)" %}</small>{% endif %}
-                        {% if record %}<br><small class="text-muted">{{ record.at|date:"d/m/Y" }}</small>{% endif %}</span>
+                        {% if record %}<br><small class="text-muted">{{ record.at|date:_('d/m/Y') }}</small>{% endif %}</span>
                     {% if kind == 'photos' %}
                     <form method="post" action="{% url 'core:my_consent_photos' %}">
                         {% csrf_token %}

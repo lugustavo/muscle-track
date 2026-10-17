@@ -33,7 +33,7 @@
             <tbody>
             {% for a in assessments %}
                 <tr>
-                    <td>{{ a.date|date:"d/m/Y" }}{% if a.notes %} <i class="bi bi-chat-left-text text-muted" title="{{ a.notes }}"></i>{% endif %}</td>
+                    <td>{{ a.date|date:_('d/m/Y') }}{% if a.notes %} <i class="bi bi-chat-left-text text-muted" title="{{ a.notes }}"></i>{% endif %}</td>
                     <td class="text-end">{{ a.weight_kg|default_if_none:"-" }}</td>
                     <td class="text-end">{{ a.height_cm|default_if_none:"-" }}</td>
                     <td class="text-end">{{ a.bmi|default_if_none:"-" }}</td>
@@ -58,7 +58,7 @@
                             <div class="text-center" style="width: 84px;" data-angle="{{ slot.angle }}">
                                 {% if slot.photo %}
                                 <a href="{% url 'core:photo_file' slot.photo.pk %}" target="_blank" rel="noopener" title="Abrir foto: {{ slot.label }}">
-                                    <img src="{% url 'core:photo_thumb' slot.photo.pk %}" loading="lazy" alt="{{ slot.label }} em {{ a.date|date:'d/m/Y' }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
+                                    <img src="{% url 'core:photo_thumb' slot.photo.pk %}" loading="lazy" alt="{{ slot.label }} em {{ a.date|date:_('d/m/Y') }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
                                 </a>
                                 {% else %}
                                 <a href="{% nav_url 'core:photo_upload' student.pk %}&amp;assessment={{ a.pk }}&amp;angle={{ slot.angle }}" class="d-flex flex-column align-items-center justify-content-center rounded border border-2 border-dashed text-muted text-decoration-none w-100" style="aspect-ratio: 3/4;" title="Adicionar foto: {{ slot.label }}">
@@ -76,7 +76,7 @@
                             {% endfor %}
                             {% for photo in a.other_photos %}
                             <div class="text-center" style="width: 84px;">
-                                <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener"><img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="Foto de {{ a.date|date:'d/m/Y' }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;"></a>
+                                <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener"><img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="Foto de {{ a.date|date:_('d/m/Y') }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;"></a>
                                 <div class="small text-muted lh-sm mt-1">{{ photo.caption|default:photo.get_angle_display }}</div>
                                 <form method="post" action="{% nav_url 'core:photo_delete' photo.pk %}" class="d-inline" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta foto?" %}{% endfilter %}');">
                                     {% csrf_token %}
@@ -106,10 +106,10 @@
     <div class="col-4 col-md-3 col-lg-2">
         <div class="card h-100">
             <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener">
-                <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" class="card-img-top" alt="Foto de {{ photo.date|date:'d/m/Y' }}" style="aspect-ratio: 3/4; object-fit: cover;">
+                <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" class="card-img-top" alt="Foto de {{ photo.date|date:_('d/m/Y') }}" style="aspect-ratio: 3/4; object-fit: cover;">
             </a>
             <div class="card-body py-1 small">
-                <div class="fw-bold">{{ photo.date|date:"d/m/Y" }}{% if photo.uploaded_by_student %} <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" data-by-student title="{% trans "Enviada pelo aluno" %}"><i class="bi bi-person"></i></span>{% endif %}</div>
+                <div class="fw-bold">{{ photo.date|date:_('d/m/Y') }}{% if photo.uploaded_by_student %} <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" data-by-student title="{% trans "Enviada pelo aluno" %}"><i class="bi bi-person"></i></span>{% endif %}</div>
                 {% if photo.angle != 'other' %}<div class="text-muted">{{ photo.get_angle_display }}</div>{% endif %}
                 {% if photo.caption %}<div class="text-muted">{{ photo.caption }}</div>{% endif %}
             </div>

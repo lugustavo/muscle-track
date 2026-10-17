@@ -3,7 +3,7 @@
 <div class="row g-4">
     <div class="col-lg-7">
         <h5 class="mb-3"><i class="bi bi-clock-history"></i> {% trans "Histórico de alterações" %}</h5>
-        <p class="text-muted small"><i class="bi bi-eye-slash"></i> {% trans "Só você vê. Textos de saúde e anotações internas aparecem como \"alterado\", sem o conteúdo." %}</p>
+        <p class="text-muted small"><i class="bi bi-eye-slash"></i> {% trans 'Só você vê. Textos de saúde e anotações internas aparecem como "alterado", sem o conteúdo.' %}</p>
         {% for event in events %}
         <div class="card mb-2">
             <div class="card-body py-2">
@@ -16,7 +16,7 @@
                     {% for label, before, after in event.change_rows %}
                     <li><strong>{{ label }}</strong>:
                         {% if before is None and after is None %}<em class="text-muted">{% trans "alterado" %}</em>
-                        {% else %}<span class="text-muted">{{ before|default:"(vazio)" }}</span> → {{ after|default:"(vazio)" }}{% endif %}
+                        {% else %}<span class="text-muted">{{ before|default:_("(vazio)") }}</span> → {{ after|default:_("(vazio)") }}{% endif %}
                     </li>
                     {% endfor %}
                 </ul>
@@ -38,7 +38,7 @@
                 {% for label, record, granted, required in consents %}
                 <li class="list-group-item d-flex justify-content-between align-items-start gap-2">
                     <span>{{ label }}{% if required %} <small class="text-muted">{% trans "(obrigatório)" %}</small>{% endif %}
-                        {% if record %}<br><small class="text-muted">{% blocktrans trimmed with at=record.at|date:"d/m/Y" version=record.version get_source_display=record.get_source_display %}{{ at }} · texto {{ version }} · {{ get_source_display }}{% endblocktrans %}</small>{% endif %}
+                        {% if record %}<br><small class="text-muted">{% blocktrans trimmed with at=record.at|date:_('d/m/Y') version=record.version get_source_display=record.get_source_display %}{{ at }} · texto {{ version }} · {{ get_source_display }}{% endblocktrans %}</small>{% endif %}
                     </span>
                     {% if granted %}<span class="badge bg-success">{% trans "ok" %}</span>
                     {% elif record and not record.granted %}<span class="badge bg-secondary">{% trans "retirado" %}</span>

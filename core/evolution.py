@@ -1,7 +1,8 @@
 """The student's physical evolution: assessments with their photos, the chart, and the side-by-side photo comparison.
 
 Shared by the trainer's file (Avaliações tab) and the student's own page, so both read the same numbers."""
-from django.utils.translation import gettext_lazy as _l
+from django.utils import dateformat
+from django.utils.translation import gettext as _, gettext_lazy as _l
 
 from .models import ProgressPhoto
 
@@ -33,7 +34,7 @@ def assessments_with_photos(person):
 def chart_points(assessments):
     """Weight, body fat and waist over time (oldest first) for the evolution chart; empty with fewer than 2 points."""
     points = [{
-        'date': a.date.strftime('%d/%m/%y'),
+        'date': dateformat.format(a.date, _('d/m/y')),
         'weight': float(a.weight_kg) if a.weight_kg is not None else None,
         'body_fat': float(a.body_fat_pct) if a.body_fat_pct is not None else None,
         'waist': float(a.waist_cm) if a.waist_cm is not None else None,

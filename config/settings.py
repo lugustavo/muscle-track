@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from decouple import config, Csv
 import dj_database_url
+from django.utils.translation import gettext_lazy as _l
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -257,7 +258,7 @@ PHOTO_MAX_SIZE_MB = config('PHOTO_MAX_SIZE_MB', default=15, cast=int)
 PHOTO_MAX_DIMENSION = config('PHOTO_MAX_DIMENSION', default=12000, cast=int)
 
 # Privacy policy (LGPD): who is the data controller and how to reach them
-PRIVACY_CONTROLLER_NAME = config('PRIVACY_CONTROLLER_NAME', default='a personal trainer responsável pelo seu acompanhamento')
+PRIVACY_CONTROLLER_NAME = config('PRIVACY_CONTROLLER_NAME', default=_l('a personal trainer responsável pelo seu acompanhamento'))
 PRIVACY_CONTACT_EMAIL = config('PRIVACY_CONTACT_EMAIL', default='')
 
 # Pix key shown in the payment reminder message (optional)

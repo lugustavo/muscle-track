@@ -19,7 +19,7 @@ import polib
 ROOT = Path(__file__).resolve().parent.parent
 DOMAINS = ('django', 'djangojs')
 PLACEHOLDER = re.compile(r'%\((\w+)\)[sd]|%[sd]')
-TAG = re.compile(r'</?\s*([a-zA-Z0-9]+)')
+TAG = re.compile(r'</?\s*(a|b|br|code|div|em|i|li|p|small|span|strong|u|ul|ol|button|h[1-6]|table|tr|td|th)\b')
 
 
 def po_path(domain):
@@ -31,10 +31,13 @@ def load(domain):
 
 
 def manage(*args):
-    env = {'SECRET_KEY': 'x', 'DEBUG': '1', 'PATH': '/usr/bin:/bin'}
+    """Runs manage.py; `makemessages` also learns the `_l` alias of gettext_lazy (xgettext only knows the full names)."""
     import os
-    env = {**os.environ, 'SECRET_KEY': 'x', 'DEBUG': '1'}
-    subprocess.run([sys.executable, 'manage.py', *args], cwd=ROOT, env=env, check=True)
+    env = {**os.environ, 'SECRET_KEY': 'x', 'DEBUG': '1', 'DJANGO_SETTINGS_MODULE': 'config.settings'}
+    code = ('import sys; from django.core.management.commands import makemessages as m; '
+            "m.Command.xgettext_options = m.Command.xgettext_options + ['--keyword=_l']; "
+            'from django.core.management import execute_from_command_line as run; run(["manage.py"] + sys.argv[1:])')
+    subprocess.run([sys.executable, '-c', code, *args], cwd=ROOT, env=env, check=True)
 
 
 def extract():

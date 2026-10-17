@@ -41,6 +41,6 @@ class EnglishCatalogTests(SimpleTestCase):
                     for index, form in entry.msgstr_plural.items():
                         if mo.ngettext(entry.msgid, entry.msgid_plural, 1 if int(index) == 0 else 2) != form:
                             stale.append(entry.msgid)
-                elif mo.gettext(entry.msgid) != entry.msgstr:
+                elif (mo.pgettext(entry.msgctxt, entry.msgid) if entry.msgctxt else mo.gettext(entry.msgid)) != entry.msgstr:
                     stale.append(entry.msgid)
             self.assertEqual(stale, [], f'{domain}.mo desatualizado (rode compilemessages): {stale[:5]}')

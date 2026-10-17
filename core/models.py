@@ -16,6 +16,14 @@ from PIL import Image, ImageOps
 from .validators import validate_avatar_image, validate_photo_image
 
 
+# The groups created by the migration, by the name they were saved with
+STANDARD_MUSCLE_GROUPS = {
+    'Peito': _('Peito'), 'Costas': _('Costas'), 'Ombros': _('Ombros'), 'Bíceps': _('Bíceps'), 'Tríceps': _('Tríceps'),
+    'Pernas': _('Pernas'), 'Glúteos': _('Glúteos'), 'Abdômen': _('Abdômen'), 'Panturrilha': _('Panturrilha'),
+    'Antebraço': _('Antebraço'), 'Cardio': _('Cardio'), 'Funcional': _('Funcional'),
+}
+
+
 class MuscleGroup(models.Model):
     """Model representing a muscle group"""
     name = models.CharField(max_length=50, unique=True, verbose_name=_('Nome'))
@@ -31,8 +39,13 @@ class MuscleGroup(models.Model):
         verbose_name_plural = _('Grupos Musculares')
         ordering = ['order', 'name']
 
+    @property
+    def label(self):
+        """The name to show: the standard groups follow the language; one the trainer renamed or created shows as typed."""
+        return str(STANDARD_MUSCLE_GROUPS.get(self.name, self.name))
+
     def __str__(self):
-        return self.name
+        return self.label
 
 
 class Person(models.Model):
@@ -233,7 +246,7 @@ class Exercise(models.Model):
         ordering = ['exercise_name']
 
     def __str__(self):
-        return f"{self.exercise_name} ({self.muscle_group.name})"
+        return f"{self.exercise_name} ({self.muscle_group.label})"
 
 
 class Routine(models.Model):

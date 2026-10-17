@@ -121,7 +121,7 @@
                     </div>
                     <div id="emptyExercisesMessage" class="text-center py-5">
                         <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
-                        <p class="text-muted mt-3 mb-0">{% trans "Nenhum exercício adicionado." %}<br>{% trans "Clique em \"Adicionar Exercícios\" para começar." %}</p>
+                        <p class="text-muted mt-3 mb-0">{% trans "Nenhum exercício adicionado." %}<br>{% trans 'Clique em "Adicionar Exercícios" para começar.' %}</p>
                     </div>
                 </div>
             </div>
@@ -194,7 +194,7 @@
                         <select class="form-select" id="muscleGroupFilter">
                             <option value="">{% trans "Todos os grupos musculares" %}</option>
                             {% for mg in muscle_groups %}
-                            <option value="{{ mg.id }}">{{ mg.name }}</option>
+                            <option value="{{ mg.id }}">{{ mg.label }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -295,7 +295,7 @@ selectedExercises = [
     {
         id: {{ re.exercise.pk }},
         name: "{{ re.exercise.exercise_name|escapejs }}",
-        muscle_group: "{{ re.exercise.muscle_group.name|escapejs }}",
+        muscle_group: "{{ re.exercise.muscle_group.label|escapejs }}",
         sets: {{ re.sets }},
         reps: {{ re.reps }},
         rest: {{ re.rest_seconds }},

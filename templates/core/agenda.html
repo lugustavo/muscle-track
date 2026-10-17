@@ -84,7 +84,7 @@
         <span class="btn disabled bg-body-tertiary text-body fw-bold" data-agenda-title>
             {% if view == 'mes' %}{{ month|date:_("F \d\e Y")|capfirst }}
             {% elif view == 'dia' %}{{ pivot|date:_("l, j \d\e F")|lower|capfirst }}
-            {% else %}{{ range_start|date:"d/m" }} a {{ range_end|date:"d/m/Y" }}{% endif %}
+            {% else %}{{ range_start|date:_('d/m') }} a {{ range_end|date:_('d/m/Y') }}{% endif %}
         </span>
         <a href="{{ next_url }}" class="btn btn-outline-secondary" title="{% trans "Próximo" %}"><i class="bi bi-chevron-right"></i><span class="visually-hidden">{% trans "Próximo" %}</span></a>
         {% if not is_current %}<a href="{{ today_url }}" class="btn btn-outline-primary">{% trans "Hoje" %}</a>{% endif %}
@@ -107,14 +107,14 @@
     <div class="col-md-6 col-xl day-pane {% if day.is_selected %}selected{% endif %}" data-day-pane="{{ day.date|date:'Y-m-d' }}">
         <div class="card h-100 day-col {% if day.is_today %}today{% endif %}">
             <div class="card-header {% if day.is_today %}bg-primary text-white{% endif %}">
-                <strong>{{ day.weekday }}</strong> <small>{{ day.date|date:"d/m" }}</small>
+                <strong>{{ day.weekday }}</strong> <small>{{ day.date|date:_('d/m') }}</small>
             </div>
             <div class="card-body p-2">
                 {% for a in day.items %}{% include 'core/_appt_card.html' %}
                 {% empty %}
                 <div class="text-muted small text-center py-2 d-none d-lg-block">—</div>
                 <div class="day-empty text-muted">
-                    <p class="mb-2">{% blocktrans trimmed with date=day.date|date:"d/m" %}Sem aulas em {{ date }}.{% endblocktrans %}</p>
+                    <p class="mb-2">{% blocktrans trimmed with date=day.date|date:_('d/m') %}Sem aulas em {{ date }}.{% endblocktrans %}</p>
                     <a href="{% nav_url 'core:appointment_create' %}&date={{ day.date|date:'Y-m-d' }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus-circle"></i> {% trans "Nova aula neste dia" %}</a>
                 </div>
                 {% endfor %}
@@ -191,7 +191,7 @@
         </div>
     </section>
     {% empty %}
-    <div class="alert alert-info" data-agenda-empty><i class="bi bi-info-circle"></i> {% blocktrans trimmed with range_start=range_start|date:"d/m" range_end=range_end|date:"d/m" %}Nenhuma aula entre {{ range_start }} e {{ range_end }}. Use as setas para ver outros dias.{% endblocktrans %}</div>
+    <div class="alert alert-info" data-agenda-empty><i class="bi bi-info-circle"></i> {% blocktrans trimmed with range_start=range_start|date:_('d/m') range_end=range_end|date:_('d/m') %}Nenhuma aula entre {{ range_start }} e {{ range_end }}. Use as setas para ver outros dias.{% endblocktrans %}</div>
     {% endfor %}
 </div>
 {% endif %}

@@ -50,7 +50,7 @@
     <div class="col-lg-5">
         <div class="card border-0 bg-body-tertiary"><div class="card-body small">
             {% for row in overview.rows %}{% if row.state != 'cancelled' %}
-            <p class="mb-2"><strong>{{ row.package.name }}</strong> ({{ row.sold_on|default:row.package.sold_on|date:"d/m/Y" }}):
+            <p class="mb-2"><strong>{{ row.package.name }}</strong> ({{ row.sold_on|default:row.package.sold_on|date:_('d/m/Y') }}):
                 {% if row.package.price_total is not None %}{% blocktrans trimmed with price_total=row.package.price_total|money paid=row.paid|money %}total {{ price_total }}, pago {{ paid }}{% endblocktrans %}{% if row.pending > 0 %}, <span class="text-warning-emphasis fw-semibold">{% blocktrans trimmed with pending=row.pending|money %}em aberto {{ pending }}{% endblocktrans %}</span>{% endif %}
                 {% else %}{% trans "sem valor definido" %}{% endif %}.</p>
             {% endif %}{% empty %}

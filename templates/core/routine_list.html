@@ -133,8 +133,8 @@
             {% if search %}
                 {% blocktrans trimmed %}para "<strong>{{ search }}</strong>"{% endblocktrans %}
             {% endif %}
-            {% if selected_difficulty %}
-                {% blocktrans trimmed with selected_difficulty=selected_difficulty|title %}com dificuldade <strong>{{ selected_difficulty }}</strong>{% endblocktrans %}
+            {% if selected_difficulty_label %}
+                {% blocktrans trimmed with selected_difficulty=selected_difficulty_label %}com dificuldade <strong>{{ selected_difficulty }}</strong>{% endblocktrans %}
             {% endif %}
         </small>
     </div>

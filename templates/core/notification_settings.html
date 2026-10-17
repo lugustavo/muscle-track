@@ -33,8 +33,8 @@
                 <label class="form-check-label fw-bold" for="email_enabled"><i class="bi bi-envelope"></i> {% trans "Avisos por e-mail" %}</label>
             </div>
             <div class="small text-muted ms-4 mb-3">
-                {% blocktrans trimmed with email=request.user.email|default:"(sem e-mail cadastrado)" %}Enviados para <strong>{{ email }}</strong>.{% endblocktrans %}
-                {% if pref.email_at %}{% blocktrans trimmed with email_at=pref.email_at|date:"d/m/Y" %}Ativado em {{ email_at }}.{% endblocktrans %}{% endif %}
+                {% blocktrans trimmed with email=request.user.email|default:_("(sem e-mail cadastrado)") %}Enviados para <strong>{{ email }}</strong>.{% endblocktrans %}
+                {% if pref.email_at %}{% blocktrans trimmed with email_at=pref.email_at|date:_('d/m/Y') %}Ativado em {{ email_at }}.{% endblocktrans %}{% endif %}
                 {% if not email_ready %}<br><span class="text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> {% trans "O envio de e-mail ainda não foi configurado no servidor." %}</span>{% endif %}
             </div>
 
@@ -44,7 +44,7 @@
             </div>
             <div class="small text-muted ms-4 mb-3">
                 {% trans "Aparecem como notificação do celular ou do computador, mesmo com o app fechado." %}
-                {% if pref.push_at %}{% blocktrans trimmed with push_at=pref.push_at|date:"d/m/Y" %}Ativado em {{ push_at }}.{% endblocktrans %}{% endif %}
+                {% if pref.push_at %}{% blocktrans trimmed with push_at=pref.push_at|date:_('d/m/Y') %}Ativado em {{ push_at }}.{% endblocktrans %}{% endif %}
                 {% if not push_ready %}<br><span class="text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> {% trans "Ainda não foi configurado no servidor." %}</span>{% endif %}
             </div>
 
@@ -80,7 +80,7 @@
         <ul class="list-group list-group-flush">
             {% for d in devices %}
             <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
-                <span class="small text-truncate"><i class="bi bi-phone"></i> {{ d.label }} <span class="text-muted">{% blocktrans trimmed with created_at=d.created_at|date:"d/m/Y" %}· desde {{ created_at }}{% endblocktrans %}</span></span>
+                <span class="small text-truncate"><i class="bi bi-phone"></i> {{ d.label }} <span class="text-muted">{% blocktrans trimmed with created_at=d.created_at|date:_('d/m/Y') %}· desde {{ created_at }}{% endblocktrans %}</span></span>
                 <form method="post" action="{% url 'core:push_unsubscribe' d.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-danger">{% trans "Remover" %}</button></form>
             </li>
             {% empty %}

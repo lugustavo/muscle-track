@@ -29,7 +29,7 @@
         <ul class="list-group mb-3" data-own-holidays>
             {% for h in own %}
             <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
-                <span><strong>{{ h.date|date:"D d/m/Y" }}</strong> · {{ h.name }}</span>
+                <span><strong>{{ h.date|date:_('D d/m/Y') }}</strong> · {{ h.name }}</span>
                 <form method="post" action="{% nav_url 'core:agenda_holiday_delete' h.pk %}" onsubmit="return confirm('{% autoescape off %}{% blocktrans trimmed asvar confirm_msg with name=h.name %}Tirar {{ name }} da lista?{% endblocktrans %}{% endautoescape %}{{ confirm_msg|escapejs }}');">
                     {% csrf_token %}
                     <button class="btn btn-sm btn-outline-danger btn-icon" title="{% trans "Remover" %}"><i class="bi bi-trash"></i><span class="visually-hidden">{% blocktrans trimmed with name=h.name %}Remover {{ name }}{% endblocktrans %}</span></button>
@@ -43,7 +43,7 @@
         <details class="small text-muted">
             <summary>{% blocktrans trimmed with past=past|length %}Dias que já passaram ({{ past }}){% endblocktrans %}</summary>
             <ul class="list-unstyled mt-2 mb-0">
-                {% for h in past %}<li>{{ h.date|date:"d/m/Y" }} · {{ h.name }}</li>{% endfor %}
+                {% for h in past %}<li>{{ h.date|date:_('d/m/Y') }} · {{ h.name }}</li>{% endfor %}
             </ul>
         </details>
         {% endif %}
@@ -54,7 +54,7 @@
         {% if national %}
         <ul class="list-group" data-national-holidays>
             {% for day, name in national %}
-            <li class="list-group-item d-flex justify-content-between"><span>{{ name }}</span><span class="text-muted">{{ day|date:"D d/m/Y" }}</span></li>
+            <li class="list-group-item d-flex justify-content-between"><span>{{ name }}</span><span class="text-muted">{{ day|date:_('D d/m/Y') }}</span></li>
             {% endfor %}
         </ul>
         <p class="small text-muted mt-2">{% blocktrans trimmed %}Calculados pelo app (os que seguem a Páscoa mudam a cada ano). País: <strong>{{ region }}</strong>; para trocar, defina <code>HOLIDAYS_REGION</code> (PT, BR ou vazio) no ambiente.{% endblocktrans %}</p>

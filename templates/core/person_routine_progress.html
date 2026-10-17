@@ -35,10 +35,10 @@
                 <p class="mb-1">{% blocktrans trimmed with description=person_routine.description %}<strong>Descrição:</strong> {{ description }}{% endblocktrans %}</p>
                 {% endif %}
                 <p class="mb-0">
-                    {% blocktrans trimmed with start_date=person_routine.start_date|date:"d/m/Y"|default:"Não definida" %}<strong>Data de Início:</strong>
+                    {% blocktrans trimmed with start_date=person_routine.start_date|date:_('d/m/Y')|default:_("Não definida") %}<strong>Data de Início:</strong>
                     {{ start_date }}{% endblocktrans %}
                     {% if person_routine.end_date %}
-                    {% blocktrans trimmed with end_date=person_routine.end_date|date:"d/m/Y" %}| <strong>Data de Término:</strong> {{ end_date }}{% endblocktrans %}
+                    {% blocktrans trimmed with end_date=person_routine.end_date|date:_('d/m/Y') %}| <strong>Data de Término:</strong> {{ end_date }}{% endblocktrans %}
                     {% endif %}
                 </p>
             </div>
@@ -134,7 +134,7 @@
                     {% for session in completed_sessions %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ session.start_time|date:"d/m/Y" }}</td>
+                        <td>{{ session.start_time|date:_('d/m/Y') }}</td>
                         <td>{{ session.start_time|date:"H:i" }}</td>
                         <td>
                             {% if session.end_time %}

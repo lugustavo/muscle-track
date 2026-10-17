@@ -1,5 +1,4 @@
 """Notifications are written in the recipient's own language, whoever (and whatever language) triggered them."""
-import unittest
 from datetime import timedelta
 from unittest import mock
 
@@ -55,14 +54,12 @@ class RecipientLanguageTests(BaseTestCase):
         self.assertEqual(mail.outbox[0].subject, 'Seu pacote está acabando')
         self.assertTrue(mail.outbox[0].body.startswith('Resta 1 aula no seu pacote. Fale com a sua personal para renovar.'))
 
-    @unittest.skip('aguarda o catálogo en')
     def test_english_catalog_for_an_english_recipient(self):
         prefer(self.alice, 'en')
         notifications.notify([self.alice], notifications.package_low(2), sync=True)
         self.assertEqual(mail.outbox[0].subject, 'Your package is running out')
         self.assertIn('2 classes left', mail.outbox[0].body)
 
-    @unittest.skip('aguarda o catálogo en')
     def test_charge_message_follows_the_students_language(self):
         prefer(self.alice, 'en')
         with translation.override('pt-br'):   # the trainer works in Portuguese; the student reads English

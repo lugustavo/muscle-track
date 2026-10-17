@@ -7,7 +7,7 @@
             {% for slot in slots %}
             <li class="list-group-item p-0 swipe-row" data-swipe-row data-slot="{{ slot.pk }}">
                 <div class="swipe-content px-3 py-2">
-                    {% blocktrans trimmed with get_weekday_display=slot.get_weekday_display start_time=slot.start_time|time:"H:i" %}<strong>{{ get_weekday_display }}</strong> às {{ start_time }}{% endblocktrans %} <small class="text-muted">{% blocktrans trimmed with duration_minutes=slot.duration_minutes %}({{ duration_minutes }} min){% endblocktrans %}{% if slot.interval_weeks > 1 %} {% blocktrans trimmed with interval_weeks=slot.interval_weeks %}· a cada {{ interval_weeks }} semanas{% endblocktrans %}{% endif %}{% if slot.valid_until %} {% blocktrans trimmed with valid_until=slot.valid_until|date:"d/m/Y" %}· até {{ valid_until }}{% endblocktrans %}{% endif %}</small>
+                    {% blocktrans trimmed with get_weekday_display=slot.get_weekday_display start_time=slot.start_time|time:"H:i" %}<strong>{{ get_weekday_display }}</strong> às {{ start_time }}{% endblocktrans %} <small class="text-muted">{% blocktrans trimmed with duration_minutes=slot.duration_minutes %}({{ duration_minutes }} min){% endblocktrans %}{% if slot.interval_weeks > 1 %} {% blocktrans trimmed with interval_weeks=slot.interval_weeks %}· a cada {{ interval_weeks }} semanas{% endblocktrans %}{% endif %}{% if slot.valid_until %} {% blocktrans trimmed with valid_until=slot.valid_until|date:_('d/m/Y') %}· até {{ valid_until }}{% endblocktrans %}{% endif %}</small>
                 </div>
                 <div class="swipe-actions">
                     <a href="{% nav_url 'core:slot_edit' slot.pk %}" class="btn btn-sm btn-link swipe-edit" title="{% trans "Editar" %}" data-slot-edit>
@@ -28,7 +28,7 @@
             <i class="bi bi-box-seam"></i> {% blocktrans trimmed with name=slot_plan.name count left=slot_plan.left %}<strong>{{ name }}</strong>:
             restam <strong>{{ left }}</strong> aula{% plural %}<strong>{{ name }}</strong>:
             restam <strong>{{ left }}</strong> aulas{% endblocktrans %}{% if slot_plan.scheduled %}{% blocktrans trimmed count scheduled=slot_plan.scheduled %}, {{ scheduled }} já marcada{% plural %}, {{ scheduled }} já marcadas{% endblocktrans %}{% endif %}
-            {% if slot_plan.ends_on %}{% blocktrans trimmed with ends_on=slot_plan.ends_on|date:"d/m/Y" %}· vale até {{ ends_on }}{% endblocktrans %}{% elif not slot_plan.package.valid_days %}{% trans "· sem prazo" %}{% elif slot_plan.state == 'not_started' %}{% trans "· o prazo começa na primeira aula" %}{% endif %}.
+            {% if slot_plan.ends_on %}{% blocktrans trimmed with ends_on=slot_plan.ends_on|date:_('d/m/Y') %}· vale até {{ ends_on }}{% endblocktrans %}{% elif not slot_plan.package.valid_days %}{% trans "· sem prazo" %}{% elif slot_plan.state == 'not_started' %}{% trans "· o prazo começa na primeira aula" %}{% endif %}.
             {% if slot_plan.to_schedule %}{% blocktrans trimmed with to_schedule=slot_plan.to_schedule %}Faltam marcar <strong>{{ to_schedule }}</strong>.{% endblocktrans %}{% else %}<i class="bi bi-check-circle"></i> {% trans "Todas as aulas do pacote já estão marcadas." %}{% endif %}
             {% if slot_plan.to_schedule and has_package_series %}
             <form method="post" action="{% nav_url 'core:slot_topup' student.pk %}" class="d-inline" data-slot-topup>
@@ -101,7 +101,7 @@
             {% for a in upcoming %}
             <li class="list-group-item p-0 swipe-row" data-swipe-row data-class="{{ a.pk }}">
                 <div class="swipe-content d-flex justify-content-between align-items-center px-3 py-2">
-                    <span>{% blocktrans trimmed with starts_at=a.starts_at|date:"D d/m" starts_at2=a.starts_at|time:"H:i" %}{{ starts_at }} às {{ starts_at2 }}{% endblocktrans %}</span>
+                    <span>{% blocktrans trimmed with starts_at=a.starts_at|date:_('D d/m') starts_at2=a.starts_at|time:"H:i" %}{{ starts_at }} às {{ starts_at2 }}{% endblocktrans %}</span>
                     <small class="text-muted">{{ a.get_kind_display }}</small>
                 </div>
                 <div class="swipe-actions">

@@ -63,7 +63,7 @@
                     <a href="{% nav_url 'core:student_detail' r.person.pk %}" class="text-decoration-none fw-semibold">{{ r.person.person_name }}</a>
                     <span class="badge {% if r.kind == 'reversal' %}bg-secondary{% else %}bg-info-subtle text-info-emphasis border border-info-subtle{% endif %}">{{ r.get_kind_display }}</span>
                     {% if r.is_voided %}<span class="badge bg-secondary">{% trans "anulada" %}</span>{% endif %}<br>
-                    <small class="text-muted">{{ r.refunded_on|date:"d/m/Y" }} · {{ r.get_method_display }}{% if r.student_package %} · {{ r.student_package.name }}{% endif %}{% if r.reason %} · {{ r.reason }}{% endif %}</small>
+                    <small class="text-muted">{{ r.refunded_on|date:_('d/m/Y') }} · {{ r.get_method_display }}{% if r.student_package %} · {{ r.student_package.name }}{% endif %}{% if r.reason %} · {{ r.reason }}{% endif %}</small>
                     {% if r.is_voided %}<br><small class="text-muted">{% blocktrans trimmed with voided_reason=r.voided_reason %}Anulada: {{ voided_reason }}{% endblocktrans %}</small>{% endif %}
                 </span>
                 <span class="text-end text-nowrap">

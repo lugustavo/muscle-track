@@ -96,7 +96,7 @@
                 <a href="{% nav_url 'core:student_detail' row.student.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                     <span>{{ row.student.person_name }}</span>
                     <small class="text-muted">
-                        {% if row.last_session_at %}{% blocktrans trimmed with last_session_at=row.last_session_at|date:"d/m" days=row.days %}último treino {{ last_session_at }} ({{ days }} dias){% endblocktrans %}{% else %}{% trans "nunca treinou" %}{% endif %}
+                        {% if row.last_session_at %}{% blocktrans trimmed with last_session_at=row.last_session_at|date:_('d/m') days=row.days %}último treino {{ last_session_at }} ({{ days }} dias){% endblocktrans %}{% else %}{% trans "nunca treinou" %}{% endif %}
                     </small>
                 </a>
                 {% empty %}
@@ -202,7 +202,7 @@
                 {% for row in dashboard.erasures %}
                 <a href="{% nav_url 'core:student_delete' row.student.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                     <span>{{ row.student.person_name }}</span>
-                    <small class="text-muted">{% blocktrans trimmed with at=row.at|date:"d/m" %}pediu em {{ at }} · abrir a exclusão{% endblocktrans %}</small>
+                    <small class="text-muted">{% blocktrans trimmed with at=row.at|date:_('d/m') %}pediu em {{ at }} · abrir a exclusão{% endblocktrans %}</small>
                 </a>
                 {% endfor %}
             </div>
@@ -264,7 +264,7 @@
                     {% if row.kind == 'expired' %}
                         <span class="badge bg-danger">{% blocktrans trimmed count left=row.left %}venceu, {{ left }} aula sobrando{% plural %}venceu, {{ left }} aulas sobrando{% endblocktrans %}</span>
                     {% elif row.kind == 'expiring' %}
-                        <span class="badge bg-warning text-dark">{% blocktrans trimmed with ends_on=row.ends_on|date:"d/m" %}vence {{ ends_on }}{% endblocktrans %}</span>
+                        <span class="badge bg-warning text-dark">{% blocktrans trimmed with ends_on=row.ends_on|date:_('d/m') %}vence {{ ends_on }}{% endblocktrans %}</span>
                     {% else %}
                         <span class="badge bg-warning text-dark">{% blocktrans trimmed count left=row.left %}restam {{ left }} aula{% plural %}restam {{ left }} aulas{% endblocktrans %}</span>
                     {% endif %}
@@ -286,7 +286,7 @@
                 {% for routine in dashboard.routines %}
                 <a href="{% nav_url 'core:student_detail' routine.person.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                     <span>{{ routine.person.person_name }} <small class="text-muted">· {{ routine.routine_name }}</small></span>
-                    <small class="text-muted">{% blocktrans trimmed with end_date=routine.end_date|date:"d/m" %}até {{ end_date }}{% endblocktrans %}</small>
+                    <small class="text-muted">{% blocktrans trimmed with end_date=routine.end_date|date:_('d/m') %}até {{ end_date }}{% endblocktrans %}</small>
                 </a>
                 {% empty %}
                 <div class="list-group-item text-muted">{% trans "Nenhuma ficha terminando." %}</div>

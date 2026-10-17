@@ -120,7 +120,7 @@
                 <div class="stat-top">
                     <i class="bi bi-calendar-event fs-1 text-warning"></i>
                     <h3 class="mt-2 stat-date">
-                        {% if last_session %}<span class="d-none d-md-inline">{{ last_session.start_time|date:"d/m/Y" }}</span><span class="d-md-none">{{ last_session.start_time|date:"d/m" }}</span>{% else %}-{% endif %}
+                        {% if last_session %}<span class="d-none d-md-inline">{{ last_session.start_time|date:_('d/m/Y') }}</span><span class="d-md-none">{{ last_session.start_time|date:_('d/m') }}</span>{% else %}-{% endif %}
                     </h3>
                 </div>
                 <p class="text-muted mb-0"><span class="d-none d-md-inline">{% trans "Última Sessão" %}</span><span class="d-md-none">{% trans "Última" %}</span></p>
@@ -136,9 +136,9 @@
 </div>
 {% endif %}
 {% if student.plan_status == 'expired' %}
-<div class="alert alert-danger py-2"><i class="bi bi-calendar-x"></i> {% blocktrans trimmed with plan_expires_on=student.plan_expires_on|date:"d/m/Y" %}Pacote vencido em {{ plan_expires_on }}: prorrogue ou venda um novo.{% endblocktrans %}</div>
+<div class="alert alert-danger py-2"><i class="bi bi-calendar-x"></i> {% blocktrans trimmed with plan_expires_on=student.plan_expires_on|date:_('d/m/Y') %}Pacote vencido em {{ plan_expires_on }}: prorrogue ou venda um novo.{% endblocktrans %}</div>
 {% elif student.plan_status == 'expiring' %}
-<div class="alert alert-warning py-2"><i class="bi bi-calendar-event"></i> {% blocktrans trimmed with plan_expires_on=student.plan_expires_on|date:"d/m/Y" count days_to_plan_expiry=student.days_to_plan_expiry %}O pacote vence em {{ days_to_plan_expiry }} dia ({{ plan_expires_on }}).{% plural %}O pacote vence em {{ days_to_plan_expiry }} dias ({{ plan_expires_on }}).{% endblocktrans %}</div>
+<div class="alert alert-warning py-2"><i class="bi bi-calendar-event"></i> {% blocktrans trimmed with plan_expires_on=student.plan_expires_on|date:_('d/m/Y') count days_to_plan_expiry=student.days_to_plan_expiry %}O pacote vence em {{ days_to_plan_expiry }} dia ({{ plan_expires_on }}).{% plural %}O pacote vence em {{ days_to_plan_expiry }} dias ({{ plan_expires_on }}).{% endblocktrans %}</div>
 {% endif %}
 
 <ul class="nav nav-tabs mb-4 tabs-sticky hide-scrollbar" id="studentTabs" role="tablist">
@@ -173,9 +173,9 @@
                                 <div>
                                     <h6 class="mb-1">{{ item.person_routine.routine_name }}</h6>
                                     <small class="text-muted">
-                                        <i class="bi bi-calendar3"></i> {% blocktrans trimmed with routine_date=item.person_routine.routine_date|date:"d/m/Y" %}Iniciado em: {{ routine_date }}{% endblocktrans %}
+                                        <i class="bi bi-calendar3"></i> {% blocktrans trimmed with routine_date=item.person_routine.routine_date|date:_('d/m/Y') %}Iniciado em: {{ routine_date }}{% endblocktrans %}
                                         {% if item.person_routine.end_date %}
-                                            {% blocktrans trimmed with end_date=item.person_routine.end_date|date:"d/m/Y" %}• Até: {{ end_date }}{% endblocktrans %}
+                                            {% blocktrans trimmed with end_date=item.person_routine.end_date|date:_('d/m/Y') %}• Até: {{ end_date }}{% endblocktrans %}
                                         {% endif %}
                                     </small>
                                 </div>
@@ -201,7 +201,7 @@
                             <div class="d-flex flex-wrap gap-2">
                                 <span class="badge bg-info">{% blocktrans trimmed count exercise_count=item.exercise_count %}{{ exercise_count }} exercício{% plural %}{{ exercise_count }} exercícios{% endblocktrans %}</span>
                                 <span class="badge bg-success">{% blocktrans trimmed count sessions_count=item.sessions_count %}{{ sessions_count }} sessões completas{% plural %}{{ sessions_count }} sessões completas{% endblocktrans %}</span>
-                                <span class="badge bg-secondary">{{ item.person_routine.difficulty_level|capfirst }}</span>
+                                <span class="badge bg-secondary">{{ item.person_routine.get_difficulty_level_display }}</span>
                             </div>
                         </div>
                         {% endfor %}
@@ -231,9 +231,9 @@
                                 <div>
                                     <h6 class="mb-1">{{ person_routine.routine_name }}</h6>
                                     <small class="text-muted">
-                                        {{ person_routine.routine_date|date:"d/m/Y" }}
+                                        {{ person_routine.routine_date|date:_('d/m/Y') }}
                                         {% if person_routine.end_date %}
-                                            - {{ person_routine.end_date|date:"d/m/Y" }}
+                                            - {{ person_routine.end_date|date:_('d/m/Y') }}
                                         {% endif %}
                                     </small>
                                 </div>
