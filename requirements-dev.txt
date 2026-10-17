@@ -1,0 +1,2 @@
+# Only for working on the translations (tools/i18n_catalog.py and its test); the app does not need it
+polib==1.2.0
