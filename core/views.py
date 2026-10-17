@@ -1,3 +1,4 @@
+from collections import Counter
 import csv
 import json
 import logging
@@ -27,11 +28,12 @@ from django.views.decorators.http import require_POST, require_safe
 from allauth.account.models import EmailAddress
 
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, trainer_dashboard
+from . import photo_positions
 from .i18n import short_date
 from .forms import (
     AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ClassRequestForm, ConsentForm, SaleForm, ExerciseForm, PaymentForm,
     CancelPackageForm, HolidayForm, MyPhotoForm, PackageEditForm, PersonForm, RefundForm, PersonRoutineForm, PackageForm, RepeatForm, ScheduleSlotForm, SlotEditForm, SlotFillForm,
-    PhotoLinkForm, ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
+    PhotoLinkForm, PhotoPositionForm, ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
 )
 from .agenda import (
     DEFAULT_VIEW as DEFAULT_AGENDA_VIEW, LIST_DAYS, VIEWS as AGENDA_VIEWS, add_months, at, attendance_stats,
@@ -52,7 +54,7 @@ from .exports import build_export
 from .history import log_event, log_profile_edit
 from .invites import build_invite_url, get_user_from_invite, revoke_invites
 from .models import (
-    Appointment, AppointmentRequest, Assessment, CalendarFeed, Holiday, Refund, NotificationPreference, PushSubscription, WhatsAppTemplate, ConsentRecord, Exercise, MuscleGroup, Payment, Package, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
+    Appointment, AppointmentRequest, Assessment, CalendarFeed, Holiday, Refund, NotificationPreference, PhotoPosition, PushSubscription, WhatsAppTemplate, ConsentRecord, Exercise, MuscleGroup, Payment, Package, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
     Routine, RoutineExercise, SessionExercise, SessionSet, StudentEvent, StudentNote, WorkoutSession,
 )
 from .navigation import after_save_url, back_label, safe_next_url, with_next
@@ -377,7 +379,7 @@ def student_detail(request, pk):
 
     assessments = evolution.assessments_with_photos(student)
     chart_points = evolution.chart_points(assessments)
-    loose_photos = list(student.progress_photos.filter(assessment__isnull=True))
+    loose_photos = photo_positions.name_photos(list(student.progress_photos.filter(assessment__isnull=True)))
 
     return render(request, 'core/student_detail.html', {
         'student': student,
@@ -864,7 +866,7 @@ def my_package(request, person):
 def my_evolution(request, person):
     """The student's own assessments, chart and photos (read-only; the trainer's private notes are never shown)."""
     assessments = evolution.assessments_with_photos(person)
-    loose_photos = list(person.progress_photos.filter(assessment__isnull=True))
+    loose_photos = photo_positions.name_photos(list(person.progress_photos.filter(assessment__isnull=True)))
     return render(request, 'core/my_evolution.html', {
         'title': _('Minha evolução'), 'assessments': assessments, 'assessment_chart': evolution.chart_points(assessments),
         'can_compare': bool(evolution.comparable_angles(assessments, evolution.comparable_loose(loose_photos))),
@@ -2458,7 +2460,8 @@ def photo_upload(request, pk):
     wanted = student.assessments.filter(pk=request.GET.get('assessment') or 0).first()
     if wanted:
         initial['assessment'] = wanted
-    if request.GET.get('angle') in ProgressPhoto.Angle.values:
+    positions = photo_positions.active_positions()
+    if request.GET.get('angle') in {p.value for p in positions} | {photo_positions.OTHER}:
         initial['angle'] = request.GET['angle']
     form = ProgressPhotoForm(request.POST or None, request.FILES or None, student=student, initial=initial)
     if request.method == 'POST' and form.is_valid():
@@ -2470,9 +2473,9 @@ def photo_upload(request, pk):
         messages.success(request, _('Foto adicionada.'))
         if 'save_next' in request.POST and photo.assessment_id:
             taken = set(photo.assessment.photos.values_list('angle', flat=True))
-            missing = [a for a in ProgressPhoto.SEQUENCE if a not in taken]
+            missing = [p for p in positions if p.value not in taken]
             if missing:
-                target = f"{reverse('core:photo_upload', kwargs={'pk': student.pk})}?assessment={photo.assessment_id}&angle={missing[0]}"
+                target = f"{reverse('core:photo_upload', kwargs={'pk': student.pk})}?assessment={photo.assessment_id}&angle={missing[0].value}"
                 came_from = request.GET.get('next')
                 return redirect(with_next(target, came_from) if came_from else target)
         return redirect(_student_tab(request, student.pk, 'avaliacoes'))
@@ -2480,7 +2483,7 @@ def photo_upload(request, pk):
     chosen = form['assessment'].value()
     return render(request, 'core/photo_form.html', {
         'form': form, 'student': student, 'photos_consent': photos_consent,
-        'sequence': [(a.value, a.label) for a in ProgressPhoto.SEQUENCE], 'has_assessment': bool(chosen)})
+        'has_assessment': bool(chosen)})
 
 
 @staff_required
@@ -2505,6 +2508,57 @@ def photo_link(request, pk):
         messages.success(request, _('Foto ligada à avaliação de %(date)s.') % {'date': short_date(assessment.date)})
         return redirect(_student_tab(request, student.pk, 'avaliacoes'))
     return render(request, 'core/photo_link.html', {'form': form, 'photo': photo, 'student': student})
+
+
+@staff_required
+def photo_position_list(request):
+    """The positions asked for in every assessment's photo sequence: add, rename, reorder, turn off, delete."""
+    form = PhotoPositionForm(request.POST or None, prefix='new')
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, _('Posição adicionada.'))
+        return redirect('core:photo_positions')
+    used = Counter(ProgressPhoto.objects.values_list('angle', flat=True))
+    positions = list(PhotoPosition.objects.all())
+    for position in positions:
+        position.photo_count = used.get(position.key, 0)
+    return render(request, 'core/photo_positions.html', {
+        'form': form, 'positions': positions, 'back_default': reverse('core:student_list')})
+
+
+@staff_required
+@require_POST
+def photo_position_action(request, pk, action):
+    position = get_object_or_404(PhotoPosition, pk=pk)
+    ordered = list(PhotoPosition.objects.all())
+    if action in ('up', 'down'):
+        i = ordered.index(position)
+        j = i - 1 if action == 'up' else i + 1
+        if 0 <= j < len(ordered):
+            ordered[i], ordered[j] = ordered[j], ordered[i]
+            for number, item in enumerate(ordered, start=1):   # renumbered, so equal or missing orders cannot stick
+                if item.order != number:
+                    PhotoPosition.objects.filter(pk=item.pk).update(order=number)
+    elif action == 'toggle':
+        position.is_active = not position.is_active
+        position.save(update_fields=['is_active'])
+        messages.success(request, _('Posição ativada.') if position.is_active else _('Posição desativada: as fotos dela ficam guardadas como extras.'))
+    elif action == 'rename':
+        form = PhotoPositionForm(request.POST, instance=position, prefix=f'p{position.pk}')
+        if form.is_valid():
+            form.save()
+            messages.success(request, _('Nome alterado.'))
+        else:
+            messages.error(request, ' '.join(form.errors['name']))
+    elif action == 'delete':
+        if ProgressPhoto.objects.filter(angle=position.key).exists():
+            messages.error(request, _('Há fotos nessa posição: desative-a em vez de excluir.'))
+        else:
+            position.delete()
+            messages.success(request, _('Posição excluída.'))
+    else:
+        raise Http404
+    return redirect('core:photo_positions')
 
 
 @staff_required

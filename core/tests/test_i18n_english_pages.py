@@ -89,7 +89,7 @@ class EnglishPagesTests(RichDataMixin, BaseTestCase):
             reverse('core:person_routine_detail', kwargs={'pk': self.alice_routine.pk}),
             reverse('core:person_routine_edit', kwargs={'pk': self.alice_routine.pk}),
             reverse('core:session_detail', kwargs={'pk': self.session.pk}),
-            reverse('core:photo_link', kwargs={'pk': self.link_photo.pk}),
+            reverse('core:photo_link', kwargs={'pk': self.link_photo.pk}), reverse('core:photo_positions'),
             reverse('core:notification_settings'), reverse('core:notification_settings') + '?tab=whatsapp',
         ])
 

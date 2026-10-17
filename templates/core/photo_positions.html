@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load navigation %}
+
+{% block title %}{% blocktrans trimmed %}Posições das fotos - {{ brand_name }}{% endblocktrans %}{% endblock %}
+
+{% block content %}
+<div class="mx-auto" style="max-width: 760px;">
+    <div class="d-flex justify-content-between align-items-start mb-3 gap-2">
+        <div>
+            <h1 class="h3 mb-1"><i class="bi bi-person-bounding-box"></i> {% trans "Posições das fotos" %}</h1>
+            <p class="text-muted small mb-0">{% trans "A sequência de fotos que cada avaliação pede, na ordem em que aparece. Desativar uma posição a tira das avaliações novas; as fotos dela ficam guardadas como extras." %}</p>
+        </div>
+        {% back_button back_default %}
+    </div>
+
+    <div class="card mb-3">
+        <ul class="list-group list-group-flush" data-position-list>
+            {% for position in positions %}
+            <li class="list-group-item" data-position="{{ position.key }}">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <form method="post" action="{% url 'core:photo_position_action' position.pk 'rename' %}" class="d-flex gap-1 flex-grow-1" style="min-width: 12rem;">
+                        {% csrf_token %}
+                        <input type="text" name="p{{ position.pk }}-name" value="{{ position.label }}" maxlength="60" class="form-control form-control-sm {% if not position.is_active %}text-muted{% endif %}" aria-label="{% trans "Nome da posição" %}" required>
+                        <button class="btn btn-sm btn-outline-secondary" title="{% trans "Salvar o nome" %}"><i class="bi bi-check2"></i><span class="visually-hidden">{% trans "Salvar o nome" %}</span></button>
+                    </form>
+                    <span class="small text-muted">{% blocktrans trimmed count n=position.photo_count %}{{ n }} foto{% plural %}{{ n }} fotos{% endblocktrans %}</span>
+                    {% if not position.is_active %}<span class="badge bg-secondary">{% trans "Desativada" %}</span>{% endif %}
+                    <div class="d-flex gap-1 ms-auto">
+                        <form method="post" action="{% url 'core:photo_position_action' position.pk 'up' %}">{% csrf_token %}<button class="btn btn-sm btn-outline-secondary" title="{% trans "Subir" %}" {% if forloop.first %}disabled{% endif %}><i class="bi bi-arrow-up"></i><span class="visually-hidden">{% trans "Subir" %}</span></button></form>
+                        <form method="post" action="{% url 'core:photo_position_action' position.pk 'down' %}">{% csrf_token %}<button class="btn btn-sm btn-outline-secondary" title="{% trans "Descer" %}" {% if forloop.last %}disabled{% endif %}><i class="bi bi-arrow-down"></i><span class="visually-hidden">{% trans "Descer" %}</span></button></form>
+                        <form method="post" action="{% url 'core:photo_position_action' position.pk 'toggle' %}">{% csrf_token %}<button class="btn btn-sm btn-outline-secondary" title="{% if position.is_active %}{% trans "Desativar" %}{% else %}{% trans "Ativar" %}{% endif %}"><i class="bi {% if position.is_active %}bi-eye-slash{% else %}bi-eye{% endif %}"></i><span class="visually-hidden">{% if position.is_active %}{% trans "Desativar" %}{% else %}{% trans "Ativar" %}{% endif %}</span></button></form>
+                        {% if not position.photo_count %}
+                        <form method="post" action="{% url 'core:photo_position_action' position.pk 'delete' %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Excluir esta posição?" %}{% endfilter %}');">{% csrf_token %}<button class="btn btn-sm btn-outline-danger" title="{% trans "Excluir" %}"><i class="bi bi-trash"></i><span class="visually-hidden">{% trans "Excluir" %}</span></button></form>
+                        {% endif %}
+                    </div>
+                </div>
+            </li>
+            {% empty %}
+            <li class="list-group-item text-muted">{% trans "Nenhuma posição: as avaliações ficam só com fotos extras." %}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <form method="post" class="card" data-position-add>
+        {% csrf_token %}
+        <div class="card-body">
+            <label class="form-label fw-bold" for="{{ form.name.id_for_label }}">{% trans "Nova posição" %}</label>
+            <div class="d-flex gap-2">
+                {{ form.name }}
+                <button class="btn btn-primary text-nowrap"><i class="bi bi-plus-lg"></i> {% trans "Adicionar" %}</button>
+            </div>
+            {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors }}</div>{% endif %}
+            <div class="form-text">{% trans 'Exemplos: perfil 45°, lateral com braços para cima. A foto "Outra" (extra, sem posição) sempre existe.' %}</div>
+        </div>
+    </form>
+</div>
+{% endblock %}
