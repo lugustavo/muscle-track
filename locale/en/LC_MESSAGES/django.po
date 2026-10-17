@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 17:27-0300\n"
+"POT-Creation-Date: 2026-10-17 17:34-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -441,6 +441,33 @@ msgstr "Profile"
 #, python-format
 msgid "Nova aula para %(name)s"
 msgstr "New class for %(name)s"
+
+msgid "Exclusão de dados"
+msgstr "Data deletion"
+
+msgid "Pagamentos e devoluções"
+msgstr "Payments and refunds"
+
+msgid "Pacotes para renovar"
+msgstr "Packages to renew"
+
+msgid "Aulas de hoje"
+msgstr "Today's classes"
+
+msgid "Faltas"
+msgstr "Absences"
+
+msgid "Sem treinar"
+msgstr "Not training"
+
+msgid "Experimentais"
+msgstr "Trials"
+
+msgid "Convites"
+msgstr "Invitations"
+
+msgid "Fichas terminando"
+msgstr "Workout plans ending"
 
 msgid "d/m"
 msgstr "m/d"
@@ -4271,9 +4298,6 @@ msgstr "Refund"
 msgid "Nenhum pagamento pendente."
 msgstr "No pending payments."
 
-msgid "Pacotes para renovar"
-msgstr "Packages to renew"
-
 #, python-format
 msgid "venceu, %(left)s aula sobrando"
 msgid_plural "venceu, %(left)s aulas sobrando"
@@ -4411,6 +4435,12 @@ msgstr "Dismiss the first steps"
 msgid "Dispensar"
 msgstr "Dismiss"
 
+msgid "Atenção agora"
+msgstr "Needs attention now"
+
+msgid "Tudo em dia: nada pede a sua atenção agora."
+msgstr "All caught up: nothing needs your attention right now."
+
 msgid "Alunos ativos"
 msgstr "Active students"
 
@@ -4436,9 +4466,6 @@ msgstr "Everyone is up to date."
 #, python-format
 msgid "e mais %(inactive_more)s — veja a lista de alunos"
 msgstr "and %(inactive_more)s more — see the students list"
-
-msgid "Aulas de hoje"
-msgstr "Today's classes"
 
 msgid "abrir a agenda"
 msgstr "open the schedule"
