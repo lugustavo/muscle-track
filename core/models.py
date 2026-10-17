@@ -851,7 +851,10 @@ class Package(models.Model):
 class StudentPackage(models.Model):
     """A package sold to one student: a copy of the numbers at the time of the sale (changing the catalog never
     changes what was sold). The balance is not stored: it is counted from the classes linked to it (core/packages.py)."""
+    # The owner: who pays (payments, refunds and the cancellation are all about this person)
     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='packages', verbose_name=_('Aluno'))
+    # Up to two more people who use the same balance (core/packages.py: every class of each of them takes one)
+    shared_with = models.ManyToManyField(Person, blank=True, related_name='shared_packages', verbose_name=_('Dividido com'))
     package = models.ForeignKey(Package, on_delete=models.SET_NULL, null=True, blank=True, related_name='sold',
                                 verbose_name=_('Pacote do catálogo'))
     name = models.CharField(max_length=100, verbose_name=_('Nome'))

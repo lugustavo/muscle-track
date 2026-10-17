@@ -89,6 +89,23 @@
         </div>
     </section>
 
+    <section class="card mb-3" data-share-section>
+        <div class="card-body">
+            <h2 class="h6"><i class="bi bi-people"></i> {% trans "Dividir com (opcional)" %}</h2>
+            <p class="text-muted small mb-2">{% blocktrans trimmed %}Até duas outras pessoas podem usar o mesmo pacote. O saldo é um só: quem marcar primeiro usa primeiro, e cada aula de cada pessoa gasta uma aula. Só o dono do pacote paga.{% endblocktrans %}</p>
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="form-label fw-bold" for="{{ form.member_1.id_for_label }}">{{ form.member_1.label }}</label>{{ form.member_1 }}
+                    {% if form.member_1.errors %}<div class="text-danger small">{{ form.member_1.errors|join:" " }}</div>{% endif %}
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label fw-bold" for="{{ form.member_2.id_for_label }}">{{ form.member_2.label }}</label>{{ form.member_2 }}
+                    {% if form.member_2.errors %}<div class="text-danger small">{{ form.member_2.errors|join:" " }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
     {% if pattern %}
     <section class="card mb-3" data-continue-schedule>
         <div class="card-body">

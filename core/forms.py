@@ -137,7 +137,33 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
         return cleaned
 
 
-class SaleForm(forms.Form):
+class SharedWithMixin(forms.Form):
+    """"Dividir com": up to two more students who use the same package (only the owner pays)."""
+    member_1 = forms.ModelChoiceField(queryset=Person.objects.none(), required=False, empty_label=_('— ninguém —'),
+                                      label=_('Segunda pessoa'), widget=forms.Select(attrs={'class': 'form-select'}))
+    member_2 = forms.ModelChoiceField(queryset=Person.objects.none(), required=False, empty_label=_('— ninguém —'),
+                                      label=_('Terceira pessoa'), widget=forms.Select(attrs={'class': 'form-select'}))
+
+    def limit_members(self, owner, current=()):
+        """Who can be chosen: active students other than the owner (and the ones already sharing, even if inactive)."""
+        queryset = Person.objects.filter(Q(is_active=True) | Q(pk__in=[m.pk for m in current])).exclude(
+            pk=owner.pk).order_by('person_name')
+        for name in ('member_1', 'member_2'):
+            self.fields[name].queryset = queryset
+
+    @property
+    def members(self):
+        return [m for m in (self.cleaned_data.get('member_1'), self.cleaned_data.get('member_2')) if m is not None]
+
+    def clean(self):
+        cleaned = super().clean()
+        first, second = cleaned.get('member_1'), cleaned.get('member_2')
+        if first is not None and first == second:
+            self.add_error('member_2', gettext('Escolha duas pessoas diferentes.'))
+        return cleaned
+
+
+class SaleForm(SharedWithMixin):
     """"Vender pacote": which catalog package, the price agreed with this student (per class or total) and a note."""
     package = forms.ModelChoiceField(queryset=Package.objects.none(), label=_('Pacote'), empty_label=None,
                                      widget=forms.RadioSelect)
@@ -726,7 +752,7 @@ class HolidayForm(forms.ModelForm):
 MONEY_ATTRS = {'class': 'form-control', 'step': '0.01', 'min': '0', 'inputmode': 'decimal', 'data-no-draft': ''}
 
 
-class PackageEditForm(forms.Form):
+class PackageEditForm(SharedWithMixin):
     """Change a package already sold to a student (the numbers of the sale, not the catalog)."""
     name = forms.CharField(max_length=100, label=_('Nome'), widget=forms.TextInput(attrs={'class': 'form-control'}))
     sessions = forms.IntegerField(min_value=1, max_value=200, label=_('Aulas'),
@@ -746,11 +772,15 @@ class PackageEditForm(forms.Form):
 
     @classmethod
     def for_package(cls, package, data=None):
+        current = list(package.shared_with.order_by('person_name'))
         initial = {'name': package.name, 'sessions': package.sessions, 'valid_days': package.valid_days,
                    'no_deadline': package.valid_days is None, 'pricing_mode': 'per_session',
                    'price_per_session': package.price_per_session, 'price_total': package.price_total,
-                   'notes': package.notes}
-        return cls(data, initial=initial)
+                   'notes': package.notes, 'member_1': current[0].pk if current else None,
+                   'member_2': current[1].pk if len(current) > 1 else None}
+        form = cls(data, initial=initial)
+        form.limit_members(package.person, current)
+        return form
 
     def clean(self):
         cleaned = super().clean()

@@ -188,8 +188,8 @@ def package_low(left):
 
 def package_attention(rows, today):
     """One notice to the trainer about every package that just needed attention (see packages.alerts)."""
-    items = [(r['student'].person_name, r['expired'], r['expiring'], (r['ends_on'] - today).days if r['expiring'] else None,
-             r['left']) for r in rows]
+    items = [(' + '.join(p.person_name for p in r['people']), r['expired'], r['expiring'],
+              (r['ends_on'] - today).days if r['expiring'] else None, r['left']) for r in rows]
 
     def line(name, expired, expiring, days, left):
         values = {'name': name, 'n': left}

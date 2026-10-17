@@ -63,9 +63,9 @@ def send_package_reminders(now, today):
     rows = packages.alerts(today)
     for row in rows:
         if row['low']:
-            user = row['student'].user
-            if user is not None:
-                notifications.notify([user], notifications.package_low(row['left']), sync=True)
+            users = [p.user for p in row['people'] if p.user is not None]   # a shared package: everyone using it hears
+            if users:
+                notifications.notify(users, notifications.package_low(row['left']), sync=True)
     if rows:
         notifications.notify(notifications.staff_users(), notifications.package_attention(rows, today), sync=True)
     for row in rows:

@@ -416,10 +416,17 @@ def student_package_sell(request, pk):
     student = get_object_or_404(Person, pk=pk)
     pattern = previous_pattern(student)
     form = SaleForm(request.POST or None, initial={'pricing_mode': 'per_session', 'continue_schedule': True})
+    form.limit_members(student)
+    sold = None
     if request.method == 'POST' and form.is_valid():
         data = form.cleaned_data
-        sold = packages.sell(student, data['package'], mode=data['pricing_mode'], price_per_session=data['price_per_session'],
-                             price_total=data['price_total'], notes=data['notes'], actor=request.user)
+        try:
+            sold = packages.sell(student, data['package'], mode=data['pricing_mode'], price_per_session=data['price_per_session'],
+                                 price_total=data['price_total'], notes=data['notes'], actor=request.user,
+                                 members=form.members)
+        except packages.PackageError as error:
+            form.add_error(None, str(error))
+    if sold:
         messages.success(request, _('Pacote vendido: %(name)s. O prazo conta a partir da primeira aula.') % {'name': sold.name})
         if data.get('continue_schedule') and pattern:
             messages.info(request, _('Confira as aulas na prévia (mesmo horário de antes: %(label)s) e confirme em '
@@ -475,11 +482,16 @@ def student_package_edit(request, pk, package_pk):
     if request.method == 'POST' and form.is_valid():
         data = form.cleaned_data
         try:
-            changed = refunds.edit_package(
-                package, request.user, name=data['name'], sessions=data['sessions'], valid_days=data['valid_days'],
-                pricing_mode=data['pricing_mode'], price_per_session=data['price_per_session'],
-                price_total=data['price_total'], notes=data['notes'])
-        except refunds.RefundError as error:
+            with transaction.atomic():   # the numbers and the people sharing go together or not at all
+                changed = refunds.edit_package(
+                    package, request.user, name=data['name'], sessions=data['sessions'], valid_days=data['valid_days'],
+                    pricing_mode=data['pricing_mode'], price_per_session=data['price_per_session'],
+                    price_total=data['price_total'], notes=data['notes'])
+                before = set(package.shared_with.values_list('pk', flat=True))
+                packages.set_members(package, form.members, request.user)
+                changed = changed or before != {m.pk for m in form.members}
+        except (refunds.RefundError, packages.PackageError) as error:
+            package.refresh_from_db()   # the rolled-back edit must not show in the page
             form.add_error(None, str(error))
         else:
             messages.success(request, _('Pacote atualizado.') if changed else _('Nada mudou.'))

@@ -8,7 +8,11 @@ What counts as a class given (Appointment.counts_override can force either way, 
   * attended; missed (a no-show pays); cancelled with less notice than allowed (`AGENDA_NOTICE_HOURS`, 24 h).
   * rescheduled, scheduled and cancelled in time do not count.
 The oldest package with a balance is used first. A frozen package stops its clock; an expired one with a balance is
-never zeroed by itself: the trainer extends it."""
+never zeroed by itself: the trainer extends it.
+
+A package can be shared by up to three people (the owner, who pays, plus `MAX_SHARED` more): one balance, and every class
+of each of them takes one from it, the earliest class first. Payments, refunds, freezing, extending and cancelling stay
+with the owner; the others only see their first-name classes counts, never money."""
 from datetime import timedelta
 from decimal import Decimal
 
@@ -20,7 +24,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _, gettext_lazy as _l, ngettext
 
 from .history import log_event
-from .models import Appointment, Payment, Refund, StudentEvent, StudentPackage, compute_prices
+from .models import Appointment, Payment, Person, Refund, StudentEvent, StudentPackage, compute_prices
 
 Status = Appointment.Status
 
@@ -32,6 +36,7 @@ STATE_LABELS = {
 }
 LOW_BALANCE = 2          # "running out": this many classes left or fewer
 EXPIRING_DAYS = 7        # "expires soon": this many days left or fewer
+MAX_SHARED = 2           # people besides the owner who can use the same package
 
 
 class PackageError(Exception):
@@ -101,42 +106,77 @@ def pending_amount(package):
     return max(package.price_total - paid_amount(package), Decimal('0'))
 
 
+def of(person):
+    """Every package the person uses: the ones they bought and the ones shared with them."""
+    return StudentPackage.objects.filter(Q(person=person) | Q(shared_with=person)).distinct()
+
+
+def participant_ids(package):
+    """The owner and the people the package is shared with (use prefetch_related('shared_with') in loops)."""
+    return [package.person_id, *(m.pk for m in package.shared_with.all())]
+
+
+def _group(person):
+    """The people who share balances with `person` (directly or through each other) and their packages, cancelled ones
+    included (their classes must be released and the cached fields redone), oldest first."""
+    people, found, frontier = {person.pk}, {}, {person.pk}
+    while frontier:
+        batch = StudentPackage.objects.filter(Q(person_id__in=frontier) | Q(shared_with__in=frontier)).distinct(
+        ).prefetch_related('shared_with')
+        frontier = set()
+        for package in batch:
+            if package.pk in found:
+                continue
+            found[package.pk] = package
+            for pk in participant_ids(package):
+                if pk not in people:
+                    people.add(pk)
+                    frontier.add(pk)
+    return people, sorted(found.values(), key=lambda p: (p.sold_on, p.pk))
+
+
 @transaction.atomic
 def sync(person, today=None):
-    """Redo which package each counting class belongs to, each package's first-class date, and the student's cached
-    "current package" fields (plan, plan_name, plan_price, hourly_rate, plan_expires_on) that lists, badges and
-    reminders read. A student who never had a package keeps whatever the old plan fields hold."""
+    """Redo which package each counting class belongs to, each package's first-class date, and the cached "current
+    package" fields (plan, plan_name, plan_price, hourly_rate, plan_expires_on) of the student and of everyone who shares
+    a package with them. A student who never had a package keeps whatever the old plan fields hold.
+
+    Each counting class goes to the oldest open package its student takes part in that still has a balance; with a
+    shared package the earliest class (of anyone in the group) is the first to take from it."""
     today = today or timezone.localdate()
-    packages = list(person.packages.filter(cancelled_at__isnull=True).order_by('sold_on', 'pk'))
-    if not person.packages.exists():
+    people, group = _group(person)
+    if not group:
         return {}
-    classes = list(person.appointments.order_by('starts_at'))
+    packages = [p for p in group if p.cancelled_at is None]
+    members = {p.pk: set(participant_ids(p)) for p in packages}
+    classes = list(Appointment.objects.filter(person_id__in=people).order_by('starts_at', 'pk'))
     used = {p.pk: 0 for p in packages}
     first = {}
     target = {}
-    index = 0
     for appointment in classes:
         if not consumes(appointment):
             target[appointment.pk] = None
             continue
-        while index < len(packages) and used[packages[index].pk] >= packages[index].sessions:
-            index += 1
-        if index < len(packages):
-            package = packages[index]
-            used[package.pk] += 1
-            target[appointment.pk] = package.pk
-            first.setdefault(package.pk, timezone.localtime(appointment.starts_at).date())
-        else:
+        package = next((p for p in packages if appointment.person_id in members[p.pk] and used[p.pk] < p.sessions), None)
+        if package is None:
             target[appointment.pk] = None   # a class given beyond every package: "sem pacote" on the card
+            continue
+        used[package.pk] += 1
+        target[appointment.pk] = package.pk
+        first.setdefault(package.pk, timezone.localtime(appointment.starts_at).date())
     for appointment in classes:
         if appointment.package_id != target[appointment.pk]:
             Appointment.objects.filter(pk=appointment.pk).update(package_id=target[appointment.pk])
             appointment.package_id = target[appointment.pk]
-    for package in packages:
-        if package.starts_on != first.get(package.pk):
+    for package in group:
+        if package.cancelled_at is None and package.starts_on != first.get(package.pk):
             package.starts_on = first.get(package.pk)
             package.save(update_fields=['starts_on'])
-    _refresh_person(person, packages, used, today)
+    others = {p.pk: p for p in Person.objects.filter(pk__in=people - {person.pk})}
+    for pk in people:
+        member = person if pk == person.pk else others.get(pk)
+        if member is not None:
+            _refresh_person(member, [p for p in packages if pk in members[p.pk]], used, today)
     return used
 
 
@@ -144,8 +184,9 @@ def _refresh_person(person, packages, used, today):
     current = next((p for p in packages if state(p, used[p.pk], today) in OPEN_STATES), None)
     values = {'plan': None, 'plan_name': '', 'plan_price': None, 'hourly_rate': None, 'plan_expires_on': None}
     if current is not None:
-        values.update(plan=current.package, plan_name=current.name, plan_price=current.price_total,
-                      hourly_rate=current.price_per_session)
+        values.update(plan=current.package, plan_name=current.name)
+        if current.person_id == person.pk:   # whoever shares a package does not pay for it: no price on their file
+            values.update(plan_price=current.price_total, hourly_rate=current.price_per_session)
         if state(current, used[current.pk], today) in ('active', 'expired'):
             values['plan_expires_on'] = ends_on(current, today)
     changed = [name for name, value in values.items() if getattr(person, name) != value]
@@ -155,28 +196,45 @@ def _refresh_person(person, packages, used, today):
         person.save(update_fields=changed + ['updated_at'])
 
 
+def _first_name(person):
+    return person.person_name.split()[0] if person.person_name.split() else person.person_name
+
+
 def overview(person, today=None):
-    """Everything the screens show about the student's packages, newest last.
+    """Everything the screens show about the student's packages, newest last (the ones shared with them included).
 
     Each row: the package, its `state`, `used`, `left`, dates, percent, money, plus top-level `current` (the one being
-    used), `scheduled` (marked classes still to happen) and `without_package` (classes given that no package covers)."""
+    used), `scheduled` (marked classes still to happen) and `without_package` (classes given that no package covers).
+    Shared packages also carry `people` (first name, classes taken, whether it is the student or the owner) and
+    `is_owner`; the money of a package the student does not pay for is always 0."""
     today = today or timezone.localdate()
     now = timezone.now()
-    packages = list(person.packages.prefetch_related('payments', 'refunds').order_by('sold_on', 'pk'))
-    used = {p.pk: p.appointments.count() for p in packages}
+    packages = list(of(person).select_related('person').prefetch_related('payments', 'refunds', 'shared_with').order_by(
+        'sold_on', 'pk'))
+    taken = {}
+    for line in Appointment.objects.filter(package__in=packages).order_by().values('package', 'person').annotate(n=Count('pk')):
+        taken[(line['package'], line['person'])] = line['n']
     rows = []
     for package in packages:
-        s = state(package, used[package.pk], today)
+        pool = sum(n for (pk, _person), n in taken.items() if pk == package.pk)
+        s = state(package, pool, today)
         end = ends_on(package, today)
         total = package.sessions
+        is_owner = package.person_id == person.pk
+        people = [{'person': p, 'name': _first_name(p), 'used': taken.get((package.pk, p.pk), 0),
+                   'is_me': p.pk == person.pk, 'is_owner': p.pk == package.person_id}
+                  for p in (package.person, *package.shared_with.all())]
         rows.append({
             'package': package, 'state': s, 'label': STATE_LABELS[s][0], 'css': STATE_LABELS[s][1],
-            'used': used[package.pk], 'left': max(total - used[package.pk], 0), 'sessions': total,
-            'percent': round(100 * min(used[package.pk], total) / total) if total else 0,
+            'used': pool, 'left': max(total - pool, 0), 'sessions': total,
+            'percent': round(100 * min(pool, total) / total) if total else 0,
             'starts_on': package.starts_on, 'ends_on': end,
             'days_left': (end - today).days if end and s in ('active', 'expired') else None,
-            'paid': paid_amount(package), 'pending': pending_amount(package), 'overpaid': overpaid_amount(package),
-            'low': s in ('active', 'not_started', 'frozen') and 0 < total - used[package.pk] <= LOW_BALANCE,
+            'is_owner': is_owner, 'owner': package.person, 'people': people, 'shared': len(people) > 1,
+            'paid': paid_amount(package) if is_owner else Decimal('0'),
+            'pending': pending_amount(package) if is_owner else Decimal('0'),
+            'overpaid': overpaid_amount(package) if is_owner else Decimal('0'),
+            'low': s in ('active', 'not_started', 'frozen') and 0 < total - pool <= LOW_BALANCE,
         })
     current = next((r for r in rows if r['state'] in OPEN_STATES), None)
     return {
@@ -236,7 +294,9 @@ def schedule_plan(person, today=None):
     current, last = open_rows[0], open_rows[-1]
     left = sum(r['left'] for r in open_rows)
     # every class still marked "Marcada" will use the package, whether it is ahead or waiting to be given an outcome
-    marked = person.appointments.filter(status=Status.SCHEDULED).count()
+    # (a shared package is also used by the classes the others marked)
+    sharing = {pk for r in open_rows for pk in participant_ids(r['package'])} | {person.pk}
+    marked = Appointment.objects.filter(person_id__in=sharing, status=Status.SCHEDULED).count()
     return {
         'row': current, 'package': last['package'], 'name': ' + '.join(r['package'].name for r in open_rows),
         'state': last['state'], 'left': left, 'scheduled': marked, 'to_schedule': max(left - marked, 0),
@@ -249,22 +309,75 @@ def _without_package(person):
         status__in=(Status.SCHEDULED, Status.RESCHEDULED)) if consumes(a))
 
 
+def _check_members(owner, members, current=()):
+    """The people a package is shared with: at most MAX_SHARED, active, not the owner, each once."""
+    unique = list({m.pk: m for m in members}.values())
+    if len(unique) > MAX_SHARED:
+        raise PackageError(ngettext('Um pacote pode ser dividido com no máximo %(n)d outra pessoa.',
+                                    'Um pacote pode ser dividido com no máximo %(n)d outras pessoas.', MAX_SHARED)
+                           % {'n': MAX_SHARED})
+    if any(m.pk == owner.pk for m in unique):
+        raise PackageError(_('O dono do pacote já usa o pacote: escolha outras pessoas.'))
+    if any(not m.is_active and m not in current for m in unique):
+        raise PackageError(_('Só alunos ativos podem dividir um pacote.'))
+    return unique
+
+
+def _log_members(package, members, actor):
+    for member in members:
+        log_event(member, StudentEvent.Kind.PACKAGE, actor,
+                  _('Pacote dividido com você: %(name)s (pago por %(owner)s)') % {'name': package.name,
+                                                                                    'owner': package.person.person_name},
+                  {'package': package.pk})
+
+
 @transaction.atomic
 def sell(person, package, *, mode='per_session', price_per_session=None, price_total=None, notes='', actor=None,
-         sold_on=None):
-    """Sell `package` (a catalog Package) to the student: a copy of its numbers with the prices agreed for this one."""
+         sold_on=None, members=()):
+    """Sell `package` (a catalog Package) to the student: a copy of its numbers with the prices agreed for this one.
+    `members` are the other students (up to MAX_SHARED) who use the same balance; only `person` pays."""
+    members = _check_members(person, members)
     per, total = compute_prices(mode, package.sessions, price_per_session, price_total)
     if per is None and total is None:   # nothing typed: the catalog price
         per, total = package.price_per_session, package.price_total
     sold = StudentPackage.objects.create(
         person=person, package=package, name=package.name, sessions=package.sessions, valid_days=package.valid_days,
         price_per_session=per, price_total=total, notes=notes[:200], sold_on=sold_on or timezone.localdate())
+    sold.shared_with.set(members)
     log_event(person, StudentEvent.Kind.PACKAGE, actor,
               ngettext('Pacote vendido: %(name)s (%(n)d aula)', 'Pacote vendido: %(name)s (%(n)d aulas)', sold.sessions)
               % {'name': sold.name, 'n': sold.sessions},
               {'package': sold.pk, 'sessions': sold.sessions})
+    _log_members(sold, members, actor)
     sync(person)
     return sold
+
+
+@transaction.atomic
+def set_members(package, members, actor=None):
+    """Change who shares the package (the owner stays). Someone who already took a class from it cannot be removed:
+    the classes would lose their package."""
+    current = list(package.shared_with.all())
+    members = _check_members(package.person, members, current)
+    removed = [m for m in current if m not in members]
+    added = [m for m in members if m not in current]
+    if not removed and not added:
+        return
+    _open(package)
+    for member in removed:
+        if package.appointments.filter(person=member).exists():
+            raise PackageError(_('%(name)s já usou aulas deste pacote e não pode ser removido(a).')
+                               % {'name': member.person_name})
+    package.shared_with.set(members)
+    log_event(package.person, StudentEvent.Kind.PACKAGE, actor,
+              _('Pacote %(name)s dividido com: %(people)s') % {
+                  'name': package.name, 'people': ', '.join(m.person_name for m in members) or _('ninguém')},
+              {'package': package.pk})
+    _log_members(package, added, actor)
+    sync(package.person)
+    for member in removed:   # no longer in the group: redo their own cached fields
+        if not sync(member):
+            _refresh_person(member, [], {}, timezone.localdate())
 
 
 def _open(package):
@@ -392,28 +505,34 @@ def refund_due_count():
 
 
 def _current_packages(today):
-    """The package each active student is using (a queued one is not): (package, state, left, ends_on)."""
+    """The package each active student is using (a queued one is not), each package once with the active people for whom
+    it is the current one: (package, state, left, ends_on, people)."""
     seen = set()
-    queryset = StudentPackage.objects.filter(
-        cancelled_at__isnull=True, person__is_active=True).select_related('person').annotate(
-        n_used=Count('appointments')).order_by('person_id', 'sold_on', 'pk')
+    queryset = StudentPackage.objects.filter(cancelled_at__isnull=True).select_related('person').prefetch_related(
+        'shared_with').annotate(n_used=Count('appointments')).order_by('sold_on', 'pk')
     for package in queryset:
-        if package.person_id in seen:
-            continue
         s = state(package, package.n_used, today)
         if s in ('done', 'cancelled'):
             continue
-        seen.add(package.person_id)
-        yield package, s, package.sessions - package.n_used, ends_on(package, today)
+        people = [p for p in (package.person, *package.shared_with.all()) if p.is_active and p.pk not in seen]
+        if not people:
+            continue
+        seen.update(p.pk for p in people)
+        yield package, s, package.sessions - package.n_used, ends_on(package, today), people
+
+
+def _student_of(package, people):
+    """The person a row is about: the owner when they are among the people it matters to, else the first of them."""
+    return package.person if package.person in people else people[0]
 
 
 def renewals(today=None, expiring_days=14):
     """Active students whose current package needs attention: expired with classes left, expiring soon or running out.
 
-    Each row: student, package, kind, left, ends_on."""
+    Each row: student (the owner, if active), people (everyone using it), package, kind, left, ends_on."""
     today = today or timezone.localdate()
     rows = []
-    for package, s, left, end in _current_packages(today):
+    for package, s, left, end, people in _current_packages(today):
         kind = None
         if s == 'expired':
             kind = 'expired'
@@ -422,7 +541,8 @@ def renewals(today=None, expiring_days=14):
         elif s in ('active', 'frozen') and left <= LOW_BALANCE:
             kind = 'low'
         if kind:
-            rows.append({'student': package.person, 'package': package, 'kind': kind, 'left': left, 'ends_on': end})
+            rows.append({'student': _student_of(package, people), 'people': people, 'package': package, 'kind': kind,
+                         'left': left, 'ends_on': end})
     order = {'expired': 0, 'expiring': 1, 'low': 2}
     rows.sort(key=lambda r: (order[r['kind']], r['ends_on'] or today))
     return rows
@@ -432,18 +552,18 @@ def alerts(today=None):
     """What is new to tell about, each package once: running low (few classes left), about to expire, expired.
 
     Compares with what was already told (`low_notified_at`, `expiring_notified_for`, `expired_notified_for`: the
-    deadline they were told about, so an extension re-arms them). Each row: student, package, left, ends_on, low,
-    expiring, expired (flags). Nothing is marked here: see `mark_alerted`."""
+    deadline they were told about, so an extension re-arms them). Each row: student, people (everyone using it),
+    package, left, ends_on, low, expiring, expired (flags). Nothing is marked here: see `mark_alerted`."""
     today = today or timezone.localdate()
     rows = []
-    for package, s, left, end in _current_packages(today):
+    for package, s, left, end, people in _current_packages(today):
         low = s in ('active', 'frozen') and left <= LOW_BALANCE and package.low_notified_at is None
         expiring = (s == 'active' and end is not None and (end - today).days <= EXPIRING_DAYS
                     and package.expiring_notified_for != end)
         expired = s == 'expired' and left > 0 and package.expired_notified_for != end
         if low or expiring or expired:
-            rows.append({'student': package.person, 'package': package, 'left': left, 'ends_on': end,
-                         'low': low, 'expiring': expiring, 'expired': expired})
+            rows.append({'student': _student_of(package, people), 'people': people, 'package': package, 'left': left,
+                         'ends_on': end, 'low': low, 'expiring': expiring, 'expired': expired})
     return rows
 
 
