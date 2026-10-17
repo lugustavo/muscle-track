@@ -10,9 +10,11 @@ from datetime import timezone as dt_timezone
 from urllib.parse import quote, urlencode
 
 from django.conf import settings
-from django.utils import timezone
+from django.utils import timezone, translation
+from django.utils.translation import gettext as _
 
 from .agenda import at, ensure_appointments
+from .i18n import language_for
 from .models import Appointment, CalendarFeed, Person
 
 PAST_DAYS = 14        # same window the agenda itself fills in backwards
@@ -96,7 +98,9 @@ def trainer_title(appointment, style):
 
 
 def student_title(appointment):
-    return 'Aula de treino' if appointment.kind == Appointment.Kind.REGULAR else f'Aula de treino ({appointment.get_kind_display().lower()})'
+    if appointment.kind == Appointment.Kind.REGULAR:
+        return _('Aula de treino')
+    return _('Aula de treino (%(kind)s)') % {'kind': str(appointment.get_kind_display()).lower()}
 
 
 def event_lines(appointment, summary, description, now, host):
@@ -123,7 +127,13 @@ def event_lines(appointment, summary, description, now, host):
 
 
 def build_ics(feed, host, now=None, site_url=''):
-    """The whole calendar as text (CRLF line ends, folded lines)."""
+    """The whole calendar as text (CRLF line ends, folded lines), written in the language saved for the feed's owner
+    (the calendar app that fetches it sends no language of its own)."""
+    with translation.override(language_for(feed.user)):
+        return _build_ics(feed, host, now, site_url)
+
+
+def _build_ics(feed, host, now, site_url):
     now = now or timezone.now()
     today = timezone.localdate()
     start, end = today - timedelta(days=PAST_DAYS), today + timedelta(days=FUTURE_DAYS)
@@ -133,9 +143,9 @@ def build_ics(feed, host, now=None, site_url=''):
         starts_at__gte=at(start, time.min), starts_at__lt=at(end + timedelta(days=1), time.min)).select_related('person')
     trainer = feed.user.is_staff or feed.user.is_superuser
     if trainer:
-        name = 'Muscle Track · Agenda'
+        name = _('Muscle Track · Agenda')
     else:
-        name = 'Minhas aulas'
+        name = _('Minhas aulas')
         queryset = queryset.filter(person__user=feed.user)
 
     lines = [
@@ -146,14 +156,14 @@ def build_ics(feed, host, now=None, site_url=''):
     for appointment in queryset:
         if trainer:
             summary = trainer_title(appointment, feed.name_style)
-            description = f'{appointment.duration_minutes} min'
+            description = _('%(n)d min') % {'n': appointment.duration_minutes}
             if appointment.notes:
                 description += f'\n{appointment.notes}'
             if site_url:
-                description += f'\nFicha do aluno: {site_url}/students/{appointment.person_id}/'
+                description += '\n' + _('Ficha do aluno: %(url)s') % {'url': f'{site_url}/students/{appointment.person_id}/'}
         else:
             summary = student_title(appointment)
-            description = f'{appointment.duration_minutes} min'
+            description = _('%(n)d min') % {'n': appointment.duration_minutes}
         lines += event_lines(appointment, summary, description, now, host)
     lines.append('END:VCALENDAR')
     return '\r\n'.join(fold(line) for line in lines) + '\r\n'

@@ -1,0 +1,6574 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-16 21:43-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "a personal trainer responsável pelo seu acompanhamento"
+msgstr "the personal trainer responsible for your training"
+
+msgid "Não encontramos um acesso para esta conta. Peça um convite à sua personal, ou entre com e-mail e senha e conecte a conta em \"Contas conectadas\"."
+msgstr "We couldn't find access for this account. Ask your trainer for an invitation, or sign in with email and password and connect the account under \"Connected accounts\"."
+
+msgid "Informações Básicas"
+msgstr "Basic Information"
+
+msgid "Endereço"
+msgstr "Address"
+
+msgid "Outras Informações"
+msgstr "Other Information"
+
+msgid "Configurações Padrão"
+msgstr "Default Settings"
+
+msgid "Mídia"
+msgstr "Media"
+
+msgid "Instruções"
+msgstr "Instructions"
+
+msgid "Datas"
+msgstr "Dates"
+
+msgid "Observações"
+msgstr "Notes"
+
+msgid "A aula já está neste horário."
+msgstr "The class is already at this time."
+
+msgid "Este aluno já tem aula neste horário."
+msgstr "This student already has a class at this time."
+
+msgid "Esta aula não veio de uma remarcação."
+msgstr "This class did not come from a reschedule."
+
+msgid "A aula nova já foi alterada; não dá mais para desfazer."
+msgstr "The new class has already been changed; it can no longer be undone."
+
+msgid "O aluno já tem outra aula no horário original; não dá mais para desfazer."
+msgstr "The student already has another class at the original time; this can no longer be undone."
+
+#, python-format
+msgid ""
+"Você é um personal trainer especializado. Crie um plano de treino com base na seguinte descrição:\n"
+"\n"
+"Descrição: %(description)s\n"
+"Nível: %(level)s\n"
+"Duração estimada: %(duration)s minutos\n"
+"\n"
+"Exercícios disponíveis:\n"
+"%(exercises)s\n"
+"\n"
+"Retorne APENAS um objeto JSON válido no seguinte formato:\n"
+"{\n"
+"  \"routine_name\": \"Nome do Treino\",\n"
+"  \"description\": \"Descrição detalhada\",\n"
+"  \"exercises\": [\n"
+"    {\"exercise_id\": 1, \"sets\": 3, \"reps\": 12, \"rest_seconds\": 60}\n"
+"  ]\n"
+"}\n"
+"\n"
+"Escolha de 5 a 8 exercícios da lista disponível (use somente os ids da lista) que melhor\n"
+"atendam a descrição, na ordem em que devem ser executados."
+msgstr ""
+"You are an expert personal trainer. Create a workout plan based on the following description:\n"
+"\n"
+"Description: %(description)s\n"
+"Level: %(level)s\n"
+"Estimated duration: %(duration)s minutes\n"
+"\n"
+"Available exercises:\n"
+"%(exercises)s\n"
+"\n"
+"Return ONLY a valid JSON object in the following format:\n"
+"{\n"
+"  \"routine_name\": \"Workout Name\",\n"
+"  \"description\": \"Detailed description\",\n"
+"  \"exercises\": [\n"
+"    {\"exercise_id\": 1, \"sets\": 3, \"reps\": 12, \"rest_seconds\": 60}\n"
+"  ]\n"
+"}\n"
+"\n"
+"Choose 5 to 8 exercises from the available list (use only the ids from the list) that best\n"
+"match the description, in the order they should be performed."
+
+msgid "Chave da API OpenAI não configurada (OPENAI_API_KEY)."
+msgstr "OpenAI API key not configured (OPENAI_API_KEY)."
+
+msgid "Cadastre exercícios antes de gerar um treino com IA."
+msgstr "Add exercises before generating a workout with AI."
+
+msgid "Você é um personal trainer expert. Responda sempre apenas com JSON válido."
+msgstr "You are an expert personal trainer. Always respond with valid JSON only."
+
+#, python-format
+msgid "Erro ao consultar a IA: %(error)s"
+msgstr "Error querying the AI: %(error)s"
+
+msgid "A IA devolveu uma resposta inválida. Tente novamente."
+msgstr "The AI returned an invalid response. Please try again."
+
+msgid "A IA não escolheu nenhum exercício válido. Tente reformular a descrição."
+msgstr "The AI didn't pick any valid exercises. Try rewording the description."
+
+msgid "Treino gerado por IA"
+msgstr "AI-generated workout"
+
+#, python-format
+msgid "Pagamento registrado (%(method)s) — %(package)s"
+msgstr "Payment recorded (%(method)s) — %(package)s"
+
+#, python-format
+msgid "Pagamento registrado (%(method)s)"
+msgstr "Payment recorded (%(method)s)"
+
+#, python-format
+msgid "Pagamento de %(label)s excluído"
+msgstr "Payment for %(label)s deleted"
+
+msgid "Início"
+msgstr "Home"
+
+msgid "Alunos"
+msgstr "Students"
+
+msgid "Exercícios"
+msgstr "Exercises"
+
+msgid "Treinos"
+msgstr "Workouts"
+
+msgid "Histórico"
+msgstr "History"
+
+msgid "Novo aluno"
+msgstr "New student"
+
+msgid "Editar"
+msgstr "Edit"
+
+msgid "Avaliações"
+msgstr "Assessments"
+
+msgid "Editar avaliação"
+msgstr "Edit assessment"
+
+msgid "Nova avaliação"
+msgstr "New assessment"
+
+msgid "Adicionar foto"
+msgstr "Add photo"
+
+msgid "Atribuir treino"
+msgstr "Assign workout"
+
+msgid "Editar treino"
+msgstr "Edit workout"
+
+#, python-format
+msgid "Progresso: %(name)s"
+msgstr "Progress: %(name)s"
+
+#, python-format
+msgid "Sessão de %(when)s"
+msgstr "Session from %(when)s"
+
+msgid "Financeiro"
+msgstr "Finances"
+
+msgid "Pacotes"
+msgstr "Packages"
+
+msgid "Agenda"
+msgstr "Schedule"
+
+msgid "Novo exercício"
+msgstr "New exercise"
+
+msgid "Novo treino"
+msgstr "New workout"
+
+msgid "Gerar com IA"
+msgstr "Generate with AI"
+
+msgid "Meus treinos"
+msgstr "My workouts"
+
+msgid "Meu perfil"
+msgstr "My profile"
+
+msgid "Google Agenda"
+msgstr "Google Calendar"
+
+msgid "Busca"
+msgstr "Search"
+
+msgid "Notificações"
+msgstr "Notifications"
+
+msgid "Editar horário fixo"
+msgstr "Edit fixed time slot"
+
+msgid "Como usar o app"
+msgstr "How to use the app"
+
+msgid "Minha evolução"
+msgstr "My progress"
+
+msgid "Enviar foto"
+msgstr "Upload photo"
+
+msgid "Comparar fotos"
+msgstr "Compare photos"
+
+msgid "Meu pacote"
+msgstr "My package"
+
+msgid "Minha agenda"
+msgstr "My schedule"
+
+msgid "Pedir remarcação"
+msgstr "Request reschedule"
+
+msgid "Novo pacote"
+msgstr "New package"
+
+msgid "Editar pacote"
+msgstr "Edit package"
+
+msgid "Registrar pagamento"
+msgstr "Record payment"
+
+msgid "Cancelar pacote"
+msgstr "Cancel package"
+
+msgid "Devolver ou estornar"
+msgstr "Refund or reverse"
+
+msgid "Devolução"
+msgstr "Refund"
+
+msgid "Devoluções e ajustes"
+msgstr "Refunds and adjustments"
+
+msgid "Feriados"
+msgstr "Holidays"
+
+msgid "Nova aula"
+msgstr "New class"
+
+msgid "Remarcar aula"
+msgstr "Reschedule class"
+
+msgid "Convite"
+msgstr "Invitation"
+
+msgid "Excluir"
+msgstr "Delete"
+
+msgid "Situação"
+msgstr "Status"
+
+msgid "Vender pacote"
+msgstr "Sell package"
+
+msgid "Privacidade e meus dados"
+msgstr "Privacy and my data"
+
+msgid "Aula de treino"
+msgstr "Workout class"
+
+#, python-format
+msgid "Aula de treino (%(kind)s)"
+msgstr "Workout class (%(kind)s)"
+
+msgid "Muscle Track · Agenda"
+msgstr "Muscle Track · Schedule"
+
+msgid "Minhas aulas"
+msgstr "My classes"
+
+#, python-format
+msgid "%(n)d min"
+msgstr "%(n)d min"
+
+#, python-format
+msgid "Ficha do aluno: %(url)s"
+msgstr "Student profile: %(url)s"
+
+msgid "Esta aula já não está marcada."
+msgstr "This class is no longer scheduled."
+
+msgid "Esta aula já passou."
+msgstr "This class has already passed."
+
+#, python-format
+msgid "O prazo para pedir pelo app terminou (%(hours)d h antes da aula). Fale direto com a sua personal."
+msgstr "The deadline to request through the app has passed (%(hours)d h before the class). Talk to your trainer directly."
+
+msgid "Você já tem um pedido aguardando resposta para esta aula."
+msgstr "You already have a request awaiting a response for this class."
+
+msgid "Aula não encontrada."
+msgstr "Class not found."
+
+msgid "Informe o dia e o horário que você prefere."
+msgstr "Enter the day and time you prefer."
+
+msgid "Escolha um horário no futuro."
+msgstr "Choose a time in the future."
+
+msgid "Você já tem uma aula neste horário."
+msgstr "You already have a class at this time."
+
+msgid "Pedido inválido."
+msgstr "Invalid request."
+
+msgid "Este pedido não pode mais ser retirado."
+msgstr "This request can no longer be withdrawn."
+
+msgid "Este pedido já foi respondido."
+msgstr "This request has already been answered."
+
+msgid "A aula já mudou de situação; recuse o pedido ou ajuste a aula na agenda."
+msgstr "The class status has already changed; decline the request or adjust the class in the schedule."
+
+msgid "Encerrado"
+msgstr "Ended"
+
+msgid "Li e aceito os termos de uso e a política de privacidade."
+msgstr "I have read and accept the terms of use and the privacy policy."
+
+msgid "Autorizo o registro e o uso dos meus dados de saúde (lesões, restrições, avaliações físicas) pela minha personal trainer, para montar e acompanhar meus treinos."
+msgstr "I authorize my personal trainer to record and use my health data (injuries, restrictions, physical assessments) to build and track my workouts."
+
+msgid "Autorizo o registro de fotos de evolução, que só eu e minha personal vemos."
+msgstr "I authorize the recording of progress photos, which only I and my trainer can see."
+
+#, python-format
+msgid "Concedeu consentimento: %(label)s"
+msgstr "Granted consent: %(label)s"
+
+#, python-format
+msgid "Retirou consentimento: %(label)s"
+msgstr "Withdrew consent: %(label)s"
+
+#, python-format
+msgid "%(summary)s (registrado pela personal)"
+msgstr "%(summary)s (logged by the trainer)"
+
+#, python-format
+msgid "Marco: %(number)s treino concluído!"
+msgid_plural "Marco: %(number)s treinos concluídos!"
+msgstr[0] "Milestone: %(number)s workout completed!"
+msgstr[1] "Milestone: %(number)s workouts completed!"
+
+msgid "Meta da semana batida!"
+msgstr "Weekly goal hit!"
+
+msgid "Hoje"
+msgstr "Today"
+
+msgid "Admin"
+msgstr "Admin"
+
+msgid "Alterar senha"
+msgstr "Change password"
+
+msgid "Contas conectadas"
+msgstr "Connected accounts"
+
+msgid "Sair"
+msgstr "Sign out"
+
+msgid "Continuar"
+msgstr "Continue"
+
+msgid "Treinar"
+msgstr "Train"
+
+msgid "Perfil"
+msgstr "Profile"
+
+#, python-format
+msgid "Nova aula para %(name)s"
+msgstr "New class for %(name)s"
+
+msgid "d/m"
+msgstr "m/d"
+
+msgid "Peso"
+msgstr "Weight"
+
+#, no-python-format
+msgid "% de gordura"
+msgstr "% body fat"
+
+msgid "Cintura"
+msgstr "Waist"
+
+msgid "Quadril"
+msgstr "Hips"
+
+msgid "Peitoral"
+msgstr "Chest"
+
+msgid "Braço"
+msgstr "Arm"
+
+msgid "Coxa"
+msgstr "Thigh"
+
+msgid "d/m/y"
+msgstr "m/d/y"
+
+msgid "email@exemplo.com"
+msgstr "email@example.com"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Usado para o login do aluno. Depois de salvar, você recebe um link de convite para enviar a ele."
+msgstr "Used for the student's login. After saving, you get an invitation link to send to them."
+
+msgid "Confirmo que é outra pessoa, pode cadastrar mesmo assim"
+msgstr "I confirm this is a different person, register anyway"
+
+msgid "Ex.: hipertrofia, emagrecer 8 kg até dezembro..."
+msgstr "E.g., hypertrophy, lose 8 kg by December..."
+
+msgid "Ex.: hérnia de disco L5, joelho direito operado em 2022, usa anticoncepcional..."
+msgstr "E.g., herniated disc L5, right knee surgery in 2022, takes birth control..."
+
+msgid "Anotações internas (o aluno não vê)"
+msgstr "Internal notes (student can't see)"
+
+msgid "O e-mail pode ter no máximo 150 caracteres."
+msgstr "Email can be at most 150 characters."
+
+msgid "Este email já está cadastrado no sistema."
+msgstr "This email is already registered in the system."
+
+msgid "mesmo nome"
+msgstr "same name"
+
+msgid "mesmo telefone"
+msgstr "same phone"
+
+msgid "Já existe aluno com dados parecidos (veja abaixo). Se for outra pessoa, marque a confirmação e salve de novo."
+msgstr "A student with similar details already exists (see below). If it's a different person, check the confirmation box and save again."
+
+msgid "Pacote"
+msgstr "Package"
+
+msgid "Como o valor é informado"
+msgstr "How the amount is entered"
+
+msgid "Valor por aula"
+msgstr "Price per class"
+
+msgid "Valor total"
+msgstr "Total amount"
+
+msgid "Observação"
+msgstr "Note"
+
+msgid "Continuar o mesmo horário"
+msgstr "Keep the same time"
+
+msgid "Descrição do Treino"
+msgstr "Workout Description"
+
+msgid "Ex: Treino para hipertrofia de peito e tríceps, com foco em exercícios compostos"
+msgstr "E.g., Hypertrophy workout for chest and triceps, focused on compound exercises"
+
+msgid "Descreva o tipo de treino que deseja gerar"
+msgstr "Describe the type of workout you want to generate"
+
+msgid "Nível de Dificuldade"
+msgstr "Difficulty Level"
+
+msgid "Iniciante"
+msgstr "Beginner"
+
+msgid "Intermediário"
+msgstr "Intermediate"
+
+msgid "Avançado"
+msgstr "Advanced"
+
+msgid "Duração Estimada (minutos)"
+msgstr "Estimated Duration (minutes)"
+
+#, python-format
+msgid "Preencha pelo menos uma medida (peso, altura, % de gordura ou circunferência)."
+msgstr "Fill in at least one measurement (weight, height, body fat % or circumference)."
+
+msgid "Foto avulsa (sem avaliação)"
+msgstr "Standalone photo (no assessment)"
+
+#, python-format
+msgid "Avaliação de %(date)s"
+msgstr "Assessment from %(date)s"
+
+msgid "Opcional"
+msgstr "Optional"
+
+msgid "Outra"
+msgstr "Other"
+
+msgid "A data não pode ser no futuro."
+msgstr "The date can't be in the future."
+
+#, python-format
+msgid "Você já enviou %(max)d fotos: remova algumas para enviar outras."
+msgstr "You've already uploaded %(max)d photos: remove some to upload others."
+
+msgid "Anotação da personal (o aluno não vê)..."
+msgstr "Trainer note (student can't see)..."
+
+msgid "Nova situação"
+msgstr "New status"
+
+msgid "Motivo"
+msgstr "Reason"
+
+msgid "Ex.: viagem de 2 meses, mudou de cidade, fechou o plano..."
+msgstr "E.g., 2-month trip, moved to another city, closed the plan..."
+
+msgid "Informe o motivo ao pausar ou encerrar o aluno."
+msgstr "Enter the reason for pausing or ending the student."
+
+msgid "É preciso aceitar para continuar."
+msgstr "You need to accept to continue."
+
+msgid "Sem prazo (o pacote não vence)"
+msgstr "No deadline (the package doesn't expire)"
+
+msgid "Ex.: Pacote 10 aulas"
+msgstr "E.g., 10-class package"
+
+msgid "Informe o prazo em dias ou marque \"Sem prazo\"."
+msgstr "Enter the deadline in days or check \"No deadline\"."
+
+msgid "Informe o valor."
+msgstr "Enter the amount."
+
+msgid "Valor"
+msgstr "Amount"
+
+msgid "— sem pacote —"
+msgstr "— no package —"
+
+msgid "Nunca"
+msgstr "Never"
+
+msgid "Em uma data"
+msgstr "On a date"
+
+msgid "Após um número de aulas"
+msgstr "After a number of classes"
+
+msgid "Repete a cada (semanas)"
+msgstr "Repeats every (weeks)"
+
+msgid "Começa em"
+msgstr "Starts on"
+
+msgid "Termina"
+msgstr "Ends"
+
+msgid "Termina em"
+msgstr "Ends on"
+
+msgid "Número de aulas"
+msgstr "Number of classes"
+
+msgid "Informe a data final."
+msgstr "Enter the end date."
+
+msgid "A data final não pode ser antes do início."
+msgstr "The end date can't be before the start date."
+
+msgid "A série pode durar no máximo 3 anos. Use \"Nunca\" para uma série sem fim."
+msgstr "A series can last 3 years at most. Use \"Never\" for a series with no end."
+
+msgid "Informe quantas aulas."
+msgstr "Enter how many classes."
+
+msgid "Dia"
+msgstr "Day"
+
+msgid "Dias"
+msgstr "Days"
+
+msgid "Horário"
+msgstr "Time"
+
+msgid "Duração (min)"
+msgstr "Duration (min)"
+
+#, python-format
+msgid "%(n)d aula a marcar"
+msgid_plural "%(n)d aulas a marcar"
+msgstr[0] "%(n)d class to schedule"
+msgstr[1] "%(n)d classes to schedule"
+
+#, python-format
+msgid "até %(date)s ou %(classes)s"
+msgstr "until %(date)s or %(classes)s"
+
+#, python-format
+msgid "Acompanhar o pacote (%(parts)s, o que vier primeiro)"
+msgstr "Track the package (%(parts)s, whichever comes first)"
+
+msgid "Escolha pelo menos um dia da semana."
+msgstr "Choose at least one day of the week."
+
+msgid "Este aluno não tem pacote em uso: escolha outra forma de terminar."
+msgstr "This student has no active package: choose another way to finish."
+
+msgid "Todas as aulas que restam do pacote já estão marcadas."
+msgstr "All remaining classes in the package are already scheduled."
+
+msgid "O pacote termina antes do início desta série."
+msgstr "The package ends before this series starts."
+
+msgid "Dias da semana"
+msgstr "Days of the week"
+
+msgid "Primeira aula"
+msgstr "First class"
+
+msgid "Dia da semana"
+msgstr "Day of the week"
+
+msgid "A partir de"
+msgstr "From"
+
+msgid "Vale até (opcional)"
+msgstr "Valid until (optional)"
+
+msgid "Repetir esta aula"
+msgstr "Repeat this class"
+
+msgid "Nos dias"
+msgstr "On days"
+
+msgid "Quero remarcar para outro dia/horário"
+msgstr "I want to reschedule to another day/time"
+
+msgid "Não vou poder ir (cancelar esta aula)"
+msgstr "I can't make it (cancel this class)"
+
+msgid "O que você precisa?"
+msgstr "What do you need?"
+
+msgid "Dia que prefere"
+msgstr "Preferred day"
+
+msgid "Horário que prefere"
+msgstr "Preferred time"
+
+msgid "Recado para a personal (opcional)"
+msgstr "Message for your trainer (optional)"
+
+msgid "Escolha o dia."
+msgstr "Choose the day."
+
+msgid "Escolha o horário."
+msgstr "Choose the time."
+
+msgid "Aluno"
+msgstr "Student"
+
+msgid "Data"
+msgstr "Date"
+
+msgid "Tipo"
+msgstr "Type"
+
+msgid "Nome"
+msgstr "Name"
+
+msgid "Ex.: São João, estúdio fechado"
+msgstr "E.g., São João, studio closed"
+
+msgid "Este dia já está na lista."
+msgstr "This day is already in the list."
+
+msgid "Aulas"
+msgstr "Classes"
+
+msgid "Prazo (dias)"
+msgstr "Validity (days)"
+
+msgid "Pagamento"
+msgstr "Payment"
+
+msgid "— escolher o pacote abaixo —"
+msgstr "— choose the package below —"
+
+msgid "—"
+msgstr "—"
+
+msgid "Forma de devolução"
+msgstr "Refund method"
+
+msgid "Ex.: pacote cancelado, valor lançado errado"
+msgstr "E.g., package canceled, amount entered by mistake"
+
+msgid "Escolha o pagamento ou o pacote a que a devolução se refere."
+msgstr "Choose the payment or package the refund refers to."
+
+msgid "Taxa ou multa combinada"
+msgstr "Agreed fee or penalty"
+
+msgid "Valor a devolver"
+msgstr "Amount to refund"
+
+msgid "Data da devolução"
+msgstr "Refund date"
+
+msgid "Ex.: o aluno mudou de cidade"
+msgstr "E.g., the student moved to another city"
+
+msgid "Tirar da agenda as aulas marcadas daqui para a frente"
+msgstr "Remove the scheduled classes from the schedule from here on"
+
+msgid "nova foto"
+msgstr "new photo"
+
+msgid "removida"
+msgstr "removed"
+
+#, python-format
+msgid "Alterou: %(fields)s"
+msgstr "Changed: %(fields)s"
+
+msgid "Ano Novo"
+msgstr "New Year's Day"
+
+msgid "Sexta-feira Santa"
+msgstr "Good Friday"
+
+msgid "Páscoa"
+msgstr "Easter"
+
+msgid "Dia da Liberdade"
+msgstr "Freedom Day"
+
+msgid "Dia do Trabalhador"
+msgstr "Workers' Day"
+
+msgid "Corpo de Deus"
+msgstr "Corpus Christi"
+
+msgid "Dia de Portugal"
+msgstr "Portugal Day"
+
+msgid "Assunção de Nossa Senhora"
+msgstr "Assumption of Mary"
+
+msgid "Implantação da República"
+msgstr "Republic Day"
+
+msgid "Todos os Santos"
+msgstr "All Saints' Day"
+
+msgid "Restauração da Independência"
+msgstr "Restoration of Independence"
+
+msgid "Imaculada Conceição"
+msgstr "Immaculate Conception"
+
+msgid "Natal"
+msgstr "Christmas"
+
+msgid "Confraternização Universal"
+msgstr "New Year's Day"
+
+msgid "Carnaval (segunda)"
+msgstr "Carnival (Monday)"
+
+msgid "Carnaval (terça)"
+msgstr "Carnival (Tuesday)"
+
+msgid "Tiradentes"
+msgstr "Tiradentes Day"
+
+msgid "Dia do Trabalho"
+msgstr "Labor Day"
+
+msgid "Corpus Christi"
+msgstr "Corpus Christi"
+
+msgid "Independência"
+msgstr "Independence Day"
+
+msgid "Nossa Senhora Aparecida"
+msgstr "Our Lady of Aparecida"
+
+msgid "Finados"
+msgstr "All Souls' Day"
+
+msgid "Proclamação da República"
+msgstr "Republic Proclamation Day"
+
+msgid "Consciência Negra"
+msgstr "Black Awareness Day"
+
+msgid "Marque cada série"
+msgstr "Mark each set"
+
+msgid "Preencha a carga e as repetições e toque no ✓ ao terminar a série. Os botões − e + ajustam a carga sem precisar digitar."
+msgstr "Fill in the weight and reps and tap ✓ when you finish the set. The − and + buttons adjust the weight without typing."
+
+msgid "Descanso automático"
+msgstr "Automatic rest"
+
+msgid "Ao marcar uma série, o cronômetro de descanso começa sozinho. Dá para somar ou tirar 15 segundos, ou pular quando já estiver pronto."
+msgstr "When you mark a set, the rest timer starts on its own. You can add or remove 15 seconds, or skip it when you are ready."
+
+msgid "Conte como foi"
+msgstr "Tell us how it went"
+
+msgid "Cada exercício tem um campo para anotar dor, ajuste ou sensação, e no fim o treino pergunta \"Como foi?\". Sua personal lê tudo e ajusta o próximo treino."
+msgstr "Each exercise has a field to note pain, adjustments or how it felt, and at the end the workout asks \"How did it go?\". Your trainer reads everything and adjusts your next workout."
+
+#, python-format
+msgid "%(n)d aula(s) criada(s)."
+msgstr "%(n)d class(es) created."
+
+msgid "Gera o par de chaves VAPID (web push) para colocar no .env"
+msgstr "Generates the VAPID key pair (web push) to put in .env"
+
+msgid "# Cole no .env (guarde a chave privada como uma senha; trocar as chaves desliga os aparelhos já inscritos)"
+msgstr "# Paste into .env (keep the private key like a password; changing the keys disconnects devices that are already subscribed)"
+
+#, python-format
+msgid "%(classes)d lembrete(s) de aula, %(plans)d de plano, %(packages)d pacote(s) com aviso, %(sessions)d treino(s) parado(s) encerrado(s)."
+msgstr "%(classes)d class reminder(s), %(plans)d plan reminder(s), %(packages)d package(s) with a warning, %(sessions)d stalled workout(s) closed."
+
+msgid "Peito"
+msgstr "Chest"
+
+msgid "Costas"
+msgstr "Back"
+
+msgid "Ombros"
+msgstr "Shoulders"
+
+msgid "Bíceps"
+msgstr "Biceps"
+
+msgid "Tríceps"
+msgstr "Triceps"
+
+msgid "Pernas"
+msgstr "Legs"
+
+msgid "Glúteos"
+msgstr "Glutes"
+
+msgid "Abdômen"
+msgstr "Abs"
+
+msgid "Panturrilha"
+msgstr "Calves"
+
+msgid "Antebraço"
+msgstr "Forearms"
+
+msgid "Cardio"
+msgstr "Cardio"
+
+msgid "Funcional"
+msgstr "Functional"
+
+msgid "Slug"
+msgstr "Slug"
+
+msgid "Descrição"
+msgstr "Description"
+
+msgid "Ativo"
+msgstr "Active"
+
+msgid "Ordem de Exibição"
+msgstr "Display Order"
+
+msgid "Grupo Muscular"
+msgstr "Muscle Group"
+
+msgid "Grupos Musculares"
+msgstr "Muscle Groups"
+
+msgid "Foto de Perfil"
+msgstr "Profile Photo"
+
+msgid "Cidade"
+msgstr "City"
+
+msgid "Estado"
+msgstr "Status"
+
+msgid "CEP"
+msgstr "Postal code"
+
+msgid "Telefone"
+msgstr "Phone"
+
+msgid "Data de Nascimento"
+msgstr "Date of Birth"
+
+msgid "Objetivo"
+msgstr "Goal"
+
+msgid "Saúde, lesões e restrições"
+msgstr "Health, injuries and restrictions"
+
+msgid "Lesões, cirurgias, medicamentos, limitações médicas..."
+msgstr "Injuries, surgeries, medications, medical limitations..."
+
+msgid "Contato de emergência"
+msgstr "Emergency contact"
+
+msgid "Telefone de emergência"
+msgstr "Emergency phone"
+
+msgid "Plano contratado"
+msgstr "Contracted plan"
+
+msgid "Vencimento do plano"
+msgstr "Plan expiration"
+
+msgid "Pacote atual (catálogo)"
+msgstr "Current package (catalog)"
+
+msgid "Valor negociado do período"
+msgstr "Negotiated amount for the period"
+
+msgid "Valor/hora negociado"
+msgstr "Negotiated hourly rate"
+
+msgid "Experimental"
+msgstr "Trial"
+
+msgid "Pausado"
+msgstr "Paused"
+
+msgid "Ex-aluno"
+msgstr "Former student"
+
+msgid "Motivo da situação"
+msgstr "Reason for status"
+
+msgid "Situação desde"
+msgstr "Status since"
+
+msgid "Inativado em"
+msgstr "Deactivated on"
+
+msgid "Mostrar meta semanal, sequência e marcos"
+msgstr "Show weekly goal, streak and milestones"
+
+msgid "Desligue se preferir ver só os treinos, sem metas."
+msgstr "Turn off if you prefer to see only workouts, without goals."
+
+msgid "Minha meta de treinos por semana"
+msgstr "My weekly workout goal"
+
+msgid "Usada quando o seu plano não define uma meta. De 1 a 7."
+msgstr "Used when your plan doesn't set a goal. From 1 to 7."
+
+#, python-format
+msgid "Situação: %(old)s → %(new)s"
+msgstr "Status: %(old)s → %(new)s"
+
+msgid "Motivo da situação atualizado"
+msgstr "Status reason updated"
+
+msgid "Imagem"
+msgstr "Image"
+
+msgid "Vídeo"
+msgstr "Video"
+
+msgid "Link Externo"
+msgstr "External Link"
+
+msgid "Nome do Exercício"
+msgstr "Exercise Name"
+
+msgid "Repetições Padrão"
+msgstr "Default Reps"
+
+msgid "Séries Padrão"
+msgstr "Default Sets"
+
+msgid "Tipo de Mídia"
+msgstr "Media Type"
+
+msgid "Arquivo"
+msgstr "File"
+
+msgid "URL da Mídia"
+msgstr "Media URL"
+
+msgid "Miniatura"
+msgstr "Thumbnail"
+
+msgid "Exercício"
+msgstr "Exercise"
+
+msgid "Nome do Treino"
+msgstr "Workout Name"
+
+msgid "Duração estimada em minutos"
+msgstr "Estimated duration in minutes"
+
+msgid "Duração Estimada (min)"
+msgstr "Estimated Duration (min)"
+
+msgid "Modelo de Treino"
+msgstr "Workout Template"
+
+msgid "Modelos de Treino"
+msgstr "Workout Templates"
+
+msgid "Treino"
+msgid_plural "Treinos"
+msgstr[0] "Workout"
+msgstr[1] "Workouts"
+
+msgid "Ordem"
+msgstr "Order"
+
+msgid "Séries"
+msgstr "Sets"
+
+msgid "Repetições"
+msgstr "Reps"
+
+msgid "Descanso (seg)"
+msgstr "Rest (sec)"
+
+msgid "Exercício do Treino"
+msgstr "Workout Exercise"
+
+msgid "Exercícios do Treino"
+msgstr "Workout Exercises"
+
+msgid "Template Original"
+msgstr "Original Template"
+
+msgid "Data de Início"
+msgstr "Start Date"
+
+msgid "Data de Início Planejada"
+msgstr "Planned Start Date"
+
+msgid "Data de Término"
+msgstr "End Date"
+
+msgid "Treino do Aluno"
+msgstr "Student's Workout"
+
+msgid "Treinos dos Alunos"
+msgstr "Students' Workouts"
+
+msgid "Exercício do Treino do Aluno"
+msgstr "Student Workout Exercise"
+
+msgid "Exercícios dos Treinos dos Alunos"
+msgstr "Students' Workout Exercises"
+
+msgid "Término"
+msgstr "End"
+
+msgid "Concluído"
+msgstr "Completed"
+
+msgid "Pausado em"
+msgstr "Paused on"
+
+msgid "Segundos em pausa"
+msgstr "Rest seconds"
+
+msgid "Sessão de Treino"
+msgstr "Workout Session"
+
+msgid "Sessões de Treino"
+msgstr "Workout Sessions"
+
+msgid "Sessão"
+msgstr "Session"
+
+msgid "Carga (kg)"
+msgstr "Weight (kg)"
+
+msgid "Completado em"
+msgstr "Completed on"
+
+msgid "Execução de Exercício na Sessão"
+msgstr "Exercise Execution in Session"
+
+msgid "Execuções de Exercícios nas Sessões"
+msgstr "Exercise Executions in Sessions"
+
+msgid "Exercício da sessão"
+msgstr "Session exercise"
+
+msgid "Série"
+msgstr "Set"
+
+msgid "Feita"
+msgstr "Done"
+
+msgid "Completada em"
+msgstr "Completed on"
+
+#, python-format
+msgid "%(exercise)s - série %(number)s"
+msgstr "%(exercise)s - set %(number)s"
+
+msgid "Peso (kg)"
+msgstr "Weight (kg)"
+
+msgid "Altura (cm)"
+msgstr "Height (cm)"
+
+msgid "Peitoral (cm)"
+msgstr "Chest (cm)"
+
+msgid "Cintura (cm)"
+msgstr "Waist (cm)"
+
+msgid "Quadril (cm)"
+msgstr "Hips (cm)"
+
+msgid "Braço (cm)"
+msgstr "Arm (cm)"
+
+msgid "Coxa (cm)"
+msgstr "Thigh (cm)"
+
+msgid "Avaliação física"
+msgstr "Physical assessment"
+
+msgid "Avaliações físicas"
+msgstr "Physical assessments"
+
+msgid "Frente"
+msgstr "Front"
+
+msgid "Lado esquerdo"
+msgstr "Left side"
+
+msgid "Lado direito"
+msgstr "Right side"
+
+msgid "Avaliação"
+msgstr "Assessment"
+
+msgid "Posição"
+msgstr "Position"
+
+msgid "Foto"
+msgstr "Photo"
+
+msgid "Legenda"
+msgstr "Legend"
+
+msgid "Enviada pelo aluno"
+msgstr "Sent by the student"
+
+msgid "Foto de progresso"
+msgstr "Progress photo"
+
+msgid "Fotos de progresso"
+msgstr "Progress photos"
+
+msgid "Autor"
+msgstr "Author"
+
+msgid "Anotação"
+msgstr "Note"
+
+msgid "Anotação da personal"
+msgstr "Trainer note"
+
+msgid "Anotações da personal"
+msgstr "Trainer notes"
+
+msgid "Cadastro"
+msgstr "Registration"
+
+msgid "Dados alterados"
+msgstr "Data changed"
+
+msgid "Convite revogado"
+msgstr "Invitation revoked"
+
+msgid "Convite aceito"
+msgstr "Invitation accepted"
+
+msgid "Consentimento"
+msgstr "Consent"
+
+msgid "Exportação de dados"
+msgstr "Data export"
+
+msgid "Pedido de exclusão"
+msgstr "Deletion request"
+
+msgid "Quem"
+msgstr "Who"
+
+msgid "Resumo"
+msgstr "Summary"
+
+msgid "Alterações"
+msgstr "Changes"
+
+msgid "Quando"
+msgstr "When"
+
+msgid "Evento do aluno"
+msgstr "Student event"
+
+msgid "Histórico do aluno"
+msgstr "Student history"
+
+msgid "E-mail"
+msgstr "Email"
+
+msgid "Termos de uso e política de privacidade"
+msgstr "Terms of use and privacy policy"
+
+msgid "Tratamento de dados de saúde"
+msgstr "Health data processing"
+
+msgid "Fotos de evolução"
+msgstr "Progress photos"
+
+msgid "Pelo próprio aluno"
+msgstr "By the student"
+
+msgid "Registrado pela personal"
+msgstr "Recorded by the trainer"
+
+msgid "Versão do texto"
+msgstr "Text version"
+
+msgid "Concedido"
+msgstr "Granted"
+
+msgid "Consentimentos"
+msgstr "Consents"
+
+msgid "Aulas no pacote"
+msgstr "Classes in package"
+
+msgid "Conta a partir da primeira aula."
+msgstr "Counts from the first class."
+
+msgid "Pacote do catálogo"
+msgstr "Catalog package"
+
+msgid "Vendido em"
+msgstr "Sold on"
+
+msgid "Dias de prorrogação"
+msgstr "Extension days"
+
+msgid "Dias congelado"
+msgstr "Days frozen"
+
+msgid "Congelado desde"
+msgstr "Frozen since"
+
+msgid "Pacote do aluno"
+msgstr "Student's package"
+
+msgid "Pacotes dos alunos"
+msgstr "Student packages"
+
+msgid "Dinheiro"
+msgstr "Cash"
+
+msgid "Cartão"
+msgstr "Card"
+
+msgid "Transferência"
+msgstr "Bank transfer"
+
+msgid "Outro"
+msgstr "Other"
+
+msgid "Data do pagamento"
+msgstr "Payment date"
+
+msgid "Forma"
+msgstr "Method"
+
+msgid "Período de"
+msgstr "Period from"
+
+msgid "Período até"
+msgstr "Period to"
+
+msgid "Pagamentos"
+msgstr "Payments"
+
+msgid "Estorno (lançamento errado)"
+msgstr "Reversal (entry error)"
+
+msgid "Resumo do cálculo"
+msgstr "Calculation summary"
+
+msgid "Devoluções"
+msgstr "Refunds"
+
+msgid "Segunda"
+msgstr "Monday"
+
+msgid "Terça"
+msgstr "Tuesday"
+
+msgid "Quarta"
+msgstr "Wednesday"
+
+msgid "Quinta"
+msgstr "Thursday"
+
+msgid "Sexta"
+msgstr "Friday"
+
+msgid "Sábado"
+msgstr "Saturday"
+
+msgid "Domingo"
+msgstr "Sunday"
+
+msgid "Vale a partir de"
+msgstr "Valid from"
+
+msgid "Vale até"
+msgstr "Valid until"
+
+msgid "Horário fixo"
+msgstr "Recurring slot"
+
+msgid "Horários fixos"
+msgstr "Recurring slots"
+
+msgid "Aula"
+msgstr "Class"
+
+msgid "Reposição"
+msgstr "Make-up class"
+
+msgid "Marcada"
+msgstr "Scheduled"
+
+msgid "Compareceu"
+msgstr "Attended"
+
+msgid "Faltou"
+msgstr "Missed"
+
+msgid "Cancelada"
+msgstr "Canceled"
+
+msgid "Remarcada"
+msgstr "Rescheduled"
+
+msgid "Remarcar"
+msgstr "Reschedule"
+
+msgid "Cancelar"
+msgstr "Cancel"
+
+msgid "Aguardando a personal"
+msgstr "Waiting for the trainer"
+
+msgid "Aprovado"
+msgstr "Approved"
+
+msgid "Recusado"
+msgstr "Declined"
+
+msgid "Retirado"
+msgstr "Withdrawn"
+
+msgid "Novo horário sugerido"
+msgstr "New suggested time"
+
+msgid "Recado"
+msgstr "Message"
+
+msgid "Cobrança de pacote"
+msgstr "Package billing"
+
+msgid "Aula que o aluno faltou"
+msgstr "Class the student missed"
+
+msgid "Convite de acesso"
+msgstr "Access invitation"
+
+msgid "Enviada"
+msgstr "Sent"
+
+msgid "Falhou"
+msgstr "Failed"
+
+msgid "Não enviada"
+msgstr "Not sent"
+
+msgid "Primeiro nome do aluno"
+msgstr "Student's first name"
+
+msgid "Nome completo do aluno"
+msgstr "Student's full name"
+
+msgid "Sem o nome do aluno"
+msgstr "Missing student name"
+
+msgid "Nome do aluno no evento"
+msgstr "Student name in the event"
+
+msgid "Link de calendário"
+msgstr "Calendar link"
+
+msgid "Links de calendário"
+msgstr "Calendar links"
+
+#, python-format
+msgid "Calendário de %(user)s"
+msgstr "%(user)s's calendar"
+
+msgid "Voltar ao painel"
+msgstr "Back to dashboard"
+
+msgid "Voltar aos alunos"
+msgstr "Back to students"
+
+msgid "Voltar ao aluno"
+msgstr "Back to student"
+
+msgid "Voltar ao histórico do aluno"
+msgstr "Back to student history"
+
+msgid "Voltar ao convite"
+msgstr "Back to invitation"
+
+msgid "Voltar à agenda"
+msgstr "Back to schedule"
+
+msgid "Voltar aos feriados"
+msgstr "Back to holidays"
+
+msgid "Voltar ao financeiro"
+msgstr "Back to finances"
+
+msgid "Voltar às devoluções"
+msgstr "Back to refunds"
+
+msgid "Voltar aos planos"
+msgstr "Back to plans"
+
+msgid "Voltar aos exercícios"
+msgstr "Back to exercises"
+
+msgid "Voltar ao exercício"
+msgstr "Back to exercise"
+
+msgid "Voltar aos treinos"
+msgstr "Back to workouts"
+
+msgid "Voltar ao treino"
+msgstr "Back to workout"
+
+msgid "Voltar ao progresso do treino"
+msgstr "Back to workout progress"
+
+msgid "Voltar à sessão"
+msgstr "Back to session"
+
+msgid "Voltar ao treino em andamento"
+msgstr "Back to workout in progress"
+
+msgid "Voltar ao histórico"
+msgstr "Back to history"
+
+msgid "Voltar à minha evolução"
+msgstr "Back to my progress"
+
+msgid "Voltar à evolução do exercício"
+msgstr "Back to exercise progress"
+
+msgid "Voltar"
+msgstr "Back"
+
+#, python-format
+msgid "%(date)s às %(time)s"
+msgstr "%(date)s at %(time)s"
+
+msgid "Navegador"
+msgstr "Browser"
+
+#, python-format
+msgid "%(browser)s no %(system)s"
+msgstr "%(browser)s on %(system)s"
+
+#, python-format
+msgid "%(name)s pediu para cancelar a aula de %(when)s."
+msgstr "%(name)s asked to cancel the class on %(when)s."
+
+#, python-format
+msgid "%(name)s pediu para remarcar a aula de %(when)s."
+msgstr "%(name)s asked to reschedule the class on %(when)s."
+
+#, python-format
+msgid "Novo pedido de %(name)s"
+msgstr "New request from %(name)s"
+
+msgid "Pedido aprovado"
+msgstr "Request approved"
+
+#, python-format
+msgid "Sua aula de %(start)s foi cancelada."
+msgstr "Your class on %(start)s was canceled."
+
+#, python-format
+msgid "Sua aula de %(start)s foi remarcada para %(new)s."
+msgstr "Your class on %(start)s was rescheduled to %(new)s."
+
+#, python-format
+msgid "Sua personal não pôde atender o pedido para a aula de %(start)s. Motivo: %(note)s"
+msgstr "Your trainer couldn't accommodate the request for the class on %(start)s. Reason: %(note)s"
+
+#, python-format
+msgid "Sua personal não pôde atender o pedido para a aula de %(start)s."
+msgstr "Your trainer couldn't accommodate the request for the class on %(start)s."
+
+msgid "Pedido recusado"
+msgstr "Request declined"
+
+msgid "Aula remarcada"
+msgstr "Class rescheduled"
+
+#, python-format
+msgid "Sua aula de %(old)s foi remarcada para %(new)s."
+msgstr "Your class on %(old)s was rescheduled to %(new)s."
+
+msgid "Aula cancelada"
+msgstr "Class canceled"
+
+msgid "Aula mantida"
+msgstr "Class kept"
+
+#, python-format
+msgid "A remarcação foi desfeita: sua aula continua em %(start)s."
+msgstr "The reschedule was undone: your class is still on %(start)s."
+
+msgid "hoje"
+msgstr "today"
+
+msgid "amanhã"
+msgstr "tomorrow"
+
+#, python-format
+msgid "Sua aula é %(day)s às %(time)s."
+msgstr "Your class is %(day)s at %(time)s."
+
+msgid "Lembrete de aula"
+msgstr "Class reminder"
+
+#, python-format
+msgid "em %(n)d dias"
+msgstr "in %(n)d days"
+
+#, python-format
+msgid "Seu pacote vence %(when)s."
+msgstr "Your package expires %(when)s."
+
+#, python-format
+msgid "Ainda resta %(n)d aula."
+msgid_plural "Ainda restam %(n)d aulas."
+msgstr[0] "%(n)d class still remains."
+msgstr[1] "%(n)d classes still remain."
+
+msgid "Fale com a sua personal para combinar."
+msgstr "Talk to your trainer to arrange it."
+
+msgid "Seu pacote está vencendo"
+msgstr "Your package is about to expire"
+
+msgid "Seu pacote está acabando"
+msgstr "Your package is running out"
+
+#, python-format
+msgid "Resta %(n)d aula no seu pacote. Fale com a sua personal para renovar."
+msgid_plural "Restam %(n)d aulas no seu pacote. Fale com a sua personal para renovar."
+msgstr[0] "%(n)d class left in your package. Talk to your trainer to renew."
+msgstr[1] "%(n)d classes left in your package. Talk to your trainer to renew."
+
+#, python-format
+msgid "%(name)s: pacote vencido, %(n)d aula sem usar"
+msgid_plural "%(name)s: pacote vencido, %(n)d aulas sem usar"
+msgstr[0] "%(name)s: package expired, %(n)d class unused"
+msgstr[1] "%(name)s: package expired, %(n)d classes unused"
+
+#, python-format
+msgid "%(name)s: vence %(when)s, %(n)d aula restante"
+msgid_plural "%(name)s: vence %(when)s, %(n)d aulas restantes"
+msgstr[0] "%(name)s: expires %(when)s, %(n)d class remaining"
+msgstr[1] "%(name)s: expires %(when)s, %(n)d classes remaining"
+
+#, python-format
+msgid "%(name)s: %(n)d aula restante"
+msgid_plural "%(name)s: %(n)d aulas restantes"
+msgstr[0] "%(name)s: %(n)d class remaining"
+msgstr[1] "%(name)s: %(n)d classes remaining"
+
+#, python-format
+msgid "e mais %(n)d"
+msgstr "and %(n)d more"
+
+#, python-format
+msgid "%(n)d pacote para renovar"
+msgid_plural "%(n)d pacotes para renovar"
+msgstr[0] "%(n)d package to renew"
+msgstr[1] "%(n)d packages to renew"
+
+msgid "Teste de notificação"
+msgstr "Notification test"
+
+msgid "Tudo certo: este aparelho recebe os avisos do Muscle Track."
+msgstr "All set: this device receives Muscle Track notifications."
+
+msgid "<endereço>"
+msgstr "<address>"
+
+msgid "o servidor de e-mail recusou o login: confira EMAIL_HOST_USER e a senha de app (EMAIL_HOST_PASSWORD)"
+msgstr "the email server rejected the login: check EMAIL_HOST_USER and the app password (EMAIL_HOST_PASSWORD)"
+
+#, python-format
+msgid "não foi possível conectar ao servidor de e-mail (%(host)s:%(port)s); confira a rede do servidor e o EMAIL_HOST"
+msgstr "couldn't connect to the email server (%(host)s:%(port)s); check the server network and EMAIL_HOST"
+
+msgid "serviço de push"
+msgstr "push service"
+
+#, python-format
+msgid "o servidor não conseguiu abrir conexão com %(host)s (porta 443); confira se ele tem acesso à internet, DNS e proxy (HTTPS_PROXY)"
+msgstr "the server couldn't open a connection to %(host)s (port 443); check that it has internet access, DNS and proxy (HTTPS_PROXY)"
+
+msgid "sem e-mail cadastrado"
+msgstr "no email on file"
+
+#, python-format
+msgid "Abrir: %(link)s"
+msgstr "Open: %(link)s"
+
+#, python-format
+msgid "Você recebe este aviso porque ativou as notificações por e-mail. Para parar: %(link)s"
+msgstr "You are receiving this notice because you turned on email notifications. To stop: %(link)s"
+
+msgid "Você recebe este aviso porque ativou as notificações por e-mail. Para parar, desative em Notificações no app."
+msgstr "You are receiving this notice because you turned on email notifications. To stop, turn them off under Notifications in the app."
+
+msgid "web push não configurado no servidor"
+msgstr "web push is not set up on the server"
+
+msgid "nenhum aparelho inscrito"
+msgstr "no device subscribed"
+
+msgid "aparelho removido (assinatura expirada)"
+msgstr "device removed (subscription expired)"
+
+msgid "Cadastre seus exercícios"
+msgstr "Add your exercises"
+
+msgid "A biblioteca que você usa para montar os treinos."
+msgstr "The library you use to build workouts."
+
+msgid "Crie um pacote"
+msgstr "Create a package"
+
+msgid "Modelo com quantidade de aulas, prazo e valor, para vender a vários alunos."
+msgstr "Template with number of classes, validity period and price, to sell to multiple students."
+
+msgid "Monte um treino"
+msgstr "Build a workout"
+
+msgid "Um treino modelo com os exercícios, séries e repetições."
+msgstr "A workout template with the exercises, sets and reps."
+
+msgid "Cadastre o primeiro aluno"
+msgstr "Add your first student"
+
+msgid "Nome e e-mail bastam; o resto pode vir depois."
+msgstr "Name and email are enough; the rest can come later."
+
+msgid "Atribua um treino a um aluno"
+msgstr "Assign a workout to a student"
+
+msgid "Sem treino atribuído, o aluno não tem o que fazer no app."
+msgstr "Without an assigned workout, the student has nothing to do in the app."
+
+msgid "Envie o convite de acesso"
+msgstr "Send the access invitation"
+
+msgid "O aluno cria a própria senha pelo link e já pode treinar."
+msgstr "The student creates their own password from the link and can start training right away."
+
+msgid "Enviar convite"
+msgstr "Send invitation"
+
+msgid "Ver alunos"
+msgstr "View students"
+
+#, python-format
+msgid "%(days)s às %(time)s"
+msgstr "%(days)s at %(time)s"
+
+#, python-format
+msgid "%(first)s e %(last)s"
+msgstr "%(first)s and %(last)s"
+
+msgid "Não há aulas a marcar: o pacote já está completo ou todas as datas foram puladas."
+msgstr "No classes to schedule: the package is already complete or all dates were skipped."
+
+#, python-format
+msgid "Já existe um horário fixo na %(day)s às %(time)s: edite-o ou remova-o antes de preencher de novo."
+msgstr "A recurring slot already exists on %(day)s at %(time)s: edit or remove it before filling again."
+
+msgid "Este pacote ainda não tem horário fixo: use \"Preencher a agenda\"."
+msgstr "This package doesn't have a recurring slot yet: use \"Fill the schedule\"."
+
+msgid "Não achei datas livres nos horários do pacote."
+msgstr "Couldn't find free dates in the package's times."
+
+msgid "Aguardando a primeira aula"
+msgstr "Waiting for the first class"
+
+msgid "Em andamento"
+msgstr "In progress"
+
+msgid "Congelado"
+msgstr "Frozen"
+
+msgid "Vencido com aulas"
+msgstr "Expired with classes left"
+
+msgid "Cancelado"
+msgstr "Canceled"
+
+#, python-format
+msgid "Pacote vendido: %(name)s (%(n)d aula)"
+msgid_plural "Pacote vendido: %(name)s (%(n)d aulas)"
+msgstr[0] "Package sold: %(name)s (%(n)d class)"
+msgstr[1] "Package sold: %(name)s (%(n)d classes)"
+
+msgid "Este pacote já foi concluído ou cancelado."
+msgstr "This package has already been completed or canceled."
+
+msgid "O pacote já está congelado."
+msgstr "The package is already frozen."
+
+msgid "O prazo só começa na primeira aula: não há o que congelar ainda."
+msgstr "The validity period only starts at the first class: there's nothing to freeze yet."
+
+#, python-format
+msgid "Pacote congelado: %(name)s"
+msgstr "Package frozen: %(name)s"
+
+msgid "O pacote não está congelado."
+msgstr "The package isn't frozen."
+
+#, python-format
+msgid "Pacote descongelado: %(name)s (prazo +%(n)d dia)"
+msgid_plural "Pacote descongelado: %(name)s (prazo +%(n)d dias)"
+msgstr[0] "Package unfrozen: %(name)s (validity +%(n)d day)"
+msgstr[1] "Package unfrozen: %(name)s (validity +%(n)d days)"
+
+msgid "A prorrogação deve ser de 1 a 365 dias."
+msgstr "The extension must be between 1 and 365 days."
+
+msgid "Este pacote não tem prazo: não há o que prorrogar."
+msgstr "This package has no deadline: there is nothing to extend."
+
+#, python-format
+msgid "Pacote prorrogado: %(name)s (+%(n)d dia)"
+msgid_plural "Pacote prorrogado: %(name)s (+%(n)d dias)"
+msgstr[0] "Package extended: %(name)s (+%(n)d day)"
+msgstr[1] "Package extended: %(name)s (+%(n)d days)"
+
+msgid "Este pacote já foi cancelado."
+msgstr "This package has already been canceled."
+
+#, python-format
+msgid "Pacote cancelado: %(name)s"
+msgstr "Package canceled: %(name)s"
+
+msgid "Você não está cadastrado como aluno."
+msgstr "You are not registered as a student."
+
+msgid "toda semana"
+msgstr "every week"
+
+#, python-format
+msgid "a cada %(n)d semanas"
+msgstr "every %(n)d weeks"
+
+#, python-format
+msgid "até %(date)s"
+msgstr "until %(date)s"
+
+msgid "A data final não pode ser antes do início da mudança."
+msgstr "The end date can't be before the start of the change."
+
+msgid "Este horário já terminou; crie um novo horário fixo."
+msgstr "This time slot has already ended; create a new recurring slot."
+
+msgid "Este aluno já tem um horário fixo nesse dia e horário (talvez encerrado: remova-o antes)."
+msgstr "This student already has a recurring slot on that day and time (maybe ended: remove it first)."
+
+msgid "A data final fica antes da primeira aula no novo dia."
+msgstr "The end date falls before the first class on the new day."
+
+#, python-format
+msgid "Aulas dadas: %(used)d de %(sessions)d x %(per_class)s = %(used_value)s"
+msgstr "Classes held: %(used)d of %(sessions)d x %(per_class)s = %(used_value)s"
+
+#, python-format
+msgid "Aulas dadas: %(used)d de %(sessions)d"
+msgstr "Classes held: %(used)d of %(sessions)d"
+
+#, python-format
+msgid "Pacote: %(name)s"
+msgstr "Package: %(name)s"
+
+#, python-format
+msgid "Pago: %(paid)s"
+msgstr "Paid: %(paid)s"
+
+#, python-format
+msgid "Taxa combinada: %(fee)s"
+msgstr "Agreed fee: %(fee)s"
+
+#, python-format
+msgid "Valor devolvido: %(amount)s"
+msgstr "Amount refunded: %(amount)s"
+
+msgid "Informe um valor maior que zero."
+msgstr "Enter a value greater than zero."
+
+msgid "Este pagamento é de outro aluno."
+msgstr "This payment belongs to another student."
+
+#, python-format
+msgid "Só dá para devolver até %(max)s deste pagamento."
+msgstr "You can refund up to %(max)s of this payment."
+
+msgid "Este pacote é de outro aluno."
+msgstr "This package belongs to another student."
+
+#, python-format
+msgid "Só dá para devolver até %(max)s: é o que foi pago por este pacote."
+msgstr "You can refund up to %(max)s: that's what was paid for this package."
+
+#, python-format
+msgid "%(kind)s registrada (%(method)s) — %(package)s"
+msgstr "%(kind)s recorded (%(method)s) — %(package)s"
+
+#, python-format
+msgid "%(kind)s registrada (%(method)s)"
+msgstr "%(kind)s recorded (%(method)s)"
+
+msgid "Esta devolução já foi anulada."
+msgstr "This refund has already been voided."
+
+msgid "Escreva o motivo da anulação."
+msgstr "Enter the reason for voiding."
+
+#, python-format
+msgid "%(kind)s de %(date)s anulada"
+msgstr "%(kind)s from %(date)s voided"
+
+msgid "Cancelamento do pacote"
+msgstr "Package cancellation"
+
+msgid "nome alterado"
+msgstr "name changed"
+
+msgid "valor alterado"
+msgstr "amount changed"
+
+msgid "observação alterada"
+msgstr "note changed"
+
+msgid "sem prazo"
+msgstr "no deadline"
+
+#, python-format
+msgid "%(n)d dia"
+msgid_plural "%(n)d dias"
+msgstr[0] "%(n)d day"
+msgstr[1] "%(n)d days"
+
+msgid "Um pacote cancelado não pode ser editado."
+msgstr "A canceled package can't be edited."
+
+#, python-format
+msgid "O pacote não pode ter menos de %(min)d aula: %(used)d já foram dadas."
+msgid_plural "O pacote não pode ter menos de %(min)d aulas: %(used)d já foram dadas."
+msgstr[0] "The package can't have fewer than %(min)d class: %(used)d have already taken place."
+msgstr[1] "The package can't have fewer than %(min)d classes: %(used)d have already taken place."
+
+#, python-format
+msgid "aulas %(old)d → %(new)d"
+msgstr "classes %(old)d → %(new)d"
+
+#, python-format
+msgid "prazo %(new)s (era %(old)s)"
+msgstr "deadline %(new)s (was %(old)s)"
+
+#, python-format
+msgid "Pacote editado: %(name)s (%(changes)s)"
+msgstr "Package edited: %(name)s (%(changes)s)"
+
+#, python-format
+msgid "Valor combinado: %(price)s"
+msgstr "Agreed amount: %(price)s"
+
+#, python-format
+msgid "Valor devolvido (diferença): %(amount)s"
+msgstr "Amount refunded (difference): %(amount)s"
+
+msgid "Inativo"
+msgstr "Inactive"
+
+#, python-format
+msgid "%(minutes)s min"
+msgstr "%(minutes)s min"
+
+msgctxt "weekday letter, Monday"
+msgid "S"
+msgstr "M"
+
+msgctxt "weekday letter, Tuesday"
+msgid "T"
+msgstr "T"
+
+msgctxt "weekday letter, Wednesday"
+msgid "Q"
+msgstr "W"
+
+msgctxt "weekday letter, Thursday"
+msgid "Q"
+msgstr "T"
+
+msgctxt "weekday letter, Friday"
+msgid "S"
+msgstr "F"
+
+msgctxt "weekday letter, Saturday"
+msgid "S"
+msgstr "S"
+
+msgctxt "weekday letter, Sunday"
+msgid "D"
+msgstr "S"
+
+#, python-format
+msgid "Formato de arquivo não suportado. Use: %(formats)s"
+msgstr "Unsupported file format. Use: %(formats)s"
+
+#, python-format
+msgid "O tamanho máximo permitido é %(max)sMB. Seu arquivo tem %(size).2fMB."
+msgstr "The maximum allowed size is %(max)sMB. Your file is %(size).2fMB."
+
+msgid "Não foi possível processar a imagem. Certifique-se de que é um arquivo de imagem válido."
+msgstr "Couldn't process the image. Make sure it's a valid image file."
+
+#, python-format
+msgid "As dimensões máximas permitidas são %(max_width)sx%(max_height)spx. Sua imagem tem %(width)sx%(height)spx."
+msgstr "The maximum allowed dimensions are %(max_width)sx%(max_height)spx. Your image is %(width)sx%(height)spx."
+
+#, python-format
+msgid "As dimensões mínimas permitidas são %(min_width)sx%(min_height)spx. Sua imagem tem %(width)sx%(height)spx."
+msgstr "The minimum allowed dimensions are %(min_width)sx%(min_height)spx. Your image is %(width)sx%(height)spx."
+
+msgid "Use apenas números, espaços, parênteses e hífen."
+msgstr "Use only numbers, spaces, parentheses and hyphens."
+
+msgid "Informe o telefone com DDD (10 ou 11 dígitos)."
+msgstr "Enter the phone number with area code (10 or 11 digits)."
+
+msgid "Informe a sigla de um estado válido (ex.: SP)."
+msgstr "Enter a valid state abbreviation (e.g., SP)."
+
+msgid "O CEP deve ter 8 dígitos."
+msgstr "The postal code (CEP) must have 8 digits."
+
+msgid "A data de nascimento não pode estar no futuro."
+msgstr "The date of birth can't be in the future."
+
+msgid "Confira a data de nascimento: o ano parece incorreto."
+msgstr "Check the date of birth: the year looks incorrect."
+
+msgid "Sem consentimento (LGPD)"
+msgstr "No consent (LGPD)"
+
+msgid "Plano vencendo"
+msgstr "Plan expiring"
+
+msgid "Plano vencido"
+msgstr "Plan expired"
+
+msgid "Sem treinar há 7+ dias"
+msgstr "Not training for 7+ days"
+
+msgid "Sem treino ativo"
+msgstr "No active workout"
+
+msgid "Convite pendente"
+msgstr "Invitation pending"
+
+#, python-format
+msgid "Cadastro criado (%(status)s)"
+msgstr "Registration created (%(status)s)"
+
+msgid "Aluno cadastrado! Envie o link de convite para ele criar a senha."
+msgstr "Student registered! Send the invitation link so they can create a password."
+
+msgid "Cadastrar Aluno"
+msgstr "Add Student"
+
+msgid "Link de acesso revogado e gerado de novo"
+msgstr "Access link revoked and regenerated"
+
+msgid "Link anterior revogado. Este é o novo link de acesso."
+msgstr "Previous link revoked. This is the new access link."
+
+msgid "Criou a senha pelo link de acesso"
+msgstr "Created a password via the access link"
+
+msgid "Senha criada! Bem-vindo(a) ao Muscle Track."
+msgstr "Password created! Welcome to Muscle Track."
+
+#, python-format
+msgid "Pacote vendido: %(name)s. O prazo conta a partir da primeira aula."
+msgstr "Package sold: %(name)s. The validity period counts from the first class."
+
+#, python-format
+msgid "Confira as aulas na prévia (mesmo horário de antes: %(label)s) e confirme em \"Preencher agenda\"."
+msgstr "Check the classes in the preview (same time as before: %(label)s) and confirm with \"Fill schedule\"."
+
+msgid "Pacote congelado: o prazo para de contar até você descongelar."
+msgstr "Package frozen: the validity period stops counting until you unfreeze it."
+
+msgid "Pacote descongelado: os dias parados foram somados ao prazo."
+msgstr "Package unfrozen: the paused days were added to the validity period."
+
+msgid "Informe quantos dias de prorrogação."
+msgstr "Enter how many days to extend."
+
+#, python-format
+msgid "Pacote prorrogado em %(days)d dias."
+msgstr "Package extended by %(days)d days."
+
+msgid "Pacote cancelado."
+msgstr "Package canceled."
+
+msgid "Ação inválida"
+msgstr "Invalid action"
+
+msgid "Pacote atualizado."
+msgstr "Package updated."
+
+msgid "Nada mudou."
+msgstr "Nothing changed."
+
+#, python-format
+msgid "O novo valor ficou %(amount)s abaixo do que já foi pago: há essa diferença a devolver (Financeiro → Devoluções e ajustes)."
+msgstr "The new amount is %(amount)s below what has already been paid: that difference is refund due (Finances → Refunds and adjustments)."
+
+#, python-format
+msgid "%(n)d aula marcada saiu da agenda."
+msgid_plural "%(n)d aulas marcadas saiu da agenda."
+msgstr[0] "%(n)d scheduled class was removed from the schedule."
+msgstr[1] "%(n)d scheduled classes were removed from the schedule."
+
+msgid "Valor do pacote reduzido: pago a mais"
+msgstr "Package amount reduced: overpaid"
+
+#, python-format
+msgid "%(kind)s registrada."
+msgstr "%(kind)s recorded."
+
+#, python-format
+msgid "Devolução de %(amount)s"
+msgstr "Refund of %(amount)s"
+
+#, python-format
+msgid ""
+"Olá, %(name)s! Segue o resumo da devolução:\n"
+"%(text)s\n"
+"Forma: %(method)s."
+msgstr ""
+"Hi, %(name)s! Here's the refund summary:\n"
+"%(text)s\n"
+"Method: %(method)s."
+
+msgid "Devolução anulada: continua registrada, mas não conta mais."
+msgstr "Refund voided: it stays on record, but no longer counts."
+
+msgid "Aluno atualizado! O e-mail de login mudou: confira o convite se o aluno ainda não criou a senha."
+msgstr "Student updated! The login email changed: check the invitation if the student hasn't created a password yet."
+
+msgid "Aluno atualizado com sucesso!"
+msgstr "Student updated successfully!"
+
+msgid "Editar Aluno"
+msgstr "Edit Student"
+
+#, python-format
+msgid "%(name)s e todos os dados foram excluídos."
+msgstr "%(name)s and all data were deleted."
+
+#, python-format
+msgid "Situação atualizada: %(status)s."
+msgstr "Status updated: %(status)s."
+
+msgid "Exportação de dados feita pela personal"
+msgstr "Data export done by the trainer"
+
+msgid "Consentimento registrado."
+msgstr "Consent recorded."
+
+msgid "Marque pelo menos um consentimento para registrar."
+msgstr "Check at least one consent to record it."
+
+msgid "Obrigado! Você já pode treinar."
+msgstr "Thank you! You can start training now."
+
+msgid "Baixou os próprios dados"
+msgstr "Downloaded their own data"
+
+msgid "Preferência de fotos atualizada."
+msgstr "Photo preference updated."
+
+msgid "Pediu a exclusão dos próprios dados"
+msgstr "Requested deletion of their own data"
+
+msgid "Pedido enviado. Sua personal vai apagar seus dados e avisar você."
+msgstr "Request sent. Your trainer will delete your data and let you know."
+
+msgid "Seu perfil foi atualizado com sucesso!"
+msgstr "Your profile was updated successfully!"
+
+msgid "Meu Perfil"
+msgstr "My Profile"
+
+msgid "Autorize o registro de fotos para enviar."
+msgstr "Authorize photo recording to upload."
+
+msgid "Foto enviada. Só você e a sua personal conseguem vê-la."
+msgstr "Photo uploaded. Only you and your trainer can see it."
+
+msgid "Foto removida."
+msgstr "Photo removed."
+
+msgid "Pedido enviado. Assim que sua personal responder, a resposta aparece aqui."
+msgstr "Request sent. As soon as your trainer replies, the reply will appear here."
+
+msgid "Pedir remarcação ou cancelamento"
+msgstr "Request reschedule or cancellation"
+
+msgid "Pedido retirado."
+msgstr "Request withdrawn."
+
+msgid "Exercício cadastrado com sucesso!"
+msgstr "Exercise created successfully!"
+
+msgid "Cadastrar Exercício"
+msgstr "Add Exercise"
+
+msgid "Exercício atualizado com sucesso!"
+msgstr "Exercise updated successfully!"
+
+msgid "Editar Exercício"
+msgstr "Edit Exercise"
+
+msgid "Erro ao processar exercícios."
+msgstr "Error processing exercises."
+
+msgid "Exercício inválido na lista."
+msgstr "Invalid exercise in the list."
+
+msgid "Um dos exercícios selecionados não existe mais."
+msgstr "One of the selected exercises no longer exists."
+
+msgid "Treino criado com sucesso!"
+msgstr "Workout created successfully!"
+
+msgid "Criar Treino"
+msgstr "Create Workout"
+
+msgid "Treino atualizado com sucesso!"
+msgstr "Workout updated successfully!"
+
+msgid "Editar Treino"
+msgstr "Edit Workout"
+
+#, python-format
+msgid "Treino \"%(routine)s\" atribuído a %(student)s com sucesso!"
+msgstr "Workout \"%(routine)s\" assigned to %(student)s successfully!"
+
+#, python-format
+msgid "Treino \"%(routine)s\" atualizado com sucesso!"
+msgstr "Workout \"%(routine)s\" updated successfully!"
+
+#, python-format
+msgid "Treino \"%(routine)s\" foi removido e movido para o histórico."
+msgstr "Workout \"%(routine)s\" was removed and moved to history."
+
+msgid "Recuperando sua sessão de treino em andamento..."
+msgstr "Recovering your workout session in progress..."
+
+msgid "Sessão anterior foi encerrada automaticamente (tempo excedido)."
+msgstr "The previous session was ended automatically (time exceeded)."
+
+msgid "Treino iniciado! Boa sorte!"
+msgstr "Workout started! Good luck!"
+
+msgid "Nenhuma sessão ativa encontrada. Inicie um novo treino."
+msgstr "No active session found. Start a new workout."
+
+msgid "Este treino já tem séries ou comentários. Finalize-o em vez de descartar."
+msgstr "This workout already has sets or comments. Finish it instead of discarding it."
+
+msgid "Treino descartado."
+msgstr "Workout discarded."
+
+msgid "Dados inválidos"
+msgstr "Invalid data"
+
+msgid "Valor inválido"
+msgstr "Invalid amount"
+
+msgid "Treino gerado com IA com sucesso!"
+msgstr "Workout generated with AI successfully!"
+
+#, python-format
+msgid "Erro ao gerar treino: %(error)s"
+msgstr "Error generating workout: %(error)s"
+
+msgid "Gerar Treino com IA"
+msgstr "Generate Workout with AI"
+
+msgid "e-mail"
+msgstr "email"
+
+msgid "push (aparelho)"
+msgstr "push (device)"
+
+#, python-format
+msgid "Ativou avisos por %(label)s"
+msgstr "Enabled alerts via %(label)s"
+
+#, python-format
+msgid "Desativou avisos por %(label)s"
+msgstr "Turned off %(label)s notifications"
+
+msgid "Texto padrão restaurado."
+msgstr "Default text restored."
+
+#, python-format
+msgid "Texto não salvo: %(errors)s"
+msgstr "Text not saved: %(errors)s"
+
+msgid "Mensagem salva."
+msgstr "Message saved."
+
+msgid "Cadastre um e-mail na sua conta para receber avisos por e-mail."
+msgstr "Add an email to your account to receive email notifications."
+
+msgid "O envio de e-mail ainda não foi configurado no servidor."
+msgstr "Email sending hasn't been set up on the server yet."
+
+msgid "O aviso no aparelho ainda não foi configurado no servidor."
+msgstr "Device notifications haven't been set up on the server yet."
+
+msgid "Preferências de notificação salvas."
+msgstr "Notification preferences saved."
+
+msgid "Aparelho"
+msgstr "Device"
+
+msgid "Aviso no aparelho não configurado no servidor."
+msgstr "Device notifications are not configured on the server."
+
+msgid "Assinatura inválida."
+msgstr "Invalid signature."
+
+msgid "Aparelho removido."
+msgstr "Device removed."
+
+msgid "Ative este canal antes de testar."
+msgstr "Enable this channel before testing."
+
+msgid "Teste enviado. Confira o e-mail."
+msgstr "Test sent. Check your email."
+
+msgid "Teste enviado. Deve aparecer no aparelho em instantes."
+msgstr "Test sent. It should show up on the device shortly."
+
+#, python-format
+msgid "Não foi possível enviar: %(detail)s."
+msgstr "Couldn't send: %(detail)s."
+
+msgid "sem detalhes"
+msgstr "no details"
+
+msgid "Novo link gerado. O anterior deixou de funcionar: adicione o novo no Google Agenda."
+msgstr "New link generated. The previous one stopped working: add the new one to Google Calendar."
+
+msgid "Preferência salva. O Google Agenda atualiza o calendário aos poucos."
+msgstr "Preference saved. Google Calendar updates the calendar gradually."
+
+msgid "Escolha uma das opções."
+msgstr "Choose one of the options."
+
+msgid "Buscar"
+msgstr "Search"
+
+msgid "Treinar agora"
+msgstr "Train now"
+
+msgid "Meu histórico"
+msgstr "My history"
+
+msgid "Gestão para personal trainers, com o aluno por dentro de treinos, evolução e aulas"
+msgstr "Management for personal trainers, with students in the loop on workouts, progress, and classes"
+
+msgid "Avaliação registrada."
+msgstr "Assessment recorded."
+
+msgid "Avaliação atualizada."
+msgstr "Assessment updated."
+
+msgid "Avaliação removida."
+msgstr "Assessment removed."
+
+msgid "Foto adicionada."
+msgstr "Photo added."
+
+msgid "Anotação salva."
+msgstr "Note saved."
+
+msgid "Escreva a anotação antes de salvar."
+msgstr "Write the note before saving."
+
+msgid "Anotação removida."
+msgstr "Note removed."
+
+#, python-format
+msgid "Pacote \"%(name)s\" criado."
+msgstr "Package \"%(name)s\" created."
+
+msgid "Pacote atualizado. Quem já comprou mantém os números da venda."
+msgstr "Package updated. Existing buyers keep the sale numbers."
+
+msgid "Pagamento registrado."
+msgstr "Payment recorded."
+
+msgid "Pagamento excluído."
+msgstr "Payment deleted."
+
+msgid "Semana"
+msgstr "Week"
+
+msgid "Mês"
+msgstr "Month"
+
+msgid "Lista"
+msgstr "List"
+
+#, python-format
+msgid "Atenção: este horário se sobrepõe a outra aula (%(names)s)."
+msgstr "Heads up: this time overlaps with another class (%(names)s)."
+
+msgid "Só aulas do tipo \"Aula\" podem se repetir."
+msgstr "Only classes of type \"Class\" can repeat."
+
+msgid "Este aluno já tem uma aula neste horário."
+msgstr "This student already has a class at this time."
+
+msgid "Aula marcada."
+msgstr "Class scheduled."
+
+#, python-format
+msgid "Aulas repetidas criadas: %(description)s."
+msgstr "Recurring classes created: %(description)s."
+
+msgid "Escolha outro horário: este aluno já tem aula neste."
+msgstr "Choose another time: this student already has a class at this time."
+
+msgid "Aula remarcada."
+msgstr "Class rescheduled."
+
+msgid "Só aulas marcadas podem ser movidas."
+msgstr "Only scheduled classes can be moved."
+
+msgid "Data ou horário inválido."
+msgstr "Invalid date or time."
+
+msgid "A duração deve ficar entre 10 e 480 minutos."
+msgstr "Duration must be between 10 and 480 minutes."
+
+msgid "Decisão inválida"
+msgstr "Invalid decision"
+
+#, python-format
+msgid "Pedido de %(name)s aprovado."
+msgstr "Request from %(name)s approved."
+
+#, python-format
+msgid "Pedido de %(name)s recusado."
+msgstr "Request from %(name)s declined."
+
+msgid "Situação inválida"
+msgstr "Invalid status"
+
+msgid "Este aluno já tem outra aula neste horário; remova ou cancele uma delas antes."
+msgstr "This student already has another class at this time; remove or cancel one of them first."
+
+#, python-format
+msgid "Cancelada com menos de %(hours)s h de antecedência: conta como aula dada no pacote. Se não for para descontar, use \"Não descontar\"."
+msgstr "Canceled with less than %(hours)s h notice: counts as a class held in the package. If it should not be deducted, use \"Don't deduct\"."
+
+msgid "Opção inválida"
+msgstr "Invalid option"
+
+msgid "Esta aula vai ser descontada do pacote."
+msgstr "This class will be deducted from the package."
+
+msgid "Esta aula não será descontada do pacote."
+msgstr "This class will not be deducted from the package."
+
+msgid "Esta aula segue a regra do pacote."
+msgstr "This class follows the package rule."
+
+msgid "Aula de horário fixo: use \"Cancelar\" (excluir faria ela voltar)."
+msgstr "Fixed-time class: use \"Cancel\" (deleting it would make it come back)."
+
+msgid "Aula removida."
+msgstr "Class removed."
+
+msgid "Só aulas marcadas podem ser removidas por aqui."
+msgstr "Only scheduled classes can be removed here."
+
+msgid "Aula removida da agenda, sem descontar do pacote. O horário fixo continua nas próximas."
+msgstr "Class removed from the schedule, without deducting from the package. The fixed time slot stays on the upcoming classes."
+
+#, python-format
+msgid "Horário fixo: %(description)s."
+msgstr "Recurring slot: %(description)s."
+
+#, python-format
+msgid "Horário inválido: %(errors)s"
+msgstr "Invalid time: %(errors)s"
+
+msgid "Esta aula não faz parte de um horário fixo."
+msgstr "This class is not part of a recurring slot."
+
+#, python-format
+msgid "%(n)d aula marcada saiu da agenda"
+msgid_plural "%(n)d aulas marcadas saíram da agenda"
+msgstr[0] "%(n)d scheduled class was removed from the schedule"
+msgstr[1] "%(n)d scheduled classes were removed from the schedule"
+
+#, python-format
+msgid "Horário fixo encerrado: %(weekday)s às %(time)s deixa de repetir a partir desta aula (%(gone)s)."
+msgstr "Recurring slot ended: %(weekday)s at %(time)s stops repeating from this class (%(gone)s) on."
+
+msgid "Este aluno não tem pacote em uso. Venda um pacote primeiro."
+msgstr "This student has no active package. Sell a package first."
+
+#, python-format
+msgid "%(n)d aula marcada, até %(date)s."
+msgid_plural "%(n)d aulas marcadas, até %(date)s."
+msgstr[0] "%(n)d class scheduled, through %(date)s."
+msgstr[1] "%(n)d classes scheduled, through %(date)s."
+
+msgid "Atenção: parte das aulas passa da validade do pacote; prorrogue-o se for preciso."
+msgstr "Heads up: some classes fall after the package expires; extend it if needed."
+
+msgid "Atenção: alguma aula se sobrepõe à de outro aluno (veja na agenda)."
+msgstr "Heads up: a class overlaps with another student's (see the schedule)."
+
+msgid "Este aluno não tem pacote em uso."
+msgstr "This student has no active package."
+
+#, python-format
+msgid "%(n)d aula a mais marcada, até %(date)s."
+msgid_plural "%(n)d aulas a mais marcadas, até %(date)s."
+msgstr[0] "%(n)d extra class scheduled, through %(date)s."
+msgstr[1] "%(n)d extra classes scheduled, through %(date)s."
+
+#, python-format
+msgid "Horário fixo atualizado: %(description)s."
+msgstr "Recurring slot updated: %(description)s."
+
+#, python-format
+msgid "%(n)d aula(s) marcada(s) foram recriadas no novo horário."
+msgstr "%(n)d scheduled class(es) were recreated at the new time."
+
+msgid "Horário fixo removido. As aulas futuras dele saíram da agenda."
+msgstr "Recurring slot removed. Its future classes were taken off the schedule."
+
+#, python-format
+msgid "%(name)s (%(date)s) entrou na lista: o app não marca aula nesse dia ao preencher a agenda."
+msgstr "%(name)s (%(date)s) was added to the list: the app won't schedule a class on that day when filling in the schedule."
+
+#, python-format
+msgid "Feriado não salvo: %(errors)s"
+msgstr "Holiday not saved: %(errors)s"
+
+#, python-format
+msgid "%(name)s saiu da lista."
+msgstr "%(name)s was removed from the list."
+
+#, python-brace-format
+msgid ""
+"Olá, {nome}! Passando para lembrar do pagamento do pacote {pacote}.\n"
+"Valor: {valor}.\n"
+"Chave Pix: {pix}\n"
+"Qualquer dúvida é só falar. 💪"
+msgstr ""
+"Hi, {nome}! Just a reminder about the payment for the {pacote} package.\n"
+"Amount: {valor}.\n"
+"Pix key: {pix}\n"
+"Any questions, just ask. 💪"
+
+#, python-brace-format
+msgid "Oi, {nome}! Sentimos sua falta na aula de {data}. Vamos remarcar? 💪"
+msgstr "Hi, {nome}! We missed you in the class on {data}. Shall we reschedule? 💪"
+
+#, python-brace-format
+msgid "Olá, {nome}! Seu acesso ao Muscle Track está pronto. Crie sua senha por este link (válido por 7 dias): {link}"
+msgstr "Hi, {nome}! Your Muscle Track access is ready. Create your password with this link (valid for 7 days): {link}"
+
+msgid "primeiro nome do aluno"
+msgstr "student's first name"
+
+msgid "nome do pacote"
+msgstr "package name"
+
+msgid "valor a pagar"
+msgstr "amount to pay"
+
+msgid "chave Pix do servidor"
+msgstr "server Pix key"
+
+msgid "dia da aula (dd/mm)"
+msgstr "class day (mm/dd)"
+
+msgid "link para criar a senha"
+msgstr "link to create the password"
+
+msgid "Ao tocar no WhatsApp de um pagamento pendente (painel, Financeiro e ficha)."
+msgstr "When tapping WhatsApp on a pending payment (dashboard, Finances and profile)."
+
+msgid "Ao tocar no WhatsApp de uma falta recente (painel)."
+msgstr "When tapping WhatsApp on a recent absence (dashboard)."
+
+msgid "Ao enviar o link de acesso ao aluno (tela do convite)."
+msgstr "When sending the access link to the student (invitation screen)."
+
+msgid "Carla"
+msgstr "Carla"
+
+msgid "Pacote 10 aulas"
+msgstr "10-class package"
+
+msgid "500,00 €"
+msgstr "€500.00"
+
+msgid "sua-chave-pix"
+msgstr "your-pix-key"
+
+msgid "12/10"
+msgstr "10/12"
+
+msgid "https://seu-site/convite/abc123"
+msgstr "https://your-site/invite/abc123"
+
+msgid "O texto não pode ficar vazio (use \"Restaurar o padrão\")."
+msgstr "The text can't be empty (use \"Restore default\")."
+
+#, python-format
+msgid "O texto passa de %(max)d caracteres."
+msgstr "The text exceeds %(max)d characters."
+
+#, python-format
+msgid "Variável desconhecida: %(names)s."
+msgstr "Unknown variable: %(names)s."
+
+#, python-format
+msgid "O texto precisa ter {%(name)s}: sem ele a mensagem não leva o link."
+msgstr "The text must include {%(name)s}: without it the message won't carry the link."
+
+#, python-format
+msgid "Entrar - %(brand_name)s"
+msgstr "Log in - %(brand_name)s"
+
+#, python-format
+msgid "Sair - %(brand_name)s"
+msgstr "Sign out - %(brand_name)s"
+
+msgid "Tem certeza de que deseja sair?"
+msgstr "Are you sure you want to sign out?"
+
+msgid "Password Reset"
+msgstr "Password Reset"
+
+msgid "Forgotten your password? Enter your email address below, and we'll send you an email allowing you to reset it."
+msgstr "Forgotten your password? Enter your email address below, and we'll send you an email allowing you to reset it."
+
+msgid "Reset My Password"
+msgstr "Reset My Password"
+
+msgid "Voltar ao login"
+msgstr "Back to login"
+
+msgid "Se o e-mail não chegar, peça um novo link de acesso à sua personal."
+msgstr "If the email doesn't arrive, ask your trainer for a new access link."
+
+msgid "Resumo e pagamentos"
+msgstr "Summary and payments"
+
+msgid "Meus Treinos"
+msgstr "My Workouts"
+
+msgid "Entrar"
+msgstr "Log in"
+
+msgid "Sem conexão. Algumas telas só abrem quando a internet voltar."
+msgstr "No connection. Some screens only open once you're back online."
+
+msgid "&copy;"
+msgstr "&copy;"
+
+#, python-format
+msgid "· feito com %(app_name)s"
+msgstr "· made with %(app_name)s"
+
+msgid "- Gestão para personal trainers"
+msgstr "- Management for personal trainers"
+
+msgid "Privacidade"
+msgstr "Privacy"
+
+#, python-format
+msgid "%(get_kind_display)s · %(duration_minutes)s min"
+msgstr "%(get_kind_display)s · %(duration_minutes)s min"
+
+msgid "D d/m \\à\\s H:i"
+msgstr "D, M j \\a\\t g:i A"
+
+#, python-format
+msgid "para %(starts_at)s"
+msgstr "to %(starts_at)s"
+
+#, python-format
+msgid "remarcada de %(starts_at)s"
+msgstr "rescheduled from %(starts_at)s"
+
+msgid "Sobreposta a outra aula"
+msgstr "Overlaps another class"
+
+msgid "desconta do pacote"
+msgstr "deducts from the package"
+
+msgid "Não descontar"
+msgstr "Don't deduct"
+
+msgid "não desconta"
+msgstr "doesn't deduct"
+
+msgid "Descontar"
+msgstr "Deduct"
+
+msgid "Desfazer (voltar para marcada)"
+msgstr "Undo (back to scheduled)"
+
+msgid "Mover para outro dia ou horário"
+msgstr "Move to another day or time"
+
+msgid "Mover"
+msgstr "Move"
+
+msgid "Adicionar esta aula ao Google Agenda"
+msgstr "Add this class to Google Calendar"
+
+msgid "Adicionar ao Google Agenda"
+msgstr "Add to Google Calendar"
+
+msgid "Só esta aula: use Cancelar ou Remarcar."
+msgstr "This class only: use Cancel or Reschedule."
+
+msgid "Esta e as próximas aulas deste horário saem da agenda. As já marcadas (compareceu, faltou...) ficam. Continuar?"
+msgstr "This and the following classes in this slot will be removed from the schedule. Those already marked (attended, missed...) stay. Continue?"
+
+msgid "Esta e as próximas deixam de repetir"
+msgstr "This and the following ones stop repeating"
+
+msgid "Remover o horário fixo inteiro? Todas as aulas futuras dele saem da agenda."
+msgstr "Remove the entire recurring time slot? All of its future classes will be taken off the schedule."
+
+msgid "Todas: remover o horário fixo"
+msgstr "All: remove the recurring time slot"
+
+msgid "Remover esta aula avulsa?"
+msgstr "Remove this one-off class?"
+
+msgid "remover"
+msgstr "remove"
+
+msgid "breadcrumb"
+msgstr "breadcrumb"
+
+msgid "D, d/m \\à\\s H:i"
+msgstr "D, M j \\a\\t g:i A"
+
+#, python-format
+msgid "Remarcada para <strong>%(starts_at)s</strong>"
+msgstr "Rescheduled to <strong>%(starts_at)s</strong>"
+
+msgid "d/m \\à\\s H:i"
+msgstr "M j \\a\\t g:i A"
+
+#, python-format
+msgid "· em %(status_changed_at)s,"
+msgstr "· on %(status_changed_at)s,"
+
+msgid "a seu pedido"
+msgstr "at your request"
+
+msgid "pela sua personal"
+msgstr "by your trainer"
+
+#, python-format
+msgid "Cancelada em %(status_changed_at)s,"
+msgstr "Canceled on %(status_changed_at)s,"
+
+#, python-format
+msgid "Remarcada de <strong>%(starts_at)s</strong>"
+msgstr "Rescheduled from <strong>%(starts_at)s</strong>"
+
+msgid "d/m/Y"
+msgstr "m/d/Y"
+
+#, python-format
+msgid "Comprado em %(sold_on)s"
+msgstr "Purchased on %(sold_on)s"
+
+#, python-format
+msgid "<strong>%(used)s</strong> de %(sessions)s aulas usadas"
+msgstr "<strong>%(used)s</strong> of %(sessions)s classes used"
+
+#, python-format
+msgid "%(left)s sobrando"
+msgstr "%(left)s left over"
+
+msgid "Aulas usadas do pacote"
+msgstr "Package classes used"
+
+msgid "Compradas"
+msgstr "Purchased"
+
+msgid "Feitas"
+msgstr "Done"
+
+msgid "Saldo"
+msgstr "Balance"
+
+msgid "Marcadas"
+msgstr "Scheduled"
+
+msgid "Remarcadas"
+msgstr "Rescheduled"
+
+msgid "Canceladas"
+msgstr "Canceled"
+
+#, python-format
+msgid "%(missed)s falta sem aviso (descontada do pacote)."
+msgid_plural "%(missed)s faltas sem aviso (descontadas do pacote)."
+msgstr[0] "%(missed)s no-show without notice (deducted from the package)."
+msgstr[1] "%(missed)s no-shows without notice (deducted from the package)."
+
+#, python-format
+msgid "%(late_cancelled)s cancelamento em cima da hora (descontado do pacote)."
+msgid_plural "%(late_cancelled)s cancelamentos em cima da hora (descontados do pacote)."
+msgstr[0] "%(late_cancelled)s last-minute cancellation (deducted from the package)."
+msgstr[1] "%(late_cancelled)s last-minute cancellations (deducted from the package)."
+
+#, python-format
+msgid "%(free_cancelled)s cancelamento sem desconto."
+msgid_plural "%(free_cancelled)s cancelamentos sem desconto."
+msgstr[0] "%(free_cancelled)s cancellation with no deduction."
+msgstr[1] "%(free_cancelled)s cancellations with no deduction."
+
+msgid "Pacote sem prazo: vale até usar todas as aulas."
+msgstr "No-expiration package: valid until all classes are used."
+
+#, python-format
+msgid "Primeira aula em %(starts_on)s; vale até <strong>%(ends_on)s</strong>"
+msgstr "First class on %(starts_on)s; valid until <strong>%(ends_on)s</strong>"
+
+msgid "vence hoje"
+msgstr "expires today"
+
+msgid "falta 1 dia"
+msgstr "1 day left"
+
+#, python-format
+msgid "faltam %(days_left)s dias"
+msgstr "%(days_left)s days left"
+
+msgid "(congelado até você voltar)"
+msgstr "(frozen until you return)"
+
+msgid "(prazo vencido: fale com a sua personal)"
+msgstr "(deadline passed: talk to your trainer)"
+
+#, python-format
+msgid "O prazo de %(valid_days)s dias começa na primeira aula."
+msgstr "The %(valid_days)s-day validity period starts on the first class."
+
+#, python-format
+msgid "Prorrogado em %(extension_days)s dia."
+msgid_plural "Prorrogado em %(extension_days)s dias."
+msgstr[0] "Extended by %(extension_days)s day."
+msgstr[1] "Extended by %(extension_days)s days."
+
+#, python-format
+msgid "Aulas descontadas (%(classes)s)"
+msgstr "Classes deducted (%(classes)s)"
+
+msgid "(tarde)"
+msgstr "(late)"
+
+msgid "Oi"
+msgstr "Hi"
+
+msgid "l, j \\d\\e F"
+msgstr "l, F j"
+
+msgid "Treino em andamento"
+msgstr "Workout in progress"
+
+#, python-format
+msgid "Iniciado às %(open_start)s"
+msgstr "Started at %(open_start)s"
+
+msgid "Continuar treino"
+msgstr "Continue workout"
+
+msgid "Treino de hoje feito"
+msgstr "Today's workout done"
+
+#, python-format
+msgid "%(duration_minutes)s min ·"
+msgstr "%(duration_minutes)s min ·"
+
+msgid "parabéns pela constância!"
+msgstr "congrats on the consistency!"
+
+msgid "Fazer outro treino"
+msgstr "Do another workout"
+
+msgid "Treino de hoje"
+msgstr "Today's workout"
+
+#, python-format
+msgid "%(exercise_count)s exercício · cerca de %(estimated_duration)s min"
+msgid_plural "%(exercise_count)s exercícios · cerca de %(estimated_duration)s min"
+msgstr[0] "%(exercise_count)s exercise · about %(estimated_duration)s min"
+msgstr[1] "%(exercise_count)s exercises · about %(estimated_duration)s min"
+
+#, python-format
+msgid "Último: %(last_done)s"
+msgstr "Last: %(last_done)s"
+
+msgid "Iniciar treino"
+msgstr "Start workout"
+
+msgid "Escolher outro treino"
+msgstr "Choose another workout"
+
+msgid "Seu treino ainda não está pronto"
+msgstr "Your workout isn't ready yet"
+
+msgid "Sua personal ainda não montou um treino para você. Assim que ele aparecer, é só tocar em iniciar."
+msgstr "Your trainer hasn't built a workout for you yet. Once it shows up, just tap start."
+
+msgid "Próxima aula"
+msgstr "Next class"
+
+msgid "Ver as minhas aulas"
+msgstr "View my classes"
+
+msgid "Sua semana"
+msgstr "Your week"
+
+msgid "Meta batida! Tudo o que vier agora é bônus."
+msgstr "Goal hit! Everything from here on is a bonus."
+
+#, python-format
+msgid "Faltam %(missing_this_week)s treino para a meta."
+msgid_plural "Faltam %(missing_this_week)s treinos para a meta."
+msgstr[0] "%(missing_this_week)s workout left to reach your goal."
+msgstr[1] "%(missing_this_week)s workouts left to reach your goal."
+
+#, python-format
+msgid "%(weeks)s semana seguida"
+msgid_plural "%(weeks)s semanas seguidas"
+msgstr[0] "%(weeks)s week in a row"
+msgstr[1] "%(weeks)s weeks in a row"
+
+#, python-format
+msgid "· treine %(missing_this_week)s vez para manter"
+msgid_plural "· treine %(missing_this_week)s vezes para manter"
+msgstr[0] "· train %(missing_this_week)s time to keep your streak"
+msgstr[1] "· train %(missing_this_week)s times to keep your streak"
+
+#, python-format
+msgid "%(week_done)s de %(week_goal)s treino"
+msgid_plural "%(week_done)s de %(week_goal)s treinos"
+msgstr[0] "%(week_done)s of %(week_goal)s workout"
+msgstr[1] "%(week_done)s of %(week_goal)s workouts"
+
+#, python-format
+msgid "%(week_done)s treino"
+msgid_plural "%(week_done)s treinos"
+msgstr[0] "%(week_done)s workout"
+msgstr[1] "%(week_done)s workouts"
+
+#, python-format
+msgid "Próximo marco: <strong>%(next_milestone)s treinos</strong>"
+msgstr "Next milestone: <strong>%(next_milestone)s workouts</strong>"
+
+#, python-format
+msgid "%(total)s de %(next_milestone)s"
+msgstr "%(total)s of %(next_milestone)s"
+
+msgid "Progresso até o próximo marco"
+msgstr "Progress to the next milestone"
+
+msgid "treinos"
+msgstr "workouts"
+
+msgid "em 30 dias"
+msgstr "in 30 days"
+
+#, python-format
+msgid "%(avg_duration)s<small class=\"fs-6\"> min</small>"
+msgstr "%(avg_duration)s<small class=\"fs-6\"> min</small>"
+
+msgid "em média"
+msgstr "on average"
+
+msgid "Pular"
+msgstr "Skip"
+
+msgid "Próximo"
+msgstr "Next"
+
+#, python-format
+msgid "Criar senha - %(brand_name)s"
+msgstr "Create password - %(brand_name)s"
+
+msgid "Convite indisponível"
+msgstr "Invitation unavailable"
+
+msgid "Este cadastro está desativado. Fale com a sua personal trainer."
+msgstr "This account is deactivated. Talk to your trainer."
+
+msgid "Este link é inválido, expirou ou já foi usado. Peça um novo link para a sua personal trainer."
+msgstr "This link is invalid, has expired, or has already been used. Ask your trainer for a new link."
+
+msgid "Ir para o login"
+msgstr "Go to login"
+
+#, python-format
+msgid "Olá, %(person_name)s!"
+msgstr "Hi, %(person_name)s!"
+
+msgid "Crie a sua senha para acessar os seus treinos."
+msgstr "Create your password to access your workouts."
+
+msgid "Criar senha e entrar"
+msgstr "Create password and sign in"
+
+#, python-format
+msgid "Seu login será o e-mail <strong>%(email)s</strong>."
+msgstr "Your login will be the email <strong>%(email)s</strong>."
+
+#, python-format
+msgid "Agenda - %(brand_name)s"
+msgstr "Schedule - %(brand_name)s"
+
+msgid "Ver a agenda no Google Agenda"
+msgstr "View schedule in Google Calendar"
+
+#, python-format
+msgid "Pedidos dos alunos (%(pending_requests)s)"
+msgstr "Student requests (%(pending_requests)s)"
+
+#, python-format
+msgid "· aula de %(starts_at)s"
+msgstr "· class on %(starts_at)s"
+
+msgid "Quer cancelar"
+msgstr "Wants to cancel"
+
+msgid "Quer remarcar"
+msgstr "Wants to reschedule"
+
+#, python-format
+msgid "para <strong>%(proposed_starts_at)s</strong>"
+msgstr "to <strong>%(proposed_starts_at)s</strong>"
+
+msgid "Motivo, se recusar (opcional)"
+msgstr "Reason, if declining (optional)"
+
+msgid "Motivo, se recusar"
+msgstr "Reason, if declining"
+
+msgid "Aprovar"
+msgstr "Approve"
+
+msgid "Recusar"
+msgstr "Decline"
+
+msgid "Tipo de vista"
+msgstr "View type"
+
+msgid "Anterior"
+msgstr "Previous"
+
+msgid "F \\d\\e Y"
+msgstr "F Y"
+
+#, python-format
+msgid "%(items)s aula"
+msgid_plural "%(items)s aulas"
+msgstr[0] "%(items)s class"
+msgstr[1] "%(items)s classes"
+
+#, python-format
+msgid "Sem aulas em %(date)s."
+msgstr "No classes on %(date)s."
+
+msgid "Nova aula neste dia"
+msgstr "New class on this day"
+
+msgid "j \\d\\e F"
+msgstr "F j"
+
+msgid "Aulas sobrepostas"
+msgstr "Overlapping classes"
+
+msgid "Toque em um dia para ver as aulas dele."
+msgstr "Tap a day to see its classes."
+
+msgid "Arraste uma aula marcada para outro dia para mudá-la de lugar."
+msgstr "Drag a scheduled class to another day to move it."
+
+#, python-format
+msgid "Próximas aulas de %(month)s"
+msgstr "Upcoming classes in %(month)s"
+
+msgid "· hoje"
+msgstr "· today"
+
+#, python-format
+msgid "%(duration_minutes)s min"
+msgstr "%(duration_minutes)s min"
+
+msgid "Nenhuma aula de hoje em diante neste mês."
+msgstr "No classes from today onward this month."
+
+msgid "Sem aulas neste dia."
+msgstr "No classes on this day."
+
+#, python-format
+msgid "Nenhuma aula entre %(range_start)s e %(range_end)s. Use as setas para ver outros dias."
+msgstr "No classes between %(range_start)s and %(range_end)s. Use the arrows to see other days."
+
+msgid "Desfazer"
+msgstr "Undo"
+
+msgid "Fechar"
+msgstr "Close"
+
+msgid "Mover aula de"
+msgstr "Move class from"
+
+msgid "A aula atual fica como “Remarcada” e uma nova é marcada. Dá para desfazer logo depois."
+msgstr "The current class is marked “Rescheduled” and a new one is booked. You can undo it right afterward."
+
+msgid "Mais opções (tipo, observação)"
+msgstr "More options (type, notes)"
+
+#, python-format
+msgid "Feriados - %(brand_name)s"
+msgstr "Holidays - %(brand_name)s"
+
+msgid "Ao preencher a agenda de um pacote, os dias abaixo ficam sem aula e a próxima data entra no lugar. Na prévia você ainda pode marcar um feriado para dar aula mesmo assim."
+msgstr "When filling in a package's schedule, the days below are left without a class and the next date takes their place. In the preview you can still mark a holiday to hold the class anyway."
+
+msgid "Meus dias sem aula"
+msgstr "My no-class days"
+
+msgid "Feriado da sua cidade, dia em que o estúdio fecha, recesso."
+msgstr "A holiday in your city, a day the studio is closed, a break."
+
+msgid "Adicionar"
+msgstr "Add"
+
+msgid "D d/m/Y"
+msgstr "D m/d/Y"
+
+#, python-format
+msgid "Tirar %(name)s da lista?"
+msgstr "Remove %(name)s from the list?"
+
+msgid "Remover"
+msgstr "Remove"
+
+#, python-format
+msgid "Remover %(name)s"
+msgstr "Remove %(name)s"
+
+msgid "Nenhum dia adicionado."
+msgstr "No days added."
+
+#, python-format
+msgid "Dias que já passaram (%(past)s)"
+msgstr "Days already passed (%(past)s)"
+
+msgid "Feriados nacionais (próximos 12 meses)"
+msgstr "National holidays (next 12 months)"
+
+#, python-format
+msgid "Calculados pelo app (os que seguem a Páscoa mudam a cada ano). País: <strong>%(region)s</strong>; para trocar, defina <code>HOLIDAYS_REGION</code> (PT, BR ou vazio) no ambiente."
+msgstr "Calculated by the app (those that follow Easter change every year). Country: <strong>%(region)s</strong>; to change it, set <code>HOLIDAYS_REGION</code> (PT, BR or empty) in the environment."
+
+msgid "Nenhum país configurado: só os dias que você adicionar ficam sem aula. Para usar os feriados nacionais, defina <code>HOLIDAYS_REGION</code> (PT ou BR)."
+msgstr "No country configured: only the days you add are class-free. To use national holidays, set <code>HOLIDAYS_REGION</code> (PT or BR)."
+
+#, python-format
+msgid "%(title)s - %(brand_name)s"
+msgstr "%(title)s - %(brand_name)s"
+
+#, python-format
+msgid "Horário atual: <strong>%(starts_at)s</strong>. A aula original fica como \"remarcada\"."
+msgstr "Current time: <strong>%(starts_at)s</strong>. The original class stays as \"rescheduled\"."
+
+msgid "A primeira aula é na data escolhida; as outras seguem os dias marcados. Só vale para aulas do tipo \"Aula\"."
+msgstr "The first class is on the chosen date; the others follow the selected days. Only applies to classes of type \"Class\"."
+
+msgid "Salvar"
+msgstr "Save"
+
+msgid "Salvar avaliação"
+msgstr "Save assessment"
+
+#, python-format
+msgid "Google Agenda - %(brand_name)s"
+msgstr "Google Calendar - %(brand_name)s"
+
+msgid "Veja todas as suas aulas no Google Agenda do celular e do computador: o app gera um link só seu e o Google passa a mostrar as aulas como um calendário."
+msgstr "See all your classes in Google Calendar on your phone and computer: the app generates a link just for you and Google starts showing the classes as a calendar."
+
+msgid "Veja as suas aulas no Google Agenda do celular: o app gera um link só seu e o Google passa a mostrar suas aulas como um calendário."
+msgstr "See your classes in Google Calendar on your phone: the app generates a link just for you and Google starts showing your classes as a calendar."
+
+msgid "1. Copie o seu link"
+msgstr "1. Copy your link"
+
+msgid "Link do calendário"
+msgstr "Calendar link"
+
+msgid "Copiar"
+msgstr "Copy"
+
+msgid "Quem tiver este link vê"
+msgstr "Anyone with this link sees"
+
+msgid "a sua agenda"
+msgstr "your schedule"
+
+msgid "as suas aulas"
+msgstr "your classes"
+
+msgid ". Não envie a ninguém. Se vazar, gere um novo link abaixo."
+msgstr ". Don't send it to anyone. If it leaks, generate a new link below."
+
+msgid "2. Adicione no Google Agenda"
+msgstr "2. Add to Google Calendar"
+
+msgid "Abra <strong>Adicionar agenda por URL</strong> no Google Agenda (botão abaixo; é no computador, o celular usa as agendas da mesma conta)."
+msgstr "Open <strong>Add calendar by URL</strong> in Google Calendar (button below; this is on a computer, phones use the calendars from the same account)."
+
+msgid "Cole o link no campo <strong>URL da agenda</strong> e clique em <strong>Adicionar agenda</strong>."
+msgstr "Paste the link in the <strong>Calendar URL</strong> field and click <strong>Add calendar</strong>."
+
+msgid "Pronto: a agenda \""
+msgstr "Done: the calendar \""
+
+msgid "\" aparece em \"Outras agendas\" e no app do celular."
+msgstr "\" appears under \"Other calendars\" and in the phone app."
+
+msgid "Abrir o Google Agenda"
+msgstr "Open Google Calendar"
+
+msgid "Abrir em outro app de calendário"
+msgstr "Open in another calendar app"
+
+msgid "O Google busca o link de tempos em tempos (de algumas horas até cerca de um dia), então uma aula remarcada ou cancelada pode demorar a aparecer lá. Para o horário exato, confira sempre no app."
+msgstr "Google fetches the link from time to time (from every few hours to about a day), so a rescheduled or canceled class may take a while to show up there. For the exact time, always check in the app."
+
+msgid "Situação do link"
+msgstr "Link status"
+
+#, python-format
+msgid "O Google ou outro app buscou este link pela última vez em <strong>%(last_fetched_at)s</strong>."
+msgstr "Google or another app last fetched this link on <strong>%(last_fetched_at)s</strong>."
+
+msgid "Ainda ninguém buscou este link. Depois de adicionar no Google Agenda, volte aqui para conferir."
+msgstr "Nobody has fetched this link yet. After adding it to Google Calendar, come back here to check."
+
+#, python-format
+msgid "Link gerado de novo em %(rotated_at)s."
+msgstr "Link regenerated on %(rotated_at)s."
+
+msgid "Como os alunos aparecem no seu Google Agenda"
+msgstr "How students appear in your Google Calendar"
+
+msgid "Nome no título do evento"
+msgstr "Name in the event title"
+
+msgid "O Google (e quem mais tiver acesso à sua conta ou ao calendário compartilhado) vê esse título. A saúde, as anotações internas e os valores dos alunos <strong>nunca</strong> vão para o calendário."
+msgstr "Google (and anyone else with access to your account or the shared calendar) sees this title. Health details, internal notes and student payment amounts <strong>never</strong> go to the calendar."
+
+msgid "O que o Google recebe"
+msgstr "What Google receives"
+
+msgid "Só o <strong>dia, o horário e a duração</strong> das suas aulas, com o título \"Aula de treino\". Nada sobre saúde, treinos, pagamentos ou outros alunos. Você pode apagar a agenda no Google a qualquer momento ou gerar um novo link abaixo para cortar o acesso."
+msgstr "Only the <strong>day, time and duration</strong> of your classes, with the title \"Training class\". Nothing about health, workouts, payments or other students. You can delete the schedule in Google at any time or generate a new link below to cut off access."
+
+msgid "Link vazou ou quer trocar?"
+msgstr "Link leaked or want to change it?"
+
+msgid "O link atual para de funcionar na hora e você precisa adicionar o novo no Google Agenda."
+msgstr "The current link stops working immediately and you need to add the new one to Google Calendar."
+
+msgid "Gerar um novo link? O atual deixa de funcionar e a agenda que você adicionou no Google vai parar de atualizar."
+msgstr "Generate a new link? The current one will stop working and the calendar you added in Google will stop updating."
+
+msgid "Gerar novo link"
+msgstr "Generate new link"
+
+msgid "Copiado!"
+msgstr "Copied!"
+
+#, python-format
+msgid "Termos e privacidade - %(brand_name)s"
+msgstr "Terms and privacy - %(brand_name)s"
+
+msgid "Antes de começar"
+msgstr "Before you start"
+
+msgid "Para treinar com acompanhamento, precisamos do seu consentimento sobre como seus dados são usados. Leia a"
+msgstr "To train with guidance, we need your consent on how your data is used. Read the"
+
+msgid "política de privacidade"
+msgstr "privacy policy"
+
+#, python-format
+msgid "(texto versão %(version)s). Você pode pedir uma cópia ou a exclusão dos seus dados a qualquer momento."
+msgstr "(text version %(version)s). You can request a copy or deletion of your data at any time."
+
+msgid "(opcional)"
+msgstr "(optional)"
+
+msgid "Concordo e quero continuar"
+msgstr "I agree and want to continue"
+
+msgid "Não concorda? Sem esse consentimento não conseguimos manter seu acompanhamento. Você pode"
+msgstr "Disagree? Without this consent we can't keep up your training follow-up. You can"
+
+msgid "pedir a exclusão dos seus dados"
+msgstr "request deletion of your data"
+
+#, python-format
+msgid "%(exercise_name)s - %(brand_name)s"
+msgstr "%(exercise_name)s - %(brand_name)s"
+
+msgid "Aluno Ativo"
+msgid_plural "Alunos Ativos"
+msgstr[0] "Active Student"
+msgstr[1] "Active Students"
+
+msgid "Sessões Realizadas"
+msgid_plural "Sessões Realizadas"
+msgstr[0] "Sessions Completed"
+msgstr[1] "Sessions Completed"
+
+msgid "Execuções Completas"
+msgid_plural "Execuções Completas"
+msgstr[0] "Completed Execution"
+msgstr[1] "Completed Executions"
+
+msgid "Informações"
+msgstr "Information"
+
+msgid "Grupo Muscular:"
+msgstr "Muscle Group:"
+
+msgid "Padrão:"
+msgstr "Default:"
+
+msgid "Descrição:"
+msgstr "Description:"
+
+msgid "Treinos que incluem este exercício"
+msgstr "Workouts that include this exercise"
+
+#, python-format
+msgid "%(sets)s séries x %(reps)s reps"
+msgstr "%(sets)s sets x %(reps)s reps"
+
+#, python-format
+msgid "• %(rest_seconds)ss descanso"
+msgstr "• %(rest_seconds)ss rest"
+
+#, python-format
+msgid "Ordem: %(order)s"
+msgstr "Order: %(order)s"
+
+msgid "Sem imagem"
+msgstr "No image"
+
+msgid "Nome do Exercício *"
+msgstr "Exercise Name *"
+
+msgid "Ex: Supino Reto"
+msgstr "E.g., Bench Press"
+
+msgid "Grupo Muscular *"
+msgstr "Muscle Group *"
+
+msgid "Selecione..."
+msgstr "Select..."
+
+msgid "Breve descrição do exercício..."
+msgstr "Brief description of the exercise..."
+
+msgid "Séries Padrão *"
+msgstr "Default Sets *"
+
+msgid "Repetições Padrão *"
+msgstr "Default Reps *"
+
+msgid "Mídia do Exercício"
+msgstr "Exercise Media"
+
+msgid "Arquivo de Mídia"
+msgstr "Media File"
+
+msgid "Formatos aceitos: JPG, PNG, GIF, MP4"
+msgstr "Accepted formats: JPG, PNG, GIF, MP4"
+
+msgid "URL do YouTube, Vimeo ou link direto"
+msgstr "YouTube or Vimeo URL, or a direct link"
+
+msgid "Thumbnail (Miniatura)"
+msgstr "Thumbnail"
+
+msgid "Imagem de visualização (recomendado 400x300px)"
+msgstr "Preview image (recommended 400x300px)"
+
+msgid "Instruções de Execução"
+msgstr "Execution Instructions"
+
+msgid "Passo a passo"
+msgstr "Step by step"
+
+msgid "1. Posicione-se...&#10;2. Segure a barra...&#10;3. Execute o movimento..."
+msgstr "1. Get into position...&#10;2. Grip the bar...&#10;3. Perform the movement..."
+
+msgid "Exercício ativo (disponível para uso)"
+msgstr "Active exercise (available for use)"
+
+msgid "Salvar Exercício"
+msgstr "Save Exercise"
+
+msgid "Preview da Mídia"
+msgstr "Media Preview"
+
+msgid "Preview"
+msgstr "Preview"
+
+msgid "Nenhuma imagem"
+msgstr "No image"
+
+msgid "Informações do Registro"
+msgstr "Record Information"
+
+#, python-format
+msgid "<small class=\"text-muted d-block\">ID do Exercício</small> <strong>#%(pk)s</strong>"
+msgstr "<small class=\"text-muted d-block\">Exercise ID</small> <strong>#%(pk)s</strong>"
+
+#, python-format
+msgid "<small class=\"text-muted d-block\">Criado em</small> <strong>%(created_at)s</strong>"
+msgstr "<small class=\"text-muted d-block\">Created on</small> <strong>%(created_at)s</strong>"
+
+#, python-format
+msgid "<small class=\"text-muted d-block\">Última atualização</small> <strong>%(updated_at)s</strong>"
+msgstr "<small class=\"text-muted d-block\">Last updated</small> <strong>%(updated_at)s</strong>"
+
+#, python-format
+msgid "Exercícios - %(brand_name)s"
+msgstr "Exercises - %(brand_name)s"
+
+msgid "Novo Exercício"
+msgstr "New Exercise"
+
+msgid "Buscar Exercício"
+msgstr "Search Exercise"
+
+msgid "Digite o nome ou descrição..."
+msgstr "Type a name or description..."
+
+msgid "Todos os grupos"
+msgstr "All groups"
+
+msgid "Visualização"
+msgstr "View"
+
+msgid "Grade"
+msgstr "Grid"
+
+#, python-format
+msgid "Encontrados <strong>%(count)s</strong> exercício(s)"
+msgstr "Found <strong>%(count)s</strong> exercise(s)"
+
+#, python-format
+msgid "para \"<strong>%(search)s</strong>\""
+msgstr "for \"<strong>%(search)s</strong>\""
+
+#, python-format
+msgid "no grupo <strong>%(selected_muscle_group)s</strong>"
+msgstr "in the <strong>%(selected_muscle_group)s</strong> group"
+
+msgid "Ver"
+msgstr "View"
+
+msgid "Nenhum exercício encontrado com os filtros selecionados."
+msgstr "No exercises found with the selected filters."
+
+#, python-format
+msgid "%(default_sets)s séries x %(default_reps)s reps"
+msgstr "%(default_sets)s sets x %(default_reps)s reps"
+
+msgid "Ver Detalhes"
+msgstr "View Details"
+
+#, python-format
+msgid "%(exercise_name)s - Evolução"
+msgstr "%(exercise_name)s - Progress"
+
+#, python-format
+msgid "%(weight_used)s kg"
+msgstr "%(weight_used)s kg"
+
+#, python-format
+msgid "Recorde de carga · %(start_time)s"
+msgstr "Load record · %(start_time)s"
+
+msgid "Treinos com este exercício"
+msgstr "Workouts with this exercise"
+
+msgid "Carga por treino (série mais pesada)"
+msgstr "Weight per workout (heaviest set)"
+
+msgid "Últimos treinos"
+msgstr "Latest workouts"
+
+msgid "Séries feitas (carga × reps)"
+msgstr "Sets completed (load × reps)"
+
+#, python-format
+msgid "%(weight)skg"
+msgstr "%(weight)skg"
+
+msgid "Você ainda não registrou carga neste exercício."
+msgstr "You haven't logged a load for this exercise yet."
+
+#, python-format
+msgid "Financeiro - %(brand_name)s"
+msgstr "Finances - %(brand_name)s"
+
+msgid "Mês anterior"
+msgstr "Previous month"
+
+msgid "Próximo mês"
+msgstr "Next month"
+
+msgid "Mês atual"
+msgstr "Current month"
+
+msgid "Recebido no mês"
+msgstr "Received this month"
+
+#, python-format
+msgid "%(payments)s pagamento"
+msgid_plural "%(payments)s pagamentos"
+msgstr[0] "%(payments)s payment"
+msgstr[1] "%(payments)s payments"
+
+#, python-format
+msgid "− %(given_back)s devolvidos · líquido <strong>%(net)s</strong> ·"
+msgstr "− %(given_back)s refunded · net <strong>%(net)s</strong> ·"
+
+msgid "ver"
+msgstr "view"
+
+msgid "Pacotes vendidos no mês"
+msgstr "Packages sold this month"
+
+#, python-format
+msgid "%(sold_count)s pacote"
+msgid_plural "%(sold_count)s pacotes"
+msgstr[0] "%(sold_count)s package"
+msgstr[1] "%(sold_count)s packages"
+
+#, python-format
+msgid "· %(sold_unpriced)s sem valor definido"
+msgstr "· %(sold_unpriced)s with no amount set"
+
+msgid "A receber agora"
+msgstr "Due now"
+
+#, python-format
+msgid "%(pending)s pacote sem pagamento completo (primeira aula dada ou valor alterado)"
+msgid_plural "%(pending)s pacotes sem pagamento completo (primeira aula dada ou valor alterado)"
+msgstr[0] "%(pending)s package without full payment (first class given or price changed)"
+msgstr[1] "%(pending)s packages without full payment (first class given or price changed)"
+
+#, python-format
+msgid "− %(refunds_due_total)s a devolver · saldo <strong>%(balance_total)s</strong>"
+msgstr "− %(refunds_due_total)s refund due · balance <strong>%(balance_total)s</strong>"
+
+msgid "Aulas dadas no mês (valor realizado)"
+msgstr "Classes held this month (realized value)"
+
+#, python-format
+msgid "%(given_classes)s aula descontada dos pacotes"
+msgid_plural "%(given_classes)s aulas descontadas dos pacotes"
+msgstr[0] "%(given_classes)s class deducted from packages"
+msgstr[1] "%(given_classes)s classes deducted from packages"
+
+#, python-format
+msgid "· %(given_unpriced)s de pacote sem valor"
+msgstr "· %(given_unpriced)s from packages with no amount"
+
+#, python-format
+msgid "%(classes)s aula · %(amount)s"
+msgid_plural "%(classes)s aulas · %(amount)s"
+msgstr[0] "%(classes)s class · %(amount)s"
+msgstr[1] "%(classes)s classes · %(amount)s"
+
+msgid "Aulas a executar (pacotes em aberto, hoje)"
+msgstr "Classes still to deliver (open packages, today)"
+
+#, python-format
+msgid "%(owed_classes)s aula ainda não dada"
+msgid_plural "%(owed_classes)s aulas ainda não dadas"
+msgstr[0] "%(owed_classes)s class not yet given"
+msgstr[1] "%(owed_classes)s classes not yet given"
+
+#, python-format
+msgid "· %(owed_unpriced)s de pacote sem valor"
+msgstr "· %(owed_unpriced)s from packages with no amount"
+
+#, python-format
+msgid "%(left)s aula · %(amount)s"
+msgid_plural "%(left)s aulas · %(amount)s"
+msgstr[0] "%(left)s class · %(amount)s"
+msgstr[1] "%(left)s classes · %(amount)s"
+
+msgid "Pagamentos pendentes"
+msgstr "Pending payments"
+
+#, python-format
+msgid "%(name)s · pago %(paid)s, valor do pacote alterado · falta %(amount)s"
+msgstr "%(name)s · paid %(paid)s, package price changed · %(amount)s remaining"
+
+#, python-format
+msgid "%(name)s · primeira aula em %(due)s · %(days)s dia · %(amount)s"
+msgid_plural "%(name)s · primeira aula em %(due)s · %(days)s dias · %(amount)s"
+msgstr[0] "%(name)s · first class on %(due)s · %(days)s day · %(amount)s"
+msgstr[1] "%(name)s · first class on %(due)s · %(days)s days · %(amount)s"
+
+msgid "Cobrar pelo WhatsApp"
+msgstr "Charge via WhatsApp"
+
+msgid "Registrar"
+msgstr "Log"
+
+msgid "pago a mais"
+msgstr "overpaid"
+
+msgid "pacote cancelado"
+msgstr "package canceled"
+
+#, python-format
+msgid "· <strong class=\"text-body\">− %(suggested)s</strong> a devolver"
+msgstr "· <strong class=\"text-body\">− %(suggested)s</strong> refund due"
+
+msgid "Devolver"
+msgstr "Refund"
+
+msgid "Nenhum pagamento pendente."
+msgstr "No pending payments."
+
+msgid "Pacotes para renovar"
+msgstr "Packages to renew"
+
+#, python-format
+msgid "venceu, %(left)s aula sobrando"
+msgid_plural "venceu, %(left)s aulas sobrando"
+msgstr[0] "expired, %(left)s class left over"
+msgstr[1] "expired, %(left)s classes left over"
+
+#, python-format
+msgid "vence %(ends_on)s"
+msgstr "expires %(ends_on)s"
+
+#, python-format
+msgid "restam %(left)s aula"
+msgid_plural "restam %(left)s aulas"
+msgstr[0] "%(left)s class left"
+msgstr[1] "%(left)s classes left"
+
+msgid "Nenhum pacote precisando de atenção."
+msgstr "No packages needing attention."
+
+msgid "Por forma de pagamento"
+msgstr "By payment method"
+
+msgid "Nada recebido neste mês."
+msgstr "Nothing received this month."
+
+msgid "Pagamentos do mês"
+msgstr "Payments this month"
+
+msgid "Exportar CSV"
+msgstr "Export CSV"
+
+msgid "Nenhum pagamento neste mês."
+msgstr "No payments this month."
+
+#, python-format
+msgid "Devoluções e ajustes - %(brand_name)s"
+msgstr "Refunds and adjustments - %(brand_name)s"
+
+msgid "Aqui ficam o dinheiro que voltou para os alunos e os lançamentos errados desfeitos. Um pagamento nunca é editado nem apagado para corrigir o dinheiro: cria-se um lançamento novo, ligado ao pagamento, e os totais são somados. Quem erra uma devolução a anula (ela continua registrada)."
+msgstr "This is where money returned to students and reversed incorrect entries are kept. A payment is never edited or deleted to fix the money: a new entry is created, linked to the payment, and the totals are added up. If you make a mistake on a refund, void it (it stays on record)."
+
+msgid "Devolvido"
+msgstr "Refunded"
+
+msgid "Estornado"
+msgstr "Reversed"
+
+msgid "Líquido no mês"
+msgstr "Net for the month"
+
+msgid "A devolver"
+msgstr "Refund due"
+
+msgid "· pacotes cancelados em que o pago passa das aulas dadas e pacotes pagos acima do valor"
+msgstr "· canceled packages where the amount paid exceeds the classes given, and packages paid above their price"
+
+#, python-format
+msgid "%(name)s · valor do pacote %(price)s · pago %(paid)s"
+msgstr "%(name)s · package price %(price)s · paid %(paid)s"
+
+#, python-format
+msgid "%(name)s · cancelado · pago %(paid)s · %(used)s aula dada"
+msgid_plural "%(name)s · cancelado · pago %(paid)s · %(used)s aulas dadas"
+msgstr[0] "%(name)s · canceled · paid %(paid)s · %(used)s class given"
+msgstr[1] "%(name)s · canceled · paid %(paid)s · %(used)s classes given"
+
+msgid "Filtrar por aluno..."
+msgstr "Filter by student..."
+
+msgid "Filtrar"
+msgstr "Filter"
+
+msgid "Lançamentos do mês"
+msgstr "Entries this month"
+
+msgid "anulada"
+msgstr "voided"
+
+#, python-format
+msgid "Anulada: %(voided_reason)s"
+msgstr "Voided: %(voided_reason)s"
+
+msgid "resumo"
+msgstr "summary"
+
+msgid "Anular"
+msgstr "Void"
+
+msgid "Motivo da anulação"
+msgstr "Reason for voiding"
+
+msgid "Nenhuma devolução ou estorno neste mês."
+msgstr "No refunds or reversals this month."
+
+msgid "Para devolver, abra o aluno → Pagamentos → <em>Devolver ou estornar</em>, ou cancele o pacote na ficha (o cálculo vem pronto)."
+msgstr "To refund, open the student → Payments → <em>Refund or reverse</em>, or cancel the package on the profile (the calculation is ready for you)."
+
+#, python-format
+msgid "Home - %(brand_name)s"
+msgstr "Home - %(brand_name)s"
+
+msgid "Painel de hoje"
+msgstr "Today's dashboard"
+
+msgid "Quem precisa da sua atenção"
+msgstr "Who needs your attention"
+
+msgid "Primeiros passos"
+msgstr "Getting started"
+
+#, python-format
+msgid "%(done)s de %(total)s concluídos. Faça nesta ordem e o app fica pronto para o primeiro aluno."
+msgstr "%(done)s of %(total)s completed. Do them in this order and the app will be ready for your first student."
+
+msgid "Dispensar os primeiros passos"
+msgstr "Dismiss the first steps"
+
+msgid "Dispensar"
+msgstr "Dismiss"
+
+msgid "Alunos ativos"
+msgstr "Active students"
+
+msgid "Fichas em andamento"
+msgstr "Workout plans in progress"
+
+msgid "Treinos (7 dias)"
+msgstr "Workouts (7 days)"
+
+msgid "Sem treinar há mais de 7 dias"
+msgstr "Hasn't trained in over 7 days"
+
+#, python-format
+msgid "último treino %(last_session_at)s (%(days)s dias)"
+msgstr "last workout %(last_session_at)s (%(days)s days)"
+
+msgid "nunca treinou"
+msgstr "never worked out"
+
+msgid "Todo mundo está em dia."
+msgstr "Everyone is up to date."
+
+#, python-format
+msgid "e mais %(inactive_more)s — veja a lista de alunos"
+msgstr "and %(inactive_more)s more — see the students list"
+
+msgid "Aulas de hoje"
+msgstr "Today's classes"
+
+msgid "abrir a agenda"
+msgstr "open the schedule"
+
+msgid "Nenhuma aula marcada para hoje."
+msgstr "No classes scheduled for today."
+
+#, python-format
+msgid "(pago %(paid)s)"
+msgstr "(paid %(paid)s)"
+
+#, python-format
+msgid "e mais %(overdue_more)s — veja o financeiro"
+msgstr "and %(overdue_more)s more — see finances"
+
+#, python-format
+msgid "%(name)s · <strong class=\"text-body\">− %(suggested)s</strong> a devolver"
+msgstr "%(name)s · <strong class=\"text-body\">− %(suggested)s</strong> refund due"
+
+#, python-format
+msgid "e mais %(refunds_due_more)s a devolver — veja o financeiro"
+msgstr "and %(refunds_due_more)s refund due — see finances"
+
+msgid "Faltas dos últimos 7 dias"
+msgstr "Absences in the last 7 days"
+
+msgid "Mensagem pelo WhatsApp"
+msgstr "WhatsApp message"
+
+msgid "Pedidos de exclusão de dados"
+msgstr "Data deletion requests"
+
+#, python-format
+msgid "pediu em %(at)s · abrir a exclusão"
+msgstr "requested on %(at)s · open the deletion request"
+
+msgid "Experimental há mais de 14 dias"
+msgstr "Trial for more than 14 days"
+
+#, python-format
+msgid "%(days)s dias · decidir se vira aluno ativo"
+msgstr "%(days)s days · decide whether to make them an active student"
+
+msgid "Aguardando convite"
+msgstr "Waiting for invitation"
+
+#, python-format
+msgid "cadastrado há %(days)s dia · ainda não criou a senha"
+msgid_plural "cadastrado há %(days)s dias · ainda não criou a senha"
+msgstr[0] "registered %(days)s day ago · hasn't created a password yet"
+msgstr[1] "registered %(days)s days ago · hasn't created a password yet"
+
+#, python-format
+msgid "e mais %(invites_more)s — veja a lista de alunos"
+msgstr "and %(invites_more)s more — see the students list"
+
+msgid "Fichas terminando (14 dias)"
+msgstr "Workout plans ending (14 days)"
+
+#, python-format
+msgid "até %(end_date)s"
+msgstr "until %(end_date)s"
+
+msgid "Nenhuma ficha terminando."
+msgstr "No workout plans ending."
+
+msgid "Treinos de hoje"
+msgstr "Today's workouts"
+
+msgid "em andamento"
+msgstr "in progress"
+
+msgid "Ninguém treinou ainda hoje."
+msgstr "No one has trained yet today."
+
+msgid "Comentários dos alunos (7 dias)"
+msgstr "Student comments (7 days)"
+
+msgid "Nenhum comentário nos últimos dias."
+msgstr "No comments in the last few days."
+
+msgid "Muscle Track"
+msgstr "Muscle Track"
+
+msgid "Sua conta ainda não está vinculada a um aluno. Fale com a sua personal trainer."
+msgstr "Your account isn't linked to a student yet. Talk to your trainer."
+
+#, python-format
+msgid "%(brand_name)s - Gestão para personal trainers, com o aluno por dentro"
+msgstr "%(brand_name)s - Management for personal trainers, keeping students in the loop"
+
+msgid "Gestão para personal trainers: alunos, treinos, agenda, pacotes e pagamentos num só lugar, e cada aluno acompanha o próprio treino, a evolução e as aulas pelo celular."
+msgstr "Management for personal trainers: students, workouts, schedule, packages, and payments in one place, and each student follows their own workout, progress, and classes on their phone."
+
+msgid "Acesso por convite da sua personal"
+msgstr "Access by invitation from your trainer"
+
+msgid "Sua rotina de personal,"
+msgstr "Your trainer routine,"
+
+msgid "organizada."
+msgstr "organized."
+
+msgid "Seus alunos, sempre por dentro."
+msgstr "Your students, always in the loop."
+
+msgid "Controle fichas de treino, aulas e pacotes, e deixe cada aluno acompanhar o próprio treino, a evolução e a agenda."
+msgstr "Manage workout plans, classes and packages, and let each student follow their own workouts, progress and schedule."
+
+msgid "Como funciona"
+msgstr "How it works"
+
+msgid "Instala como app"
+msgstr "Installs as an app"
+
+msgid "Modo escuro"
+msgstr "Dark mode"
+
+msgid "Dados privados (LGPD)"
+msgstr "Private data (LGPD)"
+
+msgid "Uma ferramenta para a personal, um app para o aluno"
+msgstr "One tool for the trainer, one app for the student"
+
+msgid "Os dois lados enxergam a mesma informação, cada um do seu jeito."
+msgstr "Both sides see the same information, each in their own way."
+
+msgid "Para a personal"
+msgstr "For the trainer"
+
+msgid "Painel “Hoje”: quem precisa de atenção, faltas e pagamentos pendentes"
+msgstr "“Today” dashboard: who needs attention, absences and pending payments"
+
+msgid "Fichas de treino, modelos e exercícios com vídeo"
+msgstr "Workout plans, templates, and exercises with video"
+
+msgid "Agenda com horários fixos, feriados e remarcação"
+msgstr "Schedule with fixed time slots, holidays, and rescheduling"
+
+msgid "Pacotes de aulas, pagamentos e devoluções"
+msgstr "Class packages, payments and refunds"
+
+msgid "Avaliações com medidas e fotos, e lembretes por WhatsApp"
+msgstr "Assessments with measurements and photos, and WhatsApp reminders"
+
+msgid "Para o aluno"
+msgstr "For the student"
+
+msgid "Treino do dia com cronômetro, séries e cargas"
+msgstr "Today's workout with timer, sets and loads"
+
+msgid "Minha evolução: medidas, gráficos e fotos lado a lado"
+msgstr "My progress: measurements, charts and side-by-side photos"
+
+msgid "Agenda e pedido de remarcação em um toque"
+msgstr "Schedule and reschedule requests in one tap"
+
+msgid "Meu pacote: aulas feitas, restantes e validade"
+msgstr "My package: classes taken, remaining, and expiration"
+
+msgid "Lembretes de aula e de pacote acabando"
+msgstr "Class and expiring package reminders"
+
+msgid "Treino B · Costas e bíceps"
+msgstr "Workout B · Back and biceps"
+
+msgid "Tempo"
+msgstr "Time"
+
+msgid "Remada curvada"
+msgstr "Bent-over row"
+
+msgid "4 × 10 · 30 kg"
+msgstr "4 × 10 · 30 kg"
+
+msgid "Puxada frontal"
+msgstr "Lat pulldown"
+
+msgid "4 × 12 · 45 kg"
+msgstr "4 × 12 · 45 kg"
+
+msgid "Rosca direta"
+msgstr "Barbell curl"
+
+msgid "3 × 12 · 12 kg"
+msgstr "3 × 12 · 12 kg"
+
+msgid "Como começar"
+msgstr "Getting started"
+
+msgid "O acesso é criado pela personal trainer, por isso não há cadastro aberto."
+msgstr "Access is created by the trainer, so there is no open sign-up."
+
+msgid "A personal cadastra o aluno"
+msgstr "The trainer registers the student"
+
+msgid "Ficha, treino, agenda e pacote ficam prontos antes do primeiro acesso."
+msgstr "Profile, workout, schedule, and package are ready before the first login."
+
+msgid "O aluno recebe o convite e cria a senha"
+msgstr "The student receives the invitation and creates a password"
+
+msgid "Pelo WhatsApp ou e-mail."
+msgstr "By WhatsApp or email."
+
+msgid "Depois, pode entrar também com"
+msgstr "Afterward, you can also sign in with"
+
+msgid "ou"
+msgstr "or"
+
+msgid "Os dois acompanham tudo"
+msgstr "Both follow everything"
+
+msgid "Instale na tela inicial do celular e abra o treino do dia em um toque."
+msgstr "Install it on your phone's home screen and open the day's workout in one tap."
+
+#, python-format
+msgid "Minha agenda - %(brand_name)s"
+msgstr "My schedule - %(brand_name)s"
+
+msgid "Pacote sem prazo: vale até você usar todas as aulas."
+msgstr "No-expiration package: valid until you use all the classes."
+
+#, python-format
+msgid "Vale até %(ends_on)s"
+msgstr "Valid until %(ends_on)s"
+
+msgid "(congelado)"
+msgstr "(frozen)"
+
+#, python-format
+msgid "O prazo de %(valid_days)s dias começa na sua primeira aula."
+msgstr "The %(valid_days)s-day validity period starts on your first class."
+
+msgid "Próximas aulas"
+msgstr "Upcoming classes"
+
+#, python-format
+msgid "%(starts_at)s · %(duration_minutes)s min"
+msgstr "%(starts_at)s · %(duration_minutes)s min"
+
+msgid "Você pediu para <strong>cancelar</strong> esta aula."
+msgstr "You asked to <strong>cancel</strong> this class."
+
+#, python-format
+msgid "Você pediu para remarcar para <strong>%(proposed_starts_at)s</strong>."
+msgstr "You asked to reschedule to <strong>%(proposed_starts_at)s</strong>."
+
+msgid "Aguardando a sua personal."
+msgstr "Waiting for your trainer."
+
+msgid "Retirar pedido"
+msgstr "Withdraw request"
+
+msgid "Sua personal recusou o último pedido"
+msgstr "Your trainer declined your last request"
+
+msgid "Você não tem aulas marcadas nos próximos dias. Quando a sua personal marcar, elas aparecem aqui."
+msgstr "You have no classes scheduled in the coming days. When your trainer schedules them, they will appear here."
+
+#, python-format
+msgid "Pedidos pelo app: até %(notice_hours)s hora antes da aula. Depois disso, fale direto com a sua personal. Faltar ou cancelar com menos de %(notice_hours)s h conta como aula dada no pacote."
+msgid_plural "Pedidos pelo app: até %(notice_hours)s horas antes da aula. Depois disso, fale direto com a sua personal. Faltar ou cancelar com menos de %(notice_hours)s h conta como aula dada no pacote."
+msgstr[0] "App requests: up to %(notice_hours)s hour before the class. After that, talk to your trainer directly. Missing or canceling less than %(notice_hours)s h ahead counts as a class given in the package."
+msgstr[1] "App requests: up to %(notice_hours)s hours before the class. After that, talk to your trainer directly. Missing or canceling less than %(notice_hours)s h ahead counts as a class given in the package."
+
+msgid "Últimos 30 dias"
+msgstr "Last 30 days"
+
+msgid "D, d/m"
+msgstr "D, m/d"
+
+#, python-format
+msgid "Aula de <strong>%(starts_at)s</strong> às <strong>%(starts_at2)s</strong>."
+msgstr "Class from <strong>%(starts_at)s</strong> to <strong>%(starts_at2)s</strong>."
+
+msgid "A sua personal confirma se o novo horário está livre."
+msgstr "Your trainer will confirm whether the new time is free."
+
+msgid "Enviar pedido"
+msgstr "Send request"
+
+#, python-format
+msgid "Minha evolução - %(brand_name)s"
+msgstr "My progress - %(brand_name)s"
+
+msgid "Evolução"
+msgstr "Progress"
+
+#, python-format
+msgid "IMC %(bmi)s"
+msgstr "BMI %(bmi)s"
+
+msgid "Sem medidas nesta avaliação."
+msgstr "No measurements in this assessment."
+
+msgid "Ainda não há avaliações registradas. Quando a sua personal fizer a primeira, as medidas e as fotos aparecem aqui."
+msgstr "No assessments recorded yet. When your trainer does the first one, the measurements and photos will appear here."
+
+msgid "Outras fotos"
+msgstr "Other photos"
+
+msgid "Remover esta foto?"
+msgstr "Remove this photo?"
+
+#, python-format
+msgid "Remover a foto de %(date)s"
+msgstr "Remove the photo from %(date)s"
+
+msgid "As fotos são privadas: só você e a sua personal conseguem abri-las."
+msgstr "Photos are private: only you and your trainer can open them."
+
+#, python-format
+msgid "Meu Histórico - %(brand_name)s"
+msgstr "My History - %(brand_name)s"
+
+msgid "Meu Histórico de Treinos"
+msgstr "My Workout History"
+
+msgid "Sessões Concluídas (últimas 20)"
+msgstr "Completed Sessions (last 20)"
+
+msgid "Duração"
+msgstr "Duration"
+
+msgid "Total de Treinos"
+msgstr "Total Workouts"
+
+msgid "Treinos/Semana (aprox.)"
+msgstr "Workouts/Week (approx.)"
+
+msgid "Treinos Atribuídos"
+msgstr "Assigned Workouts"
+
+msgid "Você ainda não concluiu nenhum treino."
+msgstr "You haven't completed any workouts yet."
+
+msgid "Iniciar Treino Agora"
+msgstr "Start Workout Now"
+
+msgid "Meus Recordes de Carga"
+msgstr "My Weight Records"
+
+msgid "Recorde"
+msgstr "Record"
+
+msgid "Último"
+msgstr "Last"
+
+#, python-format
+msgid "%(best)s kg"
+msgstr "%(best)s kg"
+
+msgid "Evolução de Treinos"
+msgstr "Workout Progress"
+
+msgid "Duração (minutos)"
+msgstr "Duration (minutes)"
+
+msgid "Carga Média (kg)"
+msgstr "Average Weight (kg)"
+
+msgid "Data da Sessão"
+msgstr "Session Date"
+
+msgid "Treino:"
+msgstr "Workout:"
+
+msgid "min"
+msgstr "min"
+
+#, python-format
+msgid "Como usar o app - %(brand_name)s"
+msgstr "How to use the app - %(brand_name)s"
+
+msgid "Três coisas para fazer o treino render. Dá menos de um minuto."
+msgstr "Three things to make your workouts count. Takes less than a minute."
+
+msgid "Entendi, vamos treinar"
+msgstr "Got it, let's train"
+
+#, python-format
+msgid "Meu pacote - %(brand_name)s"
+msgstr "My package - %(brand_name)s"
+
+msgid "Você ainda não tem um pacote de aulas registrado. Fale com a sua personal para combinar."
+msgstr "You don't have a class package registered yet. Talk to your trainer to set one up."
+
+msgid "Você não tem um pacote em andamento. Fale com a sua personal para renovar."
+msgstr "You don't have a package in progress. Talk to your trainer to renew."
+
+#, python-format
+msgid "%(without_package)s aula dada sem pacote para descontar. Combine com a sua personal."
+msgid_plural "%(without_package)s aulas dadas sem pacote para descontar. Combine com a sua personal."
+msgstr[0] "%(without_package)s class given without a package to deduct from. Work it out with your trainer."
+msgstr[1] "%(without_package)s classes given without a package to deduct from. Work it out with your trainer."
+
+msgid "Pacotes anteriores"
+msgstr "Previous packages"
+
+#, python-format
+msgid "Enviar foto - %(brand_name)s"
+msgstr "Upload photo - %(brand_name)s"
+
+msgid "Para guardar fotos, autorize o registro de fotos de evolução. Elas ficam privadas: só você e a sua personal conseguem vê-las, e você pode retirar a autorização quando quiser."
+msgstr "To save photos, authorize recording progress photos. They stay private: only you and your trainer can see them, and you can withdraw the authorization at any time."
+
+msgid "Autorizar fotos"
+msgstr "Authorize photos"
+
+msgid "Tirar foto"
+msgstr "Take photo"
+
+msgid "Escolher da galeria"
+msgstr "Choose from gallery"
+
+msgid "Capturar"
+msgstr "Capture"
+
+msgid "Pré-visualização da foto"
+msgstr "Photo preview"
+
+msgid "JPG, PNG ou WebP. A foto é privada (só você e a sua personal abrem) e é guardada sem localização nem dados do aparelho."
+msgstr "JPG, PNG, or WebP. The photo is private (only you and your trainer can open it) and is stored without location or device data."
+
+#, python-format
+msgid "Privacidade e meus dados - %(brand_name)s"
+msgstr "Privacy and my data - %(brand_name)s"
+
+msgid "Meus consentimentos"
+msgstr "My consents"
+
+msgid "(obrigatório)"
+msgstr "(required)"
+
+msgid "Retirar"
+msgstr "Withdraw"
+
+msgid "Autorizar"
+msgstr "Authorize"
+
+msgid "ok"
+msgstr "OK"
+
+msgid "pendente"
+msgstr "pending"
+
+msgid "Ler a política de privacidade"
+msgstr "Read the privacy policy"
+
+msgid "Baixar meus dados"
+msgstr "Download my data"
+
+msgid "Um arquivo ZIP com seus dados, avaliações, treinos, fotos e consentimentos."
+msgstr "A ZIP file with your data, assessments, workouts, photos and consents."
+
+msgid "Baixar"
+msgstr "Download"
+
+msgid "Excluir meus dados"
+msgstr "Delete my data"
+
+msgid "Pedido enviado. Sua personal vai apagar seus dados."
+msgstr "Request sent. Your trainer will delete your data."
+
+msgid "Sua personal apaga sua conta, treinos, avaliações e fotos definitivamente."
+msgstr "Your trainer permanently deletes your account, workouts, assessments and photos."
+
+#, python-format
+msgid "Se preferir, escreva para %(contact_email)s."
+msgstr "If you prefer, write to %(contact_email)s."
+
+msgid "Pedir a exclusão de todos os meus dados?"
+msgstr "Request deletion of all my data?"
+
+msgid "Pedir exclusão"
+msgstr "Request deletion"
+
+msgid "Atalhos da minha conta"
+msgstr "My account shortcuts"
+
+msgid "<strong class=\"d-block\">Minha agenda</strong><small class=\"text-muted\">Próximas aulas e pedidos</small>"
+msgstr "<strong class=\"d-block\">My schedule</strong><small class=\"text-muted\">Upcoming classes and requests</small>"
+
+msgid "<strong class=\"d-block\">Notificações</strong><small class=\"text-muted\">Avisos por e-mail e no aparelho</small>"
+msgstr "<strong class=\"d-block\">Notifications</strong><small class=\"text-muted\">Email and device alerts</small>"
+
+msgid "<strong class=\"d-block\">Minha evolução</strong><small class=\"text-muted\">Medidas, fotos e comparação</small>"
+msgstr "<strong class=\"d-block\">My progress</strong><small class=\"text-muted\">Measurements, photos, and comparison</small>"
+
+msgid "<strong class=\"d-block\">Meu pacote</strong><small class=\"text-muted\">Aulas feitas, canceladas e saldo</small>"
+msgstr "<strong class=\"d-block\">My package</strong><small class=\"text-muted\">Classes taken, canceled, and balance</small>"
+
+msgid "<strong class=\"d-block\">Google Agenda</strong><small class=\"text-muted\">Minhas aulas no Google</small>"
+msgstr "<strong class=\"d-block\">Google Calendar</strong><small class=\"text-muted\">My classes on Google</small>"
+
+msgid "<strong class=\"d-block\">Como usar o app</strong><small class=\"text-muted\">Séries, descanso e observações</small>"
+msgstr "<strong class=\"d-block\">How to use the app</strong><small class=\"text-muted\">Sets, rest, and notes</small>"
+
+msgid "<strong class=\"d-block\">Privacidade e meus dados</strong><small class=\"text-muted\">Consentimentos, cópia e exclusão</small>"
+msgstr "<strong class=\"d-block\">Privacy and my data</strong><small class=\"text-muted\">Consents, copy, and deletion</small>"
+
+msgid "Meus dados"
+msgstr "My data"
+
+msgid "Avatar"
+msgstr "Avatar"
+
+msgid "Avatar padrão"
+msgstr "Default avatar"
+
+msgid "Formatos: JPG, PNG, GIF, WEBP | Tamanho máx: 5MB | Dimensões: 100x100px a 2000x2000px"
+msgstr "Formats: JPG, PNG, GIF, WEBP | Max size: 5MB | Dimensions: 100x100px to 2000x2000px"
+
+msgid "O email não pode ser alterado. Entre em contato com o administrador se precisar alterá-lo."
+msgstr "Email can't be changed. Contact the administrator if you need to change it."
+
+msgid "Metas e motivação"
+msgstr "Goals and motivation"
+
+msgid "Salvar Alterações"
+msgstr "Save Changes"
+
+msgid "Conta"
+msgstr "Account"
+
+#, python-format
+msgid "Meus Treinos - %(brand_name)s"
+msgstr "My Workouts - %(brand_name)s"
+
+msgid "Meus Treinos Ativos"
+msgstr "My Active Workouts"
+
+msgid "Sessão em andamento"
+msgstr "Session in progress"
+
+#, python-format
+msgid "Iniciada em %(start_time)s"
+msgstr "Started at %(start_time)s"
+
+msgid "Ver exercícios"
+msgstr "View exercises"
+
+#, python-format
+msgid "%(estimated_duration)s min"
+msgstr "%(estimated_duration)s min"
+
+msgid "Continuar Treino"
+msgstr "Continue Workout"
+
+msgid "Iniciar Treino"
+msgstr "Start Workout"
+
+msgid "Close"
+msgstr "Close"
+
+#, python-format
+msgid "%(sets)s séries"
+msgstr "%(sets)s sets"
+
+#, python-format
+msgid "%(reps)s reps"
+msgstr "%(reps)s reps"
+
+msgid "Última execução:"
+msgstr "Last run:"
+
+#, python-format
+msgid "Carga: %(weight_used)s kg"
+msgstr "Weight: %(weight_used)s kg"
+
+msgid "Nenhum exercício cadastrado para este treino."
+msgstr "No exercises registered for this workout."
+
+msgid "Você não possui treinos ativos no momento. Entre em contato com seu instrutor para receber um plano de treino."
+msgstr "You have no active workouts right now. Contact your trainer to get a workout plan."
+
+#, python-format
+msgid "Notificações - %(brand_name)s"
+msgstr "Notifications - %(brand_name)s"
+
+msgid "Avisos"
+msgstr "Notifications"
+
+msgid "Mensagens do WhatsApp"
+msgstr "WhatsApp messages"
+
+msgid "Receba um aviso quando um aluno pedir para remarcar ou cancelar uma aula."
+msgstr "Get notified when a student asks to reschedule or cancel a class."
+
+msgid "Receba um aviso quando sua personal remarcar ou cancelar uma aula, quando ela responder a um pedido seu, um lembrete antes da aula e quando o plano estiver vencendo."
+msgstr "Get notified when your trainer reschedules or cancels a class, when she replies to one of your requests, a reminder before class, and when your plan is about to expire."
+
+msgid "Tudo começa <strong>desligado</strong>: você escolhe o que quer receber e pode desligar quando quiser. Os avisos não trazem dados de saúde nem valores."
+msgstr "Everything starts <strong>off</strong>: you choose what you want to receive and can turn it off whenever you like. Notifications never include health data or amounts."
+
+msgid "Avisos por e-mail"
+msgstr "Email notifications"
+
+msgid "(sem e-mail cadastrado)"
+msgstr "(no e-mail registered)"
+
+#, python-format
+msgid "Enviados para <strong>%(email)s</strong>."
+msgstr "Sent to <strong>%(email)s</strong>."
+
+#, python-format
+msgid "Ativado em %(email_at)s."
+msgstr "Enabled on %(email_at)s."
+
+msgid "Avisos no aparelho (push)"
+msgstr "Device notifications (push)"
+
+msgid "Aparecem como notificação do celular ou do computador, mesmo com o app fechado."
+msgstr "They appear as a phone or computer notification, even with the app closed."
+
+#, python-format
+msgid "Ativado em %(push_at)s."
+msgstr "Enabled on %(push_at)s."
+
+msgid "Ainda não foi configurado no servidor."
+msgstr "Not configured on the server yet."
+
+msgid "Quero receber"
+msgstr "I want to receive"
+
+msgid "Pedidos de remarcação e cancelamento dos alunos"
+msgstr "Student reschedule and cancellation requests"
+
+msgid "Mudanças nas minhas aulas e respostas aos meus pedidos"
+msgstr "Changes to my classes and replies to my requests"
+
+msgid "Pacotes de alunos acabando ou vencendo"
+msgstr "Student packages running out or expiring"
+
+#, python-format
+msgid "Lembrete de aula (cerca de %(reminder_hours)s hora antes)"
+msgid_plural "Lembrete de aula (cerca de %(reminder_hours)s horas antes)"
+msgstr[0] "Class reminder (about %(reminder_hours)s hour before)"
+msgstr[1] "Class reminder (about %(reminder_hours)s hours before)"
+
+msgid "Aviso quando o meu pacote estiver acabando ou vencendo"
+msgstr "Notify me when my package is running out or expiring"
+
+msgid "Vale para os dois canais acima: só chega o que estiver marcado aqui e em um canal ligado."
+msgstr "Applies to both channels above: you only receive what is checked here and on an enabled channel."
+
+msgid "Aparelhos que recebem avisos"
+msgstr "Devices that receive alerts"
+
+#, python-format
+msgid "· desde %(created_at)s"
+msgstr "· since %(created_at)s"
+
+msgid "Nenhum aparelho ainda."
+msgstr "No devices yet."
+
+msgid "Ativar neste aparelho"
+msgstr "Enable on this device"
+
+msgid "No iPhone, os avisos só funcionam depois de adicionar o app à tela de início (Compartilhar → Adicionar à Tela de Início)."
+msgstr "On iPhone, notifications only work after you add the app to your Home Screen (Share → Add to Home Screen)."
+
+msgid "Enviar um teste:"
+msgstr "Send a test:"
+
+msgid "Últimos envios"
+msgstr "Latest uploads"
+
+msgid "aparelho"
+msgstr "device"
+
+#, python-brace-format
+msgid "Estes são os textos que já vão prontos quando você toca no ícone do WhatsApp. Mude à vontade: as palavras entre chaves, como <code>{nome}</code>, são trocadas pelos dados do aluno. Uma linha com <code>{valor}</code> ou <code>{pix}</code> sem valor é omitida."
+msgstr "These are the texts that come ready-made when you tap the WhatsApp icon. Change them freely: the words in braces, like <code>{nome}</code>, are replaced with the student's details. A line with <code>{valor}</code> or <code>{pix}</code> that has no value is left out."
+
+msgid "personalizada"
+msgstr "custom"
+
+msgid "texto padrão"
+msgstr "default text"
+
+#, python-format
+msgid "Texto de %(label)s"
+msgstr "%(label)s text"
+
+msgid "Variáveis"
+msgstr "Variables"
+
+msgid ". Obrigatório:"
+msgstr ". Required:"
+
+msgid "Como fica (com um aluno de exemplo)"
+msgstr "How it looks (with a sample student)"
+
+msgid "Voltar ao texto padrão?"
+msgstr "Go back to the default text?"
+
+msgid "Restaurar o padrão"
+msgstr "Restore default"
+
+#, python-format
+msgid "Registrar pagamento - %(person_name)s - %(brand_name)s"
+msgstr "Record payment - %(person_name)s - %(brand_name)s"
+
+#, python-format
+msgid "Pagamento de %(person_name)s"
+msgstr "Payment from %(person_name)s"
+
+msgid "O pagamento é feito na primeira aula do pacote."
+msgstr "Payment is made at the first class of the package."
+
+#, python-format
+msgid "total %(price_total)s, pago %(paid)s"
+msgstr "total %(price_total)s, paid %(paid)s"
+
+#, python-format
+msgid "em aberto %(pending)s"
+msgstr "outstanding %(pending)s"
+
+msgid "sem valor definido"
+msgstr "no amount set"
+
+msgid "Este aluno ainda não tem pacote."
+msgstr "This student doesn't have a package yet."
+
+msgid "Vender um pacote"
+msgstr "Sell a package"
+
+msgid "O valor sugerido é o que falta pagar do pacote escolhido; você pode mudar."
+msgstr "The suggested amount is what's left to pay on the chosen package; you can change it."
+
+msgid "Atribuir Treino"
+msgstr "Assign Workout"
+
+msgid "- Muscle Track"
+msgstr "- Muscle Track"
+
+msgid "Atribuir Treino ao Aluno"
+msgstr "Assign Workout to Student"
+
+msgid "Informações do Treino"
+msgstr "Workout Information"
+
+msgid "Template de Treino"
+msgstr "Workout Template"
+
+msgid "Selecionar Template"
+msgstr "Select Template"
+
+msgid "Nenhum exercício adicionado"
+msgstr "No exercises added"
+
+msgid "Atualizar Treino"
+msgstr "Update Workout"
+
+msgid "Selecionar Template de Treino"
+msgstr "Select Workout Template"
+
+msgid "Buscar template..."
+msgstr "Search template..."
+
+msgid "Adicionar Exercício"
+msgstr "Add Exercise"
+
+msgid "Buscar exercício..."
+msgstr "Search exercise..."
+
+msgid "Configuração"
+msgstr "Setup"
+
+msgid "Descanso (s)"
+msgstr "Rest (s)"
+
+msgid "Adicionar ao Treino"
+msgstr "Add to Workout"
+
+msgid "exercícios"
+msgstr "exercises"
+
+#, python-format
+msgid "Progresso - %(routine_name)s - %(brand_name)s"
+msgstr "Progress - %(routine_name)s - %(brand_name)s"
+
+msgid "Progresso do Treino"
+msgstr "Workout Progress"
+
+msgid "Aluno:"
+msgstr "Student:"
+
+msgid "Detalhes do Treino"
+msgstr "Workout Details"
+
+msgid "Dificuldade:"
+msgstr "Difficulty:"
+
+#, python-format
+msgid "<strong>Duração Estimada:</strong> %(estimated_duration)s minutos"
+msgstr "<strong>Estimated Duration:</strong> %(estimated_duration)s minutes"
+
+#, python-format
+msgid "<strong>Descrição:</strong> %(description)s"
+msgstr "<strong>Description:</strong> %(description)s"
+
+msgid "Não definida"
+msgstr "Not set"
+
+#, python-format
+msgid "<strong>Data de Início:</strong> %(start_date)s"
+msgstr "<strong>Start Date:</strong> %(start_date)s"
+
+#, python-format
+msgid "| <strong>Data de Término:</strong> %(end_date)s"
+msgstr "| <strong>End Date:</strong> %(end_date)s"
+
+#, python-format
+msgid "Exercícios (%(count)s)"
+msgstr "Exercises (%(count)s)"
+
+#, python-format
+msgid "+ %(count)s mais..."
+msgstr "+ %(count)s more..."
+
+msgid "Sessões Concluídas"
+msgstr "Completed Sessions"
+
+msgid "Último Mês"
+msgstr "Last Month"
+
+msgid "Duração Média (min)"
+msgstr "Average Duration (min)"
+
+msgid "Taxa de Conclusão"
+msgstr "Completion Rate"
+
+msgid "Evolução do Treino"
+msgstr "Workout Progress"
+
+msgid "Histórico de Sessões"
+msgstr "Session History"
+
+#, python-format
+msgid "%(count)s sessões"
+msgstr "%(count)s sessions"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Ações"
+msgstr "Actions"
+
+msgid "Ver detalhes"
+msgstr "View details"
+
+msgid "Ainda não há sessões concluídas para este treino."
+msgstr "No completed sessions for this workout yet."
+
+#, python-format
+msgid "Comparar fotos - %(brand_name)s"
+msgstr "Compare photos - %(brand_name)s"
+
+msgid "Para comparar é preciso ter a foto da mesma posição em pelo menos duas avaliações."
+msgstr "To compare, you need a photo of the same position in at least two assessments."
+
+msgid "Antes"
+msgstr "Before"
+
+msgid "Depois"
+msgstr "Later"
+
+msgid "Comparar"
+msgstr "Compare"
+
+#, python-format
+msgid "O que mudou em %(days)s dia"
+msgid_plural "O que mudou em %(days)s dias"
+msgstr[0] "What changed in the last %(days)s day"
+msgstr[1] "What changed in the last %(days)s days"
+
+#, python-format
+msgid "Adicionar foto - %(person_name)s"
+msgstr "Add photo - %(person_name)s"
+
+#, python-format
+msgid "%(person_name)s ainda não autorizou as fotos de evolução. Registre o consentimento na aba <em>Histórico</em> da ficha antes de guardar fotos."
+msgstr "%(person_name)s hasn't authorized progress photos yet. Record consent in the <em>History</em> tab of the profile before saving photos."
+
+msgid "JPG, PNG ou WebP. A foto é privada (só você e o aluno abrem) e é guardada sem localização nem dados do aparelho."
+msgstr "JPG, PNG, or WebP. The photo is private (only you and the student can open it) and is stored without location or device data."
+
+msgid "Salvar foto"
+msgstr "Save photo"
+
+msgid "Salvar e próxima posição"
+msgstr "Save and next position"
+
+msgid "Digite um dos dois: o outro é calculado."
+msgstr "Enter one of the two: the other is calculated."
+
+msgid "(pacotes inativos não aparecem para vender)"
+msgstr "(inactive packages don't appear for sale)"
+
+msgid "Salvar pacote"
+msgstr "Save package"
+
+msgid "O <strong>prazo</strong> começa a contar na <strong>primeira aula</strong> do pacote e pode ser prorrogado ou congelado depois, para cada aluno."
+msgstr "The <strong>validity period</strong> starts counting on the package's <strong>first class</strong> and can be extended or frozen later, for each student."
+
+msgid "Cada aula dada (compareceu, faltou ou cancelada com menos de 24 h) desconta <strong>uma aula</strong> do pacote."
+msgstr "Each class held (attended, missed or canceled with less than 24 h notice) deducts <strong>one class</strong> from the package."
+
+msgid "Os valores são só o ponto de partida: na venda, o preço pode ser ajustado para o aluno."
+msgstr "The amounts are just a starting point: when selling, the price can be adjusted for the student."
+
+#, python-format
+msgid "%(sold_count)s pacote já vendido a partir deste modelo. Eles mantêm os números da venda."
+msgid_plural "%(sold_count)s pacotes já vendidos a partir deste modelo. Eles mantêm os números da venda."
+msgstr[0] "%(sold_count)s package already sold from this template. It keeps the sale numbers."
+msgstr[1] "%(sold_count)s packages already sold from this template. They keep the sale numbers."
+
+#, python-format
+msgid "Pacotes - %(brand_name)s"
+msgstr "Packages - %(brand_name)s"
+
+msgid "O pacote é o modelo do catálogo: uma quantidade de aulas, um prazo (contado a partir da primeira aula) e um valor por aula ou total. Ao vender um pacote para o aluno, os números são copiados para ele: mudar o modelo depois não altera quem já comprou."
+msgstr "The package is the catalog template: a number of classes, a validity period (counted from the first class) and a price per class or total. When you sell a package to a student, the numbers are copied to them: changing the template later doesn't affect those who already bought."
+
+msgid "Buscar pacote..."
+msgstr "Search package..."
+
+msgid "Ativos"
+msgstr "Active"
+
+msgid "Inativos"
+msgstr "Inactive"
+
+msgid "Todos"
+msgstr "All"
+
+msgid "inativo"
+msgstr "inactive"
+
+#, python-format
+msgid "%(sessions)s aulas ·"
+msgstr "%(sessions)s classes ·"
+
+#, python-format
+msgid "%(valid_days)s dias a partir da primeira aula"
+msgstr "%(valid_days)s days from the first class"
+
+msgid "sem valor"
+msgstr "no amount"
+
+#, python-format
+msgid "%(price_per_session)s por aula"
+msgstr "%(price_per_session)s per class"
+
+#, python-format
+msgid "%(sold_count)s vendido"
+msgid_plural "%(sold_count)s vendidos"
+msgstr[0] "%(sold_count)s sold"
+msgstr[1] "%(sold_count)s sold"
+
+msgid "Nenhum pacote"
+msgstr "No packages"
+
+msgid "encontrado"
+msgstr "found"
+
+msgid "cadastrado ainda"
+msgstr "registered yet"
+
+msgid "Crie o primeiro"
+msgstr "Create the first one"
+
+#, python-format
+msgid "Política de privacidade - %(brand_name)s"
+msgstr "Privacy policy - %(brand_name)s"
+
+msgid "Política de privacidade"
+msgstr "Privacy policy"
+
+#, python-format
+msgid "Versão %(version)s"
+msgstr "Version %(version)s"
+
+msgid "Quem cuida dos seus dados"
+msgstr "Who looks after your data"
+
+#, python-format
+msgid "O controlador dos dados é %(controller)s."
+msgstr "The data controller is %(controller)s."
+
+msgid "Contato:"
+msgstr "Contact:"
+
+msgid "Quais dados e para quê"
+msgstr "What data and why"
+
+msgid "<strong>Cadastro:</strong> nome, e-mail, telefone, endereço, data de nascimento e contato de emergência, para identificar você e entrar em contato."
+msgstr "<strong>Registration:</strong> name, email, phone, address, date of birth, and emergency contact, so we can identify you and get in touch."
+
+msgid "<strong>Saúde e treino:</strong> objetivo, lesões e restrições, avaliações físicas (peso, medidas, gordura), treinos feitos, cargas e comentários. São dados sensíveis, usados só para montar e acompanhar seu treino."
+msgstr "<strong>Health and training:</strong> goal, injuries and restrictions, physical assessments (weight, measurements, body fat), workouts done, loads, and comments. This is sensitive data, used only to build and track your training."
+
+msgid "<strong>Fotos de evolução</strong> (opcional): ficam em área privada e só você e sua personal as veem."
+msgstr "<strong>Progress photos</strong> (optional): stored in a private area, visible only to you and your trainer."
+
+msgid "<strong>Plano:</strong> nome do plano e vencimento."
+msgstr "<strong>Plan:</strong> plan name and due date."
+
+msgid "Com quem compartilhamos"
+msgstr "Who we share with"
+
+msgid "Seus dados não são vendidos nem compartilhados com terceiros. Ficam no servidor do aplicativo, acessível só pela personal e por você."
+msgstr "Your data is not sold or shared with third parties. It stays on the app's server, accessible only to your trainer and you."
+
+msgid "Por quanto tempo"
+msgstr "For how long"
+
+msgid "Enquanto você for aluno(a) e, depois disso, até você pedir a exclusão."
+msgstr "For as long as you are a student and, after that, until you ask for deletion."
+
+msgid "Seus direitos"
+msgstr "Your rights"
+
+msgid "Você pode, a qualquer momento: ver seus dados, baixar uma cópia, corrigir seu cadastro, retirar o consentimento das fotos e pedir a exclusão de todos os dados, em <em>Privacidade e meus dados</em> no menu do aplicativo."
+msgstr "At any time, you can: view your data, download a copy, correct your registration, withdraw consent for photos and request deletion of all your data, under <em>Privacy and my data</em> in the app menu."
+
+msgid "Texto padrão do aplicativo. A personal responsável deve revisá-lo (de preferência com apoio jurídico) antes de usá-lo como documento oficial."
+msgstr "Default app text. The responsible trainer should review it (preferably with legal support) before using it as an official document."
+
+#, python-format
+msgid "Devolução - %(person_name)s - %(brand_name)s"
+msgstr "Refund - %(person_name)s - %(brand_name)s"
+
+#, python-format
+msgid "Anulada em %(voided_at)s: %(voided_reason)s. Continua registrada, mas não conta."
+msgstr "Voided on %(voided_at)s: %(voided_reason)s. It stays on record but doesn't count."
+
+#, python-format
+msgid "Motivo: %(reason)s"
+msgstr "Reason: %(reason)s"
+
+msgid "Resumo para o aluno"
+msgstr "Summary for the student"
+
+msgid "Enviar o resumo"
+msgstr "Send the summary"
+
+msgid "Sem telefone cadastrado para enviar pelo WhatsApp: copie o texto acima."
+msgstr "No phone number on file to send via WhatsApp: copy the text above."
+
+#, python-format
+msgid "Devolver ou estornar - %(person_name)s - %(brand_name)s"
+msgstr "Refund or reverse - %(person_name)s - %(brand_name)s"
+
+msgid "<strong>Devolução</strong>: o dinheiro voltou para o aluno. <strong>Estorno</strong>: o pagamento foi lançado errado (valor, aluno ou pacote) e o lançamento é desfeito; depois registre o pagamento certo."
+msgstr "<strong>Refund</strong>: the money went back to the student. <strong>Reversal</strong>: the payment was entered incorrectly (amount, student, or package) and the entry is undone; then record the correct payment."
+
+msgid "Só você vê estes valores. O pagamento original não muda: a devolução é um lançamento novo."
+msgstr "Only you can see these amounts. The original payment doesn't change: the refund is a new entry."
+
+#, python-format
+msgid "%(routine_name)s - Detalhes"
+msgstr "%(routine_name)s - Details"
+
+msgid "Total Alunos"
+msgstr "Total Students"
+
+msgid "Alunos Ativos"
+msgstr "Active Students"
+
+msgid "Total Treinos"
+msgstr "Total Workouts"
+
+msgid "Completados"
+msgstr "Completed"
+
+msgid "Duração Média"
+msgstr "Average Duration"
+
+#, python-format
+msgid "%(avg_duration)s<small class=\"text-muted\">min</small>"
+msgstr "%(avg_duration)s<small class=\"text-muted\">min</small>"
+
+msgid "Informações da Rotina"
+msgstr "Routine Information"
+
+msgid "Nível de Dificuldade:"
+msgstr "Difficulty Level:"
+
+msgid "Duração Estimada:"
+msgstr "Estimated Duration:"
+
+#, python-format
+msgid "%(estimated_duration)s minutos"
+msgstr "%(estimated_duration)s minutes"
+
+msgid "Exercícios da Rotina"
+msgstr "Routine Exercises"
+
+msgid "Reps"
+msgstr "Reps"
+
+msgid "Descanso"
+msgstr "Rest"
+
+msgid "Nenhum exercício cadastrado nesta rotina."
+msgstr "No exercises registered in this routine."
+
+msgid "Análise de Desempenho"
+msgstr "Performance Analysis"
+
+#, python-format
+msgid "%(completed_sessions)s de %(total_sessions)s treinos"
+msgstr "%(completed_sessions)s of %(total_sessions)s workouts"
+
+msgid "Insights:"
+msgstr "Insights:"
+
+msgid "Excelente taxa de conclusão! Os alunos estão muito engajados com esta rotina."
+msgstr "Excellent completion rate! Students are very engaged with this routine."
+
+msgid "Boa taxa de conclusão. Considere identificar alunos que precisam de mais suporte."
+msgstr "Good completion rate. Consider identifying students who need more support."
+
+msgid "Taxa de conclusão pode melhorar. Revise a dificuldade e duração da rotina."
+msgstr "Completion rate could be better. Review the routine's difficulty and duration."
+
+#, python-format
+msgid "Duração média dos treinos: %(avg_duration)s minutos"
+msgstr "Average workout duration: %(avg_duration)s minutes"
+
+msgid "(acima do esperado)"
+msgstr "(above expected)"
+
+msgid "(abaixo do esperado)"
+msgstr "(below expected)"
+
+msgid "(dentro do esperado)"
+msgstr "(within expected range)"
+
+msgid "Ainda não há dados suficientes para análise."
+msgstr "Not enough data for analysis yet."
+
+msgid "Estado:"
+msgstr "Status:"
+
+msgid "Ativa"
+msgstr "Active"
+
+msgid "Inativa"
+msgstr "Inactive"
+
+msgid "ID da Rotina:"
+msgstr "Routine ID:"
+
+msgid "Criado em:"
+msgstr "Created on:"
+
+msgid "Atualizado em:"
+msgstr "Updated on:"
+
+msgid "Ações Rápidas"
+msgstr "Quick Actions"
+
+msgid "Editar Rotina"
+msgstr "Edit Routine"
+
+msgid "Editar no Admin"
+msgstr "Edit in Admin"
+
+msgid "Nome do Treino *"
+msgstr "Workout Name *"
+
+msgid "Ex: Treino de Peito e Tríceps"
+msgstr "E.g., Chest and Triceps Workout"
+
+msgid "Breve descrição do treino e objetivos..."
+msgstr "Brief description of the workout and goals..."
+
+msgid "Nível de Dificuldade *"
+msgstr "Difficulty Level *"
+
+msgid "Duração Estimada (min) *"
+msgstr "Estimated Duration (min) *"
+
+msgid "Treino ativo (disponível para uso)"
+msgstr "Active workout (available for use)"
+
+msgid "Adicionar Exercícios"
+msgstr "Add Exercises"
+
+msgid "Nenhum exercício adicionado."
+msgstr "No exercises added."
+
+msgid "Clique em \"Adicionar Exercícios\" para começar."
+msgstr "Click \"Add Exercises\" to get started."
+
+msgid "Resumo do Treino"
+msgstr "Workout Summary"
+
+msgid "Total de Exercícios"
+msgstr "Total Exercises"
+
+msgid "Duração Estimada"
+msgstr "Estimated Duration"
+
+msgid "0 minutos"
+msgstr "0 minutes"
+
+msgid "Salvar Treino"
+msgstr "Save Workout"
+
+msgid "Dicas"
+msgstr "Tips"
+
+msgid "Arraste os exercícios para reordenar"
+msgstr "Drag exercises to reorder"
+
+msgid "Clique em"
+msgstr "Click"
+
+msgid "para ajustar séries/reps"
+msgstr "to adjust sets/reps"
+
+msgid "Agrupe exercícios por grupo muscular"
+msgstr "Group exercises by muscle group"
+
+msgid "Configure descanso adequado entre séries"
+msgstr "Set adequate rest between sets"
+
+msgid "Selecionar Exercícios"
+msgstr "Select Exercises"
+
+msgid "Pesquisar exercício..."
+msgstr "Search exercise..."
+
+msgid "Todos os grupos musculares"
+msgstr "All muscle groups"
+
+msgid "Carregando..."
+msgstr "Loading..."
+
+msgid "Carregando exercícios..."
+msgstr "Loading exercises..."
+
+msgid "Confirmar Seleção ("
+msgstr "Confirm Selection ("
+
+msgid "Editar Parâmetros"
+msgstr "Edit Parameters"
+
+msgid "Descanso (segundos)"
+msgstr "Rest (seconds)"
+
+msgid "Erro ao carregar exercícios. Tente novamente."
+msgstr "Error loading exercises. Please try again."
+
+msgid "Nenhum exercício encontrado"
+msgstr "No exercises found"
+
+msgid "séries"
+msgstr "sets"
+
+msgid "reps"
+msgstr "reps"
+
+msgid "Editar parâmetros"
+msgstr "Edit parameters"
+
+msgid "Remover exercício"
+msgstr "Remove exercise"
+
+msgid "Remover este exercício do treino?"
+msgstr "Remove this exercise from the workout?"
+
+msgid "minutos"
+msgstr "minutes"
+
+msgid "Página"
+msgstr "Page"
+
+msgid "Conteúdo da página"
+msgstr "Page content"
+
+#, python-format
+msgid "Treinos - %(brand_name)s"
+msgstr "Workouts - %(brand_name)s"
+
+msgid "Novo Treino"
+msgstr "New Workout"
+
+msgid "Buscar Treino"
+msgstr "Search Workout"
+
+msgid "Dificuldade"
+msgstr "Difficulty"
+
+msgid "Todas as dificuldades"
+msgstr "All difficulties"
+
+#, python-format
+msgid "Encontrados <strong>%(count)s</strong> treino(s)"
+msgstr "Found <strong>%(count)s</strong> workout(s)"
+
+#, python-format
+msgid "com dificuldade <strong>%(selected_difficulty)s</strong>"
+msgstr "with <strong>%(selected_difficulty)s</strong> difficulty"
+
+msgid "Nenhum treino encontrado com os filtros selecionados."
+msgstr "No workouts found with the selected filters."
+
+#, python-format
+msgid "%(exercise_count)s exercícios"
+msgstr "%(exercise_count)s exercises"
+
+#, python-format
+msgid "%(student_count)s alunos"
+msgstr "%(student_count)s students"
+
+#, python-format
+msgid "Busca - %(brand_name)s"
+msgstr "Search - %(brand_name)s"
+
+msgid "Aluno, exercício ou treino..."
+msgstr "Student, exercise, or workout..."
+
+msgid "Digite um nome, e-mail ou telefone de aluno, o nome de um exercício ou de um treino."
+msgstr "Type a student's name, email or phone, or the name of an exercise or workout."
+
+msgid "Dica: <kbd>/</kbd> ou <kbd>Ctrl</kbd> + <kbd>K</kbd> abrem a busca de qualquer tela. <code>#12</code> acha o aluno de número 12."
+msgstr "Tip: <kbd>/</kbd> or <kbd>Ctrl</kbd> + <kbd>K</kbd> open search from any screen. <code>#12</code> finds student number 12."
+
+msgid "Digite pelo menos 2 letras."
+msgstr "Type at least 2 letters."
+
+#, python-format
+msgid "Nada encontrado para <strong>%(q)s</strong>."
+msgstr "Nothing found for <strong>%(q)s</strong>."
+
+msgid "Tente só uma parte do nome, ou o telefone sem máscara."
+msgstr "Try just part of the name, or the phone number without formatting."
+
+#, python-format
+msgid "Ver todos os %(total)s em %(label)s"
+msgstr "View all %(total)s in %(label)s"
+
+#, python-format
+msgid "Detalhes da Sessão - %(routine_name)s"
+msgstr "Session Details - %(routine_name)s"
+
+msgid "Detalhes da Sessão"
+msgstr "Session Details"
+
+msgid "Abrir a ficha do aluno"
+msgstr "Open the student's profile"
+
+msgid "Ver progresso deste treino"
+msgstr "View progress for this workout"
+
+msgid "Informações da Sessão"
+msgstr "Session Information"
+
+msgid "Data:"
+msgstr "Date:"
+
+msgid "Início:"
+msgstr "Start:"
+
+msgid "Término:"
+msgstr "End:"
+
+msgid "Duração:"
+msgstr "Duration:"
+
+msgid "Comentário do aluno sobre o treino:"
+msgstr "Student's comment on the workout:"
+
+msgid "Exercícios Executados"
+msgstr "Exercises Performed"
+
+msgid "Não executado"
+msgstr "Not performed"
+
+#, python-format
+msgid "%(sets)s séries x %(reps)s repetições"
+msgstr "%(sets)s sets x %(reps)s reps"
+
+#, python-format
+msgid "Descanso: %(rest_seconds)ss"
+msgstr "Rest: %(rest_seconds)ss"
+
+msgid "Carga"
+msgstr "Weight"
+
+#, python-format
+msgid "%(weight)s kg"
+msgstr "%(weight)s kg"
+
+#, python-format
+msgid "<strong>Observação do aluno:</strong> %(notes)s"
+msgstr "<strong>Student note:</strong> %(notes)s"
+
+msgid "Concluído em:"
+msgstr "Completed on:"
+
+msgid "Carga:"
+msgstr "Weight:"
+
+#, python-format
+msgid "Editar horário fixo - %(person_name)s"
+msgstr "Edit fixed time slot - %(person_name)s"
+
+#, python-format
+msgid "%(person_name)s · hoje: %(get_weekday_display)s às %(start_time)s (%(duration_minutes)s min)"
+msgstr "%(person_name)s · today: %(get_weekday_display)s at %(start_time)s (%(duration_minutes)s min)"
+
+#, python-format
+msgid ", a cada %(interval_weeks)s semanas"
+msgstr ", every %(interval_weeks)s weeks"
+
+msgid "A mudança vale <strong>da data escolhida em diante</strong>: as aulas já dadas e as aulas marcadas antes dela ficam como estão. As próximas aulas desse horário que ninguém mexeu (não foram movidas, nem têm pedido do aluno) são recriadas no novo dia e horário."
+msgstr "The change applies <strong>from the chosen date onward</strong>: classes already given and classes scheduled before it stay as they are. Upcoming classes in this slot that nobody has touched (not moved, and with no student request) are recreated on the new day and time."
+
+msgid "Salvar horário"
+msgstr "Save time slot"
+
+#, python-format
+msgid "<strong>%(get_weekday_display)s</strong> às %(start_time)s"
+msgstr "<strong>%(get_weekday_display)s</strong> at %(start_time)s"
+
+#, python-format
+msgid "(%(duration_minutes)s min)"
+msgstr "(%(duration_minutes)s min)"
+
+#, python-format
+msgid "· a cada %(interval_weeks)s semanas"
+msgstr "· every %(interval_weeks)s weeks"
+
+#, python-format
+msgid "· até %(valid_until)s"
+msgstr "· until %(valid_until)s"
+
+msgid "Remover este horário? As aulas futuras dele saem da agenda."
+msgstr "Remove this time slot? Its future classes will be taken off the schedule."
+
+msgid "Nenhum horário fixo. Adicione abaixo (ex.: segunda 07:00)."
+msgstr "No fixed times. Add one below (e.g., Monday 07:00)."
+
+msgid "Deslize o horário para a esquerda para editar ou remover."
+msgstr "Swipe the time left to edit or remove."
+
+#, python-format
+msgid "<strong>%(name)s</strong>: restam <strong>%(left)s</strong> aula"
+msgid_plural "<strong>%(name)s</strong>: restam <strong>%(left)s</strong> aulas"
+msgstr[0] "<strong>%(name)s</strong>: <strong>%(left)s</strong> class left"
+msgstr[1] "<strong>%(name)s</strong>: <strong>%(left)s</strong> classes left"
+
+#, python-format
+msgid ", %(scheduled)s já marcada"
+msgid_plural ", %(scheduled)s já marcadas"
+msgstr[0] ", %(scheduled)s already scheduled"
+msgstr[1] ", %(scheduled)s already scheduled"
+
+#, python-format
+msgid "· vale até %(ends_on)s"
+msgstr "· valid until %(ends_on)s"
+
+msgid "· sem prazo"
+msgstr "· no deadline"
+
+msgid "· o prazo começa na primeira aula"
+msgstr "· the deadline starts at the first class"
+
+#, python-format
+msgid "Faltam marcar <strong>%(to_schedule)s</strong>."
+msgstr "<strong>%(to_schedule)s</strong> left to schedule."
+
+msgid "Todas as aulas do pacote já estão marcadas."
+msgstr "All classes in the package are already scheduled."
+
+#, python-format
+msgid "Marcar mais %(to_schedule)s"
+msgstr "Schedule %(to_schedule)s more"
+
+msgid "Preencher a agenda do pacote"
+msgstr "Fill the package schedule"
+
+#, python-format
+msgid "Mesmo horário de antes: <strong>%(label)s</strong>, a partir do dia seguinte à última aula marcada. Confira a prévia e confirme."
+msgstr "Same time as before: <strong>%(label)s</strong>, starting the day after the last scheduled class. Check the preview and confirm."
+
+msgid "Avançado (duração, repetição)"
+msgstr "Advanced (duration, repeat)"
+
+msgid "Feriados que ficam sem aula"
+msgstr "Holidays with no classes"
+
+#, python-format
+msgid "Escolha os dias e o horário: o fim é calculado pelas aulas que faltam marcar (%(to_schedule)s)."
+msgstr "Choose the days and the time: the end date is calculated from the classes still to be scheduled (%(to_schedule)s)."
+
+#, python-format
+msgid "Preencher agenda (%(to_schedule)s aula)"
+msgid_plural "Preencher agenda (%(to_schedule)s aulas)"
+msgstr[0] "Fill schedule (%(to_schedule)s class)"
+msgstr[1] "Fill schedule (%(to_schedule)s classes)"
+
+msgid "Este aluno ainda não tem pacote em uso: venda um para preencher a agenda pelas aulas dele."
+msgstr "This student doesn't have an active package yet: sell one to fill the schedule based on their classes."
+
+msgid "Avançado: horário sem pacote ou repetição personalizada"
+msgstr "Advanced: time slot without a package or custom repeat"
+
+msgid "Novo horário fixo"
+msgstr "New fixed time"
+
+msgid "Repetição personalizada (a cada N semanas, início e fim)"
+msgstr "Custom repeat (every N weeks, start and end)"
+
+msgid "Adicionar horário"
+msgstr "Add time slot"
+
+#, python-format
+msgid "Aluno sem acesso: não gera aulas na agenda enquanto estiver %(get_status_display)s."
+msgstr "Student without access: no classes are generated on the schedule while they are %(get_status_display)s."
+
+msgid "Frequência (30 dias)"
+msgstr "Attendance (30 days)"
+
+msgid "compareceu"
+msgstr "attended"
+
+msgid "faltou"
+msgstr "missed"
+
+msgid "presença"
+msgstr "attendance"
+
+msgid "Aula avulsa"
+msgstr "Single class"
+
+msgid "D d/m"
+msgstr "D m/d"
+
+#, python-format
+msgid "%(starts_at)s às %(starts_at2)s"
+msgstr "%(starts_at)s to %(starts_at2)s"
+
+msgid "Remover esta aula? Ela sai da agenda e não desconta do pacote; o horário fixo continua nas próximas."
+msgstr "Remove this class? It will be taken off the schedule and won't count against the package; the recurring time slot stays for later classes."
+
+msgid "Nenhuma aula marcada."
+msgstr "No classes scheduled."
+
+msgid "Deslize a aula para a esquerda para editar ou remover."
+msgstr "Swipe the class left to edit or remove."
+
+msgid "Cada avaliação tem as fotos das posições (frente, lados e costas). As fotos são privadas: só você e o próprio aluno conseguem abrir."
+msgstr "Each assessment has photos of the positions (front, sides and back). The photos are private: only you and the student can open them."
+
+msgid "Altura"
+msgstr "Height"
+
+msgid "IMC"
+msgstr "BMI"
+
+#, python-format
+msgid "%% gordura"
+msgstr "%% body fat"
+
+msgid "Remover esta avaliação?"
+msgstr "Remove this assessment?"
+
+msgid "Remover foto"
+msgstr "Remove photo"
+
+msgid "Adicionar outra foto a esta avaliação"
+msgstr "Add another photo to this assessment"
+
+msgid "Medidas em cm, peso em kg. Altura e peso geram o IMC."
+msgstr "Measurements in cm, weight in kg. Height and weight give the BMI."
+
+msgid "Nenhuma avaliação registrada ainda."
+msgstr "No assessments recorded yet."
+
+msgid "Fotos avulsas"
+msgstr "Standalone photos"
+
+msgid "Fotos sem avaliação ligada: as que o aluno enviou pelo celular e as de antes de as fotos ficarem dentro das avaliações."
+msgstr "Photos not linked to an assessment: the ones the student sent from their phone and the ones from before photos were kept inside assessments."
+
+msgid "Adicionar foto avulsa"
+msgstr "Add standalone photo"
+
+msgid "Ficha do aluno"
+msgstr "Student profile"
+
+msgid "Nascimento"
+msgstr "Date of birth"
+
+#, python-format
+msgid "%(birth_date)s (%(age)s anos)"
+msgstr "%(birth_date)s (%(age)s years old)"
+
+msgid "Aluno desde"
+msgstr "Student since"
+
+#, python-format
+msgid "desde %(status_changed_at)s"
+msgstr "since %(status_changed_at)s"
+
+msgid "Alterar situação"
+msgstr "Change status"
+
+msgid "Acesso ao app"
+msgstr "App access"
+
+#, python-format
+msgid "Último acesso em %(last_login)s"
+msgstr "Last access on %(last_login)s"
+
+msgid "Senha criada, ainda sem acesso"
+msgstr "Password created, no access yet"
+
+msgid "Nada registrado."
+msgstr "Nothing recorded."
+
+msgid "<strong>Anotações internas</strong> <small class=\"text-muted\">(o aluno não vê)</small>"
+msgstr "<strong>Internal notes</strong> <small class=\"text-muted\">(student can't see)</small>"
+
+msgid "Última avaliação"
+msgstr "Last assessment"
+
+msgid "Nova"
+msgstr "New"
+
+#, python-format
+msgid "%(weight_kg)s kg"
+msgstr "%(weight_kg)s kg"
+
+msgid "peso"
+msgstr "weight"
+
+msgid "gordura"
+msgstr "body fat"
+
+msgid "Nenhuma avaliação registrada."
+msgstr "No assessments recorded."
+
+msgid "Histórico de alterações"
+msgstr "Change history"
+
+msgid "Só você vê. Textos de saúde e anotações internas aparecem como \"alterado\", sem o conteúdo."
+msgstr "Only you can see this. Health text and internal notes appear as \"changed\", without the content."
+
+msgid "alterado"
+msgstr "changed"
+
+msgid "(vazio)"
+msgstr "(empty)"
+
+msgid "Nada registrado ainda. As alterações feitas daqui em diante aparecem aqui."
+msgstr "Nothing recorded yet. Changes made from now on appear here."
+
+msgid "Consentimentos (LGPD)"
+msgstr "Consents (LGPD)"
+
+#, python-format
+msgid "%(at)s · texto %(version)s · %(get_source_display)s"
+msgstr "%(at)s · text %(version)s · %(get_source_display)s"
+
+msgid "retirado"
+msgstr "withdrawn"
+
+msgid "texto novo"
+msgstr "new text"
+
+msgid "não autorizado"
+msgstr "not authorized"
+
+msgid "Registrar consentimento dado fora do app (papel, WhatsApp)"
+msgstr "Record consent given outside the app (paper, WhatsApp)"
+
+msgid "· já concedido"
+msgstr "· already granted"
+
+msgid "Dados do aluno"
+msgstr "Student details"
+
+#, python-format
+msgid "ZIP com tudo o que está guardado sobre %(person_name)s (dados, avaliações, treinos, fotos, anotações internas e histórico)."
+msgstr "ZIP with everything stored about %(person_name)s (data, assessments, workouts, photos, internal notes and history)."
+
+msgid "Baixar dados"
+msgstr "Download data"
+
+msgid "Só você vê estas anotações; o aluno não tem acesso."
+msgstr "Only you can see these notes; the student has no access."
+
+msgid "Salvar anotação"
+msgstr "Save note"
+
+msgid "Remover esta anotação?"
+msgstr "Remove this note?"
+
+msgid "Nenhuma anotação ainda."
+msgstr "No notes yet."
+
+msgid "Sem pacote"
+msgstr "No package"
+
+#, python-format
+msgid "<strong class=\"fs-4\">%(used)s</strong> de %(sessions)s aulas usadas"
+msgstr "<strong class=\"fs-4\">%(used)s</strong> of %(sessions)s classes used"
+
+#, python-format
+msgid "· %(scheduled)s agendada"
+msgid_plural "· %(scheduled)s agendadas"
+msgstr[0] "· %(scheduled)s scheduled"
+msgstr[1] "· %(scheduled)s scheduled"
+
+#, python-format
+msgid "Há mais aulas agendadas (%(scheduled)s) do que aulas sobrando no pacote (%(left)s)."
+msgstr "There are more scheduled classes (%(scheduled)s) than classes left in the package (%(left)s)."
+
+msgid "Pacote <strong>sem prazo</strong>: não vence, vale até usar todas as aulas."
+msgstr "<strong>No-expiration</strong> package: it doesn't expire, valid until all classes are used."
+
+#, python-format
+msgid "Primeira aula em <strong>%(starts_on)s</strong>."
+msgstr "First class on <strong>%(starts_on)s</strong>."
+
+#, python-format
+msgid "Primeira aula em <strong>%(starts_on)s</strong> · vale até <strong>%(ends_on)s</strong>"
+msgstr "First class on <strong>%(starts_on)s</strong> · valid until <strong>%(ends_on)s</strong>"
+
+#, python-format
+msgid "(congelado desde %(frozen_since)s; o prazo para de contar)"
+msgstr "(frozen since %(frozen_since)s; the countdown is paused)"
+
+#, python-format
+msgid "(venceu há %(days_left)s dia)"
+msgid_plural "(venceu há %(days_left)s dias)"
+msgstr[0] "(expired %(days_left)s day ago)"
+msgstr[1] "(expired %(days_left)s days ago)"
+
+#, python-format
+msgid "(faltam %(days_left)s dia)"
+msgid_plural "(faltam %(days_left)s dias)"
+msgstr[0] "(%(days_left)s day left)"
+msgstr[1] "(%(days_left)s days left)"
+
+#, python-format
+msgid "O prazo de %(valid_days)s dias começa a contar na primeira aula."
+msgstr "The %(valid_days)s-day validity period starts counting on the first class."
+
+#, python-format
+msgid "O prazo acabou e ainda sobram %(left)s aula. Prorrogue o pacote para o aluno poder usá-las."
+msgid_plural "O prazo acabou e ainda sobram %(left)s aulas. Prorrogue o pacote para o aluno poder usá-las."
+msgstr[0] "The validity period has ended and %(left)s class is still left. Extend the package so the student can use it."
+msgstr[1] "The validity period has ended and %(left)s classes are still left. Extend the package so the student can use them."
+
+#, python-format
+msgid "Restam %(left)s aula: hora de oferecer um novo pacote."
+msgid_plural "Restam %(left)s aulas: hora de oferecer um novo pacote."
+msgstr[0] "%(left)s class left: time to offer a new package."
+msgstr[1] "%(left)s classes left: time to offer a new package."
+
+#, python-format
+msgid "Pagamento em aberto: %(pending)s"
+msgstr "Outstanding payment: %(pending)s"
+
+#, python-format
+msgid "(pago %(paid)s de %(price_total)s)"
+msgstr "(paid %(paid)s of %(price_total)s)"
+
+#, python-format
+msgid "Pago (%(paid)s)"
+msgstr "Paid (%(paid)s)"
+
+#, python-format
+msgid "Pago a mais: %(overpaid)s"
+msgstr "Overpaid: %(overpaid)s"
+
+#, python-format
+msgid "%(without_package)s aula dada sem pacote para descontar. Venda um pacote novo."
+msgid_plural "%(without_package)s aulas dadas sem pacote para descontar. Venda um pacote novo."
+msgstr[0] "%(without_package)s class given without a package to deduct from. Sell a new package."
+msgstr[1] "%(without_package)s classes given without a package to deduct from. Sell a new package."
+
+msgid "Cobrar"
+msgstr "Charge"
+
+msgid "Vender novo pacote"
+msgstr "Sell new package"
+
+msgid "Prorrogar"
+msgstr "Extend"
+
+msgid "Descongelar"
+msgstr "Unfreeze"
+
+msgid "O prazo para de contar até o aluno voltar"
+msgstr "The validity period stops counting until the student comes back"
+
+msgid "Congelar"
+msgstr "Freeze"
+
+msgid "Cancelar com devolução"
+msgstr "Cancel with refund"
+
+msgid "Dias a mais"
+msgstr "Extra days"
+
+msgid "Motivo (opcional)"
+msgstr "Reason (optional)"
+
+msgid "Ex.: viagem, lesão"
+msgstr "E.g., trip, injury"
+
+msgid "Valores (sigilosos)"
+msgstr "Amounts (confidential)"
+
+msgid "Mostrar"
+msgstr "Show"
+
+#, python-format
+msgid "Total: <strong>%(price_total)s</strong>"
+msgstr "Total: <strong>%(price_total)s</strong>"
+
+#, python-format
+msgid "· %(price_per_session)s por aula"
+msgstr "· %(price_per_session)s per class"
+
+msgid "Nenhum valor combinado."
+msgstr "No agreed amount."
+
+msgid "Ocultos. O aluno nunca vê estes valores."
+msgstr "Hidden. The student never sees these amounts."
+
+#, python-format
+msgid "· %(used)s/%(sessions)s aulas"
+msgstr "· %(used)s/%(sessions)s classes"
+
+msgid "Editar este pacote"
+msgstr "Edit this package"
+
+#, python-format
+msgid "Editar %(name)s"
+msgstr "Edit %(name)s"
+
+msgid "Só você vê os valores. O aluno não tem acesso a esta área."
+msgstr "Only you can see the amounts. The student has no access to this area."
+
+#, python-format
+msgid "(até %(period_end)s)"
+msgstr "(until %(period_end)s)"
+
+msgid "Excluir este pagamento? "
+msgstr "Delete this payment? "
+
+msgid "Nenhum pagamento registrado."
+msgstr "No payments recorded."
+
+#, python-format
+msgid "Escolha os dias da semana e o horário: o fim é calculado pelas aulas que faltam marcar (%(to_schedule)s)."
+msgstr "Choose the days of the week and the time: the end date is calculated from the classes still to be scheduled (%(to_schedule)s)."
+
+msgid "Nenhuma data disponível com essas escolhas."
+msgstr "No dates available with these choices."
+
+#, python-format
+msgid "<strong>%(count)s</strong> aula · a última é <strong>%(last)s</strong>"
+msgid_plural "<strong>%(count)s</strong> aulas · a última é <strong>%(last)s</strong>"
+msgstr[0] "<strong>%(count)s</strong> class · the last one is <strong>%(last)s</strong>"
+msgstr[1] "<strong>%(count)s</strong> classes · the last one is <strong>%(last)s</strong>"
+
+msgid "já tem aula"
+msgstr "already has a class"
+
+msgid "sem aula"
+msgstr "no class"
+
+msgid "Feriado: sem aula (marque para dar aula mesmo assim)"
+msgstr "Holiday: no class (check to hold class anyway)"
+
+msgid "Depois da validade do pacote"
+msgstr "After the package expires"
+
+msgid "depois da validade"
+msgstr "after expiration"
+
+#, python-format
+msgid "sobrepõe %(overlap)s"
+msgstr "overlaps %(overlap)s"
+
+msgid "Os feriados já ficam de fora. Desmarque outros dias sem aula (viagem, folga): a próxima data entra no lugar."
+msgstr "Holidays are already left out. Uncheck other days off (travel, time off): the next date takes its place."
+
+#, python-format
+msgid "Só deu para marcar %(count)s de %(wanted)s aulas com essas escolhas."
+msgstr "Only %(count)s of %(wanted)s classes could be scheduled with these choices."
+
+#, python-format
+msgid "%(beyond)s aula depois de %(deadline)s, fim da validade do pacote. Prorrogue o pacote ou mude as datas."
+msgid_plural "%(beyond)s aulas depois de %(deadline)s, fim da validade do pacote. Prorrogue o pacote ou mude as datas."
+msgstr[0] "%(beyond)s class after %(deadline)s, when the package expires. Extend the package or change the dates."
+msgstr[1] "%(beyond)s classes after %(deadline)s, when the package expires. Extend the package or change the dates."
+
+#, python-format
+msgid "Excluir %(person_name)s - %(brand_name)s"
+msgstr "Delete %(person_name)s - %(brand_name)s"
+
+#, python-format
+msgid "Excluir %(person_name)s"
+msgstr "Delete %(person_name)s"
+
+msgid "<strong>Esta ação não pode ser desfeita.</strong> O acesso do aluno e todos os dados abaixo serão apagados definitivamente, inclusive os arquivos de fotos."
+msgstr "<strong>This action cannot be undone.</strong> The student's access and all the data below will be permanently deleted, including photo files."
+
+#, python-format
+msgid "%(routines)s treino atribuído"
+msgid_plural "%(routines)s treinos atribuídos"
+msgstr[0] "%(routines)s workout assigned"
+msgstr[1] "%(routines)s workouts assigned"
+
+#, python-format
+msgid "%(sessions)s sessão de treino registrada"
+msgid_plural "%(sessions)s sessões de treino registradas"
+msgstr[0] "%(sessions)s workout session logged"
+msgstr[1] "%(sessions)s workout sessions logged"
+
+#, python-format
+msgid "%(assessments)s avaliação"
+msgid_plural "%(assessments)s avaliações"
+msgstr[0] "%(assessments)s assessment"
+msgstr[1] "%(assessments)s assessments"
+
+#, python-format
+msgid "%(photos)s foto de evolução"
+msgid_plural "%(photos)s fotos de evolução"
+msgstr[0] "%(photos)s progress photo"
+msgstr[1] "%(photos)s progress photos"
+
+#, python-format
+msgid "%(notes)s anotação da personal"
+msgid_plural "%(notes)s anotações da personal"
+msgstr[0] "%(notes)s trainer note"
+msgstr[1] "%(notes)s trainer notes"
+
+msgid "Só quer que ele pare de acessar o app, mantendo o histórico? Em vez de excluir,"
+msgstr "Just want them to stop accessing the app, keeping the history? Instead of deleting,"
+
+msgid "desative o aluno"
+msgstr "deactivate the student"
+
+msgid "Excluir definitivamente"
+msgstr "Delete permanently"
+
+#, python-format
+msgid "%(person_name)s - %(brand_name)s"
+msgstr "%(person_name)s - %(brand_name)s"
+
+msgid "Ainda não aceitou os termos de uso e de dados de saúde"
+msgstr "Hasn't accepted the terms of use and health data terms yet"
+
+msgid "Sem consentimento"
+msgstr "No consent"
+
+msgid "O aluno pediu a exclusão dos próprios dados"
+msgstr "The student requested deletion of their own data"
+
+msgid "Pediu exclusão"
+msgstr "Requested deletion"
+
+msgid "O aluno ainda não criou a senha"
+msgstr "The student hasn't created a password yet"
+
+msgid "Redefinir senha"
+msgstr "Reset password"
+
+msgid "Excluir aluno e todos os dados"
+msgstr "Delete student and all data"
+
+msgid "Mais ações"
+msgstr "More actions"
+
+msgid "Excluir aluno"
+msgstr "Delete student"
+
+msgid "Sessões Completadas"
+msgstr "Completed Sessions"
+
+msgid "Sessões"
+msgstr "Sessions"
+
+msgid "Treinos (30 dias)"
+msgstr "Workouts (30 days)"
+
+msgid "30 dias"
+msgstr "30 days"
+
+#, python-format
+msgid "%(avg_duration)s<small class=\"fs-6\">min</small>"
+msgstr "%(avg_duration)s<small class=\"fs-6\">min</small>"
+
+msgid "Última Sessão"
+msgstr "Last Session"
+
+msgid "Última"
+msgstr "Last"
+
+#, python-format
+msgid "<strong>Atenção — saúde/restrições:</strong> %(health_notes)s"
+msgstr "<strong>Warning — health/restrictions:</strong> %(health_notes)s"
+
+#, python-format
+msgid "Pacote vencido em %(plan_expires_on)s: prorrogue ou venda um novo."
+msgstr "Package expired on %(plan_expires_on)s: extend it or sell a new one."
+
+#, python-format
+msgid "O pacote vence em %(days_to_plan_expiry)s dia (%(plan_expires_on)s)."
+msgid_plural "O pacote vence em %(days_to_plan_expiry)s dias (%(plan_expires_on)s)."
+msgstr[0] "The package expires in %(days_to_plan_expiry)s day (%(plan_expires_on)s)."
+msgstr[1] "The package expires in %(days_to_plan_expiry)s days (%(plan_expires_on)s)."
+
+msgid "Ficha"
+msgstr "Profile"
+
+msgid "Anotações"
+msgstr "Notes"
+
+msgid "Treinos Ativos"
+msgstr "Active Workouts"
+
+#, python-format
+msgid "Iniciado em: %(routine_date)s"
+msgstr "Started on: %(routine_date)s"
+
+#, python-format
+msgid "• Até: %(end_date)s"
+msgstr "• Until: %(end_date)s"
+
+msgid "Ver template"
+msgstr "View template"
+
+msgid "Progresso"
+msgstr "Progress"
+
+#, python-format
+msgid "%(exercise_count)s exercício"
+msgid_plural "%(exercise_count)s exercícios"
+msgstr[0] "%(exercise_count)s exercise"
+msgstr[1] "%(exercise_count)s exercises"
+
+#, python-format
+msgid "%(sessions_count)s sessões completas"
+msgid_plural "%(sessions_count)s sessões completas"
+msgstr[0] "%(sessions_count)s completed sessions"
+msgstr[1] "%(sessions_count)s completed sessions"
+
+msgid "Nenhum treino ativo."
+msgstr "No active workouts."
+
+msgid "Clique aqui para adicionar um treino."
+msgstr "Click here to add a workout."
+
+msgid "Treinos Anteriores"
+msgstr "Previous Workouts"
+
+msgid "Ver Histórico Completo"
+msgstr "View Full History"
+
+msgid "Nenhum treino anterior registrado."
+msgstr "No previous workouts recorded."
+
+msgid "Confirmar Remoção"
+msgstr "Confirm Removal"
+
+#, python-format
+msgid "Tem certeza que deseja remover o treino <strong>\"%(routine_name)s\"</strong> do aluno <strong>%(person_name)s</strong>?"
+msgstr "Are you sure you want to remove the workout <strong>\"%(routine_name)s\"</strong> from student <strong>%(person_name)s</strong>?"
+
+msgid "O treino será movido para o histórico de treinos anteriores e não será mais exibido como ativo."
+msgstr "The workout will be moved to the previous workouts history and will no longer be shown as active."
+
+msgid "Sim, Remover"
+msgstr "Yes, Remove"
+
+msgid "Ocultar"
+msgstr "Hide"
+
+msgid "Possível cadastro duplicado"
+msgstr "Possible duplicate record"
+
+msgid "Escolher Foto"
+msgstr "Choose Photo"
+
+msgid "JPG, PNG, GIF, WEBP | Máx: 5MB | 100x100 até 2000x2000px"
+msgstr "JPG, PNG, GIF, WEBP | Max: 5MB | 100x100 to 2000x2000px"
+
+msgid "Informações Pessoais"
+msgstr "Personal Information"
+
+msgid "Nome Completo *"
+msgstr "Full Name *"
+
+msgid "E-mail *"
+msgstr "Email *"
+
+msgid "Usado no login. Você recebe um link de acesso para enviar ao aluno"
+msgstr "Used for login. You get an access link to send to the student"
+
+msgid "Rua, número, complemento"
+msgstr "Street, number, unit"
+
+msgid "Nome da cidade"
+msgstr "City name"
+
+msgid "UF"
+msgstr "State"
+
+msgid "Ficha da personal"
+msgstr "Trainer profile"
+
+msgid "Aparece em destaque na ficha do aluno. O aluno não vê."
+msgstr "Shown prominently on the student's profile. The student can't see it."
+
+msgid "O pacote e os valores combinados ficam em"
+msgstr "The package and agreed amounts are in"
+
+msgid "O pacote e os valores combinados são definidos depois de cadastrar, na ficha do aluno (<strong>Vender pacote</strong>)."
+msgstr "The package and agreed amounts are set after registering, on the student's profile (<strong>Sell package</strong>)."
+
+msgid "Anotações internas"
+msgstr "Internal notes"
+
+msgid "Anotações internas <small class=\"text-muted fw-normal\">(o aluno não vê)</small>"
+msgstr "Internal notes <small class=\"text-muted fw-normal\">(student can't see)</small>"
+
+msgid "Combinados, preferências, observações da personal..."
+msgstr "Agreements, preferences, trainer notes..."
+
+msgid "Situação inicial"
+msgstr "Initial status"
+
+msgid "Para pausar ou encerrar depois, use \"Alterar situação\" na ficha (fica registrado no histórico)."
+msgstr "To pause or end later, use \"Change status\" on the profile (it is recorded in the history)."
+
+#, python-format
+msgid "Situação: <strong>%(get_status_display)s</strong> —"
+msgstr "Status: <strong>%(get_status_display)s</strong> —"
+
+msgid "alterar situação"
+msgstr "change status"
+
+msgid "Salvar Aluno"
+msgstr "Save Student"
+
+#, python-format
+msgid "<small class=\"text-muted d-block\">ID do Aluno</small> <strong>#%(pk)s</strong>"
+msgstr "<small class=\"text-muted d-block\">Student ID</small> <strong>#%(pk)s</strong>"
+
+#, python-format
+msgid "<small class=\"text-muted d-block\">Cadastrado em</small> <strong>%(created_at)s</strong>"
+msgstr "<small class=\"text-muted d-block\">Registered on</small> <strong>%(created_at)s</strong>"
+
+msgid "Conta de usuário"
+msgstr "User account"
+
+msgid "Criada"
+msgstr "Created"
+
+msgid "Pendente"
+msgstr "Pending"
+
+msgid "Ao salvar, será criada a conta do aluno e você recebe um link de uso único (copiar ou WhatsApp) para ele criar a senha."
+msgstr "On save, the student's account is created and you get a single-use link (copy or WhatsApp) for them to create a password."
+
+msgid "Use uma foto clara e recente do aluno"
+msgstr "Use a clear, recent photo of the student"
+
+msgid "O e-mail será usado para login do aluno"
+msgstr "Email will be used for the student's login"
+
+msgid "Anote restrições médicas em &quot;Saúde, lesões e restrições&quot;"
+msgstr "Note medical restrictions in &quot;Health, injuries, and restrictions&quot;"
+
+msgid "Mantenha os dados atualizados para melhor acompanhamento"
+msgstr "Keep your data up to date for better tracking"
+
+#, python-format
+msgid "Histórico e Progresso de %(person_name)s - %(brand_name)s"
+msgstr "%(person_name)s's History and Progress - %(brand_name)s"
+
+msgid "Histórico e Progresso"
+msgstr "History and Progress"
+
+msgid "Treinos no Último Mês"
+msgstr "Workouts in the Last Month"
+
+msgid "Média Semanal (3m)"
+msgstr "Weekly Average (3m)"
+
+msgid "Total de treinos"
+msgstr "Total workouts"
+
+#, python-format
+msgid "%(active_routines)s Ativos"
+msgstr "%(active_routines)s Active"
+
+msgid "Nenhuma sessão concluída ainda"
+msgstr "No completed sessions yet"
+
+msgid "Treinos Mais Realizados"
+msgstr "Most Completed Workouts"
+
+msgid "Evolução dos Treinos"
+msgstr "Workouts Progress"
+
+msgid "Detalhes"
+msgstr "Details"
+
+#, python-format
+msgid "%(person_name)s ainda não concluiu nenhum treino."
+msgstr "%(person_name)s hasn't completed any workouts yet."
+
+#, python-format
+msgid "Link de acesso - %(person_name)s - %(brand_name)s"
+msgstr "Access link - %(person_name)s - %(brand_name)s"
+
+#, python-format
+msgid "Link de acesso de %(person_name)s"
+msgstr "Access link for %(person_name)s"
+
+msgid "Este aluno já criou uma senha. O link abaixo serve para <strong>redefinir o acesso</strong> (por exemplo, se ele esqueceu a senha e o e-mail de recuperação não chegou). Ao ser usado, ele define uma nova senha."
+msgstr "This student has already created a password. The link below is for <strong>resetting access</strong> (for example, if they forgot their password and the recovery email didn't arrive). When used, it sets a new password."
+
+msgid "O aluno ainda <strong>não criou a senha</strong>. Envie o link abaixo."
+msgstr "The student hasn't <strong>created a password</strong> yet. Send the link below."
+
+msgid "Link de acesso (uso único, válido por 7 dias)"
+msgstr "Access link (single use, valid for 7 days)"
+
+msgid "Enviar pelo WhatsApp"
+msgstr "Send via WhatsApp"
+
+msgid "Sem telefone cadastrado: o WhatsApp vai pedir para você escolher o contato."
+msgstr "No phone number on file: WhatsApp will ask you to choose the contact."
+
+msgid "Quem tiver este link consegue entrar como o aluno até ele ser usado, então envie só para o próprio aluno. Depois de usado o link deixa de funcionar. Enviou para a pessoa errada? Revogue: o link atual para de funcionar e um novo é gerado."
+msgstr "Anyone with this link can sign in as the student until it's used, so send it only to the student. Once it's used, the link stops working. Sent it to the wrong person? Revoke it: the current link stops working and a new one is generated."
+
+msgid "Revogar o link atual? Quem tiver o link antigo não conseguirá mais usá-lo."
+msgstr "Revoke the current link? Anyone with the old link will no longer be able to use it."
+
+msgid "Revogar e gerar novo link"
+msgstr "Revoke and generate new link"
+
+msgid "Novo Aluno"
+msgstr "New Student"
+
+msgid "Nome, e-mail, telefone ou #ID..."
+msgstr "Name, email, phone or #ID..."
+
+msgid "Pesquisar alunos"
+msgstr "Search students"
+
+msgid "Filtros"
+msgstr "Filters"
+
+msgid "Todas"
+msgstr "All"
+
+msgid "Limpar"
+msgstr "Clear"
+
+msgid "Aplicar"
+msgstr "Apply"
+
+msgid "Pesquisar"
+msgstr "Search"
+
+msgid "Limpar filtros"
+msgstr "Clear filters"
+
+#, python-format
+msgid "%(count)s aluno encontrado"
+msgid_plural "%(count)s alunos encontrados"
+msgstr[0] "%(count)s student found"
+msgstr[1] "%(count)s students found"
+
+msgid "pacote vencido"
+msgstr "package expired"
+
+#, python-format
+msgid "vence em %(days_to_plan_expiry)sd"
+msgstr "expires in %(days_to_plan_expiry)sd"
+
+#, python-format
+msgid "%(total_workouts)s treino · último há %(last_workout_at)s"
+msgid_plural "%(total_workouts)s treinos · último há %(last_workout_at)s"
+msgstr[0] "%(total_workouts)s workout · last one %(last_workout_at)s ago"
+msgstr[1] "%(total_workouts)s workouts · last one %(last_workout_at)s ago"
+
+msgid "Nenhum treino ainda"
+msgstr "No workouts yet"
+
+msgid "Nenhum aluno encontrado."
+msgstr "No students found."
+
+#, python-format
+msgid "ID: #%(id)s"
+msgstr "ID: #%(id)s"
+
+#, python-format
+msgid "pacote vence em %(days_to_plan_expiry)sd"
+msgstr "package expires in %(days_to_plan_expiry)sd"
+
+#, python-format
+msgid "%(age)s anos"
+msgstr "%(age)s years old"
+
+msgid "Último treino"
+msgstr "Last workout"
+
+msgid "Nenhum treino"
+msgstr "No workouts"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "Idade"
+msgstr "Age"
+
+msgid "Último Treino"
+msgstr "Last Workout"
+
+#, python-format
+msgid "%(last_workout_at)s atrás"
+msgstr "%(last_workout_at)s ago"
+
+msgid "Nenhum"
+msgstr "None"
+
+msgid "Paginação"
+msgstr "Pagination"
+
+msgid "&laquo; Anterior"
+msgstr "&laquo; Previous"
+
+#, python-format
+msgid "Página %(number)s de %(num_pages)s"
+msgstr "Page %(number)s of %(num_pages)s"
+
+msgid "Próxima &raquo;"
+msgstr "Next &raquo;"
+
+#, python-format
+msgid "Cancelar pacote - %(person_name)s - %(brand_name)s"
+msgstr "Cancel package - %(person_name)s - %(brand_name)s"
+
+msgid "Cálculo da devolução"
+msgstr "Refund calculation"
+
+msgid "Pago por este pacote"
+msgstr "Paid for this package"
+
+#, python-format
+msgid "Aulas dadas: %(used)s de %(sessions)s"
+msgstr "Classes held: %(used)s of %(sessions)s"
+
+msgid "Este pacote não tem valor combinado: as aulas dadas não foram valorizadas."
+msgstr "This package has no agreed price: the classes taught have not been valued."
+
+#, python-format
+msgid "Restavam %(left)s aula. O valor é uma sugestão: ajuste abaixo se o combinado for outro."
+msgid_plural "Restavam %(left)s aulas. O valor é uma sugestão: ajuste abaixo se o combinado for outro."
+msgstr[0] "%(left)s class was left. The amount is a suggestion: adjust below if the agreement was different."
+msgstr[1] "%(left)s classes were left. The amount is a suggestion: adjust below if the agreement was different."
+
+msgid "Recalcular"
+msgstr "Recalculate"
+
+msgid "0 = cancelar sem devolver."
+msgstr "0 = cancel without a refund."
+
+msgid "As aulas já dadas continuam no histórico, sem pacote. O pagamento original não é apagado: a devolução fica registrada como um lançamento à parte (e dá para anular se foi engano)."
+msgstr "Classes already given stay in the history, without a package. The original payment is not deleted: the refund is recorded as a separate entry (and can be voided if it was a mistake)."
+
+msgid "Cancelar este pacote?"
+msgstr "Cancel this package?"
+
+#, python-format
+msgid "Editar pacote - %(person_name)s - %(brand_name)s"
+msgstr "Edit package - %(person_name)s - %(brand_name)s"
+
+#, python-format
+msgid "%(used)s de %(sessions)s aulas já foram dadas: o pacote não pode ficar com menos que isso."
+msgstr "%(used)s of %(sessions)s classes have already been given: the package can't have fewer than that."
+
+#, python-format
+msgid "Pago até agora: <strong>%(paid)s</strong>."
+msgstr "Paid so far: <strong>%(paid)s</strong>."
+
+msgid "Mudar o número de aulas ou o valor refaz o saldo e o que falta pagar; nada é apagado."
+msgstr "Changing the number of classes or the amount recalculates the balance and what's left to pay; nothing is deleted."
+
+msgid "O prazo conta a partir da primeira aula; prorrogações e dias congelados já somados continuam valendo."
+msgstr "The validity period counts from the first class; extensions and frozen days already added still apply."
+
+msgid "Valor combinado (sigiloso)"
+msgstr "Agreed amount (confidential)"
+
+msgid "Os pagamentos já registrados não mudam. Para devolver dinheiro, use <em>Cancelar com devolução</em> ou <em>Devolver ou estornar</em>."
+msgstr "Payments already recorded don't change. To refund money, use <em>Cancel with refund</em> or <em>Refund or reverse</em>."
+
+#, python-format
+msgid "Vender pacote - %(person_name)s - %(brand_name)s"
+msgstr "Sell package - %(person_name)s - %(brand_name)s"
+
+#, python-format
+msgid "%(person_name)s ainda tem o pacote <strong>%(name)s</strong> (%(left)s aula sobrando). O novo pacote só é usado depois que as aulas do atual acabarem."
+msgid_plural "%(person_name)s ainda tem o pacote <strong>%(name)s</strong> (%(left)s aulas sobrando). O novo pacote só é usado depois que as aulas do atual acabarem."
+msgstr[0] "%(person_name)s still has the <strong>%(name)s</strong> package (%(left)s class left over). The new package is only used after the classes in the current one run out."
+msgstr[1] "%(person_name)s still has the <strong>%(name)s</strong> package (%(left)s classes left over). The new package is only used after the classes in the current one run out."
+
+msgid "Escolha o pacote"
+msgstr "Choose the package"
+
+msgid "Os pacotes vêm do"
+msgstr "Packages come from the"
+
+msgid "catálogo"
+msgstr "catalog"
+
+msgid ". O prazo começa a contar na <strong>primeira aula</strong>."
+msgstr ". The deadline starts counting on the <strong>first class</strong>."
+
+#, python-format
+msgid "%(valid_days)s dias"
+msgstr "%(valid_days)s days"
+
+msgid "Nenhum pacote ativo no catálogo."
+msgstr "No active packages in the catalog."
+
+msgid "primeiro."
+msgstr "first."
+
+msgid "Valor combinado com este aluno"
+msgstr "Amount agreed with this student"
+
+msgid "Vem preenchido pelo pacote; mude se o combinado for diferente. Digite o valor por aula ou o total: o outro é calculado."
+msgstr "Pre-filled from the package; change it if the agreement is different. Enter the price per class or the total: the other is calculated."
+
+msgid "ajustado"
+msgstr "adjusted"
+
+msgid "difere do valor do pacote no catálogo"
+msgstr "differs from the package price in the catalog"
+
+msgid "Os valores são sigilosos: só você os vê. O pagamento é registrado na primeira aula."
+msgstr "Amounts are confidential: only you can see them. Payment is recorded at the first class."
+
+#, python-format
+msgid "%(person_name)s vinha em <strong>%(label)s</strong>. Depois de vender, a agenda abre com esse horário já preenchido, a partir do dia seguinte à última aula marcada: você confere as datas (e desmarca feriados) e confirma."
+msgstr "%(person_name)s was in <strong>%(label)s</strong>. After the sale, the schedule opens with that time slot already filled in, starting the day after the last scheduled class: you review the dates (and cancel holidays) and confirm."
+
+#, python-format
+msgid "Situação - %(person_name)s - %(brand_name)s"
+msgstr "Status - %(person_name)s - %(brand_name)s"
+
+#, python-format
+msgid "Situação de %(person_name)s"
+msgstr "%(person_name)s's status"
+
+#, python-format
+msgid "Situação atual: <strong>%(get_status_display)s</strong>"
+msgstr "Current status: <strong>%(get_status_display)s</strong>"
+
+msgid "Obrigatório ao pausar ou encerrar. Fica no histórico do aluno."
+msgstr "Required when pausing or ending. Saved in the student's history."
+
+msgid "<strong>Experimental</strong> e <strong>Ativo</strong>: o aluno acessa o app."
+msgstr "<strong>Trial</strong> and <strong>Active</strong>: the student can access the app."
+
+msgid "<strong>Pausado</strong> e <strong>Ex-aluno</strong>: o acesso é bloqueado, mas o histórico e as fotos ficam guardados. Para voltar, é só reativar aqui."
+msgstr "<strong>Paused</strong> and <strong>Former student</strong>: access is blocked, but history and photos are kept. To come back, just reactivate here."
+
+msgid "Quer apagar tudo? Use <em>Excluir</em> na ficha do aluno."
+msgstr "Want to delete everything? Use <em>Delete</em> on the student's profile."
+
+#, python-format
+msgid "Treino - %(routine_name)s"
+msgstr "Workout - %(routine_name)s"
+
+msgid "Salvo"
+msgstr "Saved"
+
+msgid "Pausar"
+msgstr "Pause"
+
+msgid "Preferências do treino"
+msgstr "Workout preferences"
+
+msgid "Som no fim do descanso"
+msgstr "Sound at end of rest"
+
+msgid "Vibração"
+msgstr "Vibration"
+
+msgid "Todos os exercícios concluídos"
+msgstr "All exercises completed"
+
+#, python-format
+msgid "Exercício <strong id=\"progressCurrent\">%(exercises_done)s</strong> de %(exercise_total)s"
+msgstr "Exercise <strong id=\"progressCurrent\">%(exercises_done)s</strong> of %(exercise_total)s"
+
+#, python-format
+msgid "/%(sets_total)s séries"
+msgstr "/%(sets_total)s sets"
+
+msgid "Séries feitas"
+msgstr "Sets completed"
+
+msgid "Concluídos"
+msgstr "Completed"
+
+#, python-format
+msgid "· descanso %(rest_seconds)ss"
+msgstr "· rest %(rest_seconds)ss"
+
+msgid "Feito"
+msgstr "Done"
+
+#, python-format
+msgid "Última vez: <strong>%(previous_weight)s kg</strong>"
+msgstr "Last time: <strong>%(previous_weight)s kg</strong>"
+
+#, python-format
+msgid "Recorde: <strong>%(record)s kg</strong>"
+msgstr "Record: <strong>%(record)s kg</strong>"
+
+msgid "Ver execução"
+msgstr "View run"
+
+msgid "kg"
+msgstr "kg"
+
+msgid "Novo recorde de carga"
+msgstr "New weight record"
+
+msgid "Observação sobre este exercício (dor, ajuste, sensação...)"
+msgstr "Note about this exercise (pain, adjustment, how it felt...)"
+
+msgid "Este treino ainda não tem exercícios. Fale com a sua personal trainer."
+msgstr "This workout doesn't have any exercises yet. Talk to your trainer."
+
+msgid "Como foi o treino?"
+msgstr "How was the workout?"
+
+msgid "Cansaço, dores, o que mudou... (a personal vai ler)"
+msgstr "Fatigue, soreness, what changed... (the trainer will read this)"
+
+msgid "Finalizar Treino"
+msgstr "Finish Workout"
+
+msgid "Descartar este treino? Nada do que foi feito nele será guardado."
+msgstr "Discard this workout? Nothing done in it will be saved."
+
+msgid "Descartar treino"
+msgstr "Discard workout"
+
+msgid "Descanso <strong id=\"restTime\" class=\"font-monospace fs-5\">00:00</strong>"
+msgstr "Rest <strong id=\"restTime\" class=\"font-monospace fs-5\">00:00</strong>"
+
+#, python-format
+msgid "Treino concluído - %(brand_name)s"
+msgstr "Workout complete - %(brand_name)s"
+
+msgid "Treino concluído!"
+msgstr "Workout complete!"
+
+#, python-format
+msgid "%(duration_minutes)s<small class=\"fs-6\"> min</small>"
+msgstr "%(duration_minutes)s<small class=\"fs-6\"> min</small>"
+
+msgid "duração"
+msgstr "duration"
+
+msgid "séries feitas"
+msgstr "sets completed"
+
+#, python-format
+msgid "%(volume)s<small class=\"fs-6\"> kg</small>"
+msgstr "%(volume)s<small class=\"fs-6\"> kg</small>"
+
+msgid "volume levantado"
+msgstr "volume lifted"
+
+msgid "exercícios concluídos"
+msgstr "exercises completed"
+
+msgid "🏆 Novos recordes de carga"
+msgstr "🏆 New load records"
+
+#, python-format
+msgid "<strong>Comparado com o último treino</strong> <small class=\"text-muted\">(%(date)s)</small>"
+msgstr "<strong>Compared with the last workout</strong> <small class=\"text-muted\">(%(date)s)</small>"
+
+msgid "Volume levantado"
+msgstr "Volume lifted"
+
+msgid "sem base de comparação"
+msgstr "no basis for comparison"
+
+msgid "igual"
+msgstr "same"
+
+#, python-format
+msgid "%(duration_minutes)s min <small>(antes: %(last_duration)s min)</small>"
+msgstr "%(duration_minutes)s min <small>(before: %(last_duration)s min)</small>"
+
+msgid "Seu comentário"
+msgstr "Your comment"
+
+msgid "Voltar ao início"
+msgstr "Back to home"
+
+msgid "Ver histórico"
+msgstr "View history"
+
+msgid "Instale o app no seu celular"
+msgstr "Install the app on your phone"
+
+msgid "Abre direto da tela inicial, em tela cheia, e continua funcionando com sinal fraco."
+msgstr "Opens straight from the home screen, in full screen, and keeps working with a weak signal."
+
+msgid "No iPhone: toque em"
+msgstr "On iPhone: tap"
+
+msgid "<strong>Compartilhar</strong> e depois em <strong>Adicionar à Tela de Início</strong>."
+msgstr "<strong>Share</strong> and then <strong>Add to Home Screen</strong>."
+
+msgid "Instalar"
+msgstr "Install"
+
+msgid "Agora não"
+msgstr "Not now"
+
+msgid "Idioma"
+msgstr "Language"
+
+msgid "A mesma entrada serve para a personal e para os alunos."
+msgstr "The same login works for the trainer and the students."
+
+msgid "seu@email.com"
+msgstr "your@email.com"
+
+msgid "Senha"
+msgstr "Password"
+
+msgid "Lembrar de mim"
+msgstr "Remember me"
+
+msgid "Esqueceu a senha?"
+msgstr "Forgot your password?"
+
+msgid "Primeiro acesso? Use o <strong>link de convite</strong> que a sua personal enviou. Se o e-mail de recuperação não chegar, peça um novo link de acesso a ela."
+msgstr "First time here? Use the <strong>invitation link</strong> your trainer sent. If the recovery email doesn't arrive, ask your trainer for a new access link."
+
+msgid "Buscar (atalho: barra /)"
+msgstr "Search (shortcut: slash /)"
+
+msgid "Buscar ( / )"
+msgstr "Search ( / )"
+
+msgid "Recentes"
+msgstr "Recent"
+
+msgid "limpar"
+msgstr "clear"
+
+msgid "<kbd>↑</kbd> <kbd>↓</kbd> escolher · <kbd>Enter</kbd> abrir · <kbd>Esc</kbd> fechar"
+msgstr "<kbd>↑</kbd> <kbd>↓</kbd> select · <kbd>Enter</kbd> open · <kbd>Esc</kbd> close"
+
+#, python-format
+msgid "Continuar com %(name)s"
+msgstr "Continue with %(name)s"
+
+msgid "ou com e-mail"
+msgstr "or with email"
+
+msgid "Menu principal"
+msgstr "Main menu"
+
+msgid "Iniciar o treino de hoje"
+msgstr "Start today's workout"
+
+msgid "Continuar o treino em andamento"
+msgstr "Continue the workout in progress"
+
+#, python-format
+msgid ", %(badge)s pendente"
+msgid_plural ", %(badge)s pendentes"
+msgstr[0] ", %(badge)s pending"
+msgstr[1] ", %(badge)s pending"
+
+msgid "Mais"
+msgstr "More"
+
+msgid "Criar"
+msgstr "Create"
+
+msgid "Tema"
+msgstr "Theme"
+
+msgid "claro"
+msgstr "light"
+
+msgid "Claro"
+msgstr "Light"
+
+msgid "escuro"
+msgstr "dark"
+
+msgid "Escuro"
+msgstr "Dark"
+
+msgid "automático"
+msgstr "automatic"
+
+msgid "Automático"
+msgstr "Automatic"
+
+msgid "Sem conexão - Muscle Track"
+msgstr "No connection - Muscle Track"
+
+msgid "Sem conexão"
+msgstr "No connection"
+
+msgid "Não foi possível carregar esta página. Se você estava treinando, o que já foi marcado será enviado quando a internet voltar."
+msgstr "Couldn't load this page. If you were working out, what you've already marked will be sent when the internet is back."
+
+msgid "Tentar de novo"
+msgstr "Try again"

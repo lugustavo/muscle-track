@@ -1,6 +1,6 @@
-{% load static navigation %}
+{% load static navigation i18n %}
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="{{ LANGUAGE_CODE|default:'pt-br' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -14,6 +14,8 @@
 
     <!-- Color theme: before any CSS so the page never flashes -->
     <script src="{% static 'js/theme.js' %}"></script>
+    <!-- Translations for the scripts (gettext / ngettext / interpolate) -->
+    <script src="{% url 'javascript-catalog' %}"></script>
 
     <!-- PWA -->
     <link rel="manifest" href="{% url 'core:pwa_manifest' %}" crossorigin="use-credentials">
@@ -43,6 +45,7 @@
             </a>
             <div class="d-flex align-items-center ms-auto ms-lg-2 order-lg-last me-2 me-lg-0">
                 {% if user.is_staff or user.is_superuser %}{% include 'includes/_search_box.html' %}{% endif %}
+                {% include 'includes/_language_menu.html' %}
                 {% include 'includes/_theme_menu.html' %}
             </div>
             <button class="navbar-toggler{% if tabbar or hide_topmenu %} d-none{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -54,52 +57,52 @@
                         {% if user.is_staff %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'core:student_list' %}">
-                                    <i class="bi bi-people"></i> Alunos
+                                    <i class="bi bi-people"></i> {% trans "Alunos" %}
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'core:exercise_list' %}">
-                                    <i class="bi bi-activity"></i> Exercícios
+                                    <i class="bi bi-activity"></i> {% trans "Exercícios" %}
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'core:routine_list' %}">
-                                    <i class="bi bi-calendar-check"></i> Treinos
+                                    <i class="bi bi-calendar-check"></i> {% trans "Treinos" %}
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'core:agenda' %}">
-                                    <i class="bi bi-calendar-week"></i> Agenda
+                                    <i class="bi bi-calendar-week"></i> {% trans "Agenda" %}
                                 </a>
                             </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="financeDropdown" role="button" data-bs-toggle="dropdown">
-                                    <i class="bi bi-cash-coin"></i> Financeiro
+                                    <i class="bi bi-cash-coin"></i> {% trans "Financeiro" %}
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{% url 'core:finance' %}"><i class="bi bi-graph-up"></i> Resumo e pagamentos</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'core:plan_list' %}"><i class="bi bi-box-seam"></i> Pacotes</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'core:finance' %}"><i class="bi bi-graph-up"></i> {% trans "Resumo e pagamentos" %}</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'core:plan_list' %}"><i class="bi bi-box-seam"></i> {% trans "Pacotes" %}</a></li>
                                 </ul>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="/admin/">
-                                    <i class="bi bi-gear"></i> Admin
+                                    <i class="bi bi-gear"></i> {% trans "Admin" %}
                                 </a>
                             </li>
                         {% else %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'core:my_workouts' %}">
-                                    <i class="bi bi-fire"></i> Meus Treinos
+                                    <i class="bi bi-fire"></i> {% trans "Meus Treinos" %}
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'core:my_agenda' %}">
-                                    <i class="bi bi-calendar-week"></i> Agenda
+                                    <i class="bi bi-calendar-week"></i> {% trans "Agenda" %}
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'core:my_history' %}">
-                                    <i class="bi bi-graph-up"></i> Histórico
+                                    <i class="bi bi-graph-up"></i> {% trans "Histórico" %}
                                 </a>
                             </li>
                         {% endif %}
@@ -114,41 +117,41 @@
                             <ul class="dropdown-menu dropdown-menu-end">
                                 {% if not user.is_staff %}
                                 <li><a class="dropdown-item" href="{% url 'core:my_profile' %}">
-                                    <i class="bi bi-person-circle"></i> Meu Perfil
+                                    <i class="bi bi-person-circle"></i> {% trans "Meu Perfil" %}
                                 </a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 {% endif %}
                                 {% if not user.is_staff %}
                                 <li><a class="dropdown-item" href="{% url 'core:my_privacy' %}">
-                                    <i class="bi bi-shield-lock"></i> Privacidade e meus dados
+                                    <i class="bi bi-shield-lock"></i> {% trans "Privacidade e meus dados" %}
                                 </a></li>
                                 {% endif %}
                                 <li><a class="dropdown-item" href="{% url 'core:notification_settings' %}">
-                                    <i class="bi bi-bell"></i> Notificações
+                                    <i class="bi bi-bell"></i> {% trans "Notificações" %}
                                 </a></li>
                                 {% if not user.is_staff %}
                                 <li><a class="dropdown-item" href="{% url 'core:my_package' %}">
-                                    <i class="bi bi-box-seam"></i> Meu pacote
+                                    <i class="bi bi-box-seam"></i> {% trans "Meu pacote" %}
                                 </a></li>
                                 <li><a class="dropdown-item" href="{% url 'core:my_evolution' %}">
-                                    <i class="bi bi-rulers"></i> Minha evolução
+                                    <i class="bi bi-rulers"></i> {% trans "Minha evolução" %}
                                 </a></li>
                                 {% endif %}
                                 <li><a class="dropdown-item" href="{% url 'account_change_password' %}">
-                                    <i class="bi bi-key"></i> Alterar senha
+                                    <i class="bi bi-key"></i> {% trans "Alterar senha" %}
                                 </a></li>
                                 {% if sso_providers %}<li><a class="dropdown-item" href="{% url 'socialaccount_connections' %}" data-connections-link>
-                                    <i class="bi bi-link-45deg"></i> Contas conectadas
+                                    <i class="bi bi-link-45deg"></i> {% trans "Contas conectadas" %}
                                 </a></li>{% endif %}
                                 <li><a class="dropdown-item" href="{% url 'account_logout' %}">
-                                    <i class="bi bi-box-arrow-right"></i> Sair
+                                    <i class="bi bi-box-arrow-right"></i> {% trans "Sair" %}
                                 </a></li>
                             </ul>
                         </li>
                     {% else %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'account_login' %}">
-                                <i class="bi bi-box-arrow-in-right"></i> Entrar
+                                <i class="bi bi-box-arrow-in-right"></i> {% trans "Entrar" %}
                             </a>
                         </li>
                     {% endif %}
@@ -159,7 +162,7 @@
 
     <!-- Offline notice (static/js/pwa.js shows it while the device has no connection) -->
     <div class="offline-banner d-none" role="status" data-offline-banner>
-        <i class="bi bi-wifi-off"></i> <span data-offline-text>Sem conexão. Algumas telas só abrem quando a internet voltar.</span>
+        <i class="bi bi-wifi-off"></i> <span data-offline-text>{% trans "Sem conexão. Algumas telas só abrem quando a internet voltar." %}</span>
     </div>
 
     <!-- Messages -->
@@ -185,8 +188,8 @@
     <!-- Footer -->
     <footer{% if tabbar %} class="d-none d-lg-block"{% endif %}>
         <div class="container text-center">
-            <p class="mb-0">&copy; {% now "Y" %} {{ brand_name }}{% if studio_name %} · feito com {{ app_name }}{% else %} - Gestão para personal trainers{% endif %}
-                · <a href="{% url 'core:privacy_policy' %}" class="text-white-50">Privacidade</a></p>
+            <p class="mb-0">{% trans "&copy;" %} {% now "Y" %} {{ brand_name }}{% if studio_name %} {% blocktrans trimmed %}· feito com {{ app_name }}{% endblocktrans %}{% else %} {% trans "- Gestão para personal trainers" %}{% endif %}
+                · <a href="{% url 'core:privacy_policy' %}" class="text-white-50">{% trans "Privacidade" %}</a></p>
         </div>
     </footer>
 

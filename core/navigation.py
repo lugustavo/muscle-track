@@ -14,32 +14,33 @@ from urllib.parse import urlencode, urlsplit
 
 from django.urls import Resolver404, resolve
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import gettext as _, gettext_lazy as _l
 
 MAX_NEXT_LENGTH = 1000
 
 # url name -> label for a Back button that leads to that page
 BACK_LABELS = {
-    'home': 'Voltar ao painel',
-    'student_list': 'Voltar aos alunos',
-    'student_detail': 'Voltar ao aluno',
-    'student_history': 'Voltar ao histórico do aluno',
-    'student_invite': 'Voltar ao convite',
-    'agenda': 'Voltar à agenda',
-    'agenda_holidays': 'Voltar aos feriados',
-    'finance': 'Voltar ao financeiro',
-    'finance_refunds': 'Voltar às devoluções',
-    'plan_list': 'Voltar aos planos',
-    'exercise_list': 'Voltar aos exercícios',
-    'exercise_detail': 'Voltar ao exercício',
-    'routine_list': 'Voltar aos treinos',
-    'routine_detail': 'Voltar ao treino',
-    'person_routine_detail': 'Voltar ao progresso do treino',
-    'session_detail': 'Voltar à sessão',
-    'my_workouts': 'Voltar aos treinos',
-    'workout_execute': 'Voltar ao treino em andamento',
-    'my_history': 'Voltar ao histórico',
-    'my_evolution': 'Voltar à minha evolução',
-    'exercise_progress': 'Voltar à evolução do exercício',
+    'home': _l('Voltar ao painel'),
+    'student_list': _l('Voltar aos alunos'),
+    'student_detail': _l('Voltar ao aluno'),
+    'student_history': _l('Voltar ao histórico do aluno'),
+    'student_invite': _l('Voltar ao convite'),
+    'agenda': _l('Voltar à agenda'),
+    'agenda_holidays': _l('Voltar aos feriados'),
+    'finance': _l('Voltar ao financeiro'),
+    'finance_refunds': _l('Voltar às devoluções'),
+    'plan_list': _l('Voltar aos planos'),
+    'exercise_list': _l('Voltar aos exercícios'),
+    'exercise_detail': _l('Voltar ao exercício'),
+    'routine_list': _l('Voltar aos treinos'),
+    'routine_detail': _l('Voltar ao treino'),
+    'person_routine_detail': _l('Voltar ao progresso do treino'),
+    'session_detail': _l('Voltar à sessão'),
+    'my_workouts': _l('Voltar aos treinos'),
+    'workout_execute': _l('Voltar ao treino em andamento'),
+    'my_history': _l('Voltar ao histórico'),
+    'my_evolution': _l('Voltar à minha evolução'),
+    'exercise_progress': _l('Voltar à evolução do exercício'),
 }
 
 
@@ -58,12 +59,14 @@ def safe_next_url(request, default):
     return default
 
 
-def back_label(url, default='Voltar'):
+def back_label(url, default=None):
+    if default is None:
+        default = _('Voltar')
     try:
         match = resolve(urlsplit(url).path)
     except Resolver404:
         return default
-    return BACK_LABELS.get(match.url_name, default)
+    return str(BACK_LABELS.get(match.url_name, default))
 
 
 def with_next(url, next_url):

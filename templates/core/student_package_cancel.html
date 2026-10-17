@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation money_tags %}
 
-{% block title %}Cancelar pacote - {{ student.person_name }} - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed with person_name=student.person_name %}Cancelar pacote - {{ person_name }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3 gap-2">
     <div class="min-w-0">
-        <h1 class="h3 mb-0"><i class="bi bi-x-octagon"></i> Cancelar pacote</h1>
+        <h1 class="h3 mb-0"><i class="bi bi-x-octagon"></i> {% trans "Cancelar pacote" %}</h1>
         <div class="text-muted text-break">{{ student.person_name }} · {{ package.name }}</div>
     </div>
     {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default fragment='#tab-ficha' %}
@@ -15,20 +16,20 @@
 <div class="mx-auto" style="max-width: 640px;">
     <section class="card mb-3" data-quote>
         <div class="card-body">
-            <h2 class="h6 text-uppercase text-muted">Cálculo da devolução</h2>
+            <h2 class="h6 text-uppercase text-muted">{% trans "Cálculo da devolução" %}</h2>
             <dl class="row mb-0">
-                <dt class="col-7 fw-normal">Pago por este pacote</dt><dd class="col-5 text-end" data-quote-paid>{{ quote.paid|money }}</dd>
-                <dt class="col-7 fw-normal">Aulas dadas: {{ quote.used }} de {{ quote.sessions }}{% if quote.per_class %} × {{ quote.per_class|money }}{% endif %}</dt>
+                <dt class="col-7 fw-normal">{% trans "Pago por este pacote" %}</dt><dd class="col-5 text-end" data-quote-paid>{{ quote.paid|money }}</dd>
+                <dt class="col-7 fw-normal">{% blocktrans trimmed with used=quote.used sessions=quote.sessions %}Aulas dadas: {{ used }} de {{ sessions }}{% endblocktrans %}{% if quote.per_class %} × {{ quote.per_class|money }}{% endif %}</dt>
                 <dd class="col-5 text-end" data-quote-used>− {{ quote.used_value|money }}</dd>
-                {% if quote.fee %}<dt class="col-7 fw-normal">Taxa ou multa combinada</dt><dd class="col-5 text-end">− {{ quote.fee|money }}</dd>{% endif %}
-                <dt class="col-7 border-top pt-2">Valor a devolver</dt><dd class="col-5 text-end border-top pt-2 fw-bold fs-5" data-quote-suggested>{{ quote.suggested|money }}</dd>
+                {% if quote.fee %}<dt class="col-7 fw-normal">{% trans "Taxa ou multa combinada" %}</dt><dd class="col-5 text-end">− {{ quote.fee|money }}</dd>{% endif %}
+                <dt class="col-7 border-top pt-2">{% trans "Valor a devolver" %}</dt><dd class="col-5 text-end border-top pt-2 fw-bold fs-5" data-quote-suggested>{{ quote.suggested|money }}</dd>
             </dl>
-            {% if not quote.per_class %}<div class="small text-warning-emphasis mt-2"><i class="bi bi-exclamation-triangle"></i> Este pacote não tem valor combinado: as aulas dadas não foram valorizadas.</div>{% endif %}
-            <div class="small text-muted mt-2">Restavam {{ quote.left }} aula{{ quote.left|pluralize }}. O valor é uma sugestão: ajuste abaixo se o combinado for outro.</div>
+            {% if not quote.per_class %}<div class="small text-warning-emphasis mt-2"><i class="bi bi-exclamation-triangle"></i> {% trans "Este pacote não tem valor combinado: as aulas dadas não foram valorizadas." %}</div>{% endif %}
+            <div class="small text-muted mt-2">{% blocktrans trimmed count left=quote.left %}Restavam {{ left }} aula. O valor é uma sugestão: ajuste abaixo se o combinado for outro.{% plural %}Restavam {{ left }} aulas. O valor é uma sugestão: ajuste abaixo se o combinado for outro.{% endblocktrans %}</div>
             <form method="get" class="d-flex gap-2 align-items-end mt-3" data-fee-form>
-                <div class="flex-grow-1"><label class="form-label small mb-0" for="fee-calc">Taxa ou multa combinada</label>
+                <div class="flex-grow-1"><label class="form-label small mb-0" for="fee-calc">{% trans "Taxa ou multa combinada" %}</label>
                     <input id="fee-calc" name="fee" type="number" step="0.01" min="0" inputmode="decimal" value="{{ fee|default_if_none:'' }}" class="form-control form-control-sm" data-no-draft></div>
-                <button class="btn btn-sm btn-outline-secondary">Recalcular</button>
+                <button class="btn btn-sm btn-outline-secondary">{% trans "Recalcular" %}</button>
             </form>
         </div>
     </section>
@@ -42,7 +43,7 @@
                 <div class="col-6">
                     <label class="form-label fw-bold" for="{{ form.amount.id_for_label }}">{{ form.amount.label }}</label>{{ form.amount }}
                     {% if form.amount.errors %}<div class="text-danger small">{{ form.amount.errors|join:" " }}</div>{% endif %}
-                    <div class="form-text">0 = cancelar sem devolver.</div>
+                    <div class="form-text">{% trans "0 = cancelar sem devolver." %}</div>
                 </div>
                 <div class="col-6">
                     <label class="form-label fw-bold" for="{{ form.method.id_for_label }}">{{ form.method.label }}</label>{{ form.method }}
@@ -62,9 +63,9 @@
             </div>
             {% endif %}
         </div></section>
-        <div class="alert alert-warning small"><i class="bi bi-info-circle"></i> As aulas já dadas continuam no histórico, sem pacote. O pagamento original não é apagado: a devolução fica registrada como um lançamento à parte (e dá para anular se foi engano).</div>
+        <div class="alert alert-warning small"><i class="bi bi-info-circle"></i> {% trans "As aulas já dadas continuam no histórico, sem pacote. O pagamento original não é apagado: a devolução fica registrada como um lançamento à parte (e dá para anular se foi engano)." %}</div>
         <div class="form-actions d-flex gap-2">
-            <button type="submit" class="btn btn-danger" onclick="return confirm('Cancelar este pacote?');"><i class="bi bi-x-octagon"></i> Cancelar pacote</button>
+            <button type="submit" class="btn btn-danger" onclick="return confirm('{% filter escapejs %}{% trans "Cancelar este pacote?" %}{% endfilter %}');"><i class="bi bi-x-octagon"></i> {% trans "Cancelar pacote" %}</button>
             {% back_button back_default label='Voltar' css='btn btn-outline-secondary' icon='bi-arrow-left' fragment='#tab-ficha' %}
         </div>
     </form>

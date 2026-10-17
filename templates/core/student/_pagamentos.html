@@ -1,41 +1,42 @@
+{% load i18n %}
 {% load money_tags %}
 {% load navigation %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="mb-0"><i class="bi bi-cash-coin"></i> Pagamentos</h5>
+    <h5 class="mb-0"><i class="bi bi-cash-coin"></i> {% trans "Pagamentos" %}</h5>
     <div class="d-flex gap-2">
-        <a href="{% nav_url 'core:refund_create' student.pk %}" class="btn btn-outline-secondary btn-sm" data-refund-new><i class="bi bi-arrow-counterclockwise"></i> Devolver ou estornar</a>
-        <a href="{% nav_url 'core:payment_create' student.pk %}" class="btn btn-success btn-sm"><i class="bi bi-plus-circle"></i> Registrar pagamento</a>
+        <a href="{% nav_url 'core:refund_create' student.pk %}" class="btn btn-outline-secondary btn-sm" data-refund-new><i class="bi bi-arrow-counterclockwise"></i> {% trans "Devolver ou estornar" %}</a>
+        <a href="{% nav_url 'core:payment_create' student.pk %}" class="btn btn-success btn-sm"><i class="bi bi-plus-circle"></i> {% trans "Registrar pagamento" %}</a>
     </div>
 </div>
-<p class="text-muted small"><i class="bi bi-eye-slash"></i> Só você vê os valores. O aluno não tem acesso a esta área.</p>
+<p class="text-muted small"><i class="bi bi-eye-slash"></i> {% trans "Só você vê os valores. O aluno não tem acesso a esta área." %}</p>
 <div class="table-responsive">
     <table class="table table-sm align-middle">
-        <thead class="bg-body-tertiary"><tr><th>Data</th><th>Pacote</th><th>Forma</th><th class="text-end">Valor</th><th></th></tr></thead>
+        <thead class="bg-body-tertiary"><tr><th>{% trans "Data" %}</th><th>{% trans "Pacote" %}</th><th>{% trans "Forma" %}</th><th class="text-end">{% trans "Valor" %}</th><th></th></tr></thead>
         <tbody>
             {% for p in payments %}
             <tr>
-                <td>{{ p.paid_on|date:"d/m/Y" }}</td>
-                <td>{% if p.student_package %}{{ p.student_package.name }}{% else %}{{ p.plan_name|default:"—" }}{% endif %}{% if p.period_end %} <small class="text-muted">(até {{ p.period_end|date:"d/m/y" }})</small>{% endif %}{% if p.notes %}<br><small class="text-muted">{{ p.notes }}</small>{% endif %}</td>
+                <td>{{ p.paid_on|date:_('d/m/Y') }}</td>
+                <td>{% if p.student_package %}{{ p.student_package.name }}{% else %}{{ p.plan_name|default:"—" }}{% endif %}{% if p.period_end %} <small class="text-muted">{% blocktrans trimmed with period_end=p.period_end|date:_('d/m/y') %}(até {{ period_end }}){% endblocktrans %}</small>{% endif %}{% if p.notes %}<br><small class="text-muted">{{ p.notes }}</small>{% endif %}</td>
                 <td>{{ p.get_method_display }}</td>
                 <td class="text-end">{{ p.amount|money }}</td>
                 <td class="text-end text-nowrap">
-                    <a href="{% nav_url 'core:refund_create' student.pk %}&payment={{ p.pk }}" class="btn btn-sm btn-link p-0 me-1" title="Devolver ou estornar" data-payment-refund><i class="bi bi-arrow-counterclockwise"></i><span class="visually-hidden">Devolver ou estornar</span></a>
-                    <form method="post" action="{% nav_url 'core:payment_delete' p.pk %}" class="d-inline" onsubmit="return confirm('Excluir este pagamento? ');">
+                    <a href="{% nav_url 'core:refund_create' student.pk %}&payment={{ p.pk }}" class="btn btn-sm btn-link p-0 me-1" title="{% trans "Devolver ou estornar" %}" data-payment-refund><i class="bi bi-arrow-counterclockwise"></i><span class="visually-hidden">{% trans "Devolver ou estornar" %}</span></a>
+                    <form method="post" action="{% nav_url 'core:payment_delete' p.pk %}" class="d-inline" onsubmit="return confirm('{% filter escapejs %}{% trans "Excluir este pagamento? " %}{% endfilter %}');">
                         {% csrf_token %}
-                        <button class="btn btn-sm btn-link text-danger p-0" title="Excluir"><i class="bi bi-trash"></i></button>
+                        <button class="btn btn-sm btn-link text-danger p-0" title="{% trans "Excluir" %}"><i class="bi bi-trash"></i></button>
                     </form>
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="5" class="text-muted text-center py-3">Nenhum pagamento registrado.</td></tr>
+            <tr><td colspan="5" class="text-muted text-center py-3">{% trans "Nenhum pagamento registrado." %}</td></tr>
             {% endfor %}
             {% for r in refund_rows %}
             <tr class="{% if r.is_voided %}text-muted{% endif %}" data-refund-row="{{ r.pk }}">
-                <td>{{ r.refunded_on|date:"d/m/Y" }}</td>
-                <td>{{ r.get_kind_display }}{% if r.student_package %} · {{ r.student_package.name }}{% endif %}{% if r.is_voided %} <span class="badge bg-secondary">anulada</span>{% endif %}{% if r.reason %}<br><small class="text-muted">{{ r.reason }}</small>{% endif %}</td>
+                <td>{{ r.refunded_on|date:_('d/m/Y') }}</td>
+                <td>{{ r.get_kind_display }}{% if r.student_package %} · {{ r.student_package.name }}{% endif %}{% if r.is_voided %} <span class="badge bg-secondary">{% trans "anulada" %}</span>{% endif %}{% if r.reason %}<br><small class="text-muted">{{ r.reason }}</small>{% endif %}</td>
                 <td>{{ r.get_method_display }}</td>
                 <td class="text-end {% if r.is_voided %}text-decoration-line-through{% endif %}">− {{ r.amount|money }}</td>
-                <td class="text-end"><a href="{% url 'core:refund_detail' r.pk %}" class="small" title="Resumo"><i class="bi bi-file-text"></i><span class="visually-hidden">Resumo</span></a></td>
+                <td class="text-end"><a href="{% url 'core:refund_detail' r.pk %}" class="small" title="{% trans "Resumo" %}"><i class="bi bi-file-text"></i><span class="visually-hidden">{% trans "Resumo" %}</span></a></td>
             </tr>
             {% endfor %}
         </tbody>

@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load static %}
 {% load navigation %}
 
-{% block title %}{{ student.person_name }} - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed with person_name=student.person_name %}{{ person_name }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -34,45 +35,45 @@
             <h1 class="mb-1"><i class="bi bi-person-circle d-none d-lg-inline"></i> {{ student.person_name }}</h1>
             <span class="badge {% if student.status == 'active' %}bg-success{% elif student.status == 'trial' %}bg-info text-dark{% elif student.status == 'paused' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ student.get_status_display }}</span>
             {% if not has_consent %}
-                <span class="badge bg-warning text-dark" title="Ainda não aceitou os termos de uso e de dados de saúde"><i class="bi bi-shield-exclamation"></i> Sem consentimento</span>
+                <span class="badge bg-warning text-dark" title="{% trans "Ainda não aceitou os termos de uso e de dados de saúde" %}"><i class="bi bi-shield-exclamation"></i> {% trans "Sem consentimento" %}</span>
             {% endif %}
             {% if erasure_requested %}
-                <span class="badge bg-danger" title="O aluno pediu a exclusão dos próprios dados"><i class="bi bi-trash"></i> Pediu exclusão</span>
+                <span class="badge bg-danger" title="{% trans "O aluno pediu a exclusão dos próprios dados" %}"><i class="bi bi-trash"></i> {% trans "Pediu exclusão" %}</span>
             {% endif %}
             {% if not student.user.has_usable_password %}
-                <span class="badge bg-warning text-dark" title="O aluno ainda não criou a senha"><i class="bi bi-hourglass-split"></i> Convite pendente</span>
+                <span class="badge bg-warning text-dark" title="{% trans "O aluno ainda não criou a senha" %}"><i class="bi bi-hourglass-split"></i> {% trans "Convite pendente" %}</span>
             {% endif %}
         </div>
     </div>
     <div class="d-none d-lg-block">
         <a href="{% nav_url 'core:person_routine_create' %}&person={{ student.pk }}" class="btn btn-success">
-            <i class="bi bi-plus-circle"></i> Atribuir Treino
+            <i class="bi bi-plus-circle"></i> {% trans "Atribuir Treino" %}
         </a>
         <a href="{% nav_url 'core:student_invite' student.pk %}" class="btn btn-outline-primary">
-            <i class="bi bi-send"></i> {% if student.user.has_usable_password %}Redefinir senha{% else %}Convite{% endif %}
+            <i class="bi bi-send"></i> {% if student.user.has_usable_password %}{% trans "Redefinir senha" %}{% else %}{% trans "Convite" %}{% endif %}
         </a>
         <a href="{% nav_url 'core:student_edit' student.pk %}" class="btn btn-primary">
-            <i class="bi bi-pencil"></i> Editar
+            <i class="bi bi-pencil"></i> {% trans "Editar" %}
         </a>
-        <a href="{% nav_url 'core:student_delete' student.pk %}" class="btn btn-outline-danger" title="Excluir aluno e todos os dados">
-            <i class="bi bi-trash"></i> Excluir
+        <a href="{% nav_url 'core:student_delete' student.pk %}" class="btn btn-outline-danger" title="{% trans "Excluir aluno e todos os dados" %}">
+            <i class="bi bi-trash"></i> {% trans "Excluir" %}
         </a>
         {% url 'core:student_list' as back_default %}{% back_button back_default %}
     </div>
     <div class="d-lg-none d-flex gap-2 w-100 mt-3" data-student-actions>
         <a href="{% nav_url 'core:person_routine_create' %}&person={{ student.pk }}" class="btn btn-success flex-grow-1">
-            <i class="bi bi-plus-circle"></i> Atribuir treino
+            <i class="bi bi-plus-circle"></i> {% trans "Atribuir treino" %}
         </a>
         <div class="dropdown">
-            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Mais ações">
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{% trans "Mais ações" %}">
                 <i class="bi bi-three-dots-vertical"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item py-2" href="{% nav_url 'core:student_edit' student.pk %}"><i class="bi bi-pencil me-2"></i>Editar</a></li>
-                <li><a class="dropdown-item py-2" href="{% nav_url 'core:student_invite' student.pk %}"><i class="bi bi-send me-2"></i>{% if student.user.has_usable_password %}Redefinir senha{% else %}Convite{% endif %}</a></li>
-                <li><a class="dropdown-item py-2" href="{% nav_url 'core:student_status' student.pk %}"><i class="bi bi-arrow-repeat me-2"></i>Alterar situação</a></li>
+                <li><a class="dropdown-item py-2" href="{% nav_url 'core:student_edit' student.pk %}"><i class="bi bi-pencil me-2"></i>{% trans "Editar" %}</a></li>
+                <li><a class="dropdown-item py-2" href="{% nav_url 'core:student_invite' student.pk %}"><i class="bi bi-send me-2"></i>{% if student.user.has_usable_password %}{% trans "Redefinir senha" %}{% else %}{% trans "Convite" %}{% endif %}</a></li>
+                <li><a class="dropdown-item py-2" href="{% nav_url 'core:student_status' student.pk %}"><i class="bi bi-arrow-repeat me-2"></i>{% trans "Alterar situação" %}</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item py-2 text-danger" href="{% nav_url 'core:student_delete' student.pk %}"><i class="bi bi-trash me-2"></i>Excluir aluno</a></li>
+                <li><a class="dropdown-item py-2 text-danger" href="{% nav_url 'core:student_delete' student.pk %}"><i class="bi bi-trash me-2"></i>{% trans "Excluir aluno" %}</a></li>
             </ul>
         </div>
     </div>
@@ -87,7 +88,7 @@
                     <i class="bi bi-calendar-check fs-1 text-primary"></i>
                     <h3 class="mt-2">{{ total_sessions }}</h3>
                 </div>
-                <p class="text-muted mb-0"><span class="d-none d-md-inline">Sessões Completadas</span><span class="d-md-none">Sessões</span></p>
+                <p class="text-muted mb-0"><span class="d-none d-md-inline">{% trans "Sessões Completadas" %}</span><span class="d-md-none">{% trans "Sessões" %}</span></p>
             </div>
         </div>
     </div>
@@ -98,7 +99,7 @@
                     <i class="bi bi-graph-up fs-1 text-success"></i>
                     <h3 class="mt-2">{{ sessions_last_month }}</h3>
                 </div>
-                <p class="text-muted mb-0"><span class="d-none d-md-inline">Treinos (30 dias)</span><span class="d-md-none">30 dias</span></p>
+                <p class="text-muted mb-0"><span class="d-none d-md-inline">{% trans "Treinos (30 dias)" %}</span><span class="d-md-none">{% trans "30 dias" %}</span></p>
             </div>
         </div>
     </div>
@@ -107,9 +108,9 @@
             <div class="card-body">
                 <div class="stat-top">
                     <i class="bi bi-clock fs-1 text-info"></i>
-                    <h3 class="mt-2">{% if avg_duration %}{{ avg_duration|floatformat:0 }}<small class="fs-6">min</small>{% else %}-{% endif %}</h3>
+                    <h3 class="mt-2">{% if avg_duration %}{% blocktrans trimmed with avg_duration=avg_duration|floatformat:0 %}{{ avg_duration }}<small class="fs-6">min</small>{% endblocktrans %}{% else %}-{% endif %}</h3>
                 </div>
-                <p class="text-muted mb-0"><span class="d-none d-md-inline">Duração Média</span><span class="d-md-none">Duração</span></p>
+                <p class="text-muted mb-0"><span class="d-none d-md-inline">{% trans "Duração Média" %}</span><span class="d-md-none">{% trans "Duração" %}</span></p>
             </div>
         </div>
     </div>
@@ -119,10 +120,10 @@
                 <div class="stat-top">
                     <i class="bi bi-calendar-event fs-1 text-warning"></i>
                     <h3 class="mt-2 stat-date">
-                        {% if last_session %}<span class="d-none d-md-inline">{{ last_session.start_time|date:"d/m/Y" }}</span><span class="d-md-none">{{ last_session.start_time|date:"d/m" }}</span>{% else %}-{% endif %}
+                        {% if last_session %}<span class="d-none d-md-inline">{{ last_session.start_time|date:_('d/m/Y') }}</span><span class="d-md-none">{{ last_session.start_time|date:_('d/m') }}</span>{% else %}-{% endif %}
                     </h3>
                 </div>
-                <p class="text-muted mb-0"><span class="d-none d-md-inline">Última Sessão</span><span class="d-md-none">Última</span></p>
+                <p class="text-muted mb-0"><span class="d-none d-md-inline">{% trans "Última Sessão" %}</span><span class="d-md-none">{% trans "Última" %}</span></p>
             </div>
         </div>
     </div>
@@ -131,23 +132,23 @@
 {% if student.health_notes %}
 <div class="alert alert-danger d-flex gap-2" role="alert">
     <i class="bi bi-exclamation-triangle-fill"></i>
-    <div><strong>Atenção — saúde/restrições:</strong> {{ student.health_notes|truncatechars:300 }}</div>
+    <div>{% blocktrans trimmed with health_notes=student.health_notes|truncatechars:300 %}<strong>Atenção — saúde/restrições:</strong> {{ health_notes }}{% endblocktrans %}</div>
 </div>
 {% endif %}
 {% if student.plan_status == 'expired' %}
-<div class="alert alert-danger py-2"><i class="bi bi-calendar-x"></i> Pacote vencido em {{ student.plan_expires_on|date:"d/m/Y" }}: prorrogue ou venda um novo.</div>
+<div class="alert alert-danger py-2"><i class="bi bi-calendar-x"></i> {% blocktrans trimmed with plan_expires_on=student.plan_expires_on|date:_('d/m/Y') %}Pacote vencido em {{ plan_expires_on }}: prorrogue ou venda um novo.{% endblocktrans %}</div>
 {% elif student.plan_status == 'expiring' %}
-<div class="alert alert-warning py-2"><i class="bi bi-calendar-event"></i> O pacote vence em {{ student.days_to_plan_expiry }} dia{{ student.days_to_plan_expiry|pluralize }} ({{ student.plan_expires_on|date:"d/m/Y" }}).</div>
+<div class="alert alert-warning py-2"><i class="bi bi-calendar-event"></i> {% blocktrans trimmed with plan_expires_on=student.plan_expires_on|date:_('d/m/Y') count days_to_plan_expiry=student.days_to_plan_expiry %}O pacote vence em {{ days_to_plan_expiry }} dia ({{ plan_expires_on }}).{% plural %}O pacote vence em {{ days_to_plan_expiry }} dias ({{ plan_expires_on }}).{% endblocktrans %}</div>
 {% endif %}
 
 <ul class="nav nav-tabs mb-4 tabs-sticky hide-scrollbar" id="studentTabs" role="tablist">
-    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-treinos" type="button" role="tab"><i class="bi bi-lightning-charge"></i> Treinos</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-ficha" type="button" role="tab"><i class="bi bi-person-vcard"></i> Ficha</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-avaliacoes" type="button" role="tab"><i class="bi bi-rulers"></i> Avaliações <span class="badge bg-secondary">{{ assessments|length }}</span>{% if photo_count %} <i class="bi bi-camera text-muted" title="{{ photo_count }} foto{{ photo_count|pluralize }}"></i>{% endif %}</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-agenda" type="button" role="tab"><i class="bi bi-calendar-week"></i> Agenda</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pagamentos" type="button" role="tab"><i class="bi bi-cash-coin"></i> Pagamentos <span class="badge bg-secondary">{{ payments|length }}</span></button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-historico" type="button" role="tab"><i class="bi bi-clock-history"></i> Histórico</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-notas" type="button" role="tab"><i class="bi bi-journal-text"></i> Anotações <span class="badge bg-secondary">{{ notes|length }}</span></button></li>
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-treinos" type="button" role="tab"><i class="bi bi-lightning-charge"></i> {% trans "Treinos" %}</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-ficha" type="button" role="tab"><i class="bi bi-person-vcard"></i> {% trans "Ficha" %}</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-avaliacoes" type="button" role="tab"><i class="bi bi-rulers"></i> {% trans "Avaliações" %} <span class="badge bg-secondary">{{ assessments|length }}</span>{% if photo_count %} <i class="bi bi-camera text-muted" title="{{ photo_count }} foto{{ photo_count|pluralize }}"></i>{% endif %}</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-agenda" type="button" role="tab"><i class="bi bi-calendar-week"></i> {% trans "Agenda" %}</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pagamentos" type="button" role="tab"><i class="bi bi-cash-coin"></i> {% trans "Pagamentos" %} <span class="badge bg-secondary">{{ payments|length }}</span></button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-historico" type="button" role="tab"><i class="bi bi-clock-history"></i> {% trans "Histórico" %}</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-notas" type="button" role="tab"><i class="bi bi-journal-text"></i> {% trans "Anotações" %} <span class="badge bg-secondary">{{ notes|length }}</span></button></li>
 </ul>
 
 <div class="tab-content">
@@ -158,9 +159,9 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="bi bi-lightning-charge"></i> Treinos Ativos</h5>
+                <h5 class="mb-0"><i class="bi bi-lightning-charge"></i> {% trans "Treinos Ativos" %}</h5>
                 <a href="{% nav_url 'core:person_routine_create' %}&person={{ student.pk }}" class="btn btn-sm btn-success">
-                    <i class="bi bi-plus-circle"></i> Adicionar
+                    <i class="bi bi-plus-circle"></i> {% trans "Adicionar" %}
                 </a>
             </div>
             <div class="card-body">
@@ -172,43 +173,43 @@
                                 <div>
                                     <h6 class="mb-1">{{ item.person_routine.routine_name }}</h6>
                                     <small class="text-muted">
-                                        <i class="bi bi-calendar3"></i> Iniciado em: {{ item.person_routine.routine_date|date:"d/m/Y" }}
+                                        <i class="bi bi-calendar3"></i> {% blocktrans trimmed with routine_date=item.person_routine.routine_date|date:_('d/m/Y') %}Iniciado em: {{ routine_date }}{% endblocktrans %}
                                         {% if item.person_routine.end_date %}
-                                            • Até: {{ item.person_routine.end_date|date:"d/m/Y" }}
+                                            {% blocktrans trimmed with end_date=item.person_routine.end_date|date:_('d/m/Y') %}• Até: {{ end_date }}{% endblocktrans %}
                                         {% endif %}
                                     </small>
                                 </div>
                                 <div class="d-flex flex-wrap gap-2">
                                     {% if item.person_routine.routine_template %}
-                                    <a href="{% nav_url 'core:routine_detail' item.person_routine.routine_template.pk %}" class="btn btn-sm btn-icon btn-outline-primary" title="Ver template" data-routine-action="template">
-                                        <i class="bi bi-eye" aria-hidden="true"></i><span class="visually-hidden">Ver template</span>
+                                    <a href="{% nav_url 'core:routine_detail' item.person_routine.routine_template.pk %}" class="btn btn-sm btn-icon btn-outline-primary" title="{% trans "Ver template" %}" data-routine-action="template">
+                                        <i class="bi bi-eye" aria-hidden="true"></i><span class="visually-hidden">{% trans "Ver template" %}</span>
                                     </a>
                                     {% endif %}
-                                    <a href="{% nav_url 'core:person_routine_detail' item.person_routine.pk %}" class="btn btn-sm btn-icon btn-outline-info" title="Progresso" data-routine-action="progress">
-                                        <i class="bi bi-bar-chart" aria-hidden="true"></i><span class="visually-hidden">Progresso</span>
+                                    <a href="{% nav_url 'core:person_routine_detail' item.person_routine.pk %}" class="btn btn-sm btn-icon btn-outline-info" title="{% trans "Progresso" %}" data-routine-action="progress">
+                                        <i class="bi bi-bar-chart" aria-hidden="true"></i><span class="visually-hidden">{% trans "Progresso" %}</span>
                                     </a>
-                                    <a href="{% nav_url 'core:person_routine_edit' item.person_routine.pk %}" class="btn btn-sm btn-icon btn-outline-secondary" title="Editar" data-routine-action="edit">
-                                        <i class="bi bi-pencil" aria-hidden="true"></i><span class="visually-hidden">Editar</span>
+                                    <a href="{% nav_url 'core:person_routine_edit' item.person_routine.pk %}" class="btn btn-sm btn-icon btn-outline-secondary" title="{% trans "Editar" %}" data-routine-action="edit">
+                                        <i class="bi bi-pencil" aria-hidden="true"></i><span class="visually-hidden">{% trans "Editar" %}</span>
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-icon btn-outline-danger" title="Remover" data-routine-action="remove"
+                                    <button type="button" class="btn btn-sm btn-icon btn-outline-danger" title="{% trans "Remover" %}" data-routine-action="remove"
                                             data-bs-toggle="modal"
                                             data-bs-target="#deactivateModal{{ item.person_routine.pk }}">
-                                        <i class="bi bi-trash" aria-hidden="true"></i><span class="visually-hidden">Remover</span>
+                                        <i class="bi bi-trash" aria-hidden="true"></i><span class="visually-hidden">{% trans "Remover" %}</span>
                                     </button>
                                 </div>
                             </div>
                             <div class="d-flex flex-wrap gap-2">
-                                <span class="badge bg-info">{{ item.exercise_count }} exercício{{ item.exercise_count|pluralize }}</span>
-                                <span class="badge bg-success">{{ item.sessions_count }} sessõe{{ item.sessions_count|pluralize:"s,s" }} completas</span>
-                                <span class="badge bg-secondary">{{ item.person_routine.difficulty_level|capfirst }}</span>
+                                <span class="badge bg-info">{% blocktrans trimmed count exercise_count=item.exercise_count %}{{ exercise_count }} exercício{% plural %}{{ exercise_count }} exercícios{% endblocktrans %}</span>
+                                <span class="badge bg-success">{% blocktrans trimmed count sessions_count=item.sessions_count %}{{ sessions_count }} sessões completas{% plural %}{{ sessions_count }} sessões completas{% endblocktrans %}</span>
+                                <span class="badge bg-secondary">{{ item.person_routine.get_difficulty_level_display }}</span>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
                 {% else %}
                     <div class="alert alert-info mb-0">
-                        <i class="bi bi-info-circle"></i> Nenhum treino ativo.
-                        <a href="{% nav_url 'core:person_routine_create' %}&person={{ student.pk }}" class="alert-link">Clique aqui para adicionar um treino.</a>
+                        <i class="bi bi-info-circle"></i> {% trans "Nenhum treino ativo." %}
+                        <a href="{% nav_url 'core:person_routine_create' %}&person={{ student.pk }}" class="alert-link">{% trans "Clique aqui para adicionar um treino." %}</a>
                     </div>
                 {% endif %}
             </div>
@@ -219,7 +220,7 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="bi bi-archive"></i> Treinos Anteriores</h5>
+                <h5 class="mb-0"><i class="bi bi-archive"></i> {% trans "Treinos Anteriores" %}</h5>
             </div>
             <div class="card-body">
                 {% if inactive_routines %}
@@ -230,9 +231,9 @@
                                 <div>
                                     <h6 class="mb-1">{{ person_routine.routine_name }}</h6>
                                     <small class="text-muted">
-                                        {{ person_routine.routine_date|date:"d/m/Y" }}
+                                        {{ person_routine.routine_date|date:_('d/m/Y') }}
                                         {% if person_routine.end_date %}
-                                            - {{ person_routine.end_date|date:"d/m/Y" }}
+                                            - {{ person_routine.end_date|date:_('d/m/Y') }}
                                         {% endif %}
                                     </small>
                                 </div>
@@ -242,11 +243,11 @@
                     </div>
                     <div class="text-center mt-3">
                         <a href="{% nav_url 'core:student_history' student.pk %}" class="btn btn-sm btn-outline-secondary">
-                            <i class="bi bi-clock-history"></i> Ver Histórico Completo
+                            <i class="bi bi-clock-history"></i> {% trans "Ver Histórico Completo" %}
                         </a>
                     </div>
                 {% else %}
-                    <p class="text-muted mb-0">Nenhum treino anterior registrado.</p>
+                    <p class="text-muted mb-0">{% trans "Nenhum treino anterior registrado." %}</p>
                 {% endif %}
             </div>
         </div>
@@ -270,24 +271,24 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="deactivateModalLabel{{ item.person_routine.pk }}">
-                    <i class="bi bi-exclamation-triangle text-warning"></i> Confirmar Remoção
+                    <i class="bi bi-exclamation-triangle text-warning"></i> {% trans "Confirmar Remoção" %}
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans "Close" %}"></button>
             </div>
             <div class="modal-body">
-                <p>Tem certeza que deseja remover o treino <strong>"{{ item.person_routine.routine_name }}"</strong> do aluno <strong>{{ student.person_name }}</strong>?</p>
+                <p>{% blocktrans trimmed with routine_name=item.person_routine.routine_name person_name=student.person_name %}Tem certeza que deseja remover o treino <strong>"{{ routine_name }}"</strong> do aluno <strong>{{ person_name }}</strong>?{% endblocktrans %}</p>
                 <p class="text-muted mb-0">
-                    <i class="bi bi-info-circle"></i> O treino será movido para o histórico de treinos anteriores e não será mais exibido como ativo.
+                    <i class="bi bi-info-circle"></i> {% trans "O treino será movido para o histórico de treinos anteriores e não será mais exibido como ativo." %}
                 </p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle"></i> Cancelar
+                    <i class="bi bi-x-circle"></i> {% trans "Cancelar" %}
                 </button>
                 <form method="post" action="{% nav_url 'core:person_routine_deactivate' item.person_routine.pk %}" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash"></i> Sim, Remover
+                        <i class="bi bi-trash"></i> {% trans "Sim, Remover" %}
                     </button>
                 </form>
             </div>
@@ -302,6 +303,8 @@
 <script src="{% static 'vendor/chartjs/4.4.0/chart.umd.js' %}"></script>
 <script src="{% static 'js/chart-theme.js' %}"></script>
 <script>
+const T_HIDE = "{% trans 'Ocultar' as js_msg %}{{ js_msg|escapejs }}";
+const T_SHOW = "{% trans 'Mostrar' as js_msg %}{{ js_msg|escapejs }}";
 // Contract values stay hidden until asked (the trainer may be showing the screen to the student)
 (function () {
     var toggle = document.querySelector('[data-contract-values-toggle]');
@@ -313,7 +316,7 @@
         values.hidden = !show;
         note.hidden = show;
         toggle.setAttribute('aria-pressed', show ? 'true' : 'false');
-        toggle.querySelector('span').textContent = show ? 'Ocultar' : 'Mostrar';
+        toggle.querySelector('span').textContent = show ? T_HIDE : T_SHOW;
         toggle.querySelector('i').className = 'bi ' + (show ? 'bi-eye-slash' : 'bi-eye');
     });
 })();

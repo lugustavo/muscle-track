@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation money_tags %}
 
-{% block title %}Devolver ou estornar - {{ student.person_name }} - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed with person_name=student.person_name %}Devolver ou estornar - {{ person_name }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3 gap-2">
     <div class="min-w-0">
-        <h1 class="h3 mb-0"><i class="bi bi-arrow-counterclockwise"></i> Devolver ou estornar</h1>
+        <h1 class="h3 mb-0"><i class="bi bi-arrow-counterclockwise"></i> {% trans "Devolver ou estornar" %}</h1>
         <div class="text-muted">{{ student.person_name }}</div>
     </div>
     {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default fragment='#tab-pagamentos' %}
@@ -18,7 +19,7 @@
     <section class="card mb-3"><div class="card-body">
         <div class="mb-3">
             {% for radio in form.kind %}<div class="form-check">{{ radio.tag }} <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label></div>{% endfor %}
-            <div class="form-text"><strong>Devolução</strong>: o dinheiro voltou para o aluno. <strong>Estorno</strong>: o pagamento foi lançado errado (valor, aluno ou pacote) e o lançamento é desfeito; depois registre o pagamento certo.</div>
+            <div class="form-text">{% blocktrans trimmed %}<strong>Devolução</strong>: o dinheiro voltou para o aluno. <strong>Estorno</strong>: o pagamento foi lançado errado (valor, aluno ou pacote) e o lançamento é desfeito; depois registre o pagamento certo.{% endblocktrans %}</div>
         </div>
         <div class="mb-3">
             <label class="form-label fw-bold" for="{{ form.payment.id_for_label }}">{{ form.payment.label }}</label>{{ form.payment }}
@@ -43,10 +44,10 @@
                 <label class="form-label fw-bold" for="{{ form.reason.id_for_label }}">{{ form.reason.label }}</label>{{ form.reason }}
             </div>
         </div>
-        <div class="form-text mt-2"><i class="bi bi-lock"></i> Só você vê estes valores. O pagamento original não muda: a devolução é um lançamento novo.</div>
+        <div class="form-text mt-2"><i class="bi bi-lock"></i> {% trans "Só você vê estes valores. O pagamento original não muda: a devolução é um lançamento novo." %}</div>
     </div></section>
     <div class="form-actions d-flex gap-2">
-        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Registrar</button>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> {% trans "Registrar" %}</button>
         {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='bi-x-circle' fragment='#tab-pagamentos' %}
     </div>
 </form>

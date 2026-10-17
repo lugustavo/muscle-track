@@ -1,13 +1,19 @@
 """The student's physical evolution: assessments with their photos, the chart, and the side-by-side photo comparison.
 
 Shared by the trainer's file (Avaliações tab) and the student's own page, so both read the same numbers."""
+from django.utils import dateformat
+from django.utils.translation import gettext as _, gettext_lazy as _l
+
 from .models import ProgressPhoto
 
 SEQUENCE_VALUES = {angle.value for angle in ProgressPhoto.SEQUENCE}
 # (label, field) of the measures compared between two assessments
 MEASURES = (
-    ('Peso', 'weight_kg', 'kg'), ('% de gordura', 'body_fat_pct', '%'), ('Cintura', 'waist_cm', 'cm'),
-    ('Quadril', 'hip_cm', 'cm'), ('Peitoral', 'chest_cm', 'cm'), ('Braço', 'arm_cm', 'cm'), ('Coxa', 'thigh_cm', 'cm'),
+    (_l('Peso'), 'weight_kg', 'kg'),
+    # xgettext:no-python-format
+    (_l('% de gordura'), 'body_fat_pct', '%'),
+    (_l('Cintura'), 'waist_cm', 'cm'),
+    (_l('Quadril'), 'hip_cm', 'cm'), (_l('Peitoral'), 'chest_cm', 'cm'), (_l('Braço'), 'arm_cm', 'cm'), (_l('Coxa'), 'thigh_cm', 'cm'),
 )
 
 
@@ -28,7 +34,7 @@ def assessments_with_photos(person):
 def chart_points(assessments):
     """Weight, body fat and waist over time (oldest first) for the evolution chart; empty with fewer than 2 points."""
     points = [{
-        'date': a.date.strftime('%d/%m/%y'),
+        'date': dateformat.format(a.date, _('d/m/y')),
         'weight': float(a.weight_kg) if a.weight_kg is not None else None,
         'body_fat': float(a.body_fat_pct) if a.body_fat_pct is not None else None,
         'waist': float(a.waist_cm) if a.waist_cm is not None else None,

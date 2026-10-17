@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load static %}
 {% load navigation %}
 
-{% block title %}{{ exercise.exercise_name }} - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed with exercise_name=exercise.exercise_name %}{{ exercise_name }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -15,7 +16,7 @@
     <h1 class="h2 mb-0"><i class="bi bi-activity"></i> {{ exercise.exercise_name }}</h1>
     <div class="d-flex gap-2">
         <a href="{% nav_url 'core:exercise_edit' exercise.pk %}" class="btn btn-primary">
-            <i class="bi bi-pencil"></i> Editar
+            <i class="bi bi-pencil"></i> {% trans "Editar" %}
         </a>
         {% url 'core:exercise_list' as back_default %}{% back_button back_default %}
     </div>
@@ -30,7 +31,7 @@
                     <i class="bi bi-calendar-check fs-1 text-primary"></i>
                     <h3 class="mt-2">{{ routines_count }}</h3>
                 </div>
-                <p class="text-muted mb-0">Treino{{ routines_count|pluralize }}</p>
+                <p class="text-muted mb-0">{% blocktrans trimmed count routines_count=routines_count %}Treino{% plural %}Treinos{% endblocktrans %}</p>
             </div>
         </div>
     </div>
@@ -41,7 +42,7 @@
                     <i class="bi bi-people fs-1 text-success"></i>
                     <h3 class="mt-2">{{ active_students }}</h3>
                 </div>
-                <p class="text-muted mb-0">Aluno{{ active_students|pluralize }} Ativo{{ active_students|pluralize }}</p>
+                <p class="text-muted mb-0">{% blocktrans trimmed count active_students=active_students %}Aluno Ativo{% plural %}Alunos Ativos{% endblocktrans %}</p>
             </div>
         </div>
     </div>
@@ -52,7 +53,7 @@
                     <i class="bi bi-clock-history fs-1 text-info"></i>
                     <h3 class="mt-2">{{ sessions_count }}</h3>
                 </div>
-                <p class="text-muted mb-0">Sessõe{{ sessions_count|pluralize:"s,s" }} Realizadas</p>
+                <p class="text-muted mb-0">{% blocktrans trimmed count sessions_count=sessions_count %}Sessões Realizadas{% plural %}Sessões Realizadas{% endblocktrans %}</p>
             </div>
         </div>
     </div>
@@ -63,7 +64,7 @@
                     <i class="bi bi-check-circle fs-1 text-warning"></i>
                     <h3 class="mt-2">{{ completed_count }}</h3>
                 </div>
-                <p class="text-muted mb-0">Execuçõ{{ completed_count|pluralize:"es,es" }} Completas</p>
+                <p class="text-muted mb-0">{% blocktrans trimmed count completed_count=completed_count %}Execuções Completas{% plural %}Execuções Completas{% endblocktrans %}</p>
             </div>
         </div>
     </div>
@@ -74,21 +75,21 @@
         <!-- Informações do Exercício -->
         <div class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informações</h5>
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> {% trans "Informações" %}</h5>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-6">
-                        <strong>Grupo Muscular:</strong><br>
-                        <span class="badge bg-secondary mt-1">{{ exercise.muscle_group.name }}</span>
+                        <strong>{% trans "Grupo Muscular:" %}</strong><br>
+                        <span class="badge bg-secondary mt-1">{{ exercise.muscle_group.label }}</span>
                     </div>
                     <div class="col-6">
-                        <strong>Padrão:</strong><br>
+                        <strong>{% trans "Padrão:" %}</strong><br>
                         <span class="badge bg-info mt-1">{{ exercise.default_sets }}x{{ exercise.default_reps }}</span>
                     </div>
                 </div>
                 <div class="mb-2">
-                    <strong>Descrição:</strong>
+                    <strong>{% trans "Descrição:" %}</strong>
                 </div>
                 <p class="mb-0">{{ exercise.description }}</p>
             </div>
@@ -98,7 +99,7 @@
         {% if routine_exercises %}
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Treinos que incluem este exercício</h5>
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> {% trans "Treinos que incluem este exercício" %}</h5>
             </div>
             <div class="card-body">
                 <div class="list-group">
@@ -108,13 +109,13 @@
                             <div>
                                 <h6 class="mb-1">{{ routine_exercise.routine.routine_name }}</h6>
                                 <small class="text-muted">
-                                    {{ routine_exercise.sets }} séries x {{ routine_exercise.reps }} reps
+                                    {% blocktrans trimmed with sets=routine_exercise.sets reps=routine_exercise.reps %}{{ sets }} séries x {{ reps }} reps{% endblocktrans %}
                                     {% if routine_exercise.rest_seconds %}
-                                        • {{ routine_exercise.rest_seconds }}s descanso
+                                        {% blocktrans trimmed with rest_seconds=routine_exercise.rest_seconds %}• {{ rest_seconds }}s descanso{% endblocktrans %}
                                     {% endif %}
                                 </small>
                             </div>
-                            <span class="badge bg-primary">Ordem: {{ routine_exercise.order }}</span>
+                            <span class="badge bg-primary">{% blocktrans trimmed with order=routine_exercise.order %}Ordem: {{ order }}{% endblocktrans %}</span>
                         </div>
                     </a>
                     {% endfor %}
@@ -128,7 +129,7 @@
     <div class="col-md-4 order-1 order-md-2 mb-3 mb-md-0{% if not exercise.thumbnail and not exercise.media_url %} d-none d-md-block{% endif %}">
         <div class="card">
             <div class="card-header d-none d-md-block">
-                <h5 class="mb-0"><i class="bi bi-image"></i> Imagem</h5>
+                <h5 class="mb-0"><i class="bi bi-image"></i> {% trans "Imagem" %}</h5>
             </div>
             <div class="card-body text-center">
                 {% if exercise.thumbnail %}
@@ -136,7 +137,7 @@
                 {% elif exercise.media_url %}
                     <img src="{{ exercise.media_url }}" class="img-fluid rounded exercise-hero" alt="{{ exercise.exercise_name }}" onerror="this.src='{% static 'images/no-image.svg' %}'">
                 {% else %}
-                    <img src="{% static 'images/no-image.svg' %}" class="img-fluid rounded exercise-hero" alt="Sem imagem">
+                    <img src="{% static 'images/no-image.svg' %}" class="img-fluid rounded exercise-hero" alt="{% trans "Sem imagem" %}">
                 {% endif %}
             </div>
         </div>

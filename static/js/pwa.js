@@ -2,6 +2,9 @@
 (function () {
     'use strict';
 
+    // Django's JS catalog (/jsi18n/); identity fallback if it has not loaded
+    var gettext = window.gettext || function (s) { return s; };
+
     // ---- Offline notice ---------------------------------------------------------------------------------
     var banner = document.querySelector('[data-offline-banner]');
     var text = banner && banner.querySelector('[data-offline-text]');
@@ -10,7 +13,7 @@
         var offline = navigator.onLine === false;
         banner.classList.toggle('d-none', !offline);
         if (offline && text && document.querySelector('[data-workout-page]')) {
-            text.textContent = 'Sem conexão. Pode continuar treinando: as séries ficam salvas no aparelho e são enviadas quando a internet voltar.';
+            text.textContent = gettext('Sem conexão. Pode continuar treinando: as séries ficam salvas no aparelho e são enviadas quando a internet voltar.');
         }
     }
     window.addEventListener('online', renderConnection);

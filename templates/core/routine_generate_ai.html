@@ -1,18 +1,19 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load crispy_forms_tags navigation %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>{{ title|default:"Página" }}</h1>
+    <h1>{{ title|default:_("Página") }}</h1>
     {% url 'core:routine_list' as back_default %}{% back_button back_default %}
 </div>
 <div class="card"><div class="card-body">
 {% if form %}
 <form method="post" enctype="multipart/form-data">
 {% csrf_token %}{{ form|crispy }}
-<button type="submit" class="btn btn-primary">Salvar</button>
+<button type="submit" class="btn btn-primary">{% trans "Salvar" %}</button>
 </form>
 {% else %}
-<p>Conteúdo da página</p>
+<p>{% trans "Conteúdo da página" %}</p>
 {% endif %}
 </div></div>
 {% endblock %}

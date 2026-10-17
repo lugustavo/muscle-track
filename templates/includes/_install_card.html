@@ -1,3 +1,4 @@
+{% load i18n %}
 {% load static %}
 {# Invitation to install the app: only shown by static/js/pwa.js, on a browser that can install it and not yet installed #}
 <div class="card border-primary mx-auto mb-3 d-none" style="max-width: 560px;" data-install-card>
@@ -5,12 +6,12 @@
         <div class="d-flex align-items-start gap-3">
             <img src="{% static 'images/icon-192.png' %}" alt="" width="44" height="44" class="rounded flex-shrink-0">
             <div class="flex-grow-1">
-                <div class="fw-semibold">Instale o app no seu celular</div>
-                <div class="small text-muted" data-install-text>Abre direto da tela inicial, em tela cheia, e continua funcionando com sinal fraco.</div>
-                <div class="small text-muted d-none" data-install-ios>No iPhone: toque em <i class="bi bi-box-arrow-up"></i> <strong>Compartilhar</strong> e depois em <strong>Adicionar à Tela de Início</strong>.</div>
+                <div class="fw-semibold">{% trans "Instale o app no seu celular" %}</div>
+                <div class="small text-muted" data-install-text>{% trans "Abre direto da tela inicial, em tela cheia, e continua funcionando com sinal fraco." %}</div>
+                <div class="small text-muted d-none" data-install-ios>{% trans "No iPhone: toque em" %} <i class="bi bi-box-arrow-up"></i> {% blocktrans trimmed %}<strong>Compartilhar</strong> e depois em <strong>Adicionar à Tela de Início</strong>.{% endblocktrans %}</div>
                 <div class="mt-2 d-flex gap-2">
-                    <button type="button" class="btn btn-primary btn-sm" data-install-action>Instalar</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-install-dismiss>Agora não</button>
+                    <button type="button" class="btn btn-primary btn-sm" data-install-action>{% trans "Instalar" %}</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-install-dismiss>{% trans "Agora não" %}</button>
                 </div>
             </div>
         </div>

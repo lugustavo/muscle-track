@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
+from django.utils.translation import gettext as _
 from django.urls import reverse
 from urllib.parse import urlencode
 
@@ -42,7 +43,7 @@ def student_required(view_func=None, *, consent_gate=True):
             try:
                 person = request.user.person
             except Person.DoesNotExist:
-                messages.warning(request, 'Você não está cadastrado como aluno.')
+                messages.warning(request, _('Você não está cadastrado como aluno.'))
                 return redirect('core:home')
             if consent_gate and not has_current_consent(person):
                 return redirect(f"{reverse('core:consent')}?{urlencode({'next': request.get_full_path()}, safe='/')}")

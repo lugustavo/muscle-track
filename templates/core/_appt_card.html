@@ -1,3 +1,4 @@
+{% load i18n %}
 {% load navigation calendar_tags %}
 {# One class: time, student, status and the quick buttons. Needs `a` and `conflicts`. #}
 <div class="card appt s-{{ a.status }} {% if a.pk in conflicts %}conflict{% endif %} mb-2"
@@ -9,51 +10,51 @@
             <span class="badge {% if a.status == 'attended' %}bg-success{% elif a.status == 'missed' %}bg-danger{% elif a.status == 'scheduled' %}bg-body-secondary text-body border{% else %}bg-secondary{% endif %}">{{ a.get_status_display }}</span>
         </div>
         <a href="{% nav_url 'core:student_detail' a.person.pk %}" class="text-decoration-none d-block text-truncate">{{ a.person.person_name }}</a>
-        <small class="text-muted">{{ a.get_kind_display }} · {{ a.duration_minutes }} min</small>
-        {% if a.status == 'rescheduled' and a.rescheduled_to %}<div class="small text-muted" data-history="moved"><i class="bi bi-arrow-right-circle"></i> para {{ a.rescheduled_to.starts_at|date:"D d/m \à\s H:i" }}</div>{% endif %}
-        {% if a.status == 'scheduled' and a.rescheduled_from %}<div class="small text-muted" data-history="from"><i class="bi bi-clock-history"></i> remarcada de {{ a.rescheduled_from.starts_at|date:"D d/m \à\s H:i" }}</div>{% endif %}
-        {% if a.pk in conflicts %}<div class="small text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> Sobreposta a outra aula</div>{% endif %}
+        <small class="text-muted">{% blocktrans trimmed with get_kind_display=a.get_kind_display duration_minutes=a.duration_minutes %}{{ get_kind_display }} · {{ duration_minutes }} min{% endblocktrans %}</small>
+        {% if a.status == 'rescheduled' and a.rescheduled_to %}<div class="small text-muted" data-history="moved"><i class="bi bi-arrow-right-circle"></i> {% blocktrans trimmed with starts_at=a.rescheduled_to.starts_at|date:_("D d/m \à\s H:i") %}para {{ starts_at }}{% endblocktrans %}</div>{% endif %}
+        {% if a.status == 'scheduled' and a.rescheduled_from %}<div class="small text-muted" data-history="from"><i class="bi bi-clock-history"></i> {% blocktrans trimmed with starts_at=a.rescheduled_from.starts_at|date:_("D d/m \à\s H:i") %}remarcada de {{ starts_at }}{% endblocktrans %}</div>{% endif %}
+        {% if a.pk in conflicts %}<div class="small text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> {% trans "Sobreposta a outra aula" %}</div>{% endif %}
         {% if a.status == 'cancelled' or a.status == 'missed' %}
         <form method="post" action="{% nav_url 'core:appointment_counts' a.pk %}" class="small mt-1" data-package-count>
             {% csrf_token %}
-            {% if a.counts_against_package %}<span class="badge bg-warning text-dark">desconta do pacote</span> <button name="counts" value="no" class="btn btn-link btn-sm p-0 align-baseline">Não descontar</button>
-            {% else %}<span class="badge bg-body-secondary text-body border">não desconta</span> <button name="counts" value="yes" class="btn btn-link btn-sm p-0 align-baseline">Descontar</button>{% endif %}
+            {% if a.counts_against_package %}<span class="badge bg-warning text-dark">{% trans "desconta do pacote" %}</span> <button name="counts" value="no" class="btn btn-link btn-sm p-0 align-baseline">{% trans "Não descontar" %}</button>
+            {% else %}<span class="badge bg-body-secondary text-body border">{% trans "não desconta" %}</span> <button name="counts" value="yes" class="btn btn-link btn-sm p-0 align-baseline">{% trans "Descontar" %}</button>{% endif %}
         </form>
         {% endif %}
         {% if a.status != 'rescheduled' %}
         <form method="post" action="{% nav_url 'core:appointment_status' a.pk %}" class="mt-1 d-flex flex-wrap gap-1">
             {% csrf_token %}
-            {% if a.status != 'attended' %}<button name="status" value="attended" class="btn btn-sm btn-outline-success" title="Compareceu"><i class="bi bi-check-lg"></i></button>{% endif %}
-            {% if a.status != 'missed' %}<button name="status" value="missed" class="btn btn-sm btn-outline-danger" title="Faltou"><i class="bi bi-x-lg"></i></button>{% endif %}
-            {% if a.status != 'cancelled' %}<button name="status" value="cancelled" class="btn btn-sm btn-outline-secondary" title="Cancelar"><i class="bi bi-slash-circle"></i></button>{% endif %}
-            {% if a.status != 'scheduled' %}<button name="status" value="scheduled" class="btn btn-sm btn-outline-secondary" title="Desfazer (voltar para marcada)"><i class="bi bi-arrow-counterclockwise"></i></button>{% endif %}
-            <a href="{% nav_url 'core:appointment_reschedule' a.pk %}" class="btn btn-sm btn-outline-primary" title="{% if a.status == 'scheduled' %}Mover para outro dia ou horário{% else %}Remarcar{% endif %}" {% if a.status == 'scheduled' %}data-appt-move-open{% endif %}><i class="bi {% if a.status == 'scheduled' %}bi-arrows-move{% else %}bi-arrow-repeat{% endif %}"></i><span class="visually-hidden">{% if a.status == 'scheduled' %}Mover{% else %}Remarcar{% endif %}</span></a>
-            <a href="{% google_event_url a %}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary" title="Adicionar esta aula ao Google Agenda"><i class="bi bi-google"></i><span class="visually-hidden">Adicionar ao Google Agenda</span></a>
+            {% if a.status != 'attended' %}<button name="status" value="attended" class="btn btn-sm btn-outline-success" title="{% trans "Compareceu" %}"><i class="bi bi-check-lg"></i></button>{% endif %}
+            {% if a.status != 'missed' %}<button name="status" value="missed" class="btn btn-sm btn-outline-danger" title="{% trans "Faltou" %}"><i class="bi bi-x-lg"></i></button>{% endif %}
+            {% if a.status != 'cancelled' %}<button name="status" value="cancelled" class="btn btn-sm btn-outline-secondary" title="{% trans "Cancelar" %}"><i class="bi bi-slash-circle"></i></button>{% endif %}
+            {% if a.status != 'scheduled' %}<button name="status" value="scheduled" class="btn btn-sm btn-outline-secondary" title="{% trans "Desfazer (voltar para marcada)" %}"><i class="bi bi-arrow-counterclockwise"></i></button>{% endif %}
+            <a href="{% nav_url 'core:appointment_reschedule' a.pk %}" class="btn btn-sm btn-outline-primary" title="{% if a.status == 'scheduled' %}{% trans 'Mover para outro dia ou horário' %}{% else %}{% trans 'Remarcar' %}{% endif %}" {% if a.status == 'scheduled' %}data-appt-move-open{% endif %}><i class="bi {% if a.status == 'scheduled' %}bi-arrows-move{% else %}bi-arrow-repeat{% endif %}"></i><span class="visually-hidden">{% if a.status == 'scheduled' %}{% trans "Mover" %}{% else %}{% trans "Remarcar" %}{% endif %}</span></a>
+            <a href="{% google_event_url a %}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary" title="{% trans "Adicionar esta aula ao Google Agenda" %}"><i class="bi bi-google"></i><span class="visually-hidden">{% trans "Adicionar ao Google Agenda" %}</span></a>
         </form>
         {% if a.slot_id %}
         <div class="dropdown mt-1">
-            <button type="button" class="btn btn-sm btn-link p-0 small" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-arrow-repeat"></i> Horário fixo</button>
+            <button type="button" class="btn btn-sm btn-link p-0 small" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-arrow-repeat"></i> {% trans "Horário fixo" %}</button>
             <ul class="dropdown-menu">
-                <li><span class="dropdown-item-text small text-muted">Só esta aula: use Cancelar ou Remarcar.</span></li>
+                <li><span class="dropdown-item-text small text-muted">{% trans "Só esta aula: use Cancelar ou Remarcar." %}</span></li>
                 <li>
-                    <form method="post" action="{% nav_url 'core:appointment_series_end' a.pk %}" onsubmit="return confirm('Esta e as próximas aulas deste horário saem da agenda. As já marcadas (compareceu, faltou...) ficam. Continuar?');">
+                    <form method="post" action="{% nav_url 'core:appointment_series_end' a.pk %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Esta e as próximas aulas deste horário saem da agenda. As já marcadas (compareceu, faltou...) ficam. Continuar?" %}{% endfilter %}');">
                         {% csrf_token %}
-                        <button class="dropdown-item">Esta e as próximas deixam de repetir</button>
+                        <button class="dropdown-item">{% trans "Esta e as próximas deixam de repetir" %}</button>
                     </form>
                 </li>
                 <li>
-                    <form method="post" action="{% nav_url 'core:slot_delete' a.slot_id %}" onsubmit="return confirm('Remover o horário fixo inteiro? Todas as aulas futuras dele saem da agenda.');">
+                    <form method="post" action="{% nav_url 'core:slot_delete' a.slot_id %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover o horário fixo inteiro? Todas as aulas futuras dele saem da agenda." %}{% endfilter %}');">
                         {% csrf_token %}
-                        <button class="dropdown-item text-danger">Todas: remover o horário fixo</button>
+                        <button class="dropdown-item text-danger">{% trans "Todas: remover o horário fixo" %}</button>
                     </form>
                 </li>
             </ul>
         </div>
         {% endif %}
         {% if not a.slot_id %}
-        <form method="post" action="{% nav_url 'core:appointment_delete' a.pk %}" onsubmit="return confirm('Remover esta aula avulsa?');" class="mt-1">
+        <form method="post" action="{% nav_url 'core:appointment_delete' a.pk %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta aula avulsa?" %}{% endfilter %}');" class="mt-1">
             {% csrf_token %}
-            <button class="btn btn-sm btn-link text-danger p-0 small">remover</button>
+            <button class="btn btn-sm btn-link text-danger p-0 small">{% trans "remover" %}</button>
         </form>
         {% endif %}
         {% endif %}

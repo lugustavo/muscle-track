@@ -1,64 +1,65 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation %}
 
-{% block title %}Feriados - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed %}Feriados - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
     <div class="min-w-0">
-        <h1 class="h3 mb-1"><i class="bi bi-flag"></i> Feriados</h1>
-        <p class="text-muted mb-0">Ao preencher a agenda de um pacote, os dias abaixo ficam sem aula e a próxima data entra no lugar. Na prévia você ainda pode marcar um feriado para dar aula mesmo assim.</p>
+        <h1 class="h3 mb-1"><i class="bi bi-flag"></i> {% trans "Feriados" %}</h1>
+        <p class="text-muted mb-0">{% trans "Ao preencher a agenda de um pacote, os dias abaixo ficam sem aula e a próxima data entra no lugar. Na prévia você ainda pode marcar um feriado para dar aula mesmo assim." %}</p>
     </div>
     {% url 'core:agenda' as back_default %}{% back_button back_default %}
 </div>
 
 <div class="row g-4">
     <div class="col-lg-6">
-        <h2 class="h5"><i class="bi bi-plus-circle"></i> Meus dias sem aula</h2>
-        <p class="small text-muted">Feriado da sua cidade, dia em que o estúdio fecha, recesso.</p>
+        <h2 class="h5"><i class="bi bi-plus-circle"></i> {% trans "Meus dias sem aula" %}</h2>
+        <p class="small text-muted">{% trans "Feriado da sua cidade, dia em que o estúdio fecha, recesso." %}</p>
         <form method="post" action="{% nav_url 'core:agenda_holiday_add' %}" class="card card-body bg-body-tertiary mb-3" data-holiday-form>
             {% csrf_token %}
             <div class="row g-2">
                 <div class="col-sm-5"><label class="form-label small mb-0" for="{{ form.date.id_for_label }}">{{ form.date.label }}</label>{{ form.date }}</div>
                 <div class="col-sm-7"><label class="form-label small mb-0" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>{{ form.name }}</div>
             </div>
-            <button class="btn btn-primary mt-2 align-self-start"><i class="bi bi-plus-lg"></i> Adicionar</button>
+            <button class="btn btn-primary mt-2 align-self-start"><i class="bi bi-plus-lg"></i> {% trans "Adicionar" %}</button>
         </form>
 
         <ul class="list-group mb-3" data-own-holidays>
             {% for h in own %}
             <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
-                <span><strong>{{ h.date|date:"D d/m/Y" }}</strong> · {{ h.name }}</span>
-                <form method="post" action="{% nav_url 'core:agenda_holiday_delete' h.pk %}" onsubmit="return confirm('Tirar {{ h.name|escapejs }} da lista?');">
+                <span><strong>{{ h.date|date:_('D d/m/Y') }}</strong> · {{ h.name }}</span>
+                <form method="post" action="{% nav_url 'core:agenda_holiday_delete' h.pk %}" onsubmit="return confirm('{% autoescape off %}{% blocktrans trimmed asvar confirm_msg with name=h.name %}Tirar {{ name }} da lista?{% endblocktrans %}{% endautoescape %}{{ confirm_msg|escapejs }}');">
                     {% csrf_token %}
-                    <button class="btn btn-sm btn-outline-danger btn-icon" title="Remover"><i class="bi bi-trash"></i><span class="visually-hidden">Remover {{ h.name }}</span></button>
+                    <button class="btn btn-sm btn-outline-danger btn-icon" title="{% trans "Remover" %}"><i class="bi bi-trash"></i><span class="visually-hidden">{% blocktrans trimmed with name=h.name %}Remover {{ name }}{% endblocktrans %}</span></button>
                 </form>
             </li>
             {% empty %}
-            <li class="list-group-item text-muted">Nenhum dia adicionado.</li>
+            <li class="list-group-item text-muted">{% trans "Nenhum dia adicionado." %}</li>
             {% endfor %}
         </ul>
         {% if past %}
         <details class="small text-muted">
-            <summary>Dias que já passaram ({{ past|length }})</summary>
+            <summary>{% blocktrans trimmed with past=past|length %}Dias que já passaram ({{ past }}){% endblocktrans %}</summary>
             <ul class="list-unstyled mt-2 mb-0">
-                {% for h in past %}<li>{{ h.date|date:"d/m/Y" }} · {{ h.name }}</li>{% endfor %}
+                {% for h in past %}<li>{{ h.date|date:_('d/m/Y') }} · {{ h.name }}</li>{% endfor %}
             </ul>
         </details>
         {% endif %}
     </div>
 
     <div class="col-lg-6">
-        <h2 class="h5"><i class="bi bi-flag"></i> Feriados nacionais (próximos 12 meses)</h2>
+        <h2 class="h5"><i class="bi bi-flag"></i> {% trans "Feriados nacionais (próximos 12 meses)" %}</h2>
         {% if national %}
         <ul class="list-group" data-national-holidays>
             {% for day, name in national %}
-            <li class="list-group-item d-flex justify-content-between"><span>{{ name }}</span><span class="text-muted">{{ day|date:"D d/m/Y" }}</span></li>
+            <li class="list-group-item d-flex justify-content-between"><span>{{ name }}</span><span class="text-muted">{{ day|date:_('D d/m/Y') }}</span></li>
             {% endfor %}
         </ul>
-        <p class="small text-muted mt-2">Calculados pelo app (os que seguem a Páscoa mudam a cada ano). País: <strong>{{ region }}</strong>; para trocar, defina <code>HOLIDAYS_REGION</code> (PT, BR ou vazio) no ambiente.</p>
+        <p class="small text-muted mt-2">{% blocktrans trimmed %}Calculados pelo app (os que seguem a Páscoa mudam a cada ano). País: <strong>{{ region }}</strong>; para trocar, defina <code>HOLIDAYS_REGION</code> (PT, BR ou vazio) no ambiente.{% endblocktrans %}</p>
         {% else %}
-        <div class="alert alert-secondary mb-0" data-no-national>Nenhum país configurado: só os dias que você adicionar ficam sem aula. Para usar os feriados nacionais, defina <code>HOLIDAYS_REGION</code> (PT ou BR).</div>
+        <div class="alert alert-secondary mb-0" data-no-national>{% blocktrans trimmed %}Nenhum país configurado: só os dias que você adicionar ficam sem aula. Para usar os feriados nacionais, defina <code>HOLIDAYS_REGION</code> (PT ou BR).{% endblocktrans %}</div>
         {% endif %}
     </div>
 </div>

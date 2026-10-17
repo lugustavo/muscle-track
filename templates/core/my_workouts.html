@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 
-{% block title %}Meus Treinos - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed %}Meus Treinos - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<h1 class="mb-4"><i class="bi bi-fire"></i> Meus Treinos Ativos</h1>
+<h1 class="mb-4"><i class="bi bi-fire"></i> {% trans "Meus Treinos Ativos" %}</h1>
 
 {% if routines_with_sessions %}
 <div class="row g-4">
@@ -13,38 +14,38 @@
         <div class="card exercise-card {% if item.active_session %}border-warning{% elif item.suggested %}border-primary border-2{% endif %}">
             <div class="card-body">
                 {% if item.suggested and not item.active_session %}
-                <span class="badge bg-primary mb-2"><i class="bi bi-star-fill"></i> Treino de hoje</span>
+                <span class="badge bg-primary mb-2"><i class="bi bi-star-fill"></i> {% trans "Treino de hoje" %}</span>
                 {% endif %}
                 {% if item.last_done and not item.active_session %}
-                <div class="text-muted small mb-2"><i class="bi bi-calendar-check"></i> Último: {{ item.last_done|date:"d/m" }}</div>
+                <div class="text-muted small mb-2"><i class="bi bi-calendar-check"></i> {% blocktrans trimmed with last_done=item.last_done|date:_('d/m') %}Último: {{ last_done }}{% endblocktrans %}</div>
                 {% endif %}
                 {% if item.active_session %}
                 <div class="alert alert-warning py-2 px-3 mb-3" role="alert">
-                    <i class="bi bi-hourglass-split"></i> <strong>Sessão em andamento</strong>
+                    <i class="bi bi-hourglass-split"></i> <strong>{% trans "Sessão em andamento" %}</strong>
                     <br>
-                    <small>Iniciada em {{ item.active_session.start_time|date:"H:i" }}</small>
+                    <small>{% blocktrans trimmed with start_time=item.active_session.start_time|date:"H:i" %}Iniciada em {{ start_time }}{% endblocktrans %}</small>
                 </div>
                 {% endif %}
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <h5 class="card-title mb-0">{{ item.routine.routine_name }}</h5>
-                    <a href="#" class="text-primary" title="Ver exercícios" data-bs-toggle="modal" data-bs-target="#exercisesModal{{ item.routine.pk }}">
+                    <a href="#" class="text-primary" title="{% trans "Ver exercícios" %}" data-bs-toggle="modal" data-bs-target="#exercisesModal{{ item.routine.pk }}">
                         <i class="bi bi-list-ul"></i>
                     </a>
                 </div>
                 <p class="card-text">{{ item.routine.description|truncatewords:20 }}</p>
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="badge bg-info">{{ item.routine.get_difficulty_level_display }}</span>
-                    <span class="text-muted"><i class="bi bi-clock"></i> {{ item.routine.estimated_duration }} min</span>
+                    <span class="text-muted"><i class="bi bi-clock"></i> {% blocktrans trimmed with estimated_duration=item.routine.estimated_duration %}{{ estimated_duration }} min{% endblocktrans %}</span>
                 </div>
                 {% if item.active_session %}
                 <a href="{% url 'core:workout_execute' item.routine.pk %}" class="btn btn-warning w-100">
-                    <i class="bi bi-arrow-clockwise"></i> Continuar Treino
+                    <i class="bi bi-arrow-clockwise"></i> {% trans "Continuar Treino" %}
                 </a>
                 {% else %}
                 <form method="post" action="{% url 'core:workout_start' item.routine.pk %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-play-fill"></i> Iniciar Treino
+                        <i class="bi bi-play-fill"></i> {% trans "Iniciar Treino" %}
                     </button>
                 </form>
                 {% endif %}
@@ -59,7 +60,7 @@
                         <h5 class="modal-title" id="exercisesModalLabel{{ item.routine.pk }}">
                             <i class="bi bi-list-ul"></i> {{ item.routine.routine_name }}
                         </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans "Close" %}"></button>
                     </div>
                     <div class="modal-body">
                         {% if item.routine.exercises.all %}
@@ -74,8 +75,8 @@
 
                                 <!-- Configuração do exercício -->
                                 <div class="d-flex gap-3 mt-2">
-                                    <small><i class="bi bi-arrow-repeat"></i> {{ routine_exercise.sets }} séries</small>
-                                    <small><i class="bi bi-123"></i> {{ routine_exercise.reps }} reps</small>
+                                    <small><i class="bi bi-arrow-repeat"></i> {% blocktrans trimmed with sets=routine_exercise.sets %}{{ sets }} séries{% endblocktrans %}</small>
+                                    <small><i class="bi bi-123"></i> {% blocktrans trimmed with reps=routine_exercise.reps %}{{ reps }} reps{% endblocktrans %}</small>
                                     {% if routine_exercise.rest_seconds %}
                                     <small><i class="bi bi-clock"></i> {{ routine_exercise.rest_seconds }}s</small>
                                     {% endif %}
@@ -86,11 +87,11 @@
                                 {% with last_session=routine_exercise.last_session_log.0 %}
                                 <div class="mt-2 p-2 bg-body-tertiary rounded">
                                     <small class="text-success fw-bold">
-                                        <i class="bi bi-calendar-check"></i> Última execução:
+                                        <i class="bi bi-calendar-check"></i> {% trans "Última execução:" %}
                                     </small>
                                     <div class="d-flex gap-3 mt-1">
                                         {% if last_session.weight_used %}
-                                        <small><i class="bi bi-box"></i> Carga: {{ last_session.weight_used }} kg</small>
+                                        <small><i class="bi bi-box"></i> {% blocktrans trimmed with weight_used=last_session.weight_used %}Carga: {{ weight_used }} kg{% endblocktrans %}</small>
                                         {% endif %}
                                         {% if last_session.completed_at %}
                                         <small><i class="bi bi-check-circle"></i> {{ last_session.completed_at|date:"d/m/Y H:i" }}</small>
@@ -110,12 +111,12 @@
                         </div>
                         {% else %}
                         <div class="alert alert-info">
-                            <i class="bi bi-info-circle"></i> Nenhum exercício cadastrado para este treino.
+                            <i class="bi bi-info-circle"></i> {% trans "Nenhum exercício cadastrado para este treino." %}
                         </div>
                         {% endif %}
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Fechar" %}</button>
                     </div>
                 </div>
             </div>
@@ -125,8 +126,8 @@
 </div>
 {% else %}
 <div class="alert alert-info">
-    <i class="bi bi-info-circle"></i> Você não possui treinos ativos no momento.
-    Entre em contato com seu instrutor para receber um plano de treino.
+    <i class="bi bi-info-circle"></i> {% blocktrans trimmed %}Você não possui treinos ativos no momento.
+    Entre em contato com seu instrutor para receber um plano de treino.{% endblocktrans %}
 </div>
 {% endif %}
 {% endblock %}

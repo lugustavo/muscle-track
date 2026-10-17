@@ -5,6 +5,7 @@ breaks in the middle of a week (the week in progress only counts once it reaches
 from datetime import datetime, time, timedelta
 
 from django.utils import timezone
+from django.utils.translation import gettext as _, ngettext
 
 from .models import WorkoutSession
 
@@ -46,7 +47,7 @@ def streak(counts, goal, today=None):
     met_now = counts.get(this_week, 0) >= target
     week = this_week if met_now else this_week - timedelta(weeks=1)
     weeks = 0
-    for _ in range(STREAK_LOOKBACK_WEEKS):
+    for _week in range(STREAK_LOOKBACK_WEEKS):
         if counts.get(week, 0) < target:
             break
         weeks += 1
@@ -98,7 +99,8 @@ def celebrations(person, session):
     number = WorkoutSession.objects.filter(
         person_routine__person=person, is_completed=True, start_time__lte=session.start_time).count()
     if number in MILESTONES:
-        messages.append({'icon': 'bi-trophy-fill', 'text': f'Marco: {number} treinos concluídos!'})
+        messages.append({'icon': 'bi-trophy-fill', 'text': ngettext(
+            'Marco: %(number)s treino concluído!', 'Marco: %(number)s treinos concluídos!', number) % {'number': number}})
     goal = effective_goal(person)
     if goal:
         week_start = monday_of(timezone.localtime(session.start_time).date())
@@ -106,5 +108,5 @@ def celebrations(person, session):
             person_routine__person=person, is_completed=True, start_time__lte=session.start_time,
             start_time__gte=timezone.make_aware(datetime.combine(week_start, time.min))).count()
         if in_week == goal:   # this workout is the one that reached it
-            messages.append({'icon': 'bi-bullseye', 'text': 'Meta da semana batida!'})
+            messages.append({'icon': 'bi-bullseye', 'text': _('Meta da semana batida!')})
     return messages

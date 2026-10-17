@@ -1,0 +1,169 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-16 21:18-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Não foi possível concluir. Tente de novo."
+msgstr "Couldn't finish. Try again."
+
+msgid "Sem conexão. Tente de novo."
+msgstr "No connection. Try again."
+
+msgid "Aula de %(person)s movida para %(when)s."
+msgstr "%(person)s's class moved to %(when)s."
+
+msgid "Atenção: se sobrepõe a outra aula (%(classes)s)."
+msgstr "Warning: this overlaps another class (%(classes)s)."
+
+msgid "Movimento desfeito."
+msgstr "Move undone."
+
+msgid "Peso (kg)"
+msgstr "Weight (kg)"
+
+#, no-javascript-format
+msgid "% gordura"
+msgstr "% body fat"
+
+msgid "Cintura (cm)"
+msgstr "Waist (cm)"
+
+msgid "Há um rascunho deste formulário salvo às %(time)s."
+msgstr "There's a draft of this form saved at %(time)s."
+
+msgid "Restaurar"
+msgstr "Restore"
+
+msgid "Descartar"
+msgstr "Discard"
+
+msgid "Entendi"
+msgstr "Got it"
+
+msgid "Próximo"
+msgstr "Next"
+
+msgid "Não foi possível usar a câmera (permissão negada ou câmera ocupada). Escolha a foto da galeria."
+msgstr "Couldn't use the camera (permission denied or camera in use). Choose a photo from your gallery."
+
+msgid "Tire ou escolha uma foto antes de salvar."
+msgstr "Take or choose a photo before saving."
+
+msgid "Nenhuma câmera encontrada neste aparelho: escolha a foto da galeria ou dos arquivos."
+msgstr "No camera found on this device: choose a photo from your gallery or files."
+
+msgid "Este navegador não aceita avisos no aparelho. No iPhone, adicione o app à tela de início primeiro."
+msgstr "This browser doesn't support device notifications. On iPhone, add the app to your home screen first."
+
+msgid "Ativando…"
+msgstr "Activating…"
+
+msgid "Permissão negada. Libere as notificações nas configurações do navegador."
+msgstr "Permission denied. Allow notifications in your browser settings."
+
+msgid "Não foi possível ativar."
+msgstr "Couldn't activate."
+
+msgid "Pronto! Este aparelho vai receber os avisos."
+msgstr "Done! This device will receive notifications."
+
+msgid "Sem conexão. Pode continuar treinando: as séries ficam salvas no aparelho e são enviadas quando a internet voltar."
+msgstr "No connection. You can keep working out: your sets are saved on the device and sent when the internet comes back."
+
+#, javascript-format
+msgid "ver todos (%s)"
+msgstr "see all (%s)"
+
+msgid "Nada encontrado para \"%(query)s\"."
+msgstr "Nothing found for \"%(query)s\"."
+
+#, javascript-format
+msgid "%s resultado"
+msgid_plural "%s resultados"
+msgstr[0] "%s result"
+msgstr[1] "%s results"
+
+msgid "Nada encontrado"
+msgstr "Nothing found"
+
+#, javascript-format
+msgid "Preencher agenda (%s aula)"
+msgid_plural "Preencher agenda (%s aulas)"
+msgstr[0] "Fill schedule (%s class)"
+msgstr[1] "Fill schedule (%s classes)"
+
+#, javascript-format
+msgid "Tema: %s"
+msgstr "Theme: %s"
+
+msgid "Retomar"
+msgstr "Resume"
+
+msgid "Pausar"
+msgstr "Pause"
+
+msgid "Sem conexão: não foi possível pausar agora."
+msgstr "No connection: couldn't pause right now."
+
+msgid "Salvo"
+msgstr "Saved"
+
+#, javascript-format
+msgid "Offline · %s pendente(s)"
+msgstr "Offline · %s pending"
+
+msgid "Salvando…"
+msgstr "Saving…"
+
+msgid "Esta sessão de treino já foi encerrada ou expirou. Vou recarregar a página."
+msgstr "This workout session has already ended or expired. I'll reload the page."
+
+msgid "Um valor não foi aceito pelo servidor. Vou recarregar a página para sincronizar."
+msgstr "The server didn't accept a value. I'll reload the page to sync."
+
+msgid "Todos os exercícios concluídos"
+msgstr "All exercises completed"
+
+msgid "Exercício <strong id=\"progressCurrent\">%(current)s</strong> de %(total)s"
+msgstr "Exercise <strong id=\"progressCurrent\">%(current)s</strong> of %(total)s"
+
+msgid "Concluídos"
+msgstr "Completed"
+
+msgid "Próximo: %(name)s"
+msgstr "Next: %(name)s"
+
+msgid "Todos os exercícios concluídos!"
+msgstr "All exercises completed!"
+
+msgid "Todas as séries feitas. Bom trabalho!"
+msgstr "All sets done. Great job!"
+
+#, javascript-format
+msgid "Faltam %s série(s)."
+msgstr "%s set(s) remaining."
+
+msgid "🏆 Novo recorde de carga!"
+msgstr "🏆 New load record!"
+
+msgid "Ainda há alterações sem sincronizar (sem conexão?). Aguarde a internet voltar e tente finalizar de novo."
+msgstr "There are still changes that haven't synced (no connection?). Wait for the internet to come back and try to finish again."
+
+#, javascript-format
+msgid "Faltam %s série(s). Finalizar mesmo assim?"
+msgstr "%s set(s) remaining. Finish anyway?"

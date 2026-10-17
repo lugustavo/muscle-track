@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation %}
 {% load l10n static %}
 
-{% block title %}Treino - {{ person_routine.routine_name }}{% endblock %}
+{% block title %}{% blocktrans trimmed with routine_name=person_routine.routine_name %}Treino - {{ routine_name }}{% endblocktrans %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -55,21 +56,21 @@
             <div class="d-flex justify-content-between align-items-center gap-2">
                 <div class="text-truncate">
                     <div class="fw-bold text-truncate"><i class="bi bi-fire text-danger"></i> {{ person_routine.routine_name }}</div>
-                    <span id="syncState" class="badge bg-success-subtle text-success-emphasis"><i class="bi bi-cloud-check"></i> Salvo</span>
+                    <span id="syncState" class="badge bg-success-subtle text-success-emphasis"><i class="bi bi-cloud-check"></i> {% trans "Salvo" %}</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <span id="timer" class="fs-4 fw-bold font-monospace">00:00:00</span>
-                    <button type="button" id="pauseBtn" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pause-fill"></i> Pausar</button>
+                    <button type="button" id="pauseBtn" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pause-fill"></i> {% trans "Pausar" %}</button>
                     <div class="dropdown">
-                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-label="Preferências do treino" aria-expanded="false"><i class="bi bi-gear"></i></button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-label="{% trans "Preferências do treino" %}" aria-expanded="false"><i class="bi bi-gear"></i></button>
                         <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 15rem;">
                             <div class="form-check form-switch mb-2">
                                 <input class="form-check-input" type="checkbox" role="switch" id="prefSound" checked>
-                                <label class="form-check-label" for="prefSound">Som no fim do descanso</label>
+                                <label class="form-check-label" for="prefSound">{% trans "Som no fim do descanso" %}</label>
                             </div>
                             <div class="form-check form-switch mb-0">
                                 <input class="form-check-input" type="checkbox" role="switch" id="prefVibrate" checked>
-                                <label class="form-check-label" for="prefVibrate">Vibração</label>
+                                <label class="form-check-label" for="prefVibrate">{% trans "Vibração" %}</label>
                             </div>
                         </div>
                     </div>
@@ -77,11 +78,11 @@
             </div>
             <div class="d-flex justify-content-between small text-muted mt-2">
                 <span id="progressExercises" data-total="{{ exercise_total }}">
-                    {% if all_done %}Todos os exercícios concluídos{% else %}Exercício <strong id="progressCurrent">{{ exercises_done|add:1 }}</strong> de {{ exercise_total }}{% endif %}
+                    {% if all_done %}{% trans "Todos os exercícios concluídos" %}{% else %}{% blocktrans trimmed with exercises_done=exercises_done|add:1 %}Exercício <strong id="progressCurrent">{{ exercises_done }}</strong> de {{ exercise_total }}{% endblocktrans %}{% endif %}
                 </span>
-                <span id="progressSets"><span id="progressSetsDone">{{ sets_done }}</span>/{{ sets_total }} séries</span>
+                <span id="progressSets"><span id="progressSetsDone">{{ sets_done }}</span>{% blocktrans trimmed %}/{{ sets_total }} séries{% endblocktrans %}</span>
             </div>
-            <div class="progress mt-1" style="height: 4px;" role="progressbar" aria-label="Séries feitas" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ sets_percent }}">
+            <div class="progress mt-1" style="height: 4px;" role="progressbar" aria-label="{% trans "Séries feitas" %}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ sets_percent }}">
                 <div id="progressBar" class="progress-bar bg-success" style="width: {{ sets_percent }}%"></div>
             </div>
         </div>
@@ -91,7 +92,7 @@
 
     <div id="queue">
     {% for e in exercises %}
-    {% ifchanged e.complete %}{% if e.complete %}<div id="doneDivider" class="done-divider"><span>Concluídos</span></div>{% endif %}{% endifchanged %}
+    {% ifchanged e.complete %}{% if e.complete %}<div id="doneDivider" class="done-divider"><span>{% trans "Concluídos" %}</span></div>{% endif %}{% endifchanged %}
     <div class="card mb-3 {% if e.complete %}border-success{% endif %}" data-exercise-card
          data-order="{{ e.prx.order }}" data-name="{{ e.prx.exercise.exercise_name }}"
          data-rest="{{ e.prx.rest_seconds }}"
@@ -105,11 +106,11 @@
                 {% endif %}
                 <div class="flex-grow-1">
                     <h5 class="mb-0">{{ e.prx.exercise.exercise_name }}</h5>
-                    <small class="text-muted">{{ e.prx.sets }} × {{ e.prx.reps }}{% if e.prx.rest_seconds %} · descanso {{ e.prx.rest_seconds }}s{% endif %}</small>
+                    <small class="text-muted">{{ e.prx.sets }} × {{ e.prx.reps }}{% if e.prx.rest_seconds %} {% blocktrans trimmed with rest_seconds=e.prx.rest_seconds %}· descanso {{ rest_seconds }}s{% endblocktrans %}{% endif %}</small>
                 </div>
                 <div class="text-end">
-                    <span class="badge bg-success complete-badge {% if not e.complete %}d-none{% endif %}"><i class="bi bi-check-circle"></i> Feito</span>
-                    <div class="small text-muted"><span data-progress>{{ e.done_count }}/{{ e.sets|length }}</span> séries</div>
+                    <span class="badge bg-success complete-badge {% if not e.complete %}d-none{% endif %}"><i class="bi bi-check-circle"></i> {% trans "Feito" %}</span>
+                    <div class="small text-muted"><span data-progress>{{ e.done_count }}/{{ e.sets|length }}</span> {% trans "séries" %}</div>
                 </div>
             </div>
 
@@ -120,21 +121,21 @@
 
                 <div class="small text-muted mb-2">
                     {% if e.previous_weight is not None %}
-                    <span class="me-3"><i class="bi bi-clock-history"></i> Última vez: <strong>{{ e.previous_weight|unlocalize }} kg</strong>{% if e.previous_date %} ({{ e.previous_date|date:"d/m" }}){% endif %}</span>
+                    <span class="me-3"><i class="bi bi-clock-history"></i> {% blocktrans trimmed with previous_weight=e.previous_weight|unlocalize %}Última vez: <strong>{{ previous_weight }} kg</strong>{% endblocktrans %}{% if e.previous_date %} ({{ e.previous_date|date:_('d/m') }}){% endif %}</span>
                     {% endif %}
                     {% if e.record is not None %}
-                    <a href="{% nav_url 'core:my_exercise_progress' e.prx.exercise.pk %}" class="me-3 text-decoration-none"><i class="bi bi-trophy"></i> Recorde: <strong>{{ e.record|unlocalize }} kg</strong></a>
+                    <a href="{% nav_url 'core:my_exercise_progress' e.prx.exercise.pk %}" class="me-3 text-decoration-none"><i class="bi bi-trophy"></i> {% blocktrans trimmed with record=e.record|unlocalize %}Recorde: <strong>{{ record }} kg</strong>{% endblocktrans %}</a>
                     {% endif %}
                     {% if e.prx.exercise.media_url %}
-                    <a href="{{ e.prx.exercise.media_url }}" target="_blank" rel="noopener" class="text-decoration-none"><i class="bi bi-play-circle"></i> Ver execução</a>
+                    <a href="{{ e.prx.exercise.media_url }}" target="_blank" rel="noopener" class="text-decoration-none"><i class="bi bi-play-circle"></i> {% trans "Ver execução" %}</a>
                     {% elif e.prx.exercise.media_file %}
-                    <a href="{{ e.prx.exercise.media_file.url }}" target="_blank" rel="noopener" class="text-decoration-none"><i class="bi bi-play-circle"></i> Ver execução</a>
+                    <a href="{{ e.prx.exercise.media_file.url }}" target="_blank" rel="noopener" class="text-decoration-none"><i class="bi bi-play-circle"></i> {% trans "Ver execução" %}</a>
                     {% endif %}
                 </div>
 
                 <div class="set-grid mb-1">
-                    <span class="head text-center">Série</span><span class="head text-center">Carga (kg)</span>
-                    <span class="head text-center">Reps</span><span class="head text-center">Feita</span><span></span>
+                    <span class="head text-center">{% trans "Série" %}</span><span class="head text-center">{% trans "Carga (kg)" %}</span>
+                    <span class="head text-center">{% trans "Reps" %}</span><span class="head text-center">{% trans "Feita" %}</span><span></span>
                 </div>
                 {% for s in e.sets %}
                 <div class="set-grid set-row mb-2" data-url="{% url 'core:workout_set_update' s.pk %}" data-done="{{ s.is_done|yesno:'true,false' }}">
@@ -142,52 +143,52 @@
                     <div class="weight-cell">
                         <button type="button" class="btn btn-outline-secondary step-btn" data-step="-1" aria-label="Diminuir a carga da série {{ s.number }}">−</button>
                         <input type="number" inputmode="decimal" step="0.5" min="0" max="9999" class="form-control set-weight"
-                               {% if s.weight is not None %}value="{{ s.weight|unlocalize }}"{% endif %} placeholder="kg" aria-label="Carga da série {{ s.number }}">
+                               {% if s.weight is not None %}value="{{ s.weight|unlocalize }}"{% endif %} placeholder="{% trans "kg" %}" aria-label="Carga da série {{ s.number }}">
                         <button type="button" class="btn btn-outline-secondary step-btn" data-step="1" aria-label="Aumentar a carga da série {{ s.number }}">+</button>
                     </div>
                     <input type="number" inputmode="numeric" step="1" min="0" max="999" class="form-control set-reps"
-                           {% if s.reps is not None %}value="{{ s.reps }}"{% endif %} placeholder="reps" aria-label="Repetições da série {{ s.number }}">
+                           {% if s.reps is not None %}value="{{ s.reps }}"{% endif %} placeholder="{% trans "reps" %}" aria-label="Repetições da série {{ s.number }}">
                     <button type="button" class="btn btn-outline-secondary set-done" aria-label="Marcar série {{ s.number }} como feita"><i class="bi bi-check-lg"></i></button>
-                    <span class="set-record d-none" title="Novo recorde de carga">🏆</span>
+                    <span class="set-record d-none" title="{% trans "Novo recorde de carga" %}">🏆</span>
                 </div>
                 {% endfor %}
 
                 <textarea class="form-control form-control-sm mt-2 exercise-notes" rows="1" maxlength="1000"
                           data-url="{% url 'core:workout_exercise_notes' e.log.pk %}"
-                          placeholder="Observação sobre este exercício (dor, ajuste, sensação...)">{{ e.log.notes }}</textarea>
+                          placeholder="{% trans "Observação sobre este exercício (dor, ajuste, sensação...)" %}">{{ e.log.notes }}</textarea>
             </div>
         </div>
     </div>
     {% empty %}
-    <div class="alert alert-info">Este treino ainda não tem exercícios. Fale com a sua personal trainer.</div>
+    <div class="alert alert-info">{% trans "Este treino ainda não tem exercícios. Fale com a sua personal trainer." %}</div>
     {% endfor %}
     </div>
 
     <form id="finishForm" method="post" action="{% url 'core:workout_end' active_session.pk %}" class="card mb-4">
         {% csrf_token %}
         <div class="card-body">
-            <label for="sessionNotes" class="form-label fw-bold">Como foi o treino?</label>
+            <label for="sessionNotes" class="form-label fw-bold">{% trans "Como foi o treino?" %}</label>
             <textarea id="sessionNotes" name="notes" class="form-control mb-2" rows="2" maxlength="2000"
-                      placeholder="Cansaço, dores, o que mudou... (a personal vai ler)">{{ active_session.notes }}</textarea>
+                      placeholder="{% trans "Cansaço, dores, o que mudou... (a personal vai ler)" %}">{{ active_session.notes }}</textarea>
             <div id="finishHint" class="small text-muted mb-3"></div>
-            <button type="submit" class="btn btn-success btn-lg w-100"><i class="bi bi-check-circle"></i> Finalizar Treino</button>
+            <button type="submit" class="btn btn-success btn-lg w-100"><i class="bi bi-check-circle"></i> {% trans "Finalizar Treino" %}</button>
         </div>
     </form>
 
     <form method="post" action="{% url 'core:workout_discard' active_session.pk %}" class="text-center mb-5"
-          onsubmit="return confirm('Descartar este treino? Nada do que foi feito nele será guardado.');">
+          onsubmit="return confirm('{% filter escapejs %}{% trans "Descartar este treino? Nada do que foi feito nele será guardado." %}{% endfilter %}');">
         {% csrf_token %}
-        <button type="submit" class="btn btn-link text-danger btn-sm"><i class="bi bi-trash"></i> Descartar treino</button>
+        <button type="submit" class="btn btn-link text-danger btn-sm"><i class="bi bi-trash"></i> {% trans "Descartar treino" %}</button>
     </form>
 </div>
 
 <div id="restBar" class="rest-bar d-none" role="timer" aria-live="off">
     <div class="d-flex justify-content-between align-items-center mb-2">
-        <div><i class="bi bi-hourglass-split"></i> Descanso <strong id="restTime" class="font-monospace fs-5">00:00</strong></div>
+        <div><i class="bi bi-hourglass-split"></i> {% blocktrans trimmed %}Descanso <strong id="restTime" class="font-monospace fs-5">00:00</strong>{% endblocktrans %}</div>
         <div class="btn-group btn-group-sm">
             <button type="button" class="btn btn-outline-light" id="restMinus">−15s</button>
             <button type="button" class="btn btn-outline-light" id="restPlus">+15s</button>
-            <button type="button" class="btn btn-light" id="restSkip">Pular</button>
+            <button type="button" class="btn btn-light" id="restSkip">{% trans "Pular" %}</button>
         </div>
     </div>
     <div class="progress"><div id="restProgress" class="progress-bar" style="width: 0%"></div></div>

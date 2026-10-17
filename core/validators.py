@@ -2,6 +2,7 @@ import os
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext as _
 from PIL import Image
 
 VALID_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
@@ -10,13 +11,13 @@ VALID_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
 def _validate_image(image, *, max_size_mb, max_width, max_height, min_width, min_height):
     ext = os.path.splitext(image.name)[1].lower()
     if ext not in VALID_EXTENSIONS:
-        raise ValidationError(f'Formato de arquivo não suportado. Use: {", ".join(VALID_EXTENSIONS)}')
+        raise ValidationError(_('Formato de arquivo não suportado. Use: %(formats)s') % {'formats': ', '.join(VALID_EXTENSIONS)})
 
     max_size_bytes = max_size_mb * 1024 * 1024
     if image.size > max_size_bytes:
         raise ValidationError(
-            f'O tamanho máximo permitido é {max_size_mb}MB. '
-            f'Seu arquivo tem {image.size / (1024 * 1024):.2f}MB.'
+            _('O tamanho máximo permitido é %(max)sMB. Seu arquivo tem %(size).2fMB.')
+            % {'max': max_size_mb, 'size': image.size / (1024 * 1024)}
         )
 
     try:
@@ -26,20 +27,20 @@ def _validate_image(image, *, max_size_mb, max_width, max_height, min_width, min
         with Image.open(image) as img:
             width, height = img.size
     except Exception:
-        raise ValidationError('Não foi possível processar a imagem. Certifique-se de que é um arquivo de imagem válido.')
+        raise ValidationError(_('Não foi possível processar a imagem. Certifique-se de que é um arquivo de imagem válido.'))
     finally:
         image.seek(0)
 
     if width > max_width or height > max_height:
         raise ValidationError(
-            f'As dimensões máximas permitidas são {max_width}x{max_height}px. '
-            f'Sua imagem tem {width}x{height}px.'
+            _('As dimensões máximas permitidas são %(max_width)sx%(max_height)spx. Sua imagem tem %(width)sx%(height)spx.')
+            % {'max_width': max_width, 'max_height': max_height, 'width': width, 'height': height}
         )
 
     if width < min_width or height < min_height:
         raise ValidationError(
-            f'As dimensões mínimas permitidas são {min_width}x{min_height}px. '
-            f'Sua imagem tem {width}x{height}px.'
+            _('As dimensões mínimas permitidas são %(min_width)sx%(min_height)spx. Sua imagem tem %(width)sx%(height)spx.')
+            % {'min_width': min_width, 'min_height': min_height, 'width': width, 'height': height}
         )
 
     return image
@@ -84,12 +85,12 @@ def normalize_phone(value):
     if not value:
         return ''
     if any(not (ch.isdigit() or ch in ' ()-+.') for ch in value):
-        raise ValidationError('Use apenas números, espaços, parênteses e hífen.')
+        raise ValidationError(_('Use apenas números, espaços, parênteses e hífen.'))
     digits = digits_only(value)
     if len(digits) in (12, 13) and digits.startswith('55'):
         digits = digits[2:]
     if len(digits) not in (10, 11):
-        raise ValidationError('Informe o telefone com DDD (10 ou 11 dígitos).')
+        raise ValidationError(_('Informe o telefone com DDD (10 ou 11 dígitos).'))
     if len(digits) == 11:
         return f'({digits[:2]}) {digits[2:7]}-{digits[7:]}'
     return f'({digits[:2]}) {digits[2:6]}-{digits[6:]}'
@@ -98,7 +99,7 @@ def normalize_phone(value):
 def normalize_state(value):
     value = (value or '').strip().upper()
     if value and value not in BR_STATES:
-        raise ValidationError('Informe a sigla de um estado válido (ex.: SP).')
+        raise ValidationError(_('Informe a sigla de um estado válido (ex.: SP).'))
     return value
 
 
@@ -108,7 +109,7 @@ def normalize_zip_code(value):
         return ''
     digits = digits_only(value)
     if len(digits) != 8:
-        raise ValidationError('O CEP deve ter 8 dígitos.')
+        raise ValidationError(_('O CEP deve ter 8 dígitos.'))
     return f'{digits[:5]}-{digits[5:]}'
 
 
@@ -118,6 +119,6 @@ def validate_birth_date(value):
         return
     today = timezone.localdate()
     if value > today:
-        raise ValidationError('A data de nascimento não pode estar no futuro.')
+        raise ValidationError(_('A data de nascimento não pode estar no futuro.'))
     if value.year < today.year - MAX_AGE_YEARS:
-        raise ValidationError('Confira a data de nascimento: o ano parece incorreto.')
+        raise ValidationError(_('Confira a data de nascimento: o ano parece incorreto.'))

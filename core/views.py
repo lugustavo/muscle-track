@@ -20,7 +20,8 @@ from django.http import FileResponse, Http404, HttpResponse, HttpResponseBadRequ
 from django.templatetags.static import static
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils import timezone
+from django.utils import dateformat, timezone, translation
+from django.utils.translation import gettext as _, gettext_lazy as _l, ngettext
 from django.views.decorators.http import require_POST, require_safe
 
 from allauth.account.models import EmailAddress
@@ -114,15 +115,15 @@ def search_suggest(request):
 
 STUDENT_PAGE_SIZE = 24
 STUDENT_FILTERS = {
-    'trial': 'Experimental',
-    'paused': 'Pausado',
-    'former': 'Ex-aluno',
-    'consent_pending': 'Sem consentimento (LGPD)',
-    'plan_expiring': 'Plano vencendo',
-    'plan_expired': 'Plano vencido',
-    'inactive_7d': 'Sem treinar há 7+ dias',
-    'no_routine': 'Sem treino ativo',
-    'invite_pending': 'Convite pendente',
+    'trial': _l('Experimental'),
+    'paused': _l('Pausado'),
+    'former': _l('Ex-aluno'),
+    'consent_pending': _l('Sem consentimento (LGPD)'),
+    'plan_expiring': _l('Plano vencendo'),
+    'plan_expired': _l('Plano vencido'),
+    'inactive_7d': _l('Sem treinar há 7+ dias'),
+    'no_routine': _l('Sem treino ativo'),
+    'invite_pending': _l('Convite pendente'),
 }
 
 
@@ -227,13 +228,13 @@ def student_create(request):
 
                 EmailAddress.objects.create(user=user, email=email, primary=True, verified=False)
                 log_event(person, StudentEvent.Kind.CREATED, request.user,
-                          f'Cadastro criado ({person.get_status_display()})')
+                          _('Cadastro criado (%(status)s)') % {'status': person.get_status_display()})
 
-            messages.success(request, 'Aluno cadastrado! Envie o link de convite para ele criar a senha.')
+            messages.success(request, _('Aluno cadastrado! Envie o link de convite para ele criar a senha.'))
             return redirect('core:student_invite', pk=person.pk)
     else:
         form = PersonForm()
-    return render(request, 'core/student_form.html', {'form': form, 'title': 'Cadastrar Aluno'})
+    return render(request, 'core/student_form.html', {'form': form, 'title': _('Cadastrar Aluno')})
 
 
 @staff_required
@@ -242,8 +243,8 @@ def student_invite(request, pk):
     student = get_object_or_404(Person.objects.select_related('user'), pk=pk)
     if request.method == 'POST':
         revoke_invites(student)
-        log_event(student, StudentEvent.Kind.INVITE_REVOKED, request.user, 'Link de acesso revogado e gerado de novo')
-        messages.success(request, 'Link anterior revogado. Este é o novo link de acesso.')
+        log_event(student, StudentEvent.Kind.INVITE_REVOKED, request.user, _('Link de acesso revogado e gerado de novo'))
+        messages.success(request, _('Link anterior revogado. Este é o novo link de acesso.'))
         return redirect(request.get_full_path())
     invite_url = build_invite_url(request, student.user)
 
@@ -274,9 +275,9 @@ def accept_invite(request, uidb64, token):
             user.save(update_fields=['is_active'])
             EmailAddress.objects.update_or_create(
                 user=user, email=user.email, defaults={'primary': True, 'verified': True})
-            log_event(user.person, StudentEvent.Kind.INVITE_ACCEPTED, user, 'Criou a senha pelo link de acesso')
+            log_event(user.person, StudentEvent.Kind.INVITE_ACCEPTED, user, _('Criou a senha pelo link de acesso'))
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            messages.success(request, 'Senha criada! Bem-vindo(a) ao Muscle Track.')
+            messages.success(request, _('Senha criada! Bem-vindo(a) ao Muscle Track.'))
             return redirect('core:my_workouts')
     else:
         form = SetPasswordForm(user)
@@ -414,15 +415,15 @@ def student_package_sell(request, pk):
         data = form.cleaned_data
         sold = packages.sell(student, data['package'], mode=data['pricing_mode'], price_per_session=data['price_per_session'],
                              price_total=data['price_total'], notes=data['notes'], actor=request.user)
-        messages.success(request, f'Pacote vendido: {sold.name}. O prazo conta a partir da primeira aula.')
+        messages.success(request, _('Pacote vendido: %(name)s. O prazo conta a partir da primeira aula.') % {'name': sold.name})
         if data.get('continue_schedule') and pattern:
-            messages.info(request, f"Confira as aulas na prévia (mesmo horário de antes: {pattern['label']}) e confirme em "
-                                   '"Preencher agenda".')
+            messages.info(request, _('Confira as aulas na prévia (mesmo horário de antes: %(label)s) e confirme em '
+                                     '"Preencher agenda".') % {'label': pattern['label']})
             return redirect(_student_tab(request, pk, 'agenda'))
         return redirect(after_save_url(request, reverse('core:student_detail', kwargs={'pk': pk}), fragment='#tab-ficha'))
     catalog = list(form.fields['package'].queryset)
     return render(request, 'core/student_package_sell.html', {
-        'form': form, 'student': student, 'catalog': catalog, 'title': 'Vender pacote',
+        'form': form, 'student': student, 'catalog': catalog, 'title': _('Vender pacote'),
         'overview': packages.overview(student), 'pattern': pattern})
 
 
@@ -436,22 +437,22 @@ def student_package_action(request, pk, package_pk):
     try:
         if action == 'freeze':
             packages.freeze(package, request.user)
-            messages.success(request, 'Pacote congelado: o prazo para de contar até você descongelar.')
+            messages.success(request, _('Pacote congelado: o prazo para de contar até você descongelar.'))
         elif action == 'unfreeze':
             packages.unfreeze(package, request.user)
-            messages.success(request, 'Pacote descongelado: os dias parados foram somados ao prazo.')
+            messages.success(request, _('Pacote descongelado: os dias parados foram somados ao prazo.'))
         elif action == 'extend':
             try:
                 days = int(request.POST.get('days', ''))
             except ValueError:
-                raise packages.PackageError('Informe quantos dias de prorrogação.')
+                raise packages.PackageError(_('Informe quantos dias de prorrogação.'))
             packages.extend(package, days, request.POST.get('note', ''), request.user)
-            messages.success(request, f'Pacote prorrogado em {days} dias.')
+            messages.success(request, _('Pacote prorrogado em %(days)d dias.') % {'days': days})
         elif action == 'cancel':
             packages.cancel_package(package, request.user)
-            messages.success(request, 'Pacote cancelado.')
+            messages.success(request, _('Pacote cancelado.'))
         else:
-            return HttpResponseBadRequest('Ação inválida')
+            return HttpResponseBadRequest(_('Ação inválida'))
     except packages.PackageError as error:
         messages.error(request, str(error))
     return redirect(after_save_url(request, reverse('core:student_detail', kwargs={'pk': pk}), fragment='#tab-ficha'))
@@ -464,7 +465,7 @@ def student_package_edit(request, pk, package_pk):
     package = get_object_or_404(student.packages, pk=package_pk)
     form = PackageEditForm.for_package(package, request.POST or None)
     if package.cancelled_at:
-        messages.warning(request, 'Um pacote cancelado não pode ser editado.')
+        messages.warning(request, _('Um pacote cancelado não pode ser editado.'))
         return redirect(_student_tab(request, pk, 'ficha'))
     if request.method == 'POST' and form.is_valid():
         data = form.cleaned_data
@@ -476,16 +477,16 @@ def student_package_edit(request, pk, package_pk):
         except refunds.RefundError as error:
             form.add_error(None, str(error))
         else:
-            messages.success(request, 'Pacote atualizado.' if changed else 'Nada mudou.')
+            messages.success(request, _('Pacote atualizado.') if changed else _('Nada mudou.'))
             package.refresh_from_db()
             extra = packages.overpaid_amount(package)
             if extra:
-                messages.warning(request, f'O novo valor ficou {money(extra)} abaixo do que já foi pago: há essa diferença a devolver (Financeiro → Devoluções e ajustes).')
+                messages.warning(request, _('O novo valor ficou %(amount)s abaixo do que já foi pago: há essa diferença a devolver (Financeiro → Devoluções e ajustes).') % {'amount': money(extra)})
             return redirect(_student_tab(request, pk, 'ficha'))
     overview = packages.overview(student)
     row = next((r for r in overview['rows'] if r['package'].pk == package.pk), None)
     return render(request, 'core/student_package_edit.html', {
-        'form': form, 'student': student, 'package': package, 'row': row, 'title': 'Editar pacote'})
+        'form': form, 'student': student, 'package': package, 'row': row, 'title': _('Editar pacote')})
 
 
 @staff_required
@@ -494,7 +495,7 @@ def student_package_cancel(request, pk, package_pk):
     student = get_object_or_404(Person, pk=pk)
     package = get_object_or_404(student.packages.prefetch_related('payments', 'refunds'), pk=package_pk)
     if package.cancelled_at:
-        messages.warning(request, 'Este pacote já foi cancelado.')
+        messages.warning(request, _('Este pacote já foi cancelado.'))
         return redirect(_student_tab(request, pk, 'ficha'))
     today = timezone.localdate()
     fee_source = request.POST if request.method == 'POST' else request.GET
@@ -518,15 +519,16 @@ def student_package_cancel(request, pk, package_pk):
         except refunds.RefundError as error:
             form.add_error(None, str(error))
         else:
-            text = 'Pacote cancelado.'
+            text = _('Pacote cancelado.')
             if result['removed']:
-                text += f" {result['removed']} aula{'' if result['removed'] == 1 else 's'} marcada{'' if result['removed'] == 1 else 's'} saiu da agenda."
+                text += ' ' + ngettext('%(n)d aula marcada saiu da agenda.', '%(n)d aulas marcadas saiu da agenda.',
+                                       result['removed']) % {'n': result['removed']}
             messages.success(request, text)
             if result['refund']:
                 return redirect(reverse('core:refund_detail', kwargs={'pk': result['refund'].pk}))
             return redirect(_student_tab(request, pk, 'ficha'))
     return render(request, 'core/student_package_cancel.html', {
-        'form': form, 'student': student, 'package': package, 'quote': quote, 'fee': fee, 'title': 'Cancelar pacote',
+        'form': form, 'student': student, 'package': package, 'quote': quote, 'fee': fee, 'title': _('Cancelar pacote'),
         'future': student.appointments.filter(status=Appointment.Status.SCHEDULED, starts_at__gte=timezone.now()).count()})
 
 
@@ -545,7 +547,7 @@ def refund_create(request, pk):
             extra = packages.overpaid_amount(package)
             initial.update(student_package=package, amount=(extra or refunds.cancellation_quote(package)['suggested']) or None)
             if extra:
-                initial['reason'] = 'Valor do pacote reduzido: pago a mais'
+                initial['reason'] = _('Valor do pacote reduzido: pago a mais')
     form = RefundForm(request.POST or None, person=student, initial=initial)
     if request.method == 'POST' and form.is_valid():
         data = form.cleaned_data
@@ -560,21 +562,22 @@ def refund_create(request, pk):
         except refunds.RefundError as error:
             form.add_error(None, str(error))
         else:
-            messages.success(request, f'{refund.get_kind_display()} registrada.')
+            messages.success(request, _('%(kind)s registrada.') % {'kind': refund.get_kind_display()})
             if refund.summary:
                 return redirect(reverse('core:refund_detail', kwargs={'pk': refund.pk}))
             return redirect(_student_tab(request, student.pk, 'pagamentos'))
-    return render(request, 'core/refund_form.html', {'form': form, 'student': student, 'title': 'Devolver ou estornar'})
+    return render(request, 'core/refund_form.html', {'form': form, 'student': student, 'title': _('Devolver ou estornar')})
 
 
 @staff_required
 def refund_detail(request, pk):
     """One refund with the calculation in words, ready to send to the student."""
     refund = get_object_or_404(Refund.objects.select_related('person', 'student_package', 'payment'), pk=pk)
-    text = refund.summary or f'Devolução de {money(refund.amount)}' + (f' ({refund.reason})' if refund.reason else '')
-    message = f'Olá, {refund.person.person_name.split()[0]}! Segue o resumo da devolução:\n{text}\nForma: {refund.get_method_display()}.'
+    text = refund.summary or _('Devolução de %(amount)s') % {'amount': money(refund.amount)} + (f' ({refund.reason})' if refund.reason else '')
+    message = _('Olá, %(name)s! Segue o resumo da devolução:\n%(text)s\nForma: %(method)s.') % {
+        'name': refund.person.person_name.split()[0], 'text': text, 'method': refund.get_method_display()}
     return render(request, 'core/refund_detail.html', {
-        'refund': refund, 'student': refund.person, 'title': 'Devolução', 'summary_text': text,
+        'refund': refund, 'student': refund.person, 'title': _('Devolução'), 'summary_text': text,
         'whatsapp': whatsapp_url(refund.person.phone, message) if refund.person.phone else ''})
 
 
@@ -585,7 +588,7 @@ def refund_void(request, pk):
     try:
         refunds.void_refund(refund, request.POST.get('reason', ''), request.user)
         packages.sync(refund.person)
-        messages.success(request, 'Devolução anulada: continua registrada, mas não conta mais.')
+        messages.success(request, _('Devolução anulada: continua registrada, mas não conta mais.'))
     except refunds.RefundError as error:
         messages.error(request, str(error))
     return redirect(after_save_url(request, reverse('core:finance_refunds'), forward_next=False))
@@ -633,13 +636,13 @@ def student_edit(request, pk):
                 log_profile_edit(person, form, request.user)
 
             if email_changed:
-                messages.success(request, 'Aluno atualizado! O e-mail de login mudou: confira o convite se o aluno ainda não criou a senha.')
+                messages.success(request, _('Aluno atualizado! O e-mail de login mudou: confira o convite se o aluno ainda não criou a senha.'))
             else:
-                messages.success(request, 'Aluno atualizado com sucesso!')
+                messages.success(request, _('Aluno atualizado com sucesso!'))
             return redirect(after_save_url(request, reverse('core:student_detail', kwargs={'pk': pk})))
     else:
         form = PersonForm(instance=student)
-    return render(request, 'core/student_form.html', {'form': form, 'title': 'Editar Aluno'})
+    return render(request, 'core/student_form.html', {'form': form, 'title': _('Editar Aluno')})
 
 
 @staff_required
@@ -653,7 +656,7 @@ def student_delete(request, pk):
         with transaction.atomic():
             student.user.delete()  # cascades to Person and everything hanging from it
         logger.info('Student #%s deleted by user #%s', pk, request.user.pk)  # no personal data
-        messages.success(request, f'{name} e todos os dados foram excluídos.')
+        messages.success(request, _('%(name)s e todos os dados foram excluídos.') % {'name': name})
         return redirect('core:student_list')
     counts = {
         'routines': student.routines.count(),
@@ -675,7 +678,7 @@ def student_status(request, pk):
     if request.method == 'POST' and form.is_valid():
         changed = student.set_status(form.cleaned_data['status'], form.cleaned_data['reason'], actor=request.user)
         if changed:
-            messages.success(request, f'Situação atualizada: {student.get_status_display()}.')
+            messages.success(request, _('Situação atualizada: %(status)s.') % {'status': student.get_status_display()})
         return redirect(after_save_url(request, reverse('core:student_detail', kwargs={'pk': pk})))
     return render(request, 'core/student_status.html', {'student': student, 'form': form})
 
@@ -685,7 +688,7 @@ def student_status(request, pk):
 def student_export(request, pk):
     """The trainer downloads everything stored about a student (including internal notes)"""
     student = get_object_or_404(Person.objects.select_related('user'), pk=pk)
-    log_event(student, StudentEvent.Kind.DATA_EXPORT, request.user, 'Exportação de dados feita pela personal')
+    log_event(student, StudentEvent.Kind.DATA_EXPORT, request.user, _('Exportação de dados feita pela personal'))
     return _zip_response(build_export(student, include_internal_notes=True), f'aluno-{student.pk}-dados.zip')
 
 
@@ -705,9 +708,9 @@ def student_consent_record(request, pk):
             record_consent(student, kind, True, source=ConsentRecord.Source.TRAINER, actor=request.user, at=when)
             count += 1
     if count:
-        messages.success(request, 'Consentimento registrado.')
+        messages.success(request, _('Consentimento registrado.'))
     else:
-        messages.warning(request, 'Marque pelo menos um consentimento para registrar.')
+        messages.warning(request, _('Marque pelo menos um consentimento para registrar.'))
     return redirect(_student_tab(request, student.pk, 'historico'))
 
 
@@ -736,7 +739,7 @@ def consent(request, person):
             record_consent(person, kind, True, actor=request.user)
         if form.cleaned_data['photos']:
             record_consent(person, ConsentRecord.Kind.PHOTOS, True, actor=request.user)
-        messages.success(request, 'Obrigado! Você já pode treinar.')
+        messages.success(request, _('Obrigado! Você já pode treinar.'))
         return redirect(safe_next_url(request, default))
     return render(request, 'core/consent.html', {
         'form': form, 'descriptions': CONSENT_DESCRIPTIONS, 'version': CONSENT_VERSION,
@@ -760,7 +763,7 @@ def my_privacy(request, person):
 @student_required(consent_gate=False)
 @require_POST
 def my_export(request, person):
-    log_event(person, StudentEvent.Kind.DATA_EXPORT, request.user, 'Baixou os próprios dados')
+    log_event(person, StudentEvent.Kind.DATA_EXPORT, request.user, _('Baixou os próprios dados'))
     return _zip_response(build_export(person, include_internal_notes=False), 'meus-dados.zip')
 
 
@@ -770,7 +773,7 @@ def my_consent_photos(request, person):
     """Give or withdraw the optional photo consent (the required ones end only with deletion)"""
     granted = request.POST.get('granted') == '1'
     record_consent(person, ConsentRecord.Kind.PHOTOS, granted, actor=request.user)
-    messages.success(request, 'Preferência de fotos atualizada.')
+    messages.success(request, _('Preferência de fotos atualizada.'))
     return redirect(safe_next_url(request, reverse('core:my_privacy')))
 
 
@@ -778,8 +781,8 @@ def my_consent_photos(request, person):
 @require_POST
 def my_erasure_request(request, person):
     if not person.events.filter(kind=StudentEvent.Kind.ERASURE_REQUEST).exists():
-        log_event(person, StudentEvent.Kind.ERASURE_REQUEST, request.user, 'Pediu a exclusão dos próprios dados')
-    messages.success(request, 'Pedido enviado. Sua personal vai apagar seus dados e avisar você.')
+        log_event(person, StudentEvent.Kind.ERASURE_REQUEST, request.user, _('Pediu a exclusão dos próprios dados'))
+    messages.success(request, _('Pedido enviado. Sua personal vai apagar seus dados e avisar você.'))
     return redirect('core:my_privacy')
 
 
@@ -793,14 +796,14 @@ def my_profile(request, person):
         if form.is_valid():
             form.save()
             log_profile_edit(person, form, request.user)
-            messages.success(request, 'Seu perfil foi atualizado com sucesso!')
+            messages.success(request, _('Seu perfil foi atualizado com sucesso!'))
             return redirect('core:my_profile')
     else:
         form = StudentProfileForm(instance=person)
 
     return render(request, 'core/my_profile.html', {
         'form': form,
-        'title': 'Meu Perfil',
+        'title': _('Meu Perfil'),
         'user_email': request.user.email,
         'person': person
     })
@@ -825,7 +828,7 @@ def my_agenda(request, person):
         decided = [r for r in asked if r.status in (AppointmentRequest.Status.APPROVED, AppointmentRequest.Status.DECLINED)]
         appointment.last_answer = decided[-1] if decided else None
     return render(request, 'core/my_agenda.html', {
-        'title': 'Minha agenda', 'upcoming': upcoming, 'recent': recent, 'notice_hours': class_requests.notice_hours(),
+        'title': _('Minha agenda'), 'upcoming': upcoming, 'recent': recent, 'notice_hours': class_requests.notice_hours(),
         'package': packages.overview(person, today)['current']})
 
 
@@ -840,7 +843,7 @@ def my_intro(request, person):
         if request.headers.get('X-Requested-With') == 'fetch':
             return HttpResponse(status=204)
         return redirect('core:home')
-    return render(request, 'core/my_intro.html', {'title': 'Como usar o app', 'steps': intro.STEPS})
+    return render(request, 'core/my_intro.html', {'title': _('Como usar o app'), 'steps': intro.STEPS})
 
 
 @student_required
@@ -851,7 +854,7 @@ def my_package(request, person):
     current = data['current']
     others = [r for r in reversed(rows) if r is not current]
     return render(request, 'core/my_package.html', {
-        'title': 'Meu pacote', 'current': current, 'others': others, 'without_package': data['without_package'],
+        'title': _('Meu pacote'), 'current': current, 'others': others, 'without_package': data['without_package'],
         'has_packages': bool(rows)})
 
 
@@ -860,7 +863,7 @@ def my_evolution(request, person):
     """The student's own assessments, chart and photos (read-only; the trainer's private notes are never shown)."""
     assessments = evolution.assessments_with_photos(person)
     return render(request, 'core/my_evolution.html', {
-        'title': 'Minha evolução', 'assessments': assessments, 'assessment_chart': evolution.chart_points(assessments),
+        'title': _('Minha evolução'), 'assessments': assessments, 'assessment_chart': evolution.chart_points(assessments),
         'can_compare': bool(evolution.comparable_angles(assessments)),
         'photos_consent': _photos_consent(person),
         'loose_photos': list(person.progress_photos.filter(assessment__isnull=True))})
@@ -877,17 +880,17 @@ def my_photo_upload(request, person):
     consent = _photos_consent(person)
     form = MyPhotoForm(request.POST or None, request.FILES or None, person=person)
     if request.method == 'POST' and not consent:
-        messages.error(request, 'Autorize o registro de fotos para enviar.')
+        messages.error(request, _('Autorize o registro de fotos para enviar.'))
         return redirect(request.get_full_path())
     if request.method == 'POST' and form.is_valid():
         photo = form.save(commit=False)
         photo.person = person
         photo.uploaded_by_student = True
         photo.save()
-        messages.success(request, 'Foto enviada. Só você e a sua personal conseguem vê-la.')
+        messages.success(request, _('Foto enviada. Só você e a sua personal conseguem vê-la.'))
         return redirect(after_save_url(request, reverse('core:my_evolution')))
     return render(request, 'core/my_photo_form.html', {
-        'form': form, 'photos_consent': consent, 'title': 'Enviar foto',
+        'form': form, 'photos_consent': consent, 'title': _('Enviar foto'),
         'back_default': reverse('core:my_evolution')})
 
 
@@ -897,7 +900,7 @@ def my_photo_delete(request, person, pk):
     """The student removes a photo she sent herself (the trainer's own photos are never hers to delete)."""
     photo = get_object_or_404(person.progress_photos.filter(uploaded_by_student=True), pk=pk)
     photo.delete()
-    messages.success(request, 'Foto removida.')
+    messages.success(request, _('Foto removida.'))
     return redirect(after_save_url(request, reverse('core:my_evolution')))
 
 
@@ -905,7 +908,7 @@ def my_photo_delete(request, person, pk):
 def my_evolution_compare(request, person):
     data = evolution.compare(person, request.GET.get('angle'), request.GET.get('before'), request.GET.get('after'))
     return render(request, 'core/photo_compare.html', {
-        'title': 'Comparar fotos', 'data': data, 'mine': True,
+        'title': _('Comparar fotos'), 'data': data, 'mine': True,
         'form_url': reverse('core:my_evolution_compare'), 'back_url': reverse('core:my_evolution')})
 
 
@@ -914,7 +917,7 @@ def student_compare(request, pk):
     student = get_object_or_404(Person, pk=pk)
     data = evolution.compare(student, request.GET.get('angle'), request.GET.get('before'), request.GET.get('after'))
     return render(request, 'core/photo_compare.html', {
-        'title': 'Comparar fotos', 'data': data, 'mine': False, 'student': student,
+        'title': _('Comparar fotos'), 'data': data, 'mine': False, 'student': student,
         'form_url': reverse('core:student_compare', kwargs={'pk': student.pk}),
         'back_url': reverse('core:student_detail', kwargs={'pk': student.pk}) + '#tab-avaliacoes'})
 
@@ -937,10 +940,10 @@ def my_agenda_request(request, person, pk):
             form.add_error(None, str(error))
         else:
             notifications.notify(notifications.staff_users(), notifications.request_created(asked))
-            messages.success(request, 'Pedido enviado. Assim que sua personal responder, a resposta aparece aqui.')
+            messages.success(request, _('Pedido enviado. Assim que sua personal responder, a resposta aparece aqui.'))
             return redirect('core:my_agenda')
     return render(request, 'core/my_agenda_request.html', {
-        'form': form, 'appointment': appointment, 'blocked': block, 'title': 'Pedir remarcação ou cancelamento'})
+        'form': form, 'appointment': appointment, 'blocked': block, 'title': _('Pedir remarcação ou cancelamento')})
 
 
 @student_required
@@ -949,7 +952,7 @@ def my_agenda_request_withdraw(request, person, pk):
     asked = get_object_or_404(AppointmentRequest.objects.select_related('appointment'), pk=pk, appointment__person=person)
     try:
         class_requests.withdraw(person, asked)
-        messages.success(request, 'Pedido retirado.')
+        messages.success(request, _('Pedido retirado.'))
     except class_requests.RequestError as error:
         messages.error(request, str(error))
     return redirect('core:my_agenda')
@@ -987,6 +990,7 @@ def exercise_list(request):
         'muscle_groups': muscle_groups,
         'search': search,
         'selected_muscle_group': muscle_group,
+        'selected_muscle_group_label': next((g.label for g in muscle_groups if str(g.pk) == str(muscle_group)), ''),
         'view_mode': view_mode
     })
 
@@ -998,11 +1002,11 @@ def exercise_create(request):
         form = ExerciseForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Exercício cadastrado com sucesso!')
+            messages.success(request, _('Exercício cadastrado com sucesso!'))
             return redirect(after_save_url(request, reverse('core:exercise_list'), forward_next=False))
     else:
         form = ExerciseForm()
-    return render(request, 'core/exercise_form.html', {'form': form, 'title': 'Cadastrar Exercício'})
+    return render(request, 'core/exercise_form.html', {'form': form, 'title': _('Cadastrar Exercício')})
 
 
 @staff_required
@@ -1056,11 +1060,11 @@ def exercise_edit(request, pk):
         form = ExerciseForm(request.POST, request.FILES, instance=exercise)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Exercício atualizado com sucesso!')
+            messages.success(request, _('Exercício atualizado com sucesso!'))
             return redirect(after_save_url(request, reverse('core:exercise_detail', kwargs={'pk': pk})))
     else:
         form = ExerciseForm(instance=exercise)
-    return render(request, 'core/exercise_form.html', {'form': form, 'title': 'Editar Exercício'})
+    return render(request, 'core/exercise_form.html', {'form': form, 'title': _('Editar Exercício')})
 
 
 # ============= ROUTINE VIEWS =============
@@ -1081,21 +1085,21 @@ def _load_exercise_items(raw, id_key):
     try:
         items = json.loads(raw or '[]')
     except json.JSONDecodeError:
-        raise ValueError('Erro ao processar exercícios.')
+        raise ValueError(_('Erro ao processar exercícios.'))
     if not isinstance(items, list) or not all(isinstance(i, dict) for i in items):
-        raise ValueError('Erro ao processar exercícios.')
+        raise ValueError(_('Erro ao processar exercícios.'))
 
     ids = []
     for item in items:
         ex_id = _to_int(item.get(id_key), None, 1)
         if ex_id is None:
-            raise ValueError('Exercício inválido na lista.')
+            raise ValueError(_('Exercício inválido na lista.'))
         item[id_key] = ex_id
         ids.append(ex_id)
 
     exercises = Exercise.objects.in_bulk(set(ids))
     if len(exercises) != len(set(ids)):
-        raise ValueError('Um dos exercícios selecionados não existe mais.')
+        raise ValueError(_('Um dos exercícios selecionados não existe mais.'))
     return items, exercises
 
 
@@ -1200,6 +1204,7 @@ def routine_list(request):
         'routines': routines,
         'search': search,
         'selected_difficulty': difficulty,
+        'selected_difficulty_label': dict(Routine._meta.get_field('difficulty_level').choices).get(difficulty, ''),
         'selected_status': status,
         'view_mode': view_mode,
         'difficulty_choices': Routine._meta.get_field('difficulty_level').choices
@@ -1226,13 +1231,13 @@ def routine_create(request):
             except ValueError as e:
                 messages.error(request, str(e))
             else:
-                messages.success(request, 'Treino criado com sucesso!')
+                messages.success(request, _('Treino criado com sucesso!'))
                 return redirect(after_save_url(request, reverse('core:routine_detail', kwargs={'pk': routine.pk})))
     else:
         form = RoutineForm()
 
     return render(request, 'core/routine_form.html',
-                  _routine_form_context(form, 'Criar Treino', None, []))
+                  _routine_form_context(form, _('Criar Treino'), None, []))
 
 
 @staff_required
@@ -1286,14 +1291,14 @@ def routine_edit(request, pk):
             except ValueError as e:
                 messages.error(request, str(e))
             else:
-                messages.success(request, 'Treino atualizado com sucesso!')
+                messages.success(request, _('Treino atualizado com sucesso!'))
                 return redirect(after_save_url(request, reverse('core:routine_detail', kwargs={'pk': pk})))
     else:
         form = RoutineForm(instance=routine)
 
     routine_exercises = routine.exercises.all().select_related('exercise').order_by('order')
     return render(request, 'core/routine_form.html',
-                  _routine_form_context(form, 'Editar Treino', routine, routine_exercises))
+                  _routine_form_context(form, _('Editar Treino'), routine, routine_exercises))
 
 
 # ============= PERSON ROUTINE VIEWS =============
@@ -1328,7 +1333,8 @@ def person_routine_create(request):
             except ValueError as e:
                 messages.error(request, str(e))
             else:
-                messages.success(request, f'Treino "{person_routine.routine_name}" atribuído a {person_routine.person.person_name} com sucesso!')
+                messages.success(request, _('Treino "%(routine)s" atribuído a %(student)s com sucesso!') % {
+                    'routine': person_routine.routine_name, 'student': person_routine.person.person_name})
                 return redirect(after_save_url(request, reverse('core:student_detail', kwargs={'pk': person_routine.person.pk})))
         person_id = request.POST.get('person')
     else:
@@ -1420,7 +1426,7 @@ def person_routine_edit(request, pk):
             except ValueError as e:
                 messages.error(request, str(e))
             else:
-                messages.success(request, f'Treino "{person_routine.routine_name}" atualizado com sucesso!')
+                messages.success(request, _('Treino "%(routine)s" atualizado com sucesso!') % {'routine': person_routine.routine_name})
                 return redirect(after_save_url(request, reverse('core:student_detail', kwargs={'pk': person_routine.person.pk})))
     else:
         form = PersonRoutineForm(instance=person_routine)
@@ -1449,7 +1455,8 @@ def person_routine_deactivate(request, pk):
         person_routine.end_date = timezone.now().date()
         person_routine.save()
 
-        messages.success(request, f'Treino "{person_routine.routine_name}" foi removido e movido para o histórico.')
+        messages.success(request, _('Treino "%(routine)s" foi removido e movido para o histórico.') % {
+            'routine': person_routine.routine_name})
         return redirect(after_save_url(request, reverse('core:student_detail', kwargs={'pk': person_id})))
 
     return redirect('core:student_list')
@@ -1481,7 +1488,7 @@ def _chart_points(sessions, with_workout_name=False):
     for session in sessions:
         avg = averages.get(session.pk)
         point = {
-            'date': session.start_time.strftime('%d/%m'),
+            'date': dateformat.format(timezone.localtime(session.start_time), _('d/m')),
             'duration': session.duration_minutes or 0,
             'avg_weight': round(float(avg), 1) if avg else 0,
         }
@@ -1565,12 +1572,12 @@ def workout_start(request, pk, person):
     active_session = person_routine.sessions.filter(is_completed=False).first()
 
     if active_session and not _close_if_stale(active_session):
-        messages.info(request, 'Recuperando sua sessão de treino em andamento...')
+        messages.info(request, _('Recuperando sua sessão de treino em andamento...'))
     else:
         if active_session:
-            messages.warning(request, 'Sessão anterior foi encerrada automaticamente (tempo excedido).')
+            messages.warning(request, _('Sessão anterior foi encerrada automaticamente (tempo excedido).'))
         WorkoutSession.objects.create(person_routine=person_routine)
-        messages.success(request, 'Treino iniciado! Boa sorte!')
+        messages.success(request, _('Treino iniciado! Boa sorte!'))
 
     return redirect('core:workout_execute', pk=pk)
 
@@ -1613,10 +1620,10 @@ def workout_execute(request, pk, person):
 
     active_session = person_routine.sessions.filter(is_completed=False).first()
     if _close_if_stale(active_session):
-        messages.warning(request, 'Sessão anterior foi encerrada automaticamente (tempo excedido).')
+        messages.warning(request, _('Sessão anterior foi encerrada automaticamente (tempo excedido).'))
         active_session = None
     if not active_session:
-        messages.warning(request, 'Nenhuma sessão ativa encontrada. Inicie um novo treino.')
+        messages.warning(request, _('Nenhuma sessão ativa encontrada. Inicie um novo treino.'))
         return redirect('core:my_workouts')
 
     routine_exercises = list(person_routine.exercises.select_related('exercise').order_by('order'))
@@ -1716,10 +1723,10 @@ def workout_discard(request, pk, person):
     has_sets = SessionSet.objects.filter(session_exercise__session=session, is_done=True).exists()
     has_notes = bool(session.notes.strip()) or session.exercise_logs.exclude(notes='').exists()
     if has_sets or has_notes:
-        messages.warning(request, 'Este treino já tem séries ou comentários. Finalize-o em vez de descartar.')
+        messages.warning(request, _('Este treino já tem séries ou comentários. Finalize-o em vez de descartar.'))
         return redirect('core:workout_execute', pk=session.person_routine_id)
     session.delete()
-    messages.info(request, 'Treino descartado.')
+    messages.info(request, _('Treino descartado.'))
     return redirect('core:my_workouts')
 
 
@@ -1809,7 +1816,7 @@ def workout_set_update(request, pk, person):
     )
     data = _parse_json_body(request)
     if data is None:
-        return JsonResponse({'success': False, 'error': 'Dados inválidos'}, status=400)
+        return JsonResponse({'success': False, 'error': _('Dados inválidos')}, status=400)
 
     try:
         if 'weight' in data:
@@ -1839,7 +1846,7 @@ def workout_set_update(request, pk, person):
                 workout_set.completed_at = None
             workout_set.is_done = data['done']
     except (ValueError, InvalidOperation):
-        return JsonResponse({'success': False, 'error': 'Valor inválido'}, status=400)
+        return JsonResponse({'success': False, 'error': _('Valor inválido')}, status=400)
 
     workout_set.save()
     log = workout_set.session_exercise
@@ -1865,7 +1872,7 @@ def workout_exercise_notes(request, pk, person):
     )
     data = _parse_json_body(request)
     if data is None or not isinstance(data.get('notes', ''), str):
-        return JsonResponse({'success': False, 'error': 'Dados inválidos'}, status=400)
+        return JsonResponse({'success': False, 'error': _('Dados inválidos')}, status=400)
     log.notes = data.get('notes', '').strip()[:1000]
     log.save(update_fields=['notes'])
     return JsonResponse({'success': True})
@@ -1881,7 +1888,7 @@ def my_exercise_progress(request, exercise_pk, person):
         weight_used__isnull=False,
     ).select_related('session').prefetch_related('sets').order_by('session__start_time'))
 
-    points = [{'date': log.session.start_time.strftime('%d/%m/%y'), 'weight': float(log.weight_used)}
+    points = [{'date': dateformat.format(timezone.localtime(log.session.start_time), _('d/m/y')), 'weight': float(log.weight_used)}
               for log in logs]
     record_log = max(logs, key=lambda l: (l.weight_used, l.session.start_time), default=None)
     history = []
@@ -1913,7 +1920,7 @@ def api_exercises_list(request):
             'id': exercise.pk,
             'name': exercise.exercise_name,
             'muscle_group_id': exercise.muscle_group.id,
-            'muscle_group_display': exercise.muscle_group.name,
+            'muscle_group_display': exercise.muscle_group.label,
             'default_sets': exercise.default_sets,
             'default_reps': exercise.default_reps,
             'thumbnail': thumbnail_url
@@ -2077,14 +2084,14 @@ def routine_generate_ai(request):
 
             try:
                 routine = generate_workout_with_ai(description, difficulty, duration)
-                messages.success(request, 'Treino gerado com IA com sucesso!')
+                messages.success(request, _('Treino gerado com IA com sucesso!'))
                 return redirect(after_save_url(request, reverse('core:routine_detail', kwargs={'pk': routine.pk})))
             except AIGenerationError as e:
-                messages.error(request, f'Erro ao gerar treino: {e}')
+                messages.error(request, _('Erro ao gerar treino: %(error)s') % {'error': e})
     else:
         form = AIWorkoutGenerationForm()
 
-    return render(request, 'core/routine_generate_ai.html', {'form': form, 'title': 'Gerar Treino com IA'})
+    return render(request, 'core/routine_generate_ai.html', {'form': form, 'title': _('Gerar Treino com IA')})
 
 
 # ============= CALENDAR LINK (Google Agenda, Apple Calendar...) =============
@@ -2130,10 +2137,10 @@ def _set_channel(user, person, pref, channel, enabled):
     if channel == 'push' and not enabled:
         user.push_subscriptions.all().delete()   # withdrawing also forgets the devices
     if person is not None:
-        label = 'e-mail' if channel == 'email' else 'push (aparelho)'
+        label = _('e-mail') if channel == 'email' else _('push (aparelho)')
         StudentEvent.objects.create(
             person=person, kind=StudentEvent.Kind.CONSENT, actor=user,
-            summary=f'{"Ativou" if enabled else "Desativou"} avisos por {label}',
+            summary=(_('Ativou avisos por %(label)s') if enabled else _('Desativou avisos por %(label)s')) % {'label': label},
             changes={'channel': channel, 'granted': enabled})
 
 
@@ -2163,15 +2170,15 @@ def whatsapp_template_save(request, kind):
         raise Http404
     if request.POST.get('action') == 'reset':
         WhatsAppTemplate.objects.filter(kind=kind).delete()
-        messages.success(request, 'Texto padrão restaurado.')
+        messages.success(request, _('Texto padrão restaurado.'))
     else:
         text = request.POST.get('text', '').strip()
         errors = whatsapp_messages.problems(kind, text)
         if errors:
-            messages.error(request, 'Texto não salvo: ' + ' '.join(errors))
+            messages.error(request, _('Texto não salvo: %(errors)s') % {'errors': ' '.join(errors)})
         else:
             WhatsAppTemplate.objects.update_or_create(kind=kind, defaults={'text': text, 'updated_by': request.user})
-            messages.success(request, 'Mensagem salva.')
+            messages.success(request, _('Mensagem salva.'))
     return redirect(reverse('core:notification_settings') + '#tab-mensagens')
 
 
@@ -2193,17 +2200,17 @@ def notification_settings(request):
     person = getattr(request.user, 'person', None)   # None for the trainer; students go through the consent gate
     if person is not None and not has_current_consent(person):
         return redirect('core:consent')
-    pref, _ = NotificationPreference.objects.get_or_create(user=request.user)
+    pref, _created = NotificationPreference.objects.get_or_create(user=request.user)
     if request.method == 'POST':
         wants_email = 'email_enabled' in request.POST
         wants_push = 'push_enabled' in request.POST
         error = ''
         if wants_email and not request.user.email:
-            error = 'Cadastre um e-mail na sua conta para receber avisos por e-mail.'
+            error = _('Cadastre um e-mail na sua conta para receber avisos por e-mail.')
         elif wants_email and not pref.email_enabled and not notifications.email_configured():
-            error = 'O envio de e-mail ainda não foi configurado no servidor.'
+            error = _('O envio de e-mail ainda não foi configurado no servidor.')
         elif wants_push and not pref.push_enabled and not notifications.push_configured():
-            error = 'O aviso no aparelho ainda não foi configurado no servidor.'
+            error = _('O aviso no aparelho ainda não foi configurado no servidor.')
         if error:
             messages.error(request, error)
         else:
@@ -2218,14 +2225,14 @@ def notification_settings(request):
                     pref.notify_plan_expiry = 'notify_plan_expiry' in request.POST
                 pref.save(update_fields=['notify_changes', 'notify_class_reminder', 'notify_plan_expiry',
                                                  'notify_renewals'])
-            messages.success(request, 'Preferências de notificação salvas.')
+            messages.success(request, _('Preferências de notificação salvas.'))
         return redirect('core:notification_settings')
     recent = list(request.user.notification_logs.all()[:5])
     devices = list(request.user.push_subscriptions.all())
     for d in devices:   # rows saved before the friendly names hold the raw User-Agent
-        d.label = notifications.device_name(d.device) if 'Mozilla/' in d.device else (d.device or 'Aparelho')
+        d.label = notifications.device_name(d.device) if 'Mozilla/' in d.device else (d.device or _('Aparelho'))
     return render(request, 'core/notification_settings.html', {
-        'title': 'Notificações', 'pref': pref, 'person': person, 'devices': devices,
+        'title': _('Notificações'), 'pref': pref, 'person': person, 'devices': devices,
         'push_ready': notifications.push_configured(), 'email_ready': notifications.email_configured(),
         'reminder_hours': settings.REMINDER_CLASS_HOURS, 'plan_days': settings.REMINDER_PLAN_DAYS,
         'vapid_public_key': settings.VAPID_PUBLIC_KEY, 'recent': recent, 'is_trainer': request.user.is_staff,
@@ -2238,7 +2245,7 @@ def notification_settings(request):
 def push_subscribe(request):
     """The page hands over this browser's push subscription (JSON); it also means "yes, notify me here"."""
     if not notifications.push_configured():
-        return JsonResponse({'ok': False, 'error': 'Aviso no aparelho não configurado no servidor.'}, status=400)
+        return JsonResponse({'ok': False, 'error': _('Aviso no aparelho não configurado no servidor.')}, status=400)
     try:
         body = json.loads(request.body.decode())
         endpoint, keys = body['endpoint'], body['keys']
@@ -2247,11 +2254,11 @@ def push_subscribe(request):
                 and isinstance(p256dh, str) and isinstance(auth, str) and len(p256dh) <= 200 and len(auth) <= 100):
             raise ValueError
     except (ValueError, KeyError, TypeError):
-        return JsonResponse({'ok': False, 'error': 'Assinatura inválida.'}, status=400)
+        return JsonResponse({'ok': False, 'error': _('Assinatura inválida.')}, status=400)
     PushSubscription.objects.update_or_create(endpoint=endpoint, defaults={
         'user': request.user, 'p256dh': p256dh, 'auth': auth,
         'device': notifications.device_name(request.META.get('HTTP_USER_AGENT', ''))})
-    pref, _ = NotificationPreference.objects.get_or_create(user=request.user)
+    pref, _created = NotificationPreference.objects.get_or_create(user=request.user)
     _set_channel(request.user, getattr(request.user, 'person', None), pref, 'push', True)
     return JsonResponse({'ok': True})
 
@@ -2260,7 +2267,7 @@ def push_subscribe(request):
 @require_POST
 def push_unsubscribe(request, pk):
     get_object_or_404(PushSubscription, pk=pk, user=request.user).delete()
-    messages.success(request, 'Aparelho removido.')
+    messages.success(request, _('Aparelho removido.'))
     return redirect('core:notification_settings')
 
 
@@ -2271,14 +2278,15 @@ def notification_test(request):
     channel = request.POST.get('channel')
     pref = NotificationPreference.objects.filter(user=request.user).first()
     if channel not in ('email', 'push') or pref is None or not getattr(pref, f'{channel}_enabled'):
-        messages.error(request, 'Ative este canal antes de testar.')
+        messages.error(request, _('Ative este canal antes de testar.'))
         return redirect('core:notification_settings')
     notifications.deliver(request.user, notifications.test_message(), only=channel)
     last = request.user.notification_logs.filter(channel=channel).first()
     if last and last.status == 'sent':
-        messages.success(request, 'Teste enviado. Confira o e-mail.' if channel == 'email' else 'Teste enviado. Deve aparecer no aparelho em instantes.')
+        messages.success(request, _('Teste enviado. Confira o e-mail.') if channel == 'email'
+                         else _('Teste enviado. Deve aparecer no aparelho em instantes.'))
     else:
-        messages.error(request, f'Não foi possível enviar: {last.detail if last else "sem detalhes"}.')
+        messages.error(request, _('Não foi possível enviar: %(detail)s.') % {'detail': last.detail if last else _('sem detalhes')})
     return redirect('core:notification_settings')
 
 
@@ -2301,7 +2309,7 @@ def calendar_settings(request):
 def calendar_rotate(request):
     _calendar_owner(request)
     rotate(get_or_create_feed(request.user))
-    messages.success(request, 'Novo link gerado. O anterior deixou de funcionar: adicione o novo no Google Agenda.')
+    messages.success(request, _('Novo link gerado. O anterior deixou de funcionar: adicione o novo no Google Agenda.'))
     return redirect('core:calendar_settings')
 
 
@@ -2313,9 +2321,9 @@ def calendar_style(request):
     if value in dict(CalendarFeed.NAME_STYLES):
         feed.name_style = value
         feed.save(update_fields=['name_style'])
-        messages.success(request, 'Preferência salva. O Google Agenda atualiza o calendário aos poucos.')
+        messages.success(request, _('Preferência salva. O Google Agenda atualiza o calendário aos poucos.'))
     else:
-        messages.error(request, 'Escolha uma das opções.')
+        messages.error(request, _('Escolha uma das opções.'))
     return redirect('core:calendar_settings')
 
 
@@ -2327,10 +2335,10 @@ def _manifest_shortcuts(user):
         return []
     icon = [{'src': static('images/icon-192.png'), 'sizes': '192x192', 'type': 'image/png'}]
     if is_trainer(user):
-        items = (('Agenda', reverse('core:agenda')), ('Alunos', reverse('core:student_list')),
-                 ('Buscar', reverse('core:search')))
+        items = ((_('Agenda'), reverse('core:agenda')), (_('Alunos'), reverse('core:student_list')),
+                 (_('Buscar'), reverse('core:search')))
     else:
-        items = (('Treinar agora', reverse('core:my_workouts')), ('Meu histórico', reverse('core:my_history')))
+        items = ((_('Treinar agora'), reverse('core:my_workouts')), (_('Meu histórico'), reverse('core:my_history')))
     return [{'name': name, 'short_name': name, 'url': url, 'icons': icon} for name, url in items]
 
 
@@ -2352,14 +2360,14 @@ def pwa_manifest(request):
         'id': '/',
         'name': settings.STUDIO_NAME or 'Muscle Track',
         'short_name': _short_name(settings.STUDIO_NAME or 'Muscle Track'),
-        'description': 'Gestão para personal trainers, com o aluno por dentro de treinos, evolução e aulas',
+        'description': _('Gestão para personal trainers, com o aluno por dentro de treinos, evolução e aulas'),
         'start_url': '/',
         'scope': '/',
         'display': 'standalone',
         'orientation': 'portrait',
         'background_color': '#ffffff',
         'theme_color': '#FF6B6B',
-        'lang': 'pt-BR',
+        'lang': 'en' if translation.get_language() == 'en' else 'pt-BR',
         'categories': ['health', 'fitness', 'lifestyle'],
         'icons': [
             {'src': static('images/icon-192.png'), 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any maskable'},
@@ -2369,7 +2377,7 @@ def pwa_manifest(request):
     }
     response = HttpResponse(json.dumps(manifest, ensure_ascii=False), content_type='application/manifest+json')
     response['Cache-Control'] = 'private, no-cache'   # varies with who is logged in
-    response['Vary'] = 'Cookie'
+    response['Vary'] = 'Cookie, Accept-Language'
     return response
 
 
@@ -2412,9 +2420,9 @@ def assessment_create(request, pk):
         assessment = form.save(commit=False)
         assessment.person = student
         assessment.save()
-        messages.success(request, 'Avaliação registrada.')
+        messages.success(request, _('Avaliação registrada.'))
         return redirect(_student_tab(request, student.pk, 'avaliacoes'))
-    return render(request, 'core/assessment_form.html', {'form': form, 'student': student, 'title': 'Nova avaliação'})
+    return render(request, 'core/assessment_form.html', {'form': form, 'student': student, 'title': _('Nova avaliação')})
 
 
 @staff_required
@@ -2423,10 +2431,10 @@ def assessment_edit(request, pk):
     form = AssessmentForm(request.POST or None, instance=assessment)
     if request.method == 'POST' and form.is_valid():
         form.save()
-        messages.success(request, 'Avaliação atualizada.')
+        messages.success(request, _('Avaliação atualizada.'))
         return redirect(_student_tab(request, assessment.person_id, 'avaliacoes'))
     return render(request, 'core/assessment_form.html', {
-        'form': form, 'student': assessment.person, 'title': 'Editar avaliação'})
+        'form': form, 'student': assessment.person, 'title': _('Editar avaliação')})
 
 
 @staff_required
@@ -2435,7 +2443,7 @@ def assessment_delete(request, pk):
     assessment = get_object_or_404(Assessment, pk=pk)
     person_id = assessment.person_id
     assessment.delete()
-    messages.success(request, 'Avaliação removida.')
+    messages.success(request, _('Avaliação removida.'))
     return redirect(_student_tab(request, person_id, 'avaliacoes'))
 
 
@@ -2457,7 +2465,7 @@ def photo_upload(request, pk):
         photo.save()
         if photo.assessment_id and photo.angle != ProgressPhoto.Angle.OTHER:   # a new photo replaces the old one of that position
             photo.assessment.photos.filter(angle=photo.angle).exclude(pk=photo.pk).delete()
-        messages.success(request, 'Foto adicionada.')
+        messages.success(request, _('Foto adicionada.'))
         if 'save_next' in request.POST and photo.assessment_id:
             taken = set(photo.assessment.photos.values_list('angle', flat=True))
             missing = [a for a in ProgressPhoto.SEQUENCE if a not in taken]
@@ -2479,7 +2487,7 @@ def photo_delete(request, pk):
     photo = get_object_or_404(ProgressPhoto, pk=pk)
     person_id = photo.person_id
     photo.delete()
-    messages.success(request, 'Foto removida.')
+    messages.success(request, _('Foto removida.'))
     return redirect(_student_tab(request, person_id, 'avaliacoes'))
 
 
@@ -2509,9 +2517,9 @@ def note_add(request, pk):
         note.person = student
         note.author = request.user
         note.save()
-        messages.success(request, 'Anotação salva.')
+        messages.success(request, _('Anotação salva.'))
     else:
-        messages.error(request, 'Escreva a anotação antes de salvar.')
+        messages.error(request, _('Escreva a anotação antes de salvar.'))
     return redirect(_student_tab(request, student.pk, 'notas'))
 
 
@@ -2521,7 +2529,7 @@ def note_delete(request, pk):
     note = get_object_or_404(StudentNote, pk=pk)
     person_id = note.person_id
     note.delete()
-    messages.success(request, 'Anotação removida.')
+    messages.success(request, _('Anotação removida.'))
     return redirect(_student_tab(request, person_id, 'notas'))
 
 
@@ -2583,7 +2591,7 @@ def finance_export(request):
     response['Content-Disposition'] = f'attachment; filename="pagamentos-{year}-{month:02d}.csv"'
     response.write('﻿')
     writer = csv.writer(response, delimiter=';')
-    writer.writerow(['Data', 'Aluno', 'Pacote', 'Valor', 'Forma', 'Observação'])
+    writer.writerow([_('Data'), _('Aluno'), _('Pacote'), _('Valor'), _('Forma'), _('Observação')])
     for p in Payment.objects.filter(paid_on__range=(first, last)).select_related('person', 'student_package').order_by('paid_on', 'pk'):
         writer.writerow([p.paid_on.strftime('%d/%m/%Y'), _csv_safe(p.person.person_name),
                          _csv_safe(p.student_package.name if p.student_package else p.plan_name),
@@ -2618,9 +2626,9 @@ def plan_create(request):
     form = PackageForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         plan = form.save()
-        messages.success(request, f'Pacote "{plan.name}" criado.')
+        messages.success(request, _('Pacote "%(name)s" criado.') % {'name': plan.name})
         return redirect(after_save_url(request, reverse('core:plan_list'), forward_next=False))
-    return render(request, 'core/plan_form.html', {'form': form, 'title': 'Novo pacote'})
+    return render(request, 'core/plan_form.html', {'form': form, 'title': _('Novo pacote')})
 
 
 @staff_required
@@ -2629,10 +2637,10 @@ def plan_edit(request, pk):
     form = PackageForm(request.POST or None, instance=plan)
     if request.method == 'POST' and form.is_valid():
         form.save()
-        messages.success(request, 'Pacote atualizado. Quem já comprou mantém os números da venda.')
+        messages.success(request, _('Pacote atualizado. Quem já comprou mantém os números da venda.'))
         return redirect(after_save_url(request, reverse('core:plan_list'), forward_next=False))
     return render(request, 'core/plan_form.html', {
-        'form': form, 'title': 'Editar pacote', 'sold_count': plan.sold.count()})
+        'form': form, 'title': _('Editar pacote'), 'sold_count': plan.sold.count()})
 
 
 @staff_required
@@ -2646,7 +2654,7 @@ def payment_create(request, pk):
             data = form.cleaned_data
             register_payment(student, package=data['student_package'], amount=data['amount'], paid_on=data['paid_on'],
                              method=data['method'], notes=data['notes'], actor=request.user)
-            messages.success(request, 'Pagamento registrado.')
+            messages.success(request, _('Pagamento registrado.'))
             return redirect(_student_tab(request, student.pk, 'pagamentos'))
     else:
         overview = packages.overview(student, today)
@@ -2667,7 +2675,7 @@ def payment_delete(request, pk):
     payment = get_object_or_404(Payment.objects.select_related('person'), pk=pk)
     person_id = payment.person_id
     delete_payment(payment, request.user)
-    messages.success(request, 'Pagamento excluído.')
+    messages.success(request, _('Pagamento excluído.'))
     return redirect(_student_tab(request, person_id, 'pagamentos'))
 
 
@@ -2686,7 +2694,7 @@ def _agenda_selected_day(value, by_day, today):
     return next((d for d in sorted(by_day) if by_day[d]), min(by_day))
 
 
-AGENDA_VIEW_LABELS = (('semana', 'Semana'), ('dia', 'Dia'), ('mes', 'Mês'), ('lista', 'Lista'))
+AGENDA_VIEW_LABELS = (('semana', _l('Semana')), ('dia', _l('Dia')), ('mes', _l('Mês')), ('lista', _l('Lista')))
 
 
 def _agenda_url(**params):
@@ -2777,7 +2785,7 @@ def agenda(request):
 def _warn_if_conflict(request, appointment):
     names = overlap_names(appointment)
     if names:
-        messages.warning(request, f'Atenção: este horário se sobrepõe a outra aula ({", ".join(names)}).')
+        messages.warning(request, _('Atenção: este horário se sobrepõe a outra aula (%(names)s).') % {'names': ', '.join(names)})
 
 
 def _agenda_url_for(day):
@@ -2802,21 +2810,21 @@ def appointment_create(request):
         if repeat.is_valid():
             if repeat.cleaned_data['enabled']:
                 if data['kind'] != Appointment.Kind.REGULAR:
-                    form.add_error('kind', 'Só aulas do tipo "Aula" podem se repetir.')
+                    form.add_error('kind', _('Só aulas do tipo "Aula" podem se repetir.'))
                 else:
                     return _create_series_from_form(request, data, repeat)
             else:
                 starts = at(data['date'], data['time'])
                 if live_class_at(data['person'], starts) is not None:
-                    form.add_error('time', 'Este aluno já tem uma aula neste horário.')
+                    form.add_error('time', _('Este aluno já tem uma aula neste horário.'))
                 else:
                     appointment = Appointment.objects.create(
                         person=data['person'], starts_at=starts, duration_minutes=data['duration_minutes'],
                         kind=data['kind'], notes=data['notes'])
-                    messages.success(request, 'Aula marcada.')
+                    messages.success(request, _('Aula marcada.'))
                     _warn_if_conflict(request, appointment)
                     return redirect(after_save_url(request, _agenda_url_for(data['date']), forward_next=False))
-    return render(request, 'core/appointment_form.html', {'form': form, 'repeat': repeat, 'title': 'Nova aula'})
+    return render(request, 'core/appointment_form.html', {'form': form, 'repeat': repeat, 'title': _('Nova aula')})
 
 
 def _create_series_from_form(request, data, repeat):
@@ -2827,7 +2835,8 @@ def _create_series_from_form(request, data, repeat):
     create_series(data['person'], weekdays, data['time'], data['duration_minutes'], start, cleaned['interval_weeks'], until)
     today = timezone.localdate()
     ensure_appointments(max(start, today), max(start, today) + timedelta(weeks=4), today)
-    messages.success(request, 'Aulas repetidas criadas: ' + describe(weekdays, data['time'], cleaned['interval_weeks'], until) + '.')
+    messages.success(request, _('Aulas repetidas criadas: %(description)s.') % {
+        'description': describe(weekdays, data['time'], cleaned['interval_weeks'], until)})
     return redirect(after_save_url(request, _agenda_url_for(start), forward_next=False))
 
 
@@ -2847,24 +2856,24 @@ def appointment_reschedule(request, pk):
         try:
             new = move_appointment(appointment, starts, data['duration_minutes'], data['kind'], data['notes'])
         except MoveError:
-            form.add_error('time', 'Escolha outro horário: este aluno já tem aula neste.')
+            form.add_error('time', _('Escolha outro horário: este aluno já tem aula neste.'))
         else:
             notifications.notify([appointment.person.user], notifications.class_moved(appointment, new))
-            messages.success(request, 'Aula remarcada.')
+            messages.success(request, _('Aula remarcada.'))
             _warn_if_conflict(request, new)
             came_from = safe_next_url(request, '')
             if came_from.startswith('/students/'):   # edited from the student's file: go back to it
                 return redirect(came_from + '#tab-agenda')
             return redirect(after_save_url(request, _agenda_url_for(data['date']), forward_next=False))
     return render(request, 'core/appointment_form.html', {
-        'form': form, 'title': 'Remarcar aula', 'appointment': appointment})
+        'form': form, 'title': _('Remarcar aula'), 'appointment': appointment})
 
 
 def _move_response(new):
     local = timezone.localtime(new.starts_at)
     return JsonResponse({
         'ok': True, 'id': new.pk, 'person': new.person.person_name,
-        'when': f'{local:%d/%m} às {local:%H:%M}', 'date': local.date().isoformat(),
+        'when': _('%(date)s às %(time)s') % {'date': f'{local:%d/%m}', 'time': f'{local:%H:%M}'}, 'date': local.date().isoformat(),
         'overlap': overlap_names(new),
         'undo_url': reverse('core:appointment_move_undo', args=[new.pk]),
     })
@@ -2876,7 +2885,7 @@ def appointment_move(request, pk):
     """Drag & drop / "Mover": reschedule a marked class to another day (and optionally time). JSON in, JSON out."""
     appointment = get_object_or_404(Appointment.objects.select_related('person'), pk=pk)
     if appointment.status != Appointment.Status.SCHEDULED:
-        return JsonResponse({'ok': False, 'error': 'Só aulas marcadas podem ser movidas.'}, status=400)
+        return JsonResponse({'ok': False, 'error': _('Só aulas marcadas podem ser movidas.')}, status=400)
     local = timezone.localtime(appointment.starts_at)
     try:
         day = date.fromisoformat(request.POST.get('date', ''))
@@ -2884,9 +2893,9 @@ def appointment_move(request, pk):
             second=0, microsecond=0)
         duration = int(request.POST['duration']) if request.POST.get('duration') else None
     except (ValueError, TypeError):
-        return JsonResponse({'ok': False, 'error': 'Data ou horário inválido.'}, status=400)
+        return JsonResponse({'ok': False, 'error': _('Data ou horário inválido.')}, status=400)
     if duration is not None and not 10 <= duration <= 480:
-        return JsonResponse({'ok': False, 'error': 'A duração deve ficar entre 10 e 480 minutos.'}, status=400)
+        return JsonResponse({'ok': False, 'error': _('A duração deve ficar entre 10 e 480 minutos.')}, status=400)
     try:
         new = move_appointment(appointment, at(day, clock), duration)
     except MoveError as error:
@@ -2915,16 +2924,16 @@ def appointment_request_decide(request, pk):
     asked = get_object_or_404(AppointmentRequest.objects.select_related('appointment__person'), pk=pk)
     decision = request.POST.get('decision')
     if decision not in ('approve', 'decline'):
-        return HttpResponseBadRequest('Decisão inválida')
+        return HttpResponseBadRequest(_('Decisão inválida'))
     name = asked.appointment.person.person_name
     try:
         note = request.POST.get('note', '').strip()[:200]
         if decision == 'approve':
             class_requests.approve(asked)
-            messages.success(request, f'Pedido de {name} aprovado.')
+            messages.success(request, _('Pedido de %(name)s aprovado.') % {'name': name})
         else:
             class_requests.decline(asked, note)
-            messages.success(request, f'Pedido de {name} recusado.')
+            messages.success(request, _('Pedido de %(name)s recusado.') % {'name': name})
         notifications.notify([asked.appointment.person.user], notifications.request_answered(asked, note))
     except class_requests.RequestError as error:
         messages.error(request, str(error))
@@ -2939,10 +2948,10 @@ def appointment_status(request, pk):
     allowed = (Appointment.Status.SCHEDULED, Appointment.Status.ATTENDED, Appointment.Status.MISSED,
                Appointment.Status.CANCELLED)
     if status not in allowed or appointment.status == Appointment.Status.RESCHEDULED:
-        return HttpResponseBadRequest('Situação inválida')
+        return HttpResponseBadRequest(_('Situação inválida'))
     was_cancelled = appointment.status == Appointment.Status.CANCELLED
     if status != Appointment.Status.CANCELLED and live_class_at(appointment.person_id, appointment.starts_at, exclude=appointment):
-        messages.error(request, 'Este aluno já tem outra aula neste horário; remova ou cancele uma delas antes.')
+        messages.error(request, _('Este aluno já tem outra aula neste horário; remova ou cancele uma delas antes.'))
         return redirect(safe_next_url(request, _agenda_url_for(timezone.localtime(appointment.starts_at).date())))
     appointment.status = status
     appointment.status_changed_at = timezone.now()
@@ -2952,8 +2961,9 @@ def appointment_status(request, pk):
     appointment.save(update_fields=['status', 'status_changed_at', 'cancelled_late', 'counts_override'])
     packages.sync(appointment.person)
     if appointment.cancelled_late:
-        messages.warning(request, f'Cancelada com menos de {settings.AGENDA_NOTICE_HOURS} h de antecedência: conta como aula dada '
-                                  'no pacote. Se não for para descontar, use "Não descontar".')
+        messages.warning(request, _('Cancelada com menos de %(hours)s h de antecedência: conta como aula dada '
+                                    'no pacote. Se não for para descontar, use "Não descontar".')
+                         % {'hours': settings.AGENDA_NOTICE_HOURS})
     if status == Appointment.Status.CANCELLED and not was_cancelled and appointment.starts_at > timezone.now():
         notifications.notify([appointment.person.user], notifications.class_cancelled(appointment))
     return redirect(safe_next_url(request, _agenda_url_for(timezone.localtime(appointment.starts_at).date())))
@@ -2966,12 +2976,13 @@ def appointment_counts(request, pk):
     appointment = get_object_or_404(Appointment.objects.select_related('person'), pk=pk)
     choice = request.POST.get('counts')
     if choice not in ('yes', 'no', 'auto'):
-        return HttpResponseBadRequest('Opção inválida')
+        return HttpResponseBadRequest(_('Opção inválida'))
     appointment.counts_override = {'yes': True, 'no': False, 'auto': None}[choice]
     appointment.save(update_fields=['counts_override'])
     packages.sync(appointment.person)
-    messages.success(request, {'yes': 'Esta aula vai ser descontada do pacote.', 'no': 'Esta aula não será descontada do pacote.',
-                               'auto': 'Esta aula segue a regra do pacote.'}[choice])
+    messages.success(request, {'yes': _('Esta aula vai ser descontada do pacote.'),
+                               'no': _('Esta aula não será descontada do pacote.'),
+                               'auto': _('Esta aula segue a regra do pacote.')}[choice])
     return redirect(safe_next_url(request, _agenda_url_for(timezone.localtime(appointment.starts_at).date())))
 
 
@@ -2981,12 +2992,12 @@ def appointment_delete(request, pk):
     """Only one-off classes are deleted; a class from a fixed slot is cancelled instead (it would come back)"""
     appointment = get_object_or_404(Appointment, pk=pk)
     if appointment.slot_id:
-        messages.warning(request, 'Aula de horário fixo: use "Cancelar" (excluir faria ela voltar).')
+        messages.warning(request, _('Aula de horário fixo: use "Cancelar" (excluir faria ela voltar).'))
     else:
         person = appointment.person
         appointment.delete()
         packages.sync(person)
-        messages.success(request, 'Aula removida.')
+        messages.success(request, _('Aula removida.'))
     return redirect(safe_next_url(request, _agenda_url_for(timezone.localtime(appointment.starts_at).date())))
 
 
@@ -2998,11 +3009,11 @@ def appointment_remove(request, pk):
     appointment = get_object_or_404(Appointment.objects.select_related('person'), pk=pk)
     person = appointment.person
     if appointment.status != Appointment.Status.SCHEDULED:
-        messages.warning(request, 'Só aulas marcadas podem ser removidas por aqui.')
+        messages.warning(request, _('Só aulas marcadas podem ser removidas por aqui.'))
     elif appointment.slot_id is None:
         appointment.delete()
         packages.sync(person)
-        messages.success(request, 'Aula removida.')
+        messages.success(request, _('Aula removida.'))
     else:
         ahead = appointment.starts_at > timezone.now()
         appointment.status = Appointment.Status.CANCELLED
@@ -3013,7 +3024,7 @@ def appointment_remove(request, pk):
         packages.sync(person)
         if ahead:
             notifications.notify([person.user], notifications.class_cancelled(appointment))
-        messages.success(request, 'Aula removida da agenda, sem descontar do pacote. O horário fixo continua nas próximas.')
+        messages.success(request, _('Aula removida da agenda, sem descontar do pacote. O horário fixo continua nas próximas.'))
     return redirect(_student_tab(request, person.pk, 'agenda'))
 
 
@@ -3030,9 +3041,11 @@ def slot_add(request, pk):
         until = form.series_end(weekdays, start)
         create_series(student, weekdays, data['start_time'], data['duration_minutes'], start, data['interval_weeks'], until)
         ensure_appointments(today, today + timedelta(weeks=4), today)
-        messages.success(request, 'Horário fixo: ' + describe(weekdays, data['start_time'], data['interval_weeks'], until) + '.')
+        messages.success(request, _('Horário fixo: %(description)s.') % {
+            'description': describe(weekdays, data['start_time'], data['interval_weeks'], until)})
     else:
-        messages.error(request, 'Horário inválido: ' + ' '.join(e for errs in form.errors.values() for e in errs))
+        messages.error(request, _('Horário inválido: %(errors)s') % {
+            'errors': ' '.join(e for errs in form.errors.values() for e in errs)})
     return redirect(_student_tab(request, student.pk, 'agenda'))
 
 
@@ -3042,12 +3055,13 @@ def appointment_series_end(request, pk):
     """"This class and the following ones": stop the fixed time from this class on."""
     appointment = get_object_or_404(Appointment.objects.select_related('slot', 'person'), pk=pk)
     if appointment.slot_id is None:
-        messages.warning(request, 'Esta aula não faz parte de um horário fixo.')
+        messages.warning(request, _('Esta aula não faz parte de um horário fixo.'))
     else:
         slot, removed = end_series_from(appointment)
-        gone = '1 aula marcada saiu da agenda' if removed == 1 else f'{removed} aulas marcadas saíram da agenda'
-        messages.success(request, f'Horário fixo encerrado: {slot.get_weekday_display()} às {slot.start_time:%H:%M} '
-                                  f'deixa de repetir a partir desta aula ({gone}).')
+        gone = ngettext('%(n)d aula marcada saiu da agenda', '%(n)d aulas marcadas saíram da agenda', removed) % {'n': removed}
+        messages.success(request, _('Horário fixo encerrado: %(weekday)s às %(time)s '
+                                    'deixa de repetir a partir desta aula (%(gone)s).')
+                         % {'weekday': slot.get_weekday_display(), 'time': f'{slot.start_time:%H:%M}', 'gone': gone})
     return redirect(safe_next_url(request, _agenda_url_for(timezone.localtime(appointment.starts_at).date())))
 
 
@@ -3088,9 +3102,10 @@ def slot_fill(request, pk):
     plan = packages.schedule_plan(student)
     form = SlotFillForm(request.POST)
     if plan is None:
-        messages.error(request, 'Este aluno não tem pacote em uso. Venda um pacote primeiro.')
+        messages.error(request, _('Este aluno não tem pacote em uso. Venda um pacote primeiro.'))
     elif not form.is_valid():
-        messages.error(request, 'Horário inválido: ' + ' '.join(e for errs in form.errors.values() for e in errs))
+        messages.error(request, _('Horário inválido: %(errors)s') % {
+            'errors': ' '.join(e for errs in form.errors.values() for e in errs)})
     else:
         data = form.cleaned_data
         try:
@@ -3101,11 +3116,12 @@ def slot_fill(request, pk):
             messages.error(request, str(error))
         else:
             n = result['created']
-            text = f"{n} aula{'' if n == 1 else 's'} marcada{'' if n == 1 else 's'}, até {result['last']:%d/%m/%Y}."
+            text = ngettext('%(n)d aula marcada, até %(date)s.', '%(n)d aulas marcadas, até %(date)s.', n) % {
+                'n': n, 'date': f"{result['last']:%d/%m/%Y}"}
             if result['preview']['beyond']:
-                text += ' Atenção: parte das aulas passa da validade do pacote; prorrogue-o se for preciso.'
+                text += ' ' + _('Atenção: parte das aulas passa da validade do pacote; prorrogue-o se for preciso.')
             if result['preview']['overlaps']:
-                text += ' Atenção: alguma aula se sobrepõe à de outro aluno (veja na agenda).'
+                text += ' ' + _('Atenção: alguma aula se sobrepõe à de outro aluno (veja na agenda).')
             messages.success(request, text)
     return redirect(_student_tab(request, student.pk, 'agenda'))
 
@@ -3117,7 +3133,7 @@ def slot_topup(request, pk):
     student = get_object_or_404(Person, pk=pk)
     plan = packages.schedule_plan(student)
     if plan is None:
-        messages.error(request, 'Este aluno não tem pacote em uso.')
+        messages.error(request, _('Este aluno não tem pacote em uso.'))
     else:
         try:
             result = top_up(student, plan)
@@ -3125,8 +3141,9 @@ def slot_topup(request, pk):
             messages.error(request, str(error))
         else:
             n = result['created']
-            messages.success(request, f"{n} aula{'' if n == 1 else 's'} a mais marcada{'' if n == 1 else 's'}, "
-                                      f"até {result['last']:%d/%m/%Y}.")
+            messages.success(request, ngettext('%(n)d aula a mais marcada, até %(date)s.',
+                                               '%(n)d aulas a mais marcadas, até %(date)s.', n)
+                             % {'n': n, 'date': f"{result['last']:%d/%m/%Y}"})
     return redirect(_student_tab(request, student.pk, 'agenda'))
 
 
@@ -3147,11 +3164,13 @@ def slot_edit(request, pk):
             form.add_error(None, str(error))
         else:
             ensure_appointments(today, today + timedelta(weeks=4), today)
-            messages.success(request, 'Horário fixo atualizado: ' + describe(
-                [current.weekday], current.start_time, current.interval_weeks, current.valid_until) + '.'
-                + (f' {removed} aula(s) marcada(s) foram recriadas no novo horário.' if removed else ''))
+            text = _('Horário fixo atualizado: %(description)s.') % {'description': describe(
+                [current.weekday], current.start_time, current.interval_weeks, current.valid_until)}
+            if removed:
+                text += ' ' + _('%(n)d aula(s) marcada(s) foram recriadas no novo horário.') % {'n': removed}
+            messages.success(request, text)
             return redirect(_student_tab(request, slot.person_id, 'agenda'))
-    return render(request, 'core/slot_form.html', {'form': form, 'slot': slot, 'student': slot.person, 'title': 'Editar horário fixo'})
+    return render(request, 'core/slot_form.html', {'form': form, 'slot': slot, 'student': slot.person, 'title': _('Editar horário fixo')})
 
 
 @staff_required
@@ -3162,7 +3181,7 @@ def slot_delete(request, pk):
     with transaction.atomic():
         slot.appointments.filter(status=Appointment.Status.SCHEDULED, starts_at__gt=timezone.now()).delete()
         slot.delete()  # past classes stay (their slot link is cleared)
-    messages.success(request, 'Horário fixo removido. As aulas futuras dele saíram da agenda.')
+    messages.success(request, _('Horário fixo removido. As aulas futuras dele saíram da agenda.'))
     back = safe_next_url(request, '')
     if back.startswith(reverse('core:agenda')):   # removed from a calendar card: stay on the calendar
         return redirect(back)
@@ -3188,9 +3207,11 @@ def agenda_holiday_add(request):
     form = HolidayForm(request.POST)
     if form.is_valid():
         holiday = form.save()
-        messages.success(request, f'{holiday.name} ({holiday.date:%d/%m/%Y}) entrou na lista: o app não marca aula nesse dia ao preencher a agenda.')
+        messages.success(request, _('%(name)s (%(date)s) entrou na lista: o app não marca aula nesse dia ao preencher a agenda.')
+                         % {'name': holiday.name, 'date': f'{holiday.date:%d/%m/%Y}'})
     else:
-        messages.error(request, 'Feriado não salvo: ' + ' '.join(e for errs in form.errors.values() for e in errs))
+        messages.error(request, _('Feriado não salvo: %(errors)s') % {
+            'errors': ' '.join(e for errs in form.errors.values() for e in errs)})
     return redirect(after_save_url(request, reverse('core:agenda_holidays')))
 
 
@@ -3199,5 +3220,5 @@ def agenda_holiday_add(request):
 def agenda_holiday_delete(request, pk):
     holiday = get_object_or_404(Holiday, pk=pk)
     holiday.delete()
-    messages.success(request, f'{holiday.name} saiu da lista.')
+    messages.success(request, _('%(name)s saiu da lista.') % {'name': holiday.name})
     return redirect(after_save_url(request, reverse('core:agenda_holidays')))

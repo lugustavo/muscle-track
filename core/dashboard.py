@@ -3,14 +3,15 @@ from datetime import datetime, time, timedelta
 
 from django.contrib.auth.hashers import UNUSABLE_PASSWORD_PREFIX
 from django.db.models import Exists, OuterRef, Q, Subquery
-from django.utils import timezone
+from django.utils import dateformat, timezone, translation
+from django.utils.translation import gettext as _
 
 from . import packages, refunds
 from .agenda import ensure_appointments
 from .billing import charge_message, overdue_rows
 from .models import Appointment, Person, PersonRoutine, SessionExercise, StudentEvent, WorkoutSession
 from .whatsapp import whatsapp_url
-from .whatsapp_messages import Kind, current_text, render
+from .whatsapp_messages import Kind, current_text, language_of, render
 
 INACTIVE_DAYS = 7
 EXPIRING_DAYS = 14
@@ -91,9 +92,11 @@ def recent_misses(days=7, now=None):
     rows = []
     template = current_text(Kind.MISSED)
     for a in Appointment.objects.filter(status=Appointment.Status.MISSED, starts_at__gte=now - timedelta(days=days),
-                                        person__is_active=True).select_related('person').order_by('-starts_at'):
-        text = render(Kind.MISSED, {'nome': a.person.person_name.split()[0],
-                                    'data': f'{timezone.localtime(a.starts_at):%d/%m}'}, template)
+                                        person__is_active=True).select_related(
+            'person__user__notification_preference').order_by('-starts_at'):
+        with translation.override(language_of(a.person)):   # the message goes to the student, in their language
+            text = render(Kind.MISSED, {'nome': a.person.person_name.split()[0],
+                                        'data': dateformat.format(timezone.localtime(a.starts_at), _('d/m'))}, template)
         rows.append({'appointment': a, 'student': a.person, 'whatsapp': whatsapp_url(a.person.phone, text)})
     return rows
 

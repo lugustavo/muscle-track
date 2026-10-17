@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from decouple import config, Csv
 import dj_database_url
+from django.utils.translation import gettext_lazy as _l
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -75,6 +76,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',      # language: cookie, else the browser's Accept-Language, else pt-br
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -94,6 +96,7 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'django.template.context_processors.i18n',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.app_nav',
@@ -138,8 +141,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
+# Internationalization: the source texts are Portuguese (pt-br); English is the translation catalog (locale/en).
+# The language comes from the language cookie (set by the switcher), else the browser's Accept-Language, else pt-br.
 LANGUAGE_CODE = 'pt-br'
+LANGUAGES = [('pt-br', 'Português (Brasil)'), ('en', 'English')]
+LOCALE_PATHS = [BASE_DIR / 'locale']
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_L10N = True
@@ -252,7 +258,7 @@ PHOTO_MAX_SIZE_MB = config('PHOTO_MAX_SIZE_MB', default=15, cast=int)
 PHOTO_MAX_DIMENSION = config('PHOTO_MAX_DIMENSION', default=12000, cast=int)
 
 # Privacy policy (LGPD): who is the data controller and how to reach them
-PRIVACY_CONTROLLER_NAME = config('PRIVACY_CONTROLLER_NAME', default='a personal trainer responsável pelo seu acompanhamento')
+PRIVACY_CONTROLLER_NAME = config('PRIVACY_CONTROLLER_NAME', default=_l('a personal trainer responsável pelo seu acompanhamento'))
 PRIVACY_CONTACT_EMAIL = config('PRIVACY_CONTACT_EMAIL', default='')
 
 # Pix key shown in the payment reminder message (optional)

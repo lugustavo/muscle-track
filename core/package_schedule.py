@@ -10,6 +10,7 @@ from datetime import time, timedelta
 
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from . import holidays
 from .agenda import at, on_week_cycle
@@ -49,7 +50,14 @@ def previous_pattern(person):
     days = [names[d][:3].lower() for d in weekdays]
     return {'weekdays': weekdays, 'start_time': best.start_time, 'duration': best.duration_minutes,
             'interval': best.interval_weeks,
-            'label': (', '.join(days[:-1]) + ' e ' + days[-1] if len(days) > 1 else days[0]) + f' às {best.start_time:%H:%M}'}
+            'label': _('%(days)s às %(time)s') % {'days': _join_days(days), 'time': f'{best.start_time:%H:%M}'}}
+
+
+def _join_days(days):
+    """'seg, ter e qua' (a single day stays as it is)."""
+    if len(days) > 1:
+        return _('%(first)s e %(last)s') % {'first': ', '.join(days[:-1]), 'last': days[-1]}
+    return days[0]
 
 
 def continue_from(person, today=None):
@@ -123,7 +131,7 @@ def fill_series(person, plan, weekdays, start, start_time, duration=60, interval
     """Create the fixed times and all the classes the package still needs. Returns {'created', 'last', 'slots'}."""
     preview = build_preview(person, plan, weekdays, start, start_time, duration, interval, skip, keep)
     if not preview['new_dates']:
-        raise FillError('Não há aulas a marcar: o pacote já está completo ou todas as datas foram puladas.')
+        raise FillError(_('Não há aulas a marcar: o pacote já está completo ou todas as datas foram puladas.'))
     first, last = preview['new_dates'][0], preview['last']
     package = plan['package']
     skipped = sorted(r['date'].isoformat() for r in preview['rows']
@@ -133,8 +141,9 @@ def fill_series(person, plan, weekdays, start, start_time, duration=60, interval
     for weekday in sorted({d.weekday() for d in preview['new_dates']}):
         slot = ScheduleSlot.objects.filter(person=person, weekday=weekday, start_time=start_time).first()
         if slot and slot.is_active and (slot.valid_until is None or slot.valid_until >= first):
-            raise FillError(f'Já existe um horário fixo na {labels[weekday].lower()} às {start_time:%H:%M}: '
-                            'edite-o ou remova-o antes de preencher de novo.')
+            raise FillError(_('Já existe um horário fixo na %(day)s às %(time)s: '
+                              'edite-o ou remova-o antes de preencher de novo.')
+                            % {'day': str(labels[weekday]).lower(), 'time': f'{start_time:%H:%M}'})
         values = dict(duration_minutes=duration, valid_from=start, valid_until=last, interval_weeks=interval,
                       package=package, skipped_dates=skipped, is_active=True)
         if slot:
@@ -158,10 +167,10 @@ def top_up(person, plan, now=None):
     today = timezone.localdate(now)
     wanted = plan['to_schedule']
     if wanted <= 0:
-        raise FillError('Todas as aulas que restam do pacote já estão marcadas.')
+        raise FillError(_('Todas as aulas que restam do pacote já estão marcadas.'))
     slots = list(ScheduleSlot.objects.filter(person=person, package=plan['package'], is_active=True))
     if not slots:
-        raise FillError('Este pacote ainda não tem horário fixo: use "Preencher a agenda".')
+        raise FillError(_('Este pacote ainda não tem horário fixo: use "Preencher a agenda".'))
     last_live = person.appointments.exclude(status__in=DEAD).order_by('-starts_at').first()
     start = today + timedelta(days=1)
     if last_live is not None:
@@ -180,7 +189,7 @@ def top_up(person, plan, now=None):
                 break
         day += timedelta(days=1)
     if not new:
-        raise FillError('Não achei datas livres nos horários do pacote.')
+        raise FillError(_('Não achei datas livres nos horários do pacote.'))
     Appointment.objects.bulk_create([
         Appointment(person=person, starts_at=at(d, s.start_time), duration_minutes=s.duration_minutes, slot=s)
         for d, s in new])

@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load navigation %}
 {% load static %}
 
-{% block title %}{{ title }} - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed %}{{ title }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -24,19 +25,19 @@
             <!-- Informações Básicas -->
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informações Básicas</h5>
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> {% trans "Informações Básicas" %}</h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
                         <label for="{{ form.routine_name.id_for_label }}" class="form-label fw-bold">
-                            <i class="bi bi-tag"></i> Nome do Treino *
+                            <i class="bi bi-tag"></i> {% trans "Nome do Treino *" %}
                         </label>
                         <input type="text"
                                name="{{ form.routine_name.name }}"
                                class="form-control {% if form.routine_name.errors %}is-invalid{% endif %}"
                                id="{{ form.routine_name.id_for_label }}"
                                value="{{ form.routine_name.value|default:'' }}"
-                               placeholder="Ex: Treino de Peito e Tríceps"
+                               placeholder="{% trans "Ex: Treino de Peito e Tríceps" %}"
                                required>
                         {% if form.routine_name.errors %}
                             <div class="invalid-feedback">{{ form.routine_name.errors }}</div>
@@ -45,13 +46,13 @@
 
                     <div class="mb-3">
                         <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">
-                            <i class="bi bi-text-paragraph"></i> Descrição
+                            <i class="bi bi-text-paragraph"></i> {% trans "Descrição" %}
                         </label>
                         <textarea name="{{ form.description.name }}"
                                   class="form-control {% if form.description.errors %}is-invalid{% endif %}"
                                   id="{{ form.description.id_for_label }}"
                                   rows="3"
-                                  placeholder="Breve descrição do treino e objetivos...">{{ form.description.value|default:'' }}</textarea>
+                                  placeholder="{% trans "Breve descrição do treino e objetivos..." %}">{{ form.description.value|default:'' }}</textarea>
                         {% if form.description.errors %}
                             <div class="invalid-feedback">{{ form.description.errors }}</div>
                         {% endif %}
@@ -60,7 +61,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="{{ form.difficulty_level.id_for_label }}" class="form-label fw-bold">
-                                <i class="bi bi-speedometer2"></i> Nível de Dificuldade *
+                                <i class="bi bi-speedometer2"></i> {% trans "Nível de Dificuldade *" %}
                             </label>
                             <select name="{{ form.difficulty_level.name }}"
                                     class="form-select {% if form.difficulty_level.errors %}is-invalid{% endif %}"
@@ -77,7 +78,7 @@
 
                         <div class="col-md-6 mb-3">
                             <label for="{{ form.estimated_duration.id_for_label }}" class="form-label fw-bold">
-                                <i class="bi bi-clock"></i> Duração Estimada (min) *
+                                <i class="bi bi-clock"></i> {% trans "Duração Estimada (min) *" %}
                             </label>
                             <input type="number"
                                    name="{{ form.estimated_duration.name }}"
@@ -100,7 +101,7 @@
                                id="{{ form.is_active.id_for_label }}"
                                {% if form.is_active.value %}checked{% endif %}>
                         <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
-                            <i class="bi bi-check-circle"></i> Treino ativo (disponível para uso)
+                            <i class="bi bi-check-circle"></i> {% trans "Treino ativo (disponível para uso)" %}
                         </label>
                     </div>
                 </div>
@@ -109,9 +110,9 @@
             <!-- Exercícios do Treino -->
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-list-task"></i> Exercícios do Treino</h5>
+                    <h5 class="mb-0"><i class="bi bi-list-task"></i> {% trans "Exercícios do Treino" %}</h5>
                     <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#exerciseModal">
-                        <i class="bi bi-plus-circle"></i> Adicionar Exercícios
+                        <i class="bi bi-plus-circle"></i> {% trans "Adicionar Exercícios" %}
                     </button>
                 </div>
                 <div class="card-body p-0">
@@ -120,7 +121,7 @@
                     </div>
                     <div id="emptyExercisesMessage" class="text-center py-5">
                         <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
-                        <p class="text-muted mt-3 mb-0">Nenhum exercício adicionado.<br>Clique em "Adicionar Exercícios" para começar.</p>
+                        <p class="text-muted mt-3 mb-0">{% trans "Nenhum exercício adicionado." %}<br>{% trans 'Clique em "Adicionar Exercícios" para começar.' %}</p>
                     </div>
                 </div>
             </div>
@@ -131,21 +132,21 @@
             <!-- Resumo -->
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-body">
-                    <h6 class="mb-0"><i class="bi bi-bar-chart"></i> Resumo do Treino</h6>
+                    <h6 class="mb-0"><i class="bi bi-bar-chart"></i> {% trans "Resumo do Treino" %}</h6>
                 </div>
                 <div class="card-body">
                     <div class="mb-4 text-center">
-                        <small class="text-muted d-block mb-2">Total de Exercícios</small>
+                        <small class="text-muted d-block mb-2">{% trans "Total de Exercícios" %}</small>
                         <h2 id="exerciseCount" class="mb-0 text-primary">0</h2>
                     </div>
                     <div class="mb-4 text-center">
-                        <small class="text-muted d-block mb-2">Duração Estimada</small>
-                        <h4 id="estimatedDuration" class="mb-0 text-secondary">0 minutos</h4>
+                        <small class="text-muted d-block mb-2">{% trans "Duração Estimada" %}</small>
+                        <h4 id="estimatedDuration" class="mb-0 text-secondary">{% trans "0 minutos" %}</h4>
                     </div>
                     <hr>
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-success btn-lg">
-                            <i class="bi bi-check-circle"></i> Salvar Treino
+                            <i class="bi bi-check-circle"></i> {% trans "Salvar Treino" %}
                         </button>
                         {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='bi-x-circle' %}
                     </div>
@@ -155,14 +156,14 @@
             <!-- Dicas -->
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-body">
-                    <h6 class="mb-0"><i class="bi bi-lightbulb"></i> Dicas</h6>
+                    <h6 class="mb-0"><i class="bi bi-lightbulb"></i> {% trans "Dicas" %}</h6>
                 </div>
                 <div class="card-body">
                     <ul class="small mb-0 ps-3">
-                        <li class="mb-2">Arraste os exercícios para reordenar</li>
-                        <li class="mb-2">Clique em <i class="bi bi-pencil"></i> para ajustar séries/reps</li>
-                        <li class="mb-2">Agrupe exercícios por grupo muscular</li>
-                        <li>Configure descanso adequado entre séries</li>
+                        <li class="mb-2">{% trans "Arraste os exercícios para reordenar" %}</li>
+                        <li class="mb-2">{% trans "Clique em" %} <i class="bi bi-pencil"></i> {% trans "para ajustar séries/reps" %}</li>
+                        <li class="mb-2">{% trans "Agrupe exercícios por grupo muscular" %}</li>
+                        <li>{% trans "Configure descanso adequado entre séries" %}</li>
                     </ul>
                 </div>
             </div>
@@ -176,9 +177,9 @@
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="exerciseModalLabel">
-                    <i class="bi bi-search"></i> Selecionar Exercícios
+                    <i class="bi bi-search"></i> {% trans "Selecionar Exercícios" %}
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{% trans "Close" %}"></button>
             </div>
             <div class="modal-body">
                 <!-- Filtros -->
@@ -186,14 +187,14 @@
                     <div class="col-md-8">
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-search"></i></span>
-                            <input type="text" class="form-control" id="exerciseSearch" placeholder="Pesquisar exercício...">
+                            <input type="text" class="form-control" id="exerciseSearch" placeholder="{% trans "Pesquisar exercício..." %}">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <select class="form-select" id="muscleGroupFilter">
-                            <option value="">Todos os grupos musculares</option>
+                            <option value="">{% trans "Todos os grupos musculares" %}</option>
                             {% for mg in muscle_groups %}
-                            <option value="{{ mg.id }}">{{ mg.name }}</option>
+                            <option value="{{ mg.id }}">{{ mg.label }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -207,17 +208,17 @@
                 <!-- Loading -->
                 <div id="loadingExercises" class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Carregando...</span>
+                        <span class="visually-hidden">{% trans "Carregando..." %}</span>
                     </div>
-                    <p class="text-muted mt-3">Carregando exercícios...</p>
+                    <p class="text-muted mt-3">{% trans "Carregando exercícios..." %}</p>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle"></i> Fechar
+                    <i class="bi bi-x-circle"></i> {% trans "Fechar" %}
                 </button>
                 <button type="button" class="btn btn-primary" id="confirmSelection">
-                    <i class="bi bi-check-circle"></i> Confirmar Seleção (<span id="selectionCount">0</span>)
+                    <i class="bi bi-check-circle"></i> {% trans "Confirmar Seleção (" %}<span id="selectionCount">0</span>)
                 </button>
             </div>
         </div>
@@ -230,37 +231,37 @@
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="editExerciseModalLabel">
-                    <i class="bi bi-sliders"></i> Editar Parâmetros
+                    <i class="bi bi-sliders"></i> {% trans "Editar Parâmetros" %}
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{% trans "Close" %}"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="editExerciseId">
                 <div class="mb-3">
                     <label for="editSets" class="form-label fw-bold">
-                        <i class="bi bi-bar-chart"></i> Séries
+                        <i class="bi bi-bar-chart"></i> {% trans "Séries" %}
                     </label>
                     <input type="number" class="form-control" id="editSets" min="1" value="3">
                 </div>
                 <div class="mb-3">
                     <label for="editReps" class="form-label fw-bold">
-                        <i class="bi bi-arrow-repeat"></i> Repetições
+                        <i class="bi bi-arrow-repeat"></i> {% trans "Repetições" %}
                     </label>
                     <input type="number" class="form-control" id="editReps" min="1" value="12">
                 </div>
                 <div class="mb-3">
                     <label for="editRest" class="form-label fw-bold">
-                        <i class="bi bi-clock"></i> Descanso (segundos)
+                        <i class="bi bi-clock"></i> {% trans "Descanso (segundos)" %}
                     </label>
                     <input type="number" class="form-control" id="editRest" min="0" value="60">
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle"></i> Cancelar
+                    <i class="bi bi-x-circle"></i> {% trans "Cancelar" %}
                 </button>
                 <button type="button" class="btn btn-primary" id="saveExerciseEdit">
-                    <i class="bi bi-check-circle"></i> Salvar
+                    <i class="bi bi-check-circle"></i> {% trans "Salvar" %}
                 </button>
             </div>
         </div>
@@ -274,6 +275,14 @@
 
 {% block extra_js %}
 <script>
+const T_LOAD_ERROR = "{% trans 'Erro ao carregar exercícios. Tente novamente.' as js_msg %}{{ js_msg|escapejs }}";
+const T_NONE_FOUND = "{% trans 'Nenhum exercício encontrado' as js_msg %}{{ js_msg|escapejs }}";
+const T_SETS = "{% trans 'séries' as js_msg %}{{ js_msg|escapejs }}";
+const T_REPS = "{% trans 'reps' as js_msg %}{{ js_msg|escapejs }}";
+const T_EDIT_PARAMS = "{% trans 'Editar parâmetros' as js_msg %}{{ js_msg|escapejs }}";
+const T_REMOVE_EXERCISE = "{% trans 'Remover exercício' as js_msg %}{{ js_msg|escapejs }}";
+const T_CONFIRM_REMOVE = "{% trans 'Remover este exercício do treino?' as js_msg %}{{ js_msg|escapejs }}";
+const T_MINUTES = "{% trans 'minutos' as js_msg %}{{ js_msg|escapejs }}";
 // Estado global
 let selectedExercises = [];
 let allExercises = [];
@@ -286,7 +295,7 @@ selectedExercises = [
     {
         id: {{ re.exercise.pk }},
         name: "{{ re.exercise.exercise_name|escapejs }}",
-        muscle_group: "{{ re.exercise.muscle_group.name|escapejs }}",
+        muscle_group: "{{ re.exercise.muscle_group.label|escapejs }}",
         sets: {{ re.sets }},
         reps: {{ re.reps }},
         rest: {{ re.rest_seconds }},
@@ -330,7 +339,7 @@ function loadExercises() {
         })
         .catch(error => {
             console.error('Erro ao carregar exercícios:', error);
-            loading.innerHTML = '<div class="alert alert-danger">Erro ao carregar exercícios. Tente novamente.</div>';
+            loading.innerHTML = '<div class="alert alert-danger">' + T_LOAD_ERROR + '</div>';
         });
 }
 
@@ -377,7 +386,7 @@ function renderExercises(exercises) {
     });
 
     if (filtered.length === 0) {
-        grid.innerHTML = '<div class="col-12"><div class="alert alert-info text-center"><i class="bi bi-info-circle"></i> Nenhum exercício encontrado</div></div>';
+        grid.innerHTML = '<div class="col-12"><div class="alert alert-info text-center"><i class="bi bi-info-circle"></i> ' + T_NONE_FOUND + '</div></div>';
     }
 }
 
@@ -468,16 +477,16 @@ function updateSelectedExercisesList() {
                     <h6 class="mb-1">${exercise.name}</h6>
                     <small class="text-muted">
                         <i class="bi bi-diagram-3"></i> ${exercise.muscle_group} |
-                        <i class="bi bi-bar-chart"></i> ${exercise.sets} séries ×
-                        <i class="bi bi-arrow-repeat"></i> ${exercise.reps} reps |
+                        <i class="bi bi-bar-chart"></i> ${exercise.sets} ${T_SETS} ×
+                        <i class="bi bi-arrow-repeat"></i> ${exercise.reps} ${T_REPS} |
                         <i class="bi bi-clock"></i> ${exercise.rest}s
                     </small>
                 </div>
                 <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="editExercise(${exercise.id})" title="Editar parâmetros">
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="editExercise(${exercise.id})" title="${T_EDIT_PARAMS}">
                         <i class="bi bi-pencil"></i>
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeExercise(${exercise.id})" title="Remover exercício">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeExercise(${exercise.id})" title="${T_REMOVE_EXERCISE}">
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>
@@ -541,7 +550,7 @@ document.getElementById('saveExerciseEdit').addEventListener('click', function()
 
 // Remover exercício
 function removeExercise(exerciseId) {
-    if (confirm('Remover este exercício do treino?')) {
+    if (confirm(T_CONFIRM_REMOVE)) {
         selectedExercises = selectedExercises.filter(e => e.id !== exerciseId);
         updateSelectedExercisesList();
         updateSummary();
@@ -556,7 +565,7 @@ function updateSummary() {
     const duration = selectedExercises.reduce((total, ex) => {
         return total + (ex.sets * (ex.rest / 60 + 1));
     }, 0);
-    document.getElementById('estimatedDuration').textContent = Math.round(duration) + ' minutos';
+    document.getElementById('estimatedDuration').textContent = Math.round(duration) + ' ' + T_MINUTES;
 }
 
 // Salvar formulário

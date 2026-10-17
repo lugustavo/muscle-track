@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load static %}
 {% load navigation %}
 
-{% block title %}{{ exercise.exercise_name }} - Evolução{% endblock %}
+{% block title %}{% blocktrans trimmed with exercise_name=exercise.exercise_name %}{{ exercise_name }} - Evolução{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -15,41 +16,41 @@
     <div class="col-6 col-md-4">
         <div class="card text-center h-100 stat-tile"><div class="card-body">
             <div class="stat-top"><i class="bi bi-trophy-fill fs-1 text-warning"></i>
-            <h3 class="mt-2">{{ record_log.weight_used }} kg</h3></div>
-            <p class="text-muted mb-0">Recorde de carga · {{ record_log.session.start_time|date:"d/m/Y" }}</p>
+            <h3 class="mt-2">{% blocktrans trimmed with weight_used=record_log.weight_used %}{{ weight_used }} kg{% endblocktrans %}</h3></div>
+            <p class="text-muted mb-0">{% blocktrans trimmed with start_time=record_log.session.start_time|date:_('d/m/Y') %}Recorde de carga · {{ start_time }}{% endblocktrans %}</p>
         </div></div>
     </div>
     <div class="col-6 col-md-4">
         <div class="card text-center h-100 stat-tile"><div class="card-body">
             <div class="stat-top"><i class="bi bi-calendar-check fs-1 text-primary"></i>
             <h3 class="mt-2">{{ sessions_count }}</h3></div>
-            <p class="text-muted mb-0">Treinos com este exercício</p>
+            <p class="text-muted mb-0">{% trans "Treinos com este exercício" %}</p>
         </div></div>
     </div>
 </div>
 
 <div class="card mb-4">
     <div class="card-body">
-        <h5 class="card-title">Carga por treino (série mais pesada)</h5>
+        <h5 class="card-title">{% trans "Carga por treino (série mais pesada)" %}</h5>
         <div style="height: 300px;"><canvas id="progressChart"></canvas></div>
     </div>
 </div>
 
 <div class="card">
     <div class="card-body">
-        <h5 class="card-title">Últimos treinos</h5>
+        <h5 class="card-title">{% trans "Últimos treinos" %}</h5>
         <div class="table-responsive">
             <table class="table align-middle mb-0">
-                <thead><tr><th>Data</th><th>Séries feitas (carga × reps)</th></tr></thead>
+                <thead><tr><th>{% trans "Data" %}</th><th>{% trans "Séries feitas (carga × reps)" %}</th></tr></thead>
                 <tbody>
                 {% for h in history %}
                     <tr>
-                        <td>{{ h.log.session.start_time|date:"d/m/Y" }}</td>
+                        <td>{{ h.log.session.start_time|date:_('d/m/Y') }}</td>
                         <td>
                             {% for s in h.sets %}
-                                <span class="badge bg-body-secondary text-body border me-1">{% if s.weight is not None %}{{ s.weight }}kg{% else %}-{% endif %} × {% if s.reps is not None %}{{ s.reps }}{% else %}-{% endif %}</span>
+                                <span class="badge bg-body-secondary text-body border me-1">{% if s.weight is not None %}{% blocktrans trimmed with weight=s.weight %}{{ weight }}kg{% endblocktrans %}{% else %}-{% endif %} × {% if s.reps is not None %}{{ s.reps }}{% else %}-{% endif %}</span>
                             {% empty %}
-                                <span class="text-muted">{{ h.log.weight_used }} kg</span>
+                                <span class="text-muted">{% blocktrans trimmed with weight_used=h.log.weight_used %}{{ weight_used }} kg{% endblocktrans %}</span>
                             {% endfor %}
                         </td>
                     </tr>
@@ -61,7 +62,7 @@
 </div>
 {{ chart_points|json_script:"chart-data" }}
 {% else %}
-<div class="alert alert-info"><i class="bi bi-info-circle"></i> Você ainda não registrou carga neste exercício.</div>
+<div class="alert alert-info"><i class="bi bi-info-circle"></i> {% trans "Você ainda não registrou carga neste exercício." %}</div>
 {% endif %}
 {% endblock %}
 
@@ -70,13 +71,14 @@
 <script src="{% static 'vendor/chartjs/4.4.0/chart.umd.js' %}"></script>
 <script src="{% static 'js/chart-theme.js' %}"></script>
 <script>
+const T_LOAD = "{% trans 'Carga (kg)' as js_msg %}{{ js_msg|escapejs }}";
 const points = JSON.parse(document.getElementById('chart-data').textContent);
 new Chart(document.getElementById('progressChart'), {
     type: 'line',
     data: {
         labels: points.map(p => p.date),
         datasets: [{
-            label: 'Carga (kg)',
+            label: T_LOAD,
             data: points.map(p => p.weight),
             borderColor: '#FF6B6B',
             backgroundColor: 'rgba(255,107,107,0.15)',

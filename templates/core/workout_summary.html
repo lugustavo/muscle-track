@@ -1,14 +1,15 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load l10n %}
 
-{% block title %}Treino concluído - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed %}Treino concluído - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="mx-auto" style="max-width: 560px;">
     <div class="text-center mb-4">
         <div class="display-4"><i class="bi bi-check-circle-fill text-success"></i></div>
-        <h1 class="h3 mt-2 mb-1">Treino concluído!</h1>
-        <div class="text-muted">{{ routine.routine_name }} · {{ session.start_time|date:"d/m/Y" }}</div>
+        <h1 class="h3 mt-2 mb-1">{% trans "Treino concluído!" %}</h1>
+        <div class="text-muted">{{ routine.routine_name }} · {{ session.start_time|date:_('d/m/Y') }}</div>
     </div>
 
     {% for item in celebrations %}
@@ -19,29 +20,29 @@
 
     <div class="row g-3 mb-3 text-center">
         <div class="col-6"><div class="card h-100"><div class="card-body py-3">
-            <div class="fs-2 fw-bold">{{ summary.duration_minutes }}<small class="fs-6"> min</small></div>
-            <div class="text-muted small">duração</div>
+            <div class="fs-2 fw-bold">{% blocktrans trimmed with duration_minutes=summary.duration_minutes %}{{ duration_minutes }}<small class="fs-6"> min</small>{% endblocktrans %}</div>
+            <div class="text-muted small">{% trans "duração" %}</div>
         </div></div></div>
         <div class="col-6"><div class="card h-100"><div class="card-body py-3">
             <div class="fs-2 fw-bold">{{ summary.sets_done }}<small class="fs-6">/{{ summary.sets_total }}</small></div>
-            <div class="text-muted small">séries feitas</div>
+            <div class="text-muted small">{% trans "séries feitas" %}</div>
         </div></div></div>
         <div class="col-6"><div class="card h-100"><div class="card-body py-3">
-            <div class="fs-2 fw-bold">{{ summary.volume|floatformat:"0g" }}<small class="fs-6"> kg</small></div>
-            <div class="text-muted small">volume levantado</div>
+            <div class="fs-2 fw-bold">{% blocktrans trimmed with volume=summary.volume|floatformat:"0g" %}{{ volume }}<small class="fs-6"> kg</small>{% endblocktrans %}</div>
+            <div class="text-muted small">{% trans "volume levantado" %}</div>
         </div></div></div>
         <div class="col-6"><div class="card h-100"><div class="card-body py-3">
             <div class="fs-2 fw-bold">{{ summary.exercises_done }}<small class="fs-6">/{{ summary.exercises_total }}</small></div>
-            <div class="text-muted small">exercícios concluídos</div>
+            <div class="text-muted small">{% trans "exercícios concluídos" %}</div>
         </div></div></div>
     </div>
 
     {% if summary.records %}
     <div class="card border-warning mb-3">
-        <div class="card-header bg-warning-subtle"><strong>🏆 Novos recordes de carga</strong></div>
+        <div class="card-header bg-warning-subtle"><strong>{% trans "🏆 Novos recordes de carga" %}</strong></div>
         <ul class="list-group list-group-flush">
             {% for r in summary.records %}
-            <li class="list-group-item d-flex justify-content-between"><span>{{ r.name }}</span><strong>{{ r.weight|unlocalize }} kg</strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span>{{ r.name }}</span><strong>{% blocktrans trimmed with weight=r.weight|unlocalize %}{{ weight }} kg{% endblocktrans %}</strong></li>
             {% endfor %}
         </ul>
     </div>
@@ -49,20 +50,20 @@
 
     {% if summary.comparison %}
     <div class="card mb-3">
-        <div class="card-header"><strong>Comparado com o último treino</strong> <small class="text-muted">({{ summary.comparison.date|date:"d/m" }})</small></div>
+        <div class="card-header">{% blocktrans trimmed with date=summary.comparison.date|date:_('d/m') %}<strong>Comparado com o último treino</strong> <small class="text-muted">({{ date }})</small>{% endblocktrans %}</div>
         <ul class="list-group list-group-flush">
             <li class="list-group-item d-flex justify-content-between">
-                <span>Volume levantado</span>
+                <span>{% trans "Volume levantado" %}</span>
                 <span>
-                    {% if summary.comparison.volume_pct is None %}<span class="text-muted">sem base de comparação</span>
+                    {% if summary.comparison.volume_pct is None %}<span class="text-muted">{% trans "sem base de comparação" %}</span>
                     {% elif summary.comparison.volume_pct > 0 %}<span class="text-success"><i class="bi bi-arrow-up-right"></i> {{ summary.comparison.volume_pct }}%</span>
                     {% elif summary.comparison.volume_pct < 0 %}<span class="text-secondary"><i class="bi bi-arrow-down-right"></i> {{ summary.comparison.volume_pct }}%</span>
-                    {% else %}<span class="text-muted"><i class="bi bi-dash"></i> igual</span>{% endif %}
+                    {% else %}<span class="text-muted"><i class="bi bi-dash"></i> {% trans "igual" %}</span>{% endif %}
                 </span>
             </li>
             <li class="list-group-item d-flex justify-content-between">
-                <span>Duração</span>
-                <span class="text-muted">{{ summary.duration_minutes }} min <small>(antes: {{ summary.comparison.last_duration|default:"-" }} min)</small></span>
+                <span>{% trans "Duração" %}</span>
+                <span class="text-muted">{% blocktrans trimmed with duration_minutes=summary.duration_minutes last_duration=summary.comparison.last_duration|default:"-" %}{{ duration_minutes }} min <small>(antes: {{ last_duration }} min)</small>{% endblocktrans %}</span>
             </li>
         </ul>
     </div>
@@ -70,14 +71,14 @@
 
     {% if session.notes %}
     <div class="card mb-3"><div class="card-body">
-        <div class="small text-muted mb-1">Seu comentário</div>
+        <div class="small text-muted mb-1">{% trans "Seu comentário" %}</div>
         {{ session.notes|linebreaksbr }}
     </div></div>
     {% endif %}
 
     <div class="d-grid gap-2 mt-4">
-        <a href="{% url 'core:home' %}" class="btn btn-primary btn-lg"><i class="bi bi-house-door"></i> Voltar ao início</a>
-        <a href="{% url 'core:my_history' %}" class="btn btn-outline-secondary"><i class="bi bi-graph-up"></i> Ver histórico</a>
+        <a href="{% url 'core:home' %}" class="btn btn-primary btn-lg"><i class="bi bi-house-door"></i> {% trans "Voltar ao início" %}</a>
+        <a href="{% url 'core:my_history' %}" class="btn btn-outline-secondary"><i class="bi bi-graph-up"></i> {% trans "Ver histórico" %}</a>
     </div>
 </div>
 {% endblock %}

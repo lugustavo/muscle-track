@@ -4,6 +4,8 @@
    - no camera, no permission or no support: the plain file field (gallery/files) with a short explanation.
    The picture is shrunk in the browser (phone photos pass 5 MB) before it is sent. */
 (function () {
+    // Django's JS catalog (/jsi18n/); identity fallback if it has not loaded
+    var gettext = window.gettext || function (s) { return s; };
     var form = document.querySelector('[data-photo-form]');
     if (!form) return;
     var fileInput = form.querySelector('input[type=file]:not([data-phone-camera])');
@@ -75,7 +77,7 @@
             video.play();
             live.hidden = false;
         }).catch(function () {
-            say('Não foi possível usar a câmera (permissão negada ou câmera ocupada). Escolha a foto da galeria.');
+            say(gettext('Não foi possível usar a câmera (permissão negada ou câmera ocupada). Escolha a foto da galeria.'));
         });
     }
 
@@ -89,14 +91,14 @@
         form.addEventListener('submit', function (event) {
             if (!fileInput.files.length) {
                 event.preventDefault();
-                say('Tire ou escolha uma foto antes de salvar.');
+                say(gettext('Tire ou escolha uma foto antes de salvar.'));
             }
         });
         var takeBtn = buttons.querySelector('[data-take]');
         buttons.querySelector('[data-gallery]').addEventListener('click', function () { stopLive(); fileInput.click(); });
         if (!hasCamera) {
             takeBtn.hidden = true;
-            say('Nenhuma câmera encontrada neste aparelho: escolha a foto da galeria ou dos arquivos.');
+            say(gettext('Nenhuma câmera encontrada neste aparelho: escolha a foto da galeria ou dos arquivos.'));
             return;
         }
         takeBtn.addEventListener('click', function () {

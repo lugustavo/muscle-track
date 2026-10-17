@@ -3,6 +3,7 @@ from datetime import date, datetime, timedelta
 
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext
 
 from .models import Appointment, AppointmentRequest, ScheduleSlot
 
@@ -116,10 +117,10 @@ def move_appointment(appointment, starts, duration_minutes=None, kind=None, note
 
     Returns the new class. Raises MoveError when the student already has a class at that time."""
     if starts == appointment.starts_at:
-        raise MoveError('A aula já está neste horário.')
+        raise MoveError(gettext('A aula já está neste horário.'))
     with transaction.atomic():
         if live_class_at(appointment.person, starts) is not None:
-            raise MoveError('Este aluno já tem aula neste horário.')
+            raise MoveError(gettext('Este aluno já tem aula neste horário.'))
         new = Appointment.objects.create(
             person=appointment.person, starts_at=starts,
             duration_minutes=duration_minutes or appointment.duration_minutes,
@@ -138,11 +139,11 @@ def undo_move(new):
     with transaction.atomic():
         original = Appointment.objects.select_for_update().filter(rescheduled_to=new).first()
         if original is None:
-            raise MoveError('Esta aula não veio de uma remarcação.')
+            raise MoveError(gettext('Esta aula não veio de uma remarcação.'))
         if new.status != Appointment.Status.SCHEDULED:
-            raise MoveError('A aula nova já foi alterada; não dá mais para desfazer.')
+            raise MoveError(gettext('A aula nova já foi alterada; não dá mais para desfazer.'))
         if live_class_at(original.person, original.starts_at, exclude=new) is not None:
-            raise MoveError('O aluno já tem outra aula no horário original; não dá mais para desfazer.')
+            raise MoveError(gettext('O aluno já tem outra aula no horário original; não dá mais para desfazer.'))
         new.delete()  # the link on the database row is cleared by SET_NULL
         original.rescheduled_to = None
         original.status = Appointment.Status.SCHEDULED

@@ -1,5 +1,6 @@
 """LGPD consent: which consents exist, which are required, and the current state."""
 from django.utils import timezone
+from django.utils.translation import gettext as _, gettext_lazy as _l
 
 from .models import ConsentRecord, StudentEvent
 
@@ -11,11 +12,11 @@ OPTIONAL_KINDS = (ConsentRecord.Kind.PHOTOS,)
 ALL_KINDS = REQUIRED_KINDS + OPTIONAL_KINDS
 
 DESCRIPTIONS = {
-    ConsentRecord.Kind.TERMS: 'Li e aceito os termos de uso e a política de privacidade.',
-    ConsentRecord.Kind.HEALTH_DATA: (
+    ConsentRecord.Kind.TERMS: _l('Li e aceito os termos de uso e a política de privacidade.'),
+    ConsentRecord.Kind.HEALTH_DATA: _l(
         'Autorizo o registro e o uso dos meus dados de saúde (lesões, restrições, avaliações físicas) '
         'pela minha personal trainer, para montar e acompanhar meus treinos.'),
-    ConsentRecord.Kind.PHOTOS: 'Autorizo o registro de fotos de evolução, que só eu e minha personal vemos.',
+    ConsentRecord.Kind.PHOTOS: _l('Autorizo o registro de fotos de evolução, que só eu e minha personal vemos.'),
 }
 
 
@@ -49,9 +50,14 @@ def record_consent(person, kind, granted, *, source=ConsentRecord.Source.STUDENT
         person=person, kind=kind, version=CURRENT_VERSION, granted=granted, source=source,
         recorded_by=actor if getattr(actor, 'pk', None) else None, at=at or timezone.now())
     label = ConsentRecord.Kind(kind).label
+    if granted:
+        summary = _('Concedeu consentimento: %(label)s') % {'label': label}
+    else:
+        summary = _('Retirou consentimento: %(label)s') % {'label': label}
+    if source == ConsentRecord.Source.TRAINER:
+        summary = _('%(summary)s (registrado pela personal)') % {'summary': summary}
     StudentEvent.objects.create(
         person=person, kind=StudentEvent.Kind.CONSENT, actor=record.recorded_by,
-        summary=f'{"Concedeu" if granted else "Retirou"} consentimento: {label}'
-                + (' (registrado pela personal)' if source == ConsentRecord.Source.TRAINER else ''),
+        summary=summary,
         changes={'kind': kind, 'granted': granted, 'version': CURRENT_VERSION})
     return record

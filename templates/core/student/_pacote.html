@@ -1,3 +1,4 @@
+{% load i18n %}
 {% load navigation money_tags %}
 {# "Pacote", in the Ficha tab: the package being used (classes left, deadline, payment) and the previous ones. Needs `pkg` (core.packages.overview). #}
 {% with cur=pkg.current %}
@@ -5,8 +6,8 @@
     <div class="card-body">
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
             <div class="min-w-0">
-                <div class="text-muted small text-uppercase"><i class="bi bi-box-seam"></i> Pacote</div>
-                <div class="fs-5 fw-semibold text-break">{% if cur %}{{ cur.package.name }}{% else %}Sem pacote{% endif %}</div>
+                <div class="text-muted small text-uppercase"><i class="bi bi-box-seam"></i> {% trans "Pacote" %}</div>
+                <div class="fs-5 fw-semibold text-break">{% if cur %}{{ cur.package.name }}{% else %}{% trans "Sem pacote" %}{% endif %}</div>
             </div>
             {% if cur %}<span class="badge fs-6 bg-{{ cur.css }}" data-package-label>{{ cur.label }}</span>{% endif %}
         </div>
@@ -14,106 +15,106 @@
         {% if cur %}
         <div class="mt-3" data-package-balance>
             <div class="d-flex justify-content-between align-items-baseline">
-                <span><strong class="fs-4">{{ cur.used }}</strong> de {{ cur.sessions }} aulas usadas</span>
-                <span class="text-muted small">{{ cur.left }} sobrando{% if pkg.scheduled %} · {{ pkg.scheduled }} agendada{{ pkg.scheduled|pluralize }}{% endif %}</span>
+                <span>{% blocktrans trimmed with used=cur.used sessions=cur.sessions %}<strong class="fs-4">{{ used }}</strong> de {{ sessions }} aulas usadas{% endblocktrans %}</span>
+                <span class="text-muted small">{% blocktrans trimmed with left=cur.left %}{{ left }} sobrando{% endblocktrans %}{% if pkg.scheduled %} {% blocktrans trimmed count scheduled=pkg.scheduled %}· {{ scheduled }} agendada{% plural %}· {{ scheduled }} agendadas{% endblocktrans %}{% endif %}</span>
             </div>
-            <div class="progress mt-1" style="height: 8px;" role="progressbar" aria-valuenow="{{ cur.percent }}" aria-valuemin="0" aria-valuemax="100" aria-label="Aulas usadas do pacote">
+            <div class="progress mt-1" style="height: 8px;" role="progressbar" aria-valuenow="{{ cur.percent }}" aria-valuemin="0" aria-valuemax="100" aria-label="{% trans "Aulas usadas do pacote" %}">
                 <div class="progress-bar {% if cur.state == 'expired' %}bg-danger{% elif cur.low %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ cur.percent }}%"></div>
             </div>
-            {% if pkg.scheduled > cur.left %}<div class="small text-warning-emphasis mt-1" data-over-scheduled><i class="bi bi-exclamation-triangle"></i> Há mais aulas agendadas ({{ pkg.scheduled }}) do que aulas sobrando no pacote ({{ cur.left }}).</div>{% endif %}
+            {% if pkg.scheduled > cur.left %}<div class="small text-warning-emphasis mt-1" data-over-scheduled><i class="bi bi-exclamation-triangle"></i> {% blocktrans trimmed with scheduled=pkg.scheduled left=cur.left %}Há mais aulas agendadas ({{ scheduled }}) do que aulas sobrando no pacote ({{ left }}).{% endblocktrans %}</div>{% endif %}
         </div>
 
         <div class="small mt-3" data-package-dates>
             {% if not cur.package.valid_days %}
-                <span class="text-muted">Pacote <strong>sem prazo</strong>: não vence, vale até usar todas as aulas.</span>{% if cur.starts_on %} Primeira aula em <strong>{{ cur.starts_on|date:"d/m/Y" }}</strong>.{% endif %}
+                <span class="text-muted">{% blocktrans trimmed %}Pacote <strong>sem prazo</strong>: não vence, vale até usar todas as aulas.{% endblocktrans %}</span>{% if cur.starts_on %} {% blocktrans trimmed with starts_on=cur.starts_on|date:_('d/m/Y') %}Primeira aula em <strong>{{ starts_on }}</strong>.{% endblocktrans %}{% endif %}
             {% elif cur.starts_on %}
-                Primeira aula em <strong>{{ cur.starts_on|date:"d/m/Y" }}</strong> · vale até <strong>{{ cur.ends_on|date:"d/m/Y" }}</strong>
-                {% if cur.state == 'frozen' %}<span class="text-muted">(congelado desde {{ cur.package.frozen_since|date:"d/m" }}; o prazo para de contar)</span>
-                {% elif cur.state == 'expired' %}<span class="text-danger">(venceu há {{ cur.days_left|cut:"-" }} dia{{ cur.days_left|cut:"-"|pluralize }})</span>
-                {% elif cur.days_left is not None %}<span class="text-muted">(faltam {{ cur.days_left }} dia{{ cur.days_left|pluralize }})</span>{% endif %}
-                {% if cur.package.extension_days %}<div class="text-muted">Prorrogado em {{ cur.package.extension_days }} dia{{ cur.package.extension_days|pluralize }}.</div>{% endif %}
+                {% blocktrans trimmed with starts_on=cur.starts_on|date:_('d/m/Y') ends_on=cur.ends_on|date:_('d/m/Y') %}Primeira aula em <strong>{{ starts_on }}</strong> · vale até <strong>{{ ends_on }}</strong>{% endblocktrans %}
+                {% if cur.state == 'frozen' %}<span class="text-muted">{% blocktrans trimmed with frozen_since=cur.package.frozen_since|date:_('d/m') %}(congelado desde {{ frozen_since }}; o prazo para de contar){% endblocktrans %}</span>
+                {% elif cur.state == 'expired' %}<span class="text-danger">{% blocktrans trimmed count days_left=cur.days_left|cut:"-"|add:0 %}(venceu há {{ days_left }} dia){% plural %}(venceu há {{ days_left }} dias){% endblocktrans %}</span>
+                {% elif cur.days_left is not None %}<span class="text-muted">{% blocktrans trimmed count days_left=cur.days_left %}(faltam {{ days_left }} dia){% plural %}(faltam {{ days_left }} dias){% endblocktrans %}</span>{% endif %}
+                {% if cur.package.extension_days %}<div class="text-muted">{% blocktrans trimmed count extension_days=cur.package.extension_days %}Prorrogado em {{ extension_days }} dia.{% plural %}Prorrogado em {{ extension_days }} dias.{% endblocktrans %}</div>{% endif %}
             {% else %}
-                <span class="text-muted">O prazo de {{ cur.package.valid_days }} dias começa a contar na primeira aula.</span>
+                <span class="text-muted">{% blocktrans trimmed with valid_days=cur.package.valid_days %}O prazo de {{ valid_days }} dias começa a contar na primeira aula.{% endblocktrans %}</span>
             {% endif %}
         </div>
 
         {% if cur.state == 'expired' %}
-        <div class="alert alert-danger py-2 mt-3 mb-0 small" data-package-alert="expired"><i class="bi bi-calendar-x"></i> O prazo acabou e ainda sobram {{ cur.left }} aula{{ cur.left|pluralize }}. Prorrogue o pacote para o aluno poder usá-las.</div>
+        <div class="alert alert-danger py-2 mt-3 mb-0 small" data-package-alert="expired"><i class="bi bi-calendar-x"></i> {% blocktrans trimmed count left=cur.left %}O prazo acabou e ainda sobram {{ left }} aula. Prorrogue o pacote para o aluno poder usá-las.{% plural %}O prazo acabou e ainda sobram {{ left }} aulas. Prorrogue o pacote para o aluno poder usá-las.{% endblocktrans %}</div>
         {% elif cur.low and cur.state != 'not_started' %}
-        <div class="alert alert-warning py-2 mt-3 mb-0 small" data-package-alert="low"><i class="bi bi-hourglass-split"></i> Restam {{ cur.left }} aula{{ cur.left|pluralize }}: hora de oferecer um novo pacote.</div>
+        <div class="alert alert-warning py-2 mt-3 mb-0 small" data-package-alert="low"><i class="bi bi-hourglass-split"></i> {% blocktrans trimmed count left=cur.left %}Restam {{ left }} aula: hora de oferecer um novo pacote.{% plural %}Restam {{ left }} aulas: hora de oferecer um novo pacote.{% endblocktrans %}</div>
         {% endif %}
 
         <div class="mt-3 small" data-package-payment>
             {% if cur.pending > 0 %}
-                <i class="bi bi-cash-coin"></i> <span class="text-warning-emphasis fw-semibold">Pagamento em aberto: {{ cur.pending|money }}</span>
-                {% if cur.paid %}<span class="text-muted">(pago {{ cur.paid|money }} de {{ cur.package.price_total|money }})</span>{% endif %}
+                <i class="bi bi-cash-coin"></i> <span class="text-warning-emphasis fw-semibold">{% blocktrans trimmed with pending=cur.pending|money %}Pagamento em aberto: {{ pending }}{% endblocktrans %}</span>
+                {% if cur.paid %}<span class="text-muted">{% blocktrans trimmed with paid=cur.paid|money price_total=cur.package.price_total|money %}(pago {{ paid }} de {{ price_total }}){% endblocktrans %}</span>{% endif %}
             {% elif cur.package.price_total is not None %}
-                <i class="bi bi-check-circle text-success"></i> Pago ({{ cur.paid|money }})
+                <i class="bi bi-check-circle text-success"></i> {% blocktrans trimmed with paid=cur.paid|money %}Pago ({{ paid }}){% endblocktrans %}
             {% endif %}
             {% if cur.overpaid > 0 %}
-                <div class="mt-1" data-package-overpaid><i class="bi bi-arrow-counterclockwise text-warning-emphasis"></i> <span class="text-warning-emphasis fw-semibold">Pago a mais: {{ cur.overpaid|money }}</span>
-                    <a href="{% nav_url 'core:refund_create' student.pk %}&package={{ cur.package.pk }}" class="btn btn-sm btn-warning ms-1">Devolver</a></div>
+                <div class="mt-1" data-package-overpaid><i class="bi bi-arrow-counterclockwise text-warning-emphasis"></i> <span class="text-warning-emphasis fw-semibold">{% blocktrans trimmed with overpaid=cur.overpaid|money %}Pago a mais: {{ overpaid }}{% endblocktrans %}</span>
+                    <a href="{% nav_url 'core:refund_create' student.pk %}&package={{ cur.package.pk }}" class="btn btn-sm btn-warning ms-1">{% trans "Devolver" %}</a></div>
             {% endif %}
         </div>
         {% endif %}
 
         {% if pkg.without_package %}
-        <div class="alert alert-warning py-2 mt-3 mb-0 small" data-without-package><i class="bi bi-exclamation-triangle"></i> {{ pkg.without_package }} aula{{ pkg.without_package|pluralize }} dada{{ pkg.without_package|pluralize }} sem pacote para descontar. Venda um pacote novo.</div>
+        <div class="alert alert-warning py-2 mt-3 mb-0 small" data-without-package><i class="bi bi-exclamation-triangle"></i> {% blocktrans trimmed count without_package=pkg.without_package %}{{ without_package }} aula dada sem pacote para descontar. Venda um pacote novo.{% plural %}{{ without_package }} aulas dadas sem pacote para descontar. Venda um pacote novo.{% endblocktrans %}</div>
         {% endif %}
 
         <div class="d-flex flex-wrap gap-2 mt-3">
             {% if cur and cur.pending > 0 %}
-                {% if charge_url %}<a href="{{ charge_url }}" target="_blank" rel="noopener" class="btn btn-success"><i class="bi bi-whatsapp"></i> Cobrar</a>{% endif %}
-                <a href="{% nav_url 'core:payment_create' student.pk %}" class="btn {% if charge_url %}btn-outline-success{% else %}btn-success{% endif %}"><i class="bi bi-cash-coin"></i> Registrar pagamento</a>
+                {% if charge_url %}<a href="{{ charge_url }}" target="_blank" rel="noopener" class="btn btn-success"><i class="bi bi-whatsapp"></i> {% trans "Cobrar" %}</a>{% endif %}
+                <a href="{% nav_url 'core:payment_create' student.pk %}" class="btn {% if charge_url %}btn-outline-success{% else %}btn-success{% endif %}"><i class="bi bi-cash-coin"></i> {% trans "Registrar pagamento" %}</a>
             {% endif %}
-            <a href="{% nav_url 'core:student_package_sell' student.pk %}" class="btn {% if not cur or cur.low %}btn-primary{% else %}btn-outline-primary{% endif %}" data-package-sell><i class="bi bi-plus-circle"></i> {% if cur %}Vender novo pacote{% else %}Vender pacote{% endif %}</a>
+            <a href="{% nav_url 'core:student_package_sell' student.pk %}" class="btn {% if not cur or cur.low %}btn-primary{% else %}btn-outline-primary{% endif %}" data-package-sell><i class="bi bi-plus-circle"></i> {% if cur %}{% trans "Vender novo pacote" %}{% else %}{% trans "Vender pacote" %}{% endif %}</a>
         </div>
 
         {% if cur %}
         <div class="contract-more">
             <hr>
             <div class="d-flex flex-wrap gap-2">
-                <a href="{% nav_url 'core:student_package_edit' student.pk cur.package.pk %}" class="btn btn-sm btn-outline-secondary" data-package-edit><i class="bi bi-pencil-square"></i> Editar</a>
-                {% if cur.package.valid_days %}<button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#extend-{{ cur.package.pk }}"><i class="bi bi-calendar-plus"></i> Prorrogar</button>{% endif %}
+                <a href="{% nav_url 'core:student_package_edit' student.pk cur.package.pk %}" class="btn btn-sm btn-outline-secondary" data-package-edit><i class="bi bi-pencil-square"></i> {% trans "Editar" %}</a>
+                {% if cur.package.valid_days %}<button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#extend-{{ cur.package.pk }}"><i class="bi bi-calendar-plus"></i> {% trans "Prorrogar" %}</button>{% endif %}
                 {% if cur.state == 'frozen' %}
-                <form method="post" action="{% nav_url 'core:student_package_action' student.pk cur.package.pk %}">{% csrf_token %}<input type="hidden" name="action" value="unfreeze"><button class="btn btn-sm btn-outline-primary"><i class="bi bi-play-circle"></i> Descongelar</button></form>
+                <form method="post" action="{% nav_url 'core:student_package_action' student.pk cur.package.pk %}">{% csrf_token %}<input type="hidden" name="action" value="unfreeze"><button class="btn btn-sm btn-outline-primary"><i class="bi bi-play-circle"></i> {% trans "Descongelar" %}</button></form>
                 {% elif cur.package.valid_days and cur.state == 'active' or cur.package.valid_days and cur.state == 'expired' %}
-                <form method="post" action="{% nav_url 'core:student_package_action' student.pk cur.package.pk %}">{% csrf_token %}<input type="hidden" name="action" value="freeze"><button class="btn btn-sm btn-outline-secondary" title="O prazo para de contar até o aluno voltar"><i class="bi bi-snow"></i> Congelar</button></form>
+                <form method="post" action="{% nav_url 'core:student_package_action' student.pk cur.package.pk %}">{% csrf_token %}<input type="hidden" name="action" value="freeze"><button class="btn btn-sm btn-outline-secondary" title="{% trans "O prazo para de contar até o aluno voltar" %}"><i class="bi bi-snow"></i> {% trans "Congelar" %}</button></form>
                 {% endif %}
-                <a href="{% nav_url 'core:student_package_cancel' student.pk cur.package.pk %}" class="btn btn-sm btn-link text-danger" data-package-cancel>Cancelar com devolução</a>
+                <a href="{% nav_url 'core:student_package_cancel' student.pk cur.package.pk %}" class="btn btn-sm btn-link text-danger" data-package-cancel>{% trans "Cancelar com devolução" %}</a>
             </div>
             {% if cur.package.valid_days %}<div class="collapse mt-2" id="extend-{{ cur.package.pk }}">
                 <form method="post" action="{% nav_url 'core:student_package_action' student.pk cur.package.pk %}" class="row g-2 align-items-end">
                     {% csrf_token %}<input type="hidden" name="action" value="extend">
-                    <div class="col-4"><label class="form-label small mb-0" for="extend-days">Dias a mais</label><input id="extend-days" name="days" type="number" min="1" max="365" value="14" class="form-control form-control-sm" required></div>
-                    <div class="col-8"><label class="form-label small mb-0" for="extend-note">Motivo (opcional)</label><input id="extend-note" name="note" maxlength="150" class="form-control form-control-sm" placeholder="Ex.: viagem, lesão"></div>
-                    <div class="col-12"><button class="btn btn-sm btn-primary">Prorrogar</button></div>
+                    <div class="col-4"><label class="form-label small mb-0" for="extend-days">{% trans "Dias a mais" %}</label><input id="extend-days" name="days" type="number" min="1" max="365" value="14" class="form-control form-control-sm" required></div>
+                    <div class="col-8"><label class="form-label small mb-0" for="extend-note">{% trans "Motivo (opcional)" %}</label><input id="extend-note" name="note" maxlength="150" class="form-control form-control-sm" placeholder="{% trans "Ex.: viagem, lesão" %}"></div>
+                    <div class="col-12"><button class="btn btn-sm btn-primary">{% trans "Prorrogar" %}</button></div>
                 </form>
             </div>{% endif %}
 
             <div class="mt-3" data-package-money>
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                    <span class="small text-muted"><i class="bi bi-lock"></i> Valores (sigilosos)</span>
-                    <button type="button" class="btn btn-link btn-sm p-0" data-contract-values-toggle aria-pressed="false"><i class="bi bi-eye"></i> <span>Mostrar</span></button>
+                    <span class="small text-muted"><i class="bi bi-lock"></i> {% trans "Valores (sigilosos)" %}</span>
+                    <button type="button" class="btn btn-link btn-sm p-0" data-contract-values-toggle aria-pressed="false"><i class="bi bi-eye"></i> <span>{% trans "Mostrar" %}</span></button>
                 </div>
                 <div data-contract-values hidden>
-                    {% if cur.package.price_total is not None %}<div>Total: <strong>{{ cur.package.price_total|money }}</strong>{% if cur.package.price_per_session is not None %} · {{ cur.package.price_per_session|money }} por aula{% endif %}</div>
-                    {% else %}<div class="small text-muted">Nenhum valor combinado.</div>{% endif %}
+                    {% if cur.package.price_total is not None %}<div>{% blocktrans trimmed with price_total=cur.package.price_total|money %}Total: <strong>{{ price_total }}</strong>{% endblocktrans %}{% if cur.package.price_per_session is not None %} {% blocktrans trimmed with price_per_session=cur.package.price_per_session|money %}· {{ price_per_session }} por aula{% endblocktrans %}{% endif %}</div>
+                    {% else %}<div class="small text-muted">{% trans "Nenhum valor combinado." %}</div>{% endif %}
                 </div>
-                <div class="small text-muted" data-contract-values-hidden>Ocultos. O aluno nunca vê estes valores.</div>
+                <div class="small text-muted" data-contract-values-hidden>{% trans "Ocultos. O aluno nunca vê estes valores." %}</div>
             </div>
         </div>
         {% endif %}
 
         {% if pkg.rows|length > 1 or not cur and pkg.rows %}
         <hr>
-        <div class="small text-uppercase text-muted mb-1">Pacotes anteriores</div>
+        <div class="small text-uppercase text-muted mb-1">{% trans "Pacotes anteriores" %}</div>
         <ul class="list-unstyled small mb-0" data-package-history>
             {% for row in pkg.rows %}{% if row != cur %}
             <li class="d-flex justify-content-between gap-2 py-1 border-top">
-                <span>{{ row.package.name }} <span class="text-muted">· {{ row.used }}/{{ row.sessions }} aulas{% if row.starts_on %} · {{ row.starts_on|date:"d/m/y" }}{% endif %}</span></span>
+                <span>{{ row.package.name }} <span class="text-muted">{% blocktrans trimmed with used=row.used sessions=row.sessions %}· {{ used }}/{{ sessions }} aulas{% endblocktrans %}{% if row.starts_on %} · {{ row.starts_on|date:_('d/m/y') }}{% endif %}</span></span>
                 <span class="d-flex align-items-center gap-2">
-                    {% if row.state != 'cancelled' %}<a href="{% nav_url 'core:student_package_edit' student.pk row.package.pk %}" class="small" title="Editar este pacote"><i class="bi bi-pencil-square"></i><span class="visually-hidden">Editar {{ row.package.name }}</span></a>{% endif %}
+                    {% if row.state != 'cancelled' %}<a href="{% nav_url 'core:student_package_edit' student.pk row.package.pk %}" class="small" title="{% trans "Editar este pacote" %}"><i class="bi bi-pencil-square"></i><span class="visually-hidden">{% blocktrans trimmed with name=row.package.name %}Editar {{ name }}{% endblocktrans %}</span></a>{% endif %}
                     <span class="badge bg-secondary">{{ row.label }}</span>
                 </span>
             </li>

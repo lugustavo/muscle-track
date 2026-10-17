@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation %}
 
-{% block title %}{{ title }} - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed %}{{ title }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="mx-auto" style="max-width: 560px;">
@@ -11,7 +12,7 @@
     </div>
     <div class="card">
         <div class="card-body">
-            <p class="mb-3">Aula de <strong>{{ appointment.starts_at|date:"l, j \d\e F"|lower }}</strong> às <strong>{{ appointment.starts_at|time:"H:i" }}</strong>.</p>
+            <p class="mb-3">{% blocktrans trimmed with starts_at=appointment.starts_at|date:_("l, j \d\e F")|lower starts_at2=appointment.starts_at|time:"H:i" %}Aula de <strong>{{ starts_at }}</strong> às <strong>{{ starts_at2 }}</strong>.{% endblocktrans %}</p>
             {% if blocked %}
             <div class="alert alert-warning mb-0">{{ blocked }}</div>
             {% else %}
@@ -31,12 +32,12 @@
                         <label class="form-label fw-bold" for="{{ form.time.id_for_label }}">{{ form.time.label }}</label>{{ form.time }}
                         {% if form.time.errors %}<div class="text-danger small">{{ form.time.errors|join:" " }}</div>{% endif %}
                     </div>
-                    <div class="col-12 small text-muted">A sua personal confirma se o novo horário está livre.</div>
+                    <div class="col-12 small text-muted">{% trans "A sua personal confirma se o novo horário está livre." %}</div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold" for="{{ form.message.id_for_label }}">{{ form.message.label }}</label>{{ form.message }}
                 </div>
-                <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> Enviar pedido</button>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> {% trans "Enviar pedido" %}</button>
                 {% back_button back_default label='Voltar' css='btn btn-outline-secondary' icon='bi-x-circle' %}
             </form>
             {% endif %}

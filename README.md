@@ -162,6 +162,22 @@ Bootstrap, ícones, Chart.js e SortableJS são servidos localmente de `static/ve
 
 Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests/test_navigation_global.py` percorre todos os links com `next=` e confere o botão de voltar de cada página.
 
+## Idiomas (Português do Brasil e English)
+
+O app fala **português (Brasil)** e **inglês**. O idioma é escolhido assim:
+1. **Escolha manual**: o menu de idioma (ícone de globo, no topo) grava um cookie e vale até ser trocado.
+2. Sem escolha, o **idioma do navegador/aparelho** (cabeçalho `Accept-Language`): `en-*` abre em inglês; `pt-*` (inclusive `pt-PT`) em português do Brasil; qualquer outro idioma cai em português.
+3. Quem está logado tem o idioma salvo (ao escolher no menu e a cada login): **e-mails, notificações e textos de WhatsApp** feitos para essa pessoa saem **no idioma dela**, mesmo gerados pela personal ou pelo agendador.
+
+Datas, nomes de mês/dia e valores seguem o idioma (`1.234,50 €` em português, `€1,234.50` em inglês). O que a personal digita (nomes, observações, textos de WhatsApp personalizados) não é traduzido. O histórico da ficha guarda os eventos no idioma de quem os gerou.
+
+**Para quem mexe no código** (português é o idioma de origem; o inglês é o catálogo):
+- Textos novos: `{% trans "Texto" %}` / `{% blocktrans trimmed %}` nos templates, `gettext` (`_`) nas views e `gettext_lazy` em modelos, forms e constantes; `gettext()` nos scripts (`/jsi18n/` é carregado em toda página). Nunca use f-string com texto traduzível: `_('Olá, %(nome)s') % {'nome': x}`. Formatos de data que mudam por idioma entram no catálogo: `{{ d|date:_('d/m/Y') }}` (em inglês vira `m/d/Y`). Para exibir uma opção de campo use `get_xxx_display`, nunca o valor cru.
+- Catálogo: `pip install -r requirements-dev.txt` e `python tools/i18n_catalog.py extract` (precisa do pacote `gettext`), preencher `locale/en/LC_MESSAGES/django.po` e `djangojs.po`, `python tools/i18n_catalog.py check` e `python manage.py compilemessages`. Os `.mo` compilados ficam no repositório (a imagem Docker não precisa do `gettext`).
+- Um teste falha se houver entrada sem tradução, com placeholder ou tag HTML diferente, ou se o `.mo` estiver diferente do `.po`. Outro abre as páginas principais em inglês e falha se sobrar texto em português à mostra (use dados de teste sem acento).
+- O texto de um aluno novo (convite por WhatsApp) sai no idioma padrão (português) até ele ter um idioma salvo; depois disso, no idioma dele.
+- Novo idioma: incluir em `LANGUAGES` (`config/settings.py`), gerar o catálogo com `makemessages -l xx` e traduzir.
+
 ## Entrar com Google, Facebook e X (opcional)
 
 Cada botão só existe quando as duas chaves do provedor estão no `.env` (sem elas, nada aparece, nem o separador "ou com e-mail"). Depois de preencher, `docker compose up -d --build` (as tabelas do `allauth.socialaccount` entram pela migração).

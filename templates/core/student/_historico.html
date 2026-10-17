@@ -1,8 +1,9 @@
+{% load i18n %}
 {% load navigation %}
 <div class="row g-4">
     <div class="col-lg-7">
-        <h5 class="mb-3"><i class="bi bi-clock-history"></i> Histórico de alterações</h5>
-        <p class="text-muted small"><i class="bi bi-eye-slash"></i> Só você vê. Textos de saúde e anotações internas aparecem como "alterado", sem o conteúdo.</p>
+        <h5 class="mb-3"><i class="bi bi-clock-history"></i> {% trans "Histórico de alterações" %}</h5>
+        <p class="text-muted small"><i class="bi bi-eye-slash"></i> {% trans 'Só você vê. Textos de saúde e anotações internas aparecem como "alterado", sem o conteúdo.' %}</p>
         {% for event in events %}
         <div class="card mb-2">
             <div class="card-body py-2">
@@ -14,63 +15,63 @@
                 <ul class="small mb-0 mt-1">
                     {% for label, before, after in event.change_rows %}
                     <li><strong>{{ label }}</strong>:
-                        {% if before is None and after is None %}<em class="text-muted">alterado</em>
-                        {% else %}<span class="text-muted">{{ before|default:"(vazio)" }}</span> → {{ after|default:"(vazio)" }}{% endif %}
+                        {% if before is None and after is None %}<em class="text-muted">{% trans "alterado" %}</em>
+                        {% else %}<span class="text-muted">{{ before|default:_("(vazio)") }}</span> → {{ after|default:_("(vazio)") }}{% endif %}
                     </li>
                     {% endfor %}
                 </ul>
                 {% endif %}
                 {% if event.kind == 'status' and event.changes.reason %}
-                <div class="small text-muted mt-1">Motivo: {{ event.changes.reason }}</div>
+                <div class="small text-muted mt-1">{% blocktrans trimmed with reason=event.changes.reason %}Motivo: {{ reason }}{% endblocktrans %}</div>
                 {% endif %}
             </div>
         </div>
         {% empty %}
-        <div class="alert alert-info"><i class="bi bi-info-circle"></i> Nada registrado ainda. As alterações feitas daqui em diante aparecem aqui.</div>
+        <div class="alert alert-info"><i class="bi bi-info-circle"></i> {% trans "Nada registrado ainda. As alterações feitas daqui em diante aparecem aqui." %}</div>
         {% endfor %}
     </div>
 
     <div class="col-lg-5">
         <div class="card mb-4">
-            <div class="card-header"><strong><i class="bi bi-shield-check"></i> Consentimentos (LGPD)</strong></div>
+            <div class="card-header"><strong><i class="bi bi-shield-check"></i> {% trans "Consentimentos (LGPD)" %}</strong></div>
             <ul class="list-group list-group-flush">
                 {% for label, record, granted, required in consents %}
                 <li class="list-group-item d-flex justify-content-between align-items-start gap-2">
-                    <span>{{ label }}{% if required %} <small class="text-muted">(obrigatório)</small>{% endif %}
-                        {% if record %}<br><small class="text-muted">{{ record.at|date:"d/m/Y" }} · texto {{ record.version }} · {{ record.get_source_display }}</small>{% endif %}
+                    <span>{{ label }}{% if required %} <small class="text-muted">{% trans "(obrigatório)" %}</small>{% endif %}
+                        {% if record %}<br><small class="text-muted">{% blocktrans trimmed with at=record.at|date:_('d/m/Y') version=record.version get_source_display=record.get_source_display %}{{ at }} · texto {{ version }} · {{ get_source_display }}{% endblocktrans %}</small>{% endif %}
                     </span>
-                    {% if granted %}<span class="badge bg-success">ok</span>
-                    {% elif record and not record.granted %}<span class="badge bg-secondary">retirado</span>
-                    {% elif record %}<span class="badge bg-warning text-dark">texto novo</span>
-                    {% elif required %}<span class="badge bg-warning text-dark">pendente</span>
-                    {% else %}<span class="badge bg-secondary">não autorizado</span>{% endif %}
+                    {% if granted %}<span class="badge bg-success">{% trans "ok" %}</span>
+                    {% elif record and not record.granted %}<span class="badge bg-secondary">{% trans "retirado" %}</span>
+                    {% elif record %}<span class="badge bg-warning text-dark">{% trans "texto novo" %}</span>
+                    {% elif required %}<span class="badge bg-warning text-dark">{% trans "pendente" %}</span>
+                    {% else %}<span class="badge bg-secondary">{% trans "não autorizado" %}</span>{% endif %}
                 </li>
                 {% endfor %}
             </ul>
             <div class="card-body border-top">
                 <form method="post" action="{% nav_url 'core:student_consent_record' student.pk %}">
                     {% csrf_token %}
-                    <div class="small fw-bold mb-1">Registrar consentimento dado fora do app (papel, WhatsApp)</div>
+                    <div class="small fw-bold mb-1">{% trans "Registrar consentimento dado fora do app (papel, WhatsApp)" %}</div>
                     {% for kind, label, granted in consent_kinds %}
                     <div class="form-check">
                         <input type="checkbox" class="form-check-input" name="kinds" value="{{ kind }}" id="consent-{{ kind }}"{% if granted %} checked disabled{% endif %}>
-                        <label class="form-check-label small" for="consent-{{ kind }}">{{ label }}{% if granted %} <span class="text-success">· já concedido</span>{% endif %}</label>
+                        <label class="form-check-label small" for="consent-{{ kind }}">{{ label }}{% if granted %} <span class="text-success">{% trans "· já concedido" %}</span>{% endif %}</label>
                     </div>
                     {% endfor %}
-                    <div class="mt-2"><label class="form-label small mb-0" for="consent-date">Data</label>
+                    <div class="mt-2"><label class="form-label small mb-0" for="consent-date">{% trans "Data" %}</label>
                         <input type="date" class="form-control form-control-sm" name="date" id="consent-date" value="{{ today|date:'Y-m-d' }}" max="{{ today|date:'Y-m-d' }}"></div>
-                    <button type="submit" class="btn btn-sm btn-outline-primary mt-2">Registrar</button>
+                    <button type="submit" class="btn btn-sm btn-outline-primary mt-2">{% trans "Registrar" %}</button>
                 </form>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-header"><strong><i class="bi bi-download"></i> Dados do aluno</strong></div>
+            <div class="card-header"><strong><i class="bi bi-download"></i> {% trans "Dados do aluno" %}</strong></div>
             <div class="card-body">
-                <p class="small text-muted">ZIP com tudo o que está guardado sobre {{ student.person_name }} (dados, avaliações, treinos, fotos, anotações internas e histórico).</p>
+                <p class="small text-muted">{% blocktrans trimmed with person_name=student.person_name %}ZIP com tudo o que está guardado sobre {{ person_name }} (dados, avaliações, treinos, fotos, anotações internas e histórico).{% endblocktrans %}</p>
                 <form method="post" action="{% url 'core:student_export' student.pk %}">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-zip"></i> Baixar dados</button>
+                    <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-zip"></i> {% trans "Baixar dados" %}</button>
                 </form>
             </div>
         </div>

@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 
-{% block title %}Criar senha - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed %}Criar senha - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center mt-5">
@@ -11,28 +12,28 @@
                 {% if invalid %}
                 <div class="text-center">
                     <i class="bi bi-x-circle text-danger" style="font-size: 3rem;"></i>
-                    <h2 class="mt-3">Convite indisponível</h2>
+                    <h2 class="mt-3">{% trans "Convite indisponível" %}</h2>
                     {% if inactive %}
-                    <p class="text-muted">Este cadastro está desativado. Fale com a sua personal trainer.</p>
+                    <p class="text-muted">{% trans "Este cadastro está desativado. Fale com a sua personal trainer." %}</p>
                     {% else %}
-                    <p class="text-muted">Este link é inválido, expirou ou já foi usado. Peça um novo link para a sua personal trainer.</p>
+                    <p class="text-muted">{% trans "Este link é inválido, expirou ou já foi usado. Peça um novo link para a sua personal trainer." %}</p>
                     {% endif %}
-                    <a href="{% url 'account_login' %}" class="btn btn-primary">Ir para o login</a>
+                    <a href="{% url 'account_login' %}" class="btn btn-primary">{% trans "Ir para o login" %}</a>
                 </div>
                 {% else %}
                 <div class="text-center mb-4">
                     <i class="bi bi-lightning-charge-fill text-primary" style="font-size: 2.5rem;"></i>
-                    <h2 class="mt-2">Olá, {{ student.person_name }}!</h2>
-                    <p class="text-muted">Crie a sua senha para acessar os seus treinos.</p>
+                    <h2 class="mt-2">{% blocktrans trimmed with person_name=student.person_name %}Olá, {{ person_name }}!{% endblocktrans %}</h2>
+                    <p class="text-muted">{% trans "Crie a sua senha para acessar os seus treinos." %}</p>
                 </div>
                 <form method="post">
                     {% csrf_token %}
                     {{ form|crispy }}
                     <button type="submit" class="btn btn-primary w-100 mt-2">
-                        <i class="bi bi-check-circle"></i> Criar senha e entrar
+                        <i class="bi bi-check-circle"></i> {% trans "Criar senha e entrar" %}
                     </button>
                 </form>
-                <p class="text-muted small mt-3 mb-0">Seu login será o e-mail <strong>{{ student.user.email }}</strong>.</p>
+                <p class="text-muted small mt-3 mb-0">{% blocktrans trimmed with email=student.user.email %}Seu login será o e-mail <strong>{{ email }}</strong>.{% endblocktrans %}</p>
                 {% endif %}
             </div>
         </div>

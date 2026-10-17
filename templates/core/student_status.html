@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation %}
 
-{% block title %}Situação - {{ student.person_name }} - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed with person_name=student.person_name %}Situação - {{ person_name }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-arrow-repeat"></i> Situação de {{ student.person_name }}</h1>
+    <h1><i class="bi bi-arrow-repeat"></i> {% blocktrans trimmed with person_name=student.person_name %}Situação de {{ person_name }}{% endblocktrans %}</h1>
     {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default %}
 </div>
 
@@ -13,7 +14,7 @@
     <div class="col-lg-7">
         <div class="card mb-4">
             <div class="card-body">
-                <p>Situação atual: <strong>{{ student.get_status_display }}</strong>{% if student.status_changed_at %} <span class="text-muted">desde {{ student.status_changed_at|date:"d/m/Y" }}</span>{% endif %}</p>
+                <p>{% blocktrans trimmed with get_status_display=student.get_status_display %}Situação atual: <strong>{{ get_status_display }}</strong>{% endblocktrans %}{% if student.status_changed_at %} <span class="text-muted">{% blocktrans trimmed with status_changed_at=student.status_changed_at|date:_('d/m/Y') %}desde {{ status_changed_at }}{% endblocktrans %}</span>{% endif %}</p>
                 <form method="post">
                     {% csrf_token %}
                     <div class="mb-3">
@@ -25,9 +26,9 @@
                         <label for="{{ form.reason.id_for_label }}" class="form-label fw-bold">{{ form.reason.label }}</label>
                         {{ form.reason }}
                         {% if form.reason.errors %}<div class="text-danger small">{{ form.reason.errors }}</div>{% endif %}
-                        <div class="form-text">Obrigatório ao pausar ou encerrar. Fica no histórico do aluno.</div>
+                        <div class="form-text">{% trans "Obrigatório ao pausar ou encerrar. Fica no histórico do aluno." %}</div>
                     </div>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Salvar</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> {% trans "Salvar" %}</button>
                     {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='bi-x-circle' %}
                 </form>
             </div>
@@ -37,9 +38,9 @@
         <div class="card border-0 bg-body-tertiary">
             <div class="card-body small">
                 <ul class="mb-0">
-                    <li><strong>Experimental</strong> e <strong>Ativo</strong>: o aluno acessa o app.</li>
-                    <li><strong>Pausado</strong> e <strong>Ex-aluno</strong>: o acesso é bloqueado, mas o histórico e as fotos ficam guardados. Para voltar, é só reativar aqui.</li>
-                    <li>Quer apagar tudo? Use <em>Excluir</em> na ficha do aluno.</li>
+                    <li>{% blocktrans trimmed %}<strong>Experimental</strong> e <strong>Ativo</strong>: o aluno acessa o app.{% endblocktrans %}</li>
+                    <li>{% blocktrans trimmed %}<strong>Pausado</strong> e <strong>Ex-aluno</strong>: o acesso é bloqueado, mas o histórico e as fotos ficam guardados. Para voltar, é só reativar aqui.{% endblocktrans %}</li>
+                    <li>{% blocktrans trimmed %}Quer apagar tudo? Use <em>Excluir</em> na ficha do aluno.{% endblocktrans %}</li>
                 </ul>
             </div>
         </div>

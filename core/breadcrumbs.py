@@ -11,16 +11,17 @@ To give a new page a breadcrumb, add one function to ``TRAILS``.
 """
 from django.urls import reverse
 from django.utils import formats, timezone
+from django.utils.translation import gettext as _, gettext_lazy as _l
 
 from .permissions import is_trainer
 
 
 def _home():
-    return ('Início', reverse('core:home'))
+    return (_('Início'), reverse('core:home'))
 
 
 def _students():
-    return ('Alunos', reverse('core:student_list'))
+    return (_('Alunos'), reverse('core:student_list'))
 
 
 def _student(person):
@@ -32,7 +33,7 @@ def _student_tab(person, label, tab):
 
 
 def _exercises():
-    return ('Exercícios', reverse('core:exercise_list'))
+    return (_('Exercícios'), reverse('core:exercise_list'))
 
 
 def _exercise(exercise):
@@ -40,7 +41,7 @@ def _exercise(exercise):
 
 
 def _routines():
-    return ('Treinos', reverse('core:routine_list'))
+    return (_('Treinos'), reverse('core:routine_list'))
 
 
 def _routine(routine):
@@ -48,7 +49,7 @@ def _routine(routine):
 
 
 def _my_history():
-    return ('Histórico', reverse('core:my_history'))
+    return (_('Histórico'), reverse('core:my_history'))
 
 
 def _instance(ctx):
@@ -61,11 +62,11 @@ def _instance(ctx):
 # --- trails: each returns the full list; the last item is the current page ---------
 
 def _student_list(request, ctx):
-    return [_home(), ('Alunos', None)]
+    return [_home(), (_('Alunos'), None)]
 
 
 def _student_create(request, ctx):
-    return [_home(), _students(), ('Novo aluno', None)]
+    return [_home(), _students(), (_('Novo aluno'), None)]
 
 
 def _student_detail(request, ctx):
@@ -73,7 +74,7 @@ def _student_detail(request, ctx):
 
 
 def _student_edit(request, ctx):
-    return [_home(), _students(), _student(_instance(ctx)), ('Editar', None)]
+    return [_home(), _students(), _student(_instance(ctx)), (_('Editar'), None)]
 
 
 def _student_page(label):
@@ -85,37 +86,37 @@ def _student_page(label):
 def _assessment(label):
     def trail(request, ctx):
         student = ctx['student']
-        return [_home(), _students(), _student(student), _student_tab(student, 'Avaliações', 'avaliacoes'),
-                (label if label else ('Editar avaliação' if _instance(ctx) else 'Nova avaliação'), None)]
+        return [_home(), _students(), _student(student), _student_tab(student, _('Avaliações'), 'avaliacoes'),
+                (label if label else (_('Editar avaliação') if _instance(ctx) else _('Nova avaliação')), None)]
     return trail
 
 
 def _photo_upload(request, ctx):
     student = ctx['student']
-    return [_home(), _students(), _student(student), _student_tab(student, 'Avaliações', 'avaliacoes'),
-            ('Adicionar foto', None)]
+    return [_home(), _students(), _student(student), _student_tab(student, _('Avaliações'), 'avaliacoes'),
+            (_('Adicionar foto'), None)]
 
 
 def _person_routine_create(request, ctx):
     trail = [_home(), _students()]
     if ctx.get('selected_person'):
         trail.append(_student(ctx['selected_person']))
-    return trail + [('Atribuir treino', None)]
+    return trail + [(_('Atribuir treino'), None)]
 
 
 def _person_routine_edit(request, ctx):
     person = ctx.get('selected_person') or ctx['person_routine'].person
-    return [_home(), _students(), _student(person), ('Editar treino', None)]
+    return [_home(), _students(), _student(person), (_('Editar treino'), None)]
 
 
 def _person_routine_detail(request, ctx):
-    return [_home(), _students(), _student(ctx['student']), (f"Progresso: {ctx['person_routine'].routine_name}", None)]
+    return [_home(), _students(), _student(ctx['student']), (_('Progresso: %(name)s') % {'name': ctx['person_routine'].routine_name}, None)]
 
 
 def _session_detail(request, ctx):
     session = ctx['session']
     when = formats.date_format(timezone.localtime(session.start_time), 'd/m/Y H:i')
-    label = (f'Sessão de {when}', None)
+    label = (_('Sessão de %(when)s') % {'when': when}, None)
     if is_trainer(request.user):
         person_routine = ctx['person_routine']
         return [_home(), _students(), _student(ctx['student']),
@@ -125,23 +126,23 @@ def _session_detail(request, ctx):
 
 
 def _finance():
-    return ('Financeiro', reverse('core:finance'))
+    return (_('Financeiro'), reverse('core:finance'))
 
 
 def _plans():
-    return ('Pacotes', reverse('core:plan_list'))
+    return (_('Pacotes'), reverse('core:plan_list'))
 
 
 def _agenda():
-    return ('Agenda', reverse('core:agenda'))
+    return (_('Agenda'), reverse('core:agenda'))
 
 
 def _exercise_list(request, ctx):
-    return [_home(), ('Exercícios', None)]
+    return [_home(), (_('Exercícios'), None)]
 
 
 def _exercise_create(request, ctx):
-    return [_home(), _exercises(), ('Novo exercício', None)]
+    return [_home(), _exercises(), (_('Novo exercício'), None)]
 
 
 def _exercise_detail(request, ctx):
@@ -149,15 +150,15 @@ def _exercise_detail(request, ctx):
 
 
 def _exercise_edit(request, ctx):
-    return [_home(), _exercises(), _exercise(_instance(ctx)), ('Editar', None)]
+    return [_home(), _exercises(), _exercise(_instance(ctx)), (_('Editar'), None)]
 
 
 def _routine_list(request, ctx):
-    return [_home(), ('Treinos', None)]
+    return [_home(), (_('Treinos'), None)]
 
 
 def _routine_create(request, ctx):
-    return [_home(), _routines(), ('Novo treino', None)]
+    return [_home(), _routines(), (_('Novo treino'), None)]
 
 
 def _routine_detail(request, ctx):
@@ -165,23 +166,23 @@ def _routine_detail(request, ctx):
 
 
 def _routine_edit(request, ctx):
-    return [_home(), _routines(), _routine(ctx['routine']), ('Editar', None)]
+    return [_home(), _routines(), _routine(ctx['routine']), (_('Editar'), None)]
 
 
 def _routine_generate_ai(request, ctx):
-    return [_home(), _routines(), ('Gerar com IA', None)]
+    return [_home(), _routines(), (_('Gerar com IA'), None)]
 
 
 def _my_workouts(request, ctx):
-    return [_home(), ('Meus treinos', None)]
+    return [_home(), (_('Meus treinos'), None)]
 
 
 def _my_history_trail(request, ctx):
-    return [_home(), ('Histórico', None)]
+    return [_home(), (_('Histórico'), None)]
 
 
 def _my_profile(request, ctx):
-    return [_home(), ('Meu perfil', None)]
+    return [_home(), (_('Meu perfil'), None)]
 
 
 def _my_exercise_progress(request, ctx):
@@ -189,41 +190,41 @@ def _my_exercise_progress(request, ctx):
 
 
 TRAILS = {
-    'calendar_settings': lambda request, ctx: [_home(), _agenda() if request.user.is_staff else ('Meu perfil', reverse('core:my_profile')), ('Google Agenda', None)],
-    'search': lambda request, ctx: [_home(), ('Busca', None)],
-    'notification_settings': lambda request, ctx: [_home(), _agenda() if request.user.is_staff else ('Meu perfil', reverse('core:my_profile')), ('Notificações', None)],
-    'slot_edit': lambda request, ctx: [_home(), _students(), _student(ctx['student']), _student_tab(ctx['student'], 'Agenda', 'agenda'), ('Editar horário fixo', None)],
-    'my_intro': lambda request, ctx: [_home(), ('Como usar o app', None)],
-    'my_evolution': lambda request, ctx: [_home(), ('Minha evolução', None)],
-    'my_photo_upload': lambda request, ctx: [_home(), ('Minha evolução', reverse('core:my_evolution')), ('Enviar foto', None)],
-    'my_evolution_compare': lambda request, ctx: [_home(), ('Minha evolução', reverse('core:my_evolution')), ('Comparar fotos', None)],
-    'student_compare': lambda request, ctx: [_home(), _students(), _student(ctx['student']), _student_tab(ctx['student'], 'Avaliações', 'avaliacoes'), ('Comparar fotos', None)],
-    'my_package': lambda request, ctx: [_home(), ('Meu pacote', None)],
-    'my_agenda': lambda request, ctx: [_home(), ('Minha agenda', None)],
-    'my_agenda_request': lambda request, ctx: [_home(), ('Minha agenda', reverse('core:my_agenda')), ('Pedir remarcação', None)],
-    'finance': lambda request, ctx: [_home(), ('Financeiro', None)],
-    'plan_list': lambda request, ctx: [_home(), _finance(), ('Pacotes', None)],
-    'plan_create': lambda request, ctx: [_home(), _finance(), _plans(), ('Novo pacote', None)],
-    'plan_edit': lambda request, ctx: [_home(), _finance(), _plans(), ('Editar pacote', None)],
-    'payment_create': _student_page('Registrar pagamento'),
-    'student_package_edit': _student_page('Editar pacote'),
-    'student_package_cancel': _student_page('Cancelar pacote'),
-    'refund_create': _student_page('Devolver ou estornar'),
-    'refund_detail': lambda request, ctx: [_home(), _students(), _student(ctx['student']), ('Devolução', None)],
-    'finance_refunds': lambda request, ctx: [_home(), _finance(), ('Devoluções e ajustes', None)],
-    'agenda': lambda request, ctx: [_home(), ('Agenda', None)],
-    'agenda_holidays': lambda request, ctx: [_home(), _agenda(), ('Feriados', None)],
-    'appointment_create': lambda request, ctx: [_home(), _agenda(), ('Nova aula', None)],
-    'appointment_reschedule': lambda request, ctx: [_home(), _agenda(), ('Remarcar aula', None)],
+    'calendar_settings': lambda request, ctx: [_home(), _agenda() if request.user.is_staff else (_('Meu perfil'), reverse('core:my_profile')), (_('Google Agenda'), None)],
+    'search': lambda request, ctx: [_home(), (_('Busca'), None)],
+    'notification_settings': lambda request, ctx: [_home(), _agenda() if request.user.is_staff else (_('Meu perfil'), reverse('core:my_profile')), (_('Notificações'), None)],
+    'slot_edit': lambda request, ctx: [_home(), _students(), _student(ctx['student']), _student_tab(ctx['student'], _('Agenda'), 'agenda'), (_('Editar horário fixo'), None)],
+    'my_intro': lambda request, ctx: [_home(), (_('Como usar o app'), None)],
+    'my_evolution': lambda request, ctx: [_home(), (_('Minha evolução'), None)],
+    'my_photo_upload': lambda request, ctx: [_home(), (_('Minha evolução'), reverse('core:my_evolution')), (_('Enviar foto'), None)],
+    'my_evolution_compare': lambda request, ctx: [_home(), (_('Minha evolução'), reverse('core:my_evolution')), (_('Comparar fotos'), None)],
+    'student_compare': lambda request, ctx: [_home(), _students(), _student(ctx['student']), _student_tab(ctx['student'], _('Avaliações'), 'avaliacoes'), (_('Comparar fotos'), None)],
+    'my_package': lambda request, ctx: [_home(), (_('Meu pacote'), None)],
+    'my_agenda': lambda request, ctx: [_home(), (_('Minha agenda'), None)],
+    'my_agenda_request': lambda request, ctx: [_home(), (_('Minha agenda'), reverse('core:my_agenda')), (_('Pedir remarcação'), None)],
+    'finance': lambda request, ctx: [_home(), (_('Financeiro'), None)],
+    'plan_list': lambda request, ctx: [_home(), _finance(), (_('Pacotes'), None)],
+    'plan_create': lambda request, ctx: [_home(), _finance(), _plans(), (_('Novo pacote'), None)],
+    'plan_edit': lambda request, ctx: [_home(), _finance(), _plans(), (_('Editar pacote'), None)],
+    'payment_create': _student_page(_l('Registrar pagamento')),
+    'student_package_edit': _student_page(_l('Editar pacote')),
+    'student_package_cancel': _student_page(_l('Cancelar pacote')),
+    'refund_create': _student_page(_l('Devolver ou estornar')),
+    'refund_detail': lambda request, ctx: [_home(), _students(), _student(ctx['student']), (_('Devolução'), None)],
+    'finance_refunds': lambda request, ctx: [_home(), _finance(), (_('Devoluções e ajustes'), None)],
+    'agenda': lambda request, ctx: [_home(), (_('Agenda'), None)],
+    'agenda_holidays': lambda request, ctx: [_home(), _agenda(), (_('Feriados'), None)],
+    'appointment_create': lambda request, ctx: [_home(), _agenda(), (_('Nova aula'), None)],
+    'appointment_reschedule': lambda request, ctx: [_home(), _agenda(), (_('Remarcar aula'), None)],
     'student_list': _student_list,
     'student_create': _student_create,
     'student_detail': _student_detail,
     'student_edit': _student_edit,
-    'student_invite': _student_page('Convite'),
-    'student_delete': _student_page('Excluir'),
-    'student_status': _student_page('Situação'),
-    'student_package_sell': _student_page('Vender pacote'),
-    'student_history': _student_page('Histórico'),
+    'student_invite': _student_page(_l('Convite')),
+    'student_delete': _student_page(_l('Excluir')),
+    'student_status': _student_page(_l('Situação')),
+    'student_package_sell': _student_page(_l('Vender pacote')),
+    'student_history': _student_page(_l('Histórico')),
     'assessment_create': _assessment(None),
     'assessment_edit': _assessment(None),
     'photo_upload': _photo_upload,
@@ -243,7 +244,7 @@ TRAILS = {
     'my_workouts': _my_workouts,
     'my_history': _my_history_trail,
     'my_profile': _my_profile,
-    'my_privacy': lambda request, ctx: [_home(), ('Privacidade e meus dados', None)],
+    'my_privacy': lambda request, ctx: [_home(), (_('Privacidade e meus dados'), None)],
     'my_exercise_progress': _my_exercise_progress,
 }
 

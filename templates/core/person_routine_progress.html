@@ -1,15 +1,16 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load static %}
 {% load navigation %}
 
-{% block title %}Progresso - {{ person_routine.routine_name }} - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed with routine_name=person_routine.routine_name %}Progresso - {{ routine_name }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-start gap-2 mb-3 mb-md-4">
     <div class="min-w-0">
-        <h1 class="h4 page-title-lg mb-1"><i class="bi bi-bar-chart-line"></i> Progresso do Treino</h1>
+        <h1 class="h4 page-title-lg mb-1"><i class="bi bi-bar-chart-line"></i> {% trans "Progresso do Treino" %}</h1>
         <h2 class="h5 text-muted mb-0">{{ person_routine.routine_name }}</h2>
-        <small class="text-muted">Aluno: <a href="{% nav_url 'core:student_detail' student.pk %}" class="text-decoration-none">{{ student.person_name }}</a></small>
+        <small class="text-muted">{% trans "Aluno:" %} <a href="{% nav_url 'core:student_detail' student.pk %}" class="text-decoration-none">{{ student.person_name }}</a></small>
     </div>
     {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default compact=True %}
 </div>
@@ -19,8 +20,8 @@
     <div class="card-body">
         <div class="row">
             <div class="col-md-8">
-                <h5><i class="bi bi-info-circle"></i> Detalhes do Treino</h5>
-                <p class="mb-1"><strong>Dificuldade:</strong>
+                <h5><i class="bi bi-info-circle"></i> {% trans "Detalhes do Treino" %}</h5>
+                <p class="mb-1"><strong>{% trans "Dificuldade:" %}</strong>
                     {% if person_routine.difficulty_level == 'iniciante' %}
                         <span class="badge bg-success">{{ person_routine.get_difficulty_level_display }}</span>
                     {% elif person_routine.difficulty_level == 'intermediario' %}
@@ -29,20 +30,20 @@
                         <span class="badge bg-danger">{{ person_routine.get_difficulty_level_display }}</span>
                     {% endif %}
                 </p>
-                <p class="mb-1"><strong>Duração Estimada:</strong> {{ person_routine.estimated_duration }} minutos</p>
+                <p class="mb-1">{% blocktrans trimmed with estimated_duration=person_routine.estimated_duration %}<strong>Duração Estimada:</strong> {{ estimated_duration }} minutos{% endblocktrans %}</p>
                 {% if person_routine.description %}
-                <p class="mb-1"><strong>Descrição:</strong> {{ person_routine.description }}</p>
+                <p class="mb-1">{% blocktrans trimmed with description=person_routine.description %}<strong>Descrição:</strong> {{ description }}{% endblocktrans %}</p>
                 {% endif %}
                 <p class="mb-0">
-                    <strong>Data de Início:</strong>
-                    {{ person_routine.start_date|date:"d/m/Y"|default:"Não definida" }}
+                    {% blocktrans trimmed with start_date=person_routine.start_date|date:_('d/m/Y')|default:_("Não definida") %}<strong>Data de Início:</strong>
+                    {{ start_date }}{% endblocktrans %}
                     {% if person_routine.end_date %}
-                    | <strong>Data de Término:</strong> {{ person_routine.end_date|date:"d/m/Y" }}
+                    {% blocktrans trimmed with end_date=person_routine.end_date|date:_('d/m/Y') %}| <strong>Data de Término:</strong> {{ end_date }}{% endblocktrans %}
                     {% endif %}
                 </p>
             </div>
             <div class="col-md-4">
-                <h5><i class="bi bi-list-check"></i> Exercícios ({{ routine_exercises.count }})</h5>
+                <h5><i class="bi bi-list-check"></i> {% blocktrans trimmed with count=routine_exercises.count %}Exercícios ({{ count }}){% endblocktrans %}</h5>
                 <ul class="list-unstyled mb-0">
                     {% for ex in routine_exercises|slice:":5" %}
                     <li class="mb-1">
@@ -50,7 +51,7 @@
                     </li>
                     {% endfor %}
                     {% if routine_exercises.count > 5 %}
-                    <li><small class="text-muted">+ {{ routine_exercises.count|add:"-5" }} mais...</small></li>
+                    <li><small class="text-muted">{% blocktrans trimmed with count=routine_exercises.count|add:"-5" %}+ {{ count }} mais...{% endblocktrans %}</small></li>
                     {% endif %}
                 </ul>
             </div>
@@ -65,7 +66,7 @@
             <div class="card-body metric-tile text-center">
                 <i class="bi bi-check-circle-fill text-success metric-icon"></i>
                 <p class="metric-value">{{ total_sessions }}</p>
-                <p class="metric-label text-muted">Sessões Concluídas</p>
+                <p class="metric-label text-muted">{% trans "Sessões Concluídas" %}</p>
             </div>
         </div>
     </div>
@@ -74,7 +75,7 @@
             <div class="card-body metric-tile text-center">
                 <i class="bi bi-calendar-check text-primary metric-icon"></i>
                 <p class="metric-value">{{ sessions_last_month }}</p>
-                <p class="metric-label text-muted">Último Mês</p>
+                <p class="metric-label text-muted">{% trans "Último Mês" %}</p>
             </div>
         </div>
     </div>
@@ -83,7 +84,7 @@
             <div class="card-body metric-tile text-center">
                 <i class="bi bi-clock-history text-info metric-icon"></i>
                 <p class="metric-value">{{ avg_duration }}</p>
-                <p class="metric-label text-muted">Duração Média (min)</p>
+                <p class="metric-label text-muted">{% trans "Duração Média (min)" %}</p>
             </div>
         </div>
     </div>
@@ -92,7 +93,7 @@
             <div class="card-body metric-tile text-center">
                 <i class="bi bi-percent text-warning metric-icon"></i>
                 <p class="metric-value">{{ completion_rate }}%</p>
-                <p class="metric-label text-muted">Taxa de Conclusão</p>
+                <p class="metric-label text-muted">{% trans "Taxa de Conclusão" %}</p>
             </div>
         </div>
     </div>
@@ -102,7 +103,7 @@
 <!-- Gráfico de Evolução -->
 <div class="card mb-4 border-0 shadow-sm">
     <div class="card-header bg-body">
-        <h5 class="mb-0"><i class="bi bi-graph-up"></i> Evolução do Treino</h5>
+        <h5 class="mb-0"><i class="bi bi-graph-up"></i> {% trans "Evolução do Treino" %}</h5>
     </div>
     <div class="card-body">
         <canvas id="progressChart" style="max-height: 300px;"></canvas>
@@ -112,8 +113,8 @@
 <!-- Histórico de Sessões -->
 <div class="card mb-4 border-0 shadow-sm">
     <div class="card-header bg-body d-flex justify-content-between align-items-center">
-        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Histórico de Sessões</h5>
-        <span class="badge bg-primary">{{ completed_sessions.count }} sessões</span>
+        <h5 class="mb-0"><i class="bi bi-clock-history"></i> {% trans "Histórico de Sessões" %}</h5>
+        <span class="badge bg-primary">{% blocktrans trimmed with count=completed_sessions.count %}{{ count }} sessões{% endblocktrans %}</span>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -121,19 +122,19 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Data</th>
-                        <th>Início</th>
-                        <th>Término</th>
-                        <th>Duração</th>
-                        <th>Status</th>
-                        <th>Ações</th>
+                        <th>{% trans "Data" %}</th>
+                        <th>{% trans "Início" %}</th>
+                        <th>{% trans "Término" %}</th>
+                        <th>{% trans "Duração" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Ações" %}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for session in completed_sessions %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ session.start_time|date:"d/m/Y" }}</td>
+                        <td>{{ session.start_time|date:_('d/m/Y') }}</td>
                         <td>{{ session.start_time|date:"H:i" }}</td>
                         <td>
                             {% if session.end_time %}
@@ -144,22 +145,22 @@
                         </td>
                         <td>
                             {% if session.duration_minutes %}
-                                <span class="badge bg-info">{{ session.duration_minutes }} min</span>
+                                <span class="badge bg-info">{% blocktrans trimmed with duration_minutes=session.duration_minutes %}{{ duration_minutes }} min{% endblocktrans %}</span>
                             {% else %}
                                 <span class="text-muted">-</span>
                             {% endif %}
                         </td>
                         <td>
                             {% if session.is_completed %}
-                                <span class="badge bg-success">Concluído</span>
+                                <span class="badge bg-success">{% trans "Concluído" %}</span>
                             {% else %}
-                                <span class="badge bg-warning">Em andamento</span>
+                                <span class="badge bg-warning">{% trans "Em andamento" %}</span>
                             {% endif %}
                         </td>
                         <td>
                             <a href="{% nav_url 'core:session_detail' session.pk %}"
                                class="btn btn-sm btn-outline-primary"
-                               title="Ver detalhes">
+                               title="{% trans "Ver detalhes" %}">
                                 <i class="bi bi-eye"></i>
                             </a>
                         </td>
@@ -174,6 +175,11 @@
 <script src="{% static 'vendor/chartjs/4.4.0/chart.umd.js' %}"></script>
 <script src="{% static 'js/chart-theme.js' %}"></script>
 <script>
+const T_DURATION = "{% trans 'Duração (minutos)' as js_msg %}{{ js_msg|escapejs }}";
+const T_DURATION_AXIS = "{% trans 'Duração (min)' as js_msg %}{{ js_msg|escapejs }}";
+const T_AVG_LOAD = "{% trans 'Carga Média (kg)' as js_msg %}{{ js_msg|escapejs }}";
+const T_SESSION_DATE = "{% trans 'Data da Sessão' as js_msg %}{{ js_msg|escapejs }}";
+const T_MIN = "{% trans 'min' as js_msg %}{{ js_msg|escapejs }}";
 const chartData = {{ chart_data|safe }};
 
 const ctx = document.getElementById('progressChart');
@@ -183,7 +189,7 @@ new Chart(ctx, {
         labels: chartData.map(s => s.date),
         datasets: [
             {
-                label: 'Duração (minutos)',
+                label: T_DURATION,
                 data: chartData.map(s => s.duration),
                 backgroundColor: 'rgba(78, 205, 196, 0.2)',
                 borderColor: 'rgba(78, 205, 196, 1)',
@@ -195,7 +201,7 @@ new Chart(ctx, {
                 yAxisID: 'y'
             },
             {
-                label: 'Carga Média (kg)',
+                label: T_AVG_LOAD,
                 data: chartData.map(s => s.avg_weight),
                 backgroundColor: 'rgba(255, 159, 64, 0.2)',
                 borderColor: 'rgba(255, 159, 64, 1)',
@@ -223,7 +229,7 @@ new Chart(ctx, {
                 beginAtZero: true,
                 title: {
                     display: true,
-                    text: 'Duração (min)'
+                    text: T_DURATION_AXIS
                 }
             },
             y1: {
@@ -233,7 +239,7 @@ new Chart(ctx, {
                 beginAtZero: true,
                 title: {
                     display: true,
-                    text: 'Carga Média (kg)'
+                    text: T_AVG_LOAD
                 },
                 grid: {
                     drawOnChartArea: false
@@ -242,7 +248,7 @@ new Chart(ctx, {
             x: {
                 title: {
                     display: true,
-                    text: 'Data da Sessão'
+                    text: T_SESSION_DATE
                 }
             }
         },
@@ -267,10 +273,10 @@ new Chart(ctx, {
                             label += ': ';
                         }
                         label += context.parsed.y;
-                        if (context.dataset.label === 'Carga Média (kg)') {
+                        if (context.dataset.label === T_AVG_LOAD) {
                             label += ' kg';
                         } else {
-                            label += ' min';
+                            label += ' ' + T_MIN;
                         }
                         return label;
                     }
@@ -283,7 +289,7 @@ new Chart(ctx, {
 
 {% else %}
 <div class="alert alert-info">
-    <i class="bi bi-info-circle"></i> Ainda não há sessões concluídas para este treino.
+    <i class="bi bi-info-circle"></i> {% trans "Ainda não há sessões concluídas para este treino." %}
 </div>
 {% endif %}
 

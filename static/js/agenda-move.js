@@ -3,6 +3,12 @@
 (function () {
     'use strict';
 
+    // Django's JS catalog (/jsi18n/); identity fallbacks if it has not loaded
+    var gettext = window.gettext || function (s) { return s; };
+    var interpolate = window.interpolate || function (s, o) {
+        return s.replace(/%\((\w+)\)s/g, function (m, k) { return String(o[k]); });
+    };
+
     var KEY = 'agenda-move-toast';
     var modalEl = document.getElementById('moveModal');
     var toastEl = document.querySelector('[data-agenda-toast]');
@@ -15,8 +21,8 @@
         return fetch(url, {
             method: 'POST', body: body, credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch' }
         }).then(function (response) {
-            return response.json().catch(function () { return { ok: false, error: 'Não foi possível concluir. Tente de novo.' }; });
-        }, function () { return { ok: false, error: 'Sem conexão. Tente de novo.' }; });
+            return response.json().catch(function () { return { ok: false, error: gettext('Não foi possível concluir. Tente de novo.') }; });
+        }, function () { return { ok: false, error: gettext('Sem conexão. Tente de novo.') }; });
     }
 
     function remember(info) {
@@ -25,7 +31,7 @@
 
     function done(result) {
         remember({
-            text: 'Aula de ' + result.person + ' movida para ' + result.when + '.',
+            text: interpolate(gettext('Aula de %(person)s movida para %(when)s.'), { person: result.person, when: result.when }, true),
             overlap: result.overlap || [], undo: result.undo_url
         });
         window.location.reload();
@@ -37,14 +43,14 @@
         var warn = toastEl.querySelector('[data-toast-warn]');
         var undo = toastEl.querySelector('[data-toast-undo]');
         text.textContent = info.text;
-        warn.textContent = info.overlap && info.overlap.length ? 'Atenção: se sobrepõe a outra aula (' + info.overlap.join(', ') + ').' : '';
+        warn.textContent = info.overlap && info.overlap.length ? interpolate(gettext('Atenção: se sobrepõe a outra aula (%(classes)s).'), { classes: info.overlap.join(', ') }, true) : '';
         warn.hidden = !warn.textContent;
         undo.hidden = !info.undo;
         undo.onclick = function () {
             undo.disabled = true;
             post(info.undo).then(function (result) {
                 if (result.ok) {
-                    remember({ text: 'Movimento desfeito.' });
+                    remember({ text: gettext('Movimento desfeito.') });
                     window.location.reload();
                 } else {
                     undo.disabled = false;

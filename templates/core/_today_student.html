@@ -1,38 +1,40 @@
+{% load i18n %}
 {% load navigation static %}
 <div class="mx-auto" style="max-width: 560px;">
     <div class="mb-3">
-        <h1 class="h3 mb-0">Oi{% if today.first_name %}, {{ today.first_name }}{% endif %}!</h1>
-        <div class="text-muted">{{ today.today|date:"l, j \d\e F"|lower|capfirst }}</div>
+        <h1 class="h3 mb-0">{% trans "Oi" %}{% if today.first_name %}, {{ today.first_name }}{% endif %}!</h1>
+        <div class="text-muted">{{ today.today|date:_("l, j \d\e F")|lower|capfirst }}</div>
     </div>
 
     <div class="card today-hero shadow-sm mb-3 {% if today.state == 'in_progress' %}border-success{% elif today.state == 'ready' %}border-primary{% endif %}">
         <div class="card-body">
             {% if today.state == 'in_progress' %}
-                <div class="text-success fw-semibold small mb-1"><i class="bi bi-stopwatch"></i> Treino em andamento</div>
+                <div class="text-success fw-semibold small mb-1"><i class="bi bi-stopwatch"></i> {% trans "Treino em andamento" %}</div>
                 <h2 class="h4">{{ today.in_progress.routine.routine_name }}</h2>
-                <p class="text-muted mb-3">Iniciado às {{ today.in_progress.open_start|time:"H:i" }}</p>
-                <a href="{% url 'core:workout_execute' today.in_progress.routine.pk %}" class="btn btn-success btn-start w-100"><i class="bi bi-play-fill"></i> Continuar treino</a>
+                <p class="text-muted mb-3">{% blocktrans trimmed with open_start=today.in_progress.open_start|time:"H:i" %}Iniciado às {{ open_start }}{% endblocktrans %}</p>
+                <a href="{% url 'core:workout_execute' today.in_progress.routine.pk %}" class="btn btn-success btn-start w-100"><i class="bi bi-play-fill"></i> {% trans "Continuar treino" %}</a>
             {% elif today.state == 'done' %}
-                <div class="text-success fw-semibold small mb-1"><i class="bi bi-check-circle-fill"></i> Treino de hoje feito</div>
+                <div class="text-success fw-semibold small mb-1"><i class="bi bi-check-circle-fill"></i> {% trans "Treino de hoje feito" %}</div>
                 <h2 class="h4">{{ today.done_today.person_routine.routine_name }}</h2>
-                <p class="text-muted mb-3">{% if today.done_today.duration_minutes %}{{ today.done_today.duration_minutes }} min · {% endif %}parabéns pela constância!</p>
-                <a href="{% url 'core:my_workouts' %}" class="btn btn-outline-primary w-100">Fazer outro treino</a>
+                <p class="text-muted mb-3">{% if today.done_today.duration_minutes %}{% blocktrans trimmed with duration_minutes=today.done_today.duration_minutes %}{{ duration_minutes }} min ·{% endblocktrans %} {% endif %}{% trans "parabéns pela constância!" %}</p>
+                <a href="{% url 'core:my_workouts' %}" class="btn btn-outline-primary w-100">{% trans "Fazer outro treino" %}</a>
             {% elif today.state == 'ready' %}
-                <div class="text-primary fw-semibold small mb-1"><i class="bi bi-star-fill"></i> Treino de hoje</div>
+                <div class="text-primary fw-semibold small mb-1"><i class="bi bi-star-fill"></i> {% trans "Treino de hoje" %}</div>
                 <h2 class="h4">{{ today.suggested.routine.routine_name }}</h2>
                 <p class="text-muted mb-3">
-                    {{ today.suggested.exercise_count }} exercício{{ today.suggested.exercise_count|pluralize }}
-                    · cerca de {{ today.suggested.routine.estimated_duration }} min
-                    {% if today.suggested.last_done %}<br><small>Último: {{ today.suggested.last_done|date:"d/m" }}</small>{% endif %}
+                    {% blocktrans trimmed with estimated_duration=today.suggested.routine.estimated_duration count exercise_count=today.suggested.exercise_count %}{{ exercise_count }} exercício
+                    · cerca de {{ estimated_duration }} min{% plural %}{{ exercise_count }} exercícios
+                    · cerca de {{ estimated_duration }} min{% endblocktrans %}
+                    {% if today.suggested.last_done %}<br><small>{% blocktrans trimmed with last_done=today.suggested.last_done|date:_('d/m') %}Último: {{ last_done }}{% endblocktrans %}</small>{% endif %}
                 </p>
                 <form method="post" action="{% url 'core:workout_start' today.suggested.routine.pk %}">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-primary btn-start w-100"><i class="bi bi-play-fill"></i> Iniciar treino</button>
+                    <button type="submit" class="btn btn-primary btn-start w-100"><i class="bi bi-play-fill"></i> {% trans "Iniciar treino" %}</button>
                 </form>
-                <div class="text-center mt-2"><a href="{% url 'core:my_workouts' %}" class="small">Escolher outro treino</a></div>
+                <div class="text-center mt-2"><a href="{% url 'core:my_workouts' %}" class="small">{% trans "Escolher outro treino" %}</a></div>
             {% else %}
-                <h2 class="h5"><i class="bi bi-hourglass-split"></i> Seu treino ainda não está pronto</h2>
-                <p class="text-muted mb-0">Sua personal ainda não montou um treino para você. Assim que ele aparecer, é só tocar em iniciar.</p>
+                <h2 class="h5"><i class="bi bi-hourglass-split"></i> {% trans "Seu treino ainda não está pronto" %}</h2>
+                <p class="text-muted mb-0">{% trans "Sua personal ainda não montou um treino para você. Assim que ele aparecer, é só tocar em iniciar." %}</p>
             {% endif %}
         </div>
     </div>
@@ -42,11 +44,11 @@
             <i class="bi bi-calendar-week fs-4 text-primary"></i>
             <div class="flex-grow-1">
                 {% if today.next_class %}
-                <div class="small text-muted">Próxima aula</div>
-                <strong>{{ today.next_class.starts_at|date:"l, j \d\e F"|lower|capfirst }} · {{ today.next_class.starts_at|time:"H:i" }}</strong>
+                <div class="small text-muted">{% trans "Próxima aula" %}</div>
+                <strong>{{ today.next_class.starts_at|date:_("l, j \d\e F")|lower|capfirst }} · {{ today.next_class.starts_at|time:"H:i" }}</strong>
                 {% else %}
-                <strong>Minha agenda</strong>
-                <div class="small text-muted">Ver as minhas aulas</div>
+                <strong>{% trans "Minha agenda" %}</strong>
+                <div class="small text-muted">{% trans "Ver as minhas aulas" %}</div>
                 {% endif %}
             </div>
             <i class="bi bi-chevron-right text-muted"></i>
@@ -66,14 +68,14 @@
                     <div class="goal-ring-text"><span class="num">{{ ring.done }}</span><span class="of">/{{ ring.goal }}</span></div>
                 </div>
                 <div class="flex-grow-1">
-                    <strong>Sua semana</strong>
+                    <strong>{% trans "Sua semana" %}</strong>
                     <div class="small text-muted">
-                        {% if ring.complete %}Meta batida! Tudo o que vier agora é bônus.
-                        {% else %}Faltam {{ streak.missing_this_week }} treino{{ streak.missing_this_week|pluralize }} para a meta.{% endif %}
+                        {% if ring.complete %}{% trans "Meta batida! Tudo o que vier agora é bônus." %}
+                        {% else %}{% blocktrans trimmed count missing_this_week=streak.missing_this_week %}Faltam {{ missing_this_week }} treino para a meta.{% plural %}Faltam {{ missing_this_week }} treinos para a meta.{% endblocktrans %}{% endif %}
                     </div>
                     {% if streak.weeks %}
                     <div class="small mt-1" data-streak><i class="bi bi-fire text-danger"></i>
-                        <strong>{{ streak.weeks }} semana{{ streak.weeks|pluralize }} seguida{{ streak.weeks|pluralize }}</strong>{% if streak.keeping %} <span class="text-muted">· treine {{ streak.missing_this_week }} vez{{ streak.missing_this_week|pluralize:",es" }} para manter</span>{% endif %}
+                        <strong>{% blocktrans trimmed count weeks=streak.weeks %}{{ weeks }} semana seguida{% plural %}{{ weeks }} semanas seguidas{% endblocktrans %}</strong>{% if streak.keeping %} <span class="text-muted">{% blocktrans trimmed count missing_this_week=streak.missing_this_week %}· treine {{ missing_this_week }} vez para manter{% plural %}· treine {{ missing_this_week }} vezes para manter{% endblocktrans %}</span>{% endif %}
                     </div>
                     {% endif %}
                 </div>
@@ -81,10 +83,10 @@
             {% endwith %}
             {% else %}
             <div class="d-flex justify-content-between align-items-baseline mb-2">
-                <strong>Sua semana</strong>
+                <strong>{% trans "Sua semana" %}</strong>
                 <small class="text-muted">
-                    {% if today.week_goal %}{{ today.week_done }} de {{ today.week_goal }} treino{{ today.week_goal|pluralize }}
-                    {% else %}{{ today.week_done }} treino{{ today.week_done|pluralize }}{% endif %}
+                    {% if today.week_goal %}{% blocktrans trimmed with week_done=today.week_done count week_goal=today.week_goal %}{{ week_done }} de {{ week_goal }} treino{% plural %}{{ week_done }} de {{ week_goal }} treinos{% endblocktrans %}
+                    {% else %}{% blocktrans trimmed count week_done=today.week_done %}{{ week_done }} treino{% plural %}{{ week_done }} treinos{% endblocktrans %}{% endif %}
                 </small>
             </div>
             {% endif %}
@@ -99,10 +101,10 @@
             {% if today.motivation and today.motivation.next_milestone %}
             <div class="mt-3 pt-3 border-top" data-milestone>
                 <div class="d-flex justify-content-between small mb-1">
-                    <span><i class="bi bi-trophy text-warning"></i> Próximo marco: <strong>{{ today.motivation.next_milestone }} treinos</strong></span>
-                    <span class="text-muted">{{ today.motivation.total }} de {{ today.motivation.next_milestone }}</span>
+                    <span><i class="bi bi-trophy text-warning"></i> {% blocktrans trimmed with next_milestone=today.motivation.next_milestone %}Próximo marco: <strong>{{ next_milestone }} treinos</strong>{% endblocktrans %}</span>
+                    <span class="text-muted">{% blocktrans trimmed with total=today.motivation.total next_milestone=today.motivation.next_milestone %}{{ total }} de {{ next_milestone }}{% endblocktrans %}</span>
                 </div>
-                <div class="progress" style="height: 6px;" role="progressbar" aria-valuenow="{{ today.motivation.milestone_percent }}" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso até o próximo marco">
+                <div class="progress" style="height: 6px;" role="progressbar" aria-valuenow="{{ today.motivation.milestone_percent }}" aria-valuemin="0" aria-valuemax="100" aria-label="{% trans "Progresso até o próximo marco" %}">
                     <div class="progress-bar bg-warning" style="width: {{ today.motivation.milestone_percent }}%"></div>
                 </div>
             </div>
@@ -113,9 +115,9 @@
     <div class="card mb-3">
         <div class="card-body">
             <div class="row today-stats g-0">
-                <div class="col-4"><div class="num">{{ today.total_workouts }}</div><small class="text-muted">treinos</small></div>
-                <div class="col-4"><div class="num">{{ today.recent_workouts }}</div><small class="text-muted">em 30 dias</small></div>
-                <div class="col-4"><div class="num">{{ today.avg_duration }}<small class="fs-6"> min</small></div><small class="text-muted">em média</small></div>
+                <div class="col-4"><div class="num">{{ today.total_workouts }}</div><small class="text-muted">{% trans "treinos" %}</small></div>
+                <div class="col-4"><div class="num">{{ today.recent_workouts }}</div><small class="text-muted">{% trans "em 30 dias" %}</small></div>
+                <div class="col-4"><div class="num">{% blocktrans trimmed with avg_duration=today.avg_duration %}{{ avg_duration }}<small class="fs-6"> min</small>{% endblocktrans %}</div><small class="text-muted">{% trans "em média" %}</small></div>
             </div>
         </div>
     </div>
@@ -126,8 +128,8 @@
      data-intro-url="{% url 'core:my_intro' %}">
     <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
         <div class="modal-header border-0 pb-0">
-            <h2 class="modal-title h6 text-muted" id="introTourLabel">Como usar o app</h2>
-            <button type="button" class="btn btn-link btn-sm text-muted" data-intro-skip>Pular</button>
+            <h2 class="modal-title h6 text-muted" id="introTourLabel">{% trans "Como usar o app" %}</h2>
+            <button type="button" class="btn btn-link btn-sm text-muted" data-intro-skip>{% trans "Pular" %}</button>
         </div>
         <div class="modal-body text-center px-4">
             {% for step in intro_steps %}
@@ -143,8 +145,8 @@
         </div>
         <div class="modal-footer border-0 justify-content-between">
             {% csrf_token %}
-            <button type="button" class="btn btn-outline-secondary" data-intro-back>Voltar</button>
-            <button type="button" class="btn btn-primary" data-intro-next>Próximo</button>
+            <button type="button" class="btn btn-outline-secondary" data-intro-back>{% trans "Voltar" %}</button>
+            <button type="button" class="btn btn-primary" data-intro-next>{% trans "Próximo" %}</button>
         </div>
     </div></div>
 </div>

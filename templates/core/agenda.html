@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation %}
 {% load static %}
 
-{% block title %}Agenda - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed %}Agenda - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -40,31 +41,31 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-    <h1 class="mb-0"><i class="bi bi-calendar-week"></i> Agenda</h1>
+    <h1 class="mb-0"><i class="bi bi-calendar-week"></i> {% trans "Agenda" %}</h1>
     <div class="d-flex gap-2">
-        <a href="{% nav_url 'core:agenda_holidays' %}" class="btn btn-outline-secondary btn-icon" title="Feriados"><i class="bi bi-flag"></i><span class="visually-hidden">Feriados</span></a>
-        <a href="{% url 'core:calendar_settings' %}" class="btn btn-outline-secondary" title="Ver a agenda no Google Agenda"><i class="bi bi-google"></i><span class="d-none d-sm-inline"> Google Agenda</span></a>
-        <a href="{% nav_url 'core:appointment_create' %}" class="btn btn-primary d-none d-lg-inline-block"><i class="bi bi-plus-circle"></i> Nova aula</a>
+        <a href="{% nav_url 'core:agenda_holidays' %}" class="btn btn-outline-secondary btn-icon" title="{% trans "Feriados" %}"><i class="bi bi-flag"></i><span class="visually-hidden">{% trans "Feriados" %}</span></a>
+        <a href="{% url 'core:calendar_settings' %}" class="btn btn-outline-secondary" title="{% trans "Ver a agenda no Google Agenda" %}"><i class="bi bi-google"></i><span class="d-none d-sm-inline"> {% trans "Google Agenda" %}</span></a>
+        <a href="{% nav_url 'core:appointment_create' %}" class="btn btn-primary d-none d-lg-inline-block"><i class="bi bi-plus-circle"></i> {% trans "Nova aula" %}</a>
     </div>
 </div>
 
 {% if pending_requests %}
 <div class="card border-warning mb-3" data-pending-requests>
-    <div class="card-header bg-warning-subtle fw-bold"><i class="bi bi-inbox"></i> Pedidos dos alunos ({{ pending_requests|length }})</div>
+    <div class="card-header bg-warning-subtle fw-bold"><i class="bi bi-inbox"></i> {% blocktrans trimmed with pending_requests=pending_requests|length %}Pedidos dos alunos ({{ pending_requests }}){% endblocktrans %}</div>
     <ul class="list-group list-group-flush">
         {% for r in pending_requests %}
         <li class="list-group-item">
             <div><a href="{% nav_url 'core:student_detail' r.appointment.person.pk %}" class="fw-bold text-decoration-none">{{ r.appointment.person.person_name }}</a>
-                · aula de {{ r.appointment.starts_at|date:"D, d/m \à\s H:i" }}</div>
+                {% blocktrans trimmed with starts_at=r.appointment.starts_at|date:_("D, d/m \à\s H:i") %}· aula de {{ starts_at }}{% endblocktrans %}</div>
             <div class="small">
-                {% if r.kind == 'cancel' %}<span class="badge bg-secondary">Quer cancelar</span>{% else %}<span class="badge bg-primary">Quer remarcar</span> para <strong>{{ r.proposed_starts_at|date:"D, d/m \à\s H:i" }}</strong>{% endif %}
+                {% if r.kind == 'cancel' %}<span class="badge bg-secondary">{% trans "Quer cancelar" %}</span>{% else %}<span class="badge bg-primary">{% trans "Quer remarcar" %}</span> {% blocktrans trimmed with proposed_starts_at=r.proposed_starts_at|date:_("D, d/m \à\s H:i") %}para <strong>{{ proposed_starts_at }}</strong>{% endblocktrans %}{% endif %}
                 {% if r.message %}<em class="text-muted">“{{ r.message }}”</em>{% endif %}
             </div>
             <form method="post" action="{% url 'core:appointment_request_decide' r.pk %}" class="d-flex flex-wrap gap-2 mt-2">
                 {% csrf_token %}
-                <input type="text" name="note" maxlength="200" class="form-control form-control-sm" style="max-width: 16rem;" placeholder="Motivo, se recusar (opcional)" aria-label="Motivo, se recusar">
-                <button name="decision" value="approve" class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i> Aprovar</button>
-                <button name="decision" value="decline" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-lg"></i> Recusar</button>
+                <input type="text" name="note" maxlength="200" class="form-control form-control-sm" style="max-width: 16rem;" placeholder="{% trans "Motivo, se recusar (opcional)" %}" aria-label="{% trans "Motivo, se recusar" %}">
+                <button name="decision" value="approve" class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i> {% trans "Aprovar" %}</button>
+                <button name="decision" value="decline" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-lg"></i> {% trans "Recusar" %}</button>
             </form>
         </li>
         {% endfor %}
@@ -73,30 +74,30 @@
 {% endif %}
 
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3" data-agenda-toolbar>
-    <div class="btn-group" role="group" aria-label="Tipo de vista" data-agenda-views>
+    <div class="btn-group" role="group" aria-label="{% trans "Tipo de vista" %}" data-agenda-views>
         {% for key, label, url, active in view_links %}
         <a href="{{ url }}" class="btn btn-sm {% if active %}btn-primary{% else %}btn-outline-primary{% endif %}" {% if active %}aria-current="true"{% endif %} data-view="{{ key }}">{{ label }}</a>
         {% endfor %}
     </div>
     <div class="btn-group">
-        <a href="{{ prev_url }}" class="btn btn-outline-secondary" title="Anterior"><i class="bi bi-chevron-left"></i><span class="visually-hidden">Anterior</span></a>
+        <a href="{{ prev_url }}" class="btn btn-outline-secondary" title="{% trans "Anterior" %}"><i class="bi bi-chevron-left"></i><span class="visually-hidden">{% trans "Anterior" %}</span></a>
         <span class="btn disabled bg-body-tertiary text-body fw-bold" data-agenda-title>
-            {% if view == 'mes' %}{{ month|date:"F \d\e Y"|capfirst }}
-            {% elif view == 'dia' %}{{ pivot|date:"l, j \d\e F"|lower|capfirst }}
-            {% else %}{{ range_start|date:"d/m" }} a {{ range_end|date:"d/m/Y" }}{% endif %}
+            {% if view == 'mes' %}{{ month|date:_("F \d\e Y")|capfirst }}
+            {% elif view == 'dia' %}{{ pivot|date:_("l, j \d\e F")|lower|capfirst }}
+            {% else %}{{ range_start|date:_('d/m') }} a {{ range_end|date:_('d/m/Y') }}{% endif %}
         </span>
-        <a href="{{ next_url }}" class="btn btn-outline-secondary" title="Próximo"><i class="bi bi-chevron-right"></i><span class="visually-hidden">Próximo</span></a>
-        {% if not is_current %}<a href="{{ today_url }}" class="btn btn-outline-primary">Hoje</a>{% endif %}
+        <a href="{{ next_url }}" class="btn btn-outline-secondary" title="{% trans "Próximo" %}"><i class="bi bi-chevron-right"></i><span class="visually-hidden">{% trans "Próximo" %}</span></a>
+        {% if not is_current %}<a href="{{ today_url }}" class="btn btn-outline-primary">{% trans "Hoje" %}</a>{% endif %}
     </div>
 </div>
 
 {% if view == 'semana' %}
-<div class="day-strip mb-3" role="tablist" aria-label="Dias da semana" data-day-strip>
+<div class="day-strip mb-3" role="tablist" aria-label="{% trans "Dias da semana" %}" data-day-strip>
     {% for day in days %}
     <button type="button" role="tab" data-day="{{ day.date|date:'Y-m-d' }}" aria-selected="{% if day.is_selected %}true{% else %}false{% endif %}"
             class="{% if day.is_today %}today{% endif %} {% if day.is_selected %}selected{% endif %} {% if day.items %}busy{% endif %}">
         {{ day.weekday|slice:":3" }}<span class="num">{{ day.date|date:"d" }}</span><span class="has"></span>
-        {% if day.items %}<span class="visually-hidden">{{ day.items|length }} aula{{ day.items|length|pluralize }}</span>{% endif %}
+        {% if day.items %}<span class="visually-hidden">{% blocktrans trimmed count items=day.items|length %}{{ items }} aula{% plural %}{{ items }} aulas{% endblocktrans %}</span>{% endif %}
     </button>
     {% endfor %}
 </div>
@@ -106,15 +107,15 @@
     <div class="col-md-6 col-xl day-pane {% if day.is_selected %}selected{% endif %}" data-day-pane="{{ day.date|date:'Y-m-d' }}">
         <div class="card h-100 day-col {% if day.is_today %}today{% endif %}">
             <div class="card-header {% if day.is_today %}bg-primary text-white{% endif %}">
-                <strong>{{ day.weekday }}</strong> <small>{{ day.date|date:"d/m" }}</small>
+                <strong>{{ day.weekday }}</strong> <small>{{ day.date|date:_('d/m') }}</small>
             </div>
             <div class="card-body p-2">
                 {% for a in day.items %}{% include 'core/_appt_card.html' %}
                 {% empty %}
                 <div class="text-muted small text-center py-2 d-none d-lg-block">—</div>
                 <div class="day-empty text-muted">
-                    <p class="mb-2">Sem aulas em {{ day.date|date:"d/m" }}.</p>
-                    <a href="{% nav_url 'core:appointment_create' %}&date={{ day.date|date:'Y-m-d' }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus-circle"></i> Nova aula neste dia</a>
+                    <p class="mb-2">{% blocktrans trimmed with date=day.date|date:_('d/m') %}Sem aulas em {{ date }}.{% endblocktrans %}</p>
+                    <a href="{% nav_url 'core:appointment_create' %}&date={{ day.date|date:'Y-m-d' }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus-circle"></i> {% trans "Nova aula neste dia" %}</a>
                 </div>
                 {% endfor %}
             </div>
@@ -124,17 +125,17 @@
 </div>
 
 {% elif view == 'mes' %}
-<div class="month-grid" role="grid" aria-label="{{ month|date:'F \d\e Y' }}" data-agenda-view="mes">
+<div class="month-grid" role="grid" aria-label="{{ month|date:_('F \d\e Y') }}" data-agenda-view="mes">
     <div class="month-head" role="row">{% for letter in weekday_letters %}<div role="columnheader">{{ letter }}</div>{% endfor %}</div>
     {% for week in weeks %}
     <div class="month-row" role="row">
         {% for cell in week %}
         <a href="{% url 'core:agenda' %}?vista=dia&dia={{ cell.date|date:'Y-m-d' }}" role="gridcell" data-agenda-day="{{ cell.date|date:'Y-m-d' }}"
            class="month-cell {% if not cell.in_month %}out{% endif %} {% if cell.is_today %}today{% endif %}"
-           aria-label="{{ cell.date|date:'j \d\e F'|lower }}: {{ cell.live }} aula{{ cell.live|pluralize }}">
+           aria-label="{{ cell.date|date:_('j \d\e F')|lower }}: {{ cell.live }} aula{{ cell.live|pluralize }}">
             <span class="num">{{ cell.date|date:"j" }}</span>
             {% if cell.live %}<span class="badge bg-primary month-count d-md-none">{{ cell.live }}</span>{% endif %}
-            {% if cell.conflict %}<i class="bi bi-exclamation-triangle text-warning-emphasis small" title="Aulas sobrepostas"></i>{% endif %}
+            {% if cell.conflict %}<i class="bi bi-exclamation-triangle text-warning-emphasis small" title="{% trans "Aulas sobrepostas" %}"></i>{% endif %}
             <span class="d-none d-md-block">
                 {% for a in cell.items|slice:":3" %}<span class="month-chip s-{{ a.status }}"
                     {% if a.status == 'scheduled' %}draggable="true" data-appt-move="{% url 'core:appointment_move' a.pk %}" data-appt-person="{{ a.person.person_name }}"
@@ -146,14 +147,14 @@
     </div>
     {% endfor %}
 </div>
-<p class="small text-muted mt-2 mb-0">Toque em um dia para ver as aulas dele.<span class="d-none d-md-inline"> Arraste uma aula marcada para outro dia para mudá-la de lugar.</span></p>
+<p class="small text-muted mt-2 mb-0">{% trans "Toque em um dia para ver as aulas dele." %}<span class="d-none d-md-inline"> {% trans "Arraste uma aula marcada para outro dia para mudá-la de lugar." %}</span></p>
 
 <div class="mt-4" data-month-list>
-    <h2 class="h6 text-uppercase text-muted mb-2">Próximas aulas de {{ month|date:"F"|lower }}</h2>
+    <h2 class="h6 text-uppercase text-muted mb-2">{% blocktrans trimmed with month=month|date:"F"|lower %}Próximas aulas de {{ month }}{% endblocktrans %}</h2>
     {% for day in month_days %}
     <section class="mb-3" data-month-day="{{ day.date|date:'Y-m-d' }}">
         <h3 class="small fw-bold mb-1 {% if day.is_today %}text-primary{% else %}text-muted{% endif %}">
-            <a href="{% url 'core:agenda' %}?vista=dia&dia={{ day.date|date:'Y-m-d' }}" class="text-reset text-decoration-none">{{ day.weekday }}, {{ day.date|date:"j \d\e F"|lower }}{% if day.is_today %} · hoje{% endif %}</a>
+            <a href="{% url 'core:agenda' %}?vista=dia&dia={{ day.date|date:'Y-m-d' }}" class="text-reset text-decoration-none">{{ day.weekday }}, {{ day.date|date:_("j \d\e F")|lower }}{% if day.is_today %} {% trans "· hoje" %}{% endif %}</a>
         </h3>
         <div class="list-group list-group-flush rounded border">
             {% for a in day.items %}
@@ -162,13 +163,13 @@
                 <span class="status-dot rounded-circle flex-shrink-0 {% if a.status == 'attended' %}bg-success{% elif a.status == 'missed' %}bg-danger{% elif a.status == 'cancelled' or a.status == 'rescheduled' %}bg-secondary{% else %}bg-primary{% endif %}" style="width: .6rem; height: .6rem;"></span>
                 <a href="{% nav_url 'core:student_detail' a.person_id %}#tab-agenda" class="flex-grow-1 text-reset text-truncate {% if a.status == 'cancelled' or a.status == 'rescheduled' %}text-decoration-line-through{% endif %}" title="Abrir a agenda de {{ a.person.person_name }}">{{ a.person.person_name }}</a>
                 {% if a.status != 'scheduled' %}<span class="badge bg-body-secondary text-body border">{{ a.get_status_display }}</span>{% endif %}
-                <span class="small text-muted d-none d-sm-inline">{{ a.duration_minutes }} min</span>
+                <span class="small text-muted d-none d-sm-inline">{% blocktrans trimmed with duration_minutes=a.duration_minutes %}{{ duration_minutes }} min{% endblocktrans %}</span>
             </div>
             {% endfor %}
         </div>
     </section>
     {% empty %}
-    <p class="text-muted">Nenhuma aula de hoje em diante neste mês.</p>
+    <p class="text-muted">{% trans "Nenhuma aula de hoje em diante neste mês." %}</p>
     {% endfor %}
 </div>
 
@@ -177,20 +178,20 @@
     {% for day in days %}
     <section class="mb-4" data-agenda-day="{{ day.date|date:'Y-m-d' }}">
         <h2 class="h6 text-uppercase text-muted mb-2 {% if day.is_today %}text-primary{% endif %}">
-            {{ day.weekday }}, {{ day.date|date:"j \d\e F"|lower }}{% if day.is_today %} · hoje{% endif %}
+            {{ day.weekday }}, {{ day.date|date:_("j \d\e F")|lower }}{% if day.is_today %} {% trans "· hoje" %}{% endif %}
         </h2>
         <div class="row g-2">
             {% for a in day.items %}<div class="col-md-6 col-xl-4">{% include 'core/_appt_card.html' %}</div>
             {% empty %}
             <div class="col-12 text-muted">
-                <p class="mb-2">Sem aulas neste dia.</p>
-                <a href="{% nav_url 'core:appointment_create' %}&date={{ day.date|date:'Y-m-d' }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus-circle"></i> Nova aula neste dia</a>
+                <p class="mb-2">{% trans "Sem aulas neste dia." %}</p>
+                <a href="{% nav_url 'core:appointment_create' %}&date={{ day.date|date:'Y-m-d' }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus-circle"></i> {% trans "Nova aula neste dia" %}</a>
             </div>
             {% endfor %}
         </div>
     </section>
     {% empty %}
-    <div class="alert alert-info" data-agenda-empty><i class="bi bi-info-circle"></i> Nenhuma aula entre {{ range_start|date:"d/m" }} e {{ range_end|date:"d/m" }}. Use as setas para ver outros dias.</div>
+    <div class="alert alert-info" data-agenda-empty><i class="bi bi-info-circle"></i> {% blocktrans trimmed with range_start=range_start|date:_('d/m') range_end=range_end|date:_('d/m') %}Nenhuma aula entre {{ range_start }} e {{ range_end }}. Use as setas para ver outros dias.{% endblocktrans %}</div>
     {% endfor %}
 </div>
 {% endif %}
@@ -202,8 +203,8 @@
                 <div data-toast-text></div>
                 <div class="small text-warning mt-1" data-toast-warn hidden></div>
             </div>
-            <button type="button" class="btn btn-sm btn-light" data-toast-undo hidden>Desfazer</button>
-            <button type="button" class="btn-close btn-close-white" data-toast-close aria-label="Fechar"></button>
+            <button type="button" class="btn btn-sm btn-light" data-toast-undo hidden>{% trans "Desfazer" %}</button>
+            <button type="button" class="btn-close btn-close-white" data-toast-close aria-label="{% trans "Fechar" %}"></button>
         </div>
     </div>
 </div>
@@ -213,21 +214,21 @@
         <form class="modal-content" method="post" action="#">
             {% csrf_token %}
             <div class="modal-header">
-                <h2 class="modal-title h5" id="moveModalTitle">Mover aula de <span data-move-person></span></h2>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                <h2 class="modal-title h5" id="moveModalTitle">{% trans "Mover aula de" %} <span data-move-person></span></h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans "Fechar" %}"></button>
             </div>
             <div class="modal-body">
                 <div class="alert alert-danger py-2" data-move-error hidden role="alert"></div>
                 <div class="row g-2">
-                    <div class="col-12"><label class="form-label" for="move-date">Dia</label><input class="form-control" type="date" id="move-date" name="date" required></div>
-                    <div class="col-6"><label class="form-label" for="move-time">Horário</label><input class="form-control" type="time" id="move-time" name="time" required></div>
-                    <div class="col-6"><label class="form-label" for="move-duration">Duração (min)</label><input class="form-control" type="number" id="move-duration" name="duration" min="10" max="480" required></div>
+                    <div class="col-12"><label class="form-label" for="move-date">{% trans "Dia" %}</label><input class="form-control" type="date" id="move-date" name="date" required></div>
+                    <div class="col-6"><label class="form-label" for="move-time">{% trans "Horário" %}</label><input class="form-control" type="time" id="move-time" name="time" required></div>
+                    <div class="col-6"><label class="form-label" for="move-duration">{% trans "Duração (min)" %}</label><input class="form-control" type="number" id="move-duration" name="duration" min="10" max="480" required></div>
                 </div>
-                <p class="small text-muted mt-3 mb-0">A aula atual fica como “Remarcada” e uma nova é marcada. Dá para desfazer logo depois. <a href="#" data-move-more>Mais opções (tipo, observação)</a></p>
+                <p class="small text-muted mt-3 mb-0">{% trans "A aula atual fica como “Remarcada” e uma nova é marcada. Dá para desfazer logo depois." %} <a href="#" data-move-more>{% trans "Mais opções (tipo, observação)" %}</a></p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-primary"><i class="bi bi-arrows-move"></i> Mover</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancelar" %}</button>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-arrows-move"></i> {% trans "Mover" %}</button>
             </div>
         </form>
     </div>

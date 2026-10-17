@@ -73,7 +73,9 @@
             var current = menu.querySelector('[data-theme-option="' + choice + '"]');
             if (icon && current) { icon.className = 'bi ' + current.getAttribute('data-theme-icon-class'); }
             var toggle = menu.querySelector('[data-theme-toggle]');
-            if (toggle && current) { toggle.setAttribute('aria-label', 'Tema: ' + current.getAttribute('data-theme-label')); }
+            if (toggle && current) { toggle.setAttribute('aria-label', (window.interpolate && window.gettext
+                ? window.interpolate(window.gettext('Tema: %s'), [current.getAttribute('data-theme-label')])
+                : 'Tema: ' + current.getAttribute('data-theme-label'))); }
         }
         menu.addEventListener('click', function (event) {
             var item = event.target.closest('[data-theme-option]');

@@ -3,6 +3,7 @@ and the branding / single sign-on options every page shares."""
 from django.conf import settings
 from django.urls import NoReverseMatch, reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from . import packages
 from .class_requests import pending_for_trainer
@@ -56,27 +57,27 @@ def _staff_badges():
 def _staff_bar(active):
     badges = _staff_badges()
     items = [
-        {'key': 'hoje', 'label': 'Hoje', 'icon': 'bi-house-door', 'url': reverse('core:home')},
-        {'key': 'alunos', 'label': 'Alunos', 'icon': 'bi-people', 'url': reverse('core:student_list')},
-        {'key': 'agenda', 'label': 'Agenda', 'icon': 'bi-calendar-week', 'url': reverse('core:agenda')},
-        {'key': 'financeiro', 'label': 'Financeiro', 'icon': 'bi-cash-coin', 'url': reverse('core:finance')},
+        {'key': 'hoje', 'label': _('Hoje'), 'icon': 'bi-house-door', 'url': reverse('core:home')},
+        {'key': 'alunos', 'label': _('Alunos'), 'icon': 'bi-people', 'url': reverse('core:student_list')},
+        {'key': 'agenda', 'label': _('Agenda'), 'icon': 'bi-calendar-week', 'url': reverse('core:agenda')},
+        {'key': 'financeiro', 'label': _('Financeiro'), 'icon': 'bi-cash-coin', 'url': reverse('core:finance')},
     ]
     for item in items:
         item['active'] = item['key'] == active
         item['badge'] = badges.get(item['key'], 0)
     more = [
-        {'label': 'Exercícios', 'icon': 'bi-activity', 'url': reverse('core:exercise_list')},
-        {'label': 'Treinos', 'icon': 'bi-calendar-check', 'url': reverse('core:routine_list')},
-        {'label': 'Pacotes', 'icon': 'bi-box-seam', 'url': reverse('core:plan_list')},
-        {'label': 'Feriados', 'icon': 'bi-flag', 'url': reverse('core:agenda_holidays')},
-        {'label': 'Admin', 'icon': 'bi-gear', 'url': '/admin/'},
-        {'label': 'Notificações', 'icon': 'bi-bell', 'url': reverse('core:notification_settings')},
-        {'label': 'Alterar senha', 'icon': 'bi-key', 'url': reverse('account_change_password')},
+        {'label': _('Exercícios'), 'icon': 'bi-activity', 'url': reverse('core:exercise_list')},
+        {'label': _('Treinos'), 'icon': 'bi-calendar-check', 'url': reverse('core:routine_list')},
+        {'label': _('Pacotes'), 'icon': 'bi-box-seam', 'url': reverse('core:plan_list')},
+        {'label': _('Feriados'), 'icon': 'bi-flag', 'url': reverse('core:agenda_holidays')},
+        {'label': _('Admin'), 'icon': 'bi-gear', 'url': '/admin/'},
+        {'label': _('Notificações'), 'icon': 'bi-bell', 'url': reverse('core:notification_settings')},
+        {'label': _('Alterar senha'), 'icon': 'bi-key', 'url': reverse('account_change_password')},
     ]
     if settings.SSO_PROVIDERS:
-        more.append({'label': 'Contas conectadas', 'icon': 'bi-link-45deg', 'url': reverse('socialaccount_connections')})
+        more.append({'label': _('Contas conectadas'), 'icon': 'bi-link-45deg', 'url': reverse('socialaccount_connections')})
     more += [
-        {'label': 'Sair', 'icon': 'bi-box-arrow-right', 'url': reverse('account_logout')},
+        {'label': _('Sair'), 'icon': 'bi-box-arrow-right', 'url': reverse('account_logout')},
     ]
     return {'role': 'staff', 'items': items, 'more': more, 'more_active': active == 'mais'}
 
@@ -86,20 +87,20 @@ def _student_bar(request, person, active):
     running = open_row(rows)
     suggested = suggested_row(rows)
     if running:
-        center = {'state': 'continue', 'label': 'Continuar',
+        center = {'state': 'continue', 'label': _('Continuar'),
                   'url': reverse('core:workout_execute', kwargs={'pk': running['routine'].pk}),
                   'started_ms': int(running['open_start'].timestamp() * 1000)}
     elif suggested:
-        center = {'state': 'start', 'label': 'Treinar',
+        center = {'state': 'start', 'label': _('Treinar'),
                   'url': reverse('core:workout_start', kwargs={'pk': suggested['routine'].pk})}
     else:
-        center = {'state': 'idle', 'label': 'Treinar', 'url': reverse('core:home')}
+        center = {'state': 'idle', 'label': _('Treinar'), 'url': reverse('core:home')}
     items = [
-        {'key': 'hoje', 'label': 'Hoje', 'icon': 'bi-house-door', 'url': reverse('core:home')},
-        {'key': 'treinos', 'label': 'Treinos', 'icon': 'bi-fire', 'url': reverse('core:my_workouts')},
+        {'key': 'hoje', 'label': _('Hoje'), 'icon': 'bi-house-door', 'url': reverse('core:home')},
+        {'key': 'treinos', 'label': _('Treinos'), 'icon': 'bi-fire', 'url': reverse('core:my_workouts')},
         {'key': 'center'},
-        {'key': 'historico', 'label': 'Histórico', 'icon': 'bi-graph-up', 'url': reverse('core:my_history')},
-        {'key': 'perfil', 'label': 'Perfil', 'icon': 'bi-person-circle', 'url': reverse('core:my_profile')},
+        {'key': 'historico', 'label': _('Histórico'), 'icon': 'bi-graph-up', 'url': reverse('core:my_history')},
+        {'key': 'perfil', 'label': _('Perfil'), 'icon': 'bi-person-circle', 'url': reverse('core:my_profile')},
     ]
     for item in items:
         item['active'] = item['key'] == active
@@ -123,15 +124,15 @@ def _staff_fab(request, name):
         student = Person.objects.filter(pk=pk).values_list('person_name', flat=True).first()
         if student is not None:
             items += [
-                item('Registrar pagamento', 'bi-cash-coin', 'core:payment_create', pk),
-                item('Atribuir treino', 'bi-lightning-charge', 'core:person_routine_create', extra=f'&person={pk}'),
-                item(f'Nova aula para {student.split()[0]}', 'bi-calendar-plus', 'core:appointment_create', extra=f'&person={pk}'),
-                item('Nova avaliação', 'bi-rulers', 'core:assessment_create', pk),
-                item('Adicionar foto', 'bi-camera', 'core:photo_upload', pk),
+                item(_('Registrar pagamento'), 'bi-cash-coin', 'core:payment_create', pk),
+                item(_('Atribuir treino'), 'bi-lightning-charge', 'core:person_routine_create', extra=f'&person={pk}'),
+                item(_('Nova aula para %(name)s') % {'name': student.split()[0]}, 'bi-calendar-plus', 'core:appointment_create', extra=f'&person={pk}'),
+                item(_('Nova avaliação'), 'bi-rulers', 'core:assessment_create', pk),
+                item(_('Adicionar foto'), 'bi-camera', 'core:photo_upload', pk),
             ]
     items += [
-        item('Novo aluno', 'bi-person-plus', 'core:student_create'),
-        item('Nova aula', 'bi-calendar-plus', 'core:appointment_create'),
+        item(_('Novo aluno'), 'bi-person-plus', 'core:student_create'),
+        item(_('Nova aula'), 'bi-calendar-plus', 'core:appointment_create'),
     ]
     return items
 

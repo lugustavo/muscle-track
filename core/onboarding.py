@@ -1,6 +1,7 @@
 """First steps for a new trainer: what to set up, in order, and how far along it is."""
 from django.contrib.auth.hashers import UNUSABLE_PASSWORD_PREFIX
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from .models import Exercise, Person, PersonRoutine, Package, Routine
 from .navigation import with_next
@@ -21,21 +22,21 @@ def trainer_steps(here=None):
     has_access = students.exclude(user__password__startswith=UNUSABLE_PASSWORD_PREFIX).exists()
 
     steps = [
-        {'key': 'exercises', 'title': 'Cadastre seus exercícios', 'hint': 'A biblioteca que você usa para montar os treinos.',
-         'done': Exercise.objects.filter(is_active=True).exists(), 'url': link('core:exercise_create'), 'action': 'Novo exercício'},
-        {'key': 'plan', 'title': 'Crie um pacote', 'hint': 'Modelo com quantidade de aulas, prazo e valor, para vender a vários alunos.',
-         'done': Package.objects.exists(), 'url': link('core:plan_create'), 'action': 'Novo pacote'},
-        {'key': 'routine', 'title': 'Monte um treino', 'hint': 'Um treino modelo com os exercícios, séries e repetições.',
-         'done': Routine.objects.exists(), 'url': link('core:routine_create'), 'action': 'Novo treino'},
-        {'key': 'student', 'title': 'Cadastre o primeiro aluno', 'hint': 'Nome e e-mail bastam; o resto pode vir depois.',
-         'done': has_students, 'url': link('core:student_create'), 'action': 'Novo aluno'},
-        {'key': 'assign', 'title': 'Atribua um treino a um aluno', 'hint': 'Sem treino atribuído, o aluno não tem o que fazer no app.',
+        {'key': 'exercises', 'title': _('Cadastre seus exercícios'), 'hint': _('A biblioteca que você usa para montar os treinos.'),
+         'done': Exercise.objects.filter(is_active=True).exists(), 'url': link('core:exercise_create'), 'action': _('Novo exercício')},
+        {'key': 'plan', 'title': _('Crie um pacote'), 'hint': _('Modelo com quantidade de aulas, prazo e valor, para vender a vários alunos.'),
+         'done': Package.objects.exists(), 'url': link('core:plan_create'), 'action': _('Novo pacote')},
+        {'key': 'routine', 'title': _('Monte um treino'), 'hint': _('Um treino modelo com os exercícios, séries e repetições.'),
+         'done': Routine.objects.exists(), 'url': link('core:routine_create'), 'action': _('Novo treino')},
+        {'key': 'student', 'title': _('Cadastre o primeiro aluno'), 'hint': _('Nome e e-mail bastam; o resto pode vir depois.'),
+         'done': has_students, 'url': link('core:student_create'), 'action': _('Novo aluno')},
+        {'key': 'assign', 'title': _('Atribua um treino a um aluno'), 'hint': _('Sem treino atribuído, o aluno não tem o que fazer no app.'),
          'done': PersonRoutine.objects.filter(person__in=students).exists(), 'url': link('core:person_routine_create'),
-         'action': 'Atribuir treino'},
-        {'key': 'access', 'title': 'Envie o convite de acesso', 'hint': 'O aluno cria a própria senha pelo link e já pode treinar.',
+         'action': _('Atribuir treino')},
+        {'key': 'access', 'title': _('Envie o convite de acesso'), 'hint': _('O aluno cria a própria senha pelo link e já pode treinar.'),
          'done': has_access,
          'url': link('core:student_invite', pending.pk) if pending else (link('core:student_list')),
-         'action': 'Enviar convite' if pending else 'Ver alunos'},
+         'action': _('Enviar convite') if pending else _('Ver alunos')},
     ]
     done = sum(1 for s in steps if s['done'])
     next_step = next((s for s in steps if not s['done']), None)
