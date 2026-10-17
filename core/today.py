@@ -1,4 +1,6 @@
 """Data for the student's "Hoje" screen and the bottom bar: which workout is next, what is open."""
+import calendar
+from collections import Counter
 from datetime import datetime, time, timedelta
 
 from django.db.models import Avg, Count, Max, OuterRef, Q, Subquery
@@ -86,6 +88,42 @@ def week_strip(person, today):
     return days
 
 
+def month_summary(person, today, now=None):
+    """The student's month so far: workouts, days trained, classes, the same stretch of last month and a day grid.
+
+    Only about her own history (last month is shown as a plain number, never as a score)."""
+    now = now or timezone.now()
+    first = today.replace(day=1)
+    prev_first = (first - timedelta(days=1)).replace(day=1)
+    next_first = (first + timedelta(days=32)).replace(day=1)
+    # the same stretch of last month: up to the same day number (or its last day, when it is shorter)
+    until = min(today.day, calendar.monthrange(prev_first.year, prev_first.month)[1])
+    starts = WorkoutSession.objects.filter(
+        person_routine__person=person, is_completed=True,
+        start_time__gte=start_of_day(prev_first), start_time__lt=start_of_day(next_first),
+    ).values_list('start_time', flat=True)
+    this_days, previous = Counter(), 0
+    for start in starts:
+        day = timezone.localtime(start).date()
+        if day >= first:
+            this_days[day.day] += 1
+        elif day.day <= until:
+            previous += 1
+    classes = person.appointments.filter(starts_at__gte=start_of_day(first), starts_at__lt=start_of_day(next_first)).aggregate(
+        done=Count('pk', filter=Q(status=Appointment.Status.ATTENDED)),
+        upcoming=Count('pk', filter=Q(status=Appointment.Status.SCHEDULED, starts_at__gte=now)))
+    cells = [None] * first.weekday()   # blank cells before the 1st (the week starts on Monday)
+    for number in range(1, calendar.monthrange(first.year, first.month)[1] + 1):
+        cells.append({'day': number, 'trained': number in this_days, 'is_today': number == today.day,
+                      'future': number > today.day})
+    return {
+        'month': first, 'workouts': sum(this_days.values()), 'days_trained': len(this_days),
+        'classes_done': classes['done'], 'classes_upcoming': classes['upcoming'],
+        'previous': {'month': prev_first, 'workouts': previous, 'until': until},
+        'cells': cells, 'letters': WEEKDAY_LETTERS,
+    }
+
+
 def student_today(request, person):
     """Everything the "Hoje" screen shows."""
     now = timezone.now()
@@ -124,7 +162,7 @@ def student_today(request, person):
         'next_class': next_class,
         'state': state, 'first_name': person.person_name.split()[0] if person.person_name.strip() else '',
         'today': today, 'in_progress': in_progress, 'suggested': suggested, 'done_today': done_today,
-        'week': strip, 'week_done': week_done, 'week_goal': goal,
+        'week': strip, 'week_done': week_done, 'week_goal': goal, 'month': month_summary(person, today, now),
         'motivation': motivation(person, week_done, today),
         'total_workouts': stats['total'], 'recent_workouts': stats['recent'],
         'avg_duration': round(stats['avg'] or 0),
