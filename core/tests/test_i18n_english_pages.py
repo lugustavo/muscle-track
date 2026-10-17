@@ -4,11 +4,13 @@ Seed data is plain ASCII (no accents), so any accented Portuguese letter in the 
 import html
 import re
 
+from django.test import override_settings
 from django.urls import reverse
 
-from core.models import StudentEvent
+from core.models import ProgressPhoto, StudentEvent
 
 from .base import BaseTestCase
+from .test_evolution import MEDIA, picture
 from .test_navigation_global import RichDataMixin
 
 ACCENTED = re.compile(r'[áàâãéêíóôõúç]', re.I)
@@ -19,7 +21,7 @@ ATTRS = re.compile(r'\b(?:title|placeholder|aria-label|alt)="([^"]*)"')
 WORDS = re.compile(r'\b(?:voltar|cancelar|salvar|excluir|editar|adicionar|remover|enviar|buscar|confirmar|aluno|alunos|aluna|'
                    r'nome|nenhum|nenhuma|todos|todas|ativo|ativa|inativo|pagamento|pagamentos|pacote|pacotes|financeiro|'
                    r'treinos|exercicio|exercicios|obrigatorio|opcional|criar|novo|nova|proximo|proxima|anterior|'
-                   r'concluido|pendente|semana|hoje|amanha|ontem|notas|observacoes|ver mais|ver todos)\b', re.I)
+                   r'concluido|pendente|semana|hoje|amanha|ontem|notas|observacoes|ver mais|ver todos|fotos?|aulas?|vencido|vence)\b', re.I)
 NATIVE_NAMES = re.compile(r'Português( \(Brasil\))?|São João|\{\w+\}')   # each language named in itself; a local festival; the {variables} of the WhatsApp texts
 
 
@@ -37,12 +39,14 @@ def leaks(text):
     return sorted(found)
 
 
+@override_settings(MEDIA_ROOT=MEDIA)
 class EnglishPagesTests(RichDataMixin, BaseTestCase):
     maxDiff = None
 
     def setUp(self):
         super().setUp()
         self.build_world()
+        self.link_photo = ProgressPhoto.objects.create(person=self.person, angle='front', image=picture(), uploaded_by_student=True)
         StudentEvent.objects.all().delete()   # history lines are stored in the language of whoever made them
         self.client.cookies[self._cookie()] = 'en'
 
@@ -85,6 +89,7 @@ class EnglishPagesTests(RichDataMixin, BaseTestCase):
             reverse('core:person_routine_detail', kwargs={'pk': self.alice_routine.pk}),
             reverse('core:person_routine_edit', kwargs={'pk': self.alice_routine.pk}),
             reverse('core:session_detail', kwargs={'pk': self.session.pk}),
+            reverse('core:photo_link', kwargs={'pk': self.link_photo.pk}),
             reverse('core:notification_settings'), reverse('core:notification_settings') + '?tab=whatsapp',
         ])
 

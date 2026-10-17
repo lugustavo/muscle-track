@@ -13,9 +13,9 @@
         <li class="list-group-item py-1 d-flex justify-content-between align-items-center gap-2" data-preview-row="{{ row.date|date:'Y-m-d' }}" data-state="{{ row.state }}">
             <label class="d-flex gap-2 align-items-center mb-0 {% if row.state != 'new' %}text-muted{% endif %}">
                 {% if row.state == 'holiday' or row.kept %}
-                <input type="checkbox" class="form-check-input mt-0" data-keep-date="{{ row.date|date:'Y-m-d' }}"{% if row.kept %} checked{% endif %} aria-label="Dar aula mesmo assim em {{ row.date|date:_('d/m') }} ({{ row.holiday }})">
+                <input type="checkbox" class="form-check-input mt-0" data-keep-date="{{ row.date|date:'Y-m-d' }}"{% if row.kept %} checked{% endif %} aria-label="{% blocktrans trimmed with date=row.date|date:_('d/m') holiday=row.holiday %}Dar aula mesmo assim em {{ date }} ({{ holiday }}){% endblocktrans %}">
                 {% else %}
-                <input type="checkbox" class="form-check-input mt-0" data-skip-date="{{ row.date|date:'Y-m-d' }}" {% if row.state == 'new' %}checked{% endif %}{% if row.state == 'exists' %} disabled{% endif %} aria-label="Marcar aula de {{ row.date|date:_('d/m') }}">
+                <input type="checkbox" class="form-check-input mt-0" data-skip-date="{{ row.date|date:'Y-m-d' }}" {% if row.state == 'new' %}checked{% endif %}{% if row.state == 'exists' %} disabled{% endif %} aria-label="{% blocktrans trimmed with date=row.date|date:_('d/m') %}Marcar aula de {{ date }}{% endblocktrans %}">
                 {% endif %}
                 <span {% if row.state != 'new' %}class="text-decoration-line-through"{% endif %}>{{ row.date|date:_('D d/m') }}{% if start_time %} · {{ start_time|time:"H:i" }}{% endif %}</span>
             </label>

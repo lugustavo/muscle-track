@@ -97,6 +97,12 @@ def _photo_upload(request, ctx):
             (_('Adicionar foto'), None)]
 
 
+def _photo_link(request, ctx):
+    student = ctx['student']
+    return [_home(), _students(), _student(student), _student_tab(student, _('Avaliações'), 'avaliacoes'),
+            (_('Ligar foto a uma avaliação'), None)]
+
+
 def _person_routine_create(request, ctx):
     trail = [_home(), _students()]
     if ctx.get('selected_person'):
@@ -228,6 +234,7 @@ TRAILS = {
     'assessment_create': _assessment(None),
     'assessment_edit': _assessment(None),
     'photo_upload': _photo_upload,
+    'photo_link': _photo_link,
     'person_routine_create': _person_routine_create,
     'person_routine_edit': _person_routine_edit,
     'person_routine_detail': _person_routine_detail,

@@ -12,6 +12,7 @@ from django.utils.translation import gettext as _, gettext_lazy as _l, ngettext
 from . import packages
 from .billing import money
 from .history import log_event
+from .i18n import short_date
 from .models import Appointment, Payment, Refund, ScheduleSlot, StudentEvent, compute_prices
 
 CENTS = Decimal('0.01')
@@ -124,7 +125,7 @@ def void_refund(refund, reason, actor=None):
     refund.voided_reason = reason.strip()[:200]
     refund.save(update_fields=['voided_at', 'voided_reason'])
     log_event(refund.person, StudentEvent.Kind.PAYMENT, actor,
-              _('%(kind)s de %(date)s anulada') % {'kind': refund.get_kind_display(), 'date': f'{refund.refunded_on:%d/%m/%Y}'},
+              _('%(kind)s de %(date)s anulada') % {'kind': refund.get_kind_display(), 'date': short_date(refund.refunded_on)},
               {'refund': refund.pk})
     return refund
 
