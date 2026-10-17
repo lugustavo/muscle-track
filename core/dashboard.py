@@ -4,7 +4,7 @@ from datetime import datetime, time, timedelta
 from django.contrib.auth.hashers import UNUSABLE_PASSWORD_PREFIX
 from django.db.models import Exists, OuterRef, Q, Subquery
 from django.utils import dateformat, timezone, translation
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _, gettext_lazy as _l
 
 from . import packages, refunds
 from .agenda import ensure_appointments
@@ -18,6 +18,21 @@ EXPIRING_DAYS = 14
 COMMENT_DAYS = 7
 TRIAL_DAYS = 14
 LIST_LIMIT = 8
+
+# What asks for the trainer's attention, most pressing first: (card, short label, colour of its chip). A card that has
+# something to do goes up in this order; the ones with nothing to do sink to the bottom, in the same order.
+PRIORITY = (
+    ('erasures', _l('Exclusão de dados'), 'danger'),     # a legal deadline
+    ('payments', _l('Pagamentos e devoluções'), 'warning'),
+    ('plans', _l('Pacotes para renovar'), 'warning'),
+    ('classes', _l('Aulas de hoje'), 'primary'),
+    ('misses', _l('Faltas'), 'danger'),
+    ('inactive', _l('Sem treinar'), 'secondary'),
+    ('trials', _l('Experimentais'), 'secondary'),
+    ('invites', _l('Convites'), 'secondary'),
+    ('routines', _l('Fichas terminando'), 'secondary'),
+)
+INFO_CARDS = ('sessions', 'comments')   # worth reading, never "to do": ordered after the ones above, outside the strip
 
 # Student account that never set a password, i.e. never accepted the invite
 INVITE_PENDING = Q(user__password__startswith=UNUSABLE_PASSWORD_PREFIX)
@@ -163,6 +178,20 @@ def recent_comments(now=None):
     return items[:LIST_LIMIT]
 
 
+def priorities(counts):
+    """`counts` is {card: how many things it lists}. Returns the chips for the "Atenção agora" strip (only the cards with
+    something to do, most pressing first) and the CSS `order` of every card (the ones with nothing to do sink)."""
+    chips, order = [], {}
+    for rank, (key, label, level) in enumerate(PRIORITY):
+        n = counts.get(key, 0)
+        order[key] = rank if n else 50 + rank
+        if n:
+            chips.append({'key': key, 'label': label, 'count': n, 'level': level})
+    for offset, key in enumerate(INFO_CARDS):
+        order[key] = 40 + offset if counts.get(key) else 90 + offset
+    return chips, order
+
+
 def trainer_dashboard():
     now = timezone.now()
     week_ago = now - timedelta(days=7)
@@ -182,7 +211,13 @@ def trainer_dashboard():
     plans = expiring_plans()
     routines = ending_routines()
     sessions = todays_sessions()
+    comments = recent_comments(now)
+    chips, order = priorities({
+        'erasures': len(erasures), 'payments': len(overdue) + len(refunds_due), 'plans': len(plans),
+        'classes': len(today_classes), 'misses': len(misses), 'inactive': len(inactive), 'trials': len(trials),
+        'invites': len(invites), 'routines': len(routines), 'sessions': len(sessions), 'comments': len(comments)})
     return {
+        'attention': chips, 'order': order,
         'counts': counts,
         'inactive': inactive[:LIST_LIMIT], 'inactive_total': len(inactive),
         'inactive_more': max(0, len(inactive) - LIST_LIMIT),
@@ -200,5 +235,5 @@ def trainer_dashboard():
         'plans': plans[:LIST_LIMIT], 'plans_total': len(plans),
         'routines': routines[:LIST_LIMIT], 'routines_total': len(routines),
         'sessions': sessions[:LIST_LIMIT], 'sessions_total': len(sessions),
-        'comments': recent_comments(now),
+        'comments': comments,
     }

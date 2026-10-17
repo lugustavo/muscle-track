@@ -5,7 +5,7 @@ App web **self-hosted** para personal trainers: cadastro de alunos, fichas de tr
 ## Funcionalidades
 
 ### 👩‍🏫 Personal (admin)
-- **Painel de hoje** — quem está há mais de 7 dias sem treinar, quem ainda não aceitou o convite, pacotes para renovar e fichas que vencem em 14 dias, treinos do dia e comentários recentes dos alunos
+- **Painel de hoje** — quem está há mais de 7 dias sem treinar, quem ainda não aceitou o convite, pacotes para renovar e fichas que vencem em 14 dias, treinos do dia e comentários recentes dos alunos **Por prioridade:** o topo tem a faixa **Atenção agora** com um botão (e a quantidade) para cada coisa que pede ação, na ordem de urgência (exclusão de dados, pagamentos e devoluções, pacotes para renovar, aulas de hoje, faltas, sem treinar, experimentais, convites, fichas terminando); cada botão leva ao cartão. Os cartões seguem a mesma ordem: os que têm o que fazer sobem, os vazios descem (e sem nada pendente a faixa diz "Tudo em dia").
 - **Ficha do aluno** (em abas) — dados, objetivo, saúde/lesões/restrições (em destaque), contato de emergência, plano e vencimento
 - **Avaliações físicas** — peso, altura, % de gordura e medidas, com IMC e gráfico de evolução
 - **Fotos de progresso** — ficam **dentro de cada avaliação** (frente, lado esquerdo, lado direito e costas, mais fotos extras); privadas (só a personal e o próprio aluno abrem), com miniaturas, guardadas sem localização/EXIF; o botão de foto usa a **câmera** do aparelho e, sem câmera, a galeria

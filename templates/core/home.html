@@ -63,6 +63,21 @@
 </script>
 {% endif %}
 
+<div class="card mb-4 {% if dashboard.attention %}border-primary-subtle{% endif %}" data-attention>
+    <div class="card-body py-3">
+        <div class="fw-bold mb-2"><i class="bi bi-lightning-charge text-warning"></i> {% trans "Atenção agora" %}</div>
+        {% if dashboard.attention %}
+        <div class="d-flex flex-wrap gap-2">
+            {% for chip in dashboard.attention %}
+            <a href="#card-{{ chip.key }}" class="btn btn-sm btn-outline-{{ chip.level }}" data-attention-chip="{{ chip.key }}">{{ chip.label }} <span class="badge text-bg-{{ chip.level }}">{{ chip.count }}</span></a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-success" data-all-clear><i class="bi bi-check-circle"></i> {% trans "Tudo em dia: nada pede a sua atenção agora." %}</div>
+        {% endif %}
+    </div>
+</div>
+
 <div class="row g-3 mb-4">
     <div class="col-4">
         <div class="card text-center h-100"><div class="card-body py-3">
@@ -85,7 +100,7 @@
 </div>
 
 <div class="row g-4">
-    <div class="col-lg-6">
+    <div class="col-lg-6" id="card-inactive" style="order: {{ dashboard.order.inactive }};">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between">
                 <strong><i class="bi bi-person-exclamation text-danger"></i> {% trans "Sem treinar há mais de 7 dias" %}</strong>
@@ -109,7 +124,7 @@
         </div>
     </div>
 
-    <div class="col-lg-6">
+    <div class="col-lg-6" id="card-classes" style="order: {{ dashboard.order.classes }};">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between">
                 <strong><i class="bi bi-calendar-week text-primary"></i> {% trans "Aulas de hoje" %}</strong>
@@ -129,7 +144,7 @@
     </div>
 
     {% if dashboard.overdue_total or dashboard.refunds_due_total %}
-    <div class="col-lg-6">
+    <div class="col-lg-6" id="card-payments" style="order: {{ dashboard.order.payments }};">
         <div class="card h-100 border-warning">
             <div class="card-header d-flex justify-content-between">
                 <strong><i class="bi bi-cash-coin text-warning"></i> {% trans "Pagamentos pendentes" %}</strong>
@@ -169,7 +184,7 @@
     {% endif %}
 
     {% if dashboard.misses_total %}
-    <div class="col-lg-6">
+    <div class="col-lg-6" id="card-misses" style="order: {{ dashboard.order.misses }};">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between">
                 <strong><i class="bi bi-person-x text-danger"></i> {% trans "Faltas dos últimos 7 dias" %}</strong>
@@ -192,7 +207,7 @@
     {% endif %}
 
     {% if dashboard.erasures_total %}
-    <div class="col-lg-6">
+    <div class="col-lg-6" id="card-erasures" style="order: {{ dashboard.order.erasures }};">
         <div class="card h-100 border-danger">
             <div class="card-header d-flex justify-content-between">
                 <strong><i class="bi bi-trash text-danger"></i> {% trans "Pedidos de exclusão de dados" %}</strong>
@@ -211,7 +226,7 @@
     {% endif %}
 
     {% if dashboard.trials_total %}
-    <div class="col-lg-6">
+    <div class="col-lg-6" id="card-trials" style="order: {{ dashboard.order.trials }};">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between">
                 <strong><i class="bi bi-person-badge text-info"></i> {% trans "Experimental há mais de 14 dias" %}</strong>
@@ -230,7 +245,7 @@
     {% endif %}
 
     {% if dashboard.invites_total %}
-    <div class="col-lg-6">
+    <div class="col-lg-6" id="card-invites" style="order: {{ dashboard.order.invites }};">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between">
                 <strong><i class="bi bi-hourglass-split text-primary"></i> {% trans "Aguardando convite" %}</strong>
@@ -251,7 +266,7 @@
     </div>
     {% endif %}
 
-    <div class="col-lg-6">
+    <div class="col-lg-6" id="card-plans" style="order: {{ dashboard.order.plans }};">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between">
                 <strong><i class="bi bi-calendar-x text-warning"></i> {% trans "Pacotes para renovar" %}</strong>
@@ -276,7 +291,7 @@
         </div>
     </div>
 
-    <div class="col-lg-6">
+    <div class="col-lg-6" id="card-routines" style="order: {{ dashboard.order.routines }};">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between">
                 <strong><i class="bi bi-clipboard-check text-primary"></i> {% trans "Fichas terminando (14 dias)" %}</strong>
@@ -295,7 +310,7 @@
         </div>
     </div>
 
-    <div class="col-lg-6">
+    <div class="col-lg-6" id="card-sessions" style="order: {{ dashboard.order.sessions }};">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between">
                 <strong><i class="bi bi-fire text-danger"></i> {% trans "Treinos de hoje" %}</strong>
@@ -318,7 +333,7 @@
         </div>
     </div>
 
-    <div class="col-12">
+    <div class="col-12" id="card-comments" style="order: {{ dashboard.order.comments }};">
         <div class="card">
             <div class="card-header"><strong><i class="bi bi-chat-left-text text-info"></i> {% trans "Comentários dos alunos (7 dias)" %}</strong></div>
             <div class="list-group list-group-flush">
