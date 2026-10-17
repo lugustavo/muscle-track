@@ -25,7 +25,7 @@ NOT_PAGES = {
     'photo_thumb', 'pwa_manifest', 'service_worker', 'workout_end', 'workout_exercise_notes',
     'workout_pause', 'workout_resume', 'workout_set_update', 'workout_start',
     'student_export', 'student_consent_record', 'appointment_status', 'appointment_move', 'appointment_move_undo', 'appointment_counts', 'student_package_action', 'appointment_request_decide', 'push_subscribe', 'push_unsubscribe', 'notification_test', 'my_agenda_request_withdraw', 'appointment_delete', 'appointment_remove', 'whatsapp_template_save', 'whatsapp_template_preview', 'refund_void', 'photo_position_action', 'telegram_webhook', 'agenda_holiday_add', 'my_photo_delete', 'agenda_holiday_delete', 'slot_add', 'slot_preview', 'slot_fill', 'slot_topup',
-    'slot_delete', 'appointment_series_end', 'payment_delete', 'finance_export', 'workout_discard', 'my_export', 'my_consent_photos', 'my_erasure_request',
+    'slot_delete', 'appointment_series_end', 'payment_delete', 'finance_export', 'finance_service_export', 'workout_discard', 'my_export', 'my_consent_photos', 'my_erasure_request',
 }
 
 

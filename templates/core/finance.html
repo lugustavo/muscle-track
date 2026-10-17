@@ -38,6 +38,10 @@
     </div></div></div>
 </div>
 
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h2 class="h6 mb-0 text-muted">{% trans "Relatório de serviços" %}</h2>
+    <a href="{% url 'core:finance_service_export' %}?mes={{ month_value }}" class="btn btn-sm btn-outline-secondary" data-service-export><i class="bi bi-filetype-csv"></i> {% trans "Exportar CSV" %}</a>
+</div>
 <div class="row g-3 mb-4" data-service-report>
     <div class="col-md-6"><div class="card h-100">
         <div class="card-body text-center">
