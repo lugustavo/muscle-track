@@ -117,6 +117,12 @@ body.kbd-open .tabbar { display: none; }
 .week-dots .dot.done .dot-mark { background: var(--secondary-color); border-color: var(--secondary-color); color: #fff; }
 .week-dots .dot.today .dot-mark { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(255, 107, 107, .25); }
 .week-dots .dot.today { color: var(--primary-color); font-weight: 700; }
+.month-dots { display: grid; grid-template-columns: repeat(7, 1fr); gap: .25rem; text-align: center; font-size: .75rem; }
+.month-dots .head { color: var(--bs-secondary-color); }
+.month-dots .day { border-radius: 50%; aspect-ratio: 1; max-width: 2rem; width: 100%; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: var(--bs-body-color); }
+.month-dots .day.future { color: var(--bs-secondary-color); opacity: .6; }
+.month-dots .day.done { background: var(--secondary-color); color: #fff; font-weight: 700; }
+.month-dots .day.today { box-shadow: 0 0 0 2px var(--primary-color); font-weight: 700; }
 .today-stats div { text-align: center; }
 .today-stats .num { font-size: 1.4rem; font-weight: 700; line-height: 1.1; }
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 14:13-0300\n"
+"POT-Creation-Date: 2026-10-17 14:25-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -302,7 +302,6 @@ msgstr "Status"
 msgid "Vender pacote"
 msgstr "Sell package"
 
-#| msgid "Informações da Rotina"
 msgid "Posições das fotos"
 msgstr "Photo positions"
 
@@ -1285,7 +1284,6 @@ msgstr "Left side"
 msgid "Lado direito"
 msgstr "Right side"
 
-#| msgid "Posição"
 msgid "Posição de foto"
 msgstr "Photo position"
 
@@ -2588,18 +2586,15 @@ msgstr "Record an assessment before linking the photo to it."
 msgid "Foto ligada à avaliação de %(date)s."
 msgstr "Photo linked to the assessment of %(date)s."
 
-#| msgid "Foto adicionada."
 msgid "Posição adicionada."
 msgstr "Position added."
 
-#| msgid "Avaliação atualizada."
 msgid "Posição ativada."
 msgstr "Position turned on."
 
 msgid "Posição desativada: as fotos dela ficam guardadas como extras."
 msgstr "Position turned off: its photos are kept as extras."
 
-#| msgid "nome alterado"
 msgid "Nome alterado."
 msgstr "Name changed."
 
@@ -2607,7 +2602,6 @@ msgid "Há fotos nessa posição: desative-a em vez de excluir."
 msgstr ""
 "There are photos in this position: turn it off instead of deleting it."
 
-#| msgid "Posição"
 msgid "Posição excluída."
 msgstr "Position deleted."
 
@@ -3165,6 +3159,45 @@ msgstr "Classes deducted (%(classes)s)"
 
 msgid "(tarde)"
 msgstr "(late)"
+
+msgid "Seu mês"
+msgstr "Your month"
+
+#| msgid "treinos"
+msgid "treino"
+msgid_plural "treinos"
+msgstr[0] "workout"
+msgstr[1] "workouts"
+
+#| msgid "Editar treino"
+msgid "dia treinado"
+msgid_plural "dias treinados"
+msgstr[0] "day trained"
+msgstr[1] "days trained"
+
+msgid "aula feita"
+msgid_plural "aulas feitas"
+msgstr[0] "class done"
+msgstr[1] "classes done"
+
+#, python-format
+#| msgid "Pacotes vendidos no mês"
+msgid "Dias treinados no mês: %(n)s"
+msgstr "Days trained this month: %(n)s"
+
+#, python-format
+#| msgid "%(n)d aula a mais marcada, até %(date)s."
+#| msgid_plural "%(n)d aulas a mais marcadas, até %(date)s."
+msgid "%(n)s aula ainda marcada neste mês."
+msgid_plural "%(n)s aulas ainda marcadas neste mês."
+msgstr[0] "%(n)s class still scheduled this month."
+msgstr[1] "%(n)s classes still scheduled this month."
+
+#, python-format
+msgid "Em %(month_name)s, até o dia %(until)s: %(n)s treino."
+msgid_plural "Em %(month_name)s, até o dia %(until)s: %(n)s treinos."
+msgstr[0] "In %(month_name)s, through day %(until)s: %(n)s workout."
+msgstr[1] "In %(month_name)s, through day %(until)s: %(n)s workouts."
 
 msgid "Oi"
 msgstr "Hi"
@@ -5362,7 +5395,6 @@ msgid "Ligar foto"
 msgstr "Link photo"
 
 #, python-format
-#| msgid "Devoluções e ajustes - %(brand_name)s"
 msgid "Posições das fotos - %(brand_name)s"
 msgstr "Photo positions - %(brand_name)s"
 
@@ -5375,11 +5407,9 @@ msgstr ""
 "Turning a position off removes it from new assessments; its photos are kept "
 "as extras."
 
-#| msgid "Reposição"
 msgid "Nome da posição"
 msgstr "Position name"
 
-#| msgid "Salvar foto"
 msgid "Salvar o nome"
 msgstr "Save the name"
 
@@ -5395,26 +5425,21 @@ msgstr "Off"
 msgid "Subir"
 msgstr "Move up"
 
-#| msgid "Descongelar"
 msgid "Descer"
 msgstr "Move down"
 
-#| msgid "Inativa"
 msgid "Desativar"
 msgstr "Turn off"
 
-#| msgid "Ativa"
 msgid "Ativar"
 msgstr "Turn on"
 
-#| msgid "Excluir este pagamento? "
 msgid "Excluir esta posição?"
 msgstr "Delete this position?"
 
 msgid "Nenhuma posição: as avaliações ficam só com fotos extras."
 msgstr "No positions: assessments only hold extra photos."
 
-#| msgid "Nova situação"
 msgid "Nova posição"
 msgstr "New position"
 

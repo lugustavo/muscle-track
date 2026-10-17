@@ -1,0 +1,24 @@
+{% load i18n %}
+<div class="card mb-3" data-month-card>
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-baseline mb-2">
+            <strong>{% trans "Seu mês" %}</strong>
+            <small class="text-muted">{{ month.month|date:"F"|capfirst }}</small>
+        </div>
+        <div class="row today-stats g-0 mb-2">
+            <div class="col-4"><div class="num" data-month-workouts>{{ month.workouts }}</div><small class="text-muted">{% blocktrans trimmed count n=month.workouts %}treino{% plural %}treinos{% endblocktrans %}</small></div>
+            <div class="col-4"><div class="num" data-month-days>{{ month.days_trained }}</div><small class="text-muted">{% blocktrans trimmed count n=month.days_trained %}dia treinado{% plural %}dias treinados{% endblocktrans %}</small></div>
+            <div class="col-4"><div class="num" data-month-classes>{{ month.classes_done }}</div><small class="text-muted">{% blocktrans trimmed count n=month.classes_done %}aula feita{% plural %}aulas feitas{% endblocktrans %}</small></div>
+        </div>
+        <div class="month-dots" role="img" aria-label="{% blocktrans trimmed with n=month.days_trained %}Dias treinados no mês: {{ n }}{% endblocktrans %}" data-month-grid>
+            {% for letter in month.letters %}<div class="head">{{ letter }}</div>{% endfor %}
+            {% for cell in month.cells %}
+            {% if cell %}<div class="day {% if cell.trained %}done{% endif %} {% if cell.is_today %}today{% endif %} {% if cell.future %}future{% endif %}">{{ cell.day }}</div>{% else %}<div></div>{% endif %}
+            {% endfor %}
+        </div>
+        <div class="small text-muted mt-2">
+            {% if month.classes_upcoming %}<div data-month-upcoming><i class="bi bi-calendar-week"></i> {% blocktrans trimmed count n=month.classes_upcoming %}{{ n }} aula ainda marcada neste mês.{% plural %}{{ n }} aulas ainda marcadas neste mês.{% endblocktrans %}</div>{% endif %}
+            {% if motivation %}<div data-month-previous><i class="bi bi-clock-history"></i> {% blocktrans trimmed with month_name=month.previous.month|date:"F" until=month.previous.until count n=month.previous.workouts %}Em {{ month_name }}, até o dia {{ until }}: {{ n }} treino.{% plural %}Em {{ month_name }}, até o dia {{ until }}: {{ n }} treinos.{% endblocktrans %}</div>{% endif %}
+        </div>
+    </div>
+</div>
