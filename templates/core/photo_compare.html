@@ -11,13 +11,13 @@
             <h1 class="h3 mb-0"><i class="bi bi-layout-split"></i> {% trans "Comparar fotos" %}</h1>
             {% if student %}<div class="text-muted">{{ student.person_name }}</div>{% endif %}
         </div>
-        {% include 'core/_back_button.html' with url=back_url label='Voltar' css='btn btn-sm btn-outline-secondary' icon='bi-arrow-left' compact=True %}
+        {% include 'core/_back_button.html' with url=back_url label=_('Voltar') css='btn btn-sm btn-outline-secondary' icon='bi-arrow-left' compact=True %}
     </div>
 
     {% if not data.angles %}
     <div class="card"><div class="card-body text-center text-muted py-4">
         <i class="bi bi-images fs-1 d-block mb-2"></i>
-        {% trans "Para comparar é preciso ter a foto da mesma posição em pelo menos duas avaliações." %}
+        {% trans "Para comparar é preciso ter duas fotos da mesma posição, de avaliações diferentes ou enviadas pelo aluno." %}
     </div></div>
     {% else %}
     <ul class="nav nav-pills mb-3" data-angle-pills>
@@ -28,16 +28,16 @@
 
     <form method="get" action="{{ form_url }}" class="row g-2 mb-3">
         <input type="hidden" name="angle" value="{{ data.angle }}">
-        <div class="col-6">
+        <div class="col-12 col-sm-6">
             <label class="form-label small mb-0" for="cmp-before">{% trans "Antes" %}</label>
             <select name="before" id="cmp-before" class="form-select form-select-sm" onchange="this.form.submit()">
-                {% for a in data.having %}<option value="{{ a.pk }}" {% if a.pk == data.before.pk %}selected{% endif %}>{{ a.date|date:_('d/m/Y') }}</option>{% endfor %}
+                {% for e in data.having %}<option value="{{ e.key }}" {% if e.key == data.before_entry.key %}selected{% endif %}>{{ e.label }}</option>{% endfor %}
             </select>
         </div>
-        <div class="col-6">
+        <div class="col-12 col-sm-6">
             <label class="form-label small mb-0" for="cmp-after">{% trans "Depois" %}</label>
             <select name="after" id="cmp-after" class="form-select form-select-sm" onchange="this.form.submit()">
-                {% for a in data.having %}<option value="{{ a.pk }}" {% if a.pk == data.after.pk %}selected{% endif %}>{{ a.date|date:_('d/m/Y') }}</option>{% endfor %}
+                {% for e in data.having %}<option value="{{ e.key }}" {% if e.key == data.after_entry.key %}selected{% endif %}>{{ e.label }}</option>{% endfor %}
             </select>
         </div>
         <noscript><div class="col-12"><button class="btn btn-sm btn-primary">{% trans "Comparar" %}</button></div></noscript>
@@ -46,17 +46,17 @@
     <div class="row g-2" data-compare>
         <div class="col-6 text-center" data-side="before">
             {% if data.before_photo %}
-            <a href="{% url 'core:photo_file' data.before_photo.pk %}" target="_blank" rel="noopener"><img src="{% url 'core:photo_file' data.before_photo.pk %}" alt="Antes, {{ data.before.date|date:_('d/m/Y') }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;"></a>
+            <a href="{% url 'core:photo_file' data.before_photo.pk %}" target="_blank" rel="noopener"><img src="{% url 'core:photo_file' data.before_photo.pk %}" alt="{% blocktrans trimmed with date=data.before_entry.date|date:_('d/m/Y') %}Antes, {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;"></a>
             {% endif %}
             <div class="fw-bold mt-1">{% trans "Antes" %}</div>
-            <div class="small text-muted">{{ data.before.date|date:_('d/m/Y') }}</div>
+            <div class="small text-muted">{{ data.before_entry.label }}</div>
         </div>
         <div class="col-6 text-center" data-side="after">
             {% if data.after_photo %}
-            <a href="{% url 'core:photo_file' data.after_photo.pk %}" target="_blank" rel="noopener"><img src="{% url 'core:photo_file' data.after_photo.pk %}" alt="Depois, {{ data.after.date|date:_('d/m/Y') }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;"></a>
+            <a href="{% url 'core:photo_file' data.after_photo.pk %}" target="_blank" rel="noopener"><img src="{% url 'core:photo_file' data.after_photo.pk %}" alt="{% blocktrans trimmed with date=data.after_entry.date|date:_('d/m/Y') %}Depois, {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;"></a>
             {% endif %}
             <div class="fw-bold mt-1">{% trans "Depois" %}</div>
-            <div class="small text-muted">{{ data.after.date|date:_('d/m/Y') }}</div>
+            <div class="small text-muted">{{ data.after_entry.label }}</div>
         </div>
     </div>
 

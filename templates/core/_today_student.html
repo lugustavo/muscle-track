@@ -60,7 +60,7 @@
             {% if today.motivation.ring %}
             {% with ring=today.motivation.ring streak=today.motivation.streak %}
             <div class="d-flex align-items-center gap-3 mb-3" data-motivation>
-                <div class="goal-ring {% if ring.complete %}complete{% endif %}" role="img" aria-label="Meta da semana: {{ ring.done }} de {{ ring.goal }} treinos">
+                <div class="goal-ring {% if ring.complete %}complete{% endif %}" role="img" aria-label="{% blocktrans trimmed with done=ring.done goal=ring.goal %}Meta da semana: {{ done }} de {{ goal }} treinos{% endblocktrans %}">
                     <svg viewBox="0 0 80 80" width="80" height="80" aria-hidden="true">
                         <circle cx="40" cy="40" r="36" class="track"/>
                         <circle cx="40" cy="40" r="36" class="bar" stroke-dasharray="{{ ring.circumference }}" stroke-dashoffset="{{ ring.offset }}" transform="rotate(-90 40 40)"/>
@@ -90,7 +90,7 @@
                 </small>
             </div>
             {% endif %}
-            <div class="week-dots" role="img" aria-label="Treinos desta semana: {{ today.week_done }}">
+            <div class="week-dots" role="img" aria-label="{% blocktrans trimmed with done=today.week_done %}Treinos desta semana: {{ done }}{% endblocktrans %}">
                 {% for d in today.week %}
                 <div class="dot {% if d.done %}done{% endif %} {% if d.is_today %}today{% endif %}">
                     <div class="dot-mark">{% if d.done %}<i class="bi bi-check-lg"></i>{% endif %}</div>

@@ -57,11 +57,11 @@
                             {% for slot in a.photo_slots %}
                             <div class="text-center" style="width: 84px;" data-angle="{{ slot.angle }}">
                                 {% if slot.photo %}
-                                <a href="{% url 'core:photo_file' slot.photo.pk %}" target="_blank" rel="noopener" title="Abrir foto: {{ slot.label }}">
+                                <a href="{% url 'core:photo_file' slot.photo.pk %}" target="_blank" rel="noopener" title="{% blocktrans trimmed with label=slot.label %}Abrir foto: {{ label }}{% endblocktrans %}">
                                     <img src="{% url 'core:photo_thumb' slot.photo.pk %}" loading="lazy" alt="{{ slot.label }} em {{ a.date|date:_('d/m/Y') }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
                                 </a>
                                 {% else %}
-                                <a href="{% nav_url 'core:photo_upload' student.pk %}&amp;assessment={{ a.pk }}&amp;angle={{ slot.angle }}" class="d-flex flex-column align-items-center justify-content-center rounded border border-2 border-dashed text-muted text-decoration-none w-100" style="aspect-ratio: 3/4;" title="Adicionar foto: {{ slot.label }}">
+                                <a href="{% nav_url 'core:photo_upload' student.pk %}&amp;assessment={{ a.pk }}&amp;angle={{ slot.angle }}" class="d-flex flex-column align-items-center justify-content-center rounded border border-2 border-dashed text-muted text-decoration-none w-100" style="aspect-ratio: 3/4;" title="{% blocktrans trimmed with label=slot.label %}Adicionar foto: {{ label }}{% endblocktrans %}">
                                     <i class="bi bi-plus-lg fs-5"></i>
                                 </a>
                                 {% endif %}

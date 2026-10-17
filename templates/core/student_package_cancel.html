@@ -66,7 +66,7 @@
         <div class="alert alert-warning small"><i class="bi bi-info-circle"></i> {% trans "As aulas já dadas continuam no histórico, sem pacote. O pagamento original não é apagado: a devolução fica registrada como um lançamento à parte (e dá para anular se foi engano)." %}</div>
         <div class="form-actions d-flex gap-2">
             <button type="submit" class="btn btn-danger" onclick="return confirm('{% filter escapejs %}{% trans "Cancelar este pacote?" %}{% endfilter %}');"><i class="bi bi-x-octagon"></i> {% trans "Cancelar pacote" %}</button>
-            {% back_button back_default label='Voltar' css='btn btn-outline-secondary' icon='bi-arrow-left' fragment='#tab-ficha' %}
+            {% back_button back_default label=_('Voltar') css='btn btn-outline-secondary' icon='bi-arrow-left' fragment='#tab-ficha' %}
         </div>
     </form>
 </div>

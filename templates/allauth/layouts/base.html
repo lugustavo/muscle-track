@@ -6,7 +6,7 @@
     <div class="col-md-9 col-lg-6">
         {% if user.is_authenticated %}
         <div class="mb-3">
-            {% if user.is_staff %}{% url 'core:home' as back_url %}{% include 'core/_back_button.html' with url=back_url label='Voltar ao painel' css='btn btn-sm btn-outline-secondary' icon='bi-arrow-left' compact=True %}{% else %}{% url 'core:my_profile' as back_url %}{% include 'core/_back_button.html' with url=back_url label='Voltar ao perfil' css='btn btn-sm btn-outline-secondary' icon='bi-arrow-left' compact=True %}{% endif %}
+            {% if user.is_staff %}{% url 'core:home' as back_url %}{% include 'core/_back_button.html' with url=back_url label=_('Voltar ao painel') css='btn btn-sm btn-outline-secondary' icon='bi-arrow-left' compact=True %}{% else %}{% url 'core:my_profile' as back_url %}{% include 'core/_back_button.html' with url=back_url label=_('Voltar ao perfil') css='btn btn-sm btn-outline-secondary' icon='bi-arrow-left' compact=True %}{% endif %}
         </div>
         {% endif %}
         <div class="card shadow-sm border-0">

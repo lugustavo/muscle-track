@@ -32,7 +32,7 @@
                 <form method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> {% trans "Excluir definitivamente" %}</button>
-                    {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='bi-x-circle' %}
+                    {% back_button back_default label=_('Cancelar') css='btn btn-outline-secondary' icon='bi-x-circle' %}
                 </form>
             </div>
         </div>

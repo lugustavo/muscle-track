@@ -141,14 +141,14 @@
                 <div class="set-grid set-row mb-2" data-url="{% url 'core:workout_set_update' s.pk %}" data-done="{{ s.is_done|yesno:'true,false' }}">
                     <span class="set-num">{{ s.number }}</span>
                     <div class="weight-cell">
-                        <button type="button" class="btn btn-outline-secondary step-btn" data-step="-1" aria-label="Diminuir a carga da série {{ s.number }}">−</button>
+                        <button type="button" class="btn btn-outline-secondary step-btn" data-step="-1" aria-label="{% blocktrans trimmed with n=s.number %}Diminuir a carga da série {{ n }}{% endblocktrans %}">−</button>
                         <input type="number" inputmode="decimal" step="0.5" min="0" max="9999" class="form-control set-weight"
-                               {% if s.weight is not None %}value="{{ s.weight|unlocalize }}"{% endif %} placeholder="{% trans "kg" %}" aria-label="Carga da série {{ s.number }}">
-                        <button type="button" class="btn btn-outline-secondary step-btn" data-step="1" aria-label="Aumentar a carga da série {{ s.number }}">+</button>
+                               {% if s.weight is not None %}value="{{ s.weight|unlocalize }}"{% endif %} placeholder="{% trans "kg" %}" aria-label="{% blocktrans trimmed with n=s.number %}Carga da série {{ n }}{% endblocktrans %}">
+                        <button type="button" class="btn btn-outline-secondary step-btn" data-step="1" aria-label="{% blocktrans trimmed with n=s.number %}Aumentar a carga da série {{ n }}{% endblocktrans %}">+</button>
                     </div>
                     <input type="number" inputmode="numeric" step="1" min="0" max="999" class="form-control set-reps"
-                           {% if s.reps is not None %}value="{{ s.reps }}"{% endif %} placeholder="{% trans "reps" %}" aria-label="Repetições da série {{ s.number }}">
-                    <button type="button" class="btn btn-outline-secondary set-done" aria-label="Marcar série {{ s.number }} como feita"><i class="bi bi-check-lg"></i></button>
+                           {% if s.reps is not None %}value="{{ s.reps }}"{% endif %} placeholder="{% trans "reps" %}" aria-label="{% blocktrans trimmed with n=s.number %}Repetições da série {{ n }}{% endblocktrans %}">
+                    <button type="button" class="btn btn-outline-secondary set-done" aria-label="{% blocktrans trimmed with n=s.number %}Marcar série {{ n }} como feita{% endblocktrans %}"><i class="bi bi-check-lg"></i></button>
                     <span class="set-record d-none" title="{% trans "Novo recorde de carga" %}">🏆</span>
                 </div>
                 {% endfor %}

@@ -376,14 +376,15 @@ def student_detail(request, pk):
 
     assessments = evolution.assessments_with_photos(student)
     chart_points = evolution.chart_points(assessments)
+    loose_photos = list(student.progress_photos.filter(assessment__isnull=True))
 
     return render(request, 'core/student_detail.html', {
         'student': student,
         'assessments': assessments,
         'latest_assessment': assessments[0] if assessments else None,
         'assessment_chart': chart_points,
-        'can_compare': bool(evolution.comparable_angles(assessments)),
-        'loose_photos': list(student.progress_photos.filter(assessment__isnull=True)),
+        'can_compare': bool(evolution.comparable_angles(assessments, evolution.comparable_loose(loose_photos))),
+        'loose_photos': loose_photos,
         'photo_count': student.progress_photos.count(),
         'events': list(student.events.select_related('actor')[:100]),
         'consents': [(ConsentRecord.Kind(kind).label, record, is_granted(record), kind in REQUIRED_KINDS)
@@ -862,11 +863,11 @@ def my_package(request, person):
 def my_evolution(request, person):
     """The student's own assessments, chart and photos (read-only; the trainer's private notes are never shown)."""
     assessments = evolution.assessments_with_photos(person)
+    loose_photos = list(person.progress_photos.filter(assessment__isnull=True))
     return render(request, 'core/my_evolution.html', {
         'title': _('Minha evolução'), 'assessments': assessments, 'assessment_chart': evolution.chart_points(assessments),
-        'can_compare': bool(evolution.comparable_angles(assessments)),
-        'photos_consent': _photos_consent(person),
-        'loose_photos': list(person.progress_photos.filter(assessment__isnull=True))})
+        'can_compare': bool(evolution.comparable_angles(assessments, evolution.comparable_loose(loose_photos))),
+        'photos_consent': _photos_consent(person), 'loose_photos': loose_photos})
 
 
 def _photos_consent(person):

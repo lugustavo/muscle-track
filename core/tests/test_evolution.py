@@ -62,6 +62,66 @@ class EvolutionTests(BaseTestCase):
         data = evolution.compare(self.person, 'nonsense', 'x', '999999')
         self.assertEqual((data['angle'], data['before'], data['after']), ('front', self.first, self.second))
 
+    def loose(self, day, angle='front', by_student=True, person=None):
+        return ProgressPhoto.objects.create(person=person or self.person, angle=angle, date=day, image=picture(),
+                                            uploaded_by_student=by_student)
+
+    def test_loose_photos_can_be_compared(self):
+        mine = self.loose(date(2026, 2, 1))
+        self.assertEqual(evolution.comparable_angles(evolution.assessments_with_photos(self.person)), [])
+        self.photo(self.first)
+        data = evolution.compare(self.person)
+        self.assertEqual((data['before_photo'], data['after_photo']), (self.photo_of(self.first), mine))
+        self.assertEqual((data['before'], data['after']), (self.first, None))   # a loose photo has no assessment
+        self.assertEqual(data['changes'], [])
+        self.assertEqual(data['days'], 22)
+
+    def photo_of(self, assessment):
+        return assessment.photos.get()
+
+    def test_two_loose_photos_and_the_choice_by_key(self):
+        a, b, c = self.loose(date(2026, 3, 1)), self.loose(date(2026, 3, 20)), self.loose(date(2026, 5, 2), by_student=False)
+        data = evolution.compare(self.person, 'front', f'p{b.pk}', f'p{c.pk}')
+        self.assertEqual((data['before_photo'], data['after_photo']), (b, c))
+        self.assertEqual([e.key for e in data['having']], [f'p{c.pk}', f'p{b.pk}', f'p{a.pk}'])   # newest first
+        self.assertEqual([e.source for e in data['having']], ['Foto avulsa', 'Enviada pelo aluno', 'Enviada pelo aluno'])
+
+    def test_measure_changes_need_two_assessments(self):
+        self.photo(self.first), self.photo(self.second)
+        self.loose(date(2026, 6, 1))
+        both = evolution.compare(self.person, 'front', self.first.pk, self.second.pk)
+        self.assertTrue(both['changes'])
+        mixed = evolution.compare(self.person, 'front', self.second.pk, f'p{ProgressPhoto.objects.get(assessment=None).pk}')
+        self.assertEqual(mixed['changes'], [])
+
+    def test_other_position_photos_are_not_comparable(self):
+        self.loose(date(2026, 3, 1), 'other'), self.loose(date(2026, 3, 2), 'other')
+        self.assertEqual(evolution.comparable_angles([], evolution.comparable_loose(self.person.progress_photos.all())), [])
+
+    def test_another_students_loose_photo_never_appears(self):
+        mine = self.loose(date(2026, 3, 1))
+        theirs = self.loose(date(2026, 3, 2), person=self.bob.person)
+        data = evolution.compare(self.person, 'front', f'p{theirs.pk}', None)
+        self.assertEqual(data['angles'], [])   # one photo of her own is not enough, and his does not count
+        self.assertEqual([e.photo for e in data['having']], [mine])
+        self.assertEqual(data['before_photo'], mine)   # the other student's key fell back to her own photo
+
+    def test_compare_pages_offer_the_loose_photos(self):
+        mine, other = self.loose(date(2026, 2, 1)), self.loose(date(2026, 4, 1))
+        for who, url in ((self.alice, reverse('core:my_evolution_compare')),
+                         (self.trainer, reverse('core:student_compare', kwargs={'pk': self.person.pk}))):
+            self.client.force_login(who)
+            page = self.client.get(url)
+            self.assertContains(page, 'data-compare')
+            self.assertContains(page, f'value="p{mine.pk}"')
+            self.assertContains(page, '01/02/2026 · Enviada pelo aluno')
+            self.assertNotContains(page, 'O que mudou')
+        self.client.force_login(self.alice)
+        self.assertContains(self.client.get(reverse('core:my_evolution')), reverse('core:my_evolution_compare'))
+        self.client.force_login(self.bob)
+        self.assertContains(self.client.get(reverse('core:my_evolution_compare')), 'duas fotos da mesma posição')
+        self.assertTrue(other.pk)
+
     def test_trainer_compare_page(self):
         self.photo(self.first), self.photo(self.second)
         self.client.force_login(self.trainer)
@@ -76,7 +136,7 @@ class EvolutionTests(BaseTestCase):
         self.photo(self.first)
         self.client.force_login(self.trainer)
         page = self.client.get(reverse('core:student_compare', kwargs={'pk': self.person.pk}))
-        self.assertContains(page, 'pelo menos duas avaliações')
+        self.assertContains(page, 'duas fotos da mesma posição')
         detail = self.client.get(reverse('core:student_detail', kwargs={'pk': self.person.pk}))
         self.assertNotContains(detail, reverse('core:student_compare', kwargs={'pk': self.person.pk}))
 
@@ -104,7 +164,7 @@ class EvolutionTests(BaseTestCase):
         page = self.client.get(reverse('core:my_evolution_compare'))
         self.assertContains(page, 'data-compare')
         self.client.force_login(self.bob)
-        self.assertContains(self.client.get(reverse('core:my_evolution_compare')), 'pelo menos duas avaliações')
+        self.assertContains(self.client.get(reverse('core:my_evolution_compare')), 'duas fotos da mesma posição')
 
     def test_access_rules(self):
         urls = [reverse('core:my_evolution'), reverse('core:my_evolution_compare')]
