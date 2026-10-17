@@ -1,4 +1,6 @@
 """Audit trail helpers: who changed what in a student's file."""
+from django.utils.translation import gettext as _
+
 from .models import Package, StudentEvent
 
 # Sensitive free text: the history records THAT it changed, never the content.
@@ -41,7 +43,7 @@ def changed_fields(form):
             changes[name] = [Package.objects.filter(pk=before).values_list('name', flat=True).first() or '',
                              after.name if after else '']
         elif name == 'avatar':
-            changes[name] = ['', 'nova foto' if after else 'removida']
+            changes[name] = ['', _('nova foto') if after else _('removida')]
         else:
             changes[name] = [_plain(before), _plain(after)]
     return changes
@@ -53,5 +55,5 @@ def log_profile_edit(person, form, actor):
     if changes:
         labels = [str(form.fields[n].label or n) for n in changes]
         log_event(person, StudentEvent.Kind.PROFILE_EDIT, actor,
-                  'Alterou: ' + ', '.join(labels), changes)
+                  _('Alterou: %(fields)s') % {'fields': ', '.join(labels)}, changes)
     return changes

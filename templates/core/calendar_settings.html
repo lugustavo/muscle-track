@@ -100,12 +100,14 @@
 
 {% block extra_js %}
 <script>
+const T_COPIED = "{% trans 'Copiado!' as js_msg %}{{ js_msg|escapejs }}";
+const T_COPY = "{% trans 'Copiar' as js_msg %}{{ js_msg|escapejs }}";
 // Copy button: Clipboard API when available, otherwise select the field so the person can copy by hand
 document.querySelectorAll('[data-copy-target]').forEach(function (button) {
     button.addEventListener('click', function () {
         var field = document.querySelector(button.getAttribute('data-copy-target'));
         var label = button.querySelector('span');
-        function done() { label.textContent = 'Copiado!'; setTimeout(function () { label.textContent = 'Copiar'; }, 2000); }
+        function done() { label.textContent = T_COPIED; setTimeout(function () { label.textContent = T_COPY; }, 2000); }
         field.focus(); field.select();
         if (navigator.clipboard && window.isSecureContext) {
             navigator.clipboard.writeText(field.value).then(done, function () { document.execCommand('copy'); done(); });

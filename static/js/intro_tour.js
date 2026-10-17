@@ -1,6 +1,7 @@
 /* First-access tour on the student's "Hoje" screen: three steps in a modal. Finishing or skipping tells the server
    (POST to the tour address) so it is not shown again; "Como usar o app" in the profile shows it any time. */
 function startIntroTour() {
+    var gettext = window.gettext || function (s) { return s; };   // Django's JS catalog (/jsi18n/)
     var el = document.getElementById('introTour');
     if (!el || !window.bootstrap) return;
     var steps = Array.prototype.slice.call(el.querySelectorAll('[data-intro-step]'));
@@ -15,7 +16,7 @@ function startIntroTour() {
         steps.forEach(function (s, n) { s.hidden = n !== i; });
         dots.forEach(function (d, n) { d.className = 'rounded-circle ' + (n === i ? 'bg-primary' : 'bg-secondary-subtle'); });
         back.style.visibility = i === 0 ? 'hidden' : 'visible';
-        next.textContent = i === steps.length - 1 ? 'Entendi' : 'Próximo';
+        next.textContent = i === steps.length - 1 ? gettext('Entendi') : gettext('Próximo');
     }
 
     function done() {

@@ -30,7 +30,7 @@
             {% for h in own %}
             <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
                 <span><strong>{{ h.date|date:"D d/m/Y" }}</strong> · {{ h.name }}</span>
-                <form method="post" action="{% nav_url 'core:agenda_holiday_delete' h.pk %}" onsubmit="return confirm('Tirar {{ h.name|escapejs }} da lista?');">
+                <form method="post" action="{% nav_url 'core:agenda_holiday_delete' h.pk %}" onsubmit="return confirm('{% autoescape off %}{% blocktrans trimmed asvar confirm_msg with name=h.name %}Tirar {{ name }} da lista?{% endblocktrans %}{% endautoescape %}{{ confirm_msg|escapejs }}');">
                     {% csrf_token %}
                     <button class="btn btn-sm btn-outline-danger btn-icon" title="{% trans "Remover" %}"><i class="bi bi-trash"></i><span class="visually-hidden">{% blocktrans trimmed with name=h.name %}Remover {{ name }}{% endblocktrans %}</span></button>
                 </form>

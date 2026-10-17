@@ -303,6 +303,8 @@
 <script src="{% static 'vendor/chartjs/4.4.0/chart.umd.js' %}"></script>
 <script src="{% static 'js/chart-theme.js' %}"></script>
 <script>
+const T_HIDE = "{% trans 'Ocultar' as js_msg %}{{ js_msg|escapejs }}";
+const T_SHOW = "{% trans 'Mostrar' as js_msg %}{{ js_msg|escapejs }}";
 // Contract values stay hidden until asked (the trainer may be showing the screen to the student)
 (function () {
     var toggle = document.querySelector('[data-contract-values-toggle]');
@@ -314,7 +316,7 @@
         values.hidden = !show;
         note.hidden = show;
         toggle.setAttribute('aria-pressed', show ? 'true' : 'false');
-        toggle.querySelector('span').textContent = show ? 'Ocultar' : 'Mostrar';
+        toggle.querySelector('span').textContent = show ? T_HIDE : T_SHOW;
         toggle.querySelector('i').className = 'bi ' + (show ? 'bi-eye-slash' : 'bi-eye');
     });
 })();

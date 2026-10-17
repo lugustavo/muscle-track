@@ -108,7 +108,7 @@
                     <a href="{% nav_url 'core:appointment_reschedule' a.pk %}" class="btn btn-sm btn-link swipe-edit" title="{% trans "Editar" %}" data-class-edit>
                         <i class="bi bi-pencil"></i><span class="swipe-label">{% trans "Editar" %}</span></a>
                     <form method="post" action="{% nav_url 'core:appointment_remove' a.pk %}"
-                          onsubmit="return confirm('{% if a.slot_id %}Remover esta aula? Ela sai da agenda e não desconta do pacote; o horário fixo continua nas próximas.{% else %}Remover esta aula avulsa?{% endif %}');">
+                          onsubmit="return confirm('{% if a.slot_id %}{% filter escapejs %}{% trans "Remover esta aula? Ela sai da agenda e não desconta do pacote; o horário fixo continua nas próximas." %}{% endfilter %}{% else %}{% filter escapejs %}{% trans "Remover esta aula avulsa?" %}{% endfilter %}{% endif %}');">
                         {% csrf_token %}
                         <button class="btn btn-sm btn-link swipe-remove" title="{% trans "Remover" %}" data-class-remove><i class="bi bi-trash"></i><span class="swipe-label">{% trans "Remover" %}</span></button>
                     </form>

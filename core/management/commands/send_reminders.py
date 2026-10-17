@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from django.utils.translation import gettext as _
 
 from core.reminders import run
 
@@ -9,5 +10,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         result = run()
-        self.stdout.write(f"{result['classes']} lembrete(s) de aula, {result['plans']} de plano, "
-                          f"{result['packages']} pacote(s) com aviso, {result['sessions']} treino(s) parado(s) encerrado(s).")
+        self.stdout.write(_('%(classes)d lembrete(s) de aula, %(plans)d de plano, '
+                            '%(packages)d pacote(s) com aviso, %(sessions)d treino(s) parado(s) encerrado(s).') % result)

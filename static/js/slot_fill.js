@@ -2,6 +2,14 @@
    untick days without class. The server recomputes everything on submit; this script only fetches the preview. */
 (function () {
     'use strict';
+    // Django's JS catalog (/jsi18n/); identity fallbacks if it has not loaded
+    var gettext = window.gettext || function (s) { return s; };
+    var ngettext = window.ngettext || function (singular, plural, n) { return n === 1 ? singular : plural; };
+    var interpolate = window.interpolate || function (s, o, named) {
+        if (named) { return s.replace(/%\((\w+)\)s/g, function (m, k) { return String(o[k]); }); }
+        var i = 0;
+        return s.replace(/%s/g, function () { return String(o[i++]); });
+    };
     var form = document.querySelector('[data-slot-fill]');
     if (!form) return;
     var box = form.querySelector('[data-fill-preview]');
@@ -34,7 +42,8 @@
                 var preview = box.querySelector('[data-preview]');
                 var count = preview ? parseInt(preview.getAttribute('data-count'), 10) : 0;
                 if (count) {
-                    button.innerHTML = '<i class="bi bi-calendar-check"></i> Preencher agenda (' + count + (count === 1 ? ' aula)' : ' aulas)');
+                    button.innerHTML = '<i class="bi bi-calendar-check"></i> ' +
+                        interpolate(ngettext('Preencher agenda (%s aula)', 'Preencher agenda (%s aulas)', count), [count]);
                 } else {
                     button.innerHTML = idleLabel;
                 }

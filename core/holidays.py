@@ -6,6 +6,7 @@ closed) are `Holiday` rows the trainer adds in Agenda → Feriados."""
 from datetime import date, timedelta
 
 from django.conf import settings
+from django.utils.translation import gettext as _
 
 from .models import Holiday
 
@@ -27,38 +28,38 @@ def easter(year):
 def _portugal(year, paschal):
     easter_day = paschal
     return {
-        date(year, 1, 1): 'Ano Novo',
-        easter_day - timedelta(days=2): 'Sexta-feira Santa',
-        easter_day: 'Páscoa',
-        date(year, 4, 25): 'Dia da Liberdade',
-        date(year, 5, 1): 'Dia do Trabalhador',
-        easter_day + timedelta(days=60): 'Corpo de Deus',
-        date(year, 6, 10): 'Dia de Portugal',
-        date(year, 8, 15): 'Assunção de Nossa Senhora',
-        date(year, 10, 5): 'Implantação da República',
-        date(year, 11, 1): 'Todos os Santos',
-        date(year, 12, 1): 'Restauração da Independência',
-        date(year, 12, 8): 'Imaculada Conceição',
-        date(year, 12, 25): 'Natal',
+        date(year, 1, 1): _('Ano Novo'),
+        easter_day - timedelta(days=2): _('Sexta-feira Santa'),
+        easter_day: _('Páscoa'),
+        date(year, 4, 25): _('Dia da Liberdade'),
+        date(year, 5, 1): _('Dia do Trabalhador'),
+        easter_day + timedelta(days=60): _('Corpo de Deus'),
+        date(year, 6, 10): _('Dia de Portugal'),
+        date(year, 8, 15): _('Assunção de Nossa Senhora'),
+        date(year, 10, 5): _('Implantação da República'),
+        date(year, 11, 1): _('Todos os Santos'),
+        date(year, 12, 1): _('Restauração da Independência'),
+        date(year, 12, 8): _('Imaculada Conceição'),
+        date(year, 12, 25): _('Natal'),
     }
 
 
 def _brazil(year, paschal):
     easter_day = paschal
     return {
-        date(year, 1, 1): 'Confraternização Universal',
-        easter_day - timedelta(days=48): 'Carnaval (segunda)',
-        easter_day - timedelta(days=47): 'Carnaval (terça)',
-        easter_day - timedelta(days=2): 'Sexta-feira Santa',
-        date(year, 4, 21): 'Tiradentes',
-        date(year, 5, 1): 'Dia do Trabalho',
-        easter_day + timedelta(days=60): 'Corpus Christi',
-        date(year, 9, 7): 'Independência',
-        date(year, 10, 12): 'Nossa Senhora Aparecida',
-        date(year, 11, 2): 'Finados',
-        date(year, 11, 15): 'Proclamação da República',
-        date(year, 11, 20): 'Consciência Negra',
-        date(year, 12, 25): 'Natal',
+        date(year, 1, 1): _('Confraternização Universal'),
+        easter_day - timedelta(days=48): _('Carnaval (segunda)'),
+        easter_day - timedelta(days=47): _('Carnaval (terça)'),
+        easter_day - timedelta(days=2): _('Sexta-feira Santa'),
+        date(year, 4, 21): _('Tiradentes'),
+        date(year, 5, 1): _('Dia do Trabalho'),
+        easter_day + timedelta(days=60): _('Corpus Christi'),
+        date(year, 9, 7): _('Independência'),
+        date(year, 10, 12): _('Nossa Senhora Aparecida'),
+        date(year, 11, 2): _('Finados'),
+        date(year, 11, 15): _('Proclamação da República'),
+        date(year, 11, 20): _('Consciência Negra'),
+        date(year, 12, 25): _('Natal'),
     }
 
 

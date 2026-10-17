@@ -134,6 +134,12 @@
 <script src="{% static 'vendor/chartjs/4.4.0/chart.umd.js' %}"></script>
 <script src="{% static 'js/chart-theme.js' %}"></script>
 <script>
+const T_DURATION = "{% trans 'Duração (minutos)' as js_msg %}{{ js_msg|escapejs }}";
+const T_DURATION_AXIS = "{% trans 'Duração (min)' as js_msg %}{{ js_msg|escapejs }}";
+const T_AVG_LOAD = "{% trans 'Carga Média (kg)' as js_msg %}{{ js_msg|escapejs }}";
+const T_SESSION_DATE = "{% trans 'Data da Sessão' as js_msg %}{{ js_msg|escapejs }}";
+const T_WORKOUT_PREFIX = "{% trans 'Treino:' as js_msg %}{{ js_msg|escapejs }}";
+const T_MIN = "{% trans 'min' as js_msg %}{{ js_msg|escapejs }}";
 // Dados do gráfico vindos do backend
 const chartData = {{ chart_data|safe }};
 
@@ -145,7 +151,7 @@ new Chart(ctx, {
         labels: chartData.map(s => s.date),
         datasets: [
             {
-                label: 'Duração (minutos)',
+                label: T_DURATION,
                 data: chartData.map(s => s.duration),
                 backgroundColor: 'rgba(78, 205, 196, 0.2)',
                 borderColor: 'rgba(78, 205, 196, 1)',
@@ -157,7 +163,7 @@ new Chart(ctx, {
                 yAxisID: 'y'
             },
             {
-                label: 'Carga Média (kg)',
+                label: T_AVG_LOAD,
                 data: chartData.map(s => s.avg_weight),
                 backgroundColor: 'rgba(255, 159, 64, 0.2)',
                 borderColor: 'rgba(255, 159, 64, 1)',
@@ -185,7 +191,7 @@ new Chart(ctx, {
                 beginAtZero: true,
                 title: {
                     display: true,
-                    text: 'Duração (min)'
+                    text: T_DURATION_AXIS
                 }
             },
             y1: {
@@ -195,7 +201,7 @@ new Chart(ctx, {
                 beginAtZero: true,
                 title: {
                     display: true,
-                    text: 'Carga Média (kg)'
+                    text: T_AVG_LOAD
                 },
                 grid: {
                     drawOnChartArea: false
@@ -204,7 +210,7 @@ new Chart(ctx, {
             x: {
                 title: {
                     display: true,
-                    text: 'Data da Sessão'
+                    text: T_SESSION_DATE
                 }
             }
         },
@@ -225,7 +231,7 @@ new Chart(ctx, {
                 callbacks: {
                     afterTitle: function(context) {
                         if (context[0].dataIndex < chartData.length) {
-                            return 'Treino: ' + chartData[context[0].dataIndex].workout;
+                            return T_WORKOUT_PREFIX + ' ' + chartData[context[0].dataIndex].workout;
                         }
                         return '';
                     },
@@ -235,10 +241,10 @@ new Chart(ctx, {
                             label += ': ';
                         }
                         label += context.parsed.y;
-                        if (context.dataset.label === 'Carga Média (kg)') {
+                        if (context.dataset.label === T_AVG_LOAD) {
                             label += ' kg';
                         } else {
-                            label += ' min';
+                            label += ' ' + T_MIN;
                         }
                         return label;
                     }

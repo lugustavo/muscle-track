@@ -3,6 +3,12 @@
 (function () {
     'use strict';
 
+    // Django's JS catalog (/jsi18n/); identity fallbacks if it has not loaded
+    var gettext = window.gettext || function (s) { return s; };
+    var interpolate = window.interpolate || function (s, o) {
+        return s.replace(/%\((\w+)\)s/g, function (m, k) { return String(o[k]); });
+    };
+
     // ---- Masks: data-mask="phone|cep|state" -------------------------------------------------------------
     function digitsOf(value) { return value.replace(/\D/g, ''); }
 
@@ -126,14 +132,15 @@
         banner.setAttribute('role', 'status');
         var when = new Date(draft.t);
         var text = document.createElement('span');
-        text.textContent = 'Há um rascunho deste formulário salvo às ' +
-            ('0' + when.getHours()).slice(-2) + ':' + ('0' + when.getMinutes()).slice(-2) + '.';
+        text.textContent = interpolate(gettext('Há um rascunho deste formulário salvo às %(time)s.'), {
+            time: ('0' + when.getHours()).slice(-2) + ':' + ('0' + when.getMinutes()).slice(-2)
+        }, true);
         var actions = document.createElement('span');
         actions.className = 'd-flex gap-2';
         var restoreButton = document.createElement('button');
-        restoreButton.type = 'button'; restoreButton.className = 'btn btn-sm btn-primary'; restoreButton.textContent = 'Restaurar';
+        restoreButton.type = 'button'; restoreButton.className = 'btn btn-sm btn-primary'; restoreButton.textContent = gettext('Restaurar');
         var discardButton = document.createElement('button');
-        discardButton.type = 'button'; discardButton.className = 'btn btn-sm btn-outline-secondary'; discardButton.textContent = 'Descartar';
+        discardButton.type = 'button'; discardButton.className = 'btn btn-sm btn-outline-secondary'; discardButton.textContent = gettext('Descartar');
         restoreButton.addEventListener('click', function () { restore(draft); banner.remove(); });
         discardButton.addEventListener('click', function () { drop(); banner.remove(); });
         actions.appendChild(restoreButton); actions.appendChild(discardButton);

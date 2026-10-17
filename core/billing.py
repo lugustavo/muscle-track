@@ -8,7 +8,8 @@ from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
 from django.utils.formats import number_format
-from django.utils.translation import get_language
+from django.utils import translation
+from django.utils.translation import get_language, gettext as _
 
 from . import packages
 from .history import log_event
@@ -37,8 +38,12 @@ def register_payment(person, *, package, amount, paid_on, method, notes='', acto
         person=person, student_package=package, plan=package.package if package else None,
         plan_name=package.name if package else '', amount=amount, paid_on=paid_on, method=method, notes=notes,
         recorded_by=actor if getattr(actor, 'pk', None) else None)
-    what = f' — {package.name}' if package else ''
-    log_event(person, StudentEvent.Kind.PAYMENT, actor, f'Pagamento registrado ({payment.get_method_display()}){what}')
+    if package:
+        summary = _('Pagamento registrado (%(method)s) — %(package)s') % {
+            'method': payment.get_method_display(), 'package': package.name}
+    else:
+        summary = _('Pagamento registrado (%(method)s)') % {'method': payment.get_method_display()}
+    log_event(person, StudentEvent.Kind.PAYMENT, actor, summary)
     return payment
 
 
@@ -47,7 +52,7 @@ def delete_payment(payment, actor=None):
     person = payment.person
     label = f'{payment.paid_on:%d/%m/%Y} ({payment.get_method_display()})'
     payment.delete()
-    log_event(person, StudentEvent.Kind.PAYMENT, actor, f'Pagamento de {label} excluído')
+    log_event(person, StudentEvent.Kind.PAYMENT, actor, _('Pagamento de %(label)s excluído') % {'label': label})
 
 
 def overdue_rows(today=None):
@@ -138,9 +143,12 @@ def service_report(year, month):
 
 def charge_message(person, package, amount, text=None):
     """The WhatsApp text asking for the payment of a package (paid at the first class). Lists pass the trainer's
-    `text` (whatsapp_messages.current_text) once, instead of reading it for every row."""
-    from .whatsapp_messages import Kind, render
+    `text` (whatsapp_messages.current_text) once, instead of reading it for every row.
 
-    return render(Kind.CHARGE, {
-        'nome': person.person_name.split()[0], 'pacote': package.name if package is not None else '',
-        'valor': money(amount) if amount is not None else '', 'pix': settings.PIX_KEY}, text)
+    It is written in the student's own language (the amount too), whatever language the trainer is using."""
+    from .whatsapp_messages import Kind, language_of, render
+
+    with translation.override(language_of(person)):
+        return render(Kind.CHARGE, {
+            'nome': person.person_name.split()[0], 'pacote': package.name if package is not None else '',
+            'valor': money(amount) if amount is not None else '', 'pix': settings.PIX_KEY}, text)

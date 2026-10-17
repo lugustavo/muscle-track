@@ -275,6 +275,14 @@
 
 {% block extra_js %}
 <script>
+const T_LOAD_ERROR = "{% trans 'Erro ao carregar exercícios. Tente novamente.' as js_msg %}{{ js_msg|escapejs }}";
+const T_NONE_FOUND = "{% trans 'Nenhum exercício encontrado' as js_msg %}{{ js_msg|escapejs }}";
+const T_SETS = "{% trans 'séries' as js_msg %}{{ js_msg|escapejs }}";
+const T_REPS = "{% trans 'reps' as js_msg %}{{ js_msg|escapejs }}";
+const T_EDIT_PARAMS = "{% trans 'Editar parâmetros' as js_msg %}{{ js_msg|escapejs }}";
+const T_REMOVE_EXERCISE = "{% trans 'Remover exercício' as js_msg %}{{ js_msg|escapejs }}";
+const T_CONFIRM_REMOVE = "{% trans 'Remover este exercício do treino?' as js_msg %}{{ js_msg|escapejs }}";
+const T_MINUTES = "{% trans 'minutos' as js_msg %}{{ js_msg|escapejs }}";
 // Estado global
 let selectedExercises = [];
 let allExercises = [];
@@ -331,7 +339,7 @@ function loadExercises() {
         })
         .catch(error => {
             console.error('Erro ao carregar exercícios:', error);
-            loading.innerHTML = '<div class="alert alert-danger">Erro ao carregar exercícios. Tente novamente.</div>';
+            loading.innerHTML = '<div class="alert alert-danger">' + T_LOAD_ERROR + '</div>';
         });
 }
 
@@ -378,7 +386,7 @@ function renderExercises(exercises) {
     });
 
     if (filtered.length === 0) {
-        grid.innerHTML = '<div class="col-12"><div class="alert alert-info text-center"><i class="bi bi-info-circle"></i> Nenhum exercício encontrado</div></div>';
+        grid.innerHTML = '<div class="col-12"><div class="alert alert-info text-center"><i class="bi bi-info-circle"></i> ' + T_NONE_FOUND + '</div></div>';
     }
 }
 
@@ -469,16 +477,16 @@ function updateSelectedExercisesList() {
                     <h6 class="mb-1">${exercise.name}</h6>
                     <small class="text-muted">
                         <i class="bi bi-diagram-3"></i> ${exercise.muscle_group} |
-                        <i class="bi bi-bar-chart"></i> ${exercise.sets} séries ×
-                        <i class="bi bi-arrow-repeat"></i> ${exercise.reps} reps |
+                        <i class="bi bi-bar-chart"></i> ${exercise.sets} ${T_SETS} ×
+                        <i class="bi bi-arrow-repeat"></i> ${exercise.reps} ${T_REPS} |
                         <i class="bi bi-clock"></i> ${exercise.rest}s
                     </small>
                 </div>
                 <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="editExercise(${exercise.id})" title="Editar parâmetros">
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="editExercise(${exercise.id})" title="${T_EDIT_PARAMS}">
                         <i class="bi bi-pencil"></i>
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeExercise(${exercise.id})" title="Remover exercício">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeExercise(${exercise.id})" title="${T_REMOVE_EXERCISE}">
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>
@@ -542,7 +550,7 @@ document.getElementById('saveExerciseEdit').addEventListener('click', function()
 
 // Remover exercício
 function removeExercise(exerciseId) {
-    if (confirm('Remover este exercício do treino?')) {
+    if (confirm(T_CONFIRM_REMOVE)) {
         selectedExercises = selectedExercises.filter(e => e.id !== exerciseId);
         updateSelectedExercisesList();
         updateSummary();
@@ -557,7 +565,7 @@ function updateSummary() {
     const duration = selectedExercises.reduce((total, ex) => {
         return total + (ex.sets * (ex.rest / 60 + 1));
     }, 0);
-    document.getElementById('estimatedDuration').textContent = Math.round(duration) + ' minutos';
+    document.getElementById('estimatedDuration').textContent = Math.round(duration) + ' ' + T_MINUTES;
 }
 
 // Salvar formulário

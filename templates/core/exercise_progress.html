@@ -71,13 +71,14 @@
 <script src="{% static 'vendor/chartjs/4.4.0/chart.umd.js' %}"></script>
 <script src="{% static 'js/chart-theme.js' %}"></script>
 <script>
+const T_LOAD = "{% trans 'Carga (kg)' as js_msg %}{{ js_msg|escapejs }}";
 const points = JSON.parse(document.getElementById('chart-data').textContent);
 new Chart(document.getElementById('progressChart'), {
     type: 'line',
     data: {
         labels: points.map(p => p.date),
         datasets: [{
-            label: 'Carga (kg)',
+            label: T_LOAD,
             data: points.map(p => p.weight),
             borderColor: '#FF6B6B',
             backgroundColor: 'rgba(255,107,107,0.15)',

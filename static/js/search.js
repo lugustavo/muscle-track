@@ -3,6 +3,15 @@
 (function () {
     'use strict';
 
+    // Django's JS catalog (/jsi18n/); identity fallbacks if it has not loaded
+    var gettext = window.gettext || function (s) { return s; };
+    var ngettext = window.ngettext || function (singular, plural, n) { return n === 1 ? singular : plural; };
+    var interpolate = window.interpolate || function (s, o, named) {
+        if (named) { return s.replace(/%\((\w+)\)s/g, function (m, k) { return String(o[k]); }); }
+        var i = 0;
+        return s.replace(/%s/g, function () { return String(o[i++]); });
+    };
+
     var RECENT_KEY = 'mt-search-recent';
     var RECENT_MAX = 5;
     var sheet = document.getElementById('searchSheet');
@@ -88,7 +97,7 @@
             title.appendChild(document.createTextNode(group.label));
             head.appendChild(title);
             if (group.total > group.items.length) {
-                var more = el('a', 'small', 'ver todos (' + group.total + ')');
+                var more = el('a', 'small', interpolate(gettext('ver todos (%s)'), [group.total]));
                 more.href = group.more_url;
                 head.appendChild(more);
             }
@@ -110,9 +119,9 @@
             results.appendChild(list);
         });
         if (!total) {
-            results.appendChild(el('p', 'text-muted mb-0', 'Nada encontrado para "' + data.query + '".'));
+            results.appendChild(el('p', 'text-muted mb-0', interpolate(gettext('Nada encontrado para "%(query)s".'), { query: data.query }, true)));
         }
-        status.textContent = total ? total + ' resultado' + (total === 1 ? '' : 's') : 'Nada encontrado';
+        status.textContent = total ? interpolate(ngettext('%s resultado', '%s resultados', total), [total]) : gettext('Nada encontrado');
         if (total) { setActive(0); }
     }
 

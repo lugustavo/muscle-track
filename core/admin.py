@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.translation import gettext_lazy as _
 from .models import (
     MuscleGroup, Person, Exercise, Routine, RoutineExercise,
     PersonRoutine, PersonRoutineExercise, WorkoutSession, SessionExercise, SessionSet,
@@ -34,14 +35,14 @@ class PersonAdmin(admin.ModelAdmin):
     list_filter = ['status', 'city', 'state']
     search_fields = ['person_name', 'phone', 'user__email']
     fieldsets = [
-        ('Informações Básicas', {
+        (_('Informações Básicas'), {
             'fields': ['user', 'person_name', 'birth_date', 'phone']
         }),
-        ('Endereço', {
+        (_('Endereço'), {
             'fields': ['address', 'city', 'state', 'zip_code'],
             'classes': ['collapse']
         }),
-        ('Outras Informações', {
+        (_('Outras Informações'), {
             'fields': ['notes', 'status', 'status_reason', 'status_changed_at', 'is_active']
         }),
     ]
@@ -55,16 +56,16 @@ class ExerciseAdmin(admin.ModelAdmin):
     list_filter = ['muscle_group', 'media_type', 'is_active']
     search_fields = ['exercise_name', 'description']
     fieldsets = [
-        ('Informações Básicas', {
+        (_('Informações Básicas'), {
             'fields': ['exercise_name', 'muscle_group', 'description']
         }),
-        ('Configurações Padrão', {
+        (_('Configurações Padrão'), {
             'fields': ['default_sets', 'default_reps']
         }),
-        ('Mídia', {
+        (_('Mídia'), {
             'fields': ['media_type', 'media_file', 'media_url', 'thumbnail']
         }),
-        ('Instruções', {
+        (_('Instruções'), {
             'fields': ['instructions', 'is_active']
         }),
     ]
@@ -93,13 +94,13 @@ class PersonRoutineAdmin(admin.ModelAdmin):
     date_hierarchy = 'routine_date'
     inlines = [PersonRoutineExerciseInline]
     fieldsets = [
-        ('Informações Básicas', {
+        (_('Informações Básicas'), {
             'fields': ['person', 'routine_template', 'routine_name', 'description', 'difficulty_level', 'estimated_duration']
         }),
-        ('Datas', {
+        (_('Datas'), {
             'fields': ['routine_date', 'start_date', 'end_date', 'is_active']
         }),
-        ('Observações', {
+        (_('Observações'), {
             'fields': ['notes'],
             'classes': ['collapse']
         }),

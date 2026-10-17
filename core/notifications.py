@@ -1,7 +1,10 @@
 """Notifications by e-mail and web push, only on the channels each person turned on (everything starts off).
 
 `notify(users, message)` is the single entry point; the senders never raise (a failed notification must not break
-the action that caused it) and every attempt is written to NotificationLog (kind and result, never the text)."""
+the action that caused it) and every attempt is written to NotificationLog (kind and result, never the text).
+
+The title and body of a `Message` are lazy texts (`lazy_text`): they are only built when `deliver` shows them, inside
+`translation.override(<the recipient's language>)`, so one message reaches each person in their own language."""
 import json
 import logging
 import re
@@ -16,8 +19,10 @@ from django.core.mail import send_mail
 from django.db import connection
 from django.db.models import Q
 from django.urls import reverse
-from django.utils import formats, timezone
+from django.utils import formats, timezone, translation
+from django.utils.translation import gettext as _, ngettext
 
+from .i18n import language_for, lazy_text
 from .models import NotificationLog, NotificationPreference
 
 logger = logging.getLogger(__name__)
@@ -48,9 +53,9 @@ def absolute(path):
 
 
 def when(moment):
-    """'qui 15/10 às 07:00' in the local time zone."""
+    """'qui 15/10 às 07:00' in the local time zone (words in the active language)."""
     local = timezone.localtime(moment)
-    return f"{formats.date_format(local, 'D d/m')} às {formats.date_format(local, 'H:i')}"
+    return _('%(date)s às %(time)s') % {'date': formats.date_format(local, 'D d/m'), 'time': formats.date_format(local, 'H:i')}
 
 
 def device_name(user_agent):
@@ -58,10 +63,10 @@ def device_name(user_agent):
     ua = user_agent or ''
     browser = next((name for key, name in (('Edg/', 'Edge'), ('OPR/', 'Opera'), ('SamsungBrowser', 'Samsung Internet'),
                                            ('Firefox/', 'Firefox'), ('CriOS', 'Chrome'), ('Chrome/', 'Chrome'),
-                                           ('Safari/', 'Safari')) if key in ua), 'Navegador')
+                                           ('Safari/', 'Safari')) if key in ua), _('Navegador'))
     system = next((name for key, name in (('iPhone', 'iPhone'), ('iPad', 'iPad'), ('Android', 'Android'),
                                           ('Windows', 'Windows'), ('Mac OS X', 'Mac'), ('Linux', 'Linux')) if key in ua), '')
-    return f'{browser} no {system}' if system else browser
+    return _('%(browser)s no %(system)s') % {'browser': browser, 'system': system} if system else browser
 
 
 def staff_users():
@@ -69,38 +74,64 @@ def staff_users():
 
 
 # --- messages (no health data, no amounts; just what changed and when) -------------------------------------
+# Titles and bodies are lazy: built when shown, in the recipient's language. Everything they need from the database is
+# read here, up front, so building the text later (maybe in another thread) touches no query.
 
 def request_created(asked):
     name = asked.appointment.person.person_name
-    what = 'cancelar' if asked.kind == 'cancel' else 'remarcar'
-    return Message('request_new', f'Novo pedido de {name}', f'{name} pediu para {what} a aula de {when(asked.appointment.starts_at)}.',
+    cancel = asked.kind == 'cancel'
+    starts = asked.appointment.starts_at
+
+    def body():
+        if cancel:
+            return _('%(name)s pediu para cancelar a aula de %(when)s.') % {'name': name, 'when': when(starts)}
+        return _('%(name)s pediu para remarcar a aula de %(when)s.') % {'name': name, 'when': when(starts)}
+
+    return Message('request_new', lazy_text(lambda: _('Novo pedido de %(name)s') % {'name': name}), lazy_text(body),
                    reverse('core:agenda'))
 
 
 def request_answered(asked, note=''):
-    start = when(asked.appointment.starts_at)
+    starts = asked.appointment.starts_at
+    proposed = asked.proposed_starts_at
+    path = reverse('core:my_agenda')
+    title_approved = lazy_text(lambda: _('Pedido aprovado'))
     if asked.status == 'approved':
         if asked.kind == 'cancel':
-            return Message('request_answered', 'Pedido aprovado', f'Sua aula de {start} foi cancelada.', reverse('core:my_agenda'))
-        return Message('request_answered', 'Pedido aprovado', f'Sua aula de {start} foi remarcada para {when(asked.proposed_starts_at)}.',
-                       reverse('core:my_agenda'))
-    reason = f' Motivo: {note}' if note else ''
-    return Message('request_answered', 'Pedido recusado', f'Sua personal não pôde atender o pedido para a aula de {start}.{reason}',
-                   reverse('core:my_agenda'))
+            return Message('request_answered', title_approved,
+                           lazy_text(lambda: _('Sua aula de %(start)s foi cancelada.') % {'start': when(starts)}), path)
+        return Message('request_answered', title_approved,
+                       lazy_text(lambda: _('Sua aula de %(start)s foi remarcada para %(new)s.')
+                                 % {'start': when(starts), 'new': when(proposed)}), path)
+
+    def declined():
+        if note:
+            return _('Sua personal não pôde atender o pedido para a aula de %(start)s. Motivo: %(note)s') % {
+                'start': when(starts), 'note': note}
+        return _('Sua personal não pôde atender o pedido para a aula de %(start)s.') % {'start': when(starts)}
+
+    return Message('request_answered', lazy_text(lambda: _('Pedido recusado')), lazy_text(declined), path)
 
 
 def class_moved(old, new):
-    return Message('class_moved', 'Aula remarcada', f'Sua aula de {when(old.starts_at)} foi remarcada para {when(new.starts_at)}.',
+    old_starts, new_starts = old.starts_at, new.starts_at
+    return Message('class_moved', lazy_text(lambda: _('Aula remarcada')),
+                   lazy_text(lambda: _('Sua aula de %(old)s foi remarcada para %(new)s.')
+                             % {'old': when(old_starts), 'new': when(new_starts)}),
                    reverse('core:my_agenda'))
 
 
 def class_cancelled(appointment):
-    return Message('class_cancelled', 'Aula cancelada', f'Sua aula de {when(appointment.starts_at)} foi cancelada.',
+    starts = appointment.starts_at
+    return Message('class_cancelled', lazy_text(lambda: _('Aula cancelada')),
+                   lazy_text(lambda: _('Sua aula de %(start)s foi cancelada.') % {'start': when(starts)}),
                    reverse('core:my_agenda'))
 
 
 def move_undone(original):
-    return Message('move_undone', 'Aula mantida', f'A remarcação foi desfeita: sua aula continua em {when(original.starts_at)}.',
+    starts = original.starts_at
+    return Message('move_undone', lazy_text(lambda: _('Aula mantida')),
+                   lazy_text(lambda: _('A remarcação foi desfeita: sua aula continua em %(start)s.') % {'start': when(starts)}),
                    reverse('core:my_agenda'))
 
 
@@ -109,68 +140,91 @@ def day_word(moment, now=None):
     local = timezone.localtime(moment).date()
     today = timezone.localdate(now)
     if local == today:
-        return 'hoje'
+        return _('hoje')
     if (local - today).days == 1:
-        return 'amanhã'
+        return _('amanhã')
     return formats.date_format(local, 'D d/m')
 
 
 def class_reminder(appointment, now=None):
-    clock = formats.date_format(timezone.localtime(appointment.starts_at), 'H:i')
-    return Message('class_reminder', 'Lembrete de aula', f'Sua aula é {day_word(appointment.starts_at, now)} às {clock}.',
-                   reverse('core:my_agenda'))
+    starts = appointment.starts_at
+
+    def body():
+        clock = formats.date_format(timezone.localtime(starts), 'H:i')
+        return _('Sua aula é %(day)s às %(time)s.') % {'day': day_word(starts, now), 'time': clock}
+
+    return Message('class_reminder', lazy_text(lambda: _('Lembrete de aula')), lazy_text(body), reverse('core:my_agenda'))
+
+
+def _in_days(days):
+    """'em 3 dias' (the days from now, once 'hoje' and 'amanhã' are ruled out)."""
+    return _('em %(n)d dias') % {'n': days}
 
 
 def plan_expiring(days, left=None):
-    when_ = 'hoje' if days == 0 else ('amanhã' if days == 1 else f'em {days} dias')
-    sessions = '' if left is None else f' Ainda {"resta" if left == 1 else "restam"} {left} aula{"" if left == 1 else "s"}.'
-    return Message('plan_expiry', 'Seu pacote está vencendo', f'Seu pacote vence {when_}.{sessions} Fale com a sua personal para combinar.',
-                   reverse('core:my_agenda'))
+    def body():
+        when_ = _('hoje') if days == 0 else (_('amanhã') if days == 1 else _in_days(days))
+        text = _('Seu pacote vence %(when)s.') % {'when': when_}
+        if left is not None:
+            text += ' ' + ngettext('Ainda resta %(n)d aula.', 'Ainda restam %(n)d aulas.', left) % {'n': left}
+        return text + ' ' + _('Fale com a sua personal para combinar.')
+
+    return Message('plan_expiry', lazy_text(lambda: _('Seu pacote está vencendo')), lazy_text(body), reverse('core:my_agenda'))
 
 
 def package_low(left):
-    if left == 1:
-        text = 'Resta 1 aula no seu pacote. Fale com a sua personal para renovar.'
-    else:
-        text = f'Restam {left} aulas no seu pacote. Fale com a sua personal para renovar.'
-    return Message('package_low', 'Seu pacote está acabando', text, reverse('core:my_agenda'))
+    return Message('package_low', lazy_text(lambda: _('Seu pacote está acabando')),
+                   lazy_text(lambda: ngettext('Resta %(n)d aula no seu pacote. Fale com a sua personal para renovar.',
+                                              'Restam %(n)d aulas no seu pacote. Fale com a sua personal para renovar.',
+                                              left) % {'n': left}),
+                   reverse('core:my_agenda'))
 
 
 def package_attention(rows, today):
     """One notice to the trainer about every package that just needed attention (see packages.alerts)."""
-    lines = []
-    for r in rows:
-        name = r['student'].person_name
-        if r['expired']:
-            lines.append(f"{name}: pacote vencido, {r['left']} aula{'' if r['left'] == 1 else 's'} sem usar")
-        elif r['expiring']:
-            days = (r['ends_on'] - today).days
-            when_ = 'hoje' if days <= 0 else ('amanhã' if days == 1 else f'em {days} dias')
-            lines.append(f"{name}: vence {when_}, "
-                         f"{r['left']} aula{'' if r['left'] == 1 else 's'} restante{'' if r['left'] == 1 else 's'}")
-        else:
-            lines.append(f"{name}: {r['left']} aula{'' if r['left'] == 1 else 's'} restante{'' if r['left'] == 1 else 's'}")
-    title = ('1 pacote para renovar' if len(rows) == 1 else f'{len(rows)} pacotes para renovar')
-    shown = lines[:5] + ([f'e mais {len(lines) - 5}'] if len(lines) > 5 else [])
-    return Message('package_attention', title, '; '.join(shown) + '.', reverse('core:finance'))
+    items = [(r['student'].person_name, r['expired'], r['expiring'], (r['ends_on'] - today).days if r['expiring'] else None,
+             r['left']) for r in rows]
+
+    def line(name, expired, expiring, days, left):
+        values = {'name': name, 'n': left}
+        if expired:
+            return ngettext('%(name)s: pacote vencido, %(n)d aula sem usar',
+                            '%(name)s: pacote vencido, %(n)d aulas sem usar', left) % values
+        if expiring:
+            values['when'] = _('hoje') if days <= 0 else (_('amanhã') if days == 1 else _in_days(days))
+            return ngettext('%(name)s: vence %(when)s, %(n)d aula restante',
+                            '%(name)s: vence %(when)s, %(n)d aulas restantes', left) % values
+        return ngettext('%(name)s: %(n)d aula restante', '%(name)s: %(n)d aulas restantes', left) % values
+
+    def body():
+        lines = [line(*item) for item in items]
+        shown = lines[:5] + ([_('e mais %(n)d') % {'n': len(lines) - 5}] if len(lines) > 5 else [])
+        return '; '.join(shown) + '.'
+
+    return Message('package_attention',
+                   lazy_text(lambda: ngettext('%(n)d pacote para renovar', '%(n)d pacotes para renovar', len(items))
+                             % {'n': len(items)}),
+                   lazy_text(body), reverse('core:finance'))
 
 
 def test_message():
-    return Message('test', 'Teste de notificação', 'Tudo certo: este aparelho recebe os avisos do Muscle Track.',
+    return Message('test', lazy_text(lambda: _('Teste de notificação')),
+                   lazy_text(lambda: _('Tudo certo: este aparelho recebe os avisos do Muscle Track.')),
                    reverse('core:notification_settings'))
 
 
-# --- errors: short, in Portuguese, and never with a push endpoint (it works like a password) ------------
+# --- errors: short, in the recipient's language, and never with a push endpoint (it works like a password) --
 
 def _scrub(text):
-    return re.sub(r'https?://\S+', '<endereço>', str(text))[:150]
+    return re.sub(r'https?://\S+', _('<endereço>'), str(text))[:150]
 
 
 def _email_error(exc):
     if isinstance(exc, smtplib.SMTPAuthenticationError):
-        return 'o servidor de e-mail recusou o login: confira EMAIL_HOST_USER e a senha de app (EMAIL_HOST_PASSWORD)'
+        return _('o servidor de e-mail recusou o login: confira EMAIL_HOST_USER e a senha de app (EMAIL_HOST_PASSWORD)')
     if isinstance(exc, (smtplib.SMTPConnectError, ConnectionError, TimeoutError, OSError)):
-        return f'não foi possível conectar ao servidor de e-mail ({settings.EMAIL_HOST}:{settings.EMAIL_PORT}); confira a rede do servidor e o EMAIL_HOST'
+        return _('não foi possível conectar ao servidor de e-mail (%(host)s:%(port)s); '
+                 'confira a rede do servidor e o EMAIL_HOST') % {'host': settings.EMAIL_HOST, 'port': settings.EMAIL_PORT}
     return f'{type(exc).__name__}: {_scrub(exc)}'
 
 
@@ -178,9 +232,9 @@ def _push_error(exc, endpoint):
     import requests
 
     if isinstance(exc, (requests.ConnectionError, requests.Timeout)):
-        host = urlparse(endpoint).hostname or 'serviço de push'
-        return (f'o servidor não conseguiu abrir conexão com {host} (porta 443); '
-                'confira se ele tem acesso à internet, DNS e proxy (HTTPS_PROXY)')
+        host = urlparse(endpoint).hostname or _('serviço de push')
+        return _('o servidor não conseguiu abrir conexão com %(host)s (porta 443); '
+                 'confira se ele tem acesso à internet, DNS e proxy (HTTPS_PROXY)') % {'host': host}
     return f'{type(exc).__name__}: {_scrub(exc)}'
 
 
@@ -215,14 +269,17 @@ def _run(user_ids, message, close):
 
 
 def deliver(user, message, only=None):
-    """Send to one user now. `only` limits it to a channel ('email' or 'push'), used by the "send a test" button."""
+    """Send to one user now. `only` limits it to a channel ('email' or 'push'), used by the "send a test" button.
+
+    Everything the person receives (and what is logged) is written in their own language."""
     pref = NotificationPreference.objects.filter(user=user).first()
     if pref is None:
         return
-    if pref.email_enabled and only in (None, 'email'):
-        _send_email(user, message)
-    if pref.push_enabled and only in (None, 'push'):
-        _send_push(user, message)
+    with translation.override(language_for(user)):
+        if pref.email_enabled and only in (None, 'email'):
+            _send_email(user, message)
+        if pref.push_enabled and only in (None, 'push'):
+            _send_push(user, message)
 
 
 def _log(user, message, channel, status, detail=''):
@@ -230,17 +287,24 @@ def _log(user, message, channel, status, detail=''):
 
 
 def _send_email(user, message):
+    """Runs inside `deliver`'s language override: the lazy title and body are turned into text here."""
     if not user.email:
-        return _log(user, message, 'email', Status.SKIPPED, 'sem e-mail cadastrado')
+        return _log(user, message, 'email', Status.SKIPPED, _('sem e-mail cadastrado'))
     link = absolute(message.path)
     settings_link = absolute(reverse('core:notification_settings'))
-    body = message.body + (f'\n\nAbrir: {link}' if link else '')
-    body += ('\n\n—\nVocê recebe este aviso porque ativou as notificações por e-mail.'
-             + (f' Para parar: {settings_link}' if settings_link else ' Para parar, desative em Notificações no app.'))
+    title = str(message.title)
+    body = str(message.body) + ('\n\n' + _('Abrir: %(link)s') % {'link': link} if link else '')
+    if settings_link:
+        footer = _('Você recebe este aviso porque ativou as notificações por e-mail. Para parar: %(link)s') % {
+            'link': settings_link}
+    else:
+        footer = _('Você recebe este aviso porque ativou as notificações por e-mail. '
+                   'Para parar, desative em Notificações no app.')
+    body += '\n\n—\n' + footer
     error = ''
-    for _ in range(2):   # one retry: SMTP servers drop connections now and then
+    for attempt in range(2):   # one retry: SMTP servers drop connections now and then
         try:
-            send_mail(message.title, body, None, [user.email], fail_silently=False)
+            send_mail(title, body, None, [user.email], fail_silently=False)
             return _log(user, message, 'email', Status.SENT)
         except Exception as exc:
             error = _email_error(exc)
@@ -251,12 +315,12 @@ def _send_email(user, message):
 def _send_push(user, message):
     subscriptions = list(user.push_subscriptions.all())
     if not push_configured():
-        return _log(user, message, 'push', Status.SKIPPED, 'web push não configurado no servidor')
+        return _log(user, message, 'push', Status.SKIPPED, _('web push não configurado no servidor'))
     if not subscriptions:
-        return _log(user, message, 'push', Status.SKIPPED, 'nenhum aparelho inscrito')
+        return _log(user, message, 'push', Status.SKIPPED, _('nenhum aparelho inscrito'))
     from pywebpush import WebPushException, webpush
 
-    payload = json.dumps({'title': message.title, 'body': message.body, 'url': message.path, 'tag': message.kind})
+    payload = json.dumps({'title': str(message.title), 'body': str(message.body), 'url': message.path, 'tag': message.kind})
     subject = settings.VAPID_SUBJECT or f'mailto:{settings.PRIVACY_CONTACT_EMAIL or settings.EMAIL_HOST_USER or "admin@example.com"}'
     for sub in subscriptions:
         try:
@@ -266,7 +330,7 @@ def _send_push(user, message):
             status = getattr(getattr(exc, 'response', None), 'status_code', None)
             if status in (404, 410):   # the browser dropped this subscription
                 sub.delete()
-                _log(user, message, 'push', Status.SKIPPED, 'aparelho removido (assinatura expirada)')
+                _log(user, message, 'push', Status.SKIPPED, _('aparelho removido (assinatura expirada)'))
             else:
                 error = _push_error(exc, sub.endpoint)
                 logger.warning('push failed for user %s: %s', user.pk, error)

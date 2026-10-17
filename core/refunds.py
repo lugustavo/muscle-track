@@ -7,6 +7,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext as _, gettext_lazy as _l, ngettext
 
 from . import packages
 from .billing import money
@@ -58,15 +59,20 @@ def cancellation_quote(package, fee=None):
 
 def quote_text(package, quote, amount):
     """The calculation in words, to send to the student (kept on the refund)."""
+    if quote['per_class']:
+        given = _('Aulas dadas: %(used)d de %(sessions)d x %(per_class)s = %(used_value)s') % {
+            'used': quote['used'], 'sessions': quote['sessions'], 'per_class': money(quote['per_class']),
+            'used_value': money(quote['used_value'])}
+    else:
+        given = _('Aulas dadas: %(used)d de %(sessions)d') % {'used': quote['used'], 'sessions': quote['sessions']}
     lines = [
-        f'Pacote: {package.name}',
-        f'Pago: {money(quote["paid"])}',
-        f'Aulas dadas: {quote["used"]} de {quote["sessions"]}'
-        + (f' x {money(quote["per_class"])} = {money(quote["used_value"])}' if quote['per_class'] else ''),
+        _('Pacote: %(name)s') % {'name': package.name},
+        _('Pago: %(paid)s') % {'paid': money(quote['paid'])},
+        given,
     ]
     if quote['fee']:
-        lines.append(f'Taxa combinada: {money(quote["fee"])}')
-    lines.append(f'Valor devolvido: {money(amount)}')
+        lines.append(_('Taxa combinada: %(fee)s') % {'fee': money(quote['fee'])})
+    lines.append(_('Valor devolvido: %(amount)s') % {'amount': money(amount)})
     return '\n'.join(lines)
 
 
@@ -76,28 +82,32 @@ def register_refund(person, *, amount, method, refunded_on=None, reason='', kind
     """Give money back (or undo a wrong entry) against a payment and/or a package of this student."""
     amount = Decimal(amount or 0).quantize(CENTS, ROUND_HALF_UP)
     if amount <= 0:
-        raise RefundError('Informe um valor maior que zero.')
+        raise RefundError(_('Informe um valor maior que zero.'))
     if payment is not None:
         if payment.person_id != person.pk:
-            raise RefundError('Este pagamento é de outro aluno.')
+            raise RefundError(_('Este pagamento é de outro aluno.'))
         package = package or payment.student_package
         if amount > payment_balance(payment):
-            raise RefundError(f'Só dá para devolver até {money(payment_balance(payment))} deste pagamento.')
+            raise RefundError(_('Só dá para devolver até %(max)s deste pagamento.') % {'max': money(payment_balance(payment))})
     if package is None and payment is None:
-        raise RefundError('Escolha o pagamento ou o pacote a que a devolução se refere.')
+        raise RefundError(_('Escolha o pagamento ou o pacote a que a devolução se refere.'))
     if package is not None:
         if package.person_id != person.pk:
-            raise RefundError('Este pacote é de outro aluno.')
+            raise RefundError(_('Este pacote é de outro aluno.'))
         paid = packages.paid_amount(package)
         if amount > paid:
-            raise RefundError(f'Só dá para devolver até {money(paid)}: é o que foi pago por este pacote.')
+            raise RefundError(_('Só dá para devolver até %(max)s: é o que foi pago por este pacote.') % {'max': money(paid)})
     refund = Refund.objects.create(
         person=person, student_package=package, payment=payment, kind=kind, amount=amount,
         refunded_on=refunded_on or timezone.localdate(), method=method, reason=reason.strip()[:200], summary=summary,
         recorded_by=actor if getattr(actor, 'pk', None) else None)
-    what = f' — {package.name}' if package else ''
-    log_event(person, StudentEvent.Kind.PAYMENT, actor, f'{refund.get_kind_display()} registrada ({refund.get_method_display()}){what}',
-              {'refund': refund.pk})
+    if package:
+        summary_text = _('%(kind)s registrada (%(method)s) — %(package)s') % {
+            'kind': refund.get_kind_display(), 'method': refund.get_method_display(), 'package': package.name}
+    else:
+        summary_text = _('%(kind)s registrada (%(method)s)') % {
+            'kind': refund.get_kind_display(), 'method': refund.get_method_display()}
+    log_event(person, StudentEvent.Kind.PAYMENT, actor, summary_text, {'refund': refund.pk})
     if package is not None:
         packages.sync(person)
     return refund
@@ -107,14 +117,15 @@ def register_refund(person, *, amount, method, refunded_on=None, reason='', kind
 def void_refund(refund, reason, actor=None):
     """Undo a refund entered by mistake: it stays on record, marked as voided, and stops counting."""
     if refund.voided_at:
-        raise RefundError('Esta devolução já foi anulada.')
+        raise RefundError(_('Esta devolução já foi anulada.'))
     if not reason.strip():
-        raise RefundError('Escreva o motivo da anulação.')
+        raise RefundError(_('Escreva o motivo da anulação.'))
     refund.voided_at = timezone.now()
     refund.voided_reason = reason.strip()[:200]
     refund.save(update_fields=['voided_at', 'voided_reason'])
     log_event(refund.person, StudentEvent.Kind.PAYMENT, actor,
-              f'{refund.get_kind_display()} de {refund.refunded_on:%d/%m/%Y} anulada', {'refund': refund.pk})
+              _('%(kind)s de %(date)s anulada') % {'kind': refund.get_kind_display(), 'date': f'{refund.refunded_on:%d/%m/%Y}'},
+              {'refund': refund.pk})
     return refund
 
 
@@ -144,24 +155,29 @@ def cancel_with_refund(package, actor=None, *, amount=Decimal('0'), method=None,
     now = now or timezone.now()
     amount = Decimal(amount or 0)
     if package.cancelled_at:
-        raise RefundError('Este pacote já foi cancelado.')
+        raise RefundError(_('Este pacote já foi cancelado.'))
     quote = cancellation_quote(package, fee)
     if amount > quote['paid']:
-        raise RefundError(f'Só dá para devolver até {money(quote["paid"])}: é o que foi pago por este pacote.')
+        raise RefundError(_('Só dá para devolver até %(max)s: é o que foi pago por este pacote.') % {'max': money(quote['paid'])})
     refund = None
     packages.cancel_package(package, actor)
     package.cancel_fee = max(Decimal(fee or 0), Decimal('0'))
     package.save(update_fields=['cancel_fee'])
     if amount > 0:
         refund = register_refund(package.person, amount=amount, method=method or Payment.Method.TRANSFER, refunded_on=refunded_on,
-                                 reason=reason or 'Cancelamento do pacote', package=package, summary=quote_text(package, quote, amount),
+                                 reason=reason or _('Cancelamento do pacote'), package=package, summary=quote_text(package, quote, amount),
                                  actor=actor)
     removed = _clear_future(package.person, package, now) if remove_future else 0
     packages.sync(package.person)
     return {'refund': refund, 'removed': removed, 'quote': quote}
 
 
-EDIT_LABELS = {'name': 'nome', 'sessions': 'aulas', 'valid_days': 'prazo', 'price': 'valor', 'notes': 'observação'}
+# What changed in an edit, for the history (name, price and notes: only that they changed)
+EDIT_LABELS = {'name': _l('nome alterado'), 'price': _l('valor alterado'), 'notes': _l('observação alterada')}
+
+
+def _days_text(days):
+    return _('sem prazo') if days is None else ngettext('%(n)d dia', '%(n)d dias', days) % {'n': days}
 
 
 @transaction.atomic
@@ -170,11 +186,13 @@ def edit_package(package, actor=None, *, name, sessions, valid_days, pricing_mod
     """Change a package already sold (name, number of classes, deadline, agreed price). The classes already given are
     never taken away: the package cannot have fewer classes than that. Money values never go to the history."""
     if package.cancelled_at:
-        raise RefundError('Um pacote cancelado não pode ser editado.')
+        raise RefundError(_('Um pacote cancelado não pode ser editado.'))
     used = package.appointments.count()
     if sessions < max(used, 1):
-        raise RefundError(f'O pacote não pode ter menos de {max(used, 1)} aula{"" if max(used, 1) == 1 else "s"}: '
-                          f'{used} já foram dadas.')
+        raise RefundError(ngettext(
+            'O pacote não pode ter menos de %(min)d aula: %(used)d já foram dadas.',
+            'O pacote não pode ter menos de %(min)d aulas: %(used)d já foram dadas.', max(used, 1))
+            % {'min': max(used, 1), 'used': used})
     per, total = compute_prices(pricing_mode, sessions, price_per_session, price_total)
     changed = []
     if package.name != name:
@@ -195,12 +213,12 @@ def edit_package(package, actor=None, *, name, sessions, valid_days, pricing_mod
     package.save()
     parts = []
     if 'sessions' in changed:
-        parts.append(f'aulas {old["sessions"]} → {sessions}')
+        parts.append(_('aulas %(old)d → %(new)d') % {'old': old['sessions'], 'new': sessions})
     if 'valid_days' in changed:
-        parts.append('prazo ' + ('sem prazo' if valid_days is None else f'{valid_days} dias')
-                     + ' (era ' + ('sem prazo' if old['valid_days'] is None else f'{old["valid_days"]} dias') + ')')
-    parts += [EDIT_LABELS[c] + ' alterado' + ('a' if c == 'notes' else '') for c in changed if c in ('name', 'price', 'notes')]
-    log_event(package.person, StudentEvent.Kind.PACKAGE, actor, f'Pacote editado: {package.name} ({"; ".join(parts)})',
+        parts.append(_('prazo %(new)s (era %(old)s)') % {'new': _days_text(valid_days), 'old': _days_text(old['valid_days'])})
+    parts += [str(EDIT_LABELS[c]) for c in changed if c in ('name', 'price', 'notes')]
+    log_event(package.person, StudentEvent.Kind.PACKAGE, actor,
+              _('Pacote editado: %(name)s (%(changes)s)') % {'name': package.name, 'changes': '; '.join(parts)},
               {'package': package.pk, 'fields': changed})
     packages.sync(package.person)
     return changed
@@ -209,10 +227,10 @@ def edit_package(package, actor=None, *, name, sessions, valid_days, pricing_mod
 def overpaid_text(package, amount):
     """The words for a refund of what was paid above the price, to send to the student."""
     return '\n'.join([
-        f'Pacote: {package.name}',
-        f'Valor combinado: {money(package.price_total)}',
-        f'Pago: {money(packages.paid_amount(package))}',
-        f'Valor devolvido (diferença): {money(amount)}'])
+        _('Pacote: %(name)s') % {'name': package.name},
+        _('Valor combinado: %(price)s') % {'price': money(package.price_total)},
+        _('Pago: %(paid)s') % {'paid': money(packages.paid_amount(package))},
+        _('Valor devolvido (diferença): %(amount)s') % {'amount': money(amount)}])
 
 
 def awaiting_refund():

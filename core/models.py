@@ -9,6 +9,7 @@ from decimal import Decimal
 from django.core.files.base import ContentFile
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils import timezone
+from django.utils.translation import gettext, gettext_lazy as _
 
 from PIL import Image, ImageOps
 
@@ -17,17 +18,17 @@ from .validators import validate_avatar_image, validate_photo_image
 
 class MuscleGroup(models.Model):
     """Model representing a muscle group"""
-    name = models.CharField(max_length=50, unique=True, verbose_name='Nome')
-    slug = models.SlugField(max_length=50, unique=True, verbose_name='Slug')
-    description = models.TextField(blank=True, verbose_name='Descrição')
-    is_active = models.BooleanField(default=True, verbose_name='Ativo')
-    order = models.IntegerField(default=0, verbose_name='Ordem de Exibição')
+    name = models.CharField(max_length=50, unique=True, verbose_name=_('Nome'))
+    slug = models.SlugField(max_length=50, unique=True, verbose_name=_('Slug'))
+    description = models.TextField(blank=True, verbose_name=_('Descrição'))
+    is_active = models.BooleanField(default=True, verbose_name=_('Ativo'))
+    order = models.IntegerField(default=0, verbose_name=_('Ordem de Exibição'))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'Grupo Muscular'
-        verbose_name_plural = 'Grupos Musculares'
+        verbose_name = _('Grupo Muscular')
+        verbose_name_plural = _('Grupos Musculares')
         ordering = ['order', 'name']
 
     def __str__(self):
@@ -37,71 +38,71 @@ class MuscleGroup(models.Model):
 class Person(models.Model):
     """Model representing a student/person in the gym"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='person')
-    person_name = models.CharField(max_length=200, verbose_name='Nome')
-    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, validators=[validate_avatar_image], verbose_name='Foto de Perfil')
+    person_name = models.CharField(max_length=200, verbose_name=_('Nome'))
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, validators=[validate_avatar_image], verbose_name=_('Foto de Perfil'))
     # When the student closed the first-access tour ("como usar o app"); None = still to be shown
     intro_seen_at = models.DateTimeField(null=True, blank=True, editable=False)
-    address = models.CharField(max_length=300, blank=True, verbose_name='Endereço')
-    city = models.CharField(max_length=100, blank=True, verbose_name='Cidade')
-    state = models.CharField(max_length=2, blank=True, verbose_name='Estado')
-    zip_code = models.CharField(max_length=10, blank=True, verbose_name='CEP')
-    phone = models.CharField(max_length=20, blank=True, verbose_name='Telefone')
-    birth_date = models.DateField(null=True, blank=True, verbose_name='Data de Nascimento')
-    notes = models.TextField(blank=True, verbose_name='Observações')
+    address = models.CharField(max_length=300, blank=True, verbose_name=_('Endereço'))
+    city = models.CharField(max_length=100, blank=True, verbose_name=_('Cidade'))
+    state = models.CharField(max_length=2, blank=True, verbose_name=_('Estado'))
+    zip_code = models.CharField(max_length=10, blank=True, verbose_name=_('CEP'))
+    phone = models.CharField(max_length=20, blank=True, verbose_name=_('Telefone'))
+    birth_date = models.DateField(null=True, blank=True, verbose_name=_('Data de Nascimento'))
+    notes = models.TextField(blank=True, verbose_name=_('Observações'))
 
     # Trainer's file on the student (not editable by the student)
-    goal = models.TextField(blank=True, verbose_name='Objetivo')
+    goal = models.TextField(blank=True, verbose_name=_('Objetivo'))
     health_notes = models.TextField(
-        blank=True, verbose_name='Saúde, lesões e restrições',
-        help_text='Lesões, cirurgias, medicamentos, limitações médicas...'
+        blank=True, verbose_name=_('Saúde, lesões e restrições'),
+        help_text=_('Lesões, cirurgias, medicamentos, limitações médicas...')
     )
-    emergency_contact_name = models.CharField(max_length=200, blank=True, verbose_name='Contato de emergência')
-    emergency_contact_phone = models.CharField(max_length=20, blank=True, verbose_name='Telefone de emergência')
-    plan_name = models.CharField(max_length=100, blank=True, verbose_name='Plano contratado')
-    plan_expires_on = models.DateField(null=True, blank=True, verbose_name='Vencimento do plano')
+    emergency_contact_name = models.CharField(max_length=200, blank=True, verbose_name=_('Contato de emergência'))
+    emergency_contact_phone = models.CharField(max_length=20, blank=True, verbose_name=_('Telefone de emergência'))
+    plan_name = models.CharField(max_length=100, blank=True, verbose_name=_('Plano contratado'))
+    plan_expires_on = models.DateField(null=True, blank=True, verbose_name=_('Vencimento do plano'))
     # The expiry date a "plan is expiring" reminder was already sent for (a renewal changes the date, so it re-arms)
     plan_reminder_for = models.DateField(null=True, blank=True)
     # Where the plan came from (a template, like Routine -> PersonRoutine). The values below are
     # copied to the student when the plan is assigned, so editing the template never changes them.
     plan = models.ForeignKey('Package', on_delete=models.SET_NULL, null=True, blank=True,
-                             related_name='students', verbose_name='Pacote atual (catálogo)')
+                             related_name='students', verbose_name=_('Pacote atual (catálogo)'))
     # Confidential commercial terms: only the trainer sees or edits them
     plan_price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
-                                     validators=[MinValueValidator(0)], verbose_name='Valor negociado do período')
+                                     validators=[MinValueValidator(0)], verbose_name=_('Valor negociado do período'))
     hourly_rate = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
-                                      validators=[MinValueValidator(0)], verbose_name='Valor/hora negociado')
+                                      validators=[MinValueValidator(0)], verbose_name=_('Valor/hora negociado'))
 
     class Status(models.TextChoices):
-        TRIAL = 'trial', 'Experimental'
-        ACTIVE = 'active', 'Ativo'
-        PAUSED = 'paused', 'Pausado'
-        FORMER = 'former', 'Ex-aluno'
+        TRIAL = 'trial', _('Experimental')
+        ACTIVE = 'active', _('Ativo')
+        PAUSED = 'paused', _('Pausado')
+        FORMER = 'former', _('Ex-aluno')
 
     OPEN_STATUSES = (Status.TRIAL, Status.ACTIVE)
 
     # Lifecycle. `is_active` stays the access switch (login, dashboard, lists); only
     # set_status() changes it, so the two never disagree.
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE, verbose_name='Situação')
-    status_reason = models.TextField(blank=True, verbose_name='Motivo da situação')
-    status_changed_at = models.DateTimeField(null=True, blank=True, verbose_name='Situação desde')
-    is_active = models.BooleanField(default=True, verbose_name='Ativo')
-    deactivated_at = models.DateTimeField(null=True, blank=True, editable=False, verbose_name='Inativado em')
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE, verbose_name=_('Situação'))
+    status_reason = models.TextField(blank=True, verbose_name=_('Motivo da situação'))
+    status_changed_at = models.DateTimeField(null=True, blank=True, verbose_name=_('Situação desde'))
+    is_active = models.BooleanField(default=True, verbose_name=_('Ativo'))
+    deactivated_at = models.DateTimeField(null=True, blank=True, editable=False, verbose_name=_('Inativado em'))
     # The student's own motivation settings (core/consistency.py): the ring, streak and milestones on "Hoje"
     motivation_enabled = models.BooleanField(
-        default=True, verbose_name='Mostrar meta semanal, sequência e marcos',
-        help_text='Desligue se preferir ver só os treinos, sem metas.')
+        default=True, verbose_name=_('Mostrar meta semanal, sequência e marcos'),
+        help_text=_('Desligue se preferir ver só os treinos, sem metas.'))
     weekly_goal = models.PositiveSmallIntegerField(
         null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(7)],
-        verbose_name='Minha meta de treinos por semana',
-        help_text='Usada quando o seu plano não define uma meta. De 1 a 7.')
+        verbose_name=_('Minha meta de treinos por semana'),
+        help_text=_('Usada quando o seu plano não define uma meta. De 1 a 7.'))
     # Bumped to revoke invite links already handed out (see core/invites.py)
     invite_version = models.PositiveIntegerField(default=0, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'Aluno'
-        verbose_name_plural = 'Alunos'
+        verbose_name = _('Aluno')
+        verbose_name_plural = _('Alunos')
         ordering = ['person_name']
 
     def __str__(self):
@@ -153,8 +154,8 @@ class Person(models.Model):
         labels = dict(self.Status.choices)
         StudentEvent.objects.create(
             person=self, actor=actor, kind=StudentEvent.Kind.STATUS,
-            summary=f'Situação: {labels[previous]} → {labels[status]}' if status != previous
-            else 'Motivo da situação atualizado',
+            summary=gettext('Situação: %(old)s → %(new)s') % {'old': labels[previous], 'new': labels[status]}
+            if status != previous else gettext('Motivo da situação atualizado'),
             changes={'status': [previous, status], 'reason': reason,
                      **({'sessions_closed': sessions_closed} if sessions_closed else {})})
         return True
@@ -202,33 +203,33 @@ class Person(models.Model):
 class Exercise(models.Model):
     """Model representing an exercise"""
     MEDIA_TYPE_CHOICES = [
-        ('image', 'Imagem'),
+        ('image', _('Imagem')),
         ('gif', 'GIF'),
-        ('video', 'Vídeo'),
+        ('video', _('Vídeo')),
         ('youtube', 'YouTube'),
-        ('url', 'Link Externo'),
+        ('url', _('Link Externo')),
     ]
 
-    exercise_name = models.CharField(max_length=200, verbose_name='Nome do Exercício')
-    description = models.TextField(blank=True, verbose_name='Descrição')
-    muscle_group = models.ForeignKey(MuscleGroup, on_delete=models.PROTECT, related_name='exercises', verbose_name='Grupo Muscular')
-    default_reps = models.IntegerField(default=12, validators=[MinValueValidator(1)], verbose_name='Repetições Padrão')
-    default_sets = models.IntegerField(default=3, validators=[MinValueValidator(1)], verbose_name='Séries Padrão')
+    exercise_name = models.CharField(max_length=200, verbose_name=_('Nome do Exercício'))
+    description = models.TextField(blank=True, verbose_name=_('Descrição'))
+    muscle_group = models.ForeignKey(MuscleGroup, on_delete=models.PROTECT, related_name='exercises', verbose_name=_('Grupo Muscular'))
+    default_reps = models.IntegerField(default=12, validators=[MinValueValidator(1)], verbose_name=_('Repetições Padrão'))
+    default_sets = models.IntegerField(default=3, validators=[MinValueValidator(1)], verbose_name=_('Séries Padrão'))
 
     # Media fields
-    media_type = models.CharField(max_length=20, choices=MEDIA_TYPE_CHOICES, default='image', verbose_name='Tipo de Mídia')
-    media_file = models.FileField(upload_to='exercises/', blank=True, null=True, verbose_name='Arquivo')
-    media_url = models.URLField(blank=True, verbose_name='URL da Mídia')
-    thumbnail = models.ImageField(upload_to='exercises/thumbnails/', blank=True, null=True, verbose_name='Miniatura')
+    media_type = models.CharField(max_length=20, choices=MEDIA_TYPE_CHOICES, default='image', verbose_name=_('Tipo de Mídia'))
+    media_file = models.FileField(upload_to='exercises/', blank=True, null=True, verbose_name=_('Arquivo'))
+    media_url = models.URLField(blank=True, verbose_name=_('URL da Mídia'))
+    thumbnail = models.ImageField(upload_to='exercises/thumbnails/', blank=True, null=True, verbose_name=_('Miniatura'))
 
-    instructions = models.TextField(blank=True, verbose_name='Instruções')
-    is_active = models.BooleanField(default=True, verbose_name='Ativo')
+    instructions = models.TextField(blank=True, verbose_name=_('Instruções'))
+    is_active = models.BooleanField(default=True, verbose_name=_('Ativo'))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'Exercício'
-        verbose_name_plural = 'Exercícios'
+        verbose_name = _('Exercício')
+        verbose_name_plural = _('Exercícios')
         ordering = ['exercise_name']
 
     def __str__(self):
@@ -237,31 +238,31 @@ class Exercise(models.Model):
 
 class Routine(models.Model):
     """Model representing a workout routine template"""
-    routine_name = models.CharField(max_length=200, verbose_name='Nome do Treino')
-    description = models.TextField(blank=True, verbose_name='Descrição')
+    routine_name = models.CharField(max_length=200, verbose_name=_('Nome do Treino'))
+    description = models.TextField(blank=True, verbose_name=_('Descrição'))
     difficulty_level = models.CharField(
         max_length=20,
         choices=[
-            ('iniciante', 'Iniciante'),
-            ('intermediario', 'Intermediário'),
-            ('avancado', 'Avançado'),
+            ('iniciante', _('Iniciante')),
+            ('intermediario', _('Intermediário')),
+            ('avancado', _('Avançado')),
         ],
         default='intermediario',
-        verbose_name='Nível de Dificuldade'
+        verbose_name=_('Nível de Dificuldade')
     )
     estimated_duration = models.IntegerField(
         default=60,
         validators=[MinValueValidator(1)],
-        help_text='Duração estimada em minutos',
-        verbose_name='Duração Estimada (min)'
+        help_text=_('Duração estimada em minutos'),
+        verbose_name=_('Duração Estimada (min)')
     )
-    is_active = models.BooleanField(default=True, verbose_name='Ativo')
+    is_active = models.BooleanField(default=True, verbose_name=_('Ativo'))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'Modelo de Treino'
-        verbose_name_plural = 'Modelos de Treino'
+        verbose_name = _('Modelo de Treino')
+        verbose_name_plural = _('Modelos de Treino')
         ordering = ['routine_name']
 
     def __str__(self):
@@ -270,17 +271,17 @@ class Routine(models.Model):
 
 class RoutineExercise(models.Model):
     """Model linking exercises to routines with specific parameters"""
-    routine = models.ForeignKey(Routine, on_delete=models.CASCADE, related_name='exercises', verbose_name='Treino')
-    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE, related_name='routines', verbose_name='Exercício')
-    order = models.IntegerField(default=1, validators=[MinValueValidator(1)], verbose_name='Ordem')
-    sets = models.IntegerField(default=3, validators=[MinValueValidator(1)], verbose_name='Séries')
-    reps = models.IntegerField(default=12, validators=[MinValueValidator(1)], verbose_name='Repetições')
-    rest_seconds = models.IntegerField(default=60, validators=[MinValueValidator(0)], verbose_name='Descanso (seg)')
-    notes = models.TextField(blank=True, verbose_name='Observações')
+    routine = models.ForeignKey(Routine, on_delete=models.CASCADE, related_name='exercises', verbose_name=_('Treino'))
+    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE, related_name='routines', verbose_name=_('Exercício'))
+    order = models.IntegerField(default=1, validators=[MinValueValidator(1)], verbose_name=_('Ordem'))
+    sets = models.IntegerField(default=3, validators=[MinValueValidator(1)], verbose_name=_('Séries'))
+    reps = models.IntegerField(default=12, validators=[MinValueValidator(1)], verbose_name=_('Repetições'))
+    rest_seconds = models.IntegerField(default=60, validators=[MinValueValidator(0)], verbose_name=_('Descanso (seg)'))
+    notes = models.TextField(blank=True, verbose_name=_('Observações'))
 
     class Meta:
-        verbose_name = 'Exercício do Treino'
-        verbose_name_plural = 'Exercícios do Treino'
+        verbose_name = _('Exercício do Treino')
+        verbose_name_plural = _('Exercícios do Treino')
         ordering = ['routine', 'order']
         unique_together = ['routine', 'exercise', 'order']
 
@@ -290,7 +291,7 @@ class RoutineExercise(models.Model):
 
 class PersonRoutine(models.Model):
     """Model representing a personalized routine for a specific person (copy of template)"""
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='routines', verbose_name='Aluno')
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='routines', verbose_name=_('Aluno'))
 
     # Template reference (optional - for tracking origin)
     routine_template = models.ForeignKey(
@@ -299,41 +300,41 @@ class PersonRoutine(models.Model):
         null=True,
         blank=True,
         related_name='person_routines',
-        verbose_name='Template Original'
+        verbose_name=_('Template Original')
     )
 
     # Copied fields from template (editable per person)
-    routine_name = models.CharField(max_length=200, default='Treino Personalizado', verbose_name='Nome do Treino')
-    description = models.TextField(blank=True, default='', verbose_name='Descrição')
+    routine_name = models.CharField(max_length=200, default='Treino Personalizado', verbose_name=_('Nome do Treino'))
+    description = models.TextField(blank=True, default='', verbose_name=_('Descrição'))
     difficulty_level = models.CharField(
         max_length=20,
         choices=[
-            ('iniciante', 'Iniciante'),
-            ('intermediario', 'Intermediário'),
-            ('avancado', 'Avançado'),
+            ('iniciante', _('Iniciante')),
+            ('intermediario', _('Intermediário')),
+            ('avancado', _('Avançado')),
         ],
         default='intermediario',
-        verbose_name='Nível de Dificuldade'
+        verbose_name=_('Nível de Dificuldade')
     )
     estimated_duration = models.IntegerField(
         default=60,
         validators=[MinValueValidator(1)],
-        help_text='Duração estimada em minutos',
-        verbose_name='Duração Estimada (min)'
+        help_text=_('Duração estimada em minutos'),
+        verbose_name=_('Duração Estimada (min)')
     )
 
     # Person-specific fields
-    routine_date = models.DateField(default=timezone.now, verbose_name='Data de Início')
-    start_date = models.DateField(null=True, blank=True, verbose_name='Data de Início Planejada')
-    end_date = models.DateField(null=True, blank=True, verbose_name='Data de Término')
-    is_active = models.BooleanField(default=True, verbose_name='Ativo')
-    notes = models.TextField(blank=True, verbose_name='Observações')
+    routine_date = models.DateField(default=timezone.now, verbose_name=_('Data de Início'))
+    start_date = models.DateField(null=True, blank=True, verbose_name=_('Data de Início Planejada'))
+    end_date = models.DateField(null=True, blank=True, verbose_name=_('Data de Término'))
+    is_active = models.BooleanField(default=True, verbose_name=_('Ativo'))
+    notes = models.TextField(blank=True, verbose_name=_('Observações'))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'Treino do Aluno'
-        verbose_name_plural = 'Treinos dos Alunos'
+        verbose_name = _('Treino do Aluno')
+        verbose_name_plural = _('Treinos dos Alunos')
         ordering = ['-routine_date']
 
     def __str__(self):
@@ -346,21 +347,21 @@ class PersonRoutineExercise(models.Model):
         PersonRoutine,
         on_delete=models.CASCADE,
         related_name='exercises',
-        verbose_name='Treino do Aluno'
+        verbose_name=_('Treino do Aluno')
     )
     # PROTECT: deleting an exercise must not silently wipe the students' history
-    exercise = models.ForeignKey(Exercise, on_delete=models.PROTECT, verbose_name='Exercício')
+    exercise = models.ForeignKey(Exercise, on_delete=models.PROTECT, verbose_name=_('Exercício'))
 
     # Exercise configuration (copied from template, editable per person)
-    order = models.IntegerField(default=1, validators=[MinValueValidator(1)], verbose_name='Ordem')
-    sets = models.IntegerField(default=3, validators=[MinValueValidator(1)], verbose_name='Séries')
-    reps = models.IntegerField(default=12, validators=[MinValueValidator(1)], verbose_name='Repetições')
-    rest_seconds = models.IntegerField(default=60, validators=[MinValueValidator(0)], verbose_name='Descanso (seg)')
-    notes = models.TextField(blank=True, verbose_name='Observações')
+    order = models.IntegerField(default=1, validators=[MinValueValidator(1)], verbose_name=_('Ordem'))
+    sets = models.IntegerField(default=3, validators=[MinValueValidator(1)], verbose_name=_('Séries'))
+    reps = models.IntegerField(default=12, validators=[MinValueValidator(1)], verbose_name=_('Repetições'))
+    rest_seconds = models.IntegerField(default=60, validators=[MinValueValidator(0)], verbose_name=_('Descanso (seg)'))
+    notes = models.TextField(blank=True, verbose_name=_('Observações'))
 
     class Meta:
-        verbose_name = 'Exercício do Treino do Aluno'
-        verbose_name_plural = 'Exercícios dos Treinos dos Alunos'
+        verbose_name = _('Exercício do Treino do Aluno')
+        verbose_name_plural = _('Exercícios dos Treinos dos Alunos')
         ordering = ['person_routine', 'order']
 
     def __str__(self):
@@ -373,21 +374,21 @@ class WorkoutSession(models.Model):
         PersonRoutine,
         on_delete=models.CASCADE,
         related_name='sessions',
-        verbose_name='Treino'
+        verbose_name=_('Treino')
     )
-    start_time = models.DateTimeField(auto_now_add=True, verbose_name='Início')
-    end_time = models.DateTimeField(null=True, blank=True, verbose_name='Término')
-    duration_minutes = models.IntegerField(null=True, blank=True, verbose_name='Duração (min)')
-    is_completed = models.BooleanField(default=False, verbose_name='Concluído')
-    notes = models.TextField(blank=True, verbose_name='Observações')
+    start_time = models.DateTimeField(auto_now_add=True, verbose_name=_('Início'))
+    end_time = models.DateTimeField(null=True, blank=True, verbose_name=_('Término'))
+    duration_minutes = models.IntegerField(null=True, blank=True, verbose_name=_('Duração (min)'))
+    is_completed = models.BooleanField(default=False, verbose_name=_('Concluído'))
+    notes = models.TextField(blank=True, verbose_name=_('Observações'))
 
     # Pause support: time spent paused does not count towards the duration
-    paused_at = models.DateTimeField(null=True, blank=True, verbose_name='Pausado em')
-    paused_seconds = models.PositiveIntegerField(default=0, verbose_name='Segundos em pausa')
+    paused_at = models.DateTimeField(null=True, blank=True, verbose_name=_('Pausado em'))
+    paused_seconds = models.PositiveIntegerField(default=0, verbose_name=_('Segundos em pausa'))
 
     class Meta:
-        verbose_name = 'Sessão de Treino'
-        verbose_name_plural = 'Sessões de Treino'
+        verbose_name = _('Sessão de Treino')
+        verbose_name_plural = _('Sessões de Treino')
         ordering = ['-start_time']
 
     def __str__(self):
@@ -440,13 +441,13 @@ class SessionExercise(models.Model):
         WorkoutSession,
         on_delete=models.CASCADE,
         related_name='exercise_logs',
-        verbose_name='Sessão'
+        verbose_name=_('Sessão')
     )
     person_routine_exercise = models.ForeignKey(
         PersonRoutineExercise,
         on_delete=models.CASCADE,
         related_name='session_logs',
-        verbose_name='Exercício do Treino'
+        verbose_name=_('Exercício do Treino')
     )
 
     # Execution data for this specific session
@@ -456,15 +457,15 @@ class SessionExercise(models.Model):
         null=True,
         blank=True,
         validators=[MinValueValidator(0)],
-        verbose_name='Carga (kg)'
+        verbose_name=_('Carga (kg)')
     )
-    is_completed = models.BooleanField(default=False, verbose_name='Concluído')
-    completed_at = models.DateTimeField(null=True, blank=True, verbose_name='Completado em')
-    notes = models.TextField(blank=True, verbose_name='Observações')
+    is_completed = models.BooleanField(default=False, verbose_name=_('Concluído'))
+    completed_at = models.DateTimeField(null=True, blank=True, verbose_name=_('Completado em'))
+    notes = models.TextField(blank=True, verbose_name=_('Observações'))
 
     class Meta:
-        verbose_name = 'Execução de Exercício na Sessão'
-        verbose_name_plural = 'Execuções de Exercícios nas Sessões'
+        verbose_name = _('Execução de Exercício na Sessão')
+        verbose_name_plural = _('Execuções de Exercícios nas Sessões')
         unique_together = ['session', 'person_routine_exercise']
         ordering = ['person_routine_exercise__order']
 
@@ -499,58 +500,58 @@ class SessionSet(models.Model):
         SessionExercise,
         on_delete=models.CASCADE,
         related_name='sets',
-        verbose_name='Exercício da sessão'
+        verbose_name=_('Exercício da sessão')
     )
-    number = models.PositiveIntegerField(validators=[MinValueValidator(1)], verbose_name='Série')
+    number = models.PositiveIntegerField(validators=[MinValueValidator(1)], verbose_name=_('Série'))
     weight = models.DecimalField(
         max_digits=6, decimal_places=2, null=True, blank=True,
-        validators=[MinValueValidator(0)], verbose_name='Carga (kg)'
+        validators=[MinValueValidator(0)], verbose_name=_('Carga (kg)')
     )
-    reps = models.PositiveIntegerField(null=True, blank=True, verbose_name='Repetições')
-    is_done = models.BooleanField(default=False, verbose_name='Feita')
-    completed_at = models.DateTimeField(null=True, blank=True, verbose_name='Completada em')
+    reps = models.PositiveIntegerField(null=True, blank=True, verbose_name=_('Repetições'))
+    is_done = models.BooleanField(default=False, verbose_name=_('Feita'))
+    completed_at = models.DateTimeField(null=True, blank=True, verbose_name=_('Completada em'))
     # Last time anything about the set changed: the sign of life of a running workout (core/workout_sessions.py)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
     class Meta:
-        verbose_name = 'Série'
-        verbose_name_plural = 'Séries'
+        verbose_name = _('Série')
+        verbose_name_plural = _('Séries')
         ordering = ['session_exercise', 'number']
         unique_together = ['session_exercise', 'number']
 
     def __str__(self):
-        return f'{self.session_exercise} - série {self.number}'
+        return gettext('%(exercise)s - série %(number)s') % {'exercise': self.session_exercise, 'number': self.number}
 
 
 class Assessment(models.Model):
     """Physical assessment of a student on a given date (all measures optional)"""
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='assessments', verbose_name='Aluno')
-    date = models.DateField(default=timezone.localdate, verbose_name='Data')
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='assessments', verbose_name=_('Aluno'))
+    date = models.DateField(default=timezone.localdate, verbose_name=_('Data'))
     weight_kg = models.DecimalField(
         max_digits=5, decimal_places=2, null=True, blank=True,
-        validators=[MinValueValidator(1)], verbose_name='Peso (kg)')
+        validators=[MinValueValidator(1)], verbose_name=_('Peso (kg)'))
     height_cm = models.DecimalField(
         max_digits=5, decimal_places=1, null=True, blank=True,
-        validators=[MinValueValidator(30)], verbose_name='Altura (cm)')
+        validators=[MinValueValidator(30)], verbose_name=_('Altura (cm)'))
     body_fat_pct = models.DecimalField(
         max_digits=4, decimal_places=1, null=True, blank=True,
-        validators=[MinValueValidator(0), MaxValueValidator(100)], verbose_name='% de gordura')
+        validators=[MinValueValidator(0), MaxValueValidator(100)], verbose_name=_('% de gordura'))
     chest_cm = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True,
-                                   validators=[MinValueValidator(0)], verbose_name='Peitoral (cm)')
+                                   validators=[MinValueValidator(0)], verbose_name=_('Peitoral (cm)'))
     waist_cm = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True,
-                                   validators=[MinValueValidator(0)], verbose_name='Cintura (cm)')
+                                   validators=[MinValueValidator(0)], verbose_name=_('Cintura (cm)'))
     hip_cm = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True,
-                                 validators=[MinValueValidator(0)], verbose_name='Quadril (cm)')
+                                 validators=[MinValueValidator(0)], verbose_name=_('Quadril (cm)'))
     arm_cm = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True,
-                                 validators=[MinValueValidator(0)], verbose_name='Braço (cm)')
+                                 validators=[MinValueValidator(0)], verbose_name=_('Braço (cm)'))
     thigh_cm = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True,
-                                   validators=[MinValueValidator(0)], verbose_name='Coxa (cm)')
-    notes = models.TextField(blank=True, verbose_name='Observações')
+                                   validators=[MinValueValidator(0)], verbose_name=_('Coxa (cm)'))
+    notes = models.TextField(blank=True, verbose_name=_('Observações'))
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Avaliação física'
-        verbose_name_plural = 'Avaliações físicas'
+        verbose_name = _('Avaliação física')
+        verbose_name_plural = _('Avaliações físicas')
         ordering = ['-date', '-created_at']
 
     def __str__(self):
@@ -577,29 +578,29 @@ class ProgressPhoto(models.Model):
     (the ones sent before assessments held photos, or "other" positions)."""
 
     class Angle(models.TextChoices):
-        FRONT = 'front', 'Frente'
-        LEFT = 'left', 'Lado esquerdo'
-        RIGHT = 'right', 'Lado direito'
-        BACK = 'back', 'Costas'
-        OTHER = 'other', 'Outra'
+        FRONT = 'front', _('Frente')
+        LEFT = 'left', _('Lado esquerdo')
+        RIGHT = 'right', _('Lado direito')
+        BACK = 'back', _('Costas')
+        OTHER = 'other', _('Outra')
 
     # The standard sequence shown in every assessment, in this order
     SEQUENCE = (Angle.FRONT, Angle.LEFT, Angle.RIGHT, Angle.BACK)
 
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='progress_photos', verbose_name='Aluno')
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='progress_photos', verbose_name=_('Aluno'))
     assessment = models.ForeignKey('Assessment', on_delete=models.SET_NULL, null=True, blank=True,
-                                   related_name='photos', verbose_name='Avaliação')
-    angle = models.CharField(max_length=10, choices=Angle.choices, default=Angle.OTHER, verbose_name='Posição')
-    date = models.DateField(default=timezone.localdate, verbose_name='Data')
-    image = models.ImageField(upload_to=progress_photo_path, validators=[validate_photo_image], verbose_name='Foto')
-    thumbnail = models.ImageField(upload_to=progress_photo_path, blank=True, editable=False, verbose_name='Miniatura')
-    caption = models.CharField(max_length=200, blank=True, verbose_name='Legenda')
-    uploaded_by_student = models.BooleanField(default=False, editable=False, verbose_name='Enviada pelo aluno')
+                                   related_name='photos', verbose_name=_('Avaliação'))
+    angle = models.CharField(max_length=10, choices=Angle.choices, default=Angle.OTHER, verbose_name=_('Posição'))
+    date = models.DateField(default=timezone.localdate, verbose_name=_('Data'))
+    image = models.ImageField(upload_to=progress_photo_path, validators=[validate_photo_image], verbose_name=_('Foto'))
+    thumbnail = models.ImageField(upload_to=progress_photo_path, blank=True, editable=False, verbose_name=_('Miniatura'))
+    caption = models.CharField(max_length=200, blank=True, verbose_name=_('Legenda'))
+    uploaded_by_student = models.BooleanField(default=False, editable=False, verbose_name=_('Enviada pelo aluno'))
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Foto de progresso'
-        verbose_name_plural = 'Fotos de progresso'
+        verbose_name = _('Foto de progresso')
+        verbose_name_plural = _('Fotos de progresso')
         ordering = ['-date', '-created_at']
 
     def __str__(self):
@@ -638,14 +639,14 @@ class ProgressPhoto(models.Model):
 
 class StudentNote(models.Model):
     """Dated note written by the trainer about a student (never shown to the student)"""
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='trainer_notes', verbose_name='Aluno')
-    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+', verbose_name='Autor')
-    text = models.TextField(verbose_name='Anotação')
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='trainer_notes', verbose_name=_('Aluno'))
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+', verbose_name=_('Autor'))
+    text = models.TextField(verbose_name=_('Anotação'))
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Anotação da personal'
-        verbose_name_plural = 'Anotações da personal'
+        verbose_name = _('Anotação da personal')
+        verbose_name_plural = _('Anotações da personal')
         ordering = ['-created_at']
 
     def __str__(self):
@@ -656,28 +657,28 @@ class StudentEvent(models.Model):
     """Audit trail of a student's file: who changed what, when. Deleted together with the student."""
 
     class Kind(models.TextChoices):
-        CREATED = 'created', 'Cadastro'
-        PROFILE_EDIT = 'profile_edit', 'Dados alterados'
-        STATUS = 'status', 'Situação'
-        INVITE_REVOKED = 'invite_revoked', 'Convite revogado'
-        INVITE_ACCEPTED = 'invite_accepted', 'Convite aceito'
-        CONSENT = 'consent', 'Consentimento'
-        PAYMENT = 'payment', 'Pagamento'
-        DATA_EXPORT = 'data_export', 'Exportação de dados'
-        ERASURE_REQUEST = 'erasure_request', 'Pedido de exclusão'
-        PACKAGE = 'package', 'Pacote'
+        CREATED = 'created', _('Cadastro')
+        PROFILE_EDIT = 'profile_edit', _('Dados alterados')
+        STATUS = 'status', _('Situação')
+        INVITE_REVOKED = 'invite_revoked', _('Convite revogado')
+        INVITE_ACCEPTED = 'invite_accepted', _('Convite aceito')
+        CONSENT = 'consent', _('Consentimento')
+        PAYMENT = 'payment', _('Pagamento')
+        DATA_EXPORT = 'data_export', _('Exportação de dados')
+        ERASURE_REQUEST = 'erasure_request', _('Pedido de exclusão')
+        PACKAGE = 'package', _('Pacote')
 
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='events', verbose_name='Aluno')
-    actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+', verbose_name='Quem')
-    kind = models.CharField(max_length=20, choices=Kind.choices, verbose_name='Tipo')
-    summary = models.CharField(max_length=300, blank=True, verbose_name='Resumo')
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='events', verbose_name=_('Aluno'))
+    actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+', verbose_name=_('Quem'))
+    kind = models.CharField(max_length=20, choices=Kind.choices, verbose_name=_('Tipo'))
+    summary = models.CharField(max_length=300, blank=True, verbose_name=_('Resumo'))
     # {field: [before, after]}; sensitive fields store [None, None] (only "changed")
-    changes = models.JSONField(default=dict, blank=True, verbose_name='Alterações')
-    at = models.DateTimeField(auto_now_add=True, verbose_name='Quando')
+    changes = models.JSONField(default=dict, blank=True, verbose_name=_('Alterações'))
+    at = models.DateTimeField(auto_now_add=True, verbose_name=_('Quando'))
 
     class Meta:
-        verbose_name = 'Evento do aluno'
-        verbose_name_plural = 'Histórico do aluno'
+        verbose_name = _('Evento do aluno')
+        verbose_name_plural = _('Histórico do aluno')
         ordering = ['-at', '-pk']
 
     @property
@@ -689,7 +690,7 @@ class StudentEvent(models.Model):
             try:
                 label = str(Person._meta.get_field(name).verbose_name)
             except FieldDoesNotExist:
-                label = {'email': 'E-mail'}.get(name, name)
+                label = {'email': gettext('E-mail')}.get(name, name)
             rows.append((label, before, after))
         return rows
 
@@ -701,29 +702,29 @@ class ConsentRecord(models.Model):
     """One consent decision (LGPD). The current state of a kind is its latest record."""
 
     class Kind(models.TextChoices):
-        TERMS = 'terms', 'Termos de uso e política de privacidade'
-        HEALTH_DATA = 'health_data', 'Tratamento de dados de saúde'
-        PHOTOS = 'photos', 'Fotos de evolução'
+        TERMS = 'terms', _('Termos de uso e política de privacidade')
+        HEALTH_DATA = 'health_data', _('Tratamento de dados de saúde')
+        PHOTOS = 'photos', _('Fotos de evolução')
 
     class Source(models.TextChoices):
-        STUDENT = 'student', 'Pelo próprio aluno'
-        TRAINER = 'trainer', 'Registrado pela personal'
+        STUDENT = 'student', _('Pelo próprio aluno')
+        TRAINER = 'trainer', _('Registrado pela personal')
 
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='consents', verbose_name='Aluno')
-    kind = models.CharField(max_length=20, choices=Kind.choices, verbose_name='Tipo')
-    version = models.CharField(max_length=20, verbose_name='Versão do texto')
-    granted = models.BooleanField(verbose_name='Concedido')
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='consents', verbose_name=_('Aluno'))
+    kind = models.CharField(max_length=20, choices=Kind.choices, verbose_name=_('Tipo'))
+    version = models.CharField(max_length=20, verbose_name=_('Versão do texto'))
+    granted = models.BooleanField(verbose_name=_('Concedido'))
     source = models.CharField(max_length=10, choices=Source.choices, default=Source.STUDENT)
     recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
-    at = models.DateTimeField(default=timezone.now, verbose_name='Data')
+    at = models.DateTimeField(default=timezone.now, verbose_name=_('Data'))
 
     class Meta:
-        verbose_name = 'Consentimento'
-        verbose_name_plural = 'Consentimentos'
+        verbose_name = _('Consentimento')
+        verbose_name_plural = _('Consentimentos')
         ordering = ['-at', '-pk']
 
     def __str__(self):
-        return f'{self.person_id} {self.kind} v{self.version} {"sim" if self.granted else "não"}'
+        return f'{self.person_id} {self.kind} v{self.version} {gettext("sim") if self.granted else gettext("não")}'
 
 
 CENTS = Decimal('0.01')
@@ -751,28 +752,28 @@ class Package(models.Model):
 
     A package is a number of classes to be taken within a number of days counted from the first class; the price is
     typed either per class or as a total (the other one is calculated)."""
-    PRICING = [('per_session', 'Valor por aula'), ('total', 'Valor total')]
+    PRICING = [('per_session', _('Valor por aula')), ('total', _('Valor total'))]
 
-    name = models.CharField(max_length=100, unique=True, verbose_name='Nome')
-    description = models.TextField(blank=True, verbose_name='Descrição')
+    name = models.CharField(max_length=100, unique=True, verbose_name=_('Nome'))
+    description = models.TextField(blank=True, verbose_name=_('Descrição'))
     sessions = models.PositiveSmallIntegerField(
-        default=10, validators=[MinValueValidator(1), MaxValueValidator(200)], verbose_name='Aulas no pacote')
+        default=10, validators=[MinValueValidator(1), MaxValueValidator(200)], verbose_name=_('Aulas no pacote'))
     # None = no deadline (special packages); otherwise counted from the first class
     valid_days = models.PositiveSmallIntegerField(
         default=60, null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(1000)],
-        verbose_name='Prazo (dias)', help_text='Conta a partir da primeira aula.')
-    pricing_mode = models.CharField(max_length=12, choices=PRICING, default='per_session', verbose_name='Como o valor é informado')
+        verbose_name=_('Prazo (dias)'), help_text=_('Conta a partir da primeira aula.'))
+    pricing_mode = models.CharField(max_length=12, choices=PRICING, default='per_session', verbose_name=_('Como o valor é informado'))
     price_per_session = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
-                                            validators=[MinValueValidator(0)], verbose_name='Valor por aula')
+                                            validators=[MinValueValidator(0)], verbose_name=_('Valor por aula'))
     price_total = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
-                                      validators=[MinValueValidator(0)], verbose_name='Valor total')
-    is_active = models.BooleanField(default=True, verbose_name='Ativo')
+                                      validators=[MinValueValidator(0)], verbose_name=_('Valor total'))
+    is_active = models.BooleanField(default=True, verbose_name=_('Ativo'))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'Pacote'
-        verbose_name_plural = 'Pacotes'
+        verbose_name = _('Pacote')
+        verbose_name_plural = _('Pacotes')
         ordering = ['name']
 
     def save(self, *args, **kwargs):
@@ -787,26 +788,26 @@ class Package(models.Model):
 class StudentPackage(models.Model):
     """A package sold to one student: a copy of the numbers at the time of the sale (changing the catalog never
     changes what was sold). The balance is not stored: it is counted from the classes linked to it (core/packages.py)."""
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='packages', verbose_name='Aluno')
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='packages', verbose_name=_('Aluno'))
     package = models.ForeignKey(Package, on_delete=models.SET_NULL, null=True, blank=True, related_name='sold',
-                                verbose_name='Pacote do catálogo')
-    name = models.CharField(max_length=100, verbose_name='Nome')
-    sessions = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)], verbose_name='Aulas')
-    valid_days = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name='Prazo (dias)')   # None: no deadline
+                                verbose_name=_('Pacote do catálogo'))
+    name = models.CharField(max_length=100, verbose_name=_('Nome'))
+    sessions = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)], verbose_name=_('Aulas'))
+    valid_days = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name=_('Prazo (dias)'))   # None: no deadline
     price_per_session = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
-                                            validators=[MinValueValidator(0)], verbose_name='Valor por aula')
+                                            validators=[MinValueValidator(0)], verbose_name=_('Valor por aula'))
     price_total = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
-                                      validators=[MinValueValidator(0)], verbose_name='Valor total')
-    sold_on = models.DateField(default=timezone.localdate, verbose_name='Vendido em')
+                                      validators=[MinValueValidator(0)], verbose_name=_('Valor total'))
+    sold_on = models.DateField(default=timezone.localdate, verbose_name=_('Vendido em'))
     # The deadline counts from the first class (set by core/packages.sync from the first class that counts)
-    starts_on = models.DateField(null=True, blank=True, verbose_name='Primeira aula')
-    extension_days = models.PositiveSmallIntegerField(default=0, verbose_name='Dias de prorrogação')
-    frozen_days = models.PositiveSmallIntegerField(default=0, verbose_name='Dias congelado')
-    frozen_since = models.DateField(null=True, blank=True, verbose_name='Congelado desde')
+    starts_on = models.DateField(null=True, blank=True, verbose_name=_('Primeira aula'))
+    extension_days = models.PositiveSmallIntegerField(default=0, verbose_name=_('Dias de prorrogação'))
+    frozen_days = models.PositiveSmallIntegerField(default=0, verbose_name=_('Dias congelado'))
+    frozen_since = models.DateField(null=True, blank=True, verbose_name=_('Congelado desde'))
     cancelled_at = models.DateTimeField(null=True, blank=True)
     used_at_cancel = models.PositiveSmallIntegerField(null=True, blank=True)   # classes given when it was cancelled
     cancel_fee = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)   # fee kept when it was cancelled
-    notes = models.CharField(max_length=200, blank=True, verbose_name='Observação')
+    notes = models.CharField(max_length=200, blank=True, verbose_name=_('Observação'))
     created_at = models.DateTimeField(auto_now_add=True)
     # What the reminders already told about this package (core/reminders.py): once each, and a new deadline re-arms them
     low_notified_at = models.DateTimeField(null=True, blank=True)
@@ -814,8 +815,8 @@ class StudentPackage(models.Model):
     expired_notified_for = models.DateField(null=True, blank=True)
 
     class Meta:
-        verbose_name = 'Pacote do aluno'
-        verbose_name_plural = 'Pacotes dos alunos'
+        verbose_name = _('Pacote do aluno')
+        verbose_name_plural = _('Pacotes dos alunos')
         ordering = ['sold_on', 'pk']
 
     def __str__(self):
@@ -827,33 +828,33 @@ class Payment(models.Model):
 
     class Method(models.TextChoices):
         PIX = 'pix', 'Pix'
-        CASH = 'cash', 'Dinheiro'
+        CASH = 'cash', _('Dinheiro')
         MBWAY = 'mbway', 'MB Way'
         SPIN = 'spin', 'SPIN'
-        CARD = 'card', 'Cartão'
-        TRANSFER = 'transfer', 'Transferência'
-        OTHER = 'other', 'Outro'
+        CARD = 'card', _('Cartão')
+        TRANSFER = 'transfer', _('Transferência')
+        OTHER = 'other', _('Outro')
 
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='payments', verbose_name='Aluno')
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='payments', verbose_name=_('Aluno'))
     # What was paid for: the package sold to the student (the catalog package and its name stay for old payments)
     student_package = models.ForeignKey('StudentPackage', on_delete=models.SET_NULL, null=True, blank=True,
-                                        related_name='payments', verbose_name='Pacote')
+                                        related_name='payments', verbose_name=_('Pacote'))
     plan = models.ForeignKey(Package, on_delete=models.SET_NULL, null=True, blank=True, related_name='payments',
-                             verbose_name='Pacote do catálogo')
-    plan_name = models.CharField(max_length=100, blank=True, verbose_name='Pacote')
+                             verbose_name=_('Pacote do catálogo'))
+    plan_name = models.CharField(max_length=100, blank=True, verbose_name=_('Pacote'))
     amount = models.DecimalField(max_digits=8, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))],
-                                 verbose_name='Valor')
-    paid_on = models.DateField(default=timezone.localdate, verbose_name='Data do pagamento')
-    method = models.CharField(max_length=10, choices=Method.choices, default=Method.PIX, verbose_name='Forma')
-    period_start = models.DateField(null=True, blank=True, verbose_name='Período de')   # old plan payments only
-    period_end = models.DateField(null=True, blank=True, verbose_name='Período até')
-    notes = models.CharField(max_length=200, blank=True, verbose_name='Observação')
+                                 verbose_name=_('Valor'))
+    paid_on = models.DateField(default=timezone.localdate, verbose_name=_('Data do pagamento'))
+    method = models.CharField(max_length=10, choices=Method.choices, default=Method.PIX, verbose_name=_('Forma'))
+    period_start = models.DateField(null=True, blank=True, verbose_name=_('Período de'))   # old plan payments only
+    period_end = models.DateField(null=True, blank=True, verbose_name=_('Período até'))
+    notes = models.CharField(max_length=200, blank=True, verbose_name=_('Observação'))
     recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Pagamento'
-        verbose_name_plural = 'Pagamentos'
+        verbose_name = _('Pagamento')
+        verbose_name_plural = _('Pagamentos')
         ordering = ['-paid_on', '-pk']
 
     def __str__(self):
@@ -867,30 +868,30 @@ class Refund(models.Model):
     and the totals are summed from the entries. A wrong refund is voided (kept, with the reason), never removed."""
 
     class Kind(models.TextChoices):
-        REFUND = 'refund', 'Devolução'
-        REVERSAL = 'reversal', 'Estorno (lançamento errado)'
+        REFUND = 'refund', _('Devolução')
+        REVERSAL = 'reversal', _('Estorno (lançamento errado)')
 
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='refunds', verbose_name='Aluno')
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='refunds', verbose_name=_('Aluno'))
     student_package = models.ForeignKey('StudentPackage', on_delete=models.SET_NULL, null=True, blank=True,
-                                        related_name='refunds', verbose_name='Pacote')
+                                        related_name='refunds', verbose_name=_('Pacote'))
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, null=True, blank=True, related_name='refunds',
-                                verbose_name='Pagamento')
-    kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.REFUND, verbose_name='Tipo')
+                                verbose_name=_('Pagamento'))
+    kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.REFUND, verbose_name=_('Tipo'))
     amount = models.DecimalField(max_digits=8, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))],
-                                 verbose_name='Valor')
-    refunded_on = models.DateField(default=timezone.localdate, verbose_name='Data')
+                                 verbose_name=_('Valor'))
+    refunded_on = models.DateField(default=timezone.localdate, verbose_name=_('Data'))
     method = models.CharField(max_length=10, choices=Payment.Method.choices, default=Payment.Method.TRANSFER,
-                              verbose_name='Forma de devolução')
-    reason = models.CharField(max_length=200, blank=True, verbose_name='Motivo')
-    summary = models.TextField(blank=True, verbose_name='Resumo do cálculo')   # what was paid, given, discounted
+                              verbose_name=_('Forma de devolução'))
+    reason = models.CharField(max_length=200, blank=True, verbose_name=_('Motivo'))
+    summary = models.TextField(blank=True, verbose_name=_('Resumo do cálculo'))   # what was paid, given, discounted
     recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
     created_at = models.DateTimeField(auto_now_add=True)
     voided_at = models.DateTimeField(null=True, blank=True)
     voided_reason = models.CharField(max_length=200, blank=True)
 
     class Meta:
-        verbose_name = 'Devolução'
-        verbose_name_plural = 'Devoluções'
+        verbose_name = _('Devolução')
+        verbose_name_plural = _('Devoluções')
         ordering = ['-refunded_on', '-pk']
 
     @property
@@ -903,28 +904,29 @@ class Refund(models.Model):
 
 class ScheduleSlot(models.Model):
     """Fixed weekly time of a student (e.g. Mondays 07:00)."""
-    WEEKDAYS = [(0, 'Segunda'), (1, 'Terça'), (2, 'Quarta'), (3, 'Quinta'), (4, 'Sexta'), (5, 'Sábado'), (6, 'Domingo')]
+    WEEKDAYS = [(0, _('Segunda')), (1, _('Terça')), (2, _('Quarta')), (3, _('Quinta')), (4, _('Sexta')), (5, _('Sábado')),
+                (6, _('Domingo'))]
 
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='slots', verbose_name='Aluno')
-    weekday = models.PositiveSmallIntegerField(choices=WEEKDAYS, verbose_name='Dia da semana')
-    start_time = models.TimeField(verbose_name='Horário')
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='slots', verbose_name=_('Aluno'))
+    weekday = models.PositiveSmallIntegerField(choices=WEEKDAYS, verbose_name=_('Dia da semana'))
+    start_time = models.TimeField(verbose_name=_('Horário'))
     duration_minutes = models.PositiveSmallIntegerField(
-        default=60, validators=[MinValueValidator(10), MaxValueValidator(480)], verbose_name='Duração (min)')
-    is_active = models.BooleanField(default=True, verbose_name='Ativo')
-    valid_from = models.DateField(default=timezone.localdate, verbose_name='Vale a partir de')
-    valid_until = models.DateField(null=True, blank=True, verbose_name='Vale até')
+        default=60, validators=[MinValueValidator(10), MaxValueValidator(480)], verbose_name=_('Duração (min)'))
+    is_active = models.BooleanField(default=True, verbose_name=_('Ativo'))
+    valid_from = models.DateField(default=timezone.localdate, verbose_name=_('Vale a partir de'))
+    valid_until = models.DateField(null=True, blank=True, verbose_name=_('Vale até'))
     # Repeats every N weeks, counted from the week of `valid_from` (1 = every week)
     interval_weeks = models.PositiveSmallIntegerField(
-        default=1, validators=[MinValueValidator(1), MaxValueValidator(8)], verbose_name='Repete a cada (semanas)')
+        default=1, validators=[MinValueValidator(1), MaxValueValidator(8)], verbose_name=_('Repete a cada (semanas)'))
     # The package this series fills (core/package_schedule.py): "mark more classes" and renewals follow it
     package = models.ForeignKey('StudentPackage', on_delete=models.SET_NULL, null=True, blank=True,
-                                related_name='slots', verbose_name='Pacote')
+                                related_name='slots', verbose_name=_('Pacote'))
     # Days (ISO dates) with no class inside the series, e.g. a holiday: the calendar never generates them
     skipped_dates = models.JSONField(default=list, blank=True)
 
     class Meta:
-        verbose_name = 'Horário fixo'
-        verbose_name_plural = 'Horários fixos'
+        verbose_name = _('Horário fixo')
+        verbose_name_plural = _('Horários fixos')
         ordering = ['weekday', 'start_time']
         constraints = [models.UniqueConstraint(fields=['person', 'weekday', 'start_time'], name='unique_slot')]
 
@@ -936,27 +938,27 @@ class Appointment(models.Model):
     """One concrete class on the calendar (generated from a slot, or created by hand)."""
 
     class Kind(models.TextChoices):
-        REGULAR = 'regular', 'Aula'
-        TRIAL = 'trial', 'Experimental'
-        MAKEUP = 'makeup', 'Reposição'
-        OTHER = 'other', 'Outro'
+        REGULAR = 'regular', _('Aula')
+        TRIAL = 'trial', _('Experimental')
+        MAKEUP = 'makeup', _('Reposição')
+        OTHER = 'other', _('Outro')
 
     class Status(models.TextChoices):
-        SCHEDULED = 'scheduled', 'Marcada'
-        ATTENDED = 'attended', 'Compareceu'
-        MISSED = 'missed', 'Faltou'
-        CANCELLED = 'cancelled', 'Cancelada'
-        RESCHEDULED = 'rescheduled', 'Remarcada'
+        SCHEDULED = 'scheduled', _('Marcada')
+        ATTENDED = 'attended', _('Compareceu')
+        MISSED = 'missed', _('Faltou')
+        CANCELLED = 'cancelled', _('Cancelada')
+        RESCHEDULED = 'rescheduled', _('Remarcada')
 
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='appointments', verbose_name='Aluno')
-    starts_at = models.DateTimeField(verbose_name='Início')
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='appointments', verbose_name=_('Aluno'))
+    starts_at = models.DateTimeField(verbose_name=_('Início'))
     duration_minutes = models.PositiveSmallIntegerField(
-        default=60, validators=[MinValueValidator(10), MaxValueValidator(480)], verbose_name='Duração (min)')
-    kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.REGULAR, verbose_name='Tipo')
-    status = models.CharField(max_length=12, choices=Status.choices, default=Status.SCHEDULED, verbose_name='Situação')
+        default=60, validators=[MinValueValidator(10), MaxValueValidator(480)], verbose_name=_('Duração (min)'))
+    kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.REGULAR, verbose_name=_('Tipo'))
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.SCHEDULED, verbose_name=_('Situação'))
     slot = models.ForeignKey(ScheduleSlot, on_delete=models.SET_NULL, null=True, blank=True,
                              related_name='appointments')
-    notes = models.CharField(max_length=200, blank=True, verbose_name='Observação')
+    notes = models.CharField(max_length=200, blank=True, verbose_name=_('Observação'))
     status_changed_at = models.DateTimeField(null=True, blank=True)
     # On the original class of a move: the class it became (lets "desfazer" put things back)
     # The package this class was taken from (linked by core/packages.sync once the class counts)
@@ -969,8 +971,8 @@ class Appointment(models.Model):
                                           related_name='rescheduled_from')
 
     class Meta:
-        verbose_name = 'Aula'
-        verbose_name_plural = 'Aulas'
+        verbose_name = _('Aula')
+        verbose_name_plural = _('Aulas')
         ordering = ['starts_at']
         # One live class per student and time. Cancelled and rescheduled rows stay as history, so a class can be
         # moved back to a time it left, or a new one created where one was cancelled.
@@ -999,19 +1001,19 @@ class AppointmentRequest(models.Model):
     """A student asking to move or cancel one of their classes; the trainer approves or declines (core/class_requests.py)."""
 
     class Kind(models.TextChoices):
-        RESCHEDULE = 'reschedule', 'Remarcar'
-        CANCEL = 'cancel', 'Cancelar'
+        RESCHEDULE = 'reschedule', _('Remarcar')
+        CANCEL = 'cancel', _('Cancelar')
 
     class Status(models.TextChoices):
-        PENDING = 'pending', 'Aguardando a personal'
-        APPROVED = 'approved', 'Aprovado'
-        DECLINED = 'declined', 'Recusado'
-        WITHDRAWN = 'withdrawn', 'Retirado'
+        PENDING = 'pending', _('Aguardando a personal')
+        APPROVED = 'approved', _('Aprovado')
+        DECLINED = 'declined', _('Recusado')
+        WITHDRAWN = 'withdrawn', _('Retirado')
 
     appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE, related_name='requests')
     kind = models.CharField(max_length=10, choices=Kind.choices)
-    proposed_starts_at = models.DateTimeField(null=True, blank=True, verbose_name='Novo horário sugerido')
-    message = models.CharField(max_length=200, blank=True, verbose_name='Recado')
+    proposed_starts_at = models.DateTimeField(null=True, blank=True, verbose_name=_('Novo horário sugerido'))
+    message = models.CharField(max_length=200, blank=True, verbose_name=_('Recado'))
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
     decided_at = models.DateTimeField(null=True, blank=True)
@@ -1048,9 +1050,9 @@ class WhatsAppTemplate(models.Model):
     """The trainer's own text for one of the WhatsApp messages (core/whatsapp_messages.py); no row = the default text."""
 
     class Kind(models.TextChoices):
-        CHARGE = 'charge', 'Cobrança de pacote'
-        MISSED = 'missed', 'Aula que o aluno faltou'
-        INVITE = 'invite', 'Convite de acesso'
+        CHARGE = 'charge', _('Cobrança de pacote')
+        MISSED = 'missed', _('Aula que o aluno faltou')
+        INVITE = 'invite', _('Convite de acesso')
 
     kind = models.CharField(max_length=10, choices=Kind.choices, unique=True)
     text = models.TextField(max_length=1000)
@@ -1090,9 +1092,9 @@ class NotificationLog(models.Model):
     """What was sent (or not) and how it went. Never holds the message text, only its kind."""
 
     class Status(models.TextChoices):
-        SENT = 'sent', 'Enviada'
-        FAILED = 'failed', 'Falhou'
-        SKIPPED = 'skipped', 'Não enviada'
+        SENT = 'sent', _('Enviada')
+        FAILED = 'failed', _('Falhou')
+        SKIPPED = 'skipped', _('Não enviada')
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notification_logs')
     kind = models.CharField(max_length=30)
@@ -1110,19 +1112,20 @@ class CalendarFeed(models.Model):
 
     Whoever has the link can read the classes it shows, so it is treated like a password: long random token,
     one per account, and "generate a new link" invalidates the old one (see core/calendar_feed.py)."""
-    NAME_STYLES = [('first', 'Primeiro nome do aluno'), ('full', 'Nome completo do aluno'), ('none', 'Sem o nome do aluno')]
+    NAME_STYLES = [('first', _('Primeiro nome do aluno')), ('full', _('Nome completo do aluno')),
+                   ('none', _('Sem o nome do aluno'))]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='calendar_feed')
     token = models.CharField(max_length=64, unique=True, editable=False)
     # Trainer's feed only: how a student appears in the title of the event
-    name_style = models.CharField(max_length=5, choices=NAME_STYLES, default='first', verbose_name='Nome do aluno no evento')
+    name_style = models.CharField(max_length=5, choices=NAME_STYLES, default='first', verbose_name=_('Nome do aluno no evento'))
     created_at = models.DateTimeField(auto_now_add=True)
     rotated_at = models.DateTimeField(null=True, blank=True)
     last_fetched_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        verbose_name = 'Link de calendário'
-        verbose_name_plural = 'Links de calendário'
+        verbose_name = _('Link de calendário')
+        verbose_name_plural = _('Links de calendário')
 
     def __str__(self):
-        return f'Calendário de {self.user_id}'
+        return gettext('Calendário de %(user)s') % {'user': self.user_id}

@@ -3,12 +3,18 @@ from datetime import datetime, time, timedelta
 
 from django.db.models import Avg, Count, Max, OuterRef, Q, Subquery
 from django.utils import timezone
+from django.utils.translation import pgettext_lazy
 
 from .consistency import effective_goal, motivation
 from .models import Appointment, PersonRoutine, WorkoutSession
 from .workout_sessions import MAX_SESSION_MINUTES, close_stale  # noqa: F401  (MAX_SESSION_MINUTES is read from here by the tests)
 
-WEEKDAY_LETTERS = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D']
+# One letter per weekday, Monday first (the context tells the identical letters apart)
+WEEKDAY_LETTERS = [
+    pgettext_lazy('weekday letter, Monday', 'S'), pgettext_lazy('weekday letter, Tuesday', 'T'),
+    pgettext_lazy('weekday letter, Wednesday', 'Q'), pgettext_lazy('weekday letter, Thursday', 'Q'),
+    pgettext_lazy('weekday letter, Friday', 'S'), pgettext_lazy('weekday letter, Saturday', 'S'),
+    pgettext_lazy('weekday letter, Sunday', 'D')]
 
 
 def suggest_index(pairs):

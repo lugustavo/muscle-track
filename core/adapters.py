@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.shortcuts import redirect
+from django.utils.translation import gettext as _
 
 
 class AccountAdapter(DefaultAccountAdapter):
@@ -32,8 +33,8 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         if user is not None:
             sociallogin.connect(request, user)
             return
-        messages.error(request, 'Não encontramos um acesso para esta conta. Peça um convite à sua personal, ou entre '
-                                'com e-mail e senha e conecte a conta em "Contas conectadas".')
+        messages.error(request, _('Não encontramos um acesso para esta conta. Peça um convite à sua personal, ou entre '
+                                  'com e-mail e senha e conecte a conta em "Contas conectadas".'))
         raise ImmediateHttpResponse(redirect('account_login'))
 
     @staticmethod

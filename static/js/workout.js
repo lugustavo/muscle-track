@@ -5,6 +5,14 @@
 (function () {
   'use strict';
 
+  // Django's JS catalog (/jsi18n/); identity fallbacks if it has not loaded
+  var gettext = window.gettext || function (s) { return s; };
+  var interpolate = window.interpolate || function (s, o, named) {
+    if (named) { return s.replace(/%\((\w+)\)s/g, function (m, k) { return String(o[k]); }); }
+    var i = 0;
+    return s.replace(/%s/g, function () { return String(o[i++]); });
+  };
+
   var root = document.getElementById('workout');
   if (!root) return;
 
@@ -55,8 +63,8 @@
     timerEl.textContent = fmtHMS(currentElapsed());
     timerEl.classList.toggle('text-muted', paused);
     pauseBtn.innerHTML = paused
-      ? '<i class="bi bi-play-fill"></i> Retomar'
-      : '<i class="bi bi-pause-fill"></i> Pausar';
+      ? '<i class="bi bi-play-fill"></i> ' + gettext('Retomar')
+      : '<i class="bi bi-pause-fill"></i> ' + gettext('Pausar');
     pauseBtn.classList.toggle('btn-warning', paused);
     pauseBtn.classList.toggle('btn-outline-secondary', !paused);
   }
@@ -79,7 +87,7 @@
         paused = d.paused;
         renderTimer();
       })
-      .catch(function () { alert('Sem conexão: não foi possível pausar agora.'); });
+      .catch(function () { alert(gettext('Sem conexão: não foi possível pausar agora.')); });
   });
 
   // ---------- offline-tolerant queue ----------
@@ -96,22 +104,22 @@
     var pending = queue.length;
     if (!pending && !flushing) {
       syncEl.className = 'badge bg-success-subtle text-success-emphasis';
-      syncEl.innerHTML = '<i class="bi bi-cloud-check"></i> Salvo';
+      syncEl.innerHTML = '<i class="bi bi-cloud-check"></i> ' + gettext('Salvo');
     } else if (!navigator.onLine) {
       syncEl.className = 'badge bg-warning text-dark';
-      syncEl.innerHTML = '<i class="bi bi-cloud-slash"></i> Offline · ' + pending + ' pendente(s)';
+      syncEl.innerHTML = '<i class="bi bi-cloud-slash"></i> ' + interpolate(gettext('Offline · %s pendente(s)'), [pending]);
     } else {
       syncEl.className = 'badge bg-info text-dark';
-      syncEl.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> Salvando…';
+      syncEl.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> ' + gettext('Salvando…');
     }
   }
 
   function onRejected(status) {
     if (status === 404 || status === 403) {
-      alert('Esta sessão de treino já foi encerrada ou expirou. Vou recarregar a página.');
+      alert(gettext('Esta sessão de treino já foi encerrada ou expirou. Vou recarregar a página.'));
       window.location.href = root.dataset.myWorkoutsUrl;
     } else {
-      alert('Um valor não foi aceito pelo servidor. Vou recarregar a página para sincronizar.');
+      alert(gettext('Um valor não foi aceito pelo servidor. Vou recarregar a página para sincronizar.'));
       window.location.reload();
     }
   }
@@ -294,8 +302,10 @@
     var label = $('#progressExercises');
     if (label) {
       label.innerHTML = all.length && doneExercises === all.length
-        ? 'Todos os exercícios concluídos'
-        : 'Exercício <strong id="progressCurrent">' + Math.min(doneExercises + 1, all.length) + '</strong> de ' + all.length;
+        ? gettext('Todos os exercícios concluídos')
+        : interpolate(gettext('Exercício <strong id="progressCurrent">%(current)s</strong> de %(total)s'), {
+          current: Math.min(doneExercises + 1, all.length), total: all.length
+        }, true);
     }
     var setsEl = $('#progressSetsDone');
     if (setsEl) setsEl.textContent = doneSets;
@@ -314,7 +324,7 @@
       divider = document.createElement('div');
       divider.id = 'doneDivider';
       divider.className = 'done-divider';
-      divider.innerHTML = '<span>Concluídos</span>';
+      divider.innerHTML = '<span>' + gettext('Concluídos') + '</span>';
     }
     queueEl.insertBefore(divider, firstDone);
   }
@@ -354,10 +364,10 @@
       if (becameComplete) {
         if (next) {
           $('.exercise-body', next).classList.remove('d-none');
-          showToast('Próximo: ' + next.dataset.name);
+          showToast(interpolate(gettext('Próximo: %(name)s'), { name: next.dataset.name }, true));
           next.scrollIntoView({ block: 'start', behavior: behavior });
         } else {
-          showToast('Todos os exercícios concluídos!');
+          showToast(gettext('Todos os exercícios concluídos!'));
           var finish = $('#finishForm');
           if (finish) finish.scrollIntoView({ block: 'center', behavior: behavior });
         }
@@ -374,8 +384,8 @@
     var pending = pendingSets();
     var hint = $('#finishHint');
     hint.textContent = pending === 0
-      ? 'Todas as séries feitas. Bom trabalho!'
-      : 'Faltam ' + pending + ' série(s).';
+      ? gettext('Todas as séries feitas. Bom trabalho!')
+      : interpolate(gettext('Faltam %s série(s).'), [pending]);
     hint.classList.toggle('text-success', pending === 0);
   }
 
@@ -432,7 +442,7 @@
       refreshCard(card, true);
       if (nowDone) {
         copyWeightToNext(row);
-        if (isRecord) showToast('🏆 Novo recorde de carga!');
+        if (isRecord) showToast(gettext('🏆 Novo recorde de carga!'));
         if (pendingSets() > 0) startRest(parseInt(card.dataset.rest, 10));
         else hideRest();
       } else {
@@ -476,11 +486,11 @@
     setTimeout(function () {
       flush().then(function (ok) {
         if (!ok) {
-          alert('Ainda há alterações sem sincronizar (sem conexão?). Aguarde a internet voltar e tente finalizar de novo.');
+          alert(gettext('Ainda há alterações sem sincronizar (sem conexão?). Aguarde a internet voltar e tente finalizar de novo.'));
           return;
         }
         var pending = pendingSets();
-        if (pending > 0 && !confirm('Faltam ' + pending + ' série(s). Finalizar mesmo assim?')) return;
+        if (pending > 0 && !confirm(interpolate(gettext('Faltam %s série(s). Finalizar mesmo assim?'), [pending]))) return;
         finishForm.submit();
       });
     }, 50);

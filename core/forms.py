@@ -4,6 +4,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.translation import gettext, gettext_lazy as _, ngettext
 from .recurrence import MAX_INTERVAL, MAX_OCCURRENCES, MAX_SPAN_DAYS, end_date
 from .validators import normalize_phone, normalize_state, normalize_zip_code, validate_birth_date, digits_only
 from .models import (
@@ -33,13 +34,13 @@ class ContactValidationMixin:
 class PersonForm(ContactValidationMixin, forms.ModelForm):
     email = forms.EmailField(
         required=True,
-        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'email@exemplo.com'}),
-        label='Email',
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': _('email@exemplo.com')}),
+        label=_('Email'),
         max_length=150,
-        help_text='Usado para o login do aluno. Depois de salvar, você recebe um link de convite para enviar a ele.'
+        help_text=_('Usado para o login do aluno. Depois de salvar, você recebe um link de convite para enviar a ele.')
     )
     confirm_duplicate = forms.BooleanField(
-        required=False, label='Confirmo que é outra pessoa, pode cadastrar mesmo assim',
+        required=False, label=_('Confirmo que é outra pessoa, pode cadastrar mesmo assim'),
     )
 
     class Meta:
@@ -53,9 +54,9 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
                 format='%Y-%m-%d'
             ),
             'goal': forms.Textarea(attrs={'rows': 2, 'class': 'form-control',
-                                          'placeholder': 'Ex.: hipertrofia, emagrecer 8 kg até dezembro...'}),
+                                          'placeholder': _('Ex.: hipertrofia, emagrecer 8 kg até dezembro...')}),
             'health_notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control', 'data-no-draft': '',
-                                                  'placeholder': 'Ex.: hérnia de disco L5, joelho direito operado em 2022, usa anticoncepcional...'}),
+                                                  'placeholder': _('Ex.: hérnia de disco L5, joelho direito operado em 2022, usa anticoncepcional...')}),
             'emergency_contact_name': forms.TextInput(attrs={'class': 'form-control'}),
             'emergency_contact_phone': forms.TextInput(attrs={
                 'class': 'form-control', 'inputmode': 'tel', 'autocomplete': 'off', 'data-mask': 'phone'}),
@@ -69,7 +70,7 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
             'avatar': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
         }
         labels = {
-            'notes': 'Anotações internas (o aluno não vê)',
+            'notes': _('Anotações internas (o aluno não vê)'),
         }
 
     def __init__(self, *args, **kwargs):
@@ -90,14 +91,14 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
     def clean_email(self):
         email = self.cleaned_data.get('email', '').strip().lower()
         if len(email) > 150:
-            raise forms.ValidationError('O e-mail pode ter no máximo 150 caracteres.')
+            raise forms.ValidationError(gettext('O e-mail pode ter no máximo 150 caracteres.'))
         # Verificar se o email já está em uso (exceto pelo usuário atual em edição)
         user_exists = User.objects.filter(Q(email__iexact=email) | Q(username__iexact=email))
         if self.instance and self.instance.pk and self.instance.user:
             user_exists = user_exists.exclude(pk=self.instance.user.pk)
 
         if user_exists.exists():
-            raise forms.ValidationError('Este email já está cadastrado no sistema.')
+            raise forms.ValidationError(gettext('Este email já está cadastrado no sistema.'))
 
         return email
 
@@ -115,11 +116,11 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
         found = {}
         if name:
             for p in others.filter(person_name__iexact=name):
-                found[p.pk] = (p, 'mesmo nome')
+                found[p.pk] = (p, gettext('mesmo nome'))
         if phone:
             for p in others.exclude(phone='').only('pk', 'person_name', 'phone'):
                 if digits_only(p.phone) == phone:
-                    found[p.pk] = (p, 'mesmo telefone')
+                    found[p.pk] = (p, gettext('mesmo telefone'))
         return list(found.values())
 
     def clean(self):
@@ -128,27 +129,27 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
             return cleaned
         self.duplicates = self._find_duplicates()
         if self.duplicates and not cleaned.get('confirm_duplicate'):
-            raise forms.ValidationError(
+            raise forms.ValidationError(gettext(
                 'Já existe aluno com dados parecidos (veja abaixo). '
-                'Se for outra pessoa, marque a confirmação e salve de novo.')
+                'Se for outra pessoa, marque a confirmação e salve de novo.'))
         return cleaned
 
 
 class SaleForm(forms.Form):
     """"Vender pacote": which catalog package, the price agreed with this student (per class or total) and a note."""
-    package = forms.ModelChoiceField(queryset=Package.objects.none(), label='Pacote', empty_label=None,
+    package = forms.ModelChoiceField(queryset=Package.objects.none(), label=_('Pacote'), empty_label=None,
                                      widget=forms.RadioSelect)
-    pricing_mode = forms.ChoiceField(choices=Package.PRICING, initial='per_session', label='Como o valor é informado',
+    pricing_mode = forms.ChoiceField(choices=Package.PRICING, initial='per_session', label=_('Como o valor é informado'),
                                      widget=forms.RadioSelect)
     price_per_session = forms.DecimalField(
-        required=False, min_value=0, max_digits=8, decimal_places=2, label='Valor por aula',
+        required=False, min_value=0, max_digits=8, decimal_places=2, label=_('Valor por aula'),
         widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'inputmode': 'decimal', 'data-no-draft': ''}))
     price_total = forms.DecimalField(
-        required=False, min_value=0, max_digits=8, decimal_places=2, label='Valor total',
+        required=False, min_value=0, max_digits=8, decimal_places=2, label=_('Valor total'),
         widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'inputmode': 'decimal', 'data-no-draft': ''}))
-    notes = forms.CharField(required=False, max_length=200, label='Observação',
+    notes = forms.CharField(required=False, max_length=200, label=_('Observação'),
                             widget=forms.TextInput(attrs={'class': 'form-control'}))
-    continue_schedule = forms.BooleanField(required=False, label='Continuar o mesmo horário',
+    continue_schedule = forms.BooleanField(required=False, label=_('Continuar o mesmo horário'),
                                           widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
 
     def __init__(self, *args, **kwargs):
@@ -248,22 +249,22 @@ class PersonRoutineForm(forms.ModelForm):
 
 class AIWorkoutGenerationForm(forms.Form):
     description = forms.CharField(
-        label='Descrição do Treino',
+        label=_('Descrição do Treino'),
         max_length=1000,
-        widget=forms.Textarea(attrs={'rows': 4, 'placeholder': 'Ex: Treino para hipertrofia de peito e tríceps, com foco em exercícios compostos'}),
-        help_text='Descreva o tipo de treino que deseja gerar'
+        widget=forms.Textarea(attrs={'rows': 4, 'placeholder': _('Ex: Treino para hipertrofia de peito e tríceps, com foco em exercícios compostos')}),
+        help_text=_('Descreva o tipo de treino que deseja gerar')
     )
     difficulty_level = forms.ChoiceField(
-        label='Nível de Dificuldade',
+        label=_('Nível de Dificuldade'),
         choices=[
-            ('iniciante', 'Iniciante'),
-            ('intermediario', 'Intermediário'),
-            ('avancado', 'Avançado'),
+            ('iniciante', _('Iniciante')),
+            ('intermediario', _('Intermediário')),
+            ('avancado', _('Avançado')),
         ],
         initial='intermediario'
     )
     estimated_duration = forms.IntegerField(
-        label='Duração Estimada (minutos)',
+        label=_('Duração Estimada (minutos)'),
         min_value=15,
         max_value=180,
         initial=60
@@ -287,7 +288,7 @@ class AssessmentForm(forms.ModelForm):
     def clean(self):
         cleaned = super().clean()
         if not any(cleaned.get(name) is not None for name in self.MEASURE_FIELDS):
-            raise forms.ValidationError('Preencha pelo menos uma medida (peso, altura, % de gordura ou circunferência).')
+            raise forms.ValidationError(gettext('Preencha pelo menos uma medida (peso, altura, % de gordura ou circunferência).'))
         return cleaned
 
 
@@ -297,8 +298,8 @@ class ProgressPhotoForm(forms.ModelForm):
     def __init__(self, *args, student=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['assessment'].queryset = student.assessments.all() if student else Assessment.objects.none()
-        self.fields['assessment'].empty_label = 'Foto avulsa (sem avaliação)'
-        self.fields['assessment'].label_from_instance = lambda a: f'Avaliação de {a.date:%d/%m/%Y}'
+        self.fields['assessment'].empty_label = gettext('Foto avulsa (sem avaliação)')
+        self.fields['assessment'].label_from_instance = lambda a: gettext('Avaliação de %(date)s') % {'date': f'{a.date:%d/%m/%Y}'}
         self.fields['date'].required = False
         self.fields['angle'].required = False
 
@@ -320,7 +321,7 @@ class ProgressPhotoForm(forms.ModelForm):
             'angle': forms.Select(attrs={'class': 'form-select'}),
             'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
             'image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
-            'caption': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Opcional'}),
+            'caption': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Opcional')}),
         }
 
 
@@ -333,7 +334,7 @@ class MyPhotoForm(forms.ModelForm):
         self.person = person
         self.fields['date'].required = False
         self.fields['angle'].required = False
-        self.fields['angle'].choices = [(a.value, a.label) for a in ProgressPhoto.SEQUENCE] + [('other', 'Outra')]
+        self.fields['angle'].choices = [(a.value, a.label) for a in ProgressPhoto.SEQUENCE] + [('other', _('Outra'))]
 
     def clean(self):
         data = super().clean()
@@ -342,9 +343,10 @@ class MyPhotoForm(forms.ModelForm):
         if not data.get('date'):
             data['date'] = today
         elif data['date'] > today:
-            self.add_error('date', 'A data não pode ser no futuro.')
+            self.add_error('date', gettext('A data não pode ser no futuro.'))
         if self.person is not None and self.person.progress_photos.filter(uploaded_by_student=True).count() >= self.MAX_PHOTOS:
-            raise forms.ValidationError(f'Você já enviou {self.MAX_PHOTOS} fotos: remova algumas para enviar outras.')
+            raise forms.ValidationError(
+                gettext('Você já enviou %(max)d fotos: remova algumas para enviar outras.') % {'max': self.MAX_PHOTOS})
         return data
 
     class Meta:
@@ -354,7 +356,7 @@ class MyPhotoForm(forms.ModelForm):
             'angle': forms.Select(attrs={'class': 'form-select'}),
             'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
             'image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
-            'caption': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Opcional'}),
+            'caption': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Opcional')}),
         }
 
 
@@ -364,7 +366,7 @@ class StudentNoteForm(forms.ModelForm):
         fields = ['text']
         widgets = {
             'text': forms.Textarea(attrs={'rows': 3, 'class': 'form-control',
-                                          'placeholder': 'Anotação da personal (o aluno não vê)...'}),
+                                          'placeholder': _('Anotação da personal (o aluno não vê)...')}),
         }
         labels = {'text': ''}
 
@@ -372,25 +374,25 @@ class StudentNoteForm(forms.ModelForm):
 class StatusForm(forms.Form):
     """Lifecycle change of a student, with the reason."""
     status = forms.ChoiceField(
-        choices=Person.Status.choices, label='Nova situação',
+        choices=Person.Status.choices, label=_('Nova situação'),
         widget=forms.Select(attrs={'class': 'form-select'}))
     reason = forms.CharField(
-        required=False, label='Motivo', max_length=1000,
+        required=False, label=_('Motivo'), max_length=1000,
         widget=forms.Textarea(attrs={'rows': 3, 'class': 'form-control',
-                                     'placeholder': 'Ex.: viagem de 2 meses, mudou de cidade, fechou o plano...'}))
+                                     'placeholder': _('Ex.: viagem de 2 meses, mudou de cidade, fechou o plano...')}))
 
     def clean(self):
         cleaned = super().clean()
         status = cleaned.get('status')
         if status and status not in Person.OPEN_STATUSES and not cleaned.get('reason', '').strip():
-            self.add_error('reason', 'Informe o motivo ao pausar ou encerrar o aluno.')
+            self.add_error('reason', gettext('Informe o motivo ao pausar ou encerrar o aluno.'))
         return cleaned
 
 
 class ConsentForm(forms.Form):
     """First-access consent screen: the two required consents plus the optional photos one."""
-    terms = forms.BooleanField(label='', error_messages={'required': 'É preciso aceitar para continuar.'})
-    health_data = forms.BooleanField(label='', error_messages={'required': 'É preciso aceitar para continuar.'})
+    terms = forms.BooleanField(label='', error_messages={'required': _('É preciso aceitar para continuar.')})
+    health_data = forms.BooleanField(label='', error_messages={'required': _('É preciso aceitar para continuar.')})
     photos = forms.BooleanField(required=False, label='')
 
 
@@ -398,7 +400,7 @@ class PackageForm(forms.ModelForm):
     """A package of the catalog: classes, deadline (counted from the first class) and the price, typed per class or total.
 
     "Sem prazo" (a checkbox that is not a model field) is saved as an empty deadline: the package never expires."""
-    no_deadline = forms.BooleanField(required=False, label='Sem prazo (o pacote não vence)',
+    no_deadline = forms.BooleanField(required=False, label=_('Sem prazo (o pacote não vence)'),
                                      widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
 
     def __init__(self, *args, **kwargs):
@@ -410,7 +412,7 @@ class PackageForm(forms.ModelForm):
         model = Package
         fields = ['name', 'description', 'sessions', 'valid_days', 'pricing_mode', 'price_per_session', 'price_total', 'is_active']
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex.: Pacote 10 aulas'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Ex.: Pacote 10 aulas')}),
             'description': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
             'sessions': forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': '200', 'inputmode': 'numeric'}),
             'valid_days': forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': '1000', 'inputmode': 'numeric'}),
@@ -425,13 +427,13 @@ class PackageForm(forms.ModelForm):
             cleaned['valid_days'] = None
             self.errors.pop('valid_days', None)
         elif cleaned.get('valid_days') is None and 'valid_days' not in self.errors:
-            self.add_error('valid_days', 'Informe o prazo em dias ou marque "Sem prazo".')
+            self.add_error('valid_days', gettext('Informe o prazo em dias ou marque "Sem prazo".'))
         if self.errors:
             return cleaned
         mode = cleaned.get('pricing_mode')
         typed = cleaned.get('price_per_session' if mode == 'per_session' else 'price_total')
         if typed is None:
-            self.add_error('price_per_session' if mode == 'per_session' else 'price_total', 'Informe o valor.')
+            self.add_error('price_per_session' if mode == 'per_session' else 'price_total', gettext('Informe o valor.'))
         return cleaned
 
 
@@ -448,33 +450,33 @@ class PaymentForm(forms.ModelForm):
             'method': forms.Select(attrs={'class': 'form-select'}),
             'notes': forms.TextInput(attrs={'class': 'form-control'}),
         }
-        labels = {'amount': 'Valor', 'student_package': 'Pacote'}
+        labels = {'amount': _('Valor'), 'student_package': _('Pacote')}
 
     def __init__(self, *args, person=None, **kwargs):
         super().__init__(*args, **kwargs)
         field = self.fields['student_package']
         field.queryset = StudentPackage.objects.filter(person=person, cancelled_at__isnull=True) if person else StudentPackage.objects.none()
         field.required = False
-        field.empty_label = '— sem pacote —'
+        field.empty_label = gettext('— sem pacote —')
         field.label_from_instance = lambda obj: f'{obj.name} ({obj.sold_on:%d/%m/%Y})'
 
 
 class RecurrenceMixin(forms.Form):
     """Repeat every N weeks, from a start date, ending never / on a date / after N classes."""
-    ENDS = (('never', 'Nunca'), ('on', 'Em uma data'), ('after', 'Após um número de aulas'))
+    ENDS = (('never', _('Nunca')), ('on', _('Em uma data')), ('after', _('Após um número de aulas')))
 
     interval_weeks = forms.IntegerField(
-        label='Repete a cada (semanas)', min_value=1, max_value=MAX_INTERVAL, initial=1, required=False,
+        label=_('Repete a cada (semanas)'), min_value=1, max_value=MAX_INTERVAL, initial=1, required=False,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': str(MAX_INTERVAL), 'inputmode': 'numeric'}))
     starts_on = forms.DateField(
-        label='Começa em', required=False,
+        label=_('Começa em'), required=False,
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
-    ends = forms.ChoiceField(label='Termina', choices=ENDS, initial='never', required=False, widget=forms.RadioSelect)
+    ends = forms.ChoiceField(label=_('Termina'), choices=ENDS, initial='never', required=False, widget=forms.RadioSelect)
     ends_on = forms.DateField(
-        label='Termina em', required=False,
+        label=_('Termina em'), required=False,
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
     ends_after = forms.IntegerField(
-        label='Número de aulas', min_value=1, max_value=MAX_OCCURRENCES, required=False,
+        label=_('Número de aulas'), min_value=1, max_value=MAX_OCCURRENCES, required=False,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': str(MAX_OCCURRENCES), 'inputmode': 'numeric'}))
 
     def __init__(self, *args, start_hint=None, **kwargs):
@@ -491,13 +493,13 @@ class RecurrenceMixin(forms.Form):
         start = cleaned.get('starts_on') or self.start_hint or timezone.localdate()
         if ends == 'on':
             if not cleaned.get('ends_on'):
-                self.add_error('ends_on', 'Informe a data final.')
+                self.add_error('ends_on', gettext('Informe a data final.'))
             elif cleaned['ends_on'] < start:
-                self.add_error('ends_on', 'A data final não pode ser antes do início.')
+                self.add_error('ends_on', gettext('A data final não pode ser antes do início.'))
             elif (cleaned['ends_on'] - start).days > MAX_SPAN_DAYS:
-                self.add_error('ends_on', 'A série pode durar no máximo 3 anos. Use "Nunca" para uma série sem fim.')
+                self.add_error('ends_on', gettext('A série pode durar no máximo 3 anos. Use "Nunca" para uma série sem fim.'))
         elif ends == 'after' and not cleaned.get('ends_after'):
-            self.add_error('ends_after', 'Informe quantas aulas.')
+            self.add_error('ends_after', gettext('Informe quantas aulas.'))
         return cleaned
 
     def series_end(self, weekdays, start):
@@ -512,26 +514,25 @@ class ScheduleSlotForm(RecurrenceMixin):
 
     With `plan` (packages.schedule_plan) the series can follow the student's package: it ends on the package's last
     day or after the classes still to be marked, whichever comes first."""
-    weekday = forms.TypedChoiceField(choices=ScheduleSlot.WEEKDAYS, coerce=int, required=False, label='Dia',
+    weekday = forms.TypedChoiceField(choices=ScheduleSlot.WEEKDAYS, coerce=int, required=False, label=_('Dia'),
                                      widget=forms.Select(attrs={'class': 'form-select'}))
-    weekdays = forms.TypedMultipleChoiceField(choices=ScheduleSlot.WEEKDAYS, coerce=int, required=False, label='Dias',
+    weekdays = forms.TypedMultipleChoiceField(choices=ScheduleSlot.WEEKDAYS, coerce=int, required=False, label=_('Dias'),
                                               widget=forms.CheckboxSelectMultiple)
-    start_time = forms.TimeField(label='Horário',
+    start_time = forms.TimeField(label=_('Horário'),
                                  widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}, format='%H:%M'))
     duration_minutes = forms.IntegerField(
-        label='Duração (min)', min_value=10, max_value=480, initial=60,
+        label=_('Duração (min)'), min_value=10, max_value=480, initial=60,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '10', 'max': '480', 'step': '5'}))
 
     def __init__(self, *args, plan=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.plan = plan
         if plan is not None:
-            label = 'Acompanhar o pacote'
-            parts = []
+            parts = ngettext('%(n)d aula a marcar', '%(n)d aulas a marcar', plan['to_schedule']) % {'n': plan['to_schedule']}
             if plan['ends_on']:
-                parts.append(f"até {plan['ends_on']:%d/%m/%Y}")
-            parts.append(f"{plan['to_schedule']} aula{'' if plan['to_schedule'] == 1 else 's'} a marcar")
-            self.fields['ends'].choices = (('package', f"{label} ({' ou '.join(parts)}, o que vier primeiro)"),) + self.ENDS
+                parts = gettext('até %(date)s ou %(classes)s') % {'date': f"{plan['ends_on']:%d/%m/%Y}", 'classes': parts}
+            label = gettext('Acompanhar o pacote (%(parts)s, o que vier primeiro)') % {'parts': parts}
+            self.fields['ends'].choices = (('package', label),) + self.ENDS
             if not self.is_bound:
                 self.initial['ends'] = 'package'
 
@@ -541,16 +542,16 @@ class ScheduleSlotForm(RecurrenceMixin):
         if cleaned.get('weekday') not in (None, ''):
             days.add(cleaned['weekday'])
         if not days:
-            self.add_error('weekdays', 'Escolha pelo menos um dia da semana.')
+            self.add_error('weekdays', gettext('Escolha pelo menos um dia da semana.'))
         cleaned['all_weekdays'] = sorted(days)
         if cleaned.get('ends') == 'package':
             start = cleaned.get('starts_on') or timezone.localdate()
             if self.plan is None:
-                self.add_error('ends', 'Este aluno não tem pacote em uso: escolha outra forma de terminar.')
+                self.add_error('ends', gettext('Este aluno não tem pacote em uso: escolha outra forma de terminar.'))
             elif self.plan['to_schedule'] <= 0:
-                self.add_error('ends', 'Todas as aulas que restam do pacote já estão marcadas.')
+                self.add_error('ends', gettext('Todas as aulas que restam do pacote já estão marcadas.'))
             elif self.plan['ends_on'] and self.plan['ends_on'] < start:
-                self.add_error('ends', 'O pacote termina antes do início desta série.')
+                self.add_error('ends', gettext('O pacote termina antes do início desta série.'))
         return cleaned
 
     def series_end(self, weekdays, start):
@@ -564,18 +565,18 @@ class ScheduleSlotForm(RecurrenceMixin):
 
 class SlotFillForm(forms.Form):
     """Fill the agenda from the student's package: weekdays, first day and time (the end date is calculated)."""
-    weekdays = forms.TypedMultipleChoiceField(choices=ScheduleSlot.WEEKDAYS, coerce=int, required=True, label='Dias da semana',
+    weekdays = forms.TypedMultipleChoiceField(choices=ScheduleSlot.WEEKDAYS, coerce=int, required=True, label=_('Dias da semana'),
                                               widget=forms.CheckboxSelectMultiple,
-                                              error_messages={'required': 'Escolha pelo menos um dia da semana.'})
-    starts_on = forms.DateField(label='Primeira aula', required=False,
+                                              error_messages={'required': _('Escolha pelo menos um dia da semana.')})
+    starts_on = forms.DateField(label=_('Primeira aula'), required=False,
                                 widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
-    start_time = forms.TimeField(label='Horário',
+    start_time = forms.TimeField(label=_('Horário'),
                                  widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}, format='%H:%M'))
     duration_minutes = forms.IntegerField(
-        label='Duração (min)', min_value=10, max_value=480, initial=60, required=False,
+        label=_('Duração (min)'), min_value=10, max_value=480, initial=60, required=False,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '10', 'max': '480', 'step': '5'}))
     interval_weeks = forms.IntegerField(
-        label='Repete a cada (semanas)', min_value=1, max_value=MAX_INTERVAL, initial=1, required=False,
+        label=_('Repete a cada (semanas)'), min_value=1, max_value=MAX_INTERVAL, initial=1, required=False,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': str(MAX_INTERVAL)}))
 
     def clean_duration_minutes(self):
@@ -590,24 +591,24 @@ class SlotFillForm(forms.Form):
 
 class SlotEditForm(forms.Form):
     """Change a fixed time from a date on (core/recurrence.edit_series)."""
-    weekday = forms.TypedChoiceField(choices=ScheduleSlot.WEEKDAYS, coerce=int, label='Dia da semana',
+    weekday = forms.TypedChoiceField(choices=ScheduleSlot.WEEKDAYS, coerce=int, label=_('Dia da semana'),
                                      widget=forms.Select(attrs={'class': 'form-select'}))
-    start_time = forms.TimeField(label='Horário',
+    start_time = forms.TimeField(label=_('Horário'),
                                  widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}, format='%H:%M'))
     duration_minutes = forms.IntegerField(
-        label='Duração (min)', min_value=10, max_value=480,
+        label=_('Duração (min)'), min_value=10, max_value=480,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '10', 'max': '480', 'step': '5'}))
-    from_day = forms.DateField(label='A partir de', widget=forms.DateInput(
+    from_day = forms.DateField(label=_('A partir de'), widget=forms.DateInput(
         attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
-    valid_until = forms.DateField(required=False, label='Vale até (opcional)', widget=forms.DateInput(
+    valid_until = forms.DateField(required=False, label=_('Vale até (opcional)'), widget=forms.DateInput(
         attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
 
 
 class RepeatForm(RecurrenceMixin):
     """The "Repeat" part of a new class: only used when `enabled` is ticked."""
-    enabled = forms.BooleanField(required=False, label='Repetir esta aula',
+    enabled = forms.BooleanField(required=False, label=_('Repetir esta aula'),
                                  widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
-    weekdays = forms.TypedMultipleChoiceField(choices=ScheduleSlot.WEEKDAYS, coerce=int, required=False, label='Nos dias',
+    weekdays = forms.TypedMultipleChoiceField(choices=ScheduleSlot.WEEKDAYS, coerce=int, required=False, label=_('Nos dias'),
                                               widget=forms.CheckboxSelectMultiple)
 
     def clean(self):
@@ -615,44 +616,44 @@ class RepeatForm(RecurrenceMixin):
             return self.cleaned_data   # nothing to validate: it is a single class
         cleaned = super().clean()
         if not cleaned.get('weekdays'):
-            self.add_error('weekdays', 'Escolha pelo menos um dia da semana.')
+            self.add_error('weekdays', gettext('Escolha pelo menos um dia da semana.'))
         return cleaned
 
 
 class ClassRequestForm(forms.Form):
     """The student's request to move or cancel one class (core/class_requests.py applies the rules)."""
     kind = forms.ChoiceField(
-        choices=[('reschedule', 'Quero remarcar para outro dia/horário'), ('cancel', 'Não vou poder ir (cancelar esta aula)')],
-        initial='reschedule', label='O que você precisa?', widget=forms.RadioSelect)
-    date = forms.DateField(required=False, label='Dia que prefere', widget=forms.DateInput(
+        choices=[('reschedule', _('Quero remarcar para outro dia/horário')), ('cancel', _('Não vou poder ir (cancelar esta aula)'))],
+        initial='reschedule', label=_('O que você precisa?'), widget=forms.RadioSelect)
+    date = forms.DateField(required=False, label=_('Dia que prefere'), widget=forms.DateInput(
         attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
-    time = forms.TimeField(required=False, label='Horário que prefere', widget=forms.TimeInput(
+    time = forms.TimeField(required=False, label=_('Horário que prefere'), widget=forms.TimeInput(
         attrs={'type': 'time', 'class': 'form-control'}, format='%H:%M'))
-    message = forms.CharField(required=False, max_length=200, label='Recado para a personal (opcional)',
+    message = forms.CharField(required=False, max_length=200, label=_('Recado para a personal (opcional)'),
                               widget=forms.TextInput(attrs={'class': 'form-control', 'maxlength': 200}))
 
     def clean(self):
         data = super().clean()
         if data.get('kind') == 'reschedule':
             if not data.get('date'):
-                self.add_error('date', 'Escolha o dia.')
+                self.add_error('date', gettext('Escolha o dia.'))
             if not data.get('time'):
-                self.add_error('time', 'Escolha o horário.')
+                self.add_error('time', gettext('Escolha o horário.'))
         return data
 
 
 class AppointmentForm(forms.Form):
     """A one-off class (trial, makeup...) or the new time of a rescheduled one."""
     person = forms.ModelChoiceField(
-        queryset=Person.objects.none(), label='Aluno', widget=forms.Select(attrs={'class': 'form-select'}))
-    date = forms.DateField(label='Data', widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
-    time = forms.TimeField(label='Horário', widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}, format='%H:%M'))
+        queryset=Person.objects.none(), label=_('Aluno'), widget=forms.Select(attrs={'class': 'form-select'}))
+    date = forms.DateField(label=_('Data'), widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
+    time = forms.TimeField(label=_('Horário'), widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}, format='%H:%M'))
     duration_minutes = forms.IntegerField(
-        label='Duração (min)', min_value=10, max_value=480, initial=60,
+        label=_('Duração (min)'), min_value=10, max_value=480, initial=60,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '5'}))
-    kind = forms.ChoiceField(choices=Appointment.Kind.choices, label='Tipo', initial=Appointment.Kind.REGULAR,
+    kind = forms.ChoiceField(choices=Appointment.Kind.choices, label=_('Tipo'), initial=Appointment.Kind.REGULAR,
                              widget=forms.Select(attrs={'class': 'form-select'}))
-    notes = forms.CharField(required=False, max_length=200, label='Observação',
+    notes = forms.CharField(required=False, max_length=200, label=_('Observação'),
                             widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     def __init__(self, *args, **kwargs):
@@ -665,12 +666,12 @@ class HolidayForm(forms.ModelForm):
     class Meta:
         model = Holiday
         fields = ['date', 'name']
-        labels = {'date': 'Dia', 'name': 'Nome'}
+        labels = {'date': _('Dia'), 'name': _('Nome')}
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
-            'name': forms.TextInput(attrs={'class': 'form-control', 'maxlength': '80', 'placeholder': 'Ex.: São João, estúdio fechado'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'maxlength': '80', 'placeholder': _('Ex.: São João, estúdio fechado')}),
         }
-        error_messages = {'date': {'unique': 'Este dia já está na lista.'}}
+        error_messages = {'date': {'unique': _('Este dia já está na lista.')}}
 
 
 MONEY_ATTRS = {'class': 'form-control', 'step': '0.01', 'min': '0', 'inputmode': 'decimal', 'data-no-draft': ''}
@@ -678,20 +679,20 @@ MONEY_ATTRS = {'class': 'form-control', 'step': '0.01', 'min': '0', 'inputmode':
 
 class PackageEditForm(forms.Form):
     """Change a package already sold to a student (the numbers of the sale, not the catalog)."""
-    name = forms.CharField(max_length=100, label='Nome', widget=forms.TextInput(attrs={'class': 'form-control'}))
-    sessions = forms.IntegerField(min_value=1, max_value=200, label='Aulas',
+    name = forms.CharField(max_length=100, label=_('Nome'), widget=forms.TextInput(attrs={'class': 'form-control'}))
+    sessions = forms.IntegerField(min_value=1, max_value=200, label=_('Aulas'),
                                   widget=forms.NumberInput(attrs={'class': 'form-control', 'inputmode': 'numeric'}))
-    valid_days = forms.IntegerField(required=False, min_value=1, max_value=1000, label='Prazo (dias)',
+    valid_days = forms.IntegerField(required=False, min_value=1, max_value=1000, label=_('Prazo (dias)'),
                                     widget=forms.NumberInput(attrs={'class': 'form-control', 'inputmode': 'numeric'}))
-    no_deadline = forms.BooleanField(required=False, label='Sem prazo (o pacote não vence)',
+    no_deadline = forms.BooleanField(required=False, label=_('Sem prazo (o pacote não vence)'),
                                      widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
-    pricing_mode = forms.ChoiceField(choices=Package.PRICING, initial='per_session', label='Como o valor é informado',
+    pricing_mode = forms.ChoiceField(choices=Package.PRICING, initial='per_session', label=_('Como o valor é informado'),
                                      widget=forms.RadioSelect)
     price_per_session = forms.DecimalField(required=False, min_value=0, max_digits=8, decimal_places=2,
-                                           label='Valor por aula', widget=forms.NumberInput(attrs=MONEY_ATTRS))
+                                           label=_('Valor por aula'), widget=forms.NumberInput(attrs=MONEY_ATTRS))
     price_total = forms.DecimalField(required=False, min_value=0, max_digits=8, decimal_places=2,
-                                     label='Valor total', widget=forms.NumberInput(attrs=MONEY_ATTRS))
-    notes = forms.CharField(required=False, max_length=200, label='Observação',
+                                     label=_('Valor total'), widget=forms.NumberInput(attrs=MONEY_ATTRS))
+    notes = forms.CharField(required=False, max_length=200, label=_('Observação'),
                             widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     @classmethod
@@ -708,26 +709,26 @@ class PackageEditForm(forms.Form):
             cleaned['valid_days'] = None
             self.errors.pop('valid_days', None)
         elif cleaned.get('valid_days') is None and 'valid_days' not in self.errors:
-            self.add_error('valid_days', 'Informe o prazo em dias ou marque "Sem prazo".')
+            self.add_error('valid_days', gettext('Informe o prazo em dias ou marque "Sem prazo".'))
         return cleaned
 
 
 class RefundForm(forms.Form):
     """Give money back (or undo a payment entered wrongly) against one of the student's payments."""
-    payment = forms.ModelChoiceField(queryset=Payment.objects.none(), required=False, label='Pagamento',
-                                     empty_label='— escolher o pacote abaixo —',
+    payment = forms.ModelChoiceField(queryset=Payment.objects.none(), required=False, label=_('Pagamento'),
+                                     empty_label=_('— escolher o pacote abaixo —'),
                                      widget=forms.Select(attrs={'class': 'form-select'}))
-    student_package = forms.ModelChoiceField(queryset=StudentPackage.objects.none(), required=False, label='Pacote',
-                                             empty_label='—', widget=forms.Select(attrs={'class': 'form-select'}))
-    kind = forms.ChoiceField(choices=Refund.Kind.choices, initial=Refund.Kind.REFUND, label='Tipo',
+    student_package = forms.ModelChoiceField(queryset=StudentPackage.objects.none(), required=False, label=_('Pacote'),
+                                             empty_label=_('—'), widget=forms.Select(attrs={'class': 'form-select'}))
+    kind = forms.ChoiceField(choices=Refund.Kind.choices, initial=Refund.Kind.REFUND, label=_('Tipo'),
                              widget=forms.RadioSelect)
-    amount = forms.DecimalField(min_value=Decimal('0.01'), max_digits=8, decimal_places=2, label='Valor',
+    amount = forms.DecimalField(min_value=Decimal('0.01'), max_digits=8, decimal_places=2, label=_('Valor'),
                                 widget=forms.NumberInput(attrs={**MONEY_ATTRS, 'min': '0.01'}))
-    method = forms.ChoiceField(choices=Payment.Method.choices, initial=Payment.Method.TRANSFER, label='Forma de devolução',
+    method = forms.ChoiceField(choices=Payment.Method.choices, initial=Payment.Method.TRANSFER, label=_('Forma de devolução'),
                                widget=forms.Select(attrs={'class': 'form-select'}))
-    refunded_on = forms.DateField(label='Data', widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
-    reason = forms.CharField(required=False, max_length=200, label='Motivo',
-                             widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex.: pacote cancelado, valor lançado errado'}))
+    refunded_on = forms.DateField(label=_('Data'), widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
+    reason = forms.CharField(required=False, max_length=200, label=_('Motivo'),
+                             widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Ex.: pacote cancelado, valor lançado errado')}))
 
     def __init__(self, *args, person, **kwargs):
         super().__init__(*args, **kwargs)
@@ -740,20 +741,20 @@ class RefundForm(forms.Form):
     def clean(self):
         cleaned = super().clean()
         if not cleaned.get('payment') and not cleaned.get('student_package') and not self.errors:
-            self.add_error('payment', 'Escolha o pagamento ou o pacote a que a devolução se refere.')
+            self.add_error('payment', gettext('Escolha o pagamento ou o pacote a que a devolução se refere.'))
         return cleaned
 
 
 class CancelPackageForm(forms.Form):
     """Cancel a package: the agreed fee, how much goes back (it starts as the calculated amount), how and why."""
-    fee = forms.DecimalField(required=False, min_value=0, max_digits=8, decimal_places=2, label='Taxa ou multa combinada',
+    fee = forms.DecimalField(required=False, min_value=0, max_digits=8, decimal_places=2, label=_('Taxa ou multa combinada'),
                              widget=forms.NumberInput(attrs=MONEY_ATTRS))
-    amount = forms.DecimalField(required=False, min_value=0, max_digits=8, decimal_places=2, label='Valor a devolver',
+    amount = forms.DecimalField(required=False, min_value=0, max_digits=8, decimal_places=2, label=_('Valor a devolver'),
                                 widget=forms.NumberInput(attrs=MONEY_ATTRS))
-    method = forms.ChoiceField(choices=Payment.Method.choices, initial=Payment.Method.TRANSFER, label='Forma de devolução',
+    method = forms.ChoiceField(choices=Payment.Method.choices, initial=Payment.Method.TRANSFER, label=_('Forma de devolução'),
                                widget=forms.Select(attrs={'class': 'form-select'}))
-    refunded_on = forms.DateField(label='Data da devolução', widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
-    reason = forms.CharField(required=False, max_length=200, label='Motivo',
-                             widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex.: o aluno mudou de cidade'}))
-    remove_future = forms.BooleanField(required=False, label='Tirar da agenda as aulas marcadas daqui para a frente',
+    refunded_on = forms.DateField(label=_('Data da devolução'), widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
+    reason = forms.CharField(required=False, max_length=200, label=_('Motivo'),
+                             widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Ex.: o aluno mudou de cidade')}))
+    remove_future = forms.BooleanField(required=False, label=_('Tirar da agenda as aulas marcadas daqui para a frente'),
                                        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))

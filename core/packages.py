@@ -17,6 +17,7 @@ from django.db import transaction
 from django.db.models import Count, DecimalField, F, OuterRef, Q, Subquery, Sum
 from django.db.models.functions import Coalesce
 from django.utils import timezone
+from django.utils.translation import gettext as _, gettext_lazy as _l, ngettext
 
 from .history import log_event
 from .models import Appointment, Payment, Refund, StudentEvent, StudentPackage, compute_prices
@@ -25,9 +26,9 @@ Status = Appointment.Status
 
 OPEN_STATES = ('not_started', 'active', 'frozen', 'expired')
 STATE_LABELS = {
-    'not_started': ('Aguardando a primeira aula', 'info'), 'active': ('Em andamento', 'success'),
-    'frozen': ('Congelado', 'secondary'), 'expired': ('Vencido com aulas', 'danger'),
-    'done': ('Concluído', 'secondary'), 'cancelled': ('Cancelado', 'secondary'),
+    'not_started': (_l('Aguardando a primeira aula'), 'info'), 'active': (_l('Em andamento'), 'success'),
+    'frozen': (_l('Congelado'), 'secondary'), 'expired': (_l('Vencido com aulas'), 'danger'),
+    'done': (_l('Concluído'), 'secondary'), 'cancelled': (_l('Cancelado'), 'secondary'),
 }
 LOW_BALANCE = 2          # "running out": this many classes left or fewer
 EXPIRING_DAYS = 7        # "expires soon": this many days left or fewer
@@ -258,7 +259,9 @@ def sell(person, package, *, mode='per_session', price_per_session=None, price_t
     sold = StudentPackage.objects.create(
         person=person, package=package, name=package.name, sessions=package.sessions, valid_days=package.valid_days,
         price_per_session=per, price_total=total, notes=notes[:200], sold_on=sold_on or timezone.localdate())
-    log_event(person, StudentEvent.Kind.PACKAGE, actor, f'Pacote vendido: {sold.name} ({sold.sessions} aulas)',
+    log_event(person, StudentEvent.Kind.PACKAGE, actor,
+              ngettext('Pacote vendido: %(name)s (%(n)d aula)', 'Pacote vendido: %(name)s (%(n)d aulas)', sold.sessions)
+              % {'name': sold.name, 'n': sold.sessions},
               {'package': sold.pk, 'sessions': sold.sessions})
     sync(person)
     return sold
@@ -267,7 +270,7 @@ def sell(person, package, *, mode='per_session', price_per_session=None, price_t
 def _open(package):
     s = state(package, package.appointments.count())
     if s in ('done', 'cancelled'):
-        raise PackageError('Este pacote já foi concluído ou cancelado.')
+        raise PackageError(_('Este pacote já foi concluído ou cancelado.'))
     return s
 
 
@@ -276,12 +279,13 @@ def freeze(package, actor=None, today=None):
     today = today or timezone.localdate()
     s = _open(package)
     if package.frozen_since:
-        raise PackageError('O pacote já está congelado.')
+        raise PackageError(_('O pacote já está congelado.'))
     if s == 'not_started':
-        raise PackageError('O prazo só começa na primeira aula: não há o que congelar ainda.')
+        raise PackageError(_('O prazo só começa na primeira aula: não há o que congelar ainda.'))
     package.frozen_since = today
     package.save(update_fields=['frozen_since'])
-    log_event(package.person, StudentEvent.Kind.PACKAGE, actor, f'Pacote congelado: {package.name}', {'package': package.pk})
+    log_event(package.person, StudentEvent.Kind.PACKAGE, actor, _('Pacote congelado: %(name)s') % {'name': package.name},
+              {'package': package.pk})
     sync(package.person, today)
 
 
@@ -289,13 +293,14 @@ def freeze(package, actor=None, today=None):
 def unfreeze(package, actor=None, today=None):
     today = today or timezone.localdate()
     if not package.frozen_since:
-        raise PackageError('O pacote não está congelado.')
+        raise PackageError(_('O pacote não está congelado.'))
     days = max((today - package.frozen_since).days, 0)
     package.frozen_days += days
     package.frozen_since = None
     package.save(update_fields=['frozen_days', 'frozen_since'])
     log_event(package.person, StudentEvent.Kind.PACKAGE, actor,
-              f'Pacote descongelado: {package.name} (prazo +{days} dia{"" if days == 1 else "s"})',
+              ngettext('Pacote descongelado: %(name)s (prazo +%(n)d dia)', 'Pacote descongelado: %(name)s (prazo +%(n)d dias)',
+                       days) % {'name': package.name, 'n': days},
               {'package': package.pk, 'days': days})
     sync(package.person, today)
 
@@ -303,26 +308,29 @@ def unfreeze(package, actor=None, today=None):
 @transaction.atomic
 def extend(package, days, note='', actor=None, today=None):
     if not 1 <= int(days) <= 365:
-        raise PackageError('A prorrogação deve ser de 1 a 365 dias.')
+        raise PackageError(_('A prorrogação deve ser de 1 a 365 dias.'))
     _open(package)
     if package.valid_days is None:
-        raise PackageError('Este pacote não tem prazo: não há o que prorrogar.')
+        raise PackageError(_('Este pacote não tem prazo: não há o que prorrogar.'))
     package.extension_days += int(days)
     package.save(update_fields=['extension_days'])
-    reason = f': {note.strip()[:150]}' if note.strip() else ''
-    log_event(package.person, StudentEvent.Kind.PACKAGE, actor,
-              f'Pacote prorrogado: {package.name} (+{int(days)} dias){reason}', {'package': package.pk, 'days': int(days)})
+    summary = ngettext('Pacote prorrogado: %(name)s (+%(n)d dia)', 'Pacote prorrogado: %(name)s (+%(n)d dias)',
+                       int(days)) % {'name': package.name, 'n': int(days)}
+    if note.strip():
+        summary += f': {note.strip()[:150]}'
+    log_event(package.person, StudentEvent.Kind.PACKAGE, actor, summary, {'package': package.pk, 'days': int(days)})
     sync(package.person, today)
 
 
 @transaction.atomic
 def cancel_package(package, actor=None):
     if package.cancelled_at:
-        raise PackageError('Este pacote já foi cancelado.')
+        raise PackageError(_('Este pacote já foi cancelado.'))
     package.used_at_cancel = package.appointments.count()   # the classes are re-linked once it stops counting
     package.cancelled_at = timezone.now()
     package.save(update_fields=['cancelled_at', 'used_at_cancel'])
-    log_event(package.person, StudentEvent.Kind.PACKAGE, actor, f'Pacote cancelado: {package.name}', {'package': package.pk})
+    log_event(package.person, StudentEvent.Kind.PACKAGE, actor, _('Pacote cancelado: %(name)s') % {'name': package.name},
+              {'package': package.pk})
     sync(package.person)
 
 
@@ -336,8 +344,8 @@ def pending_payments(today=None):
     rows = []
     packages = StudentPackage.objects.filter(
         cancelled_at__isnull=True, person__is_active=True, price_total__gt=0
-    ).filter(Q(starts_on__isnull=False) | Q(payments__isnull=False)).distinct().select_related('person').prefetch_related(
-        'payments', 'refunds')
+    ).filter(Q(starts_on__isnull=False) | Q(payments__isnull=False)).distinct().select_related(
+        'person__user__notification_preference').prefetch_related('payments', 'refunds')
     for package in packages:
         pending = pending_amount(package)
         if pending <= 0:

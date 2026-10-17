@@ -1,0 +1,6327 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-16 21:18-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Não encontramos um acesso para esta conta. Peça um convite à sua personal, ou entre com e-mail e senha e conecte a conta em \"Contas conectadas\"."
+msgstr ""
+
+msgid "Informações Básicas"
+msgstr ""
+
+msgid "Endereço"
+msgstr ""
+
+msgid "Outras Informações"
+msgstr ""
+
+msgid "Configurações Padrão"
+msgstr ""
+
+msgid "Mídia"
+msgstr ""
+
+msgid "Instruções"
+msgstr ""
+
+msgid "Datas"
+msgstr ""
+
+msgid "Observações"
+msgstr ""
+
+msgid "A aula já está neste horário."
+msgstr ""
+
+msgid "Este aluno já tem aula neste horário."
+msgstr ""
+
+msgid "Esta aula não veio de uma remarcação."
+msgstr ""
+
+msgid "A aula nova já foi alterada; não dá mais para desfazer."
+msgstr ""
+
+msgid "O aluno já tem outra aula no horário original; não dá mais para desfazer."
+msgstr ""
+
+#, python-format
+msgid ""
+"Você é um personal trainer especializado. Crie um plano de treino com base na seguinte descrição:\n"
+"\n"
+"Descrição: %(description)s\n"
+"Nível: %(level)s\n"
+"Duração estimada: %(duration)s minutos\n"
+"\n"
+"Exercícios disponíveis:\n"
+"%(exercises)s\n"
+"\n"
+"Retorne APENAS um objeto JSON válido no seguinte formato:\n"
+"{\n"
+"  \"routine_name\": \"Nome do Treino\",\n"
+"  \"description\": \"Descrição detalhada\",\n"
+"  \"exercises\": [\n"
+"    {\"exercise_id\": 1, \"sets\": 3, \"reps\": 12, \"rest_seconds\": 60}\n"
+"  ]\n"
+"}\n"
+"\n"
+"Escolha de 5 a 8 exercícios da lista disponível (use somente os ids da lista) que melhor\n"
+"atendam a descrição, na ordem em que devem ser executados."
+msgstr ""
+
+msgid "Chave da API OpenAI não configurada (OPENAI_API_KEY)."
+msgstr ""
+
+msgid "Cadastre exercícios antes de gerar um treino com IA."
+msgstr ""
+
+msgid "Você é um personal trainer expert. Responda sempre apenas com JSON válido."
+msgstr ""
+
+#, python-format
+msgid "Erro ao consultar a IA: %(error)s"
+msgstr ""
+
+msgid "A IA devolveu uma resposta inválida. Tente novamente."
+msgstr ""
+
+msgid "A IA não escolheu nenhum exercício válido. Tente reformular a descrição."
+msgstr ""
+
+msgid "Treino gerado por IA"
+msgstr ""
+
+#, python-format
+msgid "Pagamento registrado (%(method)s) — %(package)s"
+msgstr ""
+
+#, python-format
+msgid "Pagamento registrado (%(method)s)"
+msgstr ""
+
+#, python-format
+msgid "Pagamento de %(label)s excluído"
+msgstr ""
+
+msgid "Início"
+msgstr ""
+
+msgid "Alunos"
+msgstr ""
+
+msgid "Exercícios"
+msgstr ""
+
+msgid "Treinos"
+msgstr ""
+
+msgid "Histórico"
+msgstr ""
+
+msgid "Novo aluno"
+msgstr ""
+
+msgid "Editar"
+msgstr ""
+
+msgid "Avaliações"
+msgstr ""
+
+msgid "Editar avaliação"
+msgstr ""
+
+msgid "Nova avaliação"
+msgstr ""
+
+msgid "Adicionar foto"
+msgstr ""
+
+msgid "Atribuir treino"
+msgstr ""
+
+msgid "Editar treino"
+msgstr ""
+
+#, python-format
+msgid "Progresso: %(name)s"
+msgstr ""
+
+#, python-format
+msgid "Sessão de %(when)s"
+msgstr ""
+
+msgid "Financeiro"
+msgstr ""
+
+msgid "Pacotes"
+msgstr ""
+
+msgid "Agenda"
+msgstr ""
+
+msgid "Novo exercício"
+msgstr ""
+
+msgid "Novo treino"
+msgstr ""
+
+msgid "Gerar com IA"
+msgstr ""
+
+msgid "Meus treinos"
+msgstr ""
+
+msgid "Meu perfil"
+msgstr ""
+
+msgid "Google Agenda"
+msgstr ""
+
+msgid "Busca"
+msgstr ""
+
+msgid "Notificações"
+msgstr ""
+
+msgid "Editar horário fixo"
+msgstr ""
+
+msgid "Como usar o app"
+msgstr ""
+
+msgid "Minha evolução"
+msgstr ""
+
+msgid "Enviar foto"
+msgstr ""
+
+msgid "Comparar fotos"
+msgstr ""
+
+msgid "Meu pacote"
+msgstr ""
+
+msgid "Minha agenda"
+msgstr ""
+
+msgid "Pedir remarcação"
+msgstr ""
+
+msgid "Novo pacote"
+msgstr ""
+
+msgid "Editar pacote"
+msgstr ""
+
+msgid "Devolução"
+msgstr ""
+
+msgid "Devoluções e ajustes"
+msgstr ""
+
+msgid "Feriados"
+msgstr ""
+
+msgid "Nova aula"
+msgstr ""
+
+msgid "Remarcar aula"
+msgstr ""
+
+msgid "Privacidade e meus dados"
+msgstr ""
+
+msgid "Aula de treino"
+msgstr ""
+
+#, python-format
+msgid "Aula de treino (%(kind)s)"
+msgstr ""
+
+msgid "Muscle Track · Agenda"
+msgstr ""
+
+msgid "Minhas aulas"
+msgstr ""
+
+#, python-format
+msgid "%(n)d min"
+msgstr ""
+
+#, python-format
+msgid "Ficha do aluno: %(url)s"
+msgstr ""
+
+msgid "Esta aula já não está marcada."
+msgstr ""
+
+msgid "Esta aula já passou."
+msgstr ""
+
+#, python-format
+msgid "O prazo para pedir pelo app terminou (%(hours)d h antes da aula). Fale direto com a sua personal."
+msgstr ""
+
+msgid "Você já tem um pedido aguardando resposta para esta aula."
+msgstr ""
+
+msgid "Aula não encontrada."
+msgstr ""
+
+msgid "Informe o dia e o horário que você prefere."
+msgstr ""
+
+msgid "Escolha um horário no futuro."
+msgstr ""
+
+msgid "Você já tem uma aula neste horário."
+msgstr ""
+
+msgid "Pedido inválido."
+msgstr ""
+
+msgid "Este pedido não pode mais ser retirado."
+msgstr ""
+
+msgid "Este pedido já foi respondido."
+msgstr ""
+
+msgid "A aula já mudou de situação; recuse o pedido ou ajuste a aula na agenda."
+msgstr ""
+
+msgid "Encerrado"
+msgstr ""
+
+#, python-format
+msgid "Concedeu consentimento: %(label)s"
+msgstr ""
+
+#, python-format
+msgid "Retirou consentimento: %(label)s"
+msgstr ""
+
+#, python-format
+msgid "%(summary)s (registrado pela personal)"
+msgstr ""
+
+#, python-format
+msgid "Marco: %(number)s treino concluído!"
+msgid_plural "Marco: %(number)s treinos concluídos!"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Meta da semana batida!"
+msgstr ""
+
+msgid "Hoje"
+msgstr ""
+
+msgid "Admin"
+msgstr ""
+
+msgid "Alterar senha"
+msgstr ""
+
+msgid "Contas conectadas"
+msgstr ""
+
+msgid "Sair"
+msgstr ""
+
+msgid "Continuar"
+msgstr ""
+
+msgid "Treinar"
+msgstr ""
+
+msgid "Perfil"
+msgstr ""
+
+msgid "Registrar pagamento"
+msgstr ""
+
+#, python-format
+msgid "Nova aula para %(name)s"
+msgstr ""
+
+msgid "email@exemplo.com"
+msgstr ""
+
+msgid "Email"
+msgstr ""
+
+msgid "Usado para o login do aluno. Depois de salvar, você recebe um link de convite para enviar a ele."
+msgstr ""
+
+msgid "Confirmo que é outra pessoa, pode cadastrar mesmo assim"
+msgstr ""
+
+msgid "Ex.: hipertrofia, emagrecer 8 kg até dezembro..."
+msgstr ""
+
+msgid "Ex.: hérnia de disco L5, joelho direito operado em 2022, usa anticoncepcional..."
+msgstr ""
+
+msgid "Anotações internas (o aluno não vê)"
+msgstr ""
+
+msgid "O e-mail pode ter no máximo 150 caracteres."
+msgstr ""
+
+msgid "Este email já está cadastrado no sistema."
+msgstr ""
+
+msgid "mesmo nome"
+msgstr ""
+
+msgid "mesmo telefone"
+msgstr ""
+
+msgid "Já existe aluno com dados parecidos (veja abaixo). Se for outra pessoa, marque a confirmação e salve de novo."
+msgstr ""
+
+msgid "Pacote"
+msgstr ""
+
+msgid "Como o valor é informado"
+msgstr ""
+
+msgid "Valor por aula"
+msgstr ""
+
+msgid "Valor total"
+msgstr ""
+
+msgid "Observação"
+msgstr ""
+
+msgid "Continuar o mesmo horário"
+msgstr ""
+
+msgid "Descrição do Treino"
+msgstr ""
+
+msgid "Ex: Treino para hipertrofia de peito e tríceps, com foco em exercícios compostos"
+msgstr ""
+
+msgid "Descreva o tipo de treino que deseja gerar"
+msgstr ""
+
+msgid "Nível de Dificuldade"
+msgstr ""
+
+msgid "Iniciante"
+msgstr ""
+
+msgid "Intermediário"
+msgstr ""
+
+msgid "Avançado"
+msgstr ""
+
+msgid "Duração Estimada (minutos)"
+msgstr ""
+
+#, python-format
+msgid "Preencha pelo menos uma medida (peso, altura, % de gordura ou circunferência)."
+msgstr ""
+
+msgid "Foto avulsa (sem avaliação)"
+msgstr ""
+
+#, python-format
+msgid "Avaliação de %(date)s"
+msgstr ""
+
+msgid "Opcional"
+msgstr ""
+
+msgid "Outra"
+msgstr ""
+
+msgid "A data não pode ser no futuro."
+msgstr ""
+
+#, python-format
+msgid "Você já enviou %(max)d fotos: remova algumas para enviar outras."
+msgstr ""
+
+msgid "Anotação da personal (o aluno não vê)..."
+msgstr ""
+
+msgid "Nova situação"
+msgstr ""
+
+msgid "Motivo"
+msgstr ""
+
+msgid "Ex.: viagem de 2 meses, mudou de cidade, fechou o plano..."
+msgstr ""
+
+msgid "Informe o motivo ao pausar ou encerrar o aluno."
+msgstr ""
+
+msgid "É preciso aceitar para continuar."
+msgstr ""
+
+msgid "Sem prazo (o pacote não vence)"
+msgstr ""
+
+msgid "Ex.: Pacote 10 aulas"
+msgstr ""
+
+msgid "Informe o prazo em dias ou marque \"Sem prazo\"."
+msgstr ""
+
+msgid "Informe o valor."
+msgstr ""
+
+msgid "Valor"
+msgstr ""
+
+msgid "— sem pacote —"
+msgstr ""
+
+msgid "Nunca"
+msgstr ""
+
+msgid "Em uma data"
+msgstr ""
+
+msgid "Após um número de aulas"
+msgstr ""
+
+msgid "Repete a cada (semanas)"
+msgstr ""
+
+msgid "Começa em"
+msgstr ""
+
+msgid "Termina"
+msgstr ""
+
+msgid "Termina em"
+msgstr ""
+
+msgid "Número de aulas"
+msgstr ""
+
+msgid "Informe a data final."
+msgstr ""
+
+msgid "A data final não pode ser antes do início."
+msgstr ""
+
+msgid "A série pode durar no máximo 3 anos. Use \"Nunca\" para uma série sem fim."
+msgstr ""
+
+msgid "Informe quantas aulas."
+msgstr ""
+
+msgid "Dia"
+msgstr ""
+
+msgid "Dias"
+msgstr ""
+
+msgid "Horário"
+msgstr ""
+
+msgid "Duração (min)"
+msgstr ""
+
+#, python-format
+msgid "%(n)d aula a marcar"
+msgid_plural "%(n)d aulas a marcar"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "até %(date)s ou %(classes)s"
+msgstr ""
+
+#, python-format
+msgid "Acompanhar o pacote (%(parts)s, o que vier primeiro)"
+msgstr ""
+
+msgid "Escolha pelo menos um dia da semana."
+msgstr ""
+
+msgid "Este aluno não tem pacote em uso: escolha outra forma de terminar."
+msgstr ""
+
+msgid "Todas as aulas que restam do pacote já estão marcadas."
+msgstr ""
+
+msgid "O pacote termina antes do início desta série."
+msgstr ""
+
+msgid "Dias da semana"
+msgstr ""
+
+msgid "Primeira aula"
+msgstr ""
+
+msgid "Dia da semana"
+msgstr ""
+
+msgid "A partir de"
+msgstr ""
+
+msgid "Vale até (opcional)"
+msgstr ""
+
+msgid "Repetir esta aula"
+msgstr ""
+
+msgid "Nos dias"
+msgstr ""
+
+msgid "Quero remarcar para outro dia/horário"
+msgstr ""
+
+msgid "Não vou poder ir (cancelar esta aula)"
+msgstr ""
+
+msgid "O que você precisa?"
+msgstr ""
+
+msgid "Dia que prefere"
+msgstr ""
+
+msgid "Horário que prefere"
+msgstr ""
+
+msgid "Recado para a personal (opcional)"
+msgstr ""
+
+msgid "Escolha o dia."
+msgstr ""
+
+msgid "Escolha o horário."
+msgstr ""
+
+msgid "Aluno"
+msgstr ""
+
+msgid "Data"
+msgstr ""
+
+msgid "Tipo"
+msgstr ""
+
+msgid "Nome"
+msgstr ""
+
+msgid "Ex.: São João, estúdio fechado"
+msgstr ""
+
+msgid "Este dia já está na lista."
+msgstr ""
+
+msgid "Aulas"
+msgstr ""
+
+msgid "Prazo (dias)"
+msgstr ""
+
+msgid "Pagamento"
+msgstr ""
+
+msgid "— escolher o pacote abaixo —"
+msgstr ""
+
+msgid "—"
+msgstr ""
+
+msgid "Forma de devolução"
+msgstr ""
+
+msgid "Ex.: pacote cancelado, valor lançado errado"
+msgstr ""
+
+msgid "Escolha o pagamento ou o pacote a que a devolução se refere."
+msgstr ""
+
+msgid "Taxa ou multa combinada"
+msgstr ""
+
+msgid "Valor a devolver"
+msgstr ""
+
+msgid "Data da devolução"
+msgstr ""
+
+msgid "Ex.: o aluno mudou de cidade"
+msgstr ""
+
+msgid "Tirar da agenda as aulas marcadas daqui para a frente"
+msgstr ""
+
+msgid "nova foto"
+msgstr ""
+
+msgid "removida"
+msgstr ""
+
+#, python-format
+msgid "Alterou: %(fields)s"
+msgstr ""
+
+msgid "Ano Novo"
+msgstr ""
+
+msgid "Sexta-feira Santa"
+msgstr ""
+
+msgid "Páscoa"
+msgstr ""
+
+msgid "Dia da Liberdade"
+msgstr ""
+
+msgid "Dia do Trabalhador"
+msgstr ""
+
+msgid "Corpo de Deus"
+msgstr ""
+
+msgid "Dia de Portugal"
+msgstr ""
+
+msgid "Assunção de Nossa Senhora"
+msgstr ""
+
+msgid "Implantação da República"
+msgstr ""
+
+msgid "Todos os Santos"
+msgstr ""
+
+msgid "Restauração da Independência"
+msgstr ""
+
+msgid "Imaculada Conceição"
+msgstr ""
+
+msgid "Natal"
+msgstr ""
+
+msgid "Confraternização Universal"
+msgstr ""
+
+msgid "Carnaval (segunda)"
+msgstr ""
+
+msgid "Carnaval (terça)"
+msgstr ""
+
+msgid "Tiradentes"
+msgstr ""
+
+msgid "Dia do Trabalho"
+msgstr ""
+
+msgid "Corpus Christi"
+msgstr ""
+
+msgid "Independência"
+msgstr ""
+
+msgid "Nossa Senhora Aparecida"
+msgstr ""
+
+msgid "Finados"
+msgstr ""
+
+msgid "Proclamação da República"
+msgstr ""
+
+msgid "Consciência Negra"
+msgstr ""
+
+#, python-format
+msgid "%(n)d aula(s) criada(s)."
+msgstr ""
+
+msgid "# Cole no .env (guarde a chave privada como uma senha; trocar as chaves desliga os aparelhos já inscritos)"
+msgstr ""
+
+#, python-format
+msgid "%(classes)d lembrete(s) de aula, %(plans)d de plano, %(packages)d pacote(s) com aviso, %(sessions)d treino(s) parado(s) encerrado(s)."
+msgstr ""
+
+msgid "Slug"
+msgstr ""
+
+msgid "Descrição"
+msgstr ""
+
+msgid "Ativo"
+msgstr ""
+
+msgid "Ordem de Exibição"
+msgstr ""
+
+msgid "Grupo Muscular"
+msgstr ""
+
+msgid "Grupos Musculares"
+msgstr ""
+
+msgid "Foto de Perfil"
+msgstr ""
+
+msgid "Cidade"
+msgstr ""
+
+msgid "Estado"
+msgstr ""
+
+msgid "CEP"
+msgstr ""
+
+msgid "Telefone"
+msgstr ""
+
+msgid "Data de Nascimento"
+msgstr ""
+
+msgid "Objetivo"
+msgstr ""
+
+msgid "Saúde, lesões e restrições"
+msgstr ""
+
+msgid "Lesões, cirurgias, medicamentos, limitações médicas..."
+msgstr ""
+
+msgid "Contato de emergência"
+msgstr ""
+
+msgid "Telefone de emergência"
+msgstr ""
+
+msgid "Plano contratado"
+msgstr ""
+
+msgid "Vencimento do plano"
+msgstr ""
+
+msgid "Pacote atual (catálogo)"
+msgstr ""
+
+msgid "Valor negociado do período"
+msgstr ""
+
+msgid "Valor/hora negociado"
+msgstr ""
+
+msgid "Experimental"
+msgstr ""
+
+msgid "Pausado"
+msgstr ""
+
+msgid "Ex-aluno"
+msgstr ""
+
+msgid "Situação"
+msgstr ""
+
+msgid "Motivo da situação"
+msgstr ""
+
+msgid "Situação desde"
+msgstr ""
+
+msgid "Inativado em"
+msgstr ""
+
+msgid "Mostrar meta semanal, sequência e marcos"
+msgstr ""
+
+msgid "Desligue se preferir ver só os treinos, sem metas."
+msgstr ""
+
+msgid "Minha meta de treinos por semana"
+msgstr ""
+
+msgid "Usada quando o seu plano não define uma meta. De 1 a 7."
+msgstr ""
+
+#, python-format
+msgid "Situação: %(old)s → %(new)s"
+msgstr ""
+
+msgid "Motivo da situação atualizado"
+msgstr ""
+
+msgid "Imagem"
+msgstr ""
+
+msgid "Vídeo"
+msgstr ""
+
+msgid "Link Externo"
+msgstr ""
+
+msgid "Nome do Exercício"
+msgstr ""
+
+msgid "Repetições Padrão"
+msgstr ""
+
+msgid "Séries Padrão"
+msgstr ""
+
+msgid "Tipo de Mídia"
+msgstr ""
+
+msgid "Arquivo"
+msgstr ""
+
+msgid "URL da Mídia"
+msgstr ""
+
+msgid "Miniatura"
+msgstr ""
+
+msgid "Exercício"
+msgstr ""
+
+msgid "Nome do Treino"
+msgstr ""
+
+msgid "Duração estimada em minutos"
+msgstr ""
+
+msgid "Duração Estimada (min)"
+msgstr ""
+
+msgid "Modelo de Treino"
+msgstr ""
+
+msgid "Modelos de Treino"
+msgstr ""
+
+msgid "Treino"
+msgid_plural "Treinos"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Ordem"
+msgstr ""
+
+msgid "Séries"
+msgstr ""
+
+msgid "Repetições"
+msgstr ""
+
+msgid "Descanso (seg)"
+msgstr ""
+
+msgid "Exercício do Treino"
+msgstr ""
+
+msgid "Exercícios do Treino"
+msgstr ""
+
+msgid "Template Original"
+msgstr ""
+
+msgid "Data de Início"
+msgstr ""
+
+msgid "Data de Início Planejada"
+msgstr ""
+
+msgid "Data de Término"
+msgstr ""
+
+msgid "Treino do Aluno"
+msgstr ""
+
+msgid "Treinos dos Alunos"
+msgstr ""
+
+msgid "Exercício do Treino do Aluno"
+msgstr ""
+
+msgid "Exercícios dos Treinos dos Alunos"
+msgstr ""
+
+msgid "Término"
+msgstr ""
+
+msgid "Concluído"
+msgstr ""
+
+msgid "Pausado em"
+msgstr ""
+
+msgid "Segundos em pausa"
+msgstr ""
+
+msgid "Sessão de Treino"
+msgstr ""
+
+msgid "Sessões de Treino"
+msgstr ""
+
+msgid "Sessão"
+msgstr ""
+
+msgid "Carga (kg)"
+msgstr ""
+
+msgid "Completado em"
+msgstr ""
+
+msgid "Execução de Exercício na Sessão"
+msgstr ""
+
+msgid "Execuções de Exercícios nas Sessões"
+msgstr ""
+
+msgid "Exercício da sessão"
+msgstr ""
+
+msgid "Série"
+msgstr ""
+
+msgid "Feita"
+msgstr ""
+
+msgid "Completada em"
+msgstr ""
+
+#, python-format
+msgid "%(exercise)s - série %(number)s"
+msgstr ""
+
+msgid "Peso (kg)"
+msgstr ""
+
+msgid "Altura (cm)"
+msgstr ""
+
+#, python-format
+msgid "% de gordura"
+msgstr ""
+
+msgid "Peitoral (cm)"
+msgstr ""
+
+msgid "Cintura (cm)"
+msgstr ""
+
+msgid "Quadril (cm)"
+msgstr ""
+
+msgid "Braço (cm)"
+msgstr ""
+
+msgid "Coxa (cm)"
+msgstr ""
+
+msgid "Avaliação física"
+msgstr ""
+
+msgid "Avaliações físicas"
+msgstr ""
+
+msgid "Frente"
+msgstr ""
+
+msgid "Lado esquerdo"
+msgstr ""
+
+msgid "Lado direito"
+msgstr ""
+
+msgid "Costas"
+msgstr ""
+
+msgid "Avaliação"
+msgstr ""
+
+msgid "Posição"
+msgstr ""
+
+msgid "Foto"
+msgstr ""
+
+msgid "Legenda"
+msgstr ""
+
+msgid "Enviada pelo aluno"
+msgstr ""
+
+msgid "Foto de progresso"
+msgstr ""
+
+msgid "Fotos de progresso"
+msgstr ""
+
+msgid "Autor"
+msgstr ""
+
+msgid "Anotação"
+msgstr ""
+
+msgid "Anotação da personal"
+msgstr ""
+
+msgid "Anotações da personal"
+msgstr ""
+
+msgid "Cadastro"
+msgstr ""
+
+msgid "Dados alterados"
+msgstr ""
+
+msgid "Convite revogado"
+msgstr ""
+
+msgid "Convite aceito"
+msgstr ""
+
+msgid "Consentimento"
+msgstr ""
+
+msgid "Exportação de dados"
+msgstr ""
+
+msgid "Pedido de exclusão"
+msgstr ""
+
+msgid "Quem"
+msgstr ""
+
+msgid "Resumo"
+msgstr ""
+
+msgid "Alterações"
+msgstr ""
+
+msgid "Quando"
+msgstr ""
+
+msgid "Evento do aluno"
+msgstr ""
+
+msgid "Histórico do aluno"
+msgstr ""
+
+msgid "E-mail"
+msgstr ""
+
+msgid "Termos de uso e política de privacidade"
+msgstr ""
+
+msgid "Tratamento de dados de saúde"
+msgstr ""
+
+msgid "Fotos de evolução"
+msgstr ""
+
+msgid "Pelo próprio aluno"
+msgstr ""
+
+msgid "Registrado pela personal"
+msgstr ""
+
+msgid "Versão do texto"
+msgstr ""
+
+msgid "Concedido"
+msgstr ""
+
+msgid "Consentimentos"
+msgstr ""
+
+msgid "Aulas no pacote"
+msgstr ""
+
+msgid "Conta a partir da primeira aula."
+msgstr ""
+
+msgid "Pacote do catálogo"
+msgstr ""
+
+msgid "Vendido em"
+msgstr ""
+
+msgid "Dias de prorrogação"
+msgstr ""
+
+msgid "Dias congelado"
+msgstr ""
+
+msgid "Congelado desde"
+msgstr ""
+
+msgid "Pacote do aluno"
+msgstr ""
+
+msgid "Pacotes dos alunos"
+msgstr ""
+
+msgid "Dinheiro"
+msgstr ""
+
+msgid "Cartão"
+msgstr ""
+
+msgid "Transferência"
+msgstr ""
+
+msgid "Outro"
+msgstr ""
+
+msgid "Data do pagamento"
+msgstr ""
+
+msgid "Forma"
+msgstr ""
+
+msgid "Período de"
+msgstr ""
+
+msgid "Período até"
+msgstr ""
+
+msgid "Pagamentos"
+msgstr ""
+
+msgid "Estorno (lançamento errado)"
+msgstr ""
+
+msgid "Resumo do cálculo"
+msgstr ""
+
+msgid "Devoluções"
+msgstr ""
+
+msgid "Segunda"
+msgstr ""
+
+msgid "Terça"
+msgstr ""
+
+msgid "Quarta"
+msgstr ""
+
+msgid "Quinta"
+msgstr ""
+
+msgid "Sexta"
+msgstr ""
+
+msgid "Sábado"
+msgstr ""
+
+msgid "Domingo"
+msgstr ""
+
+msgid "Vale a partir de"
+msgstr ""
+
+msgid "Vale até"
+msgstr ""
+
+msgid "Horário fixo"
+msgstr ""
+
+msgid "Horários fixos"
+msgstr ""
+
+msgid "Aula"
+msgstr ""
+
+msgid "Reposição"
+msgstr ""
+
+msgid "Marcada"
+msgstr ""
+
+msgid "Compareceu"
+msgstr ""
+
+msgid "Faltou"
+msgstr ""
+
+msgid "Cancelada"
+msgstr ""
+
+msgid "Remarcada"
+msgstr ""
+
+msgid "Remarcar"
+msgstr ""
+
+msgid "Cancelar"
+msgstr ""
+
+msgid "Aguardando a personal"
+msgstr ""
+
+msgid "Aprovado"
+msgstr ""
+
+msgid "Recusado"
+msgstr ""
+
+msgid "Retirado"
+msgstr ""
+
+msgid "Novo horário sugerido"
+msgstr ""
+
+msgid "Recado"
+msgstr ""
+
+msgid "Cobrança de pacote"
+msgstr ""
+
+msgid "Aula que o aluno faltou"
+msgstr ""
+
+msgid "Convite de acesso"
+msgstr ""
+
+msgid "Enviada"
+msgstr ""
+
+msgid "Falhou"
+msgstr ""
+
+msgid "Não enviada"
+msgstr ""
+
+msgid "Primeiro nome do aluno"
+msgstr ""
+
+msgid "Nome completo do aluno"
+msgstr ""
+
+msgid "Sem o nome do aluno"
+msgstr ""
+
+msgid "Nome do aluno no evento"
+msgstr ""
+
+msgid "Link de calendário"
+msgstr ""
+
+msgid "Links de calendário"
+msgstr ""
+
+#, python-format
+msgid "Calendário de %(user)s"
+msgstr ""
+
+msgid "Voltar"
+msgstr ""
+
+#, python-format
+msgid "%(date)s às %(time)s"
+msgstr ""
+
+msgid "Navegador"
+msgstr ""
+
+#, python-format
+msgid "%(browser)s no %(system)s"
+msgstr ""
+
+#, python-format
+msgid "%(name)s pediu para cancelar a aula de %(when)s."
+msgstr ""
+
+#, python-format
+msgid "%(name)s pediu para remarcar a aula de %(when)s."
+msgstr ""
+
+#, python-format
+msgid "Novo pedido de %(name)s"
+msgstr ""
+
+msgid "Pedido aprovado"
+msgstr ""
+
+#, python-format
+msgid "Sua aula de %(start)s foi cancelada."
+msgstr ""
+
+#, python-format
+msgid "Sua aula de %(start)s foi remarcada para %(new)s."
+msgstr ""
+
+#, python-format
+msgid "Sua personal não pôde atender o pedido para a aula de %(start)s. Motivo: %(note)s"
+msgstr ""
+
+#, python-format
+msgid "Sua personal não pôde atender o pedido para a aula de %(start)s."
+msgstr ""
+
+msgid "Pedido recusado"
+msgstr ""
+
+msgid "Aula remarcada"
+msgstr ""
+
+#, python-format
+msgid "Sua aula de %(old)s foi remarcada para %(new)s."
+msgstr ""
+
+msgid "Aula cancelada"
+msgstr ""
+
+msgid "Aula mantida"
+msgstr ""
+
+#, python-format
+msgid "A remarcação foi desfeita: sua aula continua em %(start)s."
+msgstr ""
+
+msgid "hoje"
+msgstr ""
+
+msgid "amanhã"
+msgstr ""
+
+#, python-format
+msgid "Sua aula é %(day)s às %(time)s."
+msgstr ""
+
+msgid "Lembrete de aula"
+msgstr ""
+
+#, python-format
+msgid "em %(n)d dias"
+msgstr ""
+
+#, python-format
+msgid "Seu pacote vence %(when)s."
+msgstr ""
+
+#, python-format
+msgid "Ainda resta %(n)d aula."
+msgid_plural "Ainda restam %(n)d aulas."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Fale com a sua personal para combinar."
+msgstr ""
+
+msgid "Seu pacote está vencendo"
+msgstr ""
+
+msgid "Seu pacote está acabando"
+msgstr ""
+
+#, python-format
+msgid "Resta %(n)d aula no seu pacote. Fale com a sua personal para renovar."
+msgid_plural "Restam %(n)d aulas no seu pacote. Fale com a sua personal para renovar."
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%(name)s: pacote vencido, %(n)d aula sem usar"
+msgid_plural "%(name)s: pacote vencido, %(n)d aulas sem usar"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%(name)s: vence %(when)s, %(n)d aula restante"
+msgid_plural "%(name)s: vence %(when)s, %(n)d aulas restantes"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%(name)s: %(n)d aula restante"
+msgid_plural "%(name)s: %(n)d aulas restantes"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "e mais %(n)d"
+msgstr ""
+
+#, python-format
+msgid "%(n)d pacote para renovar"
+msgid_plural "%(n)d pacotes para renovar"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Teste de notificação"
+msgstr ""
+
+msgid "Tudo certo: este aparelho recebe os avisos do Muscle Track."
+msgstr ""
+
+msgid "<endereço>"
+msgstr ""
+
+msgid "o servidor de e-mail recusou o login: confira EMAIL_HOST_USER e a senha de app (EMAIL_HOST_PASSWORD)"
+msgstr ""
+
+#, python-format
+msgid "não foi possível conectar ao servidor de e-mail (%(host)s:%(port)s); confira a rede do servidor e o EMAIL_HOST"
+msgstr ""
+
+msgid "serviço de push"
+msgstr ""
+
+#, python-format
+msgid "o servidor não conseguiu abrir conexão com %(host)s (porta 443); confira se ele tem acesso à internet, DNS e proxy (HTTPS_PROXY)"
+msgstr ""
+
+msgid "sem e-mail cadastrado"
+msgstr ""
+
+#, python-format
+msgid "Abrir: %(link)s"
+msgstr ""
+
+#, python-format
+msgid "Você recebe este aviso porque ativou as notificações por e-mail. Para parar: %(link)s"
+msgstr ""
+
+msgid "Você recebe este aviso porque ativou as notificações por e-mail. Para parar, desative em Notificações no app."
+msgstr ""
+
+msgid "web push não configurado no servidor"
+msgstr ""
+
+msgid "nenhum aparelho inscrito"
+msgstr ""
+
+msgid "aparelho removido (assinatura expirada)"
+msgstr ""
+
+msgid "Cadastre seus exercícios"
+msgstr ""
+
+msgid "A biblioteca que você usa para montar os treinos."
+msgstr ""
+
+msgid "Crie um pacote"
+msgstr ""
+
+msgid "Modelo com quantidade de aulas, prazo e valor, para vender a vários alunos."
+msgstr ""
+
+msgid "Monte um treino"
+msgstr ""
+
+msgid "Um treino modelo com os exercícios, séries e repetições."
+msgstr ""
+
+msgid "Cadastre o primeiro aluno"
+msgstr ""
+
+msgid "Nome e e-mail bastam; o resto pode vir depois."
+msgstr ""
+
+msgid "Atribua um treino a um aluno"
+msgstr ""
+
+msgid "Sem treino atribuído, o aluno não tem o que fazer no app."
+msgstr ""
+
+msgid "Envie o convite de acesso"
+msgstr ""
+
+msgid "O aluno cria a própria senha pelo link e já pode treinar."
+msgstr ""
+
+msgid "Enviar convite"
+msgstr ""
+
+msgid "Ver alunos"
+msgstr ""
+
+#, python-format
+msgid "%(days)s às %(time)s"
+msgstr ""
+
+#, python-format
+msgid "%(first)s e %(last)s"
+msgstr ""
+
+msgid "Não há aulas a marcar: o pacote já está completo ou todas as datas foram puladas."
+msgstr ""
+
+#, python-format
+msgid "Já existe um horário fixo na %(day)s às %(time)s: edite-o ou remova-o antes de preencher de novo."
+msgstr ""
+
+msgid "Este pacote ainda não tem horário fixo: use \"Preencher a agenda\"."
+msgstr ""
+
+msgid "Não achei datas livres nos horários do pacote."
+msgstr ""
+
+#, python-format
+msgid "Pacote vendido: %(name)s (%(n)d aula)"
+msgid_plural "Pacote vendido: %(name)s (%(n)d aulas)"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Este pacote já foi concluído ou cancelado."
+msgstr ""
+
+msgid "O pacote já está congelado."
+msgstr ""
+
+msgid "O prazo só começa na primeira aula: não há o que congelar ainda."
+msgstr ""
+
+#, python-format
+msgid "Pacote congelado: %(name)s"
+msgstr ""
+
+msgid "O pacote não está congelado."
+msgstr ""
+
+#, python-format
+msgid "Pacote descongelado: %(name)s (prazo +%(n)d dia)"
+msgid_plural "Pacote descongelado: %(name)s (prazo +%(n)d dias)"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "A prorrogação deve ser de 1 a 365 dias."
+msgstr ""
+
+msgid "Este pacote não tem prazo: não há o que prorrogar."
+msgstr ""
+
+#, python-format
+msgid "Pacote prorrogado: %(name)s (+%(n)d dia)"
+msgid_plural "Pacote prorrogado: %(name)s (+%(n)d dias)"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Este pacote já foi cancelado."
+msgstr ""
+
+#, python-format
+msgid "Pacote cancelado: %(name)s"
+msgstr ""
+
+msgid "Você não está cadastrado como aluno."
+msgstr ""
+
+msgid "toda semana"
+msgstr ""
+
+#, python-format
+msgid "a cada %(n)d semanas"
+msgstr ""
+
+#, python-format
+msgid "até %(date)s"
+msgstr ""
+
+msgid "A data final não pode ser antes do início da mudança."
+msgstr ""
+
+msgid "Este horário já terminou; crie um novo horário fixo."
+msgstr ""
+
+msgid "Este aluno já tem um horário fixo nesse dia e horário (talvez encerrado: remova-o antes)."
+msgstr ""
+
+msgid "A data final fica antes da primeira aula no novo dia."
+msgstr ""
+
+#, python-format
+msgid "Aulas dadas: %(used)d de %(sessions)d x %(per_class)s = %(used_value)s"
+msgstr ""
+
+#, python-format
+msgid "Aulas dadas: %(used)d de %(sessions)d"
+msgstr ""
+
+#, python-format
+msgid "Pacote: %(name)s"
+msgstr ""
+
+#, python-format
+msgid "Pago: %(paid)s"
+msgstr ""
+
+#, python-format
+msgid "Taxa combinada: %(fee)s"
+msgstr ""
+
+#, python-format
+msgid "Valor devolvido: %(amount)s"
+msgstr ""
+
+msgid "Informe um valor maior que zero."
+msgstr ""
+
+msgid "Este pagamento é de outro aluno."
+msgstr ""
+
+#, python-format
+msgid "Só dá para devolver até %(max)s deste pagamento."
+msgstr ""
+
+msgid "Este pacote é de outro aluno."
+msgstr ""
+
+#, python-format
+msgid "Só dá para devolver até %(max)s: é o que foi pago por este pacote."
+msgstr ""
+
+#, python-format
+msgid "%(kind)s registrada (%(method)s) — %(package)s"
+msgstr ""
+
+#, python-format
+msgid "%(kind)s registrada (%(method)s)"
+msgstr ""
+
+msgid "Esta devolução já foi anulada."
+msgstr ""
+
+msgid "Escreva o motivo da anulação."
+msgstr ""
+
+#, python-format
+msgid "%(kind)s de %(date)s anulada"
+msgstr ""
+
+msgid "Cancelamento do pacote"
+msgstr ""
+
+msgid "sem prazo"
+msgstr ""
+
+#, python-format
+msgid "%(n)d dia"
+msgid_plural "%(n)d dias"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Um pacote cancelado não pode ser editado."
+msgstr ""
+
+#, python-format
+msgid "O pacote não pode ter menos de %(min)d aula: %(used)d já foram dadas."
+msgid_plural "O pacote não pode ter menos de %(min)d aulas: %(used)d já foram dadas."
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "aulas %(old)d → %(new)d"
+msgstr ""
+
+#, python-format
+msgid "prazo %(new)s (era %(old)s)"
+msgstr ""
+
+#, python-format
+msgid "Pacote editado: %(name)s (%(changes)s)"
+msgstr ""
+
+#, python-format
+msgid "Valor combinado: %(price)s"
+msgstr ""
+
+#, python-format
+msgid "Valor devolvido (diferença): %(amount)s"
+msgstr ""
+
+msgid "Inativo"
+msgstr ""
+
+#, python-format
+msgid "%(minutes)s min"
+msgstr ""
+
+msgctxt "weekday letter, Monday"
+msgid "S"
+msgstr ""
+
+msgctxt "weekday letter, Tuesday"
+msgid "T"
+msgstr ""
+
+msgctxt "weekday letter, Wednesday"
+msgid "Q"
+msgstr ""
+
+msgctxt "weekday letter, Thursday"
+msgid "Q"
+msgstr ""
+
+msgctxt "weekday letter, Friday"
+msgid "S"
+msgstr ""
+
+msgctxt "weekday letter, Saturday"
+msgid "S"
+msgstr ""
+
+msgctxt "weekday letter, Sunday"
+msgid "D"
+msgstr ""
+
+#, python-format
+msgid "Formato de arquivo não suportado. Use: %(formats)s"
+msgstr ""
+
+#, python-format
+msgid "O tamanho máximo permitido é %(max)sMB. Seu arquivo tem %(size).2fMB."
+msgstr ""
+
+msgid "Não foi possível processar a imagem. Certifique-se de que é um arquivo de imagem válido."
+msgstr ""
+
+#, python-format
+msgid "As dimensões máximas permitidas são %(max_width)sx%(max_height)spx. Sua imagem tem %(width)sx%(height)spx."
+msgstr ""
+
+#, python-format
+msgid "As dimensões mínimas permitidas são %(min_width)sx%(min_height)spx. Sua imagem tem %(width)sx%(height)spx."
+msgstr ""
+
+msgid "Use apenas números, espaços, parênteses e hífen."
+msgstr ""
+
+msgid "Informe o telefone com DDD (10 ou 11 dígitos)."
+msgstr ""
+
+msgid "Informe a sigla de um estado válido (ex.: SP)."
+msgstr ""
+
+msgid "O CEP deve ter 8 dígitos."
+msgstr ""
+
+msgid "A data de nascimento não pode estar no futuro."
+msgstr ""
+
+msgid "Confira a data de nascimento: o ano parece incorreto."
+msgstr ""
+
+#, python-format
+msgid "Cadastro criado (%(status)s)"
+msgstr ""
+
+msgid "Aluno cadastrado! Envie o link de convite para ele criar a senha."
+msgstr ""
+
+msgid "Cadastrar Aluno"
+msgstr ""
+
+msgid "Link de acesso revogado e gerado de novo"
+msgstr ""
+
+msgid "Link anterior revogado. Este é o novo link de acesso."
+msgstr ""
+
+msgid "Criou a senha pelo link de acesso"
+msgstr ""
+
+msgid "Senha criada! Bem-vindo(a) ao Muscle Track."
+msgstr ""
+
+#, python-format
+msgid "Pacote vendido: %(name)s. O prazo conta a partir da primeira aula."
+msgstr ""
+
+#, python-format
+msgid "Confira as aulas na prévia (mesmo horário de antes: %(label)s) e confirme em \"Preencher agenda\"."
+msgstr ""
+
+msgid "Vender pacote"
+msgstr ""
+
+msgid "Pacote congelado: o prazo para de contar até você descongelar."
+msgstr ""
+
+msgid "Pacote descongelado: os dias parados foram somados ao prazo."
+msgstr ""
+
+msgid "Informe quantos dias de prorrogação."
+msgstr ""
+
+#, python-format
+msgid "Pacote prorrogado em %(days)d dias."
+msgstr ""
+
+msgid "Pacote cancelado."
+msgstr ""
+
+msgid "Ação inválida"
+msgstr ""
+
+msgid "Pacote atualizado."
+msgstr ""
+
+msgid "Nada mudou."
+msgstr ""
+
+#, python-format
+msgid "O novo valor ficou %(amount)s abaixo do que já foi pago: há essa diferença a devolver (Financeiro → Devoluções e ajustes)."
+msgstr ""
+
+#, python-format
+msgid "%(n)d aula marcada saiu da agenda."
+msgid_plural "%(n)d aulas marcadas saiu da agenda."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Cancelar pacote"
+msgstr ""
+
+msgid "Valor do pacote reduzido: pago a mais"
+msgstr ""
+
+#, python-format
+msgid "%(kind)s registrada."
+msgstr ""
+
+msgid "Devolver ou estornar"
+msgstr ""
+
+#, python-format
+msgid "Devolução de %(amount)s"
+msgstr ""
+
+#, python-format
+msgid ""
+"Olá, %(name)s! Segue o resumo da devolução:\n"
+"%(text)s\n"
+"Forma: %(method)s."
+msgstr ""
+
+msgid "Devolução anulada: continua registrada, mas não conta mais."
+msgstr ""
+
+msgid "Aluno atualizado! O e-mail de login mudou: confira o convite se o aluno ainda não criou a senha."
+msgstr ""
+
+msgid "Aluno atualizado com sucesso!"
+msgstr ""
+
+msgid "Editar Aluno"
+msgstr ""
+
+#, python-format
+msgid "%(name)s e todos os dados foram excluídos."
+msgstr ""
+
+#, python-format
+msgid "Situação atualizada: %(status)s."
+msgstr ""
+
+msgid "Exportação de dados feita pela personal"
+msgstr ""
+
+msgid "Consentimento registrado."
+msgstr ""
+
+msgid "Marque pelo menos um consentimento para registrar."
+msgstr ""
+
+msgid "Obrigado! Você já pode treinar."
+msgstr ""
+
+msgid "Baixou os próprios dados"
+msgstr ""
+
+msgid "Preferência de fotos atualizada."
+msgstr ""
+
+msgid "Pediu a exclusão dos próprios dados"
+msgstr ""
+
+msgid "Pedido enviado. Sua personal vai apagar seus dados e avisar você."
+msgstr ""
+
+msgid "Seu perfil foi atualizado com sucesso!"
+msgstr ""
+
+msgid "Meu Perfil"
+msgstr ""
+
+msgid "Autorize o registro de fotos para enviar."
+msgstr ""
+
+msgid "Foto enviada. Só você e a sua personal conseguem vê-la."
+msgstr ""
+
+msgid "Foto removida."
+msgstr ""
+
+msgid "Pedido enviado. Assim que sua personal responder, a resposta aparece aqui."
+msgstr ""
+
+msgid "Pedir remarcação ou cancelamento"
+msgstr ""
+
+msgid "Pedido retirado."
+msgstr ""
+
+msgid "Exercício cadastrado com sucesso!"
+msgstr ""
+
+msgid "Cadastrar Exercício"
+msgstr ""
+
+msgid "Exercício atualizado com sucesso!"
+msgstr ""
+
+msgid "Editar Exercício"
+msgstr ""
+
+msgid "Erro ao processar exercícios."
+msgstr ""
+
+msgid "Exercício inválido na lista."
+msgstr ""
+
+msgid "Um dos exercícios selecionados não existe mais."
+msgstr ""
+
+msgid "Treino criado com sucesso!"
+msgstr ""
+
+msgid "Criar Treino"
+msgstr ""
+
+msgid "Treino atualizado com sucesso!"
+msgstr ""
+
+msgid "Editar Treino"
+msgstr ""
+
+#, python-format
+msgid "Treino \"%(routine)s\" atribuído a %(student)s com sucesso!"
+msgstr ""
+
+#, python-format
+msgid "Treino \"%(routine)s\" atualizado com sucesso!"
+msgstr ""
+
+#, python-format
+msgid "Treino \"%(routine)s\" foi removido e movido para o histórico."
+msgstr ""
+
+msgid "Recuperando sua sessão de treino em andamento..."
+msgstr ""
+
+msgid "Sessão anterior foi encerrada automaticamente (tempo excedido)."
+msgstr ""
+
+msgid "Treino iniciado! Boa sorte!"
+msgstr ""
+
+msgid "Nenhuma sessão ativa encontrada. Inicie um novo treino."
+msgstr ""
+
+msgid "Este treino já tem séries ou comentários. Finalize-o em vez de descartar."
+msgstr ""
+
+msgid "Treino descartado."
+msgstr ""
+
+msgid "Dados inválidos"
+msgstr ""
+
+msgid "Valor inválido"
+msgstr ""
+
+msgid "Treino gerado com IA com sucesso!"
+msgstr ""
+
+#, python-format
+msgid "Erro ao gerar treino: %(error)s"
+msgstr ""
+
+msgid "Gerar Treino com IA"
+msgstr ""
+
+msgid "e-mail"
+msgstr ""
+
+msgid "push (aparelho)"
+msgstr ""
+
+#, python-format
+msgid "Ativou avisos por %(label)s"
+msgstr ""
+
+#, python-format
+msgid "Desativou avisos por %(label)s"
+msgstr ""
+
+msgid "Texto padrão restaurado."
+msgstr ""
+
+#, python-format
+msgid "Texto não salvo: %(errors)s"
+msgstr ""
+
+msgid "Mensagem salva."
+msgstr ""
+
+msgid "Cadastre um e-mail na sua conta para receber avisos por e-mail."
+msgstr ""
+
+msgid "O envio de e-mail ainda não foi configurado no servidor."
+msgstr ""
+
+msgid "O aviso no aparelho ainda não foi configurado no servidor."
+msgstr ""
+
+msgid "Preferências de notificação salvas."
+msgstr ""
+
+msgid "Aparelho"
+msgstr ""
+
+msgid "Aviso no aparelho não configurado no servidor."
+msgstr ""
+
+msgid "Assinatura inválida."
+msgstr ""
+
+msgid "Aparelho removido."
+msgstr ""
+
+msgid "Ative este canal antes de testar."
+msgstr ""
+
+msgid "Teste enviado. Confira o e-mail."
+msgstr ""
+
+msgid "Teste enviado. Deve aparecer no aparelho em instantes."
+msgstr ""
+
+#, python-format
+msgid "Não foi possível enviar: %(detail)s."
+msgstr ""
+
+msgid "sem detalhes"
+msgstr ""
+
+msgid "Novo link gerado. O anterior deixou de funcionar: adicione o novo no Google Agenda."
+msgstr ""
+
+msgid "Preferência salva. O Google Agenda atualiza o calendário aos poucos."
+msgstr ""
+
+msgid "Escolha uma das opções."
+msgstr ""
+
+msgid "Buscar"
+msgstr ""
+
+msgid "Treinar agora"
+msgstr ""
+
+msgid "Meu histórico"
+msgstr ""
+
+msgid "Gestão para personal trainers, com o aluno por dentro de treinos, evolução e aulas"
+msgstr ""
+
+msgid "Avaliação registrada."
+msgstr ""
+
+msgid "Avaliação atualizada."
+msgstr ""
+
+msgid "Avaliação removida."
+msgstr ""
+
+msgid "Foto adicionada."
+msgstr ""
+
+msgid "Anotação salva."
+msgstr ""
+
+msgid "Escreva a anotação antes de salvar."
+msgstr ""
+
+msgid "Anotação removida."
+msgstr ""
+
+#, python-format
+msgid "Pacote \"%(name)s\" criado."
+msgstr ""
+
+msgid "Pacote atualizado. Quem já comprou mantém os números da venda."
+msgstr ""
+
+msgid "Pagamento registrado."
+msgstr ""
+
+msgid "Pagamento excluído."
+msgstr ""
+
+#, python-format
+msgid "Atenção: este horário se sobrepõe a outra aula (%(names)s)."
+msgstr ""
+
+msgid "Só aulas do tipo \"Aula\" podem se repetir."
+msgstr ""
+
+msgid "Este aluno já tem uma aula neste horário."
+msgstr ""
+
+msgid "Aula marcada."
+msgstr ""
+
+#, python-format
+msgid "Aulas repetidas criadas: %(description)s."
+msgstr ""
+
+msgid "Escolha outro horário: este aluno já tem aula neste."
+msgstr ""
+
+msgid "Aula remarcada."
+msgstr ""
+
+msgid "Só aulas marcadas podem ser movidas."
+msgstr ""
+
+msgid "Data ou horário inválido."
+msgstr ""
+
+msgid "A duração deve ficar entre 10 e 480 minutos."
+msgstr ""
+
+msgid "Decisão inválida"
+msgstr ""
+
+#, python-format
+msgid "Pedido de %(name)s aprovado."
+msgstr ""
+
+#, python-format
+msgid "Pedido de %(name)s recusado."
+msgstr ""
+
+msgid "Situação inválida"
+msgstr ""
+
+msgid "Este aluno já tem outra aula neste horário; remova ou cancele uma delas antes."
+msgstr ""
+
+#, python-format
+msgid "Cancelada com menos de %(hours)s h de antecedência: conta como aula dada no pacote. Se não for para descontar, use \"Não descontar\"."
+msgstr ""
+
+msgid "Opção inválida"
+msgstr ""
+
+msgid "Esta aula vai ser descontada do pacote."
+msgstr ""
+
+msgid "Esta aula não será descontada do pacote."
+msgstr ""
+
+msgid "Esta aula segue a regra do pacote."
+msgstr ""
+
+msgid "Aula de horário fixo: use \"Cancelar\" (excluir faria ela voltar)."
+msgstr ""
+
+msgid "Aula removida."
+msgstr ""
+
+msgid "Só aulas marcadas podem ser removidas por aqui."
+msgstr ""
+
+msgid "Aula removida da agenda, sem descontar do pacote. O horário fixo continua nas próximas."
+msgstr ""
+
+#, python-format
+msgid "Horário fixo: %(description)s."
+msgstr ""
+
+#, python-format
+msgid "Horário inválido: %(errors)s"
+msgstr ""
+
+msgid "Esta aula não faz parte de um horário fixo."
+msgstr ""
+
+#, python-format
+msgid "%(n)d aula marcada saiu da agenda"
+msgid_plural "%(n)d aulas marcadas saíram da agenda"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "Horário fixo encerrado: %(weekday)s às %(time)s deixa de repetir a partir desta aula (%(gone)s)."
+msgstr ""
+
+msgid "Este aluno não tem pacote em uso. Venda um pacote primeiro."
+msgstr ""
+
+#, python-format
+msgid "%(n)d aula marcada, até %(date)s."
+msgid_plural "%(n)d aulas marcadas, até %(date)s."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Atenção: parte das aulas passa da validade do pacote; prorrogue-o se for preciso."
+msgstr ""
+
+msgid "Atenção: alguma aula se sobrepõe à de outro aluno (veja na agenda)."
+msgstr ""
+
+msgid "Este aluno não tem pacote em uso."
+msgstr ""
+
+#, python-format
+msgid "%(n)d aula a mais marcada, até %(date)s."
+msgid_plural "%(n)d aulas a mais marcadas, até %(date)s."
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "Horário fixo atualizado: %(description)s."
+msgstr ""
+
+#, python-format
+msgid "%(n)d aula(s) marcada(s) foram recriadas no novo horário."
+msgstr ""
+
+msgid "Horário fixo removido. As aulas futuras dele saíram da agenda."
+msgstr ""
+
+#, python-format
+msgid "%(name)s (%(date)s) entrou na lista: o app não marca aula nesse dia ao preencher a agenda."
+msgstr ""
+
+#, python-format
+msgid "Feriado não salvo: %(errors)s"
+msgstr ""
+
+#, python-format
+msgid "%(name)s saiu da lista."
+msgstr ""
+
+msgid "O texto não pode ficar vazio (use \"Restaurar o padrão\")."
+msgstr ""
+
+#, python-format
+msgid "O texto passa de %(max)d caracteres."
+msgstr ""
+
+#, python-format
+msgid "Variável desconhecida: %(names)s."
+msgstr ""
+
+#, python-format
+msgid "O texto precisa ter {%(name)s}: sem ele a mensagem não leva o link."
+msgstr ""
+
+#, python-format
+msgid "Entrar - %(brand_name)s"
+msgstr ""
+
+#, python-format
+msgid "Sair - %(brand_name)s"
+msgstr ""
+
+msgid "Tem certeza de que deseja sair?"
+msgstr ""
+
+msgid "Password Reset"
+msgstr ""
+
+msgid "Forgotten your password? Enter your email address below, and we'll send you an email allowing you to reset it."
+msgstr ""
+
+msgid "Reset My Password"
+msgstr ""
+
+msgid "Voltar ao login"
+msgstr ""
+
+msgid "Se o e-mail não chegar, peça um novo link de acesso à sua personal."
+msgstr ""
+
+#, python-format
+msgid "a href=\"%(href)s\""
+msgstr ""
+
+msgid "button"
+msgstr ""
+
+#, python-format
+msgid "form=\"%(form)s\""
+msgstr ""
+
+#, python-format
+msgid "id=\"%(id)s\""
+msgstr ""
+
+#, python-format
+msgid "name=\"%(name)s\""
+msgstr ""
+
+#, python-format
+msgid "value=\"%(value)s\""
+msgstr ""
+
+#, python-format
+msgid "type=\"%(type)s\""
+msgstr ""
+
+msgid "class=\\"
+msgstr ""
+
+msgid "btn-outline-danger"
+msgstr ""
+
+msgid "btn-outline-secondary"
+msgstr ""
+
+msgid "btn-link"
+msgstr ""
+
+msgid "btn-primary"
+msgstr ""
+
+msgid "- Muscle Track"
+msgstr ""
+
+msgid "Resumo e pagamentos"
+msgstr ""
+
+msgid "Meus Treinos"
+msgstr ""
+
+msgid "Entrar"
+msgstr ""
+
+msgid "Sem conexão. Algumas telas só abrem quando a internet voltar."
+msgstr ""
+
+msgid "&copy;"
+msgstr ""
+
+#, python-format
+msgid "· feito com %(app_name)s"
+msgstr ""
+
+msgid "- Gestão para personal trainers"
+msgstr ""
+
+msgid "Privacidade"
+msgstr ""
+
+#, python-format
+msgid "%(get_kind_display)s · %(duration_minutes)s min"
+msgstr ""
+
+msgid "D d/m \\à\\s H:i"
+msgstr ""
+
+#, python-format
+msgid "para %(starts_at)s"
+msgstr ""
+
+#, python-format
+msgid "remarcada de %(starts_at)s"
+msgstr ""
+
+msgid "Sobreposta a outra aula"
+msgstr ""
+
+msgid "desconta do pacote"
+msgstr ""
+
+msgid "Não descontar"
+msgstr ""
+
+msgid "não desconta"
+msgstr ""
+
+msgid "Descontar"
+msgstr ""
+
+msgid "Desfazer (voltar para marcada)"
+msgstr ""
+
+msgid "Mover"
+msgstr ""
+
+msgid "Adicionar esta aula ao Google Agenda"
+msgstr ""
+
+msgid "Adicionar ao Google Agenda"
+msgstr ""
+
+msgid "Só esta aula: use Cancelar ou Remarcar."
+msgstr ""
+
+msgid "Esta e as próximas aulas deste horário saem da agenda. As já marcadas (compareceu, faltou...) ficam. Continuar?"
+msgstr ""
+
+msgid "Esta e as próximas deixam de repetir"
+msgstr ""
+
+msgid "Remover o horário fixo inteiro? Todas as aulas futuras dele saem da agenda."
+msgstr ""
+
+msgid "Todas: remover o horário fixo"
+msgstr ""
+
+msgid "Remover esta aula avulsa?"
+msgstr ""
+
+msgid "remover"
+msgstr ""
+
+msgid "breadcrumb"
+msgstr ""
+
+msgid "D, d/m \\à\\s H:i"
+msgstr ""
+
+#, python-format
+msgid "Remarcada para <strong>%(starts_at)s</strong>"
+msgstr ""
+
+msgid "d/m \\à\\s H:i"
+msgstr ""
+
+#, python-format
+msgid "· em %(status_changed_at)s,"
+msgstr ""
+
+msgid "a seu pedido"
+msgstr ""
+
+msgid "pela sua personal"
+msgstr ""
+
+#, python-format
+msgid "Cancelada em %(status_changed_at)s,"
+msgstr ""
+
+#, python-format
+msgid "Remarcada de <strong>%(starts_at)s</strong>"
+msgstr ""
+
+#, python-format
+msgid "Comprado em %(sold_on)s"
+msgstr ""
+
+#, python-format
+msgid "<strong>%(used)s</strong> de %(sessions)s aulas usadas"
+msgstr ""
+
+#, python-format
+msgid "%(left)s sobrando"
+msgstr ""
+
+msgid "Aulas usadas do pacote"
+msgstr ""
+
+msgid "Compradas"
+msgstr ""
+
+msgid "Feitas"
+msgstr ""
+
+msgid "Saldo"
+msgstr ""
+
+msgid "Marcadas"
+msgstr ""
+
+msgid "Remarcadas"
+msgstr ""
+
+msgid "Canceladas"
+msgstr ""
+
+#, python-format
+msgid "%(missed)s falta sem aviso (descontada do pacote)."
+msgid_plural "%(missed)s faltas sem aviso (descontadas do pacote)."
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%(late_cancelled)s cancelamento em cima da hora (descontado do pacote)."
+msgid_plural "%(late_cancelled)s cancelamentos em cima da hora (descontados do pacote)."
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%(free_cancelled)s cancelamento sem desconto."
+msgid_plural "%(free_cancelled)s cancelamentos sem desconto."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Pacote sem prazo: vale até usar todas as aulas."
+msgstr ""
+
+#, python-format
+msgid "Primeira aula em %(starts_on)s; vale até <strong>%(ends_on)s</strong>"
+msgstr ""
+
+msgid "vence hoje"
+msgstr ""
+
+msgid "falta 1 dia"
+msgstr ""
+
+#, python-format
+msgid "faltam %(days_left)s dias"
+msgstr ""
+
+msgid "(congelado até você voltar)"
+msgstr ""
+
+msgid "(prazo vencido: fale com a sua personal)"
+msgstr ""
+
+#, python-format
+msgid "O prazo de %(valid_days)s dias começa na primeira aula."
+msgstr ""
+
+#, python-format
+msgid "Prorrogado em %(extension_days)s dia."
+msgid_plural "Prorrogado em %(extension_days)s dias."
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "Aulas descontadas (%(classes)s)"
+msgstr ""
+
+msgid "(tarde)"
+msgstr ""
+
+msgid "Oi"
+msgstr ""
+
+msgid "l, j \\d\\e F"
+msgstr ""
+
+msgid "Treino em andamento"
+msgstr ""
+
+#, python-format
+msgid "Iniciado às %(open_start)s"
+msgstr ""
+
+msgid "Continuar treino"
+msgstr ""
+
+msgid "Treino de hoje feito"
+msgstr ""
+
+#, python-format
+msgid "%(duration_minutes)s min ·"
+msgstr ""
+
+msgid "parabéns pela constância!"
+msgstr ""
+
+msgid "Fazer outro treino"
+msgstr ""
+
+msgid "Treino de hoje"
+msgstr ""
+
+#, python-format
+msgid "%(exercise_count)s exercício · cerca de %(estimated_duration)s min"
+msgid_plural "%(exercise_count)s exercícios · cerca de %(estimated_duration)s min"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "Último: %(last_done)s"
+msgstr ""
+
+msgid "Iniciar treino"
+msgstr ""
+
+msgid "Escolher outro treino"
+msgstr ""
+
+msgid "Seu treino ainda não está pronto"
+msgstr ""
+
+msgid "Sua personal ainda não montou um treino para você. Assim que ele aparecer, é só tocar em iniciar."
+msgstr ""
+
+msgid "Próxima aula"
+msgstr ""
+
+msgid "Ver as minhas aulas"
+msgstr ""
+
+msgid "Sua semana"
+msgstr ""
+
+msgid "Meta batida! Tudo o que vier agora é bônus."
+msgstr ""
+
+#, python-format
+msgid "Faltam %(missing_this_week)s treino para a meta."
+msgid_plural "Faltam %(missing_this_week)s treinos para a meta."
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%(weeks)s semana seguida"
+msgid_plural "%(weeks)s semanas seguidas"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "· treine %(missing_this_week)s vez para manter"
+msgid_plural "· treine %(missing_this_week)s vezes para manter"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%(week_done)s de %(week_goal)s treino"
+msgid_plural "%(week_done)s de %(week_goal)s treinos"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%(week_done)s treino"
+msgid_plural "%(week_done)s treinos"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "Próximo marco: <strong>%(next_milestone)s treinos</strong>"
+msgstr ""
+
+#, python-format
+msgid "%(total)s de %(next_milestone)s"
+msgstr ""
+
+msgid "Progresso até o próximo marco"
+msgstr ""
+
+msgid "treinos"
+msgstr ""
+
+msgid "em 30 dias"
+msgstr ""
+
+#, python-format
+msgid "%(avg_duration)s<small class=\"fs-6\"> min</small>"
+msgstr ""
+
+msgid "em média"
+msgstr ""
+
+msgid "Pular"
+msgstr ""
+
+msgid "Próximo"
+msgstr ""
+
+#, python-format
+msgid "Criar senha - %(brand_name)s"
+msgstr ""
+
+msgid "Convite indisponível"
+msgstr ""
+
+msgid "Este cadastro está desativado. Fale com a sua personal trainer."
+msgstr ""
+
+msgid "Este link é inválido, expirou ou já foi usado. Peça um novo link para a sua personal trainer."
+msgstr ""
+
+msgid "Ir para o login"
+msgstr ""
+
+#, python-format
+msgid "Olá, %(person_name)s!"
+msgstr ""
+
+msgid "Crie a sua senha para acessar os seus treinos."
+msgstr ""
+
+msgid "Criar senha e entrar"
+msgstr ""
+
+#, python-format
+msgid "Seu login será o e-mail <strong>%(email)s</strong>."
+msgstr ""
+
+#, python-format
+msgid "Agenda - %(brand_name)s"
+msgstr ""
+
+msgid "Ver a agenda no Google Agenda"
+msgstr ""
+
+#, python-format
+msgid "Pedidos dos alunos (%(pending_requests)s)"
+msgstr ""
+
+#, python-format
+msgid "· aula de %(starts_at)s"
+msgstr ""
+
+msgid "Quer cancelar"
+msgstr ""
+
+msgid "Quer remarcar"
+msgstr ""
+
+#, python-format
+msgid "para <strong>%(proposed_starts_at)s</strong>"
+msgstr ""
+
+msgid "Motivo, se recusar (opcional)"
+msgstr ""
+
+msgid "Motivo, se recusar"
+msgstr ""
+
+msgid "Aprovar"
+msgstr ""
+
+msgid "Recusar"
+msgstr ""
+
+msgid "Tipo de vista"
+msgstr ""
+
+msgid "Anterior"
+msgstr ""
+
+msgid "F \\d\\e Y"
+msgstr ""
+
+#, python-format
+msgid "%(items)s aula"
+msgid_plural "%(items)s aulas"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "Sem aulas em %(date)s."
+msgstr ""
+
+msgid "Nova aula neste dia"
+msgstr ""
+
+msgid "j \\d\\e F"
+msgstr ""
+
+msgid "Aulas sobrepostas"
+msgstr ""
+
+msgid "Toque em um dia para ver as aulas dele."
+msgstr ""
+
+msgid "Arraste uma aula marcada para outro dia para mudá-la de lugar."
+msgstr ""
+
+#, python-format
+msgid "Próximas aulas de %(month)s"
+msgstr ""
+
+msgid "· hoje"
+msgstr ""
+
+#, python-format
+msgid "%(duration_minutes)s min"
+msgstr ""
+
+msgid "Nenhuma aula de hoje em diante neste mês."
+msgstr ""
+
+msgid "Sem aulas neste dia."
+msgstr ""
+
+#, python-format
+msgid "Nenhuma aula entre %(range_start)s e %(range_end)s. Use as setas para ver outros dias."
+msgstr ""
+
+msgid "Desfazer"
+msgstr ""
+
+msgid "Fechar"
+msgstr ""
+
+msgid "Mover aula de"
+msgstr ""
+
+msgid "A aula atual fica como “Remarcada” e uma nova é marcada. Dá para desfazer logo depois."
+msgstr ""
+
+msgid "Mais opções (tipo, observação)"
+msgstr ""
+
+#, python-format
+msgid "Feriados - %(brand_name)s"
+msgstr ""
+
+msgid "Ao preencher a agenda de um pacote, os dias abaixo ficam sem aula e a próxima data entra no lugar. Na prévia você ainda pode marcar um feriado para dar aula mesmo assim."
+msgstr ""
+
+msgid "Meus dias sem aula"
+msgstr ""
+
+msgid "Feriado da sua cidade, dia em que o estúdio fecha, recesso."
+msgstr ""
+
+msgid "Adicionar"
+msgstr ""
+
+#, python-format
+msgid "Tirar %(name)s da lista?"
+msgstr ""
+
+msgid "Remover"
+msgstr ""
+
+#, python-format
+msgid "Remover %(name)s"
+msgstr ""
+
+msgid "Nenhum dia adicionado."
+msgstr ""
+
+#, python-format
+msgid "Dias que já passaram (%(past)s)"
+msgstr ""
+
+msgid "Feriados nacionais (próximos 12 meses)"
+msgstr ""
+
+#, python-format
+msgid "Calculados pelo app (os que seguem a Páscoa mudam a cada ano). País: <strong>%(region)s</strong>; para trocar, defina <code>HOLIDAYS_REGION</code> (PT, BR ou vazio) no ambiente."
+msgstr ""
+
+msgid "Nenhum país configurado: só os dias que você adicionar ficam sem aula. Para usar os feriados nacionais, defina <code>HOLIDAYS_REGION</code> (PT ou BR)."
+msgstr ""
+
+#, python-format
+msgid "%(title)s - %(brand_name)s"
+msgstr ""
+
+#, python-format
+msgid "Horário atual: <strong>%(starts_at)s</strong>. A aula original fica como \"remarcada\"."
+msgstr ""
+
+msgid "A primeira aula é na data escolhida; as outras seguem os dias marcados. Só vale para aulas do tipo \\"
+msgstr ""
+
+msgid "Salvar"
+msgstr ""
+
+msgid "Salvar avaliação"
+msgstr ""
+
+#, python-format
+msgid "Google Agenda - %(brand_name)s"
+msgstr ""
+
+msgid "Veja todas as suas aulas no Google Agenda do celular e do computador: o app gera um link só seu e o Google passa a mostrar as aulas como um calendário."
+msgstr ""
+
+msgid "Veja as suas aulas no Google Agenda do celular: o app gera um link só seu e o Google passa a mostrar suas aulas como um calendário."
+msgstr ""
+
+msgid "1. Copie o seu link"
+msgstr ""
+
+msgid "Link do calendário"
+msgstr ""
+
+msgid "Copiar"
+msgstr ""
+
+msgid "Quem tiver este link vê"
+msgstr ""
+
+msgid "a sua agenda"
+msgstr ""
+
+msgid "as suas aulas"
+msgstr ""
+
+msgid ". Não envie a ninguém. Se vazar, gere um novo link abaixo."
+msgstr ""
+
+msgid "2. Adicione no Google Agenda"
+msgstr ""
+
+msgid "Abra <strong>Adicionar agenda por URL</strong> no Google Agenda (botão abaixo; é no computador, o celular usa as agendas da mesma conta)."
+msgstr ""
+
+msgid "Cole o link no campo <strong>URL da agenda</strong> e clique em <strong>Adicionar agenda</strong>."
+msgstr ""
+
+msgid "Pronto: a agenda \\"
+msgstr ""
+
+msgid "\\"
+msgstr ""
+
+msgid "Abrir o Google Agenda"
+msgstr ""
+
+msgid "Abrir em outro app de calendário"
+msgstr ""
+
+msgid "O Google busca o link de tempos em tempos (de algumas horas até cerca de um dia), então uma aula remarcada ou cancelada pode demorar a aparecer lá. Para o horário exato, confira sempre no app."
+msgstr ""
+
+msgid "Situação do link"
+msgstr ""
+
+#, python-format
+msgid "O Google ou outro app buscou este link pela última vez em <strong>%(last_fetched_at)s</strong>."
+msgstr ""
+
+msgid "Ainda ninguém buscou este link. Depois de adicionar no Google Agenda, volte aqui para conferir."
+msgstr ""
+
+#, python-format
+msgid "Link gerado de novo em %(rotated_at)s."
+msgstr ""
+
+msgid "Como os alunos aparecem no seu Google Agenda"
+msgstr ""
+
+msgid "Nome no título do evento"
+msgstr ""
+
+msgid "O Google (e quem mais tiver acesso à sua conta ou ao calendário compartilhado) vê esse título. A saúde, as anotações internas e os valores dos alunos <strong>nunca</strong> vão para o calendário."
+msgstr ""
+
+msgid "O que o Google recebe"
+msgstr ""
+
+msgid "Só o <strong>dia, o horário e a duração</strong> das suas aulas, com o título \"Aula de treino\". Nada sobre saúde, treinos, pagamentos ou outros alunos. Você pode apagar a agenda no Google a qualquer momento ou gerar um novo link abaixo para cortar o acesso."
+msgstr ""
+
+msgid "Link vazou ou quer trocar?"
+msgstr ""
+
+msgid "O link atual para de funcionar na hora e você precisa adicionar o novo no Google Agenda."
+msgstr ""
+
+msgid "Gerar um novo link? O atual deixa de funcionar e a agenda que você adicionou no Google vai parar de atualizar."
+msgstr ""
+
+msgid "Gerar novo link"
+msgstr ""
+
+msgid "Copiado!"
+msgstr ""
+
+#, python-format
+msgid "Termos e privacidade - %(brand_name)s"
+msgstr ""
+
+msgid "Antes de começar"
+msgstr ""
+
+msgid "Para treinar com acompanhamento, precisamos do seu consentimento sobre como seus dados são usados. Leia a"
+msgstr ""
+
+msgid "política de privacidade"
+msgstr ""
+
+#, python-format
+msgid "(texto versão %(version)s). Você pode pedir uma cópia ou a exclusão dos seus dados a qualquer momento."
+msgstr ""
+
+msgid "(opcional)"
+msgstr ""
+
+msgid "Concordo e quero continuar"
+msgstr ""
+
+msgid "Não concorda? Sem esse consentimento não conseguimos manter seu acompanhamento. Você pode"
+msgstr ""
+
+msgid "pedir a exclusão dos seus dados"
+msgstr ""
+
+#, python-format
+msgid "%(exercise_name)s - %(brand_name)s"
+msgstr ""
+
+msgid "Aluno Ativo"
+msgid_plural "Alunos Ativos"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Sessões Realizadas"
+msgid_plural "Sessões Realizadas"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Execuções Completas"
+msgid_plural "Execuções Completas"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Informações"
+msgstr ""
+
+msgid "Grupo Muscular:"
+msgstr ""
+
+msgid "Padrão:"
+msgstr ""
+
+msgid "Descrição:"
+msgstr ""
+
+msgid "Treinos que incluem este exercício"
+msgstr ""
+
+#, python-format
+msgid "%(sets)s séries x %(reps)s reps"
+msgstr ""
+
+#, python-format
+msgid "• %(rest_seconds)ss descanso"
+msgstr ""
+
+#, python-format
+msgid "Ordem: %(order)s"
+msgstr ""
+
+msgid "Sem imagem"
+msgstr ""
+
+msgid "Nome do Exercício *"
+msgstr ""
+
+msgid "Ex: Supino Reto"
+msgstr ""
+
+msgid "Grupo Muscular *"
+msgstr ""
+
+msgid "Selecione..."
+msgstr ""
+
+msgid "Breve descrição do exercício..."
+msgstr ""
+
+msgid "Séries Padrão *"
+msgstr ""
+
+msgid "Repetições Padrão *"
+msgstr ""
+
+msgid "Mídia do Exercício"
+msgstr ""
+
+msgid "Arquivo de Mídia"
+msgstr ""
+
+msgid "Formatos aceitos: JPG, PNG, GIF, MP4"
+msgstr ""
+
+msgid "URL do YouTube, Vimeo ou link direto"
+msgstr ""
+
+msgid "Thumbnail (Miniatura)"
+msgstr ""
+
+msgid "Imagem de visualização (recomendado 400x300px)"
+msgstr ""
+
+msgid "Instruções de Execução"
+msgstr ""
+
+msgid "Passo a passo"
+msgstr ""
+
+msgid "1. Posicione-se...&#10;2. Segure a barra...&#10;3. Execute o movimento..."
+msgstr ""
+
+msgid "Exercício ativo (disponível para uso)"
+msgstr ""
+
+msgid "Salvar Exercício"
+msgstr ""
+
+msgid "Preview da Mídia"
+msgstr ""
+
+msgid "Preview"
+msgstr ""
+
+msgid "Nenhuma imagem"
+msgstr ""
+
+msgid "Informações do Registro"
+msgstr ""
+
+#, python-format
+msgid "<small class=\"text-muted d-block\">ID do Exercício</small> <strong>#%(pk)s</strong>"
+msgstr ""
+
+#, python-format
+msgid "<small class=\"text-muted d-block\">Criado em</small> <strong>%(created_at)s</strong>"
+msgstr ""
+
+#, python-format
+msgid "<small class=\"text-muted d-block\">Última atualização</small> <strong>%(updated_at)s</strong>"
+msgstr ""
+
+#, python-format
+msgid "Exercícios - %(brand_name)s"
+msgstr ""
+
+msgid "Novo Exercício"
+msgstr ""
+
+msgid "Buscar Exercício"
+msgstr ""
+
+msgid "Digite o nome ou descrição..."
+msgstr ""
+
+msgid "Todos os grupos"
+msgstr ""
+
+msgid "Visualização"
+msgstr ""
+
+msgid "Grade"
+msgstr ""
+
+msgid "Lista"
+msgstr ""
+
+#, python-format
+msgid "Encontrados <strong>%(count)s</strong> exercício(s)"
+msgstr ""
+
+#, python-format
+msgid "para \"<strong>%(search)s</strong>\""
+msgstr ""
+
+#, python-format
+msgid "no grupo <strong>%(selected_muscle_group)s</strong>"
+msgstr ""
+
+msgid "Ver"
+msgstr ""
+
+msgid "Nenhum exercício encontrado com os filtros selecionados."
+msgstr ""
+
+#, python-format
+msgid "%(default_sets)s séries x %(default_reps)s reps"
+msgstr ""
+
+msgid "Ver Detalhes"
+msgstr ""
+
+#, python-format
+msgid "%(exercise_name)s - Evolução"
+msgstr ""
+
+#, python-format
+msgid "%(weight_used)s kg"
+msgstr ""
+
+#, python-format
+msgid "Recorde de carga · %(start_time)s"
+msgstr ""
+
+msgid "Treinos com este exercício"
+msgstr ""
+
+msgid "Carga por treino (série mais pesada)"
+msgstr ""
+
+msgid "Últimos treinos"
+msgstr ""
+
+msgid "Séries feitas (carga × reps)"
+msgstr ""
+
+#, python-format
+msgid "%(weight)skg"
+msgstr ""
+
+msgid "Você ainda não registrou carga neste exercício."
+msgstr ""
+
+#, python-format
+msgid "Financeiro - %(brand_name)s"
+msgstr ""
+
+msgid "Mês anterior"
+msgstr ""
+
+msgid "Próximo mês"
+msgstr ""
+
+msgid "Mês atual"
+msgstr ""
+
+msgid "Recebido no mês"
+msgstr ""
+
+#, python-format
+msgid "%(payments)s pagamento"
+msgid_plural "%(payments)s pagamentos"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "− %(given_back)s devolvidos · líquido <strong>%(net)s</strong> ·"
+msgstr ""
+
+msgid "ver"
+msgstr ""
+
+msgid "Pacotes vendidos no mês"
+msgstr ""
+
+#, python-format
+msgid "%(sold_count)s pacote"
+msgid_plural "%(sold_count)s pacotes"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "· %(sold_unpriced)s sem valor definido"
+msgstr ""
+
+msgid "A receber agora"
+msgstr ""
+
+#, python-format
+msgid "%(pending)s pacote sem pagamento completo (primeira aula dada ou valor alterado)"
+msgid_plural "%(pending)s pacotes sem pagamento completo (primeira aula dada ou valor alterado)"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "− %(refunds_due_total)s a devolver · saldo <strong>%(balance_total)s</strong>"
+msgstr ""
+
+msgid "Aulas dadas no mês (valor realizado)"
+msgstr ""
+
+#, python-format
+msgid "%(given_classes)s aula descontada dos pacotes"
+msgid_plural "%(given_classes)s aulas descontadas dos pacotes"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "· %(given_unpriced)s de pacote sem valor"
+msgstr ""
+
+#, python-format
+msgid "%(classes)s aula · %(amount)s"
+msgid_plural "%(classes)s aulas · %(amount)s"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Aulas a executar (pacotes em aberto, hoje)"
+msgstr ""
+
+#, python-format
+msgid "%(owed_classes)s aula ainda não dada"
+msgid_plural "%(owed_classes)s aulas ainda não dadas"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "· %(owed_unpriced)s de pacote sem valor"
+msgstr ""
+
+#, python-format
+msgid "%(left)s aula · %(amount)s"
+msgid_plural "%(left)s aulas · %(amount)s"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Pagamentos pendentes"
+msgstr ""
+
+#, python-format
+msgid "%(name)s · pago %(paid)s, valor do pacote alterado · falta %(amount)s"
+msgstr ""
+
+#, python-format
+msgid "%(name)s · primeira aula em %(due)s · %(days)s dia · %(amount)s"
+msgid_plural "%(name)s · primeira aula em %(due)s · %(days)s dias · %(amount)s"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Cobrar pelo WhatsApp"
+msgstr ""
+
+msgid "Registrar"
+msgstr ""
+
+msgid "pago a mais"
+msgstr ""
+
+msgid "pacote cancelado"
+msgstr ""
+
+#, python-format
+msgid "· <strong class=\"text-body\">− %(suggested)s</strong> a devolver"
+msgstr ""
+
+msgid "Devolver"
+msgstr ""
+
+msgid "Nenhum pagamento pendente."
+msgstr ""
+
+msgid "Pacotes para renovar"
+msgstr ""
+
+#, python-format
+msgid "venceu, %(left)s aula sobrando"
+msgid_plural "venceu, %(left)s aulas sobrando"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "vence %(ends_on)s"
+msgstr ""
+
+#, python-format
+msgid "restam %(left)s aula"
+msgid_plural "restam %(left)s aulas"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Nenhum pacote precisando de atenção."
+msgstr ""
+
+msgid "Por forma de pagamento"
+msgstr ""
+
+msgid "Nada recebido neste mês."
+msgstr ""
+
+msgid "Pagamentos do mês"
+msgstr ""
+
+msgid "Exportar CSV"
+msgstr ""
+
+msgid "Nenhum pagamento neste mês."
+msgstr ""
+
+#, python-format
+msgid "Devoluções e ajustes - %(brand_name)s"
+msgstr ""
+
+msgid "Aqui ficam o dinheiro que voltou para os alunos e os lançamentos errados desfeitos. Um pagamento nunca é editado nem apagado para corrigir o dinheiro: cria-se um lançamento novo, ligado ao pagamento, e os totais são somados. Quem erra uma devolução a anula (ela continua registrada)."
+msgstr ""
+
+msgid "Devolvido"
+msgstr ""
+
+msgid "Estornado"
+msgstr ""
+
+msgid "Líquido no mês"
+msgstr ""
+
+msgid "A devolver"
+msgstr ""
+
+msgid "· pacotes cancelados em que o pago passa das aulas dadas e pacotes pagos acima do valor"
+msgstr ""
+
+#, python-format
+msgid "%(name)s · valor do pacote %(price)s · pago %(paid)s"
+msgstr ""
+
+#, python-format
+msgid "%(name)s · cancelado · pago %(paid)s · %(used)s aula dada"
+msgid_plural "%(name)s · cancelado · pago %(paid)s · %(used)s aulas dadas"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Filtrar por aluno..."
+msgstr ""
+
+msgid "Filtrar"
+msgstr ""
+
+msgid "Lançamentos do mês"
+msgstr ""
+
+msgid "anulada"
+msgstr ""
+
+#, python-format
+msgid "Anulada: %(voided_reason)s"
+msgstr ""
+
+msgid "resumo"
+msgstr ""
+
+msgid "Anular"
+msgstr ""
+
+msgid "Motivo da anulação"
+msgstr ""
+
+msgid "Nenhuma devolução ou estorno neste mês."
+msgstr ""
+
+msgid "Para devolver, abra o aluno → Pagamentos → <em>Devolver ou estornar</em>, ou cancele o pacote na ficha (o cálculo vem pronto)."
+msgstr ""
+
+#, python-format
+msgid "Home - %(brand_name)s"
+msgstr ""
+
+msgid "Painel de hoje"
+msgstr ""
+
+msgid "Quem precisa da sua atenção"
+msgstr ""
+
+msgid "Primeiros passos"
+msgstr ""
+
+#, python-format
+msgid "%(done)s de %(total)s concluídos. Faça nesta ordem e o app fica pronto para o primeiro aluno."
+msgstr ""
+
+msgid "Dispensar os primeiros passos"
+msgstr ""
+
+msgid "Dispensar"
+msgstr ""
+
+msgid "Alunos ativos"
+msgstr ""
+
+msgid "Fichas em andamento"
+msgstr ""
+
+msgid "Treinos (7 dias)"
+msgstr ""
+
+msgid "Sem treinar há mais de 7 dias"
+msgstr ""
+
+#, python-format
+msgid "último treino %(last_session_at)s (%(days)s dias)"
+msgstr ""
+
+msgid "nunca treinou"
+msgstr ""
+
+msgid "Todo mundo está em dia."
+msgstr ""
+
+#, python-format
+msgid "e mais %(inactive_more)s — veja a lista de alunos"
+msgstr ""
+
+msgid "Aulas de hoje"
+msgstr ""
+
+msgid "abrir a agenda"
+msgstr ""
+
+msgid "Nenhuma aula marcada para hoje."
+msgstr ""
+
+#, python-format
+msgid "(pago %(paid)s)"
+msgstr ""
+
+#, python-format
+msgid "e mais %(overdue_more)s — veja o financeiro"
+msgstr ""
+
+#, python-format
+msgid "%(name)s · <strong class=\"text-body\">− %(suggested)s</strong> a devolver"
+msgstr ""
+
+#, python-format
+msgid "e mais %(refunds_due_more)s a devolver — veja o financeiro"
+msgstr ""
+
+msgid "Faltas dos últimos 7 dias"
+msgstr ""
+
+msgid "Mensagem pelo WhatsApp"
+msgstr ""
+
+msgid "Pedidos de exclusão de dados"
+msgstr ""
+
+#, python-format
+msgid "pediu em %(at)s · abrir a exclusão"
+msgstr ""
+
+msgid "Experimental há mais de 14 dias"
+msgstr ""
+
+#, python-format
+msgid "%(days)s dias · decidir se vira aluno ativo"
+msgstr ""
+
+msgid "Aguardando convite"
+msgstr ""
+
+#, python-format
+msgid "cadastrado há %(days)s dia · ainda não criou a senha"
+msgid_plural "cadastrado há %(days)s dias · ainda não criou a senha"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "e mais %(invites_more)s — veja a lista de alunos"
+msgstr ""
+
+msgid "Fichas terminando (14 dias)"
+msgstr ""
+
+#, python-format
+msgid "até %(end_date)s"
+msgstr ""
+
+msgid "Nenhuma ficha terminando."
+msgstr ""
+
+msgid "Treinos de hoje"
+msgstr ""
+
+msgid "em andamento"
+msgstr ""
+
+msgid "Ninguém treinou ainda hoje."
+msgstr ""
+
+msgid "Comentários dos alunos (7 dias)"
+msgstr ""
+
+msgid "Nenhum comentário nos últimos dias."
+msgstr ""
+
+msgid "Muscle Track"
+msgstr ""
+
+msgid "Sua conta ainda não está vinculada a um aluno. Fale com a sua personal trainer."
+msgstr ""
+
+#, python-format
+msgid "%(brand_name)s - Gestão para personal trainers, com o aluno por dentro"
+msgstr ""
+
+msgid "Gestão para personal trainers: alunos, treinos, agenda, pacotes e pagamentos num só lugar, e cada aluno acompanha o próprio treino, a evolução e as aulas pelo celular."
+msgstr ""
+
+msgid "Acesso por convite da sua personal"
+msgstr ""
+
+msgid "Sua rotina de personal,"
+msgstr ""
+
+msgid "organizada."
+msgstr ""
+
+msgid "Seus alunos, sempre por dentro."
+msgstr ""
+
+msgid "Controle fichas de treino, aulas e pacotes, e deixe cada aluno acompanhar o próprio treino, a evolução e a agenda."
+msgstr ""
+
+msgid "Como funciona"
+msgstr ""
+
+msgid "Instala como app"
+msgstr ""
+
+msgid "Modo escuro"
+msgstr ""
+
+msgid "Dados privados (LGPD)"
+msgstr ""
+
+msgid "Uma ferramenta para a personal, um app para o aluno"
+msgstr ""
+
+msgid "Os dois lados enxergam a mesma informação, cada um do seu jeito."
+msgstr ""
+
+msgid "Para a personal"
+msgstr ""
+
+msgid "Painel “Hoje”: quem precisa de atenção, faltas e pagamentos pendentes"
+msgstr ""
+
+msgid "Fichas de treino, modelos e exercícios com vídeo"
+msgstr ""
+
+msgid "Agenda com horários fixos, feriados e remarcação"
+msgstr ""
+
+msgid "Pacotes de aulas, pagamentos e devoluções"
+msgstr ""
+
+msgid "Avaliações com medidas e fotos, e lembretes por WhatsApp"
+msgstr ""
+
+msgid "Para o aluno"
+msgstr ""
+
+msgid "Treino do dia com cronômetro, séries e cargas"
+msgstr ""
+
+msgid "Minha evolução: medidas, gráficos e fotos lado a lado"
+msgstr ""
+
+msgid "Agenda e pedido de remarcação em um toque"
+msgstr ""
+
+msgid "Meu pacote: aulas feitas, restantes e validade"
+msgstr ""
+
+msgid "Lembretes de aula e de pacote acabando"
+msgstr ""
+
+msgid "Treino B · Costas e bíceps"
+msgstr ""
+
+msgid "Tempo"
+msgstr ""
+
+msgid "Em andamento"
+msgstr ""
+
+msgid "Remada curvada"
+msgstr ""
+
+msgid "4 × 10 · 30 kg"
+msgstr ""
+
+msgid "Puxada frontal"
+msgstr ""
+
+msgid "4 × 12 · 45 kg"
+msgstr ""
+
+msgid "Rosca direta"
+msgstr ""
+
+msgid "3 × 12 · 12 kg"
+msgstr ""
+
+msgid "Como começar"
+msgstr ""
+
+msgid "O acesso é criado pela personal trainer, por isso não há cadastro aberto."
+msgstr ""
+
+msgid "A personal cadastra o aluno"
+msgstr ""
+
+msgid "Ficha, treino, agenda e pacote ficam prontos antes do primeiro acesso."
+msgstr ""
+
+msgid "O aluno recebe o convite e cria a senha"
+msgstr ""
+
+msgid "Pelo WhatsApp ou e-mail."
+msgstr ""
+
+msgid "Depois, pode entrar também com"
+msgstr ""
+
+msgid "ou"
+msgstr ""
+
+msgid "Os dois acompanham tudo"
+msgstr ""
+
+msgid "Instale na tela inicial do celular e abra o treino do dia em um toque."
+msgstr ""
+
+#, python-format
+msgid "Minha agenda - %(brand_name)s"
+msgstr ""
+
+msgid "Pacote sem prazo: vale até você usar todas as aulas."
+msgstr ""
+
+#, python-format
+msgid "Vale até %(ends_on)s"
+msgstr ""
+
+msgid "(congelado)"
+msgstr ""
+
+#, python-format
+msgid "O prazo de %(valid_days)s dias começa na sua primeira aula."
+msgstr ""
+
+msgid "Próximas aulas"
+msgstr ""
+
+#, python-format
+msgid "%(starts_at)s · %(duration_minutes)s min"
+msgstr ""
+
+msgid "Você pediu para <strong>cancelar</strong> esta aula."
+msgstr ""
+
+#, python-format
+msgid "Você pediu para remarcar para <strong>%(proposed_starts_at)s</strong>."
+msgstr ""
+
+msgid "Aguardando a sua personal."
+msgstr ""
+
+msgid "Retirar pedido"
+msgstr ""
+
+msgid "Sua personal recusou o último pedido"
+msgstr ""
+
+msgid "Você não tem aulas marcadas nos próximos dias. Quando a sua personal marcar, elas aparecem aqui."
+msgstr ""
+
+#, python-format
+msgid "Pedidos pelo app: até %(notice_hours)s hora antes da aula. Depois disso, fale direto com a sua personal. Faltar ou cancelar com menos de %(notice_hours)s h conta como aula dada no pacote."
+msgid_plural "Pedidos pelo app: até %(notice_hours)s horas antes da aula. Depois disso, fale direto com a sua personal. Faltar ou cancelar com menos de %(notice_hours)s h conta como aula dada no pacote."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Últimos 30 dias"
+msgstr ""
+
+#, python-format
+msgid "Aula de <strong>%(starts_at)s</strong> às <strong>%(starts_at2)s</strong>."
+msgstr ""
+
+msgid "A sua personal confirma se o novo horário está livre."
+msgstr ""
+
+msgid "Enviar pedido"
+msgstr ""
+
+#, python-format
+msgid "Minha evolução - %(brand_name)s"
+msgstr ""
+
+msgid "Evolução"
+msgstr ""
+
+#, python-format
+msgid "IMC %(bmi)s"
+msgstr ""
+
+msgid "Sem medidas nesta avaliação."
+msgstr ""
+
+msgid "Ainda não há avaliações registradas. Quando a sua personal fizer a primeira, as medidas e as fotos aparecem aqui."
+msgstr ""
+
+msgid "Outras fotos"
+msgstr ""
+
+msgid "Remover esta foto?"
+msgstr ""
+
+#, python-format
+msgid "Remover a foto de %(date)s"
+msgstr ""
+
+msgid "As fotos são privadas: só você e a sua personal conseguem abri-las."
+msgstr ""
+
+#, python-format
+msgid "Meu Histórico - %(brand_name)s"
+msgstr ""
+
+msgid "Meu Histórico de Treinos"
+msgstr ""
+
+msgid "Sessões Concluídas (últimas 20)"
+msgstr ""
+
+msgid "Duração"
+msgstr ""
+
+msgid "Total de Treinos"
+msgstr ""
+
+msgid "Treinos/Semana (aprox.)"
+msgstr ""
+
+msgid "Treinos Atribuídos"
+msgstr ""
+
+msgid "Você ainda não concluiu nenhum treino."
+msgstr ""
+
+msgid "Iniciar Treino Agora"
+msgstr ""
+
+msgid "Meus Recordes de Carga"
+msgstr ""
+
+msgid "Recorde"
+msgstr ""
+
+msgid "Último"
+msgstr ""
+
+#, python-format
+msgid "%(best)s kg"
+msgstr ""
+
+msgid "Evolução de Treinos"
+msgstr ""
+
+msgid "Duração (minutos)"
+msgstr ""
+
+msgid "Carga Média (kg)"
+msgstr ""
+
+msgid "Data da Sessão"
+msgstr ""
+
+msgid "Treino:"
+msgstr ""
+
+msgid "min"
+msgstr ""
+
+#, python-format
+msgid "Como usar o app - %(brand_name)s"
+msgstr ""
+
+msgid "Três coisas para fazer o treino render. Dá menos de um minuto."
+msgstr ""
+
+msgid "Entendi, vamos treinar"
+msgstr ""
+
+#, python-format
+msgid "Meu pacote - %(brand_name)s"
+msgstr ""
+
+msgid "Você ainda não tem um pacote de aulas registrado. Fale com a sua personal para combinar."
+msgstr ""
+
+msgid "Você não tem um pacote em andamento. Fale com a sua personal para renovar."
+msgstr ""
+
+#, python-format
+msgid "%(without_package)s aula dada sem pacote para descontar. Combine com a sua personal."
+msgid_plural "%(without_package)s aulas dadas sem pacote para descontar. Combine com a sua personal."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Pacotes anteriores"
+msgstr ""
+
+#, python-format
+msgid "Enviar foto - %(brand_name)s"
+msgstr ""
+
+msgid "Para guardar fotos, autorize o registro de fotos de evolução. Elas ficam privadas: só você e a sua personal conseguem vê-las, e você pode retirar a autorização quando quiser."
+msgstr ""
+
+msgid "Autorizar fotos"
+msgstr ""
+
+msgid "Tirar foto"
+msgstr ""
+
+msgid "Escolher da galeria"
+msgstr ""
+
+msgid "Capturar"
+msgstr ""
+
+msgid "Pré-visualização da foto"
+msgstr ""
+
+msgid "JPG, PNG ou WebP. A foto é privada (só você e a sua personal abrem) e é guardada sem localização nem dados do aparelho."
+msgstr ""
+
+#, python-format
+msgid "Privacidade e meus dados - %(brand_name)s"
+msgstr ""
+
+msgid "Meus consentimentos"
+msgstr ""
+
+msgid "(obrigatório)"
+msgstr ""
+
+msgid "Retirar"
+msgstr ""
+
+msgid "Autorizar"
+msgstr ""
+
+msgid "ok"
+msgstr ""
+
+msgid "pendente"
+msgstr ""
+
+msgid "Ler a política de privacidade"
+msgstr ""
+
+msgid "Baixar meus dados"
+msgstr ""
+
+msgid "Um arquivo ZIP com seus dados, avaliações, treinos, fotos e consentimentos."
+msgstr ""
+
+msgid "Baixar"
+msgstr ""
+
+msgid "Excluir meus dados"
+msgstr ""
+
+msgid "Pedido enviado. Sua personal vai apagar seus dados."
+msgstr ""
+
+msgid "Sua personal apaga sua conta, treinos, avaliações e fotos definitivamente."
+msgstr ""
+
+#, python-format
+msgid "Se preferir, escreva para %(contact_email)s."
+msgstr ""
+
+msgid "Pedir a exclusão de todos os meus dados?"
+msgstr ""
+
+msgid "Pedir exclusão"
+msgstr ""
+
+msgid "Atalhos da minha conta"
+msgstr ""
+
+msgid "<strong class=\"d-block\">Minha agenda</strong><small class=\"text-muted\">Próximas aulas e pedidos</small>"
+msgstr ""
+
+msgid "<strong class=\"d-block\">Notificações</strong><small class=\"text-muted\">Avisos por e-mail e no aparelho</small>"
+msgstr ""
+
+msgid "<strong class=\"d-block\">Minha evolução</strong><small class=\"text-muted\">Medidas, fotos e comparação</small>"
+msgstr ""
+
+msgid "<strong class=\"d-block\">Meu pacote</strong><small class=\"text-muted\">Aulas feitas, canceladas e saldo</small>"
+msgstr ""
+
+msgid "<strong class=\"d-block\">Google Agenda</strong><small class=\"text-muted\">Minhas aulas no Google</small>"
+msgstr ""
+
+msgid "<strong class=\"d-block\">Como usar o app</strong><small class=\"text-muted\">Séries, descanso e observações</small>"
+msgstr ""
+
+msgid "<strong class=\"d-block\">Privacidade e meus dados</strong><small class=\"text-muted\">Consentimentos, cópia e exclusão</small>"
+msgstr ""
+
+msgid "Meus dados"
+msgstr ""
+
+msgid "Avatar"
+msgstr ""
+
+msgid "Avatar padrão"
+msgstr ""
+
+msgid "Formatos: JPG, PNG, GIF, WEBP | Tamanho máx: 5MB | Dimensões: 100x100px a 2000x2000px"
+msgstr ""
+
+msgid "O email não pode ser alterado. Entre em contato com o administrador se precisar alterá-lo."
+msgstr ""
+
+msgid "Metas e motivação"
+msgstr ""
+
+msgid "Salvar Alterações"
+msgstr ""
+
+msgid "Conta"
+msgstr ""
+
+#, python-format
+msgid "Meus Treinos - %(brand_name)s"
+msgstr ""
+
+msgid "Meus Treinos Ativos"
+msgstr ""
+
+msgid "Sessão em andamento"
+msgstr ""
+
+#, python-format
+msgid "Iniciada em %(start_time)s"
+msgstr ""
+
+msgid "Ver exercícios"
+msgstr ""
+
+#, python-format
+msgid "%(estimated_duration)s min"
+msgstr ""
+
+msgid "Continuar Treino"
+msgstr ""
+
+msgid "Iniciar Treino"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+#, python-format
+msgid "%(sets)s séries"
+msgstr ""
+
+#, python-format
+msgid "%(reps)s reps"
+msgstr ""
+
+msgid "Última execução:"
+msgstr ""
+
+#, python-format
+msgid "Carga: %(weight_used)s kg"
+msgstr ""
+
+msgid "Nenhum exercício cadastrado para este treino."
+msgstr ""
+
+msgid "Você não possui treinos ativos no momento. Entre em contato com seu instrutor para receber um plano de treino."
+msgstr ""
+
+#, python-format
+msgid "Notificações - %(brand_name)s"
+msgstr ""
+
+msgid "Avisos"
+msgstr ""
+
+msgid "Mensagens do WhatsApp"
+msgstr ""
+
+msgid "Receba um aviso quando um aluno pedir para remarcar ou cancelar uma aula."
+msgstr ""
+
+msgid "Receba um aviso quando sua personal remarcar ou cancelar uma aula, quando ela responder a um pedido seu, um lembrete antes da aula e quando o plano estiver vencendo."
+msgstr ""
+
+msgid "Tudo começa <strong>desligado</strong>: você escolhe o que quer receber e pode desligar quando quiser. Os avisos não trazem dados de saúde nem valores."
+msgstr ""
+
+msgid "Avisos por e-mail"
+msgstr ""
+
+#, python-format
+msgid "Enviados para <strong>%(email)s</strong>."
+msgstr ""
+
+#, python-format
+msgid "Ativado em %(email_at)s."
+msgstr ""
+
+msgid "Avisos no aparelho (push)"
+msgstr ""
+
+msgid "Aparecem como notificação do celular ou do computador, mesmo com o app fechado."
+msgstr ""
+
+#, python-format
+msgid "Ativado em %(push_at)s."
+msgstr ""
+
+msgid "Ainda não foi configurado no servidor."
+msgstr ""
+
+msgid "Quero receber"
+msgstr ""
+
+msgid "Pedidos de remarcação e cancelamento dos alunos"
+msgstr ""
+
+msgid "Mudanças nas minhas aulas e respostas aos meus pedidos"
+msgstr ""
+
+msgid "Pacotes de alunos acabando ou vencendo"
+msgstr ""
+
+#, python-format
+msgid "Lembrete de aula (cerca de %(reminder_hours)s hora antes)"
+msgid_plural "Lembrete de aula (cerca de %(reminder_hours)s horas antes)"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Aviso quando o meu pacote estiver acabando ou vencendo"
+msgstr ""
+
+msgid "Vale para os dois canais acima: só chega o que estiver marcado aqui e em um canal ligado."
+msgstr ""
+
+msgid "Aparelhos que recebem avisos"
+msgstr ""
+
+#, python-format
+msgid "· desde %(created_at)s"
+msgstr ""
+
+msgid "Nenhum aparelho ainda."
+msgstr ""
+
+msgid "Ativar neste aparelho"
+msgstr ""
+
+msgid "No iPhone, os avisos só funcionam depois de adicionar o app à tela de início (Compartilhar → Adicionar à Tela de Início)."
+msgstr ""
+
+msgid "Enviar um teste:"
+msgstr ""
+
+msgid "Últimos envios"
+msgstr ""
+
+msgid "aparelho"
+msgstr ""
+
+#, python-brace-format
+msgid "Estes são os textos que já vão prontos quando você toca no ícone do WhatsApp. Mude à vontade: as palavras entre chaves, como <code>{nome}</code>, são trocadas pelos dados do aluno. Uma linha com <code>{valor}</code> ou <code>{pix}</code> sem valor é omitida."
+msgstr ""
+
+msgid "personalizada"
+msgstr ""
+
+msgid "texto padrão"
+msgstr ""
+
+#, python-format
+msgid "Texto de %(label)s"
+msgstr ""
+
+msgid "Variáveis"
+msgstr ""
+
+msgid ". Obrigatório:"
+msgstr ""
+
+msgid "Como fica (com um aluno de exemplo)"
+msgstr ""
+
+msgid "Voltar ao texto padrão?"
+msgstr ""
+
+msgid "Restaurar o padrão"
+msgstr ""
+
+#, python-format
+msgid "Registrar pagamento - %(person_name)s - %(brand_name)s"
+msgstr ""
+
+#, python-format
+msgid "Pagamento de %(person_name)s"
+msgstr ""
+
+msgid "O pagamento é feito na primeira aula do pacote."
+msgstr ""
+
+#, python-format
+msgid "total %(price_total)s, pago %(paid)s"
+msgstr ""
+
+#, python-format
+msgid "em aberto %(pending)s"
+msgstr ""
+
+msgid "sem valor definido"
+msgstr ""
+
+msgid "Este aluno ainda não tem pacote."
+msgstr ""
+
+msgid "Vender um pacote"
+msgstr ""
+
+msgid "O valor sugerido é o que falta pagar do pacote escolhido; você pode mudar."
+msgstr ""
+
+msgid "Atribuir Treino"
+msgstr ""
+
+msgid "Atribuir Treino ao Aluno"
+msgstr ""
+
+msgid "Informações do Treino"
+msgstr ""
+
+msgid "Template de Treino"
+msgstr ""
+
+msgid "Selecionar Template"
+msgstr ""
+
+msgid "Nenhum exercício adicionado"
+msgstr ""
+
+msgid "Atualizar Treino"
+msgstr ""
+
+msgid "Selecionar Template de Treino"
+msgstr ""
+
+msgid "Buscar template..."
+msgstr ""
+
+msgid "Adicionar Exercício"
+msgstr ""
+
+msgid "Buscar exercício..."
+msgstr ""
+
+msgid "Configuração"
+msgstr ""
+
+msgid "Descanso (s)"
+msgstr ""
+
+msgid "Adicionar ao Treino"
+msgstr ""
+
+msgid "exercícios"
+msgstr ""
+
+#, python-format
+msgid "Progresso - %(routine_name)s - %(brand_name)s"
+msgstr ""
+
+msgid "Progresso do Treino"
+msgstr ""
+
+msgid "Aluno:"
+msgstr ""
+
+msgid "Detalhes do Treino"
+msgstr ""
+
+msgid "Dificuldade:"
+msgstr ""
+
+#, python-format
+msgid "<strong>Duração Estimada:</strong> %(estimated_duration)s minutos"
+msgstr ""
+
+#, python-format
+msgid "<strong>Descrição:</strong> %(description)s"
+msgstr ""
+
+#, python-format
+msgid "<strong>Data de Início:</strong> %(start_date)s"
+msgstr ""
+
+#, python-format
+msgid "| <strong>Data de Término:</strong> %(end_date)s"
+msgstr ""
+
+#, python-format
+msgid "Exercícios (%(count)s)"
+msgstr ""
+
+#, python-format
+msgid "+ %(count)s mais..."
+msgstr ""
+
+msgid "Sessões Concluídas"
+msgstr ""
+
+msgid "Último Mês"
+msgstr ""
+
+msgid "Duração Média (min)"
+msgstr ""
+
+msgid "Taxa de Conclusão"
+msgstr ""
+
+msgid "Evolução do Treino"
+msgstr ""
+
+msgid "Histórico de Sessões"
+msgstr ""
+
+#, python-format
+msgid "%(count)s sessões"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Ações"
+msgstr ""
+
+msgid "Ver detalhes"
+msgstr ""
+
+msgid "Ainda não há sessões concluídas para este treino."
+msgstr ""
+
+#, python-format
+msgid "Comparar fotos - %(brand_name)s"
+msgstr ""
+
+msgid "Para comparar é preciso ter a foto da mesma posição em pelo menos duas avaliações."
+msgstr ""
+
+msgid "Antes"
+msgstr ""
+
+msgid "Depois"
+msgstr ""
+
+msgid "Comparar"
+msgstr ""
+
+#, python-format
+msgid "O que mudou em %(days)s dia"
+msgid_plural "O que mudou em %(days)s dias"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "Adicionar foto - %(person_name)s"
+msgstr ""
+
+#, python-format
+msgid "%(person_name)s ainda não autorizou as fotos de evolução. Registre o consentimento na aba <em>Histórico</em> da ficha antes de guardar fotos."
+msgstr ""
+
+msgid "JPG, PNG ou WebP. A foto é privada (só você e o aluno abrem) e é guardada sem localização nem dados do aparelho."
+msgstr ""
+
+msgid "Salvar foto"
+msgstr ""
+
+msgid "Salvar e próxima posição"
+msgstr ""
+
+msgid "Digite um dos dois: o outro é calculado."
+msgstr ""
+
+msgid "(pacotes inativos não aparecem para vender)"
+msgstr ""
+
+msgid "Salvar pacote"
+msgstr ""
+
+msgid "O <strong>prazo</strong> começa a contar na <strong>primeira aula</strong> do pacote e pode ser prorrogado ou congelado depois, para cada aluno."
+msgstr ""
+
+msgid "Cada aula dada (compareceu, faltou ou cancelada com menos de 24 h) desconta <strong>uma aula</strong> do pacote."
+msgstr ""
+
+msgid "Os valores são só o ponto de partida: na venda, o preço pode ser ajustado para o aluno."
+msgstr ""
+
+#, python-format
+msgid "%(sold_count)s pacote já vendido a partir deste modelo. Eles mantêm os números da venda."
+msgid_plural "%(sold_count)s pacotes já vendidos a partir deste modelo. Eles mantêm os números da venda."
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "Pacotes - %(brand_name)s"
+msgstr ""
+
+msgid "O pacote é o modelo do catálogo: uma quantidade de aulas, um prazo (contado a partir da primeira aula) e um valor por aula ou total. Ao vender um pacote para o aluno, os números são copiados para ele: mudar o modelo depois não altera quem já comprou."
+msgstr ""
+
+msgid "Buscar pacote..."
+msgstr ""
+
+msgid "Ativos"
+msgstr ""
+
+msgid "Inativos"
+msgstr ""
+
+msgid "Todos"
+msgstr ""
+
+msgid "inativo"
+msgstr ""
+
+#, python-format
+msgid "%(sessions)s aulas ·"
+msgstr ""
+
+#, python-format
+msgid "%(valid_days)s dias a partir da primeira aula"
+msgstr ""
+
+msgid "sem valor"
+msgstr ""
+
+#, python-format
+msgid "%(price_per_session)s por aula"
+msgstr ""
+
+#, python-format
+msgid "%(sold_count)s vendido"
+msgid_plural "%(sold_count)s vendidos"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Nenhum pacote"
+msgstr ""
+
+msgid "encontrado"
+msgstr ""
+
+msgid "cadastrado ainda"
+msgstr ""
+
+msgid "Crie o primeiro"
+msgstr ""
+
+#, python-format
+msgid "Política de privacidade - %(brand_name)s"
+msgstr ""
+
+msgid "Política de privacidade"
+msgstr ""
+
+#, python-format
+msgid "Versão %(version)s"
+msgstr ""
+
+msgid "Quem cuida dos seus dados"
+msgstr ""
+
+#, python-format
+msgid "O controlador dos dados é %(controller)s."
+msgstr ""
+
+msgid "Contato:"
+msgstr ""
+
+msgid "Quais dados e para quê"
+msgstr ""
+
+msgid "<strong>Cadastro:</strong> nome, e-mail, telefone, endereço, data de nascimento e contato de emergência, para identificar você e entrar em contato."
+msgstr ""
+
+msgid "<strong>Saúde e treino:</strong> objetivo, lesões e restrições, avaliações físicas (peso, medidas, gordura), treinos feitos, cargas e comentários. São dados sensíveis, usados só para montar e acompanhar seu treino."
+msgstr ""
+
+msgid "<strong>Fotos de evolução</strong> (opcional): ficam em área privada e só você e sua personal as veem."
+msgstr ""
+
+msgid "<strong>Plano:</strong> nome do plano e vencimento."
+msgstr ""
+
+msgid "Com quem compartilhamos"
+msgstr ""
+
+msgid "Seus dados não são vendidos nem compartilhados com terceiros. Ficam no servidor do aplicativo, acessível só pela personal e por você."
+msgstr ""
+
+msgid "Por quanto tempo"
+msgstr ""
+
+msgid "Enquanto você for aluno(a) e, depois disso, até você pedir a exclusão."
+msgstr ""
+
+msgid "Seus direitos"
+msgstr ""
+
+msgid "Você pode, a qualquer momento: ver seus dados, baixar uma cópia, corrigir seu cadastro, retirar o consentimento das fotos e pedir a exclusão de todos os dados, em <em>Privacidade e meus dados</em> no menu do aplicativo."
+msgstr ""
+
+msgid "Texto padrão do aplicativo. A personal responsável deve revisá-lo (de preferência com apoio jurídico) antes de usá-lo como documento oficial."
+msgstr ""
+
+#, python-format
+msgid "Devolução - %(person_name)s - %(brand_name)s"
+msgstr ""
+
+#, python-format
+msgid "Anulada em %(voided_at)s: %(voided_reason)s. Continua registrada, mas não conta."
+msgstr ""
+
+#, python-format
+msgid "Motivo: %(reason)s"
+msgstr ""
+
+msgid "Resumo para o aluno"
+msgstr ""
+
+msgid "Enviar o resumo"
+msgstr ""
+
+msgid "Sem telefone cadastrado para enviar pelo WhatsApp: copie o texto acima."
+msgstr ""
+
+#, python-format
+msgid "Devolver ou estornar - %(person_name)s - %(brand_name)s"
+msgstr ""
+
+msgid "<strong>Devolução</strong>: o dinheiro voltou para o aluno. <strong>Estorno</strong>: o pagamento foi lançado errado (valor, aluno ou pacote) e o lançamento é desfeito; depois registre o pagamento certo."
+msgstr ""
+
+msgid "Só você vê estes valores. O pagamento original não muda: a devolução é um lançamento novo."
+msgstr ""
+
+#, python-format
+msgid "%(routine_name)s - Detalhes"
+msgstr ""
+
+msgid "Total Alunos"
+msgstr ""
+
+msgid "Alunos Ativos"
+msgstr ""
+
+msgid "Total Treinos"
+msgstr ""
+
+msgid "Completados"
+msgstr ""
+
+msgid "Duração Média"
+msgstr ""
+
+#, python-format
+msgid "%(avg_duration)s<small class=\"text-muted\">min</small>"
+msgstr ""
+
+msgid "Informações da Rotina"
+msgstr ""
+
+msgid "Nível de Dificuldade:"
+msgstr ""
+
+msgid "Duração Estimada:"
+msgstr ""
+
+#, python-format
+msgid "%(estimated_duration)s minutos"
+msgstr ""
+
+msgid "Exercícios da Rotina"
+msgstr ""
+
+msgid "Reps"
+msgstr ""
+
+msgid "Descanso"
+msgstr ""
+
+msgid "Nenhum exercício cadastrado nesta rotina."
+msgstr ""
+
+msgid "Análise de Desempenho"
+msgstr ""
+
+#, python-format
+msgid "%(completed_sessions)s de %(total_sessions)s treinos"
+msgstr ""
+
+msgid "Insights:"
+msgstr ""
+
+msgid "Excelente taxa de conclusão! Os alunos estão muito engajados com esta rotina."
+msgstr ""
+
+msgid "Boa taxa de conclusão. Considere identificar alunos que precisam de mais suporte."
+msgstr ""
+
+msgid "Taxa de conclusão pode melhorar. Revise a dificuldade e duração da rotina."
+msgstr ""
+
+#, python-format
+msgid "Duração média dos treinos: %(avg_duration)s minutos"
+msgstr ""
+
+msgid "(acima do esperado)"
+msgstr ""
+
+msgid "(abaixo do esperado)"
+msgstr ""
+
+msgid "(dentro do esperado)"
+msgstr ""
+
+msgid "Ainda não há dados suficientes para análise."
+msgstr ""
+
+msgid "Estado:"
+msgstr ""
+
+msgid "Ativa"
+msgstr ""
+
+msgid "Inativa"
+msgstr ""
+
+msgid "ID da Rotina:"
+msgstr ""
+
+msgid "Criado em:"
+msgstr ""
+
+msgid "Atualizado em:"
+msgstr ""
+
+msgid "Ações Rápidas"
+msgstr ""
+
+msgid "Editar Rotina"
+msgstr ""
+
+msgid "Editar no Admin"
+msgstr ""
+
+msgid "Nome do Treino *"
+msgstr ""
+
+msgid "Ex: Treino de Peito e Tríceps"
+msgstr ""
+
+msgid "Breve descrição do treino e objetivos..."
+msgstr ""
+
+msgid "Nível de Dificuldade *"
+msgstr ""
+
+msgid "Duração Estimada (min) *"
+msgstr ""
+
+msgid "Treino ativo (disponível para uso)"
+msgstr ""
+
+msgid "Adicionar Exercícios"
+msgstr ""
+
+msgid "Nenhum exercício adicionado."
+msgstr ""
+
+msgid "Clique em \\"
+msgstr ""
+
+msgid "Resumo do Treino"
+msgstr ""
+
+msgid "Total de Exercícios"
+msgstr ""
+
+msgid "Duração Estimada"
+msgstr ""
+
+msgid "0 minutos"
+msgstr ""
+
+msgid "Salvar Treino"
+msgstr ""
+
+msgid "Dicas"
+msgstr ""
+
+msgid "Arraste os exercícios para reordenar"
+msgstr ""
+
+msgid "Clique em"
+msgstr ""
+
+msgid "para ajustar séries/reps"
+msgstr ""
+
+msgid "Agrupe exercícios por grupo muscular"
+msgstr ""
+
+msgid "Configure descanso adequado entre séries"
+msgstr ""
+
+msgid "Selecionar Exercícios"
+msgstr ""
+
+msgid "Pesquisar exercício..."
+msgstr ""
+
+msgid "Todos os grupos musculares"
+msgstr ""
+
+msgid "Carregando..."
+msgstr ""
+
+msgid "Carregando exercícios..."
+msgstr ""
+
+msgid "Confirmar Seleção ("
+msgstr ""
+
+msgid "Editar Parâmetros"
+msgstr ""
+
+msgid "Descanso (segundos)"
+msgstr ""
+
+msgid "Erro ao carregar exercícios. Tente novamente."
+msgstr ""
+
+msgid "Nenhum exercício encontrado"
+msgstr ""
+
+msgid "séries"
+msgstr ""
+
+msgid "reps"
+msgstr ""
+
+msgid "Editar parâmetros"
+msgstr ""
+
+msgid "Remover exercício"
+msgstr ""
+
+msgid "Remover este exercício do treino?"
+msgstr ""
+
+msgid "minutos"
+msgstr ""
+
+msgid "Conteúdo da página"
+msgstr ""
+
+#, python-format
+msgid "Treinos - %(brand_name)s"
+msgstr ""
+
+msgid "Novo Treino"
+msgstr ""
+
+msgid "Buscar Treino"
+msgstr ""
+
+msgid "Dificuldade"
+msgstr ""
+
+msgid "Todas as dificuldades"
+msgstr ""
+
+#, python-format
+msgid "Encontrados <strong>%(count)s</strong> treino(s)"
+msgstr ""
+
+#, python-format
+msgid "com dificuldade <strong>%(selected_difficulty)s</strong>"
+msgstr ""
+
+msgid "Nenhum treino encontrado com os filtros selecionados."
+msgstr ""
+
+#, python-format
+msgid "%(exercise_count)s exercícios"
+msgstr ""
+
+#, python-format
+msgid "%(student_count)s alunos"
+msgstr ""
+
+#, python-format
+msgid "Busca - %(brand_name)s"
+msgstr ""
+
+msgid "Aluno, exercício ou treino..."
+msgstr ""
+
+msgid "Digite um nome, e-mail ou telefone de aluno, o nome de um exercício ou de um treino."
+msgstr ""
+
+msgid "Dica: <kbd>/</kbd> ou <kbd>Ctrl</kbd> + <kbd>K</kbd> abrem a busca de qualquer tela. <code>#12</code> acha o aluno de número 12."
+msgstr ""
+
+msgid "Digite pelo menos 2 letras."
+msgstr ""
+
+#, python-format
+msgid "Nada encontrado para <strong>%(q)s</strong>."
+msgstr ""
+
+msgid "Tente só uma parte do nome, ou o telefone sem máscara."
+msgstr ""
+
+#, python-format
+msgid "Ver todos os %(total)s em %(label)s"
+msgstr ""
+
+#, python-format
+msgid "Detalhes da Sessão - %(routine_name)s"
+msgstr ""
+
+msgid "Detalhes da Sessão"
+msgstr ""
+
+msgid "Abrir a ficha do aluno"
+msgstr ""
+
+msgid "Ver progresso deste treino"
+msgstr ""
+
+msgid "Informações da Sessão"
+msgstr ""
+
+msgid "Data:"
+msgstr ""
+
+msgid "Início:"
+msgstr ""
+
+msgid "Término:"
+msgstr ""
+
+msgid "Duração:"
+msgstr ""
+
+msgid "Comentário do aluno sobre o treino:"
+msgstr ""
+
+msgid "Exercícios Executados"
+msgstr ""
+
+msgid "Não executado"
+msgstr ""
+
+#, python-format
+msgid "%(sets)s séries x %(reps)s repetições"
+msgstr ""
+
+#, python-format
+msgid "Descanso: %(rest_seconds)ss"
+msgstr ""
+
+msgid "Carga"
+msgstr ""
+
+#, python-format
+msgid "%(weight)s kg"
+msgstr ""
+
+#, python-format
+msgid "<strong>Observação do aluno:</strong> %(notes)s"
+msgstr ""
+
+msgid "Concluído em:"
+msgstr ""
+
+msgid "Carga:"
+msgstr ""
+
+#, python-format
+msgid "Editar horário fixo - %(person_name)s"
+msgstr ""
+
+#, python-format
+msgid "%(person_name)s · hoje: %(get_weekday_display)s às %(start_time)s (%(duration_minutes)s min)"
+msgstr ""
+
+#, python-format
+msgid ", a cada %(interval_weeks)s semanas"
+msgstr ""
+
+msgid "A mudança vale <strong>da data escolhida em diante</strong>: as aulas já dadas e as aulas marcadas antes dela ficam como estão. As próximas aulas desse horário que ninguém mexeu (não foram movidas, nem têm pedido do aluno) são recriadas no novo dia e horário."
+msgstr ""
+
+msgid "Salvar horário"
+msgstr ""
+
+#, python-format
+msgid "<strong>%(get_weekday_display)s</strong> às %(start_time)s"
+msgstr ""
+
+#, python-format
+msgid "(%(duration_minutes)s min)"
+msgstr ""
+
+#, python-format
+msgid "· a cada %(interval_weeks)s semanas"
+msgstr ""
+
+#, python-format
+msgid "· até %(valid_until)s"
+msgstr ""
+
+msgid "Remover este horário? As aulas futuras dele saem da agenda."
+msgstr ""
+
+msgid "Nenhum horário fixo. Adicione abaixo (ex.: segunda 07:00)."
+msgstr ""
+
+msgid "Deslize o horário para a esquerda para editar ou remover."
+msgstr ""
+
+#, python-format
+msgid "<strong>%(name)s</strong>: restam <strong>%(left)s</strong> aula"
+msgid_plural "<strong>%(name)s</strong>: restam <strong>%(left)s</strong> aulas"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid ", %(scheduled)s já marcada"
+msgid_plural ", %(scheduled)s já marcadas"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "· vale até %(ends_on)s"
+msgstr ""
+
+msgid "· sem prazo"
+msgstr ""
+
+msgid "· o prazo começa na primeira aula"
+msgstr ""
+
+#, python-format
+msgid "Faltam marcar <strong>%(to_schedule)s</strong>."
+msgstr ""
+
+msgid "Todas as aulas do pacote já estão marcadas."
+msgstr ""
+
+#, python-format
+msgid "Marcar mais %(to_schedule)s"
+msgstr ""
+
+msgid "Preencher a agenda do pacote"
+msgstr ""
+
+#, python-format
+msgid "Mesmo horário de antes: <strong>%(label)s</strong>, a partir do dia seguinte à última aula marcada. Confira a prévia e confirme."
+msgstr ""
+
+msgid "Avançado (duração, repetição)"
+msgstr ""
+
+msgid "Feriados que ficam sem aula"
+msgstr ""
+
+#, python-format
+msgid "Escolha os dias e o horário: o fim é calculado pelas aulas que faltam marcar (%(to_schedule)s)."
+msgstr ""
+
+#, python-format
+msgid "Preencher agenda (%(to_schedule)s aula)"
+msgid_plural "Preencher agenda (%(to_schedule)s aulas)"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Este aluno ainda não tem pacote em uso: venda um para preencher a agenda pelas aulas dele."
+msgstr ""
+
+msgid "Avançado: horário sem pacote ou repetição personalizada"
+msgstr ""
+
+msgid "Novo horário fixo"
+msgstr ""
+
+msgid "Repetição personalizada (a cada N semanas, início e fim)"
+msgstr ""
+
+msgid "Adicionar horário"
+msgstr ""
+
+#, python-format
+msgid "Aluno sem acesso: não gera aulas na agenda enquanto estiver %(get_status_display)s."
+msgstr ""
+
+msgid "Frequência (30 dias)"
+msgstr ""
+
+msgid "compareceu"
+msgstr ""
+
+msgid "faltou"
+msgstr ""
+
+msgid "presença"
+msgstr ""
+
+msgid "Aula avulsa"
+msgstr ""
+
+#, python-format
+msgid "%(starts_at)s às %(starts_at2)s"
+msgstr ""
+
+msgid "Remover esta aula? Ela sai da agenda e não desconta do pacote; o horário fixo continua nas próximas."
+msgstr ""
+
+msgid "Nenhuma aula marcada."
+msgstr ""
+
+msgid "Deslize a aula para a esquerda para editar ou remover."
+msgstr ""
+
+msgid "Cada avaliação tem as fotos das posições (frente, lados e costas). As fotos são privadas: só você e o próprio aluno conseguem abrir."
+msgstr ""
+
+msgid "Peso"
+msgstr ""
+
+msgid "Altura"
+msgstr ""
+
+msgid "IMC"
+msgstr ""
+
+#, python-format
+msgid "%% gordura"
+msgstr ""
+
+msgid "Peito"
+msgstr ""
+
+msgid "Cintura"
+msgstr ""
+
+msgid "Quadril"
+msgstr ""
+
+msgid "Braço"
+msgstr ""
+
+msgid "Coxa"
+msgstr ""
+
+msgid "Remover esta avaliação?"
+msgstr ""
+
+msgid "Remover foto"
+msgstr ""
+
+msgid "Adicionar outra foto a esta avaliação"
+msgstr ""
+
+msgid "Medidas em cm, peso em kg. Altura e peso geram o IMC."
+msgstr ""
+
+msgid "Nenhuma avaliação registrada ainda."
+msgstr ""
+
+msgid "Fotos avulsas"
+msgstr ""
+
+msgid "Fotos sem avaliação ligada: as que o aluno enviou pelo celular e as de antes de as fotos ficarem dentro das avaliações."
+msgstr ""
+
+msgid "Adicionar foto avulsa"
+msgstr ""
+
+msgid "Ficha do aluno"
+msgstr ""
+
+msgid "Nascimento"
+msgstr ""
+
+#, python-format
+msgid "%(birth_date)s (%(age)s anos)"
+msgstr ""
+
+msgid "Aluno desde"
+msgstr ""
+
+#, python-format
+msgid "desde %(status_changed_at)s"
+msgstr ""
+
+msgid "Alterar situação"
+msgstr ""
+
+msgid "Acesso ao app"
+msgstr ""
+
+#, python-format
+msgid "Último acesso em %(last_login)s"
+msgstr ""
+
+msgid "Senha criada, ainda sem acesso"
+msgstr ""
+
+msgid "Nada registrado."
+msgstr ""
+
+msgid "<strong>Anotações internas</strong> <small class=\"text-muted\">(o aluno não vê)</small>"
+msgstr ""
+
+msgid "Última avaliação"
+msgstr ""
+
+msgid "Nova"
+msgstr ""
+
+#, python-format
+msgid "%(weight_kg)s kg"
+msgstr ""
+
+msgid "peso"
+msgstr ""
+
+msgid "gordura"
+msgstr ""
+
+msgid "Nenhuma avaliação registrada."
+msgstr ""
+
+msgid "Histórico de alterações"
+msgstr ""
+
+msgid "Só você vê. Textos de saúde e anotações internas aparecem como \\"
+msgstr ""
+
+msgid "alterado"
+msgstr ""
+
+msgid "Nada registrado ainda. As alterações feitas daqui em diante aparecem aqui."
+msgstr ""
+
+msgid "Consentimentos (LGPD)"
+msgstr ""
+
+#, python-format
+msgid "%(at)s · texto %(version)s · %(get_source_display)s"
+msgstr ""
+
+msgid "retirado"
+msgstr ""
+
+msgid "texto novo"
+msgstr ""
+
+msgid "não autorizado"
+msgstr ""
+
+msgid "Registrar consentimento dado fora do app (papel, WhatsApp)"
+msgstr ""
+
+msgid "· já concedido"
+msgstr ""
+
+msgid "Dados do aluno"
+msgstr ""
+
+#, python-format
+msgid "ZIP com tudo o que está guardado sobre %(person_name)s (dados, avaliações, treinos, fotos, anotações internas e histórico)."
+msgstr ""
+
+msgid "Baixar dados"
+msgstr ""
+
+msgid "Só você vê estas anotações; o aluno não tem acesso."
+msgstr ""
+
+msgid "Salvar anotação"
+msgstr ""
+
+msgid "Remover esta anotação?"
+msgstr ""
+
+msgid "Nenhuma anotação ainda."
+msgstr ""
+
+msgid "Sem pacote"
+msgstr ""
+
+#, python-format
+msgid "<strong class=\"fs-4\">%(used)s</strong> de %(sessions)s aulas usadas"
+msgstr ""
+
+#, python-format
+msgid "· %(scheduled)s agendada"
+msgid_plural "· %(scheduled)s agendadas"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "Há mais aulas agendadas (%(scheduled)s) do que aulas sobrando no pacote (%(left)s)."
+msgstr ""
+
+msgid "Pacote <strong>sem prazo</strong>: não vence, vale até usar todas as aulas."
+msgstr ""
+
+#, python-format
+msgid "Primeira aula em <strong>%(starts_on)s</strong>."
+msgstr ""
+
+#, python-format
+msgid "Primeira aula em <strong>%(starts_on)s</strong> · vale até <strong>%(ends_on)s</strong>"
+msgstr ""
+
+#, python-format
+msgid "(congelado desde %(frozen_since)s; o prazo para de contar)"
+msgstr ""
+
+#, python-format
+msgid "(venceu há %(days_left)s dia)"
+msgid_plural "(venceu há %(days_left)s dias)"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "(faltam %(days_left)s dia)"
+msgid_plural "(faltam %(days_left)s dias)"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "O prazo de %(valid_days)s dias começa a contar na primeira aula."
+msgstr ""
+
+#, python-format
+msgid "O prazo acabou e ainda sobram %(left)s aula. Prorrogue o pacote para o aluno poder usá-las."
+msgid_plural "O prazo acabou e ainda sobram %(left)s aulas. Prorrogue o pacote para o aluno poder usá-las."
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "Restam %(left)s aula: hora de oferecer um novo pacote."
+msgid_plural "Restam %(left)s aulas: hora de oferecer um novo pacote."
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "Pagamento em aberto: %(pending)s"
+msgstr ""
+
+#, python-format
+msgid "(pago %(paid)s de %(price_total)s)"
+msgstr ""
+
+#, python-format
+msgid "Pago (%(paid)s)"
+msgstr ""
+
+#, python-format
+msgid "Pago a mais: %(overpaid)s"
+msgstr ""
+
+#, python-format
+msgid "%(without_package)s aula dada sem pacote para descontar. Venda um pacote novo."
+msgid_plural "%(without_package)s aulas dadas sem pacote para descontar. Venda um pacote novo."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Cobrar"
+msgstr ""
+
+msgid "Vender novo pacote"
+msgstr ""
+
+msgid "Prorrogar"
+msgstr ""
+
+msgid "Descongelar"
+msgstr ""
+
+msgid "O prazo para de contar até o aluno voltar"
+msgstr ""
+
+msgid "Congelar"
+msgstr ""
+
+msgid "Cancelar com devolução"
+msgstr ""
+
+msgid "Dias a mais"
+msgstr ""
+
+msgid "Motivo (opcional)"
+msgstr ""
+
+msgid "Ex.: viagem, lesão"
+msgstr ""
+
+msgid "Valores (sigilosos)"
+msgstr ""
+
+msgid "Mostrar"
+msgstr ""
+
+#, python-format
+msgid "Total: <strong>%(price_total)s</strong>"
+msgstr ""
+
+#, python-format
+msgid "· %(price_per_session)s por aula"
+msgstr ""
+
+msgid "Nenhum valor combinado."
+msgstr ""
+
+msgid "Ocultos. O aluno nunca vê estes valores."
+msgstr ""
+
+#, python-format
+msgid "· %(used)s/%(sessions)s aulas"
+msgstr ""
+
+msgid "Editar este pacote"
+msgstr ""
+
+#, python-format
+msgid "Editar %(name)s"
+msgstr ""
+
+msgid "Só você vê os valores. O aluno não tem acesso a esta área."
+msgstr ""
+
+#, python-format
+msgid "(até %(period_end)s)"
+msgstr ""
+
+msgid "Excluir este pagamento? "
+msgstr ""
+
+msgid "Excluir"
+msgstr ""
+
+msgid "Nenhum pagamento registrado."
+msgstr ""
+
+#, python-format
+msgid "Escolha os dias da semana e o horário: o fim é calculado pelas aulas que faltam marcar (%(to_schedule)s)."
+msgstr ""
+
+msgid "Nenhuma data disponível com essas escolhas."
+msgstr ""
+
+#, python-format
+msgid "<strong>%(count)s</strong> aula · a última é <strong>%(last)s</strong>"
+msgid_plural "<strong>%(count)s</strong> aulas · a última é <strong>%(last)s</strong>"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "já tem aula"
+msgstr ""
+
+msgid "sem aula"
+msgstr ""
+
+msgid "Feriado: sem aula (marque para dar aula mesmo assim)"
+msgstr ""
+
+msgid "Depois da validade do pacote"
+msgstr ""
+
+msgid "depois da validade"
+msgstr ""
+
+#, python-format
+msgid "sobrepõe %(overlap)s"
+msgstr ""
+
+msgid "Os feriados já ficam de fora. Desmarque outros dias sem aula (viagem, folga): a próxima data entra no lugar."
+msgstr ""
+
+#, python-format
+msgid "Só deu para marcar %(count)s de %(wanted)s aulas com essas escolhas."
+msgstr ""
+
+#, python-format
+msgid "%(beyond)s aula depois de %(deadline)s, fim da validade do pacote. Prorrogue o pacote ou mude as datas."
+msgid_plural "%(beyond)s aulas depois de %(deadline)s, fim da validade do pacote. Prorrogue o pacote ou mude as datas."
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "Excluir %(person_name)s - %(brand_name)s"
+msgstr ""
+
+#, python-format
+msgid "Excluir %(person_name)s"
+msgstr ""
+
+msgid "<strong>Esta ação não pode ser desfeita.</strong> O acesso do aluno e todos os dados abaixo serão apagados definitivamente, inclusive os arquivos de fotos."
+msgstr ""
+
+#, python-format
+msgid "%(routines)s treino atribuído"
+msgid_plural "%(routines)s treinos atribuídos"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%(sessions)s sessão de treino registrada"
+msgid_plural "%(sessions)s sessões de treino registradas"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%(assessments)s avaliação"
+msgid_plural "%(assessments)s avaliações"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%(photos)s foto de evolução"
+msgid_plural "%(photos)s fotos de evolução"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%(notes)s anotação da personal"
+msgid_plural "%(notes)s anotações da personal"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Só quer que ele pare de acessar o app, mantendo o histórico? Em vez de excluir,"
+msgstr ""
+
+msgid "desative o aluno"
+msgstr ""
+
+msgid "Excluir definitivamente"
+msgstr ""
+
+#, python-format
+msgid "%(person_name)s - %(brand_name)s"
+msgstr ""
+
+msgid "Ainda não aceitou os termos de uso e de dados de saúde"
+msgstr ""
+
+msgid "Sem consentimento"
+msgstr ""
+
+msgid "O aluno pediu a exclusão dos próprios dados"
+msgstr ""
+
+msgid "Pediu exclusão"
+msgstr ""
+
+msgid "O aluno ainda não criou a senha"
+msgstr ""
+
+msgid "Convite pendente"
+msgstr ""
+
+msgid "Redefinir senha"
+msgstr ""
+
+msgid "Convite"
+msgstr ""
+
+msgid "Excluir aluno e todos os dados"
+msgstr ""
+
+msgid "Mais ações"
+msgstr ""
+
+msgid "Excluir aluno"
+msgstr ""
+
+msgid "Sessões Completadas"
+msgstr ""
+
+msgid "Sessões"
+msgstr ""
+
+msgid "Treinos (30 dias)"
+msgstr ""
+
+msgid "30 dias"
+msgstr ""
+
+#, python-format
+msgid "%(avg_duration)s<small class=\"fs-6\">min</small>"
+msgstr ""
+
+msgid "Última Sessão"
+msgstr ""
+
+msgid "Última"
+msgstr ""
+
+#, python-format
+msgid "<strong>Atenção — saúde/restrições:</strong> %(health_notes)s"
+msgstr ""
+
+#, python-format
+msgid "Pacote vencido em %(plan_expires_on)s: prorrogue ou venda um novo."
+msgstr ""
+
+#, python-format
+msgid "O pacote vence em %(days_to_plan_expiry)s dia (%(plan_expires_on)s)."
+msgid_plural "O pacote vence em %(days_to_plan_expiry)s dias (%(plan_expires_on)s)."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Ficha"
+msgstr ""
+
+msgid "Anotações"
+msgstr ""
+
+msgid "Treinos Ativos"
+msgstr ""
+
+#, python-format
+msgid "Iniciado em: %(routine_date)s"
+msgstr ""
+
+#, python-format
+msgid "• Até: %(end_date)s"
+msgstr ""
+
+msgid "Ver template"
+msgstr ""
+
+msgid "Progresso"
+msgstr ""
+
+#, python-format
+msgid "%(exercise_count)s exercício"
+msgid_plural "%(exercise_count)s exercícios"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%(sessions_count)s sessões completas"
+msgid_plural "%(sessions_count)s sessões completas"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Nenhum treino ativo."
+msgstr ""
+
+msgid "Clique aqui para adicionar um treino."
+msgstr ""
+
+msgid "Treinos Anteriores"
+msgstr ""
+
+msgid "Ver Histórico Completo"
+msgstr ""
+
+msgid "Nenhum treino anterior registrado."
+msgstr ""
+
+msgid "Confirmar Remoção"
+msgstr ""
+
+#, python-format
+msgid "Tem certeza que deseja remover o treino <strong>\"%(routine_name)s\"</strong> do aluno <strong>%(person_name)s</strong>?"
+msgstr ""
+
+msgid "O treino será movido para o histórico de treinos anteriores e não será mais exibido como ativo."
+msgstr ""
+
+msgid "Sim, Remover"
+msgstr ""
+
+msgid "Ocultar"
+msgstr ""
+
+msgid "Possível cadastro duplicado"
+msgstr ""
+
+msgid "Escolher Foto"
+msgstr ""
+
+msgid "JPG, PNG, GIF, WEBP | Máx: 5MB | 100x100 até 2000x2000px"
+msgstr ""
+
+msgid "Informações Pessoais"
+msgstr ""
+
+msgid "Nome Completo *"
+msgstr ""
+
+msgid "E-mail *"
+msgstr ""
+
+msgid "Usado no login. Você recebe um link de acesso para enviar ao aluno"
+msgstr ""
+
+msgid "Rua, número, complemento"
+msgstr ""
+
+msgid "Nome da cidade"
+msgstr ""
+
+msgid "UF"
+msgstr ""
+
+msgid "Ficha da personal"
+msgstr ""
+
+msgid "Aparece em destaque na ficha do aluno. O aluno não vê."
+msgstr ""
+
+msgid "O pacote e os valores combinados ficam em"
+msgstr ""
+
+msgid "O pacote e os valores combinados são definidos depois de cadastrar, na ficha do aluno (<strong>Vender pacote</strong>)."
+msgstr ""
+
+msgid "Anotações internas"
+msgstr ""
+
+msgid "Anotações internas <small class=\"text-muted fw-normal\">(o aluno não vê)</small>"
+msgstr ""
+
+msgid "Combinados, preferências, observações da personal..."
+msgstr ""
+
+msgid "Situação inicial"
+msgstr ""
+
+msgid "Para pausar ou encerrar depois, use \\"
+msgstr ""
+
+#, python-format
+msgid "Situação: <strong>%(get_status_display)s</strong> —"
+msgstr ""
+
+msgid "alterar situação"
+msgstr ""
+
+msgid "Salvar Aluno"
+msgstr ""
+
+#, python-format
+msgid "<small class=\"text-muted d-block\">ID do Aluno</small> <strong>#%(pk)s</strong>"
+msgstr ""
+
+#, python-format
+msgid "<small class=\"text-muted d-block\">Cadastrado em</small> <strong>%(created_at)s</strong>"
+msgstr ""
+
+msgid "Conta de usuário"
+msgstr ""
+
+msgid "Criada"
+msgstr ""
+
+msgid "Pendente"
+msgstr ""
+
+msgid "Ao salvar, será criada a conta do aluno e você recebe um link de uso único (copiar ou WhatsApp) para ele criar a senha."
+msgstr ""
+
+msgid "Use uma foto clara e recente do aluno"
+msgstr ""
+
+msgid "O e-mail será usado para login do aluno"
+msgstr ""
+
+msgid "Anote restrições médicas em &quot;Saúde, lesões e restrições&quot;"
+msgstr ""
+
+msgid "Mantenha os dados atualizados para melhor acompanhamento"
+msgstr ""
+
+#, python-format
+msgid "Histórico e Progresso de %(person_name)s - %(brand_name)s"
+msgstr ""
+
+msgid "Histórico e Progresso"
+msgstr ""
+
+msgid "Treinos no Último Mês"
+msgstr ""
+
+msgid "Média Semanal (3m)"
+msgstr ""
+
+msgid "Total de treinos"
+msgstr ""
+
+#, python-format
+msgid "%(active_routines)s Ativos"
+msgstr ""
+
+msgid "Nenhuma sessão concluída ainda"
+msgstr ""
+
+msgid "Treinos Mais Realizados"
+msgstr ""
+
+msgid "Evolução dos Treinos"
+msgstr ""
+
+msgid "Detalhes"
+msgstr ""
+
+#, python-format
+msgid "%(person_name)s ainda não concluiu nenhum treino."
+msgstr ""
+
+#, python-format
+msgid "Link de acesso - %(person_name)s - %(brand_name)s"
+msgstr ""
+
+#, python-format
+msgid "Link de acesso de %(person_name)s"
+msgstr ""
+
+msgid "Este aluno já criou uma senha. O link abaixo serve para <strong>redefinir o acesso</strong> (por exemplo, se ele esqueceu a senha e o e-mail de recuperação não chegou). Ao ser usado, ele define uma nova senha."
+msgstr ""
+
+msgid "O aluno ainda <strong>não criou a senha</strong>. Envie o link abaixo."
+msgstr ""
+
+msgid "Link de acesso (uso único, válido por 7 dias)"
+msgstr ""
+
+msgid "Enviar pelo WhatsApp"
+msgstr ""
+
+msgid "Sem telefone cadastrado: o WhatsApp vai pedir para você escolher o contato."
+msgstr ""
+
+msgid "Quem tiver este link consegue entrar como o aluno até ele ser usado, então envie só para o próprio aluno. Depois de usado o link deixa de funcionar. Enviou para a pessoa errada? Revogue: o link atual para de funcionar e um novo é gerado."
+msgstr ""
+
+msgid "Revogar o link atual? Quem tiver o link antigo não conseguirá mais usá-lo."
+msgstr ""
+
+msgid "Revogar e gerar novo link"
+msgstr ""
+
+msgid "Novo Aluno"
+msgstr ""
+
+msgid "Nome, e-mail, telefone ou #ID..."
+msgstr ""
+
+msgid "Pesquisar alunos"
+msgstr ""
+
+msgid "Filtros"
+msgstr ""
+
+msgid "Todas"
+msgstr ""
+
+msgid "Limpar"
+msgstr ""
+
+msgid "Aplicar"
+msgstr ""
+
+msgid "Pesquisar"
+msgstr ""
+
+msgid "Limpar filtros"
+msgstr ""
+
+#, python-format
+msgid "%(count)s aluno encontrado"
+msgid_plural "%(count)s alunos encontrados"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "pacote vencido"
+msgstr ""
+
+#, python-format
+msgid "vence em %(days_to_plan_expiry)sd"
+msgstr ""
+
+#, python-format
+msgid "%(total_workouts)s treino · último há %(last_workout_at)s"
+msgid_plural "%(total_workouts)s treinos · último há %(last_workout_at)s"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Nenhum treino ainda"
+msgstr ""
+
+msgid "Nenhum aluno encontrado."
+msgstr ""
+
+#, python-format
+msgid "ID: #%(id)s"
+msgstr ""
+
+#, python-format
+msgid "pacote vence em %(days_to_plan_expiry)sd"
+msgstr ""
+
+#, python-format
+msgid "%(age)s anos"
+msgstr ""
+
+msgid "Último treino"
+msgstr ""
+
+msgid "Nenhum treino"
+msgstr ""
+
+msgid "ID"
+msgstr ""
+
+msgid "Idade"
+msgstr ""
+
+msgid "Último Treino"
+msgstr ""
+
+#, python-format
+msgid "%(last_workout_at)s atrás"
+msgstr ""
+
+msgid "Nenhum"
+msgstr ""
+
+msgid "Paginação"
+msgstr ""
+
+msgid "&laquo; Anterior"
+msgstr ""
+
+#, python-format
+msgid "Página %(number)s de %(num_pages)s"
+msgstr ""
+
+msgid "Próxima &raquo;"
+msgstr ""
+
+#, python-format
+msgid "Cancelar pacote - %(person_name)s - %(brand_name)s"
+msgstr ""
+
+msgid "Cálculo da devolução"
+msgstr ""
+
+msgid "Pago por este pacote"
+msgstr ""
+
+#, python-format
+msgid "Aulas dadas: %(used)s de %(sessions)s"
+msgstr ""
+
+msgid "Este pacote não tem valor combinado: as aulas dadas não foram valorizadas."
+msgstr ""
+
+#, python-format
+msgid "Restavam %(left)s aula. O valor é uma sugestão: ajuste abaixo se o combinado for outro."
+msgid_plural "Restavam %(left)s aulas. O valor é uma sugestão: ajuste abaixo se o combinado for outro."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Recalcular"
+msgstr ""
+
+msgid "0 = cancelar sem devolver."
+msgstr ""
+
+msgid "As aulas já dadas continuam no histórico, sem pacote. O pagamento original não é apagado: a devolução fica registrada como um lançamento à parte (e dá para anular se foi engano)."
+msgstr ""
+
+msgid "Cancelar este pacote?"
+msgstr ""
+
+#, python-format
+msgid "Editar pacote - %(person_name)s - %(brand_name)s"
+msgstr ""
+
+#, python-format
+msgid "%(used)s de %(sessions)s aulas já foram dadas: o pacote não pode ficar com menos que isso."
+msgstr ""
+
+#, python-format
+msgid "Pago até agora: <strong>%(paid)s</strong>."
+msgstr ""
+
+msgid "Mudar o número de aulas ou o valor refaz o saldo e o que falta pagar; nada é apagado."
+msgstr ""
+
+msgid "O prazo conta a partir da primeira aula; prorrogações e dias congelados já somados continuam valendo."
+msgstr ""
+
+msgid "Valor combinado (sigiloso)"
+msgstr ""
+
+msgid "Os pagamentos já registrados não mudam. Para devolver dinheiro, use <em>Cancelar com devolução</em> ou <em>Devolver ou estornar</em>."
+msgstr ""
+
+#, python-format
+msgid "Vender pacote - %(person_name)s - %(brand_name)s"
+msgstr ""
+
+#, python-format
+msgid "%(person_name)s ainda tem o pacote <strong>%(name)s</strong> (%(left)s aula sobrando). O novo pacote só é usado depois que as aulas do atual acabarem."
+msgid_plural "%(person_name)s ainda tem o pacote <strong>%(name)s</strong> (%(left)s aulas sobrando). O novo pacote só é usado depois que as aulas do atual acabarem."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Escolha o pacote"
+msgstr ""
+
+msgid "Os pacotes vêm do"
+msgstr ""
+
+msgid "catálogo"
+msgstr ""
+
+msgid ". O prazo começa a contar na <strong>primeira aula</strong>."
+msgstr ""
+
+#, python-format
+msgid "%(valid_days)s dias"
+msgstr ""
+
+msgid "Nenhum pacote ativo no catálogo."
+msgstr ""
+
+msgid "primeiro."
+msgstr ""
+
+msgid "Valor combinado com este aluno"
+msgstr ""
+
+msgid "Vem preenchido pelo pacote; mude se o combinado for diferente. Digite o valor por aula ou o total: o outro é calculado."
+msgstr ""
+
+msgid "ajustado"
+msgstr ""
+
+msgid "difere do valor do pacote no catálogo"
+msgstr ""
+
+msgid "Os valores são sigilosos: só você os vê. O pagamento é registrado na primeira aula."
+msgstr ""
+
+#, python-format
+msgid "%(person_name)s vinha em <strong>%(label)s</strong>. Depois de vender, a agenda abre com esse horário já preenchido, a partir do dia seguinte à última aula marcada: você confere as datas (e desmarca feriados) e confirma."
+msgstr ""
+
+#, python-format
+msgid "Situação - %(person_name)s - %(brand_name)s"
+msgstr ""
+
+#, python-format
+msgid "Situação de %(person_name)s"
+msgstr ""
+
+#, python-format
+msgid "Situação atual: <strong>%(get_status_display)s</strong>"
+msgstr ""
+
+msgid "Obrigatório ao pausar ou encerrar. Fica no histórico do aluno."
+msgstr ""
+
+msgid "<strong>Experimental</strong> e <strong>Ativo</strong>: o aluno acessa o app."
+msgstr ""
+
+msgid "<strong>Pausado</strong> e <strong>Ex-aluno</strong>: o acesso é bloqueado, mas o histórico e as fotos ficam guardados. Para voltar, é só reativar aqui."
+msgstr ""
+
+msgid "Quer apagar tudo? Use <em>Excluir</em> na ficha do aluno."
+msgstr ""
+
+#, python-format
+msgid "Treino - %(routine_name)s"
+msgstr ""
+
+msgid "Salvo"
+msgstr ""
+
+msgid "Pausar"
+msgstr ""
+
+msgid "Preferências do treino"
+msgstr ""
+
+msgid "Som no fim do descanso"
+msgstr ""
+
+msgid "Vibração"
+msgstr ""
+
+msgid "Todos os exercícios concluídos"
+msgstr ""
+
+#, python-format
+msgid "Exercício <strong id=\"progressCurrent\">%(exercises_done)s</strong> de %(exercise_total)s"
+msgstr ""
+
+#, python-format
+msgid "/%(sets_total)s séries"
+msgstr ""
+
+msgid "Séries feitas"
+msgstr ""
+
+msgid "Concluídos"
+msgstr ""
+
+#, python-format
+msgid "· descanso %(rest_seconds)ss"
+msgstr ""
+
+msgid "Feito"
+msgstr ""
+
+#, python-format
+msgid "Última vez: <strong>%(previous_weight)s kg</strong>"
+msgstr ""
+
+#, python-format
+msgid "Recorde: <strong>%(record)s kg</strong>"
+msgstr ""
+
+msgid "Ver execução"
+msgstr ""
+
+msgid "kg"
+msgstr ""
+
+msgid "Novo recorde de carga"
+msgstr ""
+
+msgid "Observação sobre este exercício (dor, ajuste, sensação...)"
+msgstr ""
+
+msgid "Este treino ainda não tem exercícios. Fale com a sua personal trainer."
+msgstr ""
+
+msgid "Como foi o treino?"
+msgstr ""
+
+msgid "Cansaço, dores, o que mudou... (a personal vai ler)"
+msgstr ""
+
+msgid "Finalizar Treino"
+msgstr ""
+
+msgid "Descartar este treino? Nada do que foi feito nele será guardado."
+msgstr ""
+
+msgid "Descartar treino"
+msgstr ""
+
+msgid "Descanso <strong id=\"restTime\" class=\"font-monospace fs-5\">00:00</strong>"
+msgstr ""
+
+#, python-format
+msgid "Treino concluído - %(brand_name)s"
+msgstr ""
+
+msgid "Treino concluído!"
+msgstr ""
+
+#, python-format
+msgid "%(duration_minutes)s<small class=\"fs-6\"> min</small>"
+msgstr ""
+
+msgid "duração"
+msgstr ""
+
+msgid "séries feitas"
+msgstr ""
+
+#, python-format
+msgid "%(volume)s<small class=\"fs-6\"> kg</small>"
+msgstr ""
+
+msgid "volume levantado"
+msgstr ""
+
+msgid "exercícios concluídos"
+msgstr ""
+
+msgid "🏆 Novos recordes de carga"
+msgstr ""
+
+#, python-format
+msgid "<strong>Comparado com o último treino</strong> <small class=\"text-muted\">(%(date)s)</small>"
+msgstr ""
+
+msgid "Volume levantado"
+msgstr ""
+
+msgid "sem base de comparação"
+msgstr ""
+
+msgid "igual"
+msgstr ""
+
+#, python-format
+msgid "%(duration_minutes)s min <small>(antes: %(last_duration)s min)</small>"
+msgstr ""
+
+msgid "Seu comentário"
+msgstr ""
+
+msgid "Voltar ao início"
+msgstr ""
+
+msgid "Ver histórico"
+msgstr ""
+
+msgid "Instale o app no seu celular"
+msgstr ""
+
+msgid "Abre direto da tela inicial, em tela cheia, e continua funcionando com sinal fraco."
+msgstr ""
+
+msgid "No iPhone: toque em"
+msgstr ""
+
+msgid "<strong>Compartilhar</strong> e depois em <strong>Adicionar à Tela de Início</strong>."
+msgstr ""
+
+msgid "Instalar"
+msgstr ""
+
+msgid "Agora não"
+msgstr ""
+
+msgid "Idioma"
+msgstr ""
+
+msgid "A mesma entrada serve para a personal e para os alunos."
+msgstr ""
+
+msgid "seu@email.com"
+msgstr ""
+
+msgid "Senha"
+msgstr ""
+
+msgid "Lembrar de mim"
+msgstr ""
+
+msgid "Esqueceu a senha?"
+msgstr ""
+
+msgid "Primeiro acesso? Use o <strong>link de convite</strong> que a sua personal enviou. Se o e-mail de recuperação não chegar, peça um novo link de acesso a ela."
+msgstr ""
+
+msgid "Buscar (atalho: barra /)"
+msgstr ""
+
+msgid "Buscar ( / )"
+msgstr ""
+
+msgid "Recentes"
+msgstr ""
+
+msgid "limpar"
+msgstr ""
+
+msgid "<kbd>↑</kbd> <kbd>↓</kbd> escolher · <kbd>Enter</kbd> abrir · <kbd>Esc</kbd> fechar"
+msgstr ""
+
+#, python-format
+msgid "Continuar com %(name)s"
+msgstr ""
+
+msgid "ou com e-mail"
+msgstr ""
+
+msgid "Menu principal"
+msgstr ""
+
+msgid "Iniciar o treino de hoje"
+msgstr ""
+
+msgid "Continuar o treino em andamento"
+msgstr ""
+
+#, python-format
+msgid ", %(badge)s pendente"
+msgid_plural ", %(badge)s pendentes"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Mais"
+msgstr ""
+
+msgid "Criar"
+msgstr ""
+
+msgid "Tema"
+msgstr ""
+
+msgid "claro"
+msgstr ""
+
+msgid "Claro"
+msgstr ""
+
+msgid "escuro"
+msgstr ""
+
+msgid "Escuro"
+msgstr ""
+
+msgid "automático"
+msgstr ""
+
+msgid "Automático"
+msgstr ""
+
+msgid "Sem conexão - Muscle Track"
+msgstr ""
+
+msgid "Sem conexão"
+msgstr ""
+
+msgid "Não foi possível carregar esta página. Se você estava treinando, o que já foi marcado será enviado quando a internet voltar."
+msgstr ""
+
+msgid "Tentar de novo"
+msgstr ""

@@ -5,6 +5,7 @@ Results carry only what is needed to recognise and open the item. Confidential o
 from django.db.models import F, Q, Value
 from django.db.models.functions import Replace
 from django.urls import reverse
+from django.utils.translation import gettext as _
 from urllib.parse import urlencode
 
 from .models import Exercise, Person, Routine
@@ -66,7 +67,7 @@ def search_all(query, limit=8):
     groups = []
     rows = list(students[:limit])
     groups.append({
-        'key': 'students', 'label': 'Alunos', 'icon': 'bi-people', 'total': students.count() if len(rows) == limit else len(rows),
+        'key': 'students', 'label': _('Alunos'), 'icon': 'bi-people', 'total': students.count() if len(rows) == limit else len(rows),
         'more_url': reverse('core:student_list') + more,
         'items': [{
             'title': s.person_name,
@@ -77,7 +78,7 @@ def search_all(query, limit=8):
     })
     rows = list(exercises[:limit])
     groups.append({
-        'key': 'exercises', 'label': 'Exercícios', 'icon': 'bi-activity', 'total': exercises.count() if len(rows) == limit else len(rows),
+        'key': 'exercises', 'label': _('Exercícios'), 'icon': 'bi-activity', 'total': exercises.count() if len(rows) == limit else len(rows),
         'more_url': reverse('core:exercise_list') + more,
         'items': [{
             'title': e.exercise_name, 'subtitle': e.muscle_group.name, 'badge': '',
@@ -86,11 +87,11 @@ def search_all(query, limit=8):
     })
     rows = list(routines[:limit])
     groups.append({
-        'key': 'routines', 'label': 'Treinos', 'icon': 'bi-calendar-check', 'total': routines.count() if len(rows) == limit else len(rows),
+        'key': 'routines', 'label': _('Treinos'), 'icon': 'bi-calendar-check', 'total': routines.count() if len(rows) == limit else len(rows),
         'more_url': reverse('core:routine_list') + more,
         'items': [{
             'title': r.routine_name, 'subtitle': r.get_difficulty_level_display(),
-            'badge': '' if r.is_active else 'Inativo',
+            'badge': '' if r.is_active else _('Inativo'),
             'url': reverse('core:routine_detail', kwargs={'pk': r.pk}),
         } for r in rows],
     })

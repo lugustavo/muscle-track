@@ -201,6 +201,8 @@
 
 {% block extra_js %}
 <script>
+const T_EXERCISES = "{% trans 'exercícios' as js_msg %}{{ js_msg|escapejs }}";
+const T_NO_EXERCISES = "{% trans 'Nenhum exercício adicionado' as js_msg %}{{ js_msg|escapejs }}";
 let allRoutines = [];
 let allExercises = [];
 let selectedExercises = [];
@@ -251,7 +253,7 @@ function displayRoutines(routines) {
                 </div>
                 <div class="text-end">
                     <span class="badge bg-secondary">${routine.difficulty_display}</span>
-                    <br><small class="text-muted">${routine.exercises_count} exercícios • ${routine.estimated_duration}min</small>
+                    <br><small class="text-muted">${routine.exercises_count} ${T_EXERCISES} • ${routine.estimated_duration}min</small>
                 </div>
             </div>
         `;
@@ -377,7 +379,7 @@ function updateExercisesList() {
     list.innerHTML = '';
 
     if (selectedExercises.length === 0) {
-        list.innerHTML = '<p class="text-muted text-center">Nenhum exercício adicionado</p>';
+        list.innerHTML = '<p class="text-muted text-center">' + T_NO_EXERCISES + '</p>';
         return;
     }
 

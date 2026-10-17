@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext
 
 from .agenda import at, on_week_cycle
 from .models import Appointment, ScheduleSlot
@@ -47,13 +48,14 @@ def end_date(starts_on, weekdays, interval_weeks, ends, ends_on=None, ends_after
 
 
 def describe(weekdays, start_time, interval_weeks, valid_until=None):
-    names = {value: label for value, label in ScheduleSlot.WEEKDAYS}
+    names = {value: str(label) for value, label in ScheduleSlot.WEEKDAYS}
     days = ', '.join(names[d][:3].lower() for d in sorted(weekdays))
-    text = f'{days} às {start_time:%H:%M}'
-    text += ', toda semana' if interval_weeks == 1 else f', a cada {interval_weeks} semanas'
+    parts = [gettext('%(days)s às %(time)s') % {'days': days, 'time': f'{start_time:%H:%M}'}]
+    parts.append(gettext('toda semana') if interval_weeks == 1
+                 else gettext('a cada %(n)d semanas') % {'n': interval_weeks})
     if valid_until:
-        text += f', até {valid_until:%d/%m/%Y}'
-    return text
+        parts.append(gettext('até %(date)s') % {'date': f'{valid_until:%d/%m/%Y}'})
+    return ', '.join(parts)
 
 
 @transaction.atomic
@@ -121,12 +123,12 @@ def edit_series(slot, weekday, start_time, duration_minutes, valid_until, from_d
     today = timezone.localdate(now)
     from_day = max(from_day, today)
     if valid_until and valid_until < from_day:
-        raise SeriesError('A data final não pode ser antes do início da mudança.')
+        raise SeriesError(gettext('A data final não pode ser antes do início da mudança.'))
     if slot.valid_until and slot.valid_until < from_day:
-        raise SeriesError('Este horário já terminou; crie um novo horário fixo.')
+        raise SeriesError(gettext('Este horário já terminou; crie um novo horário fixo.'))
     same_place = weekday == slot.weekday and start_time == slot.start_time
     if not same_place and ScheduleSlot.objects.filter(person=slot.person, weekday=weekday, start_time=start_time).exists():
-        raise SeriesError('Este aluno já tem um horário fixo nesse dia e horário (talvez encerrado: remova-o antes).')
+        raise SeriesError(gettext('Este aluno já tem um horário fixo nesse dia e horário (talvez encerrado: remova-o antes).'))
     old = list(_untouched(slot, from_day, now))
     removed = 0
     if same_place:
@@ -152,7 +154,7 @@ def edit_series(slot, weekday, start_time, duration_minutes, valid_until, from_d
             break
         first += timedelta(days=1)
     if valid_until and valid_until < first:
-        raise SeriesError('A data final fica antes da primeira aula no novo dia.')
+        raise SeriesError(gettext('A data final fica antes da primeira aula no novo dia.'))
     slot.valid_until = from_day - timedelta(days=1)
     slot.save(update_fields=['valid_until'])
     new = ScheduleSlot.objects.create(

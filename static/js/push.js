@@ -2,6 +2,9 @@
 (function () {
     'use strict';
 
+    // Django's JS catalog (/jsi18n/); identity fallback if it has not loaded
+    var gettext = window.gettext || function (s) { return s; };
+
     var card = document.querySelector('[data-push-card]');
     if (!card) { return; }
     var button = card.querySelector('[data-push-enable]');
@@ -15,7 +18,7 @@
 
     if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
         button.disabled = true;
-        say('Este navegador não aceita avisos no aparelho. No iPhone, adicione o app à tela de início primeiro.', true);
+        say(gettext('Este navegador não aceita avisos no aparelho. No iPhone, adicione o app à tela de início primeiro.'), true);
         return;
     }
 
@@ -29,9 +32,9 @@
 
     button.addEventListener('click', function () {
         button.disabled = true;
-        say('Ativando…');
+        say(gettext('Ativando…'));
         Notification.requestPermission().then(function (permission) {
-            if (permission !== 'granted') { throw new Error('Permissão negada. Libere as notificações nas configurações do navegador.'); }
+            if (permission !== 'granted') { throw new Error(gettext('Permissão negada. Libere as notificações nas configurações do navegador.')); }
             return navigator.serviceWorker.ready;
         }).then(function (registration) {
             return registration.pushManager.getSubscription().then(function (existing) {
@@ -47,13 +50,13 @@
             });
         }).then(function (response) {
             return response.json().then(function (data) {
-                if (!data.ok) { throw new Error(data.error || 'Não foi possível ativar.'); }
-                say('Pronto! Este aparelho vai receber os avisos.');
+                if (!data.ok) { throw new Error(data.error || gettext('Não foi possível ativar.')); }
+                say(gettext('Pronto! Este aparelho vai receber os avisos.'));
                 window.setTimeout(function () { window.location.reload(); }, 800);
             });
         }).catch(function (error) {
             button.disabled = false;
-            say(error.message || 'Não foi possível ativar.', true);
+            say(error.message || gettext('Não foi possível ativar.'), true);
         });
     });
 })();
