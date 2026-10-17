@@ -147,6 +147,13 @@ class FormatTests(SimpleTestCase):
         with translation.override('en'):
             self.assertEqual(money(Decimal('1234.5')), 'R$ 1,234.50')
 
+    def test_the_language_menu_names_each_language_in_itself(self):
+        for code in ('pt-br', 'en'):
+            page = self.client.get('/', HTTP_ACCEPT_LANGUAGE=code).content.decode()
+            self.assertIn('Português (Brasil)', page)
+            self.assertIn('English', page)
+            self.assertNotIn('Inglês', page)
+
     def test_short_date_follows_the_language(self):
         from datetime import date
         with translation.override('pt-br'):
