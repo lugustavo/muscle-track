@@ -235,6 +235,7 @@ TRAILS = {
     'assessment_edit': _assessment(None),
     'photo_upload': _photo_upload,
     'photo_link': _photo_link,
+    'photo_positions': lambda request, ctx: [_home(), _students(), (_('Posições das fotos'), None)],
     'person_routine_create': _person_routine_create,
     'person_routine_edit': _person_routine_edit,
     'person_routine_detail': _person_routine_detail,

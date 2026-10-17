@@ -6,11 +6,12 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext, gettext_lazy as _, ngettext
 from .i18n import short_date
+from . import photo_positions
 from .recurrence import MAX_INTERVAL, MAX_OCCURRENCES, MAX_SPAN_DAYS, end_date
 from .validators import normalize_phone, normalize_state, normalize_zip_code, validate_birth_date, digits_only
 from .models import (
     Appointment, Holiday, Payment, Package, Refund, ScheduleSlot, StudentPackage,
-    Assessment, Exercise, Person, PersonRoutine, ProgressPhoto, Routine, RoutineExercise, StudentNote,
+    Assessment, Exercise, Person, PersonRoutine, PhotoPosition, ProgressPhoto, Routine, RoutineExercise, StudentNote,
 )
 
 
@@ -302,7 +303,12 @@ class ProgressPhotoForm(forms.ModelForm):
         self.fields['assessment'].empty_label = gettext('Foto avulsa (sem avaliação)')
         self.fields['assessment'].label_from_instance = lambda a: gettext('Avaliação de %(date)s') % {'date': short_date(a.date)}
         self.fields['date'].required = False
-        self.fields['angle'].required = False
+        self.fields['angle'] = self._angle_field()
+
+    @staticmethod
+    def _angle_field():
+        return forms.ChoiceField(choices=photo_positions.choices(), required=False, label=_('Posição'),
+                                 widget=forms.Select(attrs={'class': 'form-select'}))
 
     def clean(self):
         data = super().clean()
@@ -337,17 +343,36 @@ class PhotoLinkForm(forms.Form):
         super().__init__(*args, **kwargs)
         assessments = list(student.assessments.prefetch_related('photos'))
         self.fields['assessment'].queryset = student.assessments.all()
+        self._names = photo_positions.labels()
         self.fields['assessment'].label_from_instance = self._label
-        self.fields['angle'].choices = [(a.value, a.label) for a in ProgressPhoto.SEQUENCE] + [('other', gettext('Outra'))]
+        self.fields['angle'].choices = photo_positions.choices()
         if assessments:   # the assessment closest to the day the photo was taken
             self.fields['assessment'].initial = min(assessments, key=lambda a: abs((a.date - photo.date).days)).pk
         self.fields['angle'].initial = photo.angle
 
-    @staticmethod
-    def _label(assessment):
-        taken = [p.get_angle_display() for p in assessment.photos.all() if p.angle != ProgressPhoto.Angle.OTHER]
+    def _label(self, assessment):
+        taken = [self._names.get(p.angle, p.angle) for p in assessment.photos.all() if p.angle != ProgressPhoto.Angle.OTHER]
         label = gettext('Avaliação de %(date)s') % {'date': short_date(assessment.date)}
         return label + (' ' + gettext('(já tem: %(angles)s)') % {'angles': ', '.join(taken)} if taken else '')
+
+
+class PhotoPositionForm(forms.ModelForm):
+    """The name of a position of the photo sequence."""
+
+    def clean_name(self):
+        name = ' '.join((self.cleaned_data.get('name') or '').split())
+        if name.casefold() in {'outra', 'other'}:
+            raise forms.ValidationError(gettext('"Outra" já existe: é para as fotos extras, sem posição.'))
+        taken = PhotoPosition.objects.filter(name__iexact=name).exclude(pk=self.instance.pk)
+        if taken.exists():
+            raise forms.ValidationError(gettext('Já existe uma posição com esse nome.'))
+        return name
+
+    class Meta:
+        model = PhotoPosition
+        fields = ['name']
+        widgets = {'name': forms.TextInput(attrs={'class': 'form-control', 'maxlength': 60,
+                                                  'placeholder': _('Ex.: Perfil 45°')})}
 
 
 class MyPhotoForm(forms.ModelForm):
@@ -358,8 +383,7 @@ class MyPhotoForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.person = person
         self.fields['date'].required = False
-        self.fields['angle'].required = False
-        self.fields['angle'].choices = [(a.value, a.label) for a in ProgressPhoto.SEQUENCE] + [('other', _('Outra'))]
+        self.fields['angle'] = ProgressPhotoForm._angle_field()
 
     def clean(self):
         data = super().clean()

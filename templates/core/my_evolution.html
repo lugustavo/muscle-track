@@ -45,7 +45,7 @@
                 {% for photo in a.other_photos %}
                 <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener" class="text-center text-decoration-none" style="width: 76px;">
                     <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="{% blocktrans trimmed with date=a.date|date:_('d/m/Y') %}Foto de {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
-                    <div class="small text-muted lh-sm">{{ photo.caption|default:photo.get_angle_display }}</div>
+                    <div class="small text-muted lh-sm">{{ photo.caption|default:photo.angle_label }}</div>
                 </a>
                 {% endfor %}
             </div>
@@ -65,7 +65,7 @@
         <div class="text-center" style="width: 76px;" data-loose-photo="{{ photo.pk }}">
             <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener" class="text-decoration-none">
                 <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="{% blocktrans trimmed with date=photo.date|date:_('d/m/Y') %}Foto de {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
-                <div class="small text-muted lh-sm">{{ photo.date|date:_('d/m/Y') }}{% if photo.angle != 'other' %}<br>{{ photo.get_angle_display }}{% endif %}</div>
+                <div class="small text-muted lh-sm">{{ photo.date|date:_('d/m/Y') }}{% if photo.angle != 'other' %}<br>{{ photo.angle_label }}{% endif %}</div>
             </a>
             {% if photo.uploaded_by_student %}
             <form method="post" action="{% nav_url 'core:my_photo_delete' photo.pk %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta foto?" %}{% endfilter %}');">

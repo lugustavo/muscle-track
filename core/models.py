@@ -9,6 +9,7 @@ from decimal import Decimal
 from django.core.files.base import ContentFile
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils import timezone
+from django.utils.text import slugify
 from django.utils.translation import gettext, gettext_lazy as _
 
 from PIL import Image, ImageOps
@@ -584,26 +585,66 @@ def progress_photo_path(instance, filename):
     return f'progress/{instance.person_id}/{uuid.uuid4().hex}{ext}'
 
 
+# The positions created by the migration, by the name they were saved with
+STANDARD_PHOTO_POSITIONS = {
+    'Frente': _('Frente'), 'Lado esquerdo': _('Lado esquerdo'), 'Lado direito': _('Lado direito'), 'Costas': _('Costas'),
+}
+
+
+class PhotoPosition(models.Model):
+    """A position the trainer wants in the photo sequence of every assessment (front, back, 45 degrees...).
+
+    `key` is what a photo stores in `angle`, so renaming a position never touches the photos; "other" (extra photos
+    with no position) always exists and is not one of these."""
+    RESERVED_KEY = 'other'
+
+    key = models.SlugField(max_length=30, unique=True, editable=False)
+    name = models.CharField(max_length=60, unique=True, verbose_name=_('Nome'))
+    order = models.PositiveSmallIntegerField(default=0, verbose_name=_('Ordem de Exibição'))
+    is_active = models.BooleanField(default=True, verbose_name=_('Ativo'))
+
+    class Meta:
+        verbose_name = _('Posição de foto')
+        verbose_name_plural = _('Posições de foto')
+        ordering = ['order', 'id']
+
+    @property
+    def label(self):
+        """The name to show: the standard positions follow the language; one the trainer renamed or created shows as typed."""
+        return str(STANDARD_PHOTO_POSITIONS.get(self.name, self.name))
+
+    def __str__(self):
+        return self.label
+
+    def save(self, *args, **kwargs):
+        if not self.key:
+            base = slugify(self.name)[:24] or 'posicao'
+            if base == self.RESERVED_KEY:
+                base = 'posicao'
+            key, n = base, 1
+            while PhotoPosition.objects.filter(key=key).exists():
+                n += 1
+                key = f'{base}-{n}'
+            self.key = key
+        if self.pk is None and not self.order:
+            self.order = (PhotoPosition.objects.aggregate(top=models.Max('order'))['top'] or 0) + 1
+        super().save(*args, **kwargs)
+
+
 class ProgressPhoto(models.Model):
     """Private progress photo of a student; only served to the trainer and the student.
 
-    A photo belongs to an assessment (one per position: front, left, right, back); photos without one are loose
-    (the ones sent before assessments held photos, or "other" positions)."""
+    A photo belongs to an assessment (one per position of the trainer's sequence: front, left, right, back...);
+    photos without one are loose (sent by the student, or from before assessments held photos). `angle` is the key of a
+    `PhotoPosition`, or "other" for an extra photo."""
 
     class Angle(models.TextChoices):
-        FRONT = 'front', _('Frente')
-        LEFT = 'left', _('Lado esquerdo')
-        RIGHT = 'right', _('Lado direito')
-        BACK = 'back', _('Costas')
         OTHER = 'other', _('Outra')
-
-    # The standard sequence shown in every assessment, in this order
-    SEQUENCE = (Angle.FRONT, Angle.LEFT, Angle.RIGHT, Angle.BACK)
 
     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='progress_photos', verbose_name=_('Aluno'))
     assessment = models.ForeignKey('Assessment', on_delete=models.SET_NULL, null=True, blank=True,
                                    related_name='photos', verbose_name=_('Avaliação'))
-    angle = models.CharField(max_length=10, choices=Angle.choices, default=Angle.OTHER, verbose_name=_('Posição'))
+    angle = models.CharField(max_length=30, default=Angle.OTHER, verbose_name=_('Posição'))
     date = models.DateField(default=timezone.localdate, verbose_name=_('Data'))
     image = models.ImageField(upload_to=progress_photo_path, validators=[validate_photo_image], verbose_name=_('Foto'))
     thumbnail = models.ImageField(upload_to=progress_photo_path, blank=True, editable=False, verbose_name=_('Miniatura'))
@@ -618,6 +659,15 @@ class ProgressPhoto(models.Model):
 
     def __str__(self):
         return f'{self.person.person_name} - {self.date:%d/%m/%Y}'
+
+    @property
+    def angle_label(self):
+        """The position's name. Views that list many photos set `angle_name` once (see `photo_positions.name_photos`)."""
+        name = getattr(self, 'angle_name', None)
+        if name is None:
+            from .photo_positions import labels
+            name = self.angle_name = labels().get(self.angle, self.angle)
+        return name
 
     THUMBNAIL_SIZE = (480, 480)
     MAX_SIZE = (2000, 2000)

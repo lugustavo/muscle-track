@@ -4,9 +4,8 @@ Shared by the trainer's file (Avaliações tab) and the student's own page, so b
 from django.utils import dateformat
 from django.utils.translation import gettext as _, gettext_lazy as _l
 
-from .models import ProgressPhoto
+from . import photo_positions
 
-SEQUENCE_VALUES = {angle.value for angle in ProgressPhoto.SEQUENCE}
 # (label, field) of the measures compared between two assessments
 MEASURES = (
     (_l('Peso'), 'weight_kg', 'kg'),
@@ -17,15 +16,18 @@ MEASURES = (
 )
 
 
-def assessments_with_photos(person):
-    """The person's assessments (newest first), each with `photo_slots` (one per standard position) and `other_photos`."""
+def assessments_with_photos(person, positions=None):
+    """The person's assessments (newest first), each with `photo_slots` (one per position of the sequence) and
+    `other_photos` (extras, and photos of a position that is no longer in use)."""
+    positions = photo_positions.active_positions() if positions is None else positions
+    names = photo_positions.labels()
+    in_use = {p.value for p in positions}
     assessments = list(person.assessments.prefetch_related('photos'))
     for a in assessments:
-        photos = list(a.photos.all())
+        photos = photo_positions.name_photos(list(a.photos.all()), names)
         by_angle = {p.angle: p for p in photos}
-        a.photo_slots = [{'angle': angle.value, 'label': angle.label, 'photo': by_angle.get(angle.value)}
-                         for angle in ProgressPhoto.SEQUENCE]
-        a.other_photos = [p for p in photos if p.angle not in SEQUENCE_VALUES]
+        a.photo_slots = [{'angle': p.value, 'label': p.label, 'photo': by_angle.get(p.value)} for p in positions]
+        a.other_photos = [p for p in photos if p.angle not in in_use]
         a.shown_measures = [(label, getattr(a, field), unit) for label, field, unit in MEASURES
                             if getattr(a, field) is not None]
     return assessments
@@ -61,9 +63,10 @@ class Entry:
         return f'{dateformat.format(self.date, _("d/m/Y"))} · {self.source}'
 
 
-def comparable_loose(photos):
-    """Of these photos with no assessment, the ones with a standard position (the ones a comparison can use)."""
-    return [p for p in photos if p.angle in SEQUENCE_VALUES]
+def comparable_loose(photos, positions=None):
+    """Of these photos with no assessment, the ones with a position of the sequence (the ones a comparison can use)."""
+    in_use = {p.value for p in (photo_positions.active_positions() if positions is None else positions)}
+    return [p for p in photos if p.angle in in_use]
 
 
 def entries_for(angle, assessments, loose=()):
@@ -73,9 +76,10 @@ def entries_for(angle, assessments, loose=()):
     return sorted(found, key=lambda e: (e.date, e.photo.created_at))
 
 
-def comparable_angles(assessments, loose=()):
-    """Positions with at least two photos (in assessments or loose), in the standard order (the ones worth comparing)."""
-    return [angle for angle in ProgressPhoto.SEQUENCE if len(entries_for(angle.value, assessments, loose)) >= 2]
+def comparable_angles(assessments, loose=(), positions=None):
+    """Positions with at least two photos (in assessments or loose), in the trainer's order (the ones worth comparing)."""
+    positions = photo_positions.active_positions() if positions is None else positions
+    return [p for p in positions if len(entries_for(p.value, assessments, loose)) >= 2]
 
 
 def compare(person, angle=None, before_id=None, after_id=None):
@@ -83,11 +87,12 @@ def compare(person, angle=None, before_id=None, after_id=None):
 
     A side is an assessment (`before_id` is its id) or a loose photo (`p` + the photo id). Defaults to the first
     comparable position, the oldest and the newest photo of it. The measure changes need two assessments."""
-    assessments = assessments_with_photos(person)
-    loose = comparable_loose(person.progress_photos.filter(assessment__isnull=True))
-    angles = comparable_angles(assessments, loose)
-    if angle not in SEQUENCE_VALUES:
-        angle = angles[0].value if angles else ProgressPhoto.Angle.FRONT.value
+    positions = photo_positions.active_positions()
+    assessments = assessments_with_photos(person, positions)
+    loose = comparable_loose(person.progress_photos.filter(assessment__isnull=True), positions)
+    angles = comparable_angles(assessments, loose, positions)
+    if angle not in {p.value for p in positions}:
+        angle = angles[0].value if angles else (positions[0].value if positions else photo_positions.OTHER)
     having = entries_for(angle, assessments, loose)
     by_key = {e.key: e for e in having}
     before = by_key.get(str(before_id)) or (having[0] if having else None)
