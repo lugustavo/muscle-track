@@ -125,7 +125,7 @@
                                 {% if item.completed_at %}
                                 <span class="me-3">
                                     <strong><i class="bi bi-clock-fill"></i> {% trans "Concluído em:" %}</strong>
-                                    {{ item.completed_at|date:"d/m/Y H:i" }}
+                                    {{ item.completed_at|date:_('d/m/Y H:i') }}
                                 </span>
                                 {% endif %}
                                 {% if item.weight_used %}

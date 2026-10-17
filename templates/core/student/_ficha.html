@@ -21,7 +21,7 @@
                     </div>
                     <div class="col-md-6"><strong>{% trans "Acesso ao app" %}</strong><br>
                         {% if not student.user.has_usable_password %}<span class="text-warning-emphasis"><i class="bi bi-hourglass-split"></i> {% trans "Aguardando convite" %}</span>
-                        {% elif student.user.last_login %}{% blocktrans trimmed with last_login=student.user.last_login|date:"d/m/Y H:i" %}Último acesso em {{ last_login }}{% endblocktrans %}
+                        {% elif student.user.last_login %}{% blocktrans trimmed with last_login=student.user.last_login|date:_('d/m/Y H:i') %}Último acesso em {{ last_login }}{% endblocktrans %}
                         {% else %}<span class="text-muted">{% trans "Senha criada, ainda sem acesso" %}</span>{% endif %}
                     </div>
                     <div class="col-md-6">

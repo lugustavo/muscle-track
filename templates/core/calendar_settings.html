@@ -52,11 +52,11 @@
         <div class="card-header"><strong>{% trans "Situação do link" %}</strong></div>
         <div class="card-body small">
             {% if feed.last_fetched_at %}
-                <i class="bi bi-check-circle text-success"></i> {% blocktrans trimmed with last_fetched_at=feed.last_fetched_at|date:"d/m/Y H:i" %}O Google ou outro app buscou este link pela última vez em <strong>{{ last_fetched_at }}</strong>.{% endblocktrans %}
+                <i class="bi bi-check-circle text-success"></i> {% blocktrans trimmed with last_fetched_at=feed.last_fetched_at|date:_('d/m/Y H:i') %}O Google ou outro app buscou este link pela última vez em <strong>{{ last_fetched_at }}</strong>.{% endblocktrans %}
             {% else %}
                 <i class="bi bi-clock text-muted"></i> {% trans "Ainda ninguém buscou este link. Depois de adicionar no Google Agenda, volte aqui para conferir." %}
             {% endif %}
-            {% if feed.rotated_at %}<div class="text-muted mt-1">{% blocktrans trimmed with rotated_at=feed.rotated_at|date:"d/m/Y H:i" %}Link gerado de novo em {{ rotated_at }}.{% endblocktrans %}</div>{% endif %}
+            {% if feed.rotated_at %}<div class="text-muted mt-1">{% blocktrans trimmed with rotated_at=feed.rotated_at|date:_('d/m/Y H:i') %}Link gerado de novo em {{ rotated_at }}.{% endblocktrans %}</div>{% endif %}
         </div>
     </div>
 

@@ -80,7 +80,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-1">{{ last_session.person_routine.routine_name }}</h6>
-                        <small class="text-muted">{{ last_session.start_time|date:"d/m/Y - H:i" }}</small>
+                        <small class="text-muted">{{ last_session.start_time|date:_('d/m/Y - H:i') }}</small>
                     </div>
                     <div class="text-end">
                         <span class="badge bg-info" style="font-size: 1rem;">{% blocktrans trimmed with duration_minutes=last_session.duration_minutes|default:"0" %}{{ duration_minutes }} min{% endblocktrans %}</span>

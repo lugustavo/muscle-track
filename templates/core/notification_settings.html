@@ -68,7 +68,7 @@
                 <label class="form-check-label" for="notify_plan_expiry">{% trans "Aviso quando o meu pacote estiver acabando ou vencendo" %}</label>
             </div>
             {% endif %}
-            <div class="small text-muted mb-3">{% trans "Vale para os dois canais acima: só chega o que estiver marcado aqui e em um canal ligado." %}</div>
+            <div class="small text-muted mb-3">{% trans "Vale para todos os canais: só chega o que estiver marcado aqui e em um canal ligado." %}</div>
 
             <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> {% trans "Salvar" %}</button>
         </div>
@@ -95,12 +95,36 @@
     </div>
     {% endif %}
 
-    {% if pref.email_enabled or pref.push_enabled %}
+    {% if telegram_ready or pref.telegram_enabled %}
+    <div class="card mb-3" data-telegram-card>
+        <div class="card-body">
+            <div class="fw-bold mb-1"><i class="bi bi-telegram"></i> {% trans "Avisos no Telegram" %}</div>
+            {% if pref.telegram_enabled %}
+            <div class="small text-muted mb-2">
+                {% blocktrans trimmed with telegram_at=pref.telegram_at|date:_('d/m/Y') %}Ligado em {{ telegram_at }}. Os mesmos avisos chegam na conversa com o bot; para parar, desligue aqui ou envie /stop no Telegram.{% endblocktrans %}
+            </div>
+            <form method="post">{% csrf_token %}<input type="hidden" name="telegram" value="unlink"><button class="btn btn-sm btn-outline-danger"><i class="bi bi-x-circle"></i> {% trans "Desligar o Telegram" %}</button></form>
+            {% elif telegram_link %}
+            <div class="small text-muted mb-2" data-telegram-pending>{% trans "Abra o Telegram pelo botão, toque em Iniciar (Start) e volte aqui. O código vale 15 minutos e só serve uma vez." %}</div>
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-primary" href="{{ telegram_link }}" target="_blank" rel="noopener" data-telegram-open><i class="bi bi-telegram"></i> {% trans "Abrir o Telegram" %}</a>
+                <a class="btn btn-outline-secondary" href="{% url 'core:notification_settings' %}"><i class="bi bi-arrow-clockwise"></i> {% trans "Já iniciei no Telegram" %}</a>
+            </div>
+            {% else %}
+            <div class="small text-muted mb-2">{% trans "Receba os mesmos avisos em uma conversa com o bot do Telegram. Você liga com um código de uso único; o app não guarda seu telefone, só o número da conversa." %}</div>
+            <form method="post">{% csrf_token %}<input type="hidden" name="telegram" value="link"><button class="btn btn-outline-primary"><i class="bi bi-telegram"></i> {% trans "Ligar o Telegram" %}</button></form>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if pref.email_enabled or pref.push_enabled or pref.telegram_enabled %}
     <div class="card mb-3">
         <div class="card-body d-flex flex-wrap gap-2 align-items-center">
             <strong class="me-2">{% trans "Enviar um teste:" %}</strong>
             {% if pref.email_enabled %}<form method="post" action="{% url 'core:notification_test' %}">{% csrf_token %}<input type="hidden" name="channel" value="email"><button class="btn btn-sm btn-outline-secondary"><i class="bi bi-envelope"></i> {% trans "E-mail" %}</button></form>{% endif %}
             {% if pref.push_enabled %}<form method="post" action="{% url 'core:notification_test' %}">{% csrf_token %}<input type="hidden" name="channel" value="push"><button class="btn btn-sm btn-outline-secondary"><i class="bi bi-phone-vibrate"></i> {% trans "Aparelho" %}</button></form>{% endif %}
+            {% if pref.telegram_enabled %}<form method="post" action="{% url 'core:notification_test' %}">{% csrf_token %}<input type="hidden" name="channel" value="telegram"><button class="btn btn-sm btn-outline-secondary"><i class="bi bi-telegram"></i> Telegram</button></form>{% endif %}
         </div>
     </div>
     {% endif %}
@@ -111,7 +135,7 @@
         <ul class="list-group list-group-flush small">
             {% for log in recent %}
             <li class="list-group-item d-flex justify-content-between">
-                <span>{{ log.created_at|date:"d/m H:i" }} · {% if log.channel == 'email' %}{% trans "e-mail" %}{% else %}{% trans "aparelho" %}{% endif %}</span>
+                <span>{{ log.created_at|date:_('d/m H:i') }} · {% if log.channel == 'email' %}{% trans "e-mail" %}{% elif log.channel == 'telegram' %}Telegram{% else %}{% trans "aparelho" %}{% endif %}</span>
                 <span class="{% if log.status == 'sent' %}text-success{% elif log.status == 'failed' %}text-danger{% else %}text-muted{% endif %}">{{ log.get_status_display }}</span>
             </li>
             {% endfor %}

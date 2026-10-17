@@ -13,7 +13,7 @@
 <div class="card mb-2">
     <div class="card-body py-2">
         <div class="d-flex justify-content-between">
-            <small class="text-muted">{{ note.created_at|date:"d/m/Y H:i" }}{% if note.author %} · {{ note.author.get_short_name|default:note.author.email }}{% endif %}</small>
+            <small class="text-muted">{{ note.created_at|date:_('d/m/Y H:i') }}{% if note.author %} · {{ note.author.get_short_name|default:note.author.email }}{% endif %}</small>
             <form method="post" action="{% nav_url 'core:note_delete' note.pk %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta anotação?" %}{% endfilter %}');">
                 {% csrf_token %}
                 <button class="btn btn-sm btn-link text-danger p-0" title="{% trans "Remover" %}"><i class="bi bi-trash"></i></button>

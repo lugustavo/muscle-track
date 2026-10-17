@@ -99,6 +99,7 @@ urlpatterns = [
     path('notifications/push/subscribe/', views.push_subscribe, name='push_subscribe'),
     path('notifications/push/<int:pk>/remove/', views.push_unsubscribe, name='push_unsubscribe'),
     path('notifications/test/', views.notification_test, name='notification_test'),
+    path('telegram/webhook/', views.telegram_webhook, name='telegram_webhook'),
     path('notifications/whatsapp/<str:kind>/save/', views.whatsapp_template_save, name='whatsapp_template_save'),
     path('notifications/whatsapp/<str:kind>/preview/', views.whatsapp_template_preview, name='whatsapp_template_preview'),
     path('my-agenda/', views.my_agenda, name='my_agenda'),

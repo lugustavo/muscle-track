@@ -180,7 +180,7 @@
                 <div class="list-group-item d-flex justify-content-between align-items-center">
                     <a href="{% nav_url 'core:student_detail' row.student.pk %}" class="text-decoration-none">{{ row.student.person_name }}</a>
                     <span class="d-flex align-items-center gap-2">
-                        <small class="text-muted">{{ row.appointment.starts_at|date:"d/m H:i" }}</small>
+                        <small class="text-muted">{{ row.appointment.starts_at|date:_('d/m H:i') }}</small>
                         <a href="{% url 'core:appointment_reschedule' row.appointment.pk %}" class="btn btn-sm btn-outline-secondary" title="{% trans "Remarcar" %}"><i class="bi bi-arrow-repeat"></i></a>
                         <a href="{{ row.whatsapp }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success" title="{% trans "Mensagem pelo WhatsApp" %}"><i class="bi bi-whatsapp"></i></a>
                     </span>
@@ -326,7 +326,7 @@
                 <a href="{% nav_url 'core:session_detail' c.session_pk %}" class="list-group-item list-group-item-action">
                     <div class="d-flex justify-content-between">
                         <strong>{{ c.student.person_name }}</strong>
-                        <small class="text-muted">{{ c.when|date:"d/m H:i" }}</small>
+                        <small class="text-muted">{{ c.when|date:_('d/m H:i') }}</small>
                     </div>
                     <div class="small text-muted">{{ c.routine }}{% if c.exercise %} · {{ c.exercise }}{% endif %}</div>
                     <div>{{ c.text|truncatechars:200 }}</div>

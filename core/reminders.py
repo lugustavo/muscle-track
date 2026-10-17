@@ -20,7 +20,7 @@ MIN_LEAD = timedelta(hours=1)
 def _wants(prefix, flag):
     """Filter on the person's account preferences: a channel on and the given per-type switch on."""
     base = 'user__notification_preference__' if prefix == 'person' else 'person__user__notification_preference__'
-    return Q(**{f'{base}{flag}': True}) & (Q(**{f'{base}email_enabled': True}) | Q(**{f'{base}push_enabled': True}))
+    return Q(**{f'{base}{flag}': True}) & (Q(**{f'{base}email_enabled': True}) | Q(**{f'{base}push_enabled': True}) | Q(**{f'{base}telegram_enabled': True}))
 
 
 def send_class_reminders(now):

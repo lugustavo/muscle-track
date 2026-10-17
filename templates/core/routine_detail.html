@@ -286,11 +286,11 @@
                     </div>
                     <div class="mb-3">
                         <strong class="text-muted">{% trans "Criado em:" %}</strong>
-                        <div class="mt-1 small">{{ routine.created_at|date:"d/m/Y H:i" }}</div>
+                        <div class="mt-1 small">{{ routine.created_at|date:_('d/m/Y H:i') }}</div>
                     </div>
                     <div class="mb-0">
                         <strong class="text-muted">{% trans "Atualizado em:" %}</strong>
-                        <div class="mt-1 small">{{ routine.updated_at|date:"d/m/Y H:i" }}</div>
+                        <div class="mt-1 small">{{ routine.updated_at|date:_('d/m/Y H:i') }}</div>
                     </div>
                 </div>
             </div>
