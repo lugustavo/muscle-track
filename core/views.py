@@ -27,10 +27,11 @@ from django.views.decorators.http import require_POST, require_safe
 from allauth.account.models import EmailAddress
 
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, trainer_dashboard
+from .i18n import short_date
 from .forms import (
     AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ClassRequestForm, ConsentForm, SaleForm, ExerciseForm, PaymentForm,
     CancelPackageForm, HolidayForm, MyPhotoForm, PackageEditForm, PersonForm, RefundForm, PersonRoutineForm, PackageForm, RepeatForm, ScheduleSlotForm, SlotEditForm, SlotFillForm,
-    ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
+    PhotoLinkForm, ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
 )
 from .agenda import (
     DEFAULT_VIEW as DEFAULT_AGENDA_VIEW, LIST_DAYS, VIEWS as AGENDA_VIEWS, add_months, at, attendance_stats,
@@ -2483,6 +2484,30 @@ def photo_upload(request, pk):
 
 
 @staff_required
+def photo_link(request, pk):
+    """Put a loose photo inside one of the student's assessments (in a position); it takes the assessment's date and,
+    as in the upload, replaces the photo that position already had."""
+    photo = get_object_or_404(ProgressPhoto.objects.select_related('person'), pk=pk)
+    student = photo.person
+    if photo.assessment_id:
+        messages.info(request, _('Essa foto já está em uma avaliação.'))
+        return redirect(_student_tab(request, student.pk, 'avaliacoes'))
+    if not student.assessments.exists():
+        messages.warning(request, _('Registre uma avaliação antes de ligar a foto a ela.'))
+        return redirect(_student_tab(request, student.pk, 'avaliacoes'))
+    form = PhotoLinkForm(request.POST or None, student=student, photo=photo)
+    if request.method == 'POST' and form.is_valid():
+        assessment, angle = form.cleaned_data['assessment'], form.cleaned_data['angle']
+        photo.assessment, photo.angle, photo.date = assessment, angle, assessment.date
+        photo.save()
+        if angle != ProgressPhoto.Angle.OTHER:
+            assessment.photos.filter(angle=angle).exclude(pk=photo.pk).delete()
+        messages.success(request, _('Foto ligada à avaliação de %(date)s.') % {'date': short_date(assessment.date)})
+        return redirect(_student_tab(request, student.pk, 'avaliacoes'))
+    return render(request, 'core/photo_link.html', {'form': form, 'photo': photo, 'student': student})
+
+
+@staff_required
 @require_POST
 def photo_delete(request, pk):
     photo = get_object_or_404(ProgressPhoto, pk=pk)
@@ -2874,7 +2899,7 @@ def _move_response(new):
     local = timezone.localtime(new.starts_at)
     return JsonResponse({
         'ok': True, 'id': new.pk, 'person': new.person.person_name,
-        'when': _('%(date)s às %(time)s') % {'date': f'{local:%d/%m}', 'time': f'{local:%H:%M}'}, 'date': local.date().isoformat(),
+        'when': _('%(date)s às %(time)s') % {'date': dateformat.format(local, _('d/m')), 'time': f'{local:%H:%M}'}, 'date': local.date().isoformat(),
         'overlap': overlap_names(new),
         'undo_url': reverse('core:appointment_move_undo', args=[new.pk]),
     })
@@ -3118,7 +3143,7 @@ def slot_fill(request, pk):
         else:
             n = result['created']
             text = ngettext('%(n)d aula marcada, até %(date)s.', '%(n)d aulas marcadas, até %(date)s.', n) % {
-                'n': n, 'date': f"{result['last']:%d/%m/%Y}"}
+                'n': n, 'date': short_date(result['last'])}
             if result['preview']['beyond']:
                 text += ' ' + _('Atenção: parte das aulas passa da validade do pacote; prorrogue-o se for preciso.')
             if result['preview']['overlaps']:
@@ -3144,7 +3169,7 @@ def slot_topup(request, pk):
             n = result['created']
             messages.success(request, ngettext('%(n)d aula a mais marcada, até %(date)s.',
                                                '%(n)d aulas a mais marcadas, até %(date)s.', n)
-                             % {'n': n, 'date': f"{result['last']:%d/%m/%Y}"})
+                             % {'n': n, 'date': short_date(result['last'])})
     return redirect(_student_tab(request, student.pk, 'agenda'))
 
 
@@ -3209,7 +3234,7 @@ def agenda_holiday_add(request):
     if form.is_valid():
         holiday = form.save()
         messages.success(request, _('%(name)s (%(date)s) entrou na lista: o app não marca aula nesse dia ao preencher a agenda.')
-                         % {'name': holiday.name, 'date': f'{holiday.date:%d/%m/%Y}'})
+                         % {'name': holiday.name, 'date': short_date(holiday.date)})
     else:
         messages.error(request, _('Feriado não salvo: %(errors)s') % {
             'errors': ' '.join(e for errs in form.errors.values() for e in errs)})

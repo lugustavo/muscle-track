@@ -132,7 +132,7 @@
         {% for cell in week %}
         <a href="{% url 'core:agenda' %}?vista=dia&dia={{ cell.date|date:'Y-m-d' }}" role="gridcell" data-agenda-day="{{ cell.date|date:'Y-m-d' }}"
            class="month-cell {% if not cell.in_month %}out{% endif %} {% if cell.is_today %}today{% endif %}"
-           aria-label="{{ cell.date|date:_('j \d\e F')|lower }}: {{ cell.live }} aula{{ cell.live|pluralize }}">
+           aria-label="{% blocktrans trimmed count n=cell.live with day=cell.date|date:_('j \d\e F')|lower %}{{ day }}: {{ n }} aula{% plural %}{{ day }}: {{ n }} aulas{% endblocktrans %}">
             <span class="num">{{ cell.date|date:"j" }}</span>
             {% if cell.live %}<span class="badge bg-primary month-count d-md-none">{{ cell.live }}</span>{% endif %}
             {% if cell.conflict %}<i class="bi bi-exclamation-triangle text-warning-emphasis small" title="{% trans "Aulas sobrepostas" %}"></i>{% endif %}

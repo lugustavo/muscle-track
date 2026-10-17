@@ -10,11 +10,17 @@ refreshed at every sign-in with the language that device is using."""
 from django.conf import settings
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
-from django.utils import translation
+from django.utils import dateformat, translation
+from django.utils.translation import gettext
 from django.utils.functional import lazy
 from django.views.i18n import set_language as django_set_language
 
 SUPPORTED = [code for code, _name in settings.LANGUAGES]
+
+
+def short_date(value):
+    """A date as the active language writes it: 16/10/2026 in Portuguese, 10/16/2026 in English."""
+    return dateformat.format(value, gettext('d/m/Y'))
 
 
 def clean(code):

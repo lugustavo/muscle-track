@@ -38,13 +38,13 @@
             <div class="d-flex flex-wrap gap-2 mt-3">
                 {% for slot in a.photo_slots %}{% if slot.photo %}
                 <a href="{% url 'core:photo_file' slot.photo.pk %}" target="_blank" rel="noopener" class="text-center text-decoration-none" style="width: 76px;">
-                    <img src="{% url 'core:photo_thumb' slot.photo.pk %}" loading="lazy" alt="{{ slot.label }} em {{ a.date|date:_('d/m/Y') }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
+                    <img src="{% url 'core:photo_thumb' slot.photo.pk %}" loading="lazy" alt="{% blocktrans trimmed with label=slot.label date=a.date|date:_('d/m/Y') %}{{ label }} em {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
                     <div class="small text-muted lh-sm">{{ slot.label }}</div>
                 </a>
                 {% endif %}{% endfor %}
                 {% for photo in a.other_photos %}
                 <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener" class="text-center text-decoration-none" style="width: 76px;">
-                    <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="Foto de {{ a.date|date:_('d/m/Y') }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
+                    <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="{% blocktrans trimmed with date=a.date|date:_('d/m/Y') %}Foto de {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
                     <div class="small text-muted lh-sm">{{ photo.caption|default:photo.get_angle_display }}</div>
                 </a>
                 {% endfor %}
@@ -64,7 +64,7 @@
         {% for photo in loose_photos %}
         <div class="text-center" style="width: 76px;" data-loose-photo="{{ photo.pk }}">
             <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener" class="text-decoration-none">
-                <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="Foto de {{ photo.date|date:_('d/m/Y') }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
+                <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="{% blocktrans trimmed with date=photo.date|date:_('d/m/Y') %}Foto de {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
                 <div class="small text-muted lh-sm">{{ photo.date|date:_('d/m/Y') }}{% if photo.angle != 'other' %}<br>{{ photo.get_angle_display }}{% endif %}</div>
             </a>
             {% if photo.uploaded_by_student %}

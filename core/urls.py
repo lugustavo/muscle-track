@@ -31,6 +31,7 @@ urlpatterns = [
     path('refunds/<int:pk>/void/', views.refund_void, name='refund_void'),
     path('finance/refunds/', views.finance_refunds, name='finance_refunds'),
     path('students/<int:pk>/photos/new/', views.photo_upload, name='photo_upload'),
+    path('photos/<int:pk>/link/', views.photo_link, name='photo_link'),
     path('photos/<int:pk>/delete/', views.photo_delete, name='photo_delete'),
     path('photos/<int:pk>/file/', views.photo_file, name='photo_file'),
     path('photos/<int:pk>/thumb/', views.photo_file, {'size': 'thumb'}, name='photo_thumb'),

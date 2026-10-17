@@ -122,6 +122,71 @@ class EvolutionTests(BaseTestCase):
         self.assertContains(self.client.get(reverse('core:my_evolution_compare')), 'duas fotos da mesma posição')
         self.assertTrue(other.pk)
 
+    def link_url(self, photo):
+        return reverse('core:photo_link', kwargs={'pk': photo.pk})
+
+    def test_trainer_links_a_loose_photo_to_an_assessment(self):
+        loose = self.loose(date(2026, 3, 1), 'back')
+        self.client.force_login(self.trainer)
+        page = self.client.get(self.link_url(loose))
+        self.assertContains(page, 'data-photo-link')
+        self.assertContains(page, 'selected')   # the nearest assessment is pre-selected
+        done = self.client.post(self.link_url(loose), {'assessment': self.second.pk, 'angle': 'front'})
+        self.assertRedirects(done, reverse('core:student_detail', kwargs={'pk': self.person.pk}) + '#tab-avaliacoes',
+                             fetch_redirect_response=False)
+        loose.refresh_from_db()
+        self.assertEqual((loose.assessment, loose.angle, loose.date), (self.second, 'front', self.second.date))
+        self.assertTrue(loose.uploaded_by_student)   # still marked as sent by the student
+
+    def test_linking_replaces_the_photo_of_that_position(self):
+        old = self.photo(self.first)
+        loose = self.loose(date(2026, 2, 2))
+        self.client.force_login(self.trainer)
+        self.client.post(self.link_url(loose), {'assessment': self.first.pk, 'angle': 'front'})
+        self.assertFalse(ProgressPhoto.objects.filter(pk=old.pk).exists())
+        self.assertEqual(self.first.photos.get(), loose)
+
+    def test_extra_position_keeps_the_other_photos(self):
+        kept = self.photo(self.first)
+        loose = self.loose(date(2026, 2, 2), 'other')
+        self.client.force_login(self.trainer)
+        self.client.post(self.link_url(loose), {'assessment': self.first.pk, 'angle': 'other'})
+        self.assertEqual(self.first.photos.count(), 2)
+        self.assertTrue(ProgressPhoto.objects.filter(pk=kept.pk).exists())
+
+    def test_cannot_link_to_another_students_assessment(self):
+        theirs = Assessment.objects.create(person=self.bob.person, date=date(2026, 5, 5))
+        loose = self.loose(date(2026, 3, 1))
+        self.client.force_login(self.trainer)
+        page = self.client.post(self.link_url(loose), {'assessment': theirs.pk, 'angle': 'front'})
+        self.assertEqual(page.status_code, 200)   # the form is shown again with an error
+        loose.refresh_from_db()
+        self.assertIsNone(loose.assessment)
+
+    def test_link_needs_an_assessment_and_a_loose_photo(self):
+        Assessment.objects.filter(person=self.person).delete()
+        loose = self.loose(date(2026, 3, 1))
+        self.client.force_login(self.trainer)
+        self.assertEqual(self.client.get(self.link_url(loose)).status_code, 302)
+        a = Assessment.objects.create(person=self.person, date=date(2026, 3, 2))
+        inside = self.photo(a)
+        self.assertEqual(self.client.get(self.link_url(inside)).status_code, 302)   # already inside an assessment
+
+    def test_only_the_trainer_can_link(self):
+        loose = self.loose(date(2026, 3, 1))
+        self.assertEqual(Client().get(self.link_url(loose)).status_code, 302)
+        self.client.force_login(self.alice)
+        self.assertEqual(self.client.get(self.link_url(loose)).status_code, 403)
+        self.assertEqual(self.client.post(self.link_url(loose), {'assessment': self.first.pk, 'angle': 'front'}).status_code, 403)
+
+    def test_the_loose_photo_card_offers_the_link_only_with_assessments(self):
+        self.loose(date(2026, 3, 1))
+        self.client.force_login(self.trainer)
+        detail = reverse('core:student_detail', kwargs={'pk': self.person.pk})
+        self.assertContains(self.client.get(detail), 'data-link-photo')
+        Assessment.objects.filter(person=self.person).delete()
+        self.assertNotContains(self.client.get(detail), 'data-link-photo')
+
     def test_trainer_compare_page(self):
         self.photo(self.first), self.photo(self.second)
         self.client.force_login(self.trainer)

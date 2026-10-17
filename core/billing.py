@@ -13,6 +13,7 @@ from django.utils.translation import get_language, gettext as _
 
 from . import packages
 from .history import log_event
+from .i18n import short_date
 from .models import Payment, StudentEvent
 
 CENTS = Decimal('0.01')
@@ -50,7 +51,7 @@ def register_payment(person, *, package, amount, paid_on, method, notes='', acto
 @transaction.atomic
 def delete_payment(payment, actor=None):
     person = payment.person
-    label = f'{payment.paid_on:%d/%m/%Y} ({payment.get_method_display()})'
+    label = f'{short_date(payment.paid_on)} ({payment.get_method_display()})'
     payment.delete()
     log_event(person, StudentEvent.Kind.PAYMENT, actor, _('Pagamento de %(label)s excluído') % {'label': label})
 

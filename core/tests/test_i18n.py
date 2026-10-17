@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.utils import translation
 
 from core.billing import money
-from core.i18n import clean, language_for, lazy_text, save_language
+from core.i18n import clean, language_for, lazy_text, save_language, short_date
 from core.models import NotificationPreference
 
 from .base import BaseTestCase
@@ -146,6 +146,13 @@ class FormatTests(SimpleTestCase):
             self.assertEqual(money(Decimal('1234.5')), 'R$ 1.234,50')
         with translation.override('en'):
             self.assertEqual(money(Decimal('1234.5')), 'R$ 1,234.50')
+
+    def test_short_date_follows_the_language(self):
+        from datetime import date
+        with translation.override('pt-br'):
+            self.assertEqual(short_date(date(2026, 10, 16)), '16/10/2026')
+        with translation.override('en'):
+            self.assertEqual(short_date(date(2026, 10, 16)), '10/16/2026')
 
     def test_month_names_follow_the_language(self):
         from datetime import date

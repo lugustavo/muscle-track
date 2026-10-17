@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext, gettext_lazy as _, ngettext
+from .i18n import short_date
 from .recurrence import MAX_INTERVAL, MAX_OCCURRENCES, MAX_SPAN_DAYS, end_date
 from .validators import normalize_phone, normalize_state, normalize_zip_code, validate_birth_date, digits_only
 from .models import (
@@ -299,7 +300,7 @@ class ProgressPhotoForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['assessment'].queryset = student.assessments.all() if student else Assessment.objects.none()
         self.fields['assessment'].empty_label = gettext('Foto avulsa (sem avaliação)')
-        self.fields['assessment'].label_from_instance = lambda a: gettext('Avaliação de %(date)s') % {'date': f'{a.date:%d/%m/%Y}'}
+        self.fields['assessment'].label_from_instance = lambda a: gettext('Avaliação de %(date)s') % {'date': short_date(a.date)}
         self.fields['date'].required = False
         self.fields['angle'].required = False
 
@@ -323,6 +324,30 @@ class ProgressPhotoForm(forms.ModelForm):
             'image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'caption': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Opcional')}),
         }
+
+
+class PhotoLinkForm(forms.Form):
+    """Put a loose photo inside an assessment, in one of its positions (the photo then takes the assessment's date)."""
+
+    assessment = forms.ModelChoiceField(queryset=Assessment.objects.none(), empty_label=None, label=_('Avaliação'),
+                                        widget=forms.Select(attrs={'class': 'form-select'}))
+    angle = forms.ChoiceField(label=_('Posição'), widget=forms.Select(attrs={'class': 'form-select'}))
+
+    def __init__(self, *args, student, photo, **kwargs):
+        super().__init__(*args, **kwargs)
+        assessments = list(student.assessments.prefetch_related('photos'))
+        self.fields['assessment'].queryset = student.assessments.all()
+        self.fields['assessment'].label_from_instance = self._label
+        self.fields['angle'].choices = [(a.value, a.label) for a in ProgressPhoto.SEQUENCE] + [('other', gettext('Outra'))]
+        if assessments:   # the assessment closest to the day the photo was taken
+            self.fields['assessment'].initial = min(assessments, key=lambda a: abs((a.date - photo.date).days)).pk
+        self.fields['angle'].initial = photo.angle
+
+    @staticmethod
+    def _label(assessment):
+        taken = [p.get_angle_display() for p in assessment.photos.all() if p.angle != ProgressPhoto.Angle.OTHER]
+        label = gettext('Avaliação de %(date)s') % {'date': short_date(assessment.date)}
+        return label + (' ' + gettext('(já tem: %(angles)s)') % {'angles': ', '.join(taken)} if taken else '')
 
 
 class MyPhotoForm(forms.ModelForm):
@@ -458,7 +483,7 @@ class PaymentForm(forms.ModelForm):
         field.queryset = StudentPackage.objects.filter(person=person, cancelled_at__isnull=True) if person else StudentPackage.objects.none()
         field.required = False
         field.empty_label = gettext('— sem pacote —')
-        field.label_from_instance = lambda obj: f'{obj.name} ({obj.sold_on:%d/%m/%Y})'
+        field.label_from_instance = lambda obj: f'{obj.name} ({short_date(obj.sold_on)})'
 
 
 class RecurrenceMixin(forms.Form):
@@ -530,7 +555,7 @@ class ScheduleSlotForm(RecurrenceMixin):
         if plan is not None:
             parts = ngettext('%(n)d aula a marcar', '%(n)d aulas a marcar', plan['to_schedule']) % {'n': plan['to_schedule']}
             if plan['ends_on']:
-                parts = gettext('até %(date)s ou %(classes)s') % {'date': f"{plan['ends_on']:%d/%m/%Y}", 'classes': parts}
+                parts = gettext('até %(date)s ou %(classes)s') % {'date': short_date(plan['ends_on']), 'classes': parts}
             label = gettext('Acompanhar o pacote (%(parts)s, o que vier primeiro)') % {'parts': parts}
             self.fields['ends'].choices = (('package', label),) + self.ENDS
             if not self.is_bound:
@@ -734,9 +759,9 @@ class RefundForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.person = person
         self.fields['payment'].queryset = person.payments.select_related('student_package')
-        self.fields['payment'].label_from_instance = lambda p: f'{p.paid_on:%d/%m/%Y} · {p.get_method_display()} · {p.amount}'
+        self.fields['payment'].label_from_instance = lambda p: f'{short_date(p.paid_on)} · {p.get_method_display()} · {p.amount}'
         self.fields['student_package'].queryset = person.packages.all()
-        self.fields['student_package'].label_from_instance = lambda p: f'{p.name} ({p.sold_on:%d/%m/%Y})'
+        self.fields['student_package'].label_from_instance = lambda p: f'{p.name} ({short_date(p.sold_on)})'
 
     def clean(self):
         cleaned = super().clean()

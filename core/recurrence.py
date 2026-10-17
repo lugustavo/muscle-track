@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.utils.translation import gettext
 
 from .agenda import at, on_week_cycle
+from .i18n import short_date
 from .models import Appointment, ScheduleSlot
 
 MAX_INTERVAL = 8
@@ -54,7 +55,7 @@ def describe(weekdays, start_time, interval_weeks, valid_until=None):
     parts.append(gettext('toda semana') if interval_weeks == 1
                  else gettext('a cada %(n)d semanas') % {'n': interval_weeks})
     if valid_until:
-        parts.append(gettext('até %(date)s') % {'date': f'{valid_until:%d/%m/%Y}'})
+        parts.append(gettext('até %(date)s') % {'date': short_date(valid_until)})
     return ', '.join(parts)
 
 
