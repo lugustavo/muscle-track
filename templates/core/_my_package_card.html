@@ -12,6 +12,15 @@
         <div class="d-flex justify-content-between small mt-3"><span>{% blocktrans trimmed with used=p.used sessions=p.sessions %}<strong>{{ used }}</strong> de {{ sessions }} aulas usadas{% endblocktrans %}</span><span class="text-muted">{% blocktrans trimmed with left=p.left %}{{ left }} sobrando{% endblocktrans %}</span></div>
         <div class="progress mt-1" style="height: 8px;" role="progressbar" aria-valuenow="{{ p.percent }}" aria-valuemin="0" aria-valuemax="100" aria-label="{% trans "Aulas usadas do pacote" %}"><div class="progress-bar bg-success" style="width: {{ p.percent }}%"></div></div>
 
+        {% if p.shared %}
+        <div class="small mt-2" data-package-people>
+            <i class="bi bi-people"></i> {% trans "Pacote dividido." %}
+            {% for q in p.people %}{% if q.is_me %}{% blocktrans trimmed with used=q.used %}Você usou {{ used }}.{% endblocktrans %}{% endif %}{% endfor %}
+            {% for q in p.people %}{% if not q.is_me %}<span class="badge bg-body-secondary text-body border">{% blocktrans trimmed with name=q.name count used=q.used %}{{ name }} · {{ used }} usada{% plural %}{{ name }} · {{ used }} usadas{% endblocktrans %}</span> {% endif %}{% endfor %}
+            <div class="text-muted">{% trans "O saldo é um só: quem marca primeiro usa primeiro." %}</div>
+        </div>
+        {% endif %}
+
         <div class="row row-cols-3 g-2 text-center mt-2">
             <div class="col"><div class="border rounded py-2"><div class="fs-4 fw-bold" data-sum="bought">{{ p.sessions }}</div><div class="small text-muted">{% trans "Compradas" %}</div></div></div>
             <div class="col"><div class="border rounded py-2"><div class="fs-4 fw-bold" data-sum="done">{{ p.done }}</div><div class="small text-muted">{% trans "Feitas" %}</div></div></div>

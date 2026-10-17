@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 15:01-0300\n"
+"POT-Creation-Date: 2026-10-17 17:27-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -525,6 +525,19 @@ msgid ""
 msgstr ""
 "A student with similar details already exists (see below). If it's a "
 "different person, check the confirmation box and save again."
+
+msgid "— ninguém —"
+msgstr "— nobody —"
+
+#| msgid "Segunda"
+msgid "Segunda pessoa"
+msgstr "Second person"
+
+msgid "Terceira pessoa"
+msgstr "Third person"
+
+msgid "Escolha duas pessoas diferentes."
+msgstr "Choose two different people."
 
 msgid "Pacote"
 msgstr "Package"
@@ -1389,6 +1402,9 @@ msgstr "Classes in package"
 msgid "Conta a partir da primeira aula."
 msgstr "Counts from the first class."
 
+msgid "Dividido com"
+msgstr "Shared with"
+
 msgid "Pacote do catálogo"
 msgstr "Catalog package"
 
@@ -1955,10 +1971,39 @@ msgid "Cancelado"
 msgstr "Canceled"
 
 #, python-format
+msgid "Um pacote pode ser dividido com no máximo %(n)d outra pessoa."
+msgid_plural "Um pacote pode ser dividido com no máximo %(n)d outras pessoas."
+msgstr[0] "A package can be shared with at most %(n)d other person."
+msgstr[1] "A package can be shared with at most %(n)d other people."
+
+msgid "O dono do pacote já usa o pacote: escolha outras pessoas."
+msgstr "The package owner already uses the package: choose other people."
+
+msgid "Só alunos ativos podem dividir um pacote."
+msgstr "Only active students can share a package."
+
+#, python-format
+#| msgid "Pacote editado: %(name)s (%(changes)s)"
+msgid "Pacote dividido com você: %(name)s (pago por %(owner)s)"
+msgstr "Package shared with you: %(name)s (paid by %(owner)s)"
+
+#, python-format
 msgid "Pacote vendido: %(name)s (%(n)d aula)"
 msgid_plural "Pacote vendido: %(name)s (%(n)d aulas)"
 msgstr[0] "Package sold: %(name)s (%(n)d class)"
 msgstr[1] "Package sold: %(name)s (%(n)d classes)"
+
+#, python-format
+msgid "%(name)s já usou aulas deste pacote e não pode ser removido(a)."
+msgstr ""
+"%(name)s has already used classes from this package and cannot be removed."
+
+#, python-format
+msgid "Pacote %(name)s dividido com: %(people)s"
+msgstr "Package %(name)s shared with: %(people)s"
+
+msgid "ninguém"
+msgstr "nobody"
 
 msgid "Este pacote já foi concluído ou cancelado."
 msgstr "This package has already been completed or canceled."
@@ -2672,11 +2717,9 @@ msgstr "Write the note before saving."
 msgid "Anotação removida."
 msgstr "Note removed."
 
-#| msgid "personalizada"
 msgid "Realizado"
 msgstr "Realized"
 
-#| msgid "Não executado"
 msgid "A executar"
 msgstr "To be held"
 
@@ -3144,6 +3187,24 @@ msgstr "%(left)s left over"
 
 msgid "Aulas usadas do pacote"
 msgstr "Package classes used"
+
+#| msgid "pacote vencido"
+msgid "Pacote dividido."
+msgstr "Shared package."
+
+#, python-format
+msgid "Você usou %(used)s."
+msgstr "You used %(used)s."
+
+#, python-format
+#| msgid "%(kind)s de %(date)s anulada"
+msgid "%(name)s · %(used)s usada"
+msgid_plural "%(name)s · %(used)s usadas"
+msgstr[0] "%(name)s · %(used)s used"
+msgstr[1] "%(name)s · %(used)s used"
+
+msgid "O saldo é um só: quem marca primeiro usa primeiro."
+msgstr "There is a single balance: whoever books first uses first."
 
 msgid "Compradas"
 msgstr "Purchased"
@@ -4129,7 +4190,6 @@ msgstr ""
 "− %(refunds_due_total)s refund due · balance "
 "<strong>%(balance_total)s</strong>"
 
-#| msgid "Meu Histórico de Treinos"
 msgid "Relatório de serviços"
 msgstr "Service report"
 
@@ -6539,6 +6599,17 @@ msgid "Sem pacote"
 msgstr "No package"
 
 #, python-format
+msgid "Pacote de <a href=\"%(owner_url)s\">%(owner)s</a>, dividido com você."
+msgstr "Package of <a href=\"%(owner_url)s\">%(owner)s</a>, shared with you."
+
+msgid ""
+"O saldo é um só: quem marca primeiro usa primeiro. Cada aula de cada pessoa "
+"gasta uma aula."
+msgstr ""
+"There is a single balance: whoever books first uses first. Every class of "
+"every person takes one class."
+
+#, python-format
 msgid "<strong class=\"fs-4\">%(used)s</strong> de %(sessions)s aulas usadas"
 msgstr "<strong class=\"fs-4\">%(used)s</strong> of %(sessions)s classes used"
 
@@ -6651,6 +6722,14 @@ msgstr "Charge"
 msgid "Vender novo pacote"
 msgstr "Sell new package"
 
+#, python-format
+msgid ""
+"Pagamento, prorrogação, congelamento e cancelamento são feitos na ficha de "
+"%(owner)s."
+msgstr ""
+"Payment, extension, freezing and cancellation are handled on the file of "
+"%(owner)s."
+
 msgid "Prorrogar"
 msgstr "Extend"
 
@@ -6694,6 +6773,9 @@ msgstr "No agreed amount."
 
 msgid "Ocultos. O aluno nunca vê estes valores."
 msgstr "Hidden. The student never sees these amounts."
+
+msgid "Dividido"
+msgstr "Shared"
 
 #, python-format
 msgid "· %(used)s/%(sessions)s aulas"
@@ -7415,6 +7497,19 @@ msgid ""
 msgstr ""
 "Payments already recorded don't change. To refund money, use <em>Cancel with"
 " refund</em> or <em>Refund or reverse</em>."
+
+#| msgid "Motivo (opcional)"
+msgid "Dividir com (opcional)"
+msgstr "Share with (optional)"
+
+msgid ""
+"Até duas outras pessoas podem usar o mesmo pacote. O saldo é um só: quem "
+"marcar primeiro usa primeiro, e cada aula de cada pessoa gasta uma aula. Só "
+"o dono do pacote paga."
+msgstr ""
+"Up to two other people can use the same package. There is a single balance: "
+"whoever books first uses first, and every class of every person takes one "
+"class. Only the package owner pays."
 
 #, python-format
 msgid "Vender pacote - %(person_name)s - %(brand_name)s"

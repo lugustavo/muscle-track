@@ -11,6 +11,14 @@
             </div>
             {% if cur %}<span class="badge fs-6 bg-{{ cur.css }}" data-package-label>{{ cur.label }}</span>{% endif %}
         </div>
+        {% if cur.shared %}
+        <div class="small mt-2" data-package-people>
+            <i class="bi bi-people"></i>
+            {% if not cur.is_owner %}{% url 'core:student_detail' cur.owner.pk as owner_url %}{% blocktrans trimmed with owner=cur.owner.person_name %}Pacote de <a href="{{ owner_url }}">{{ owner }}</a>, dividido com você.{% endblocktrans %}{% else %}{% trans "Dividido com" %}{% endif %}
+            {% for p in cur.people %}{% if cur.is_owner and not p.is_owner or not cur.is_owner and not p.is_me %}<span class="badge bg-body-secondary text-body border">{% blocktrans trimmed with name=p.person.person_name count used=p.used %}{{ name }} · {{ used }} usada{% plural %}{{ name }} · {{ used }} usadas{% endblocktrans %}</span> {% endif %}{% endfor %}
+            <div class="text-muted">{% blocktrans trimmed %}O saldo é um só: quem marca primeiro usa primeiro. Cada aula de cada pessoa gasta uma aula.{% endblocktrans %}</div>
+        </div>
+        {% endif %}
 
         {% if cur %}
         <div class="mt-3" data-package-balance>
@@ -44,6 +52,7 @@
         <div class="alert alert-warning py-2 mt-3 mb-0 small" data-package-alert="low"><i class="bi bi-hourglass-split"></i> {% blocktrans trimmed count left=cur.left %}Restam {{ left }} aula: hora de oferecer um novo pacote.{% plural %}Restam {{ left }} aulas: hora de oferecer um novo pacote.{% endblocktrans %}</div>
         {% endif %}
 
+        {% if cur.is_owner %}
         <div class="mt-3 small" data-package-payment>
             {% if cur.pending > 0 %}
                 <i class="bi bi-cash-coin"></i> <span class="text-warning-emphasis fw-semibold">{% blocktrans trimmed with pending=cur.pending|money %}Pagamento em aberto: {{ pending }}{% endblocktrans %}</span>
@@ -57,20 +66,24 @@
             {% endif %}
         </div>
         {% endif %}
+        {% endif %}
 
         {% if pkg.without_package %}
         <div class="alert alert-warning py-2 mt-3 mb-0 small" data-without-package><i class="bi bi-exclamation-triangle"></i> {% blocktrans trimmed count without_package=pkg.without_package %}{{ without_package }} aula dada sem pacote para descontar. Venda um pacote novo.{% plural %}{{ without_package }} aulas dadas sem pacote para descontar. Venda um pacote novo.{% endblocktrans %}</div>
         {% endif %}
 
         <div class="d-flex flex-wrap gap-2 mt-3">
-            {% if cur and cur.pending > 0 %}
+            {% if cur and cur.is_owner and cur.pending > 0 %}
                 {% if charge_url %}<a href="{{ charge_url }}" target="_blank" rel="noopener" class="btn btn-success"><i class="bi bi-whatsapp"></i> {% trans "Cobrar" %}</a>{% endif %}
                 <a href="{% nav_url 'core:payment_create' student.pk %}" class="btn {% if charge_url %}btn-outline-success{% else %}btn-success{% endif %}"><i class="bi bi-cash-coin"></i> {% trans "Registrar pagamento" %}</a>
             {% endif %}
             <a href="{% nav_url 'core:student_package_sell' student.pk %}" class="btn {% if not cur or cur.low %}btn-primary{% else %}btn-outline-primary{% endif %}" data-package-sell><i class="bi bi-plus-circle"></i> {% if cur %}{% trans "Vender novo pacote" %}{% else %}{% trans "Vender pacote" %}{% endif %}</a>
         </div>
 
-        {% if cur %}
+        {% if cur and not cur.is_owner %}
+        <div class="small text-muted mt-3" data-package-not-owner><i class="bi bi-lock"></i> {% blocktrans trimmed with owner=cur.owner.person_name %}Pagamento, prorrogação, congelamento e cancelamento são feitos na ficha de {{ owner }}.{% endblocktrans %}</div>
+        {% endif %}
+        {% if cur and cur.is_owner %}
         <div class="contract-more">
             <hr>
             <div class="d-flex flex-wrap gap-2">
@@ -112,9 +125,9 @@
         <ul class="list-unstyled small mb-0" data-package-history>
             {% for row in pkg.rows %}{% if row != cur %}
             <li class="d-flex justify-content-between gap-2 py-1 border-top">
-                <span>{{ row.package.name }} <span class="text-muted">{% blocktrans trimmed with used=row.used sessions=row.sessions %}· {{ used }}/{{ sessions }} aulas{% endblocktrans %}{% if row.starts_on %} · {{ row.starts_on|date:_('d/m/y') }}{% endif %}</span></span>
+                <span>{{ row.package.name }}{% if row.shared %} <i class="bi bi-people" title="{% trans "Dividido" %}"></i>{% endif %} <span class="text-muted">{% blocktrans trimmed with used=row.used sessions=row.sessions %}· {{ used }}/{{ sessions }} aulas{% endblocktrans %}{% if row.starts_on %} · {{ row.starts_on|date:_('d/m/y') }}{% endif %}</span></span>
                 <span class="d-flex align-items-center gap-2">
-                    {% if row.state != 'cancelled' %}<a href="{% nav_url 'core:student_package_edit' student.pk row.package.pk %}" class="small" title="{% trans "Editar este pacote" %}"><i class="bi bi-pencil-square"></i><span class="visually-hidden">{% blocktrans trimmed with name=row.package.name %}Editar {{ name }}{% endblocktrans %}</span></a>{% endif %}
+                    {% if row.is_owner and row.state != 'cancelled' %}<a href="{% nav_url 'core:student_package_edit' student.pk row.package.pk %}" class="small" title="{% trans "Editar este pacote" %}"><i class="bi bi-pencil-square"></i><span class="visually-hidden">{% blocktrans trimmed with name=row.package.name %}Editar {{ name }}{% endblocktrans %}</span></a>{% endif %}
                     <span class="badge bg-secondary">{{ row.label }}</span>
                 </span>
             </li>
