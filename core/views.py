@@ -2708,6 +2708,33 @@ def finance_export(request):
     return response
 
 
+def _csv_money(value):
+    return '' if value is None else f'{value:.2f}'.replace('.', ',')
+
+
+@staff_required
+def finance_service_export(request):
+    """The month's service report as a CSV: every class given in the month at its package's price ("realizado") and the
+    classes still owed on open packages with their value ("a executar", as of today), one row each."""
+    year, month = parse_month(request.GET.get('mes'))
+    report = service_report(year, month)
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="servicos-{year}-{month:02d}.csv"'
+    response.write('\ufeff')
+    writer = csv.writer(response, delimiter=';')
+    writer.writerow([_('Tipo'), _('Data'), _('Aluno'), _('Pacote'), _('Aulas'), _('Valor por aula'), _('Valor')])
+    given, owed = _('Realizado'), _('A executar')
+    for item in report['given_items']:
+        writer.writerow([given, item['date'].strftime('%d/%m/%Y'), _csv_safe(item['student'].person_name),
+                         _csv_safe(item['package'].name), 1, _csv_money(item['price']), _csv_money(item['price'])])
+    for row in report['owed_rows']:
+        writer.writerow([owed, '', _csv_safe(row['student'].person_name), _csv_safe(row['package'].name), row['left'],
+                         _csv_money(row['package'].price_per_session), _csv_money(row['amount'])])
+    for row in report['owed_unpriced_rows']:   # no price to value them at: listed, with the value empty
+        writer.writerow([owed, '', _csv_safe(row['student'].person_name), _csv_safe(row['package'].name), row['left'], '', ''])
+    return response
+
+
 @staff_required
 def plan_list(request):
     """Package templates, like the exercise catalog"""

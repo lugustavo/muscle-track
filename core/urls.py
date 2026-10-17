@@ -44,6 +44,7 @@ urlpatterns = [
     # Finance
     path('finance/', views.finance, name='finance'),
     path('finance/export/', views.finance_export, name='finance_export'),
+    path('finance/export/services/', views.finance_service_export, name='finance_service_export'),
     path('plans/', views.plan_list, name='plan_list'),
     path('plans/create/', views.plan_create, name='plan_create'),
     path('plans/<int:pk>/edit/', views.plan_edit, name='plan_edit'),

@@ -111,17 +111,18 @@ def service_report(year, month):
     from .models import Appointment, StudentPackage
 
     first, last = month_bounds(year, month)
-    given, unpriced_given = {}, 0
+    given, unpriced_given, items = {}, 0, []
     for a in Appointment.objects.filter(
-            package__isnull=False, starts_at__date__range=(first, last)).select_related('package', 'person'):
+            package__isnull=False, starts_at__date__range=(first, last)).select_related('package', 'person').order_by('starts_at', 'pk'):
         price = a.package.price_per_session
+        items.append({'date': timezone.localtime(a.starts_at).date(), 'student': a.person, 'package': a.package, 'price': price})
         if price is None:
             unpriced_given += 1
             continue
         row = given.setdefault(a.person_id, {'student': a.person, 'classes': 0, 'amount': Decimal('0')})
         row['classes'] += 1
         row['amount'] += price
-    owed, unpriced_left = [], 0
+    owed, unpriced_left, unpriced_rows = [], 0, []
     for package in StudentPackage.objects.filter(cancelled_at__isnull=True).select_related('person').annotate(
             n_used=Count('appointments')):
         left = package.sessions - package.n_used
@@ -129,6 +130,7 @@ def service_report(year, month):
             continue
         if package.price_per_session is None:
             unpriced_left += left
+            unpriced_rows.append({'student': package.person, 'package': package, 'left': left})
             continue
         owed.append({'student': package.person, 'package': package, 'left': left,
                      'amount': package.price_per_session * left})
@@ -139,6 +141,8 @@ def service_report(year, month):
         'given_classes': sum(r['classes'] for r in given_rows), 'given_unpriced': unpriced_given,
         'owed_rows': owed, 'owed_total': sum((r['amount'] for r in owed), Decimal('0')),
         'owed_classes': sum(r['left'] for r in owed), 'owed_unpriced': unpriced_left,
+        # what the CSV lists: every class given (with its price, None when the package has none) and the unpriced packages
+        'given_items': items, 'owed_unpriced_rows': unpriced_rows,
     }
 
 

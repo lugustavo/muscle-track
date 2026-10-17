@@ -383,6 +383,77 @@ class ServiceReportTests(BaseTestCase):
         self.assertEqual((report['given_total'], report['given_unpriced'], report['owed_unpriced']),
                          (Decimal('0'), 1, 3))
 
+    def export(self, month='2026-03'):
+        self.client.force_login(self.trainer)
+        response = self.client.get(reverse('core:finance_service_export'), {'mes': month})
+        self.assertEqual(response.status_code, 200)
+        return response, response.content.decode('utf-8').lstrip('\ufeff').splitlines()
+
+    def test_csv_lists_every_class_given_and_every_open_package(self):
+        for d in (date(2026, 3, 9), date(2026, 3, 2)):
+            self.klass(d)
+        self.klass(date(2026, 4, 6))                               # another month: not in March
+        self.pk.sync(self.person, date(2026, 3, 20))
+        response, lines = self.export()
+        self.assertIn('servicos-2026-03.csv', response['Content-Disposition'])
+        self.assertTrue(response.content.decode('utf-8').startswith('\ufeff'))   # Excel reads the accents
+        self.assertEqual(lines[0], 'Tipo;Data;Aluno;Pacote;Aulas;Valor por aula;Valor')
+        self.assertEqual(lines[1:], [
+            'Realizado;02/03/2026;Alice;P10;1;50,00;50,00',   # by date, one row per class
+            'Realizado;09/03/2026;Alice;P10;1;50,00;50,00',
+            'A executar;;Alice;P10;7;50,00;350,00',           # 10 - 3 used (the April class is used too)
+        ])
+
+    def test_csv_totals_match_the_page(self):
+        from core.billing import service_report
+        for d in (date(2026, 3, 2), date(2026, 3, 9), date(2026, 3, 16)):
+            self.klass(d)
+        self.pk.sync(self.person, date(2026, 3, 20))
+        _response, lines = self.export()
+        given = sum(Decimal(l.split(';')[6].replace(',', '.')) for l in lines[1:] if l.startswith('Realizado'))
+        owed = sum(Decimal(l.split(';')[6].replace(',', '.')) for l in lines[1:] if l.startswith('A executar'))
+        report = service_report(2026, 3)
+        self.assertEqual((given, owed), (report['given_total'], report['owed_total']))
+
+    def test_csv_packages_without_a_price_are_listed_with_empty_values(self):
+        free = Package.objects.create(name='Livre', sessions=4, valid_days=30, pricing_mode='per_session')
+        self.sold.delete()
+        self.pk.sell(self.person, free)
+        self.klass(date(2026, 3, 2))
+        self.pk.sync(self.person, date(2026, 3, 10))
+        _response, lines = self.export()
+        self.assertEqual(lines[1:], ['Realizado;02/03/2026;Alice;Livre;1;;', 'A executar;;Alice;Livre;3;;'])
+
+    def test_csv_neutralises_formulas_in_names(self):
+        self.klass(date(2026, 3, 2))
+        self.pk.sync(self.person, date(2026, 3, 10))
+        self.sold.refresh_from_db()
+        self.sold.name = '=HYPERLINK("x")'
+        self.sold.save()
+        self.person.person_name = '@SUM(A1)'
+        self.person.save()
+        _response, lines = self.export()
+        self.assertIn(";'@SUM(A1);", lines[1])
+        self.assertIn("'=HYPERLINK", lines[1])   # (the CSV writer quotes the field because of the inner quotes)
+
+    def test_csv_month_without_classes_still_lists_what_is_owed(self):
+        _response, lines = self.export('2025-01')
+        self.assertEqual(lines[1:], ['A executar;;Alice;P10;10;50,00;500,00'])   # "as of today", whatever the month
+        self.client.force_login(self.trainer)
+        bad = self.client.get(reverse('core:finance_service_export'), {'mes': 'nonsense'})
+        self.assertEqual(bad.status_code, 200)   # a bad month falls back to the current one, like the page
+    def test_finance_page_links_to_the_export(self):
+        self.client.force_login(self.trainer)
+        page = self.client.get(reverse('core:finance'), {'mes': '2026-03'})
+        self.assertContains(page, 'data-service-export')
+        self.assertContains(page, reverse('core:finance_service_export') + '?mes=2026-03')
+
+    def test_export_is_for_the_trainer_only(self):
+        url = reverse('core:finance_service_export')
+        self.assertEqual(self.client.get(url).status_code, 302)
+        self.client.force_login(self.alice)
+        self.assertEqual(self.client.get(url).status_code, 403)
+
     def test_finance_page_shows_both_cards_with_values(self):
         for d in (date(2026, 3, 2), date(2026, 3, 9)):
             self.klass(d)

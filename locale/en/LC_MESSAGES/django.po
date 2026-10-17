@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 14:41-0300\n"
+"POT-Creation-Date: 2026-10-17 15:01-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2672,6 +2672,14 @@ msgstr "Write the note before saving."
 msgid "Anotação removida."
 msgstr "Note removed."
 
+#| msgid "personalizada"
+msgid "Realizado"
+msgstr "Realized"
+
+#| msgid "Não executado"
+msgid "A executar"
+msgstr "To be held"
+
 #, python-format
 msgid "Pacote \"%(name)s\" criado."
 msgstr "Package \"%(name)s\" created."
@@ -3719,7 +3727,6 @@ msgstr ""
 msgid "Situação do link"
 msgstr "Link status"
 
-#| msgid "d/m H:i"
 msgid "d/m/Y H:i"
 msgstr "m/d/Y g:i A"
 
@@ -4122,6 +4129,13 @@ msgstr ""
 "− %(refunds_due_total)s refund due · balance "
 "<strong>%(balance_total)s</strong>"
 
+#| msgid "Meu Histórico de Treinos"
+msgid "Relatório de serviços"
+msgstr "Service report"
+
+msgid "Exportar CSV"
+msgstr "Export CSV"
+
 msgid "Aulas dadas no mês (valor realizado)"
 msgstr "Classes held this month (realized value)"
 
@@ -4227,9 +4241,6 @@ msgstr "Nothing received this month."
 
 msgid "Pagamentos do mês"
 msgstr "Payments this month"
-
-msgid "Exportar CSV"
-msgstr "Export CSV"
 
 msgid "Nenhum pagamento neste mês."
 msgstr "No payments this month."
@@ -7135,7 +7146,6 @@ msgstr "Total workouts"
 msgid "%(active_routines)s Ativos"
 msgstr "%(active_routines)s Active"
 
-#| msgid "d/m H:i"
 msgid "d/m/Y - H:i"
 msgstr "m/d/Y - g:i A"
 
