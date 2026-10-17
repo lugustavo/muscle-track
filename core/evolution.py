@@ -42,40 +42,69 @@ def chart_points(assessments):
     return points if len(points) >= 2 else []
 
 
-def comparable_angles(assessments):
-    """Positions that have a photo in at least two assessments, in the standard order (the ones worth comparing)."""
-    result = []
-    for angle in ProgressPhoto.SEQUENCE:
-        if sum(1 for a in assessments if any(s['angle'] == angle.value and s['photo'] for s in a.photo_slots)) >= 2:
-            result.append(angle)
-    return result
+class Entry:
+    """One photo that can sit on a side of the comparison: from an assessment, or a loose one (sent by the student or the trainer)."""
+
+    def __init__(self, photo, assessment=None):
+        self.photo, self.assessment = photo, assessment
+        self.date = assessment.date if assessment else photo.date
+        self.key = str(assessment.pk) if assessment else f'p{photo.pk}'
+        if assessment:
+            self.source = _('Avaliação')
+        elif photo.uploaded_by_student:
+            self.source = _('Enviada pelo aluno')
+        else:
+            self.source = _('Foto avulsa')
+
+    @property
+    def label(self):
+        return f'{dateformat.format(self.date, _("d/m/Y"))} · {self.source}'
+
+
+def comparable_loose(photos):
+    """Of these photos with no assessment, the ones with a standard position (the ones a comparison can use)."""
+    return [p for p in photos if p.angle in SEQUENCE_VALUES]
+
+
+def entries_for(angle, assessments, loose=()):
+    """The photos of one position, oldest first: those inside assessments and the loose ones."""
+    found = [Entry(s['photo'], a) for a in assessments for s in a.photo_slots if s['angle'] == angle and s['photo']]
+    found += [Entry(p) for p in loose if p.angle == angle]
+    return sorted(found, key=lambda e: (e.date, e.photo.created_at))
+
+
+def comparable_angles(assessments, loose=()):
+    """Positions with at least two photos (in assessments or loose), in the standard order (the ones worth comparing)."""
+    return [angle for angle in ProgressPhoto.SEQUENCE if len(entries_for(angle.value, assessments, loose)) >= 2]
 
 
 def compare(person, angle=None, before_id=None, after_id=None):
     """Two photos of the same position side by side: `before` (older) and `after` (newer), with the measure changes.
 
-    Defaults to the first comparable position, the oldest and the newest assessment that have it."""
+    A side is an assessment (`before_id` is its id) or a loose photo (`p` + the photo id). Defaults to the first
+    comparable position, the oldest and the newest photo of it. The measure changes need two assessments."""
     assessments = assessments_with_photos(person)
-    angles = comparable_angles(assessments)
+    loose = comparable_loose(person.progress_photos.filter(assessment__isnull=True))
+    angles = comparable_angles(assessments, loose)
     if angle not in SEQUENCE_VALUES:
         angle = angles[0].value if angles else ProgressPhoto.Angle.FRONT.value
-    having = [a for a in reversed(assessments)   # oldest first
-              if any(s['angle'] == angle and s['photo'] for s in a.photo_slots)]
-    by_id = {a.pk: a for a in having}
-    before = by_id.get(_int(before_id)) or (having[0] if having else None)
-    after = by_id.get(_int(after_id)) or (having[-1] if having else None)
-    if before and after and before.date > after.date:   # always older on the left
+    having = entries_for(angle, assessments, loose)
+    by_key = {e.key: e for e in having}
+    before = by_key.get(str(before_id)) or (having[0] if having else None)
+    after = by_key.get(str(after_id)) or (having[-1] if having else None)
+    if before and after and (before.date, before.photo.created_at) > (after.date, after.photo.created_at):   # older on the left
         before, after = after, before
-    photo = lambda a: next((s['photo'] for s in a.photo_slots if s['angle'] == angle), None) if a else None  # noqa: E731
     changes = []
-    if before and after and before.pk != after.pk:
+    if before and after and before.assessment and after.assessment and before.assessment.pk != after.assessment.pk:
         for label, field, unit in MEASURES:
-            old, new = getattr(before, field), getattr(after, field)
+            old, new = getattr(before.assessment, field), getattr(after.assessment, field)
             if old is not None and new is not None:
                 changes.append({'label': label, 'old': old, 'new': new, 'delta': new - old, 'unit': unit})
     return {
-        'angle': angle, 'angles': angles, 'having': list(reversed(having)), 'before': before, 'after': after,
-        'before_photo': photo(before), 'after_photo': photo(after), 'changes': changes,
+        'angle': angle, 'angles': angles, 'having': list(reversed(having)), 'before_entry': before, 'after_entry': after,
+        'before': before.assessment if before else None, 'after': after.assessment if after else None,
+        'before_photo': before.photo if before else None, 'after_photo': after.photo if after else None,
+        'changes': changes,
         'days': (after.date - before.date).days if before and after else 0,
     }
 

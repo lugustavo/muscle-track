@@ -161,7 +161,7 @@
             <div class="list-group-item d-flex align-items-center gap-2 py-2 {% if a.status == 'cancelled' or a.status == 'rescheduled' %}text-muted{% endif %}" data-month-class="{{ a.pk }}">
                 <span class="fw-bold text-nowrap" style="min-width: 3rem;">{{ a.starts_at|time:"H:i" }}</span>
                 <span class="status-dot rounded-circle flex-shrink-0 {% if a.status == 'attended' %}bg-success{% elif a.status == 'missed' %}bg-danger{% elif a.status == 'cancelled' or a.status == 'rescheduled' %}bg-secondary{% else %}bg-primary{% endif %}" style="width: .6rem; height: .6rem;"></span>
-                <a href="{% nav_url 'core:student_detail' a.person_id %}#tab-agenda" class="flex-grow-1 text-reset text-truncate {% if a.status == 'cancelled' or a.status == 'rescheduled' %}text-decoration-line-through{% endif %}" title="Abrir a agenda de {{ a.person.person_name }}">{{ a.person.person_name }}</a>
+                <a href="{% nav_url 'core:student_detail' a.person_id %}#tab-agenda" class="flex-grow-1 text-reset text-truncate {% if a.status == 'cancelled' or a.status == 'rescheduled' %}text-decoration-line-through{% endif %}" title="{% blocktrans trimmed with name=a.person.person_name %}Abrir a agenda de {{ name }}{% endblocktrans %}">{{ a.person.person_name }}</a>
                 {% if a.status != 'scheduled' %}<span class="badge bg-body-secondary text-body border">{{ a.get_status_display }}</span>{% endif %}
                 <span class="small text-muted d-none d-sm-inline">{% blocktrans trimmed with duration_minutes=a.duration_minutes %}{{ duration_minutes }} min{% endblocktrans %}</span>
             </div>

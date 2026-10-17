@@ -59,7 +59,7 @@
                     <label class="form-check-label" for="{{ form.is_active.id_for_label }}">{{ form.is_active.label }} <span class="text-muted small">{% trans "(pacotes inativos não aparecem para vender)" %}</span></label>
                 </div>
                 <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> {% trans "Salvar pacote" %}</button>
-                {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='bi-x-circle' %}
+                {% back_button back_default label=_('Cancelar') css='btn btn-outline-secondary' icon='bi-x-circle' %}
             </div>
         </form>
     </div>

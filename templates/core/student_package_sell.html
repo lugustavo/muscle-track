@@ -103,7 +103,7 @@
 
     <div class="form-actions d-flex gap-2">
         <button type="submit" class="btn btn-primary" {% if not catalog %}disabled{% endif %}><i class="bi bi-check-circle"></i> {% trans "Vender pacote" %}</button>
-        {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='bi-x-circle' %}
+        {% back_button back_default label=_('Cancelar') css='btn btn-outline-secondary' icon='bi-x-circle' %}
     </div>
 </form>
 {% endblock %}

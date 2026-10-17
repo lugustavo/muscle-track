@@ -14,8 +14,13 @@ from .test_navigation_global import RichDataMixin
 ACCENTED = re.compile(r'[áàâãéêíóôõúç]', re.I)
 HIDDEN = re.compile(r'<(script|style|template)\b.*?</\1>|<!--.*?-->', re.S | re.I)
 TAGS = re.compile(r'<[^>]+>')
-ATTRS = re.compile(r'\b(?:title|placeholder|aria-label|alt|data-[\w-]+)="([^"]*)"')
-NATIVE_NAMES = re.compile(r'Português( \(Brasil\))?|São João')   # each language named in itself; a local festival
+ATTRS = re.compile(r'\b(?:title|placeholder|aria-label|alt)="([^"]*)"')
+# Common Portuguese words that carry no accent (the accent test cannot see them); none is an English word
+WORDS = re.compile(r'\b(?:voltar|cancelar|salvar|excluir|editar|adicionar|remover|enviar|buscar|confirmar|aluno|alunos|aluna|'
+                   r'nome|nenhum|nenhuma|todos|todas|ativo|ativa|inativo|pagamento|pagamentos|pacote|pacotes|financeiro|'
+                   r'treinos|exercicio|exercicios|obrigatorio|opcional|criar|novo|nova|proximo|proxima|anterior|'
+                   r'concluido|pendente|semana|hoje|amanha|ontem|notas|observacoes|ver mais|ver todos)\b', re.I)
+NATIVE_NAMES = re.compile(r'Português( \(Brasil\))?|São João|\{\w+\}')   # each language named in itself; a local festival; the {variables} of the WhatsApp texts
 
 
 def visible(page):
@@ -28,10 +33,13 @@ def visible(page):
 def leaks(text):
     text = ' '.join(text.split())
     found = {text[max(m.start() - 30, 0):m.end() + 20] for m in re.finditer(r'\S*' + ACCENTED.pattern + r'\S*', text, re.I)}
+    found |= {text[max(m.start() - 30, 0):m.end() + 20] for m in WORDS.finditer(text)}
     return sorted(found)
 
 
 class EnglishPagesTests(RichDataMixin, BaseTestCase):
+    maxDiff = None
+
     def setUp(self):
         super().setUp()
         self.build_world()
