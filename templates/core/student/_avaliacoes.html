@@ -1,17 +1,18 @@
+{% load i18n %}
 {% load navigation %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="mb-0"><i class="bi bi-rulers"></i> Avaliações físicas</h5>
+    <h5 class="mb-0"><i class="bi bi-rulers"></i> {% trans "Avaliações físicas" %}</h5>
     <div class="d-flex gap-2">
-        {% if can_compare %}<a href="{% nav_url 'core:student_compare' student.pk %}" class="btn btn-outline-primary"><i class="bi bi-layout-split"></i> Comparar fotos</a>{% endif %}
-        <a href="{% nav_url 'core:assessment_create' student.pk %}" class="btn btn-success"><i class="bi bi-plus-circle"></i> Nova avaliação</a>
+        {% if can_compare %}<a href="{% nav_url 'core:student_compare' student.pk %}" class="btn btn-outline-primary"><i class="bi bi-layout-split"></i> {% trans "Comparar fotos" %}</a>{% endif %}
+        <a href="{% nav_url 'core:assessment_create' student.pk %}" class="btn btn-success"><i class="bi bi-plus-circle"></i> {% trans "Nova avaliação" %}</a>
     </div>
 </div>
-<p class="text-muted small"><i class="bi bi-lock"></i> Cada avaliação tem as fotos das posições (frente, lados e costas). As fotos são privadas: só você e o próprio aluno conseguem abrir.</p>
+<p class="text-muted small"><i class="bi bi-lock"></i> {% trans "Cada avaliação tem as fotos das posições (frente, lados e costas). As fotos são privadas: só você e o próprio aluno conseguem abrir." %}</p>
 
 {% if assessment_chart %}
 <div class="card mb-4">
     <div class="card-body">
-        <h6 class="card-title">Evolução</h6>
+        <h6 class="card-title">{% trans "Evolução" %}</h6>
         <div style="height: 280px;"><canvas id="assessmentChart"></canvas></div>
     </div>
 </div>
@@ -24,9 +25,9 @@
         <table class="table table-hover align-middle mb-0">
             <thead>
                 <tr>
-                    <th>Data</th><th class="text-end">Peso</th><th class="text-end">Altura</th><th class="text-end">IMC</th>
-                    <th class="text-end">% gordura</th><th class="text-end">Peito</th><th class="text-end">Cintura</th>
-                    <th class="text-end">Quadril</th><th class="text-end">Braço</th><th class="text-end">Coxa</th><th></th>
+                    <th>{% trans "Data" %}</th><th class="text-end">{% trans "Peso" %}</th><th class="text-end">{% trans "Altura" %}</th><th class="text-end">{% trans "IMC" %}</th>
+                    <th class="text-end">{% trans "% gordura" %}</th><th class="text-end">{% trans "Peito" %}</th><th class="text-end">{% trans "Cintura" %}</th>
+                    <th class="text-end">{% trans "Quadril" %}</th><th class="text-end">{% trans "Braço" %}</th><th class="text-end">{% trans "Coxa" %}</th><th></th>
                 </tr>
             </thead>
             <tbody>
@@ -43,10 +44,10 @@
                     <td class="text-end">{{ a.arm_cm|default_if_none:"-" }}</td>
                     <td class="text-end">{{ a.thigh_cm|default_if_none:"-" }}</td>
                     <td class="text-end text-nowrap">
-                        <a href="{% nav_url 'core:assessment_edit' a.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar"><i class="bi bi-pencil"></i></a>
-                        <form method="post" action="{% nav_url 'core:assessment_delete' a.pk %}" class="d-inline" onsubmit="return confirm('Remover esta avaliação?');">
+                        <a href="{% nav_url 'core:assessment_edit' a.pk %}" class="btn btn-sm btn-outline-secondary" title="{% trans "Editar" %}"><i class="bi bi-pencil"></i></a>
+                        <form method="post" action="{% nav_url 'core:assessment_delete' a.pk %}" class="d-inline" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta avaliação?" %}{% endfilter %}');">
                             {% csrf_token %}
-                            <button class="btn btn-sm btn-outline-danger" title="Remover"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" title="{% trans "Remover" %}"><i class="bi bi-trash"></i></button>
                         </form>
                     </td>
                 </tr>
@@ -66,9 +67,9 @@
                                 {% endif %}
                                 <div class="small text-muted lh-sm mt-1">{{ slot.label }}</div>
                                 {% if slot.photo %}
-                                <form method="post" action="{% nav_url 'core:photo_delete' slot.photo.pk %}" class="d-inline" onsubmit="return confirm('Remover esta foto?');">
+                                <form method="post" action="{% nav_url 'core:photo_delete' slot.photo.pk %}" class="d-inline" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta foto?" %}{% endfilter %}');">
                                     {% csrf_token %}
-                                    <button class="btn btn-link btn-sm text-danger p-0" title="Remover foto"><i class="bi bi-trash"></i></button>
+                                    <button class="btn btn-link btn-sm text-danger p-0" title="{% trans "Remover foto" %}"><i class="bi bi-trash"></i></button>
                                 </form>
                                 {% endif %}
                             </div>
@@ -77,13 +78,13 @@
                             <div class="text-center" style="width: 84px;">
                                 <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener"><img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="Foto de {{ a.date|date:'d/m/Y' }}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;"></a>
                                 <div class="small text-muted lh-sm mt-1">{{ photo.caption|default:photo.get_angle_display }}</div>
-                                <form method="post" action="{% nav_url 'core:photo_delete' photo.pk %}" class="d-inline" onsubmit="return confirm('Remover esta foto?');">
+                                <form method="post" action="{% nav_url 'core:photo_delete' photo.pk %}" class="d-inline" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta foto?" %}{% endfilter %}');">
                                     {% csrf_token %}
-                                    <button class="btn btn-link btn-sm text-danger p-0" title="Remover foto"><i class="bi bi-trash"></i></button>
+                                    <button class="btn btn-link btn-sm text-danger p-0" title="{% trans "Remover foto" %}"><i class="bi bi-trash"></i></button>
                                 </form>
                             </div>
                             {% endfor %}
-                            <a href="{% nav_url 'core:photo_upload' student.pk %}&amp;assessment={{ a.pk }}&amp;angle=other" class="btn btn-sm btn-outline-secondary ms-auto" title="Adicionar outra foto a esta avaliação"><i class="bi bi-camera"></i> Foto</a>
+                            <a href="{% nav_url 'core:photo_upload' student.pk %}&amp;assessment={{ a.pk }}&amp;angle=other" class="btn btn-sm btn-outline-secondary ms-auto" title="{% trans "Adicionar outra foto a esta avaliação" %}"><i class="bi bi-camera"></i> {% trans "Foto" %}</a>
                         </div>
                     </td>
                 </tr>
@@ -92,14 +93,14 @@
         </table>
     </div>
 </div>
-<p class="text-muted small mt-2">Medidas em cm, peso em kg. Altura e peso geram o IMC.</p>
+<p class="text-muted small mt-2">{% trans "Medidas em cm, peso em kg. Altura e peso geram o IMC." %}</p>
 {% else %}
-<div class="alert alert-info"><i class="bi bi-info-circle"></i> Nenhuma avaliação registrada ainda.</div>
+<div class="alert alert-info"><i class="bi bi-info-circle"></i> {% trans "Nenhuma avaliação registrada ainda." %}</div>
 {% endif %}
 
 {% if loose_photos %}
-<h6 class="mt-4"><i class="bi bi-images"></i> Fotos avulsas</h6>
-<p class="text-muted small">Fotos sem avaliação ligada: as que o aluno enviou pelo celular e as de antes de as fotos ficarem dentro das avaliações.</p>
+<h6 class="mt-4"><i class="bi bi-images"></i> {% trans "Fotos avulsas" %}</h6>
+<p class="text-muted small">{% trans "Fotos sem avaliação ligada: as que o aluno enviou pelo celular e as de antes de as fotos ficarem dentro das avaliações." %}</p>
 <div class="row g-3" data-loose-photos>
     {% for photo in loose_photos %}
     <div class="col-4 col-md-3 col-lg-2">
@@ -108,14 +109,14 @@
                 <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" class="card-img-top" alt="Foto de {{ photo.date|date:'d/m/Y' }}" style="aspect-ratio: 3/4; object-fit: cover;">
             </a>
             <div class="card-body py-1 small">
-                <div class="fw-bold">{{ photo.date|date:"d/m/Y" }}{% if photo.uploaded_by_student %} <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" data-by-student title="Enviada pelo aluno"><i class="bi bi-person"></i></span>{% endif %}</div>
+                <div class="fw-bold">{{ photo.date|date:"d/m/Y" }}{% if photo.uploaded_by_student %} <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" data-by-student title="{% trans "Enviada pelo aluno" %}"><i class="bi bi-person"></i></span>{% endif %}</div>
                 {% if photo.angle != 'other' %}<div class="text-muted">{{ photo.get_angle_display }}</div>{% endif %}
                 {% if photo.caption %}<div class="text-muted">{{ photo.caption }}</div>{% endif %}
             </div>
             <div class="card-footer bg-transparent py-1 text-end">
-                <form method="post" action="{% nav_url 'core:photo_delete' photo.pk %}" class="d-inline" onsubmit="return confirm('Remover esta foto?');">
+                <form method="post" action="{% nav_url 'core:photo_delete' photo.pk %}" class="d-inline" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta foto?" %}{% endfilter %}');">
                     {% csrf_token %}
-                    <button class="btn btn-sm btn-outline-danger" title="Remover"><i class="bi bi-trash"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" title="{% trans "Remover" %}"><i class="bi bi-trash"></i></button>
                 </form>
             </div>
         </div>
@@ -123,4 +124,4 @@
     {% endfor %}
 </div>
 {% endif %}
-<div class="mt-3"><a href="{% nav_url 'core:photo_upload' student.pk %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-camera"></i> Adicionar foto avulsa</a></div>
+<div class="mt-3"><a href="{% nav_url 'core:photo_upload' student.pk %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-camera"></i> {% trans "Adicionar foto avulsa" %}</a></div>

@@ -1,41 +1,42 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation %}
 
-{% block title %}Minha agenda - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed %}Minha agenda - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="mx-auto" style="max-width: 560px;">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h3 mb-0"><i class="bi bi-calendar-week"></i> Minha agenda</h1>
-        <a href="{% url 'core:calendar_settings' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-google"></i> Google Agenda</a>
+        <h1 class="h3 mb-0"><i class="bi bi-calendar-week"></i> {% trans "Minha agenda" %}</h1>
+        <a href="{% url 'core:calendar_settings' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-google"></i> {% trans "Google Agenda" %}</a>
     </div>
 
     {% if package %}
     <div class="card mb-3" data-my-package>
         <div class="card-body py-2">
             <div class="d-flex justify-content-between align-items-start gap-2">
-                <div><div class="small text-muted"><i class="bi bi-box-seam"></i> Meu pacote</div><strong>{{ package.package.name }}</strong></div>
+                <div><div class="small text-muted"><i class="bi bi-box-seam"></i> {% trans "Meu pacote" %}</div><strong>{{ package.package.name }}</strong></div>
                 <span class="badge bg-{{ package.css }}">{{ package.label }}</span>
             </div>
-            <div class="d-flex justify-content-between small mt-2"><span><strong>{{ package.used }}</strong> de {{ package.sessions }} aulas usadas</span><span class="text-muted">{{ package.left }} sobrando</span></div>
-            <div class="progress mt-1" style="height: 6px;" role="progressbar" aria-valuenow="{{ package.percent }}" aria-valuemin="0" aria-valuemax="100" aria-label="Aulas usadas do pacote"><div class="progress-bar bg-success" style="width: {{ package.percent }}%"></div></div>
+            <div class="d-flex justify-content-between small mt-2"><span>{% blocktrans trimmed with used=package.used sessions=package.sessions %}<strong>{{ used }}</strong> de {{ sessions }} aulas usadas{% endblocktrans %}</span><span class="text-muted">{% blocktrans trimmed with left=package.left %}{{ left }} sobrando{% endblocktrans %}</span></div>
+            <div class="progress mt-1" style="height: 6px;" role="progressbar" aria-valuenow="{{ package.percent }}" aria-valuemin="0" aria-valuemax="100" aria-label="{% trans "Aulas usadas do pacote" %}"><div class="progress-bar bg-success" style="width: {{ package.percent }}%"></div></div>
             <div class="small text-muted mt-1">
-                {% if not package.package.valid_days %}Pacote sem prazo: vale até você usar todas as aulas.
-                {% elif package.starts_on %}Vale até {{ package.ends_on|date:"d/m/Y" }}{% if package.state == 'frozen' %} (congelado){% elif package.state == 'expired' %} (prazo vencido: fale com a sua personal){% endif %}
-                {% else %}O prazo de {{ package.package.valid_days }} dias começa na sua primeira aula.{% endif %}
+                {% if not package.package.valid_days %}{% trans "Pacote sem prazo: vale até você usar todas as aulas." %}
+                {% elif package.starts_on %}{% blocktrans trimmed with ends_on=package.ends_on|date:"d/m/Y" %}Vale até {{ ends_on }}{% endblocktrans %}{% if package.state == 'frozen' %} {% trans "(congelado)" %}{% elif package.state == 'expired' %} {% trans "(prazo vencido: fale com a sua personal)" %}{% endif %}
+                {% else %}{% blocktrans trimmed with valid_days=package.package.valid_days %}O prazo de {{ valid_days }} dias começa na sua primeira aula.{% endblocktrans %}{% endif %}
             </div>
         </div>
     </div>
     {% endif %}
 
-    <h2 class="h6 text-uppercase text-muted">Próximas aulas</h2>
+    <h2 class="h6 text-uppercase text-muted">{% trans "Próximas aulas" %}</h2>
     {% for a in upcoming %}
     <div class="card mb-2 {% if a.status == 'rescheduled' %}opacity-75{% endif %}" data-my-class="{{ a.pk }}">
         <div class="card-body py-2">
             <div class="d-flex justify-content-between align-items-start gap-2">
                 <div>
-                    <strong>{{ a.starts_at|date:"l, j \d\e F"|lower|capfirst }}</strong>
-                    <div class="text-muted">{{ a.starts_at|time:"H:i" }} · {{ a.duration_minutes }} min</div>
+                    <strong>{{ a.starts_at|date:_("l, j \d\e F")|lower|capfirst }}</strong>
+                    <div class="text-muted">{% blocktrans trimmed with starts_at=a.starts_at|time:"H:i" duration_minutes=a.duration_minutes %}{{ starts_at }} · {{ duration_minutes }} min{% endblocktrans %}</div>
                 </div>
                 <span class="badge {% if a.status == 'cancelled' or a.status == 'rescheduled' %}bg-secondary{% else %}bg-body-secondary text-body border{% endif %}">{{ a.get_status_display }}</span>
             </div>
@@ -44,31 +45,31 @@
                 {% if a.open_request %}
                 <div class="alert alert-info py-2 small mt-2 mb-0" data-open-request>
                     <i class="bi bi-hourglass-split"></i>
-                    {% if a.open_request.kind == 'cancel' %}Você pediu para <strong>cancelar</strong> esta aula.{% else %}Você pediu para remarcar para <strong>{{ a.open_request.proposed_starts_at|date:"D, d/m \à\s H:i" }}</strong>.{% endif %}
+                    {% if a.open_request.kind == 'cancel' %}{% blocktrans trimmed %}Você pediu para <strong>cancelar</strong> esta aula.{% endblocktrans %}{% else %}{% blocktrans trimmed with proposed_starts_at=a.open_request.proposed_starts_at|date:_("D, d/m \à\s H:i") %}Você pediu para remarcar para <strong>{{ proposed_starts_at }}</strong>.{% endblocktrans %}{% endif %}
                     {% if a.open_request.message %}<em>“{{ a.open_request.message }}”</em>{% endif %}
-                    Aguardando a sua personal.
+                    {% trans "Aguardando a sua personal." %}
                     <form method="post" action="{% url 'core:my_agenda_request_withdraw' a.open_request.pk %}" class="d-inline">
-                        {% csrf_token %}<button class="btn btn-link btn-sm p-0 align-baseline">Retirar pedido</button>
+                        {% csrf_token %}<button class="btn btn-link btn-sm p-0 align-baseline">{% trans "Retirar pedido" %}</button>
                     </form>
                 </div>
                 {% elif a.block %}
                 <div class="small text-muted mt-2" data-request-block>{{ a.block }}</div>
                 {% else %}
-                <a href="{% url 'core:my_agenda_request' a.pk %}" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-arrow-repeat"></i> Pedir remarcação ou cancelamento</a>
+                <a href="{% url 'core:my_agenda_request' a.pk %}" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-arrow-repeat"></i> {% trans "Pedir remarcação ou cancelamento" %}</a>
                 {% endif %}
                 {% if a.last_answer and a.last_answer.status == 'declined' and not a.open_request %}
-                <div class="small text-warning-emphasis mt-2" data-declined><i class="bi bi-x-circle"></i> Sua personal recusou o último pedido{% if a.last_answer.decision_note %}: “{{ a.last_answer.decision_note }}”{% else %}.{% endif %}</div>
+                <div class="small text-warning-emphasis mt-2" data-declined><i class="bi bi-x-circle"></i> {% trans "Sua personal recusou o último pedido" %}{% if a.last_answer.decision_note %}: “{{ a.last_answer.decision_note }}”{% else %}.{% endif %}</div>
                 {% endif %}
             {% endif %}
         </div>
     </div>
     {% empty %}
-    <div class="card mb-2"><div class="card-body text-muted">Você não tem aulas marcadas nos próximos dias. Quando a sua personal marcar, elas aparecem aqui.</div></div>
+    <div class="card mb-2"><div class="card-body text-muted">{% trans "Você não tem aulas marcadas nos próximos dias. Quando a sua personal marcar, elas aparecem aqui." %}</div></div>
     {% endfor %}
-    <p class="small text-muted">Pedidos pelo app: até {{ notice_hours }} hora{{ notice_hours|pluralize }} antes da aula. Depois disso, fale direto com a sua personal. Faltar ou cancelar com menos de {{ notice_hours }} h conta como aula dada no pacote.</p>
+    <p class="small text-muted">{% blocktrans trimmed count notice_hours=notice_hours %}Pedidos pelo app: até {{ notice_hours }} hora antes da aula. Depois disso, fale direto com a sua personal. Faltar ou cancelar com menos de {{ notice_hours }} h conta como aula dada no pacote.{% plural %}Pedidos pelo app: até {{ notice_hours }} horas antes da aula. Depois disso, fale direto com a sua personal. Faltar ou cancelar com menos de {{ notice_hours }} h conta como aula dada no pacote.{% endblocktrans %}</p>
 
     {% if recent %}
-    <h2 class="h6 text-uppercase text-muted mt-4">Últimos 30 dias</h2>
+    <h2 class="h6 text-uppercase text-muted mt-4">{% trans "Últimos 30 dias" %}</h2>
     <ul class="list-group mb-3">
         {% for a in recent %}
         <li class="list-group-item d-flex justify-content-between align-items-center">

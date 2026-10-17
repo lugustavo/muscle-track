@@ -7,6 +7,8 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
+from django.utils.formats import number_format
+from django.utils.translation import get_language
 
 from . import packages
 from .history import log_event
@@ -16,11 +18,15 @@ CENTS = Decimal('0.01')
 
 
 def money(value):
-    """'1.234,50 €' (or 'R$ 1.234,50', see CURRENCY_SYMBOL / CURRENCY_POSITION) for pages, messages and CSV."""
+    """'1.234,50 €' (or 'R$ 1.234,50', see CURRENCY_SYMBOL / CURRENCY_POSITION) for pages, messages and CSV.
+
+    The number follows the active language ('1,234.50' in English) and, in English, the symbol goes before it."""
     if value is None:
         return ''
-    text = f'{Decimal(value).quantize(CENTS, ROUND_HALF_UP):,.2f}'.replace(',', '#').replace('.', ',').replace('#', '.')
+    text = number_format(Decimal(value).quantize(CENTS, ROUND_HALF_UP), decimal_pos=2, use_l10n=True, force_grouping=True)
     symbol = settings.CURRENCY_SYMBOL
+    if (get_language() or '').startswith('en'):
+        return f'{symbol}{text}' if len(symbol) == 1 else f'{symbol} {text}'
     return f'{symbol} {text}' if settings.CURRENCY_POSITION == 'before' else f'{text} {symbol}'
 
 

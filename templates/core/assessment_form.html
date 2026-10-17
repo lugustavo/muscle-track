@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation %}
 
 {% block title %}{{ title }} - {{ student.person_name }}{% endblock %}
@@ -20,7 +21,7 @@
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label class="form-label fw-bold" for="{{ form.date.id_for_label }}">Data</label>
+                        <label class="form-label fw-bold" for="{{ form.date.id_for_label }}">{% trans "Data" %}</label>
                         {{ form.date }} {{ form.date.errors }}
                     </div>
                     <div class="col-6 col-md-4"><label class="form-label fw-bold" for="{{ form.weight_kg.id_for_label }}">{{ form.weight_kg.label }}</label>{{ form.weight_kg }}{{ form.weight_kg.errors }}</div>
@@ -32,13 +33,13 @@
                     <div class="col-6 col-md-4"><label class="form-label fw-bold" for="{{ form.arm_cm.id_for_label }}">{{ form.arm_cm.label }}</label>{{ form.arm_cm }}{{ form.arm_cm.errors }}</div>
                     <div class="col-6 col-md-4"><label class="form-label fw-bold" for="{{ form.thigh_cm.id_for_label }}">{{ form.thigh_cm.label }}</label>{{ form.thigh_cm }}{{ form.thigh_cm.errors }}</div>
                     <div class="col-12">
-                        <label class="form-label fw-bold" for="{{ form.notes.id_for_label }}">Observações</label>
+                        <label class="form-label fw-bold" for="{{ form.notes.id_for_label }}">{% trans "Observações" %}</label>
                         {{ form.notes }}
                     </div>
                 </div>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Salvar avaliação</button>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> {% trans "Salvar avaliação" %}</button>
         {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='' fragment='#tab-avaliacoes' %}
     </div>
 </form>

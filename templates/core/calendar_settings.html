@@ -1,96 +1,97 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation %}
 
-{% block title %}Google Agenda - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed %}Google Agenda - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="mx-auto" style="max-width: 720px;">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-        <h1 class="h3 mb-0"><i class="bi bi-calendar-plus"></i> Google Agenda</h1>
+        <h1 class="h3 mb-0"><i class="bi bi-calendar-plus"></i> {% trans "Google Agenda" %}</h1>
         {% if role == 'trainer' %}{% url 'core:agenda' as back_default %}{% else %}{% url 'core:my_profile' as back_default %}{% endif %}
         {% back_button back_default %}
     </div>
 
     <p class="text-muted">
-        {% if role == 'trainer' %}Veja todas as suas aulas no Google Agenda do celular e do computador: o app gera um link só seu e o Google passa a mostrar as aulas como um calendário.
-        {% else %}Veja as suas aulas no Google Agenda do celular: o app gera um link só seu e o Google passa a mostrar suas aulas como um calendário.{% endif %}
+        {% if role == 'trainer' %}{% trans "Veja todas as suas aulas no Google Agenda do celular e do computador: o app gera um link só seu e o Google passa a mostrar as aulas como um calendário." %}
+        {% else %}{% trans "Veja as suas aulas no Google Agenda do celular: o app gera um link só seu e o Google passa a mostrar suas aulas como um calendário." %}{% endif %}
     </p>
 
     <div class="card mb-3" data-calendar-link>
-        <div class="card-header"><strong>1. Copie o seu link</strong></div>
+        <div class="card-header"><strong>{% trans "1. Copie o seu link" %}</strong></div>
         <div class="card-body">
             <div class="input-group">
-                <input type="text" class="form-control" id="calendarUrl" value="{{ feed_url }}" readonly aria-label="Link do calendário" data-calendar-url>
-                <button class="btn btn-primary" type="button" data-copy-target="#calendarUrl"><i class="bi bi-clipboard"></i> <span>Copiar</span></button>
+                <input type="text" class="form-control" id="calendarUrl" value="{{ feed_url }}" readonly aria-label="{% trans "Link do calendário" %}" data-calendar-url>
+                <button class="btn btn-primary" type="button" data-copy-target="#calendarUrl"><i class="bi bi-clipboard"></i> <span>{% trans "Copiar" %}</span></button>
             </div>
             <div class="small text-muted mt-2">
-                <i class="bi bi-shield-lock"></i> Quem tiver este link vê {% if role == 'trainer' %}a sua agenda{% else %}as suas aulas{% endif %}. Não envie a ninguém. Se vazar, gere um novo link abaixo.
+                <i class="bi bi-shield-lock"></i> {% trans "Quem tiver este link vê" %} {% if role == 'trainer' %}{% trans "a sua agenda" %}{% else %}{% trans "as suas aulas" %}{% endif %}{% trans ". Não envie a ninguém. Se vazar, gere um novo link abaixo." %}
             </div>
         </div>
     </div>
 
     <div class="card mb-3">
-        <div class="card-header"><strong>2. Adicione no Google Agenda</strong></div>
+        <div class="card-header"><strong>{% trans "2. Adicione no Google Agenda" %}</strong></div>
         <div class="card-body">
             <ol class="mb-3">
-                <li>Abra <strong>Adicionar agenda por URL</strong> no Google Agenda (botão abaixo; é no computador, o celular usa as agendas da mesma conta).</li>
-                <li>Cole o link no campo <strong>URL da agenda</strong> e clique em <strong>Adicionar agenda</strong>.</li>
-                <li>Pronto: a agenda "{% if role == 'trainer' %}Muscle Track · Agenda{% else %}Minhas aulas{% endif %}" aparece em "Outras agendas" e no app do celular.</li>
+                <li>{% blocktrans trimmed %}Abra <strong>Adicionar agenda por URL</strong> no Google Agenda (botão abaixo; é no computador, o celular usa as agendas da mesma conta).{% endblocktrans %}</li>
+                <li>{% blocktrans trimmed %}Cole o link no campo <strong>URL da agenda</strong> e clique em <strong>Adicionar agenda</strong>.{% endblocktrans %}</li>
+                <li>{% trans "Pronto: a agenda \"" %}{% if role == 'trainer' %}{% trans "Muscle Track · Agenda" %}{% else %}{% trans "Minhas aulas" %}{% endif %}{% trans "\" aparece em \"Outras agendas\" e no app do celular." %}</li>
             </ol>
             <div class="d-flex flex-wrap gap-2">
-                <a class="btn btn-outline-primary" href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl" target="_blank" rel="noopener"><i class="bi bi-google"></i> Abrir o Google Agenda</a>
-                <a class="btn btn-outline-secondary" href="{{ webcal_url }}"><i class="bi bi-apple"></i> Abrir em outro app de calendário</a>
+                <a class="btn btn-outline-primary" href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl" target="_blank" rel="noopener"><i class="bi bi-google"></i> {% trans "Abrir o Google Agenda" %}</a>
+                <a class="btn btn-outline-secondary" href="{{ webcal_url }}"><i class="bi bi-apple"></i> {% trans "Abrir em outro app de calendário" %}</a>
             </div>
             <div class="alert alert-info small mt-3 mb-0">
-                <i class="bi bi-hourglass-split"></i> O Google busca o link de tempos em tempos (de algumas horas até cerca de um dia), então uma aula remarcada ou cancelada pode demorar a aparecer lá. Para o horário exato, confira sempre no app.
+                <i class="bi bi-hourglass-split"></i> {% trans "O Google busca o link de tempos em tempos (de algumas horas até cerca de um dia), então uma aula remarcada ou cancelada pode demorar a aparecer lá. Para o horário exato, confira sempre no app." %}
             </div>
         </div>
     </div>
 
     <div class="card mb-3">
-        <div class="card-header"><strong>Situação do link</strong></div>
+        <div class="card-header"><strong>{% trans "Situação do link" %}</strong></div>
         <div class="card-body small">
             {% if feed.last_fetched_at %}
-                <i class="bi bi-check-circle text-success"></i> O Google ou outro app buscou este link pela última vez em <strong>{{ feed.last_fetched_at|date:"d/m/Y H:i" }}</strong>.
+                <i class="bi bi-check-circle text-success"></i> {% blocktrans trimmed with last_fetched_at=feed.last_fetched_at|date:"d/m/Y H:i" %}O Google ou outro app buscou este link pela última vez em <strong>{{ last_fetched_at }}</strong>.{% endblocktrans %}
             {% else %}
-                <i class="bi bi-clock text-muted"></i> Ainda ninguém buscou este link. Depois de adicionar no Google Agenda, volte aqui para conferir.
+                <i class="bi bi-clock text-muted"></i> {% trans "Ainda ninguém buscou este link. Depois de adicionar no Google Agenda, volte aqui para conferir." %}
             {% endif %}
-            {% if feed.rotated_at %}<div class="text-muted mt-1">Link gerado de novo em {{ feed.rotated_at|date:"d/m/Y H:i" }}.</div>{% endif %}
+            {% if feed.rotated_at %}<div class="text-muted mt-1">{% blocktrans trimmed with rotated_at=feed.rotated_at|date:"d/m/Y H:i" %}Link gerado de novo em {{ rotated_at }}.{% endblocktrans %}</div>{% endif %}
         </div>
     </div>
 
     {% if role == 'trainer' %}
     <div class="card mb-3">
-        <div class="card-header"><strong>Como os alunos aparecem no seu Google Agenda</strong></div>
+        <div class="card-header"><strong>{% trans "Como os alunos aparecem no seu Google Agenda" %}</strong></div>
         <div class="card-body">
             <form method="post" action="{% url 'core:calendar_style' %}" class="d-flex flex-wrap gap-2 align-items-end">
                 {% csrf_token %}
                 <div class="flex-grow-1">
-                    <label class="form-label small mb-1" for="nameStyle">Nome no título do evento</label>
+                    <label class="form-label small mb-1" for="nameStyle">{% trans "Nome no título do evento" %}</label>
                     <select class="form-select" id="nameStyle" name="name_style">
                         {% for key, label in name_styles %}<option value="{{ key }}" {% if feed.name_style == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
                     </select>
                 </div>
-                <button class="btn btn-primary" type="submit">Salvar</button>
+                <button class="btn btn-primary" type="submit">{% trans "Salvar" %}</button>
             </form>
-            <div class="small text-muted mt-2">O Google (e quem mais tiver acesso à sua conta ou ao calendário compartilhado) vê esse título. A saúde, as anotações internas e os valores dos alunos <strong>nunca</strong> vão para o calendário.</div>
+            <div class="small text-muted mt-2">{% blocktrans trimmed %}O Google (e quem mais tiver acesso à sua conta ou ao calendário compartilhado) vê esse título. A saúde, as anotações internas e os valores dos alunos <strong>nunca</strong> vão para o calendário.{% endblocktrans %}</div>
         </div>
     </div>
     {% else %}
     <div class="card mb-3">
-        <div class="card-header"><strong>O que o Google recebe</strong></div>
+        <div class="card-header"><strong>{% trans "O que o Google recebe" %}</strong></div>
         <div class="card-body small">
-            Só o <strong>dia, o horário e a duração</strong> das suas aulas, com o título "Aula de treino". Nada sobre saúde, treinos, pagamentos ou outros alunos. Você pode apagar a agenda no Google a qualquer momento ou gerar um novo link abaixo para cortar o acesso.
+            {% blocktrans trimmed %}Só o <strong>dia, o horário e a duração</strong> das suas aulas, com o título "Aula de treino". Nada sobre saúde, treinos, pagamentos ou outros alunos. Você pode apagar a agenda no Google a qualquer momento ou gerar um novo link abaixo para cortar o acesso.{% endblocktrans %}
         </div>
     </div>
     {% endif %}
 
     <div class="card border-danger-subtle">
         <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <div class="small"><strong>Link vazou ou quer trocar?</strong><br><span class="text-muted">O link atual para de funcionar na hora e você precisa adicionar o novo no Google Agenda.</span></div>
-            <form method="post" action="{% url 'core:calendar_rotate' %}" onsubmit="return confirm('Gerar um novo link? O atual deixa de funcionar e a agenda que você adicionou no Google vai parar de atualizar.');">
+            <div class="small"><strong>{% trans "Link vazou ou quer trocar?" %}</strong><br><span class="text-muted">{% trans "O link atual para de funcionar na hora e você precisa adicionar o novo no Google Agenda." %}</span></div>
+            <form method="post" action="{% url 'core:calendar_rotate' %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Gerar um novo link? O atual deixa de funcionar e a agenda que você adicionou no Google vai parar de atualizar." %}{% endfilter %}');">
                 {% csrf_token %}
-                <button class="btn btn-outline-danger" type="submit"><i class="bi bi-arrow-repeat"></i> Gerar novo link</button>
+                <button class="btn btn-outline-danger" type="submit"><i class="bi bi-arrow-repeat"></i> {% trans "Gerar novo link" %}</button>
             </form>
         </div>
     </div>

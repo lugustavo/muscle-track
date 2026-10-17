@@ -1,35 +1,36 @@
 {% extends 'base.html' %}
 
-{% block title %}Política de privacidade - Muscle Track{% endblock %}
+{% load i18n %}
+{% block title %}{% blocktrans trimmed %}Política de privacidade - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <h1 class="h3 mb-1">Política de privacidade</h1>
-        <p class="text-muted">Versão {{ version }}</p>
+        <h1 class="h3 mb-1">{% trans "Política de privacidade" %}</h1>
+        <p class="text-muted">{% blocktrans trimmed %}Versão {{ version }}{% endblocktrans %}</p>
 
-        <h2 class="h5 mt-4">Quem cuida dos seus dados</h2>
-        <p>O controlador dos dados é {{ controller }}.{% if contact_email %} Contato: <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.{% endif %}</p>
+        <h2 class="h5 mt-4">{% trans "Quem cuida dos seus dados" %}</h2>
+        <p>{% blocktrans trimmed %}O controlador dos dados é {{ controller }}.{% endblocktrans %}{% if contact_email %} {% trans "Contato:" %} <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.{% endif %}</p>
 
-        <h2 class="h5 mt-4">Quais dados e para quê</h2>
+        <h2 class="h5 mt-4">{% trans "Quais dados e para quê" %}</h2>
         <ul>
-            <li><strong>Cadastro:</strong> nome, e-mail, telefone, endereço, data de nascimento e contato de emergência, para identificar você e entrar em contato.</li>
-            <li><strong>Saúde e treino:</strong> objetivo, lesões e restrições, avaliações físicas (peso, medidas, gordura), treinos feitos, cargas e comentários. São dados sensíveis, usados só para montar e acompanhar seu treino.</li>
-            <li><strong>Fotos de evolução</strong> (opcional): ficam em área privada e só você e sua personal as veem.</li>
-            <li><strong>Plano:</strong> nome do plano e vencimento.</li>
+            <li>{% blocktrans trimmed %}<strong>Cadastro:</strong> nome, e-mail, telefone, endereço, data de nascimento e contato de emergência, para identificar você e entrar em contato.{% endblocktrans %}</li>
+            <li>{% blocktrans trimmed %}<strong>Saúde e treino:</strong> objetivo, lesões e restrições, avaliações físicas (peso, medidas, gordura), treinos feitos, cargas e comentários. São dados sensíveis, usados só para montar e acompanhar seu treino.{% endblocktrans %}</li>
+            <li>{% blocktrans trimmed %}<strong>Fotos de evolução</strong> (opcional): ficam em área privada e só você e sua personal as veem.{% endblocktrans %}</li>
+            <li>{% blocktrans trimmed %}<strong>Plano:</strong> nome do plano e vencimento.{% endblocktrans %}</li>
         </ul>
 
-        <h2 class="h5 mt-4">Com quem compartilhamos</h2>
-        <p>Seus dados não são vendidos nem compartilhados com terceiros. Ficam no servidor do aplicativo, acessível só pela personal e por você.</p>
+        <h2 class="h5 mt-4">{% trans "Com quem compartilhamos" %}</h2>
+        <p>{% trans "Seus dados não são vendidos nem compartilhados com terceiros. Ficam no servidor do aplicativo, acessível só pela personal e por você." %}</p>
 
-        <h2 class="h5 mt-4">Por quanto tempo</h2>
-        <p>Enquanto você for aluno(a) e, depois disso, até você pedir a exclusão.</p>
+        <h2 class="h5 mt-4">{% trans "Por quanto tempo" %}</h2>
+        <p>{% trans "Enquanto você for aluno(a) e, depois disso, até você pedir a exclusão." %}</p>
 
-        <h2 class="h5 mt-4">Seus direitos</h2>
-        <p>Você pode, a qualquer momento: ver seus dados, baixar uma cópia, corrigir seu cadastro, retirar o consentimento das fotos e pedir a exclusão de todos os dados, em
-            <em>Privacidade e meus dados</em> no menu do aplicativo.</p>
+        <h2 class="h5 mt-4">{% trans "Seus direitos" %}</h2>
+        <p>{% blocktrans trimmed %}Você pode, a qualquer momento: ver seus dados, baixar uma cópia, corrigir seu cadastro, retirar o consentimento das fotos e pedir a exclusão de todos os dados, em
+            <em>Privacidade e meus dados</em> no menu do aplicativo.{% endblocktrans %}</p>
 
-        <p class="small text-muted border-top pt-3">Texto padrão do aplicativo. A personal responsável deve revisá-lo (de preferência com apoio jurídico) antes de usá-lo como documento oficial.</p>
+        <p class="small text-muted border-top pt-3">{% trans "Texto padrão do aplicativo. A personal responsável deve revisá-lo (de preferência com apoio jurídico) antes de usá-lo como documento oficial." %}</p>
     </div>
 </div>
 {% endblock %}

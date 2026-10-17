@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation %}
 
-{% block title %}Editar horário fixo - {{ student.person_name }}{% endblock %}
+{% block title %}{% blocktrans trimmed with person_name=student.person_name %}Editar horário fixo - {{ person_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1 class="h2"><i class="bi bi-calendar-week"></i> Editar horário fixo</h1>
-        <div class="text-muted">{{ student.person_name }} · hoje: {{ slot.get_weekday_display }} às {{ slot.start_time|time:"H:i" }} ({{ slot.duration_minutes }} min){% if slot.interval_weeks > 1 %}, a cada {{ slot.interval_weeks }} semanas{% endif %}</div>
+        <h1 class="h2"><i class="bi bi-calendar-week"></i> {% trans "Editar horário fixo" %}</h1>
+        <div class="text-muted">{% blocktrans trimmed with person_name=student.person_name get_weekday_display=slot.get_weekday_display start_time=slot.start_time|time:"H:i" duration_minutes=slot.duration_minutes %}{{ person_name }} · hoje: {{ get_weekday_display }} às {{ start_time }} ({{ duration_minutes }} min){% endblocktrans %}{% if slot.interval_weeks > 1 %}{% blocktrans trimmed with interval_weeks=slot.interval_weeks %}, a cada {{ interval_weeks }} semanas{% endblocktrans %}{% endif %}</div>
     </div>
     {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default fragment='#tab-agenda' %}
 </div>
@@ -18,20 +19,20 @@
         {{ form.non_field_errors }}
         <div class="card mb-3"><div class="card-body">
             <div class="row g-2 mb-3">
-                <div class="col-sm-6"><label class="form-label fw-bold" for="{{ form.weekday.id_for_label }}">Dia da semana</label>{{ form.weekday }}{{ form.weekday.errors }}</div>
-                <div class="col-sm-6"><label class="form-label fw-bold" for="{{ form.start_time.id_for_label }}">Horário</label>{{ form.start_time }}{{ form.start_time.errors }}</div>
+                <div class="col-sm-6"><label class="form-label fw-bold" for="{{ form.weekday.id_for_label }}">{% trans "Dia da semana" %}</label>{{ form.weekday }}{{ form.weekday.errors }}</div>
+                <div class="col-sm-6"><label class="form-label fw-bold" for="{{ form.start_time.id_for_label }}">{% trans "Horário" %}</label>{{ form.start_time }}{{ form.start_time.errors }}</div>
             </div>
-            <div class="mb-3"><label class="form-label fw-bold" for="{{ form.duration_minutes.id_for_label }}">Duração (min)</label>{{ form.duration_minutes }}{{ form.duration_minutes.errors }}</div>
+            <div class="mb-3"><label class="form-label fw-bold" for="{{ form.duration_minutes.id_for_label }}">{% trans "Duração (min)" %}</label>{{ form.duration_minutes }}{{ form.duration_minutes.errors }}</div>
             <div class="row g-2">
-                <div class="col-sm-6"><label class="form-label fw-bold" for="{{ form.from_day.id_for_label }}">A partir de</label>{{ form.from_day }}{{ form.from_day.errors }}</div>
-                <div class="col-sm-6"><label class="form-label fw-bold" for="{{ form.valid_until.id_for_label }}">Vale até (opcional)</label>{{ form.valid_until }}{{ form.valid_until.errors }}</div>
+                <div class="col-sm-6"><label class="form-label fw-bold" for="{{ form.from_day.id_for_label }}">{% trans "A partir de" %}</label>{{ form.from_day }}{{ form.from_day.errors }}</div>
+                <div class="col-sm-6"><label class="form-label fw-bold" for="{{ form.valid_until.id_for_label }}">{% trans "Vale até (opcional)" %}</label>{{ form.valid_until }}{{ form.valid_until.errors }}</div>
             </div>
         </div></div>
         <div class="alert alert-info small"><i class="bi bi-info-circle"></i>
-            A mudança vale <strong>da data escolhida em diante</strong>: as aulas já dadas e as aulas marcadas antes dela ficam como estão.
-            As próximas aulas desse horário que ninguém mexeu (não foram movidas, nem têm pedido do aluno) são recriadas no novo dia e horário.
+            {% blocktrans trimmed %}A mudança vale <strong>da data escolhida em diante</strong>: as aulas já dadas e as aulas marcadas antes dela ficam como estão.
+            As próximas aulas desse horário que ninguém mexeu (não foram movidas, nem têm pedido do aluno) são recriadas no novo dia e horário.{% endblocktrans %}
         </div>
-        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Salvar horário</button>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> {% trans "Salvar horário" %}</button>
         {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='' fragment='#tab-agenda' %}
     </div>
 </form>

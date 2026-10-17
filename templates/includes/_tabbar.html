@@ -1,6 +1,7 @@
+{% load i18n %}
 {% load static %}
 {% if tabbar %}
-<nav class="tabbar d-lg-none" aria-label="Menu principal">
+<nav class="tabbar d-lg-none" aria-label="{% trans "Menu principal" %}">
     {% if tabbar.role == 'student' %}
         {% for item in tabbar.items %}
             {% if item.key == 'center' %}
@@ -8,13 +9,13 @@
                 {% if tabbar.center.state == 'start' %}
                 <form method="post" action="{{ tabbar.center.url }}">
                     {% csrf_token %}
-                    <button type="submit" class="btn-center" aria-label="Iniciar o treino de hoje">
+                    <button type="submit" class="btn-center" aria-label="{% trans "Iniciar o treino de hoje" %}">
                         <span class="circle"><i class="bi bi-play-fill"></i></span>
                         <span class="label">{{ tabbar.center.label }}</span>
                     </button>
                 </form>
                 {% elif tabbar.center.state == 'continue' %}
-                <a href="{{ tabbar.center.url }}" class="btn-center" aria-label="Continuar o treino em andamento"{% if tabbar.center.active %} aria-current="page"{% endif %}>
+                <a href="{{ tabbar.center.url }}" class="btn-center" aria-label="{% trans "Continuar o treino em andamento" %}"{% if tabbar.center.active %} aria-current="page"{% endif %}>
                     <span class="circle"><i class="bi bi-stopwatch"></i></span>
                     <span class="label tab-timer" data-tabbar-timer="{{ tabbar.center.started_ms }}">{{ tabbar.center.label }}</span>
                 </a>
@@ -35,19 +36,19 @@
         {% for item in tabbar.items %}
         <a href="{{ item.url }}" class="tab {% if item.active %}active{% endif %}" {% if item.active %}aria-current="page"{% endif %}>
             <i class="bi {{ item.icon }}"></i><span class="label">{{ item.label }}</span>
-            {% if item.badge %}<span class="tab-badge" aria-hidden="true">{{ item.badge }}</span><span class="visually-hidden">, {{ item.badge }} pendente{{ item.badge|pluralize }}</span>{% endif %}
+            {% if item.badge %}<span class="tab-badge" aria-hidden="true">{{ item.badge }}</span><span class="visually-hidden">{% blocktrans trimmed count badge=item.badge %}, {{ badge }} pendente{% plural %}, {{ badge }} pendentes{% endblocktrans %}</span>{% endif %}
         </a>
         {% endfor %}
         <button type="button" class="tab {% if tabbar.more_active %}active{% endif %}" data-bs-toggle="offcanvas" data-bs-target="#moreSheet" aria-controls="moreSheet">
-            <i class="bi bi-three-dots"></i><span class="label">Mais</span>
+            <i class="bi bi-three-dots"></i><span class="label">{% trans "Mais" %}</span>
         </button>
     {% endif %}
 </nav>
 {% if tabbar.role == 'staff' %}
 <div class="offcanvas offcanvas-bottom" tabindex="-1" id="moreSheet" aria-labelledby="moreSheetLabel" style="height: auto;">
     <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="moreSheetLabel">Mais</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+        <h5 class="offcanvas-title" id="moreSheetLabel">{% trans "Mais" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{% trans "Fechar" %}"></button>
     </div>
     <div class="offcanvas-body pt-0" style="padding-bottom: calc(1rem + env(safe-area-inset-bottom));">
         <div class="list-group list-group-flush">
@@ -60,13 +61,13 @@
     </div>
 </div>
 {% if fab_items %}
-<button type="button" class="fab d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#createSheet" aria-controls="createSheet" aria-label="Criar">
+<button type="button" class="fab d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#createSheet" aria-controls="createSheet" aria-label="{% trans "Criar" %}">
     <i class="bi bi-plus-lg"></i>
 </button>
 <div class="offcanvas offcanvas-bottom" tabindex="-1" id="createSheet" aria-labelledby="createSheetLabel" style="height: auto;">
     <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="createSheetLabel">Criar</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+        <h5 class="offcanvas-title" id="createSheetLabel">{% trans "Criar" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{% trans "Fechar" %}"></button>
     </div>
     <div class="offcanvas-body pt-0" style="padding-bottom: calc(1rem + env(safe-area-inset-bottom));">
         <div class="list-group list-group-flush">

@@ -1,29 +1,30 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation %}
 
-{% block title %}Busca - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed %}Busca - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-3"><i class="bi bi-search"></i> Busca</h1>
+<h1 class="h3 mb-3"><i class="bi bi-search"></i> {% trans "Busca" %}</h1>
 
 <form method="get" action="{% url 'core:search' %}" class="mb-4" role="search" data-search-page>
     <div class="input-group input-group-lg">
-        <input type="search" name="q" value="{{ q }}" class="form-control" placeholder="Aluno, exercício ou treino..." aria-label="Buscar" maxlength="80" autocomplete="off" {% if not q %}autofocus{% endif %}>
-        <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i><span class="visually-hidden"> Buscar</span></button>
+        <input type="search" name="q" value="{{ q }}" class="form-control" placeholder="{% trans "Aluno, exercício ou treino..." %}" aria-label="{% trans "Buscar" %}" maxlength="80" autocomplete="off" {% if not q %}autofocus{% endif %}>
+        <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i><span class="visually-hidden"> {% trans "Buscar" %}</span></button>
     </div>
 </form>
 
 {% if not q %}
     <div class="text-muted">
-        <p class="mb-1">Digite um nome, e-mail ou telefone de aluno, o nome de um exercício ou de um treino.</p>
-        <p class="small mb-0">Dica: <kbd>/</kbd> ou <kbd>Ctrl</kbd> + <kbd>K</kbd> abrem a busca de qualquer tela. <code>#12</code> acha o aluno de número 12.</p>
+        <p class="mb-1">{% trans "Digite um nome, e-mail ou telefone de aluno, o nome de um exercício ou de um treino." %}</p>
+        <p class="small mb-0">{% blocktrans trimmed %}Dica: <kbd>/</kbd> ou <kbd>Ctrl</kbd> + <kbd>K</kbd> abrem a busca de qualquer tela. <code>#12</code> acha o aluno de número 12.{% endblocktrans %}</p>
     </div>
 {% elif result.too_short %}
-    <div class="alert alert-info">Digite pelo menos 2 letras.</div>
+    <div class="alert alert-info">{% trans "Digite pelo menos 2 letras." %}</div>
 {% elif not found %}
     <div class="alert alert-info">
-        <i class="bi bi-info-circle"></i> Nada encontrado para <strong>{{ q }}</strong>.
-        <div class="small mt-1">Tente só uma parte do nome, ou o telefone sem máscara.</div>
+        <i class="bi bi-info-circle"></i> {% blocktrans trimmed %}Nada encontrado para <strong>{{ q }}</strong>.{% endblocktrans %}
+        <div class="small mt-1">{% trans "Tente só uma parte do nome, ou o telefone sem máscara." %}</div>
     </div>
 {% else %}
     {% for group in result.groups %}
@@ -45,7 +46,7 @@
             {% endfor %}
         </div>
         {% if group.total > group.items|length %}
-        <div class="card-footer text-center"><a href="{{ group.more_url }}">Ver todos os {{ group.total }} em {{ group.label|lower }}</a></div>
+        <div class="card-footer text-center"><a href="{{ group.more_url }}">{% blocktrans trimmed with total=group.total label=group.label|lower %}Ver todos os {{ total }} em {{ label }}{% endblocktrans %}</a></div>
         {% endif %}
     </div>
     {% endif %}

@@ -1,3 +1,4 @@
+{% load i18n %}
 {% load static %}<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,7 +7,7 @@
     <meta name="theme-color" content="#FF6B6B" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1d2733" media="(prefers-color-scheme: dark)">
     <meta name="color-scheme" content="light dark">
-    <title>Sem conexão - Muscle Track</title>
+    <title>{% trans "Sem conexão - Muscle Track" %}</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; align-items: center;
                justify-content: center; text-align: center; margin: 0; padding: 1rem; color: #2C3E50; }
@@ -17,9 +18,9 @@
 </head>
 <body>
     <div>
-        <h1>Sem conexão</h1>
-        <p>Não foi possível carregar esta página. Se você estava treinando, o que já foi marcado será enviado quando a internet voltar.</p>
-        <button onclick="location.reload()">Tentar de novo</button>
+        <h1>{% trans "Sem conexão" %}</h1>
+        <p>{% trans "Não foi possível carregar esta página. Se você estava treinando, o que já foi marcado será enviado quando a internet voltar." %}</p>
+        <button onclick="location.reload()">{% trans "Tentar de novo" %}</button>
     </div>
 </body>
 </html>

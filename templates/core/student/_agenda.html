@@ -1,37 +1,39 @@
+{% load i18n %}
 {% load navigation static %}
 <div class="row g-4">
     <div class="col-lg-6">
-        <h5 class="mb-3"><i class="bi bi-calendar-week"></i> Horários fixos</h5>
+        <h5 class="mb-3"><i class="bi bi-calendar-week"></i> {% trans "Horários fixos" %}</h5>
         <ul class="list-group mb-3">
             {% for slot in slots %}
             <li class="list-group-item p-0 swipe-row" data-swipe-row data-slot="{{ slot.pk }}">
                 <div class="swipe-content px-3 py-2">
-                    <strong>{{ slot.get_weekday_display }}</strong> às {{ slot.start_time|time:"H:i" }} <small class="text-muted">({{ slot.duration_minutes }} min){% if slot.interval_weeks > 1 %} · a cada {{ slot.interval_weeks }} semanas{% endif %}{% if slot.valid_until %} · até {{ slot.valid_until|date:"d/m/Y" }}{% endif %}</small>
+                    {% blocktrans trimmed with get_weekday_display=slot.get_weekday_display start_time=slot.start_time|time:"H:i" %}<strong>{{ get_weekday_display }}</strong> às {{ start_time }}{% endblocktrans %} <small class="text-muted">{% blocktrans trimmed with duration_minutes=slot.duration_minutes %}({{ duration_minutes }} min){% endblocktrans %}{% if slot.interval_weeks > 1 %} {% blocktrans trimmed with interval_weeks=slot.interval_weeks %}· a cada {{ interval_weeks }} semanas{% endblocktrans %}{% endif %}{% if slot.valid_until %} {% blocktrans trimmed with valid_until=slot.valid_until|date:"d/m/Y" %}· até {{ valid_until }}{% endblocktrans %}{% endif %}</small>
                 </div>
                 <div class="swipe-actions">
-                    <a href="{% nav_url 'core:slot_edit' slot.pk %}" class="btn btn-sm btn-link swipe-edit" title="Editar" data-slot-edit>
-                        <i class="bi bi-pencil"></i><span class="swipe-label">Editar</span></a>
-                    <form method="post" action="{% nav_url 'core:slot_delete' slot.pk %}" onsubmit="return confirm('Remover este horário? As aulas futuras dele saem da agenda.');">
+                    <a href="{% nav_url 'core:slot_edit' slot.pk %}" class="btn btn-sm btn-link swipe-edit" title="{% trans "Editar" %}" data-slot-edit>
+                        <i class="bi bi-pencil"></i><span class="swipe-label">{% trans "Editar" %}</span></a>
+                    <form method="post" action="{% nav_url 'core:slot_delete' slot.pk %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover este horário? As aulas futuras dele saem da agenda." %}{% endfilter %}');">
                         {% csrf_token %}
-                        <button class="btn btn-sm btn-link swipe-remove" title="Remover" data-slot-remove><i class="bi bi-trash"></i><span class="swipe-label">Remover</span></button>
+                        <button class="btn btn-sm btn-link swipe-remove" title="{% trans "Remover" %}" data-slot-remove><i class="bi bi-trash"></i><span class="swipe-label">{% trans "Remover" %}</span></button>
                     </form>
                 </div>
             </li>
             {% empty %}
-            <li class="list-group-item text-muted">Nenhum horário fixo. Adicione abaixo (ex.: segunda 07:00).</li>
+            <li class="list-group-item text-muted">{% trans "Nenhum horário fixo. Adicione abaixo (ex.: segunda 07:00)." %}</li>
             {% endfor %}
         </ul>
-        {% if slots %}<p class="small text-muted mt-n2 mb-3 d-md-none"><i class="bi bi-arrow-left-right"></i> Deslize o horário para a esquerda para editar ou remover.</p>{% endif %}
+        {% if slots %}<p class="small text-muted mt-n2 mb-3 d-md-none"><i class="bi bi-arrow-left-right"></i> {% trans "Deslize o horário para a esquerda para editar ou remover." %}</p>{% endif %}
         {% if slot_plan %}
         <div class="alert alert-info py-2 small" data-slot-package>
-            <i class="bi bi-box-seam"></i> <strong>{{ slot_plan.name }}</strong>:
-            restam <strong>{{ slot_plan.left }}</strong> aula{{ slot_plan.left|pluralize }}{% if slot_plan.scheduled %}, {{ slot_plan.scheduled }} já marcada{{ slot_plan.scheduled|pluralize }}{% endif %}
-            {% if slot_plan.ends_on %}· vale até {{ slot_plan.ends_on|date:"d/m/Y" }}{% elif not slot_plan.package.valid_days %}· sem prazo{% elif slot_plan.state == 'not_started' %}· o prazo começa na primeira aula{% endif %}.
-            {% if slot_plan.to_schedule %}Faltam marcar <strong>{{ slot_plan.to_schedule }}</strong>.{% else %}<i class="bi bi-check-circle"></i> Todas as aulas do pacote já estão marcadas.{% endif %}
+            <i class="bi bi-box-seam"></i> {% blocktrans trimmed with name=slot_plan.name count left=slot_plan.left %}<strong>{{ name }}</strong>:
+            restam <strong>{{ left }}</strong> aula{% plural %}<strong>{{ name }}</strong>:
+            restam <strong>{{ left }}</strong> aulas{% endblocktrans %}{% if slot_plan.scheduled %}{% blocktrans trimmed count scheduled=slot_plan.scheduled %}, {{ scheduled }} já marcada{% plural %}, {{ scheduled }} já marcadas{% endblocktrans %}{% endif %}
+            {% if slot_plan.ends_on %}{% blocktrans trimmed with ends_on=slot_plan.ends_on|date:"d/m/Y" %}· vale até {{ ends_on }}{% endblocktrans %}{% elif not slot_plan.package.valid_days %}{% trans "· sem prazo" %}{% elif slot_plan.state == 'not_started' %}{% trans "· o prazo começa na primeira aula" %}{% endif %}.
+            {% if slot_plan.to_schedule %}{% blocktrans trimmed with to_schedule=slot_plan.to_schedule %}Faltam marcar <strong>{{ to_schedule }}</strong>.{% endblocktrans %}{% else %}<i class="bi bi-check-circle"></i> {% trans "Todas as aulas do pacote já estão marcadas." %}{% endif %}
             {% if slot_plan.to_schedule and has_package_series %}
             <form method="post" action="{% nav_url 'core:slot_topup' student.pk %}" class="d-inline" data-slot-topup>
                 {% csrf_token %}
-                <button class="btn btn-sm btn-primary ms-1">Marcar mais {{ slot_plan.to_schedule }}</button>
+                <button class="btn btn-sm btn-primary ms-1">{% blocktrans trimmed with to_schedule=slot_plan.to_schedule %}Marcar mais {{ to_schedule }}{% endblocktrans %}</button>
             </form>
             {% endif %}
         </div>
@@ -39,84 +41,84 @@
         <form method="post" action="{% nav_url 'core:slot_fill' student.pk %}" class="card card-body bg-body-tertiary mb-3"
               data-slot-fill data-preview-url="{% url 'core:slot_preview' student.pk %}">
             {% csrf_token %}
-            <div class="small fw-bold mb-2">Preencher a agenda do pacote</div>
-            {% if fill_pattern %}<div class="small text-muted mb-2" data-fill-continue><i class="bi bi-arrow-repeat"></i> Mesmo horário de antes: <strong>{{ fill_pattern.label }}</strong>, a partir do dia seguinte à última aula marcada. Confira a prévia e confirme.</div>{% endif %}
+            <div class="small fw-bold mb-2">{% trans "Preencher a agenda do pacote" %}</div>
+            {% if fill_pattern %}<div class="small text-muted mb-2" data-fill-continue><i class="bi bi-arrow-repeat"></i> {% blocktrans trimmed with label=fill_pattern.label %}Mesmo horário de antes: <strong>{{ label }}</strong>, a partir do dia seguinte à última aula marcada. Confira a prévia e confirme.{% endblocktrans %}</div>{% endif %}
             <div class="mb-2">{% include 'core/_weekday_pills.html' with field=fill_form.weekdays %}</div>
             <div class="row g-2 mb-2">
-                <div class="col-6"><label class="form-label small mb-0" for="{{ fill_form.starts_on.id_for_label }}">Primeira aula</label>{{ fill_form.starts_on }}</div>
-                <div class="col-6"><label class="form-label small mb-0" for="{{ fill_form.start_time.id_for_label }}">Horário</label>{{ fill_form.start_time }}</div>
+                <div class="col-6"><label class="form-label small mb-0" for="{{ fill_form.starts_on.id_for_label }}">{% trans "Primeira aula" %}</label>{{ fill_form.starts_on }}</div>
+                <div class="col-6"><label class="form-label small mb-0" for="{{ fill_form.start_time.id_for_label }}">{% trans "Horário" %}</label>{{ fill_form.start_time }}</div>
             </div>
             <details class="mb-2">
-                <summary class="small text-primary" style="cursor: pointer;">Avançado (duração, repetição)</summary>
+                <summary class="small text-primary" style="cursor: pointer;">{% trans "Avançado (duração, repetição)" %}</summary>
                 <div class="row g-2 mt-1">
-                    <div class="col-6"><label class="form-label small mb-0" for="{{ fill_form.duration_minutes.id_for_label }}">Duração (min)</label>{{ fill_form.duration_minutes }}</div>
-                    <div class="col-6"><label class="form-label small mb-0" for="{{ fill_form.interval_weeks.id_for_label }}">Repete a cada (semanas)</label>{{ fill_form.interval_weeks }}</div>
+                    <div class="col-6"><label class="form-label small mb-0" for="{{ fill_form.duration_minutes.id_for_label }}">{% trans "Duração (min)" %}</label>{{ fill_form.duration_minutes }}</div>
+                    <div class="col-6"><label class="form-label small mb-0" for="{{ fill_form.interval_weeks.id_for_label }}">{% trans "Repete a cada (semanas)" %}</label>{{ fill_form.interval_weeks }}</div>
                 </div>
             </details>
-            <div class="small mb-2"><a href="{% nav_url 'core:agenda_holidays' %}" class="text-decoration-none"><i class="bi bi-flag"></i> Feriados que ficam sem aula</a></div>
-            <div data-fill-preview class="mb-2" aria-live="polite"><span class="small text-muted">Escolha os dias e o horário: o fim é calculado pelas aulas que faltam marcar ({{ slot_plan.to_schedule }}).</span></div>
-            <button class="btn btn-primary" data-fill-submit><i class="bi bi-calendar-check"></i> Preencher agenda ({{ slot_plan.to_schedule }} aula{{ slot_plan.to_schedule|pluralize }})</button>
+            <div class="small mb-2"><a href="{% nav_url 'core:agenda_holidays' %}" class="text-decoration-none"><i class="bi bi-flag"></i> {% trans "Feriados que ficam sem aula" %}</a></div>
+            <div data-fill-preview class="mb-2" aria-live="polite"><span class="small text-muted">{% blocktrans trimmed with to_schedule=slot_plan.to_schedule %}Escolha os dias e o horário: o fim é calculado pelas aulas que faltam marcar ({{ to_schedule }}).{% endblocktrans %}</span></div>
+            <button class="btn btn-primary" data-fill-submit><i class="bi bi-calendar-check"></i> {% blocktrans trimmed count to_schedule=slot_plan.to_schedule %}Preencher agenda ({{ to_schedule }} aula){% plural %}Preencher agenda ({{ to_schedule }} aulas){% endblocktrans %}</button>
         </form>
         {% endif %}
         {% else %}
         <div class="alert alert-warning py-2 small d-flex justify-content-between align-items-center gap-2" data-slot-no-package>
-            <span><i class="bi bi-box-seam"></i> Este aluno ainda não tem pacote em uso: venda um para preencher a agenda pelas aulas dele.</span>
-            <a href="{% nav_url 'core:student_package_sell' student.pk %}" class="btn btn-sm btn-warning text-nowrap">Vender pacote</a>
+            <span><i class="bi bi-box-seam"></i> {% trans "Este aluno ainda não tem pacote em uso: venda um para preencher a agenda pelas aulas dele." %}</span>
+            <a href="{% nav_url 'core:student_package_sell' student.pk %}" class="btn btn-sm btn-warning text-nowrap">{% trans "Vender pacote" %}</a>
         </div>
         {% endif %}
         <details class="mb-2" data-slot-advanced{% if not slot_plan %} open{% endif %}>
-            <summary class="small text-primary mb-2" style="cursor: pointer;">Avançado: horário sem pacote ou repetição personalizada</summary>
+            <summary class="small text-primary mb-2" style="cursor: pointer;">{% trans "Avançado: horário sem pacote ou repetição personalizada" %}</summary>
         <form method="post" action="{% nav_url 'core:slot_add' student.pk %}" class="card card-body bg-body-tertiary" data-recurrence-form>
             {% csrf_token %}
-            <div class="small fw-bold mb-2">Novo horário fixo</div>
+            <div class="small fw-bold mb-2">{% trans "Novo horário fixo" %}</div>
             <div class="mb-2">{% include 'core/_weekday_pills.html' with field=slot_form.weekdays %}</div>
             <div class="row g-2 mb-2">
-                <div class="col-6"><label class="form-label small mb-0" for="{{ slot_form.start_time.id_for_label }}">Horário</label>{{ slot_form.start_time }}</div>
-                <div class="col-6"><label class="form-label small mb-0" for="{{ slot_form.duration_minutes.id_for_label }}">Duração</label>{{ slot_form.duration_minutes }}</div>
+                <div class="col-6"><label class="form-label small mb-0" for="{{ slot_form.start_time.id_for_label }}">{% trans "Horário" %}</label>{{ slot_form.start_time }}</div>
+                <div class="col-6"><label class="form-label small mb-0" for="{{ slot_form.duration_minutes.id_for_label }}">{% trans "Duração" %}</label>{{ slot_form.duration_minutes }}</div>
             </div>
             <details class="mb-2"{% if slot_plan %} open{% endif %}>
-                <summary class="small text-primary" style="cursor: pointer;">Repetição personalizada (a cada N semanas, início e fim)</summary>
+                <summary class="small text-primary" style="cursor: pointer;">{% trans "Repetição personalizada (a cada N semanas, início e fim)" %}</summary>
                 <div class="mt-2">{% include 'core/_recurrence_options.html' with rec=slot_form with_start=True %}</div>
             </details>
-            <button class="btn btn-primary"><i class="bi bi-plus-lg"></i> Adicionar horário</button>
+            <button class="btn btn-primary"><i class="bi bi-plus-lg"></i> {% trans "Adicionar horário" %}</button>
         </form>
         </details>
-        {% if not student.is_active %}<p class="small text-muted mt-2">Aluno sem acesso: não gera aulas na agenda enquanto estiver {{ student.get_status_display|lower }}.</p>{% endif %}
+        {% if not student.is_active %}<p class="small text-muted mt-2">{% blocktrans trimmed with get_status_display=student.get_status_display|lower %}Aluno sem acesso: não gera aulas na agenda enquanto estiver {{ get_status_display }}.{% endblocktrans %}</p>{% endif %}
     </div>
 
     <div class="col-lg-6">
-        <h5 class="mb-3"><i class="bi bi-graph-up"></i> Frequência (30 dias)</h5>
+        <h5 class="mb-3"><i class="bi bi-graph-up"></i> {% trans "Frequência (30 dias)" %}</h5>
         <div class="row text-center g-2 mb-3">
-            <div class="col-4"><div class="card"><div class="card-body py-2"><div class="fs-4 fw-bold text-success">{{ attendance.attended }}</div><small class="text-muted">compareceu</small></div></div></div>
-            <div class="col-4"><div class="card"><div class="card-body py-2"><div class="fs-4 fw-bold text-danger">{{ attendance.missed }}</div><small class="text-muted">faltou</small></div></div></div>
-            <div class="col-4"><div class="card"><div class="card-body py-2"><div class="fs-4 fw-bold">{% if attendance.rate is None %}—{% else %}{{ attendance.rate }}%{% endif %}</div><small class="text-muted">presença</small></div></div></div>
+            <div class="col-4"><div class="card"><div class="card-body py-2"><div class="fs-4 fw-bold text-success">{{ attendance.attended }}</div><small class="text-muted">{% trans "compareceu" %}</small></div></div></div>
+            <div class="col-4"><div class="card"><div class="card-body py-2"><div class="fs-4 fw-bold text-danger">{{ attendance.missed }}</div><small class="text-muted">{% trans "faltou" %}</small></div></div></div>
+            <div class="col-4"><div class="card"><div class="card-body py-2"><div class="fs-4 fw-bold">{% if attendance.rate is None %}—{% else %}{{ attendance.rate }}%{% endif %}</div><small class="text-muted">{% trans "presença" %}</small></div></div></div>
         </div>
         <div class="d-flex justify-content-between align-items-center mb-2">
-            <strong>Próximas aulas</strong>
-            <a href="{% nav_url 'core:appointment_create' %}&person={{ student.pk }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-circle"></i> Aula avulsa</a>
+            <strong>{% trans "Próximas aulas" %}</strong>
+            <a href="{% nav_url 'core:appointment_create' %}&person={{ student.pk }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-circle"></i> {% trans "Aula avulsa" %}</a>
         </div>
         <ul class="list-group" data-upcoming-classes>
             {% for a in upcoming %}
             <li class="list-group-item p-0 swipe-row" data-swipe-row data-class="{{ a.pk }}">
                 <div class="swipe-content d-flex justify-content-between align-items-center px-3 py-2">
-                    <span>{{ a.starts_at|date:"D d/m" }} às {{ a.starts_at|time:"H:i" }}</span>
+                    <span>{% blocktrans trimmed with starts_at=a.starts_at|date:"D d/m" starts_at2=a.starts_at|time:"H:i" %}{{ starts_at }} às {{ starts_at2 }}{% endblocktrans %}</span>
                     <small class="text-muted">{{ a.get_kind_display }}</small>
                 </div>
                 <div class="swipe-actions">
-                    <a href="{% nav_url 'core:appointment_reschedule' a.pk %}" class="btn btn-sm btn-link swipe-edit" title="Editar" data-class-edit>
-                        <i class="bi bi-pencil"></i><span class="swipe-label">Editar</span></a>
+                    <a href="{% nav_url 'core:appointment_reschedule' a.pk %}" class="btn btn-sm btn-link swipe-edit" title="{% trans "Editar" %}" data-class-edit>
+                        <i class="bi bi-pencil"></i><span class="swipe-label">{% trans "Editar" %}</span></a>
                     <form method="post" action="{% nav_url 'core:appointment_remove' a.pk %}"
                           onsubmit="return confirm('{% if a.slot_id %}Remover esta aula? Ela sai da agenda e não desconta do pacote; o horário fixo continua nas próximas.{% else %}Remover esta aula avulsa?{% endif %}');">
                         {% csrf_token %}
-                        <button class="btn btn-sm btn-link swipe-remove" title="Remover" data-class-remove><i class="bi bi-trash"></i><span class="swipe-label">Remover</span></button>
+                        <button class="btn btn-sm btn-link swipe-remove" title="{% trans "Remover" %}" data-class-remove><i class="bi bi-trash"></i><span class="swipe-label">{% trans "Remover" %}</span></button>
                     </form>
                 </div>
             </li>
             {% empty %}
-            <li class="list-group-item text-muted">Nenhuma aula marcada.</li>
+            <li class="list-group-item text-muted">{% trans "Nenhuma aula marcada." %}</li>
             {% endfor %}
         </ul>
-        {% if upcoming %}<p class="small text-muted mt-1 mb-0 d-md-none"><i class="bi bi-arrow-left-right"></i> Deslize a aula para a esquerda para editar ou remover.</p>{% endif %}
+        {% if upcoming %}<p class="small text-muted mt-1 mb-0 d-md-none"><i class="bi bi-arrow-left-right"></i> {% trans "Deslize a aula para a esquerda para editar ou remover." %}</p>{% endif %}
     </div>
 </div>
 <script src="{% static 'js/slot_fill.js' %}"></script>

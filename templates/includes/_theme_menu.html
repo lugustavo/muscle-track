@@ -1,10 +1,11 @@
+{% load i18n %}
 <div class="dropdown theme-menu" data-theme-menu>
-    <button class="btn btn-link nav-link px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-theme-toggle aria-label="Tema">
+    <button class="btn btn-link nav-link px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-theme-toggle aria-label="{% trans "Tema" %}">
         <i class="bi bi-circle-half fs-5" data-theme-icon></i>
     </button>
     <ul class="dropdown-menu dropdown-menu-end">
-        <li><button type="button" class="dropdown-item d-flex align-items-center gap-2" data-theme-option="light" data-theme-icon-class="bi-sun-fill" data-theme-label="claro" aria-pressed="false"><i class="bi bi-sun-fill"></i> Claro</button></li>
-        <li><button type="button" class="dropdown-item d-flex align-items-center gap-2" data-theme-option="dark" data-theme-icon-class="bi-moon-stars-fill" data-theme-label="escuro" aria-pressed="false"><i class="bi bi-moon-stars-fill"></i> Escuro</button></li>
-        <li><button type="button" class="dropdown-item d-flex align-items-center gap-2" data-theme-option="auto" data-theme-icon-class="bi-circle-half" data-theme-label="automático" aria-pressed="false"><i class="bi bi-circle-half"></i> Automático</button></li>
+        <li><button type="button" class="dropdown-item d-flex align-items-center gap-2" data-theme-option="light" data-theme-icon-class="bi-sun-fill" data-theme-label="claro" aria-pressed="false"><i class="bi bi-sun-fill"></i> {% trans "Claro" %}</button></li>
+        <li><button type="button" class="dropdown-item d-flex align-items-center gap-2" data-theme-option="dark" data-theme-icon-class="bi-moon-stars-fill" data-theme-label="escuro" aria-pressed="false"><i class="bi bi-moon-stars-fill"></i> {% trans "Escuro" %}</button></li>
+        <li><button type="button" class="dropdown-item d-flex align-items-center gap-2" data-theme-option="auto" data-theme-icon-class="bi-circle-half" data-theme-label="automático" aria-pressed="false"><i class="bi bi-circle-half"></i> {% trans "Automático" %}</button></li>
     </ul>
 </div>

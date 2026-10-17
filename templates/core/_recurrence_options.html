@@ -1,19 +1,20 @@
+{% load i18n %}
 {# Repeat options: every N weeks, start, how it ends. `rec` is a RecurrenceMixin form; `with_start` shows "Começa em". #}
 <div class="row g-3" data-recurrence>
     <div class="col-sm-6">
-        <label class="form-label small mb-1" for="{{ rec.interval_weeks.id_for_label }}">Repete a cada (semanas)</label>
+        <label class="form-label small mb-1" for="{{ rec.interval_weeks.id_for_label }}">{% trans "Repete a cada (semanas)" %}</label>
         {{ rec.interval_weeks }}
         {% if rec.interval_weeks.errors %}<div class="text-danger small">{{ rec.interval_weeks.errors|join:" " }}</div>{% endif %}
     </div>
     {% if with_start %}
     <div class="col-sm-6">
-        <label class="form-label small mb-1" for="{{ rec.starts_on.id_for_label }}">Começa em</label>
+        <label class="form-label small mb-1" for="{{ rec.starts_on.id_for_label }}">{% trans "Começa em" %}</label>
         {{ rec.starts_on }}
         {% if rec.starts_on.errors %}<div class="text-danger small">{{ rec.starts_on.errors|join:" " }}</div>{% endif %}
     </div>
     {% endif %}
     <div class="col-12">
-        <div class="form-label small mb-1">Termina</div>
+        <div class="form-label small mb-1">{% trans "Termina" %}</div>
         {% for radio in rec.ends %}
         <div class="form-check d-flex align-items-center gap-2 mb-1">
             <input class="form-check-input mt-0" type="radio" name="{{ radio.data.name }}" value="{{ radio.data.value }}" id="{{ radio.id_for_label }}"

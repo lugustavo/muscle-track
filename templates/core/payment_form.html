@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation %}
 {% load money_tags %}
 
-{% block title %}Registrar pagamento - {{ student.person_name }} - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed with person_name=student.person_name %}Registrar pagamento - {{ person_name }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-cash-coin"></i> Pagamento de {{ student.person_name }}</h1>
+    <h1><i class="bi bi-cash-coin"></i> {% blocktrans trimmed with person_name=student.person_name %}Pagamento de {{ person_name }}{% endblocktrans %}</h1>
     {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default %}
 </div>
 
@@ -19,7 +20,7 @@
                 <div class="mb-3">
                     <label for="{{ form.student_package.id_for_label }}" class="form-label fw-bold">{{ form.student_package.label }}</label>
                     {{ form.student_package }}
-                    <div class="form-text">O pagamento é feito na primeira aula do pacote.</div>
+                    <div class="form-text">{% trans "O pagamento é feito na primeira aula do pacote." %}</div>
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
@@ -41,7 +42,7 @@
                     <label for="{{ form.notes.id_for_label }}" class="form-label fw-bold">{{ form.notes.label }}</label>
                     {{ form.notes }}
                 </div>
-                <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Registrar pagamento</button>
+                <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> {% trans "Registrar pagamento" %}</button>
                 {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='bi-x-circle' %}
             </div>
         </form>
@@ -50,12 +51,12 @@
         <div class="card border-0 bg-body-tertiary"><div class="card-body small">
             {% for row in overview.rows %}{% if row.state != 'cancelled' %}
             <p class="mb-2"><strong>{{ row.package.name }}</strong> ({{ row.sold_on|default:row.package.sold_on|date:"d/m/Y" }}):
-                {% if row.package.price_total is not None %}total {{ row.package.price_total|money }}, pago {{ row.paid|money }}{% if row.pending > 0 %}, <span class="text-warning-emphasis fw-semibold">em aberto {{ row.pending|money }}</span>{% endif %}
-                {% else %}sem valor definido{% endif %}.</p>
+                {% if row.package.price_total is not None %}{% blocktrans trimmed with price_total=row.package.price_total|money paid=row.paid|money %}total {{ price_total }}, pago {{ paid }}{% endblocktrans %}{% if row.pending > 0 %}, <span class="text-warning-emphasis fw-semibold">{% blocktrans trimmed with pending=row.pending|money %}em aberto {{ pending }}{% endblocktrans %}</span>{% endif %}
+                {% else %}{% trans "sem valor definido" %}{% endif %}.</p>
             {% endif %}{% empty %}
-            <p class="mb-2">Este aluno ainda não tem pacote. <a href="{% url 'core:student_package_sell' student.pk %}">Vender um pacote</a>.</p>
+            <p class="mb-2">{% trans "Este aluno ainda não tem pacote." %} <a href="{% url 'core:student_package_sell' student.pk %}">{% trans "Vender um pacote" %}</a>.</p>
             {% endfor %}
-            <p class="mb-0 text-muted">O valor sugerido é o que falta pagar do pacote escolhido; você pode mudar.</p>
+            <p class="mb-0 text-muted">{% trans "O valor sugerido é o que falta pagar do pacote escolhido; você pode mudar." %}</p>
         </div></div>
     </div>
 </div>

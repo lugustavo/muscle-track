@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation %}
 {% load static %}
 
-{% block title %}Alunos{% endblock %}
+{% block title %}{% trans "Alunos" %}{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
@@ -11,12 +12,12 @@
         <div class="col">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h2 class="mb-1"><i class="bi bi-people"></i> Alunos</h2>
+                    <h2 class="mb-1"><i class="bi bi-people"></i> {% trans "Alunos" %}</h2>
                 </div>
                 <div class="d-none d-lg-block">
                     {% if user.is_staff %}
                     <a href="{% nav_url 'core:student_create' %}" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-1"></i> Novo Aluno
+                        <i class="bi bi-plus-circle me-1"></i> {% trans "Novo Aluno" %}
                     </a>
                     {% endif %}
                 </div>
@@ -29,8 +30,8 @@
         <form method="get" class="d-flex gap-2">
             {% if selected_status %}<input type="hidden" name="status" value="{{ selected_status }}">{% endif %}
             {% if selected_filter %}<input type="hidden" name="filtro" value="{{ selected_filter }}">{% endif %}
-            <input type="search" class="form-control" name="search" value="{{ search }}" placeholder="Nome, e-mail, telefone ou #ID..." aria-label="Pesquisar alunos">
-            <button type="button" class="btn btn-outline-secondary position-relative flex-shrink-0" data-bs-toggle="offcanvas" data-bs-target="#filterSheet" aria-controls="filterSheet" aria-label="Filtros">
+            <input type="search" class="form-control" name="search" value="{{ search }}" placeholder="{% trans "Nome, e-mail, telefone ou #ID..." %}" aria-label="{% trans "Pesquisar alunos" %}">
+            <button type="button" class="btn btn-outline-secondary position-relative flex-shrink-0" data-bs-toggle="offcanvas" data-bs-target="#filterSheet" aria-controls="filterSheet" aria-label="{% trans "Filtros" %}">
                 <i class="bi bi-sliders"></i>
                 {% if active_filters %}<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" data-filter-count>{{ active_filters }}</span>{% endif %}
             </button>
@@ -38,32 +39,32 @@
     </div>
     <div class="offcanvas offcanvas-bottom d-lg-none" tabindex="-1" id="filterSheet" aria-labelledby="filterSheetLabel" style="height: auto;">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="filterSheetLabel">Filtros</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+            <h5 class="offcanvas-title" id="filterSheetLabel">{% trans "Filtros" %}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{% trans "Fechar" %}"></button>
         </div>
         <div class="offcanvas-body pt-0" style="padding-bottom: calc(1rem + env(safe-area-inset-bottom));">
             <form method="get">
                 {% if search %}<input type="hidden" name="search" value="{{ search }}">{% endif %}
                 <div class="mb-3">
-                    <label for="m-status" class="form-label small text-muted">Status</label>
+                    <label for="m-status" class="form-label small text-muted">{% trans "Status" %}</label>
                     <select class="form-select" id="m-status" name="status">
-                        <option value="">Todos</option>
-                        <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Ativos</option>
-                        <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Inativos</option>
+                        <option value="">{% trans "Todos" %}</option>
+                        <option value="active" {% if selected_status == 'active' %}selected{% endif %}>{% trans "Ativos" %}</option>
+                        <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>{% trans "Inativos" %}</option>
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label for="m-filtro" class="form-label small text-muted">Situação</label>
+                    <label for="m-filtro" class="form-label small text-muted">{% trans "Situação" %}</label>
                     <select class="form-select" id="m-filtro" name="filtro">
-                        <option value="">Todas</option>
+                        <option value="">{% trans "Todas" %}</option>
                         {% for key, label in filters.items %}
                         <option value="{{ key }}" {% if selected_filter == key %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="d-flex gap-2">
-                    <a href="{% url 'core:student_list' %}" class="btn btn-outline-secondary flex-fill">Limpar</a>
-                    <button type="submit" class="btn btn-primary flex-fill">Aplicar</button>
+                    <a href="{% url 'core:student_list' %}" class="btn btn-outline-secondary flex-fill">{% trans "Limpar" %}</a>
+                    <button type="submit" class="btn btn-primary flex-fill">{% trans "Aplicar" %}</button>
                 </div>
             </form>
         </div>
@@ -73,26 +74,26 @@
         <div class="card-body">
             <form method="get" id="filterForm" class="row g-3 align-items-end">
                 <div class="col-md-4">
-                    <label for="search" class="form-label small text-muted">Pesquisar</label>
+                    <label for="search" class="form-label small text-muted">{% trans "Pesquisar" %}</label>
                     <input type="text"
                            class="form-control"
                            id="search"
                            name="search"
                            value="{{ search }}"
-                           placeholder="Nome, e-mail, telefone ou #ID...">
+                           placeholder="{% trans "Nome, e-mail, telefone ou #ID..." %}">
                 </div>
                 <div class="col-md-2">
-                    <label for="status" class="form-label small text-muted">Status</label>
+                    <label for="status" class="form-label small text-muted">{% trans "Status" %}</label>
                     <select class="form-select" id="status" name="status" onchange="this.form.submit()">
-                        <option value="">Todos</option>
-                        <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Ativos</option>
-                        <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Inativos</option>
+                        <option value="">{% trans "Todos" %}</option>
+                        <option value="active" {% if selected_status == 'active' %}selected{% endif %}>{% trans "Ativos" %}</option>
+                        <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>{% trans "Inativos" %}</option>
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label for="filtro" class="form-label small text-muted">Situação</label>
+                    <label for="filtro" class="form-label small text-muted">{% trans "Situação" %}</label>
                     <select class="form-select" id="filtro" name="filtro" onchange="this.form.submit()">
-                        <option value="">Todas</option>
+                        <option value="">{% trans "Todas" %}</option>
                         {% for key, label in filters.items %}
                         <option value="{{ key }}" {% if selected_filter == key %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
@@ -100,12 +101,12 @@
                 </div>
                 <div class="col-md-1">
                     <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-search"></i><span class="visually-hidden">Filtrar</span>
+                        <i class="bi bi-search"></i><span class="visually-hidden">{% trans "Filtrar" %}</span>
                     </button>
                 </div>
                 <div class="col-md-1">
-                    <a href="{% url 'core:student_list' %}" class="btn btn-outline-secondary w-100" title="Limpar filtros">
-                        <i class="bi bi-x-circle"></i><span class="visually-hidden">Limpar</span>
+                    <a href="{% url 'core:student_list' %}" class="btn btn-outline-secondary w-100" title="{% trans "Limpar filtros" %}">
+                        <i class="bi bi-x-circle"></i><span class="visually-hidden">{% trans "Limpar" %}</span>
                     </a>
                 </div>
             </form>
@@ -115,16 +116,16 @@
     <!-- View Toggle and Count -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <span class="text-muted">{{ page.paginator.count }} aluno{{ page.paginator.count|pluralize }} encontrado{{ page.paginator.count|pluralize }}</span>
+            <span class="text-muted">{% blocktrans trimmed count count=page.paginator.count %}{{ count }} aluno encontrado{% plural %}{{ count }} alunos encontrados{% endblocktrans %}</span>
         </div>
         <div class="btn-group d-none d-lg-inline-flex" role="group">
             <a href="?{% if base_qs %}{{ base_qs }}&{% endif %}view=grid"
                class="btn btn-sm {% if view_mode == 'grid' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                <i class="bi bi-grid-3x3-gap"></i> Grade
+                <i class="bi bi-grid-3x3-gap"></i> {% trans "Grade" %}
             </a>
             <a href="?{% if base_qs %}{{ base_qs }}&{% endif %}view=list"
                class="btn btn-sm {% if view_mode == 'list' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                <i class="bi bi-list-ul"></i> Lista
+                <i class="bi bi-list-ul"></i> {% trans "Lista" %}
             </a>
         </div>
     </div>
@@ -138,16 +139,16 @@
                 <span class="name d-block text-truncate">{{ student.person_name }}</span>
                 <span class="d-block">
                     <span class="badge {% if student.status == 'active' %}bg-success{% elif student.status == 'trial' %}bg-info text-dark{% elif student.status == 'paused' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ student.get_status_display }}</span>
-                    {% if student.plan_status == 'expired' %}<span class="badge bg-danger">pacote vencido</span>
-                    {% elif student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark">vence em {{ student.days_to_plan_expiry }}d</span>{% endif %}
+                    {% if student.plan_status == 'expired' %}<span class="badge bg-danger">{% trans "pacote vencido" %}</span>
+                    {% elif student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark">{% blocktrans trimmed with days_to_plan_expiry=student.days_to_plan_expiry %}vence em {{ days_to_plan_expiry }}d{% endblocktrans %}</span>{% endif %}
                 </span>
                 <small class="text-muted">{% if student.phone %}{{ student.phone }}{% else %}{{ student.user.email }}{% endif %}</small>
-                <small class="text-muted">{% if student.last_workout_at %}{{ student.total_workouts }} treino{{ student.total_workouts|pluralize }} · último há {{ student.last_workout_at|timesince }}{% else %}Nenhum treino ainda{% endif %}</small>
+                <small class="text-muted">{% if student.last_workout_at %}{% blocktrans trimmed with last_workout_at=student.last_workout_at|timesince count total_workouts=student.total_workouts %}{{ total_workouts }} treino · último há {{ last_workout_at }}{% plural %}{{ total_workouts }} treinos · último há {{ last_workout_at }}{% endblocktrans %}{% else %}{% trans "Nenhum treino ainda" %}{% endif %}</small>
             </span>
             <i class="bi bi-chevron-right text-muted"></i>
         </a>
         {% empty %}
-        <div class="list-group-item text-center text-muted py-4"><i class="bi bi-info-circle me-2"></i>Nenhum aluno encontrado.</div>
+        <div class="list-group-item text-center text-muted py-4"><i class="bi bi-info-circle me-2"></i>{% trans "Nenhum aluno encontrado." %}</div>
         {% endfor %}
     </div>
 
@@ -169,12 +170,12 @@
                                     {{ student.person_name }}
                                 </a>
                             </h5>
-                            <small class="text-muted">ID: #{{ student.id }}</small>
+                            <small class="text-muted">{% blocktrans trimmed with id=student.id %}ID: #{{ id }}{% endblocktrans %}</small>
                         </div>
                         <div>
                             <span class="badge {% if student.status == 'active' %}bg-success{% elif student.status == 'trial' %}bg-info text-dark{% elif student.status == 'paused' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ student.get_status_display }}</span>
-                            {% if student.plan_status == 'expired' %}<span class="badge bg-danger" title="Pacote vencido em {{ student.plan_expires_on|date:'d/m/Y' }}">pacote vencido</span>
-                            {% elif student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark" title="Vence em {{ student.plan_expires_on|date:'d/m/Y' }}">pacote vence em {{ student.days_to_plan_expiry }}d</span>{% endif %}
+                            {% if student.plan_status == 'expired' %}<span class="badge bg-danger" title="Pacote vencido em {{ student.plan_expires_on|date:'d/m/Y' }}">{% trans "pacote vencido" %}</span>
+                            {% elif student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark" title="Vence em {{ student.plan_expires_on|date:'d/m/Y' }}">{% blocktrans trimmed with days_to_plan_expiry=student.days_to_plan_expiry %}pacote vence em {{ days_to_plan_expiry }}d{% endblocktrans %}</span>{% endif %}
                         </div>
                     </div>
 
@@ -192,7 +193,7 @@
                         {% if student.age %}
                         <div class="d-flex align-items-center mb-2">
                             <i class="bi bi-calendar text-muted me-2"></i>
-                            <small class="text-muted">{{ student.age }} anos</small>
+                            <small class="text-muted">{% blocktrans trimmed with age=student.age %}{{ age }} anos{% endblocktrans %}</small>
                         </div>
                         {% endif %}
                     </div>
@@ -201,7 +202,7 @@
                         <div class="row text-center">
                             <div class="col-6 border-end">
                                 <div class="text-primary fw-bold">{{ student.total_workouts }}</div>
-                                <small class="text-muted">Treinos</small>
+                                <small class="text-muted">{% trans "Treinos" %}</small>
                             </div>
                             <div class="col-6">
                                 {% if student.last_workout_at %}
@@ -209,10 +210,10 @@
                                     <i class="bi bi-clock"></i>
                                     {{ student.last_workout_at|timesince }}
                                 </div>
-                                <small class="text-muted">Último treino</small>
+                                <small class="text-muted">{% trans "Último treino" %}</small>
                                 {% else %}
                                 <div class="small text-muted">-</div>
-                                <small class="text-muted">Nenhum treino</small>
+                                <small class="text-muted">{% trans "Nenhum treino" %}</small>
                                 {% endif %}
                             </div>
                         </div>
@@ -220,7 +221,7 @@
 
                     <div class="mt-3">
                         <a href="{% nav_url 'core:student_detail' student.pk %}" class="btn btn-sm btn-outline-primary w-100">
-                            Ver Detalhes
+                            {% trans "Ver Detalhes" %}
                         </a>
                     </div>
                 </div>
@@ -230,7 +231,7 @@
         <div class="col-12">
             <div class="alert alert-info text-center mb-0">
                 <i class="bi bi-info-circle me-2"></i>
-                Nenhum aluno encontrado.
+                {% trans "Nenhum aluno encontrado." %}
             </div>
         </div>
         {% endfor %}
@@ -245,15 +246,15 @@
                 <thead class="bg-body-tertiary">
                     <tr>
                         <th style="width: 60px;"></th>
-                        <th style="width: 60px;">ID</th>
-                        <th>Nome</th>
-                        <th style="width: 80px;">Idade</th>
-                        <th>Email</th>
-                        <th>Telefone</th>
-                        <th style="width: 100px;" class="text-center">Treinos</th>
-                        <th style="width: 150px;">Último Treino</th>
-                        <th style="width: 100px;" class="text-center">Status</th>
-                        <th style="width: 120px;" class="text-center">Ações</th>
+                        <th style="width: 60px;">{% trans "ID" %}</th>
+                        <th>{% trans "Nome" %}</th>
+                        <th style="width: 80px;">{% trans "Idade" %}</th>
+                        <th>{% trans "Email" %}</th>
+                        <th>{% trans "Telefone" %}</th>
+                        <th style="width: 100px;" class="text-center">{% trans "Treinos" %}</th>
+                        <th style="width: 150px;">{% trans "Último Treino" %}</th>
+                        <th style="width: 100px;" class="text-center">{% trans "Status" %}</th>
+                        <th style="width: 120px;" class="text-center">{% trans "Ações" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -270,7 +271,7 @@
                         </td>
                         <td>
                             {% if student.age %}
-                                {{ student.age }} anos
+                                {% blocktrans trimmed with age=student.age %}{{ age }} anos{% endblocktrans %}
                             {% else %}
                                 <span class="text-muted">-</span>
                             {% endif %}
@@ -292,23 +293,23 @@
                             {% if student.last_workout_at %}
                                 <small class="text-success">
                                     <i class="bi bi-clock"></i>
-                                    {{ student.last_workout_at|timesince }} atrás
+                                    {% blocktrans trimmed with last_workout_at=student.last_workout_at|timesince %}{{ last_workout_at }} atrás{% endblocktrans %}
                                 </small>
                             {% else %}
-                                <small class="text-muted">Nenhum</small>
+                                <small class="text-muted">{% trans "Nenhum" %}</small>
                             {% endif %}
                         </td>
                         <td class="text-center">
                             <span class="badge {% if student.status == 'active' %}bg-success{% elif student.status == 'trial' %}bg-info text-dark{% elif student.status == 'paused' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ student.get_status_display }}</span>
-                            {% if student.plan_status == 'expired' %}<span class="badge bg-danger" title="Pacote vencido em {{ student.plan_expires_on|date:'d/m/Y' }}">pacote vencido</span>
-                            {% elif student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark" title="Vence em {{ student.plan_expires_on|date:'d/m/Y' }}">pacote vence em {{ student.days_to_plan_expiry }}d</span>{% endif %}
+                            {% if student.plan_status == 'expired' %}<span class="badge bg-danger" title="Pacote vencido em {{ student.plan_expires_on|date:'d/m/Y' }}">{% trans "pacote vencido" %}</span>
+                            {% elif student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark" title="Vence em {{ student.plan_expires_on|date:'d/m/Y' }}">{% blocktrans trimmed with days_to_plan_expiry=student.days_to_plan_expiry %}pacote vence em {{ days_to_plan_expiry }}d{% endblocktrans %}</span>{% endif %}
                         </td>
                         <td class="text-center">
-                            <a href="{% nav_url 'core:student_detail' student.pk %}" class="btn btn-sm btn-outline-primary" title="Ver Detalhes">
+                            <a href="{% nav_url 'core:student_detail' student.pk %}" class="btn btn-sm btn-outline-primary" title="{% trans "Ver Detalhes" %}">
                                 <i class="bi bi-eye"></i>
                             </a>
                             {% if user.is_staff %}
-                            <a href="{% nav_url 'core:student_edit' student.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                            <a href="{% nav_url 'core:student_edit' student.pk %}" class="btn btn-sm btn-outline-secondary" title="{% trans "Editar" %}">
                                 <i class="bi bi-pencil"></i>
                             </a>
                             {% endif %}
@@ -318,7 +319,7 @@
                     <tr>
                         <td colspan="9" class="text-center py-4 text-muted">
                             <i class="bi bi-info-circle me-2"></i>
-                            Nenhum aluno encontrado.
+                            {% trans "Nenhum aluno encontrado." %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -330,14 +331,14 @@
     </div>
 
     {% if page.has_other_pages %}
-    <nav aria-label="Paginação" class="mt-4">
+    <nav aria-label="{% trans "Paginação" %}" class="mt-4">
         <ul class="pagination justify-content-center flex-wrap">
             {% if page.has_previous %}
-            <li class="page-item"><a class="page-link" href="?{% if base_qs %}{{ base_qs }}&{% endif %}view={{ view_mode }}&page={{ page.previous_page_number }}">&laquo; Anterior</a></li>
+            <li class="page-item"><a class="page-link" href="?{% if base_qs %}{{ base_qs }}&{% endif %}view={{ view_mode }}&page={{ page.previous_page_number }}">{% trans "&laquo; Anterior" %}</a></li>
             {% endif %}
-            <li class="page-item disabled"><span class="page-link">Página {{ page.number }} de {{ page.paginator.num_pages }}</span></li>
+            <li class="page-item disabled"><span class="page-link">{% blocktrans trimmed with number=page.number num_pages=page.paginator.num_pages %}Página {{ number }} de {{ num_pages }}{% endblocktrans %}</span></li>
             {% if page.has_next %}
-            <li class="page-item"><a class="page-link" href="?{% if base_qs %}{{ base_qs }}&{% endif %}view={{ view_mode }}&page={{ page.next_page_number }}">Próxima &raquo;</a></li>
+            <li class="page-item"><a class="page-link" href="?{% if base_qs %}{{ base_qs }}&{% endif %}view={{ view_mode }}&page={{ page.next_page_number }}">{% trans "Próxima &raquo;" %}</a></li>
             {% endif %}
         </ul>
     </nav>

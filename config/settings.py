@@ -75,6 +75,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',      # language: cookie, else the browser's Accept-Language, else pt-br
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -94,6 +95,7 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'django.template.context_processors.i18n',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.app_nav',
@@ -138,8 +140,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
+# Internationalization: the source texts are Portuguese (pt-br); English is the translation catalog (locale/en).
+# The language comes from the language cookie (set by the switcher), else the browser's Accept-Language, else pt-br.
 LANGUAGE_CODE = 'pt-br'
+LANGUAGES = [('pt-br', 'Português (Brasil)'), ('en', 'English')]
+LOCALE_PATHS = [BASE_DIR / 'locale']
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_L10N = True

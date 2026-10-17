@@ -1,4 +1,5 @@
-{% load allauth %}{% comment %} djlint:off {% endcomment %}
-<{% if attrs.href %}a href="{{ attrs.href }}"{% else %}button{% endif %}
-{% if attrs.form %} form="{{ attrs.form }}"{% endif %}{% if attrs.id %} id="{{ attrs.id }}"{% endif %}{% if attrs.name %} name="{{ attrs.name }}"{% endif %}{% if attrs.value %} value="{{ attrs.value }}"{% endif %}{% if not attrs.href %} type="{{ attrs.type|default:'button' }}"{% endif %}
- class="btn {% if 'danger' in attrs.tags %}btn-outline-danger{% elif 'secondary' in attrs.tags or 'outline' in attrs.tags %}btn-outline-secondary{% elif 'link' in attrs.tags %}btn-link{% else %}btn-primary{% endif %}">{% slot %}{% endslot %}</{% if attrs.href %}a{% else %}button{% endif %}>
+{% load i18n %}
+{% load allauth %}{% comment %} {% trans "djlint:off" %} {% endcomment %}
+<{% if attrs.href %}{% blocktrans trimmed with href=attrs.href %}a href="{{ href }}"{% endblocktrans %}{% else %}{% trans "button" %}{% endif %}
+{% if attrs.form %} {% blocktrans trimmed with form=attrs.form %}form="{{ form }}"{% endblocktrans %}{% endif %}{% if attrs.id %} {% blocktrans trimmed with id=attrs.id %}id="{{ id }}"{% endblocktrans %}{% endif %}{% if attrs.name %} {% blocktrans trimmed with name=attrs.name %}name="{{ name }}"{% endblocktrans %}{% endif %}{% if attrs.value %} {% blocktrans trimmed with value=attrs.value %}value="{{ value }}"{% endblocktrans %}{% endif %}{% if not attrs.href %} {% blocktrans trimmed with type=attrs.type|default:'button' %}type="{{ type }}"{% endblocktrans %}{% endif %}
+ {% trans "class=\"btn" %} {% if 'danger' in attrs.tags %}{% trans "btn-outline-danger" %}{% elif 'secondary' in attrs.tags or 'outline' in attrs.tags %}{% trans "btn-outline-secondary" %}{% elif 'link' in attrs.tags %}{% trans "btn-link" %}{% else %}{% trans "btn-primary" %}{% endif %}">{% slot %}{% endslot %}</{% if attrs.href %}a{% else %}button{% endif %}>

@@ -1,4 +1,5 @@
+{% load i18n %}
 {# Trainer only: the magnifier in the top bar and the quick-search sheet (static/js/search.js) #}
-<a href="{% url 'core:search' %}" class="btn btn-link nav-link px-2 search-open" data-search-open aria-label="Buscar (atalho: barra /)" title="Buscar ( / )">
+<a href="{% url 'core:search' %}" class="btn btn-link nav-link px-2 search-open" data-search-open aria-label="{% trans "Buscar (atalho: barra /)" %}" title="{% trans "Buscar ( / )" %}">
     <i class="bi bi-search fs-5"></i>
 </a>

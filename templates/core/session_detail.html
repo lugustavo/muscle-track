@@ -1,18 +1,19 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation %}
 
-{% block title %}Detalhes da Sessão - {{ person_routine.routine_name }}{% endblock %}
+{% block title %}{% blocktrans trimmed with routine_name=person_routine.routine_name %}Detalhes da Sessão - {{ routine_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-8 mx-auto">
         <div class="d-flex justify-content-between align-items-start gap-2 mb-3 mb-md-4">
             <div class="min-w-0">
-                <h1 class="h4 page-title-lg mb-1"><i class="bi bi-clipboard-data"></i> Detalhes da Sessão</h1>
+                <h1 class="h4 page-title-lg mb-1"><i class="bi bi-clipboard-data"></i> {% trans "Detalhes da Sessão" %}</h1>
                 <p class="text-muted mb-0">
                     {% if user.is_staff or user.is_superuser %}
-                        <a href="{% nav_url 'core:student_detail' student.pk %}" class="text-decoration-none fw-semibold" title="Abrir a ficha do aluno"><i class="bi bi-person-circle"></i> {{ student.person_name }}</a>
-                        - <a href="{% nav_url 'core:person_routine_detail' person_routine.pk %}" class="text-decoration-none text-muted" title="Ver progresso deste treino">{{ person_routine.routine_name }}</a>
+                        <a href="{% nav_url 'core:student_detail' student.pk %}" class="text-decoration-none fw-semibold" title="{% trans "Abrir a ficha do aluno" %}"><i class="bi bi-person-circle"></i> {{ student.person_name }}</a>
+                        - <a href="{% nav_url 'core:person_routine_detail' person_routine.pk %}" class="text-decoration-none text-muted" title="{% trans "Ver progresso deste treino" %}">{{ person_routine.routine_name }}</a>
                     {% else %}
                         {{ student.person_name }} - {{ person_routine.routine_name }}
                     {% endif %}
@@ -24,23 +25,23 @@
         <!-- Session Information -->
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
-                <h3 class="h5 card-title-lg mb-0"><i class="bi bi-info-circle"></i> Informações da Sessão</h3>
+                <h3 class="h5 card-title-lg mb-0"><i class="bi bi-info-circle"></i> {% trans "Informações da Sessão" %}</h3>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
                         <p class="mb-2">
-                            <strong><i class="bi bi-calendar"></i> Data:</strong>
+                            <strong><i class="bi bi-calendar"></i> {% trans "Data:" %}</strong>
                             {{ session.start_time|date:"d/m/Y" }}
                         </p>
                         <p class="mb-2">
-                            <strong><i class="bi bi-clock"></i> Início:</strong>
+                            <strong><i class="bi bi-clock"></i> {% trans "Início:" %}</strong>
                             {{ session.start_time|date:"H:i" }}
                         </p>
                     </div>
                     <div class="col-md-6">
                         <p class="mb-2">
-                            <strong><i class="bi bi-clock-history"></i> Término:</strong>
+                            <strong><i class="bi bi-clock-history"></i> {% trans "Término:" %}</strong>
                             {% if session.end_time %}
                                 {{ session.end_time|date:"H:i" }}
                             {% else %}
@@ -48,9 +49,9 @@
                             {% endif %}
                         </p>
                         <p class="mb-2">
-                            <strong><i class="bi bi-stopwatch"></i> Duração:</strong>
+                            <strong><i class="bi bi-stopwatch"></i> {% trans "Duração:" %}</strong>
                             {% if session.duration_minutes %}
-                                <span class="badge bg-success">{{ session.duration_minutes }} min</span>
+                                <span class="badge bg-success">{% blocktrans trimmed with duration_minutes=session.duration_minutes %}{{ duration_minutes }} min{% endblocktrans %}</span>
                             {% else %}
                                 <span class="text-muted">-</span>
                             {% endif %}
@@ -62,14 +63,14 @@
 
         {% if session.notes %}
         <div class="alert alert-secondary mb-4">
-            <i class="bi bi-chat-left-text"></i> <strong>Comentário do aluno sobre o treino:</strong><br>{{ session.notes|linebreaksbr }}
+            <i class="bi bi-chat-left-text"></i> <strong>{% trans "Comentário do aluno sobre o treino:" %}</strong><br>{{ session.notes|linebreaksbr }}
         </div>
         {% endif %}
 
         <!-- Exercises List -->
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
-                <h3 class="h5 card-title-lg mb-0"><i class="bi bi-list-check"></i> Exercícios Executados</h3>
+                <h3 class="h5 card-title-lg mb-0"><i class="bi bi-list-check"></i> {% trans "Exercícios Executados" %}</h3>
             </div>
             <div class="card-body">
                 {% for item in exercises_data %}
@@ -81,11 +82,11 @@
                                 {{ item.exercise.exercise.exercise_name }}
                                 {% if item.is_completed %}
                                     <span class="badge bg-success ms-2">
-                                        <i class="bi bi-check-circle"></i> Concluído
+                                        <i class="bi bi-check-circle"></i> {% trans "Concluído" %}
                                     </span>
                                 {% else %}
                                     <span class="badge bg-secondary ms-2">
-                                        <i class="bi bi-x-circle"></i> Não executado
+                                        <i class="bi bi-x-circle"></i> {% trans "Não executado" %}
                                     </span>
                                 {% endif %}
                             </h5>
@@ -93,19 +94,19 @@
 
                         <!-- Exercise Parameters -->
                         <p class="mb-2">
-                            <strong>{{ item.exercise.sets }} séries x {{ item.exercise.reps }} repetições</strong>
+                            <strong>{% blocktrans trimmed with sets=item.exercise.sets reps=item.exercise.reps %}{{ sets }} séries x {{ reps }} repetições{% endblocktrans %}</strong>
                             <br>
-                            <small class="text-muted">Descanso: {{ item.exercise.rest_seconds }}s</small>
+                            <small class="text-muted">{% blocktrans trimmed with rest_seconds=item.exercise.rest_seconds %}Descanso: {{ rest_seconds }}s{% endblocktrans %}</small>
                         </p>
 
                         {% if item.sets %}
                         <table class="table table-sm mb-2">
-                            <thead><tr><th>Série</th><th>Carga</th><th>Reps</th><th></th></tr></thead>
+                            <thead><tr><th>{% trans "Série" %}</th><th>{% trans "Carga" %}</th><th>{% trans "Reps" %}</th><th></th></tr></thead>
                             <tbody>
                             {% for s in item.sets %}
                                 <tr class="{% if s.is_done %}table-success{% else %}text-muted{% endif %}">
                                     <td>{{ s.number }}</td>
-                                    <td>{% if s.weight is not None %}{{ s.weight }} kg{% else %}-{% endif %}</td>
+                                    <td>{% if s.weight is not None %}{% blocktrans trimmed with weight=s.weight %}{{ weight }} kg{% endblocktrans %}{% else %}-{% endif %}</td>
                                     <td>{% if s.reps is not None %}{{ s.reps }}{% else %}-{% endif %}</td>
                                     <td>{% if s.is_done %}<i class="bi bi-check-circle-fill text-success"></i>{% else %}<i class="bi bi-dash-circle"></i>{% endif %}</td>
                                 </tr>
@@ -114,7 +115,7 @@
                         </table>
                         {% endif %}
                         {% if item.notes %}
-                        <div class="alert alert-secondary py-2 small mb-2"><i class="bi bi-chat-left-text"></i> <strong>Observação do aluno:</strong> {{ item.notes }}</div>
+                        <div class="alert alert-secondary py-2 small mb-2"><i class="bi bi-chat-left-text"></i> {% blocktrans trimmed with notes=item.notes %}<strong>Observação do aluno:</strong> {{ notes }}{% endblocktrans %}</div>
                         {% endif %}
 
                         {% if item.is_completed and not item.sets %}
@@ -123,14 +124,14 @@
                             <small>
                                 {% if item.completed_at %}
                                 <span class="me-3">
-                                    <strong><i class="bi bi-clock-fill"></i> Concluído em:</strong>
+                                    <strong><i class="bi bi-clock-fill"></i> {% trans "Concluído em:" %}</strong>
                                     {{ item.completed_at|date:"d/m/Y H:i" }}
                                 </span>
                                 {% endif %}
                                 {% if item.weight_used %}
                                 <span>
-                                    <strong><i class="bi bi-box"></i> Carga:</strong>
-                                    {{ item.weight_used }} kg
+                                    <strong><i class="bi bi-box"></i> {% trans "Carga:" %}</strong>
+                                    {% blocktrans trimmed with weight_used=item.weight_used %}{{ weight_used }} kg{% endblocktrans %}
                                 </span>
                                 {% endif %}
                             </small>

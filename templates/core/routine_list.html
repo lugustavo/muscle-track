@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation %}
 {% load static %}
 
-{% block title %}Treinos - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed %}Treinos - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -48,13 +49,13 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-calendar-check"></i> Treinos</h1>
+    <h1><i class="bi bi-calendar-check"></i> {% trans "Treinos" %}</h1>
     <div>
         <a href="{% nav_url 'core:routine_generate_ai' %}" class="btn btn-success me-2">
-            <i class="bi bi-magic"></i> Gerar com IA
+            <i class="bi bi-magic"></i> {% trans "Gerar com IA" %}
         </a>
         <a href="{% nav_url 'core:routine_create' %}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Novo Treino
+            <i class="bi bi-plus-circle"></i> {% trans "Novo Treino" %}
         </a>
     </div>
 </div>
@@ -64,19 +65,19 @@
     <form method="get" action="{% url 'core:routine_list' %}" id="filterForm">
         <div class="row g-3">
             <div class="col-md-4">
-                <label for="search" class="form-label"><i class="bi bi-search"></i> Buscar Treino</label>
+                <label for="search" class="form-label"><i class="bi bi-search"></i> {% trans "Buscar Treino" %}</label>
                 <input type="text"
                        class="form-control"
                        id="search"
                        name="search"
                        value="{{ search }}"
-                       placeholder="Digite o nome ou descrição..."
+                       placeholder="{% trans "Digite o nome ou descrição..." %}"
                        autocomplete="off">
             </div>
             <div class="col-md-3">
-                <label for="difficulty" class="form-label"><i class="bi bi-filter"></i> Dificuldade</label>
+                <label for="difficulty" class="form-label"><i class="bi bi-filter"></i> {% trans "Dificuldade" %}</label>
                 <select class="form-select" id="difficulty" name="difficulty" onchange="document.getElementById('filterForm').submit();">
-                    <option value="">Todas as dificuldades</option>
+                    <option value="">{% trans "Todas as dificuldades" %}</option>
                     {% for value, label in difficulty_choices %}
                         <option value="{{ value }}" {% if selected_difficulty == value %}selected{% endif %}>
                             {{ label }}
@@ -85,11 +86,11 @@
                 </select>
             </div>
                 <div class="col-md-2">
-                    <label for="status" class="form-label small text-muted">Status</label>
+                    <label for="status" class="form-label small text-muted">{% trans "Status" %}</label>
                     <select class="form-select" id="status" name="status" onchange="this.form.submit()">
-                        <option value="">Todos</option>
-                        <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Ativos</option>
-                        <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Inativos</option>
+                        <option value="">{% trans "Todos" %}</option>
+                        <option value="active" {% if selected_status == 'active' %}selected{% endif %}>{% trans "Ativos" %}</option>
+                        <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>{% trans "Inativos" %}</option>
                     </select>
                 </div>
             <!--<div class="col-md-2">
@@ -128,23 +129,23 @@
     <div class="mb-3">
         <small class="text-muted">
             <i class="bi bi-info-circle"></i>
-            Encontrados <strong>{{ routines.count }}</strong> treino(s)
+            {% blocktrans trimmed with count=routines.count %}Encontrados <strong>{{ count }}</strong> treino(s){% endblocktrans %}
             {% if search %}
-                para "<strong>{{ search }}</strong>"
+                {% blocktrans trimmed %}para "<strong>{{ search }}</strong>"{% endblocktrans %}
             {% endif %}
             {% if selected_difficulty %}
-                com dificuldade <strong>{{ selected_difficulty|title }}</strong>
+                {% blocktrans trimmed with selected_difficulty=selected_difficulty|title %}com dificuldade <strong>{{ selected_difficulty }}</strong>{% endblocktrans %}
             {% endif %}
         </small>
     </div>
     <div class="btn-group" role="group">
         <a href="?{% if search %}search={{ search }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}view=grid"
             class="btn btn-sm {% if view_mode == 'grid' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-            <i class="bi bi-grid-3x3-gap"></i> Grade
+            <i class="bi bi-grid-3x3-gap"></i> {% trans "Grade" %}
         </a>
         <a href="?{% if search %}search={{ search }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}view=list"
             class="btn btn-sm {% if view_mode == 'list' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-            <i class="bi bi-list-ul"></i> Lista
+            <i class="bi bi-list-ul"></i> {% trans "Lista" %}
         </a>
     </div>
 </div>
@@ -172,7 +173,7 @@
                         </span>
                     {% endif %}
                     <span class="badge bg-info difficulty-badge">
-                        <i class="bi bi-clock"></i> {{ routine.estimated_duration }} min
+                        <i class="bi bi-clock"></i> {% blocktrans trimmed with estimated_duration=routine.estimated_duration %}{{ estimated_duration }} min{% endblocktrans %}
                     </span>
                 </div>
                 <p class="card-text text-muted small">{{ routine.description|truncatewords:20 }}</p>
@@ -181,23 +182,23 @@
                     <div class="col-6">
                         <div class="text-center bg-body-tertiary p-2 rounded">
                             <div class="fw-bold text-primary">{{ routine.exercise_count }}</div>
-                            <small class="text-muted">Exercícios</small>
+                            <small class="text-muted">{% trans "Exercícios" %}</small>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="text-center bg-body-tertiary p-2 rounded">
                             <div class="fw-bold text-success">{{ routine.student_count }}</div>
-                            <small class="text-muted">Alunos</small>
+                            <small class="text-muted">{% trans "Alunos" %}</small>
                         </div>
                     </div>
                 </div>
 
                 <div class="d-flex gap-2">
                     <a href="{% nav_url 'core:routine_detail' routine.pk %}" class="btn btn-sm btn-outline-primary flex-fill">
-                        <i class="bi bi-eye"></i> Ver
+                        <i class="bi bi-eye"></i> {% trans "Ver" %}
                     </a>
                     <a href="{% nav_url 'core:routine_edit' routine.pk %}" class="btn btn-sm btn-outline-secondary flex-fill">
-                        <i class="bi bi-pencil"></i> Editar
+                        <i class="bi bi-pencil"></i> {% trans "Editar" %}
                     </a>
                 </div>
             </div>
@@ -206,7 +207,7 @@
     {% empty %}
     <div class="col-12">
         <div class="alert alert-info">
-            <i class="bi bi-info-circle"></i> Nenhum treino encontrado com os filtros selecionados.
+            <i class="bi bi-info-circle"></i> {% trans "Nenhum treino encontrado com os filtros selecionados." %}
         </div>
     </div>
     {% endfor %}
@@ -229,29 +230,29 @@
                     {% else %}
                         <span class="badge bg-danger">{{ routine.get_difficulty_level_display }}</span>
                     {% endif %}
-                    <span class="badge bg-info"><i class="bi bi-clock"></i> {{ routine.estimated_duration }} min</span>
+                    <span class="badge bg-info"><i class="bi bi-clock"></i> {% blocktrans trimmed with estimated_duration=routine.estimated_duration %}{{ estimated_duration }} min{% endblocktrans %}</span>
                     <span class="badge bg-secondary stats-badge">
-                        <i class="bi bi-activity"></i> {{ routine.exercise_count }} exercícios
+                        <i class="bi bi-activity"></i> {% blocktrans trimmed with exercise_count=routine.exercise_count %}{{ exercise_count }} exercícios{% endblocktrans %}
                     </span>
                     <span class="badge bg-secondary stats-badge">
-                        <i class="bi bi-people"></i> {{ routine.student_count }} alunos
+                        <i class="bi bi-people"></i> {% blocktrans trimmed with student_count=routine.student_count %}{{ student_count }} alunos{% endblocktrans %}
                     </span>
                 </div>
                 <p class="text-muted small mb-0">{{ routine.description|truncatewords:30 }}</p>
             </div>
             <div class="routine-actions d-flex flex-column gap-2">
                 <a href="{% nav_url 'core:routine_detail' routine.pk %}" class="btn btn-sm btn-outline-primary">
-                    <i class="bi bi-eye"></i> Ver Detalhes
+                    <i class="bi bi-eye"></i> {% trans "Ver Detalhes" %}
                 </a>
                 <a href="{% nav_url 'core:routine_edit' routine.pk %}" class="btn btn-sm btn-outline-secondary">
-                    <i class="bi bi-pencil"></i> Editar
+                    <i class="bi bi-pencil"></i> {% trans "Editar" %}
                 </a>
             </div>
         </div>
     </div>
     {% empty %}
     <div class="alert alert-info">
-        <i class="bi bi-info-circle"></i> Nenhum treino encontrado com os filtros selecionados.
+        <i class="bi bi-info-circle"></i> {% trans "Nenhum treino encontrado com os filtros selecionados." %}
     </div>
     {% endfor %}
 </div>

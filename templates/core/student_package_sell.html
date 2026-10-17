@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation %}
 {% load static %}
 {% load money_tags %}
 
-{% block title %}Vender pacote - {{ student.person_name }} - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed with person_name=student.person_name %}Vender pacote - {{ person_name }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -19,7 +20,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3 gap-2">
     <div>
-        <h1 class="h3 mb-0"><i class="bi bi-box-seam"></i> Vender pacote</h1>
+        <h1 class="h3 mb-0"><i class="bi bi-box-seam"></i> {% trans "Vender pacote" %}</h1>
         <div class="text-muted">{{ student.person_name }}</div>
     </div>
     {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default %}
@@ -27,8 +28,9 @@
 
 {% if overview.current %}
 <div class="alert alert-info mx-auto" style="max-width: 760px;" data-has-open>
-    <i class="bi bi-info-circle"></i> {{ student.person_name }} ainda tem o pacote <strong>{{ overview.current.package.name }}</strong>
-    ({{ overview.current.left }} aula{{ overview.current.left|pluralize }} sobrando). O novo pacote só é usado depois que as aulas do atual acabarem.
+    <i class="bi bi-info-circle"></i> {% blocktrans trimmed with person_name=student.person_name name=overview.current.package.name count left=overview.current.left %}{{ person_name }} ainda tem o pacote <strong>{{ name }}</strong>
+    ({{ left }} aula sobrando). O novo pacote só é usado depois que as aulas do atual acabarem.{% plural %}{{ person_name }} ainda tem o pacote <strong>{{ name }}</strong>
+    ({{ left }} aulas sobrando). O novo pacote só é usado depois que as aulas do atual acabarem.{% endblocktrans %}
 </div>
 {% endif %}
 
@@ -38,9 +40,9 @@
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5 d-flex align-items-center gap-2"><span class="step-num">1</span> Escolha o pacote</h2>
-            <p class="text-muted small">Os pacotes vêm do <a href="{% url 'core:plan_list' %}">catálogo</a>. O prazo começa a contar na <strong>primeira aula</strong>.</p>
-            <div class="row g-2" role="radiogroup" aria-label="Pacote">
+            <h2 class="h5 d-flex align-items-center gap-2"><span class="step-num">1</span> {% trans "Escolha o pacote" %}</h2>
+            <p class="text-muted small">{% trans "Os pacotes vêm do" %} <a href="{% url 'core:plan_list' %}">{% trans "catálogo" %}</a>{% blocktrans trimmed %}. O prazo começa a contar na <strong>primeira aula</strong>.{% endblocktrans %}</p>
+            <div class="row g-2" role="radiogroup" aria-label="{% trans "Pacote" %}">
                 {% for p in catalog %}
                 <div class="col-6 col-md-4">
                     <label class="plan-choice d-block position-relative">
@@ -49,13 +51,13 @@
                                {% if form.package.value|stringformat:"s" == p.pk|stringformat:"s" %}checked{% endif %}>
                         <span class="card"><span class="card-body py-2">
                             <strong class="d-block text-break">{{ p.name }}</strong>
-                            <span class="d-block small text-muted">{{ p.sessions }} aulas · {% if p.valid_days %}{{ p.valid_days }} dias{% else %}sem prazo{% endif %}</span>
-                            {% if p.price_per_session is not None %}<span class="d-block small"><i class="bi bi-lock"></i> {{ p.price_per_session|money }} por aula</span>{% endif %}
+                            <span class="d-block small text-muted">{% blocktrans trimmed with sessions=p.sessions %}{{ sessions }} aulas ·{% endblocktrans %} {% if p.valid_days %}{% blocktrans trimmed with valid_days=p.valid_days %}{{ valid_days }} dias{% endblocktrans %}{% else %}{% trans "sem prazo" %}{% endif %}</span>
+                            {% if p.price_per_session is not None %}<span class="d-block small"><i class="bi bi-lock"></i> {% blocktrans trimmed with price_per_session=p.price_per_session|money %}{{ price_per_session }} por aula{% endblocktrans %}</span>{% endif %}
                         </span></span>
                     </label>
                 </div>
                 {% empty %}
-                <div class="col-12"><div class="alert alert-warning mb-0">Nenhum pacote ativo no catálogo. <a href="{% url 'core:plan_create' %}">Crie um pacote</a> primeiro.</div></div>
+                <div class="col-12"><div class="alert alert-warning mb-0">{% trans "Nenhum pacote ativo no catálogo." %} <a href="{% url 'core:plan_create' %}">{% trans "Crie um pacote" %}</a> {% trans "primeiro." %}</div></div>
                 {% endfor %}
             </div>
             {% if form.package.errors %}<div class="text-danger small mt-1">{{ form.package.errors|join:" " }}</div>{% endif %}
@@ -64,8 +66,8 @@
 
     <section class="card mb-3">
         <div class="card-body">
-            <h2 class="h5 d-flex align-items-center gap-2"><span class="step-num">2</span> Valor combinado com este aluno</h2>
-            <p class="text-muted small">Vem preenchido pelo pacote; mude se o combinado for diferente. Digite o valor por aula ou o total: o outro é calculado.</p>
+            <h2 class="h5 d-flex align-items-center gap-2"><span class="step-num">2</span> {% trans "Valor combinado com este aluno" %}</h2>
+            <p class="text-muted small">{% trans "Vem preenchido pelo pacote; mude se o combinado for diferente. Digite o valor por aula ou o total: o outro é calculado." %}</p>
             <div class="mb-2">
                 {% for radio in form.pricing_mode %}<div class="form-check form-check-inline">{{ radio.tag }} <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label></div>{% endfor %}
             </div>
@@ -79,11 +81,11 @@
                     {% if form.price_total.errors %}<div class="text-danger small">{{ form.price_total.errors|join:" " }}</div>{% endif %}
                 </div>
             </div>
-            <div class="small mt-2" data-adjusted hidden><span class="badge bg-body-secondary text-body border">ajustado</span> <span class="text-muted">difere do valor do pacote no catálogo</span></div>
+            <div class="small mt-2" data-adjusted hidden><span class="badge bg-body-secondary text-body border">{% trans "ajustado" %}</span> <span class="text-muted">{% trans "difere do valor do pacote no catálogo" %}</span></div>
             <div class="mt-3">
                 <label for="{{ form.notes.id_for_label }}" class="form-label fw-bold">{{ form.notes.label }}</label>{{ form.notes }}
             </div>
-            <div class="form-text mt-2"><i class="bi bi-lock"></i> Os valores são sigilosos: só você os vê. O pagamento é registrado na primeira aula.</div>
+            <div class="form-text mt-2"><i class="bi bi-lock"></i> {% trans "Os valores são sigilosos: só você os vê. O pagamento é registrado na primeira aula." %}</div>
         </div>
     </section>
 
@@ -92,15 +94,15 @@
         <div class="card-body">
             <div class="form-check">
                 {{ form.continue_schedule }}
-                <label class="form-check-label fw-bold" for="{{ form.continue_schedule.id_for_label }}">Continuar o mesmo horário</label>
+                <label class="form-check-label fw-bold" for="{{ form.continue_schedule.id_for_label }}">{% trans "Continuar o mesmo horário" %}</label>
             </div>
-            <div class="form-text">{{ student.person_name }} vinha em <strong>{{ pattern.label }}</strong>. Depois de vender, a agenda abre com esse horário já preenchido, a partir do dia seguinte à última aula marcada: você confere as datas (e desmarca feriados) e confirma.</div>
+            <div class="form-text">{% blocktrans trimmed with person_name=student.person_name label=pattern.label %}{{ person_name }} vinha em <strong>{{ label }}</strong>. Depois de vender, a agenda abre com esse horário já preenchido, a partir do dia seguinte à última aula marcada: você confere as datas (e desmarca feriados) e confirma.{% endblocktrans %}</div>
         </div>
     </section>
     {% endif %}
 
     <div class="form-actions d-flex gap-2">
-        <button type="submit" class="btn btn-primary" {% if not catalog %}disabled{% endif %}><i class="bi bi-check-circle"></i> Vender pacote</button>
+        <button type="submit" class="btn btn-primary" {% if not catalog %}disabled{% endif %}><i class="bi bi-check-circle"></i> {% trans "Vender pacote" %}</button>
         {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='bi-x-circle' %}
     </div>
 </form>

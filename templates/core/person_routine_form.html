@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load static %}
 {% load navigation %}
 
-{% block title %}{% if is_edit %}Editar Treino{% else %}Atribuir Treino{% endif %} - Muscle Track{% endblock %}
+{% block title %}{% if is_edit %}{% trans "Editar Treino" %}{% else %}{% trans "Atribuir Treino" %}{% endif %} {% trans "- Muscle Track" %}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-clipboard-plus"></i> {% if is_edit %}Editar Treino{% else %}Atribuir Treino ao Aluno{% endif %}</h1>
+    <h1><i class="bi bi-clipboard-plus"></i> {% if is_edit %}{% trans "Editar Treino" %}{% else %}{% trans "Atribuir Treino ao Aluno" %}{% endif %}</h1>
     {% back_button back_default %}
 </div>
 
@@ -14,7 +15,7 @@
     <div class="col-md-8">
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informações do Treino</h5>
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> {% trans "Informações do Treino" %}</h5>
             </div>
             <div class="card-body">
                 <form method="post" id="personRoutineForm">
@@ -40,9 +41,9 @@
 
                     {% if not is_edit %}
                     <div class="mb-3">
-                        <label class="form-label">Template de Treino</label>
+                        <label class="form-label">{% trans "Template de Treino" %}</label>
                         <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#templateModal">
-                            <i class="bi bi-search"></i> <span id="selectedTemplateName">Selecionar Template</span>
+                            <i class="bi bi-search"></i> <span id="selectedTemplateName">{% trans "Selecionar Template" %}</span>
                         </button>
                     </div>
                     {% endif %}
@@ -106,9 +107,9 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="bi bi-list-ol"></i> Exercícios</h5>
+                <h5 class="mb-0"><i class="bi bi-list-ol"></i> {% trans "Exercícios" %}</h5>
                 <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#exerciseModal">
-                    <i class="bi bi-plus"></i> Adicionar
+                    <i class="bi bi-plus"></i> {% trans "Adicionar" %}
                 </button>
             </div>
             <div class="card-body">
@@ -128,14 +129,14 @@
                         </div>
                         {% endfor %}
                     {% else %}
-                    <p class="text-muted text-center">Nenhum exercício adicionado</p>
+                    <p class="text-muted text-center">{% trans "Nenhum exercício adicionado" %}</p>
                     {% endif %}
                 </div>
             </div>
         </div>
 
         <button type="button" class="btn btn-primary w-100 mt-3" onclick="submitForm()">
-            <i class="bi bi-check-circle"></i> {% if is_edit %}Atualizar Treino{% else %}Criar Treino{% endif %}
+            <i class="bi bi-check-circle"></i> {% if is_edit %}{% trans "Atualizar Treino" %}{% else %}{% trans "Criar Treino" %}{% endif %}
         </button>
     </div>
 </div>
@@ -145,11 +146,11 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-clipboard-check"></i> Selecionar Template de Treino</h5>
+                <h5 class="modal-title"><i class="bi bi-clipboard-check"></i> {% trans "Selecionar Template de Treino" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <input type="text" id="templateSearch" class="form-control mb-3" placeholder="Buscar template...">
+                <input type="text" id="templateSearch" class="form-control mb-3" placeholder="{% trans "Buscar template..." %}">
                 <div id="templatesList" class="list-group">
                     <!-- Templates will be loaded here -->
                 </div>
@@ -163,33 +164,33 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Adicionar Exercício</h5>
+                <h5 class="modal-title"><i class="bi bi-plus-circle"></i> {% trans "Adicionar Exercício" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <input type="text" id="exerciseSearch" class="form-control mb-3" placeholder="Buscar exercício...">
+                <input type="text" id="exerciseSearch" class="form-control mb-3" placeholder="{% trans "Buscar exercício..." %}">
                 <div id="exerciseSearchList" class="list-group mb-3" style="max-height: 300px; overflow-y: auto;">
                     <!-- Exercises will be loaded here -->
                 </div>
                 <div id="exerciseConfig" style="display: none;">
-                    <h6>Configuração</h6>
+                    <h6>{% trans "Configuração" %}</h6>
                     <input type="hidden" id="selectedExerciseId">
                     <div class="row">
                         <div class="col-md-4 mb-2">
-                            <label>Séries</label>
+                            <label>{% trans "Séries" %}</label>
                             <input type="number" id="exerciseSets" class="form-control" value="3" min="1">
                         </div>
                         <div class="col-md-4 mb-2">
-                            <label>Repetições</label>
+                            <label>{% trans "Repetições" %}</label>
                             <input type="number" id="exerciseReps" class="form-control" value="12" min="1">
                         </div>
                         <div class="col-md-4 mb-2">
-                            <label>Descanso (s)</label>
+                            <label>{% trans "Descanso (s)" %}</label>
                             <input type="number" id="exerciseRest" class="form-control" value="60" min="0">
                         </div>
                     </div>
                     <button type="button" class="btn btn-primary w-100 mt-2" onclick="addExercise()">
-                        Adicionar ao Treino
+                        {% trans "Adicionar ao Treino" %}
                     </button>
                 </div>
             </div>

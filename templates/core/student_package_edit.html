@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation static money_tags %}
 
-{% block title %}Editar pacote - {{ student.person_name }} - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed with person_name=student.person_name %}Editar pacote - {{ person_name }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3 gap-2">
     <div class="min-w-0">
-        <h1 class="h3 mb-0"><i class="bi bi-pencil-square"></i> Editar pacote</h1>
+        <h1 class="h3 mb-0"><i class="bi bi-pencil-square"></i> {% trans "Editar pacote" %}</h1>
         <div class="text-muted text-break">{{ student.person_name }} · {{ package.name }}</div>
     </div>
     {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default fragment='#tab-ficha' %}
@@ -18,9 +19,9 @@
 
     {% if row %}
     <div class="alert alert-info small" data-edit-context>
-        <i class="bi bi-info-circle"></i> {{ row.used }} de {{ row.sessions }} aulas já foram dadas: o pacote não pode ficar com menos que isso.
-        {% if row.paid %}Pago até agora: <strong>{{ row.paid|money }}</strong>.{% endif %}
-        Mudar o número de aulas ou o valor refaz o saldo e o que falta pagar; nada é apagado.
+        <i class="bi bi-info-circle"></i> {% blocktrans trimmed with used=row.used sessions=row.sessions %}{{ used }} de {{ sessions }} aulas já foram dadas: o pacote não pode ficar com menos que isso.{% endblocktrans %}
+        {% if row.paid %}{% blocktrans trimmed with paid=row.paid|money %}Pago até agora: <strong>{{ paid }}</strong>.{% endblocktrans %}{% endif %}
+        {% trans "Mudar o número de aulas ou o valor refaz o saldo e o que falta pagar; nada é apagado." %}
     </div>
     {% endif %}
 
@@ -40,11 +41,11 @@
                 <div class="form-check mt-1">{{ form.no_deadline }} <label class="form-check-label small" for="{{ form.no_deadline.id_for_label }}">{{ form.no_deadline.label }}</label></div>
             </div>
         </div>
-        <div class="form-text mt-2">O prazo conta a partir da primeira aula; prorrogações e dias congelados já somados continuam valendo.</div>
+        <div class="form-text mt-2">{% trans "O prazo conta a partir da primeira aula; prorrogações e dias congelados já somados continuam valendo." %}</div>
     </div></section>
 
     <section class="card mb-3"><div class="card-body">
-        <h2 class="h6"><i class="bi bi-lock"></i> Valor combinado (sigiloso)</h2>
+        <h2 class="h6"><i class="bi bi-lock"></i> {% trans "Valor combinado (sigiloso)" %}</h2>
         <div class="mb-2">
             {% for radio in form.pricing_mode %}<div class="form-check form-check-inline">{{ radio.tag }} <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label></div>{% endfor %}
         </div>
@@ -61,11 +62,11 @@
         <div class="mt-3">
             <label class="form-label fw-bold" for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>{{ form.notes }}
         </div>
-        <div class="form-text mt-2">Os pagamentos já registrados não mudam. Para devolver dinheiro, use <em>Cancelar com devolução</em> ou <em>Devolver ou estornar</em>.</div>
+        <div class="form-text mt-2">{% blocktrans trimmed %}Os pagamentos já registrados não mudam. Para devolver dinheiro, use <em>Cancelar com devolução</em> ou <em>Devolver ou estornar</em>.{% endblocktrans %}</div>
     </div></section>
 
     <div class="form-actions d-flex gap-2">
-        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Salvar</button>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> {% trans "Salvar" %}</button>
         {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='bi-x-circle' fragment='#tab-ficha' %}
     </div>
 </form>

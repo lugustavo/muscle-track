@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load navigation %}
 {% load static %}
 
-{% block title %}{{ title }} - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed %}{{ title }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -20,20 +21,20 @@
             <!-- Informações Básicas -->
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informações Básicas</h5>
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> {% trans "Informações Básicas" %}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-8 mb-3">
                             <label for="{{ form.exercise_name.id_for_label }}" class="form-label fw-bold">
-                                <i class="bi bi-tag"></i> Nome do Exercício *
+                                <i class="bi bi-tag"></i> {% trans "Nome do Exercício *" %}
                             </label>
                             <input type="text"
                                    name="{{ form.exercise_name.name }}"
                                    class="form-control {% if form.exercise_name.errors %}is-invalid{% endif %}"
                                    id="{{ form.exercise_name.id_for_label }}"
                                    value="{{ form.exercise_name.value|default:'' }}"
-                                   placeholder="Ex: Supino Reto"
+                                   placeholder="{% trans "Ex: Supino Reto" %}"
                                    required>
                             {% if form.exercise_name.errors %}
                                 <div class="invalid-feedback">{{ form.exercise_name.errors }}</div>
@@ -42,13 +43,13 @@
 
                         <div class="col-md-4 mb-3">
                             <label for="{{ form.muscle_group.id_for_label }}" class="form-label fw-bold">
-                                <i class="bi bi-diagram-3"></i> Grupo Muscular *
+                                <i class="bi bi-diagram-3"></i> {% trans "Grupo Muscular *" %}
                             </label>
                             <select name="{{ form.muscle_group.name }}"
                                     class="form-select {% if form.muscle_group.errors %}is-invalid{% endif %}"
                                     id="{{ form.muscle_group.id_for_label }}"
                                     required>
-                                <option value="">Selecione...</option>
+                                <option value="">{% trans "Selecione..." %}</option>
                                 {% for value, label in form.muscle_group.field.choices %}
                                     {% if value %}
                                     <option value="{{ value }}" {% if form.muscle_group.value == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
@@ -63,13 +64,13 @@
 
                     <div class="mb-3">
                         <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">
-                            <i class="bi bi-text-paragraph"></i> Descrição
+                            <i class="bi bi-text-paragraph"></i> {% trans "Descrição" %}
                         </label>
                         <textarea name="{{ form.description.name }}"
                                   class="form-control {% if form.description.errors %}is-invalid{% endif %}"
                                   id="{{ form.description.id_for_label }}"
                                   rows="3"
-                                  placeholder="Breve descrição do exercício...">{{ form.description.value|default:'' }}</textarea>
+                                  placeholder="{% trans "Breve descrição do exercício..." %}">{{ form.description.value|default:'' }}</textarea>
                         {% if form.description.errors %}
                             <div class="invalid-feedback">{{ form.description.errors }}</div>
                         {% endif %}
@@ -78,7 +79,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="{{ form.default_sets.id_for_label }}" class="form-label fw-bold">
-                                <i class="bi bi-bar-chart"></i> Séries Padrão *
+                                <i class="bi bi-bar-chart"></i> {% trans "Séries Padrão *" %}
                             </label>
                             <input type="number"
                                    name="{{ form.default_sets.name }}"
@@ -94,7 +95,7 @@
 
                         <div class="col-md-6 mb-3">
                             <label for="{{ form.default_reps.id_for_label }}" class="form-label fw-bold">
-                                <i class="bi bi-arrow-repeat"></i> Repetições Padrão *
+                                <i class="bi bi-arrow-repeat"></i> {% trans "Repetições Padrão *" %}
                             </label>
                             <input type="number"
                                    name="{{ form.default_reps.name }}"
@@ -114,12 +115,12 @@
             <!-- Mídia -->
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-image"></i> Mídia do Exercício</h5>
+                    <h5 class="mb-0"><i class="bi bi-image"></i> {% trans "Mídia do Exercício" %}</h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
                         <label for="{{ form.media_type.id_for_label }}" class="form-label fw-bold">
-                            <i class="bi bi-collection-play"></i> Tipo de Mídia
+                            <i class="bi bi-collection-play"></i> {% trans "Tipo de Mídia" %}
                         </label>
                         <select name="{{ form.media_type.name }}"
                                 class="form-select {% if form.media_type.errors %}is-invalid{% endif %}"
@@ -135,7 +136,7 @@
 
                     <div class="mb-3">
                         <label for="{{ form.media_file.id_for_label }}" class="form-label fw-bold">
-                            <i class="bi bi-file-earmark-arrow-up"></i> Arquivo de Mídia
+                            <i class="bi bi-file-earmark-arrow-up"></i> {% trans "Arquivo de Mídia" %}
                         </label>
                         <input type="file"
                                name="{{ form.media_file.name }}"
@@ -146,13 +147,13 @@
                             <div class="invalid-feedback">{{ form.media_file.errors }}</div>
                         {% endif %}
                         <small class="form-text text-muted">
-                            <i class="bi bi-info-circle"></i> Formatos aceitos: JPG, PNG, GIF, MP4
+                            <i class="bi bi-info-circle"></i> {% trans "Formatos aceitos: JPG, PNG, GIF, MP4" %}
                         </small>
                     </div>
 
                     <div class="mb-3">
                         <label for="{{ form.media_url.id_for_label }}" class="form-label fw-bold">
-                            <i class="bi bi-link-45deg"></i> URL da Mídia
+                            <i class="bi bi-link-45deg"></i> {% trans "URL da Mídia" %}
                         </label>
                         <input type="url"
                                name="{{ form.media_url.name }}"
@@ -164,13 +165,13 @@
                             <div class="invalid-feedback">{{ form.media_url.errors }}</div>
                         {% endif %}
                         <small class="form-text text-muted">
-                            <i class="bi bi-info-circle"></i> URL do YouTube, Vimeo ou link direto
+                            <i class="bi bi-info-circle"></i> {% trans "URL do YouTube, Vimeo ou link direto" %}
                         </small>
                     </div>
 
                     <div class="mb-3">
                         <label for="{{ form.thumbnail.id_for_label }}" class="form-label fw-bold">
-                            <i class="bi bi-card-image"></i> Thumbnail (Miniatura)
+                            <i class="bi bi-card-image"></i> {% trans "Thumbnail (Miniatura)" %}
                         </label>
                         <input type="file"
                                name="{{ form.thumbnail.name }}"
@@ -181,7 +182,7 @@
                             <div class="invalid-feedback">{{ form.thumbnail.errors }}</div>
                         {% endif %}
                         <small class="form-text text-muted">
-                            <i class="bi bi-info-circle"></i> Imagem de visualização (recomendado 400x300px)
+                            <i class="bi bi-info-circle"></i> {% trans "Imagem de visualização (recomendado 400x300px)" %}
                         </small>
                     </div>
                 </div>
@@ -190,18 +191,18 @@
             <!-- Instruções -->
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-list-check"></i> Instruções de Execução</h5>
+                    <h5 class="mb-0"><i class="bi bi-list-check"></i> {% trans "Instruções de Execução" %}</h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
                         <label for="{{ form.instructions.id_for_label }}" class="form-label fw-bold">
-                            Passo a passo
+                            {% trans "Passo a passo" %}
                         </label>
                         <textarea name="{{ form.instructions.name }}"
                                   class="form-control {% if form.instructions.errors %}is-invalid{% endif %}"
                                   id="{{ form.instructions.id_for_label }}"
                                   rows="5"
-                                  placeholder="1. Posicione-se...&#10;2. Segure a barra...&#10;3. Execute o movimento...">{{ form.instructions.value|default:'' }}</textarea>
+                                  placeholder="{% trans "1. Posicione-se...&#10;2. Segure a barra...&#10;3. Execute o movimento..." %}">{{ form.instructions.value|default:'' }}</textarea>
                         {% if form.instructions.errors %}
                             <div class="invalid-feedback">{{ form.instructions.errors }}</div>
                         {% endif %}
@@ -214,7 +215,7 @@
                                id="{{ form.is_active.id_for_label }}"
                                {% if form.is_active.value %}checked{% endif %}>
                         <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
-                            <i class="bi bi-check-circle"></i> Exercício ativo (disponível para uso)
+                            <i class="bi bi-check-circle"></i> {% trans "Exercício ativo (disponível para uso)" %}
                         </label>
                     </div>
                 </div>
@@ -223,7 +224,7 @@
             <!-- Botões de Ação -->
             <div class="d-flex gap-2 mb-4">
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i> Salvar Exercício
+                    <i class="bi bi-check-circle"></i> {% trans "Salvar Exercício" %}
                 </button>
                 {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='bi-x-circle' %}
             </div>
@@ -235,24 +236,24 @@
         <!-- Preview da Mídia -->
         <div class="card mb-4 border-0 shadow-sm">
             <div class="card-header bg-body">
-                <h6 class="mb-0"><i class="bi bi-eye"></i> Preview da Mídia</h6>
+                <h6 class="mb-0"><i class="bi bi-eye"></i> {% trans "Preview da Mídia" %}</h6>
             </div>
             <div class="card-body">
                 <div id="mediaPreview" class="text-center">
                     {% if form.instance.thumbnail %}
                         <img src="{{ form.instance.thumbnail.url }}"
                              class="img-fluid rounded shadow-sm"
-                             alt="Preview"
+                             alt="{% trans "Preview" %}"
                              onerror="this.src='{% static 'images/no-image.svg' %}'">
                     {% elif form.instance.media_file %}
                         <img src="{{ form.instance.media_file.url }}"
                              class="img-fluid rounded shadow-sm"
-                             alt="Preview"
+                             alt="{% trans "Preview" %}"
                              onerror="this.src='{% static 'images/no-image.svg' %}'">
                     {% else %}
                         <div class="bg-body-tertiary p-5 rounded">
                             <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
-                            <p class="text-muted mt-3 mb-0">Nenhuma imagem</p>
+                            <p class="text-muted mt-3 mb-0">{% trans "Nenhuma imagem" %}</p>
                         </div>
                     {% endif %}
                 </div>
@@ -263,23 +264,23 @@
         {% if form.instance.pk %}
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-body">
-                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Informações do Registro</h6>
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> {% trans "Informações do Registro" %}</h6>
             </div>
             <div class="card-body">
                 <ul class="list-unstyled mb-0">
                     <li class="mb-2">
-                        <small class="text-muted d-block">ID do Exercício</small>
-                        <strong>#{{ form.instance.pk }}</strong>
+                        {% blocktrans trimmed with pk=form.instance.pk %}<small class="text-muted d-block">ID do Exercício</small>
+                        <strong>#{{ pk }}</strong>{% endblocktrans %}
                     </li>
                     <li class="mb-2">
-                        <small class="text-muted d-block">Criado em</small>
-                        <strong>{{ form.instance.created_at|date:"d/m/Y" }}</strong>
+                        {% blocktrans trimmed with created_at=form.instance.created_at|date:"d/m/Y" %}<small class="text-muted d-block">Criado em</small>
+                        <strong>{{ created_at }}</strong>{% endblocktrans %}
                         <br>
                         <small class="text-muted">{{ form.instance.created_at|date:"H:i" }}</small>
                     </li>
                     <li>
-                        <small class="text-muted d-block">Última atualização</small>
-                        <strong>{{ form.instance.updated_at|date:"d/m/Y" }}</strong>
+                        {% blocktrans trimmed with updated_at=form.instance.updated_at|date:"d/m/Y" %}<small class="text-muted d-block">Última atualização</small>
+                        <strong>{{ updated_at }}</strong>{% endblocktrans %}
                         <br>
                         <small class="text-muted">{{ form.instance.updated_at|date:"H:i" }}</small>
                     </li>

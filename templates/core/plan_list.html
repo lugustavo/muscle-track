@@ -1,23 +1,24 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation %}
 {% load money_tags %}
 
-{% block title %}Pacotes - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed %}Pacotes - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-box-seam"></i> Pacotes</h1>
-    <a href="{% nav_url 'core:plan_create' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Novo pacote</a>
+    <h1><i class="bi bi-box-seam"></i> {% trans "Pacotes" %}</h1>
+    <a href="{% nav_url 'core:plan_create' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> {% trans "Novo pacote" %}</a>
 </div>
-<p class="text-muted">O pacote é o modelo do catálogo: uma quantidade de aulas, um prazo (contado a partir da primeira aula) e um valor por aula ou total. Ao vender um pacote para o aluno, os números são copiados para ele: mudar o modelo depois não altera quem já comprou.</p>
+<p class="text-muted">{% trans "O pacote é o modelo do catálogo: uma quantidade de aulas, um prazo (contado a partir da primeira aula) e um valor por aula ou total. Ao vender um pacote para o aluno, os números são copiados para ele: mudar o modelo depois não altera quem já comprou." %}</p>
 
 <form method="get" class="row g-2 mb-4">
-    <div class="col-md-5"><input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Buscar pacote..."></div>
+    <div class="col-md-5"><input type="text" name="search" value="{{ search }}" class="form-control" placeholder="{% trans "Buscar pacote..." %}"></div>
     <div class="col-md-3">
         <select name="status" class="form-select" onchange="this.form.submit()">
-            <option value="active" {% if status == 'active' %}selected{% endif %}>Ativos</option>
-            <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Inativos</option>
-            <option value="all" {% if status == 'all' %}selected{% endif %}>Todos</option>
+            <option value="active" {% if status == 'active' %}selected{% endif %}>{% trans "Ativos" %}</option>
+            <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>{% trans "Inativos" %}</option>
+            <option value="all" {% if status == 'all' %}selected{% endif %}>{% trans "Todos" %}</option>
         </select>
     </div>
     <div class="col-md-2"><button class="btn btn-outline-primary w-100"><i class="bi bi-search"></i></button></div>
@@ -30,21 +31,21 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <h5 class="card-title mb-1">{{ plan.name }}</h5>
-                    {% if not plan.is_active %}<span class="badge bg-secondary">inativo</span>{% endif %}
+                    {% if not plan.is_active %}<span class="badge bg-secondary">{% trans "inativo" %}</span>{% endif %}
                 </div>
-                <div class="text-muted small mb-2">{{ plan.sessions }} aulas · {% if plan.valid_days %}{{ plan.valid_days }} dias a partir da primeira aula{% else %}sem prazo{% endif %}</div>
-                <div class="fs-4 fw-bold">{% if plan.price_total is not None %}{{ plan.price_total|money }}{% else %}<span class="text-muted fs-6">sem valor</span>{% endif %}</div>
-                {% if plan.price_per_session is not None %}<div class="small text-muted">{{ plan.price_per_session|money }} por aula</div>{% endif %}
+                <div class="text-muted small mb-2">{% blocktrans trimmed with sessions=plan.sessions %}{{ sessions }} aulas ·{% endblocktrans %} {% if plan.valid_days %}{% blocktrans trimmed with valid_days=plan.valid_days %}{{ valid_days }} dias a partir da primeira aula{% endblocktrans %}{% else %}{% trans "sem prazo" %}{% endif %}</div>
+                <div class="fs-4 fw-bold">{% if plan.price_total is not None %}{{ plan.price_total|money }}{% else %}<span class="text-muted fs-6">{% trans "sem valor" %}</span>{% endif %}</div>
+                {% if plan.price_per_session is not None %}<div class="small text-muted">{% blocktrans trimmed with price_per_session=plan.price_per_session|money %}{{ price_per_session }} por aula{% endblocktrans %}</div>{% endif %}
                 {% if plan.description %}<p class="small mt-2 mb-2">{{ plan.description|linebreaksbr }}</p>{% endif %}
-                <div class="small text-muted">{{ plan.sold_count }} vendido{{ plan.sold_count|pluralize }}</div>
+                <div class="small text-muted">{% blocktrans trimmed count sold_count=plan.sold_count %}{{ sold_count }} vendido{% plural %}{{ sold_count }} vendidos{% endblocktrans %}</div>
             </div>
             <div class="card-footer bg-transparent">
-                <a href="{% nav_url 'core:plan_edit' plan.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> Editar</a>
+                <a href="{% nav_url 'core:plan_edit' plan.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> {% trans "Editar" %}</a>
             </div>
         </div>
     </div>
     {% empty %}
-    <div class="col-12"><div class="alert alert-info">Nenhum pacote {% if search %}encontrado{% else %}cadastrado ainda{% endif %}. <a href="{% nav_url 'core:plan_create' %}">Crie o primeiro</a>.</div></div>
+    <div class="col-12"><div class="alert alert-info">{% trans "Nenhum pacote" %} {% if search %}{% trans "encontrado" %}{% else %}{% trans "cadastrado ainda" %}{% endif %}. <a href="{% nav_url 'core:plan_create' %}">{% trans "Crie o primeiro" %}</a>.</div></div>
     {% endfor %}
 </div>
 {% endblock %}

@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% load navigation %}
 {% load static %}
 
-{% block title %}{{ title }} - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed %}{{ title }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -22,7 +23,7 @@
             {% endif %}
             {% if form.duplicates %}
             <div class="alert alert-warning">
-                <strong><i class="bi bi-exclamation-triangle"></i> Possível cadastro duplicado</strong>
+                <strong><i class="bi bi-exclamation-triangle"></i> {% trans "Possível cadastro duplicado" %}</strong>
                 <ul class="mb-2">
                     {% for other, reason in form.duplicates %}
                     <li><a href="{% url 'core:student_detail' other.pk %}" target="_blank" rel="noopener">{{ other.person_name }}</a> ({{ reason }})</li>
@@ -39,7 +40,7 @@
             <div class="card mb-4 border-0 shadow-sm form-section">
                 <div class="card-header bg-primary text-white p-0">
                     <button type="button" class="section-toggle" data-bs-toggle="collapse" data-bs-target="#sec-foto" aria-controls="sec-foto" aria-expanded="{% if form.avatar.errors %}true{% else %}false{% endif %}">
-                        <h5 class="mb-0"><i class="bi bi-camera"></i> Foto de Perfil</h5>
+                        <h5 class="mb-0"><i class="bi bi-camera"></i> {% trans "Foto de Perfil" %}</h5>
                         <i class="bi bi-chevron-down section-chevron" aria-hidden="true"></i>
                     </button>
                 </div>
@@ -50,11 +51,11 @@
                              src="{% if form.instance.avatar %}{{ form.instance.avatar.url }}{% else %}{% static 'images/default-avatar.svg' %}{% endif %}"
                              class="rounded-circle shadow-sm mb-3"
                              style="width: 150px; height: 150px; object-fit: cover; border: 4px solid var(--bs-border-color);"
-                             alt="Avatar">
+                             alt="{% trans "Avatar" %}">
                     </div>
                     <div class="mb-2">
                         <label for="{{ form.avatar.id_for_label }}" class="btn btn-outline-primary">
-                            <i class="bi bi-upload"></i> Escolher Foto
+                            <i class="bi bi-upload"></i> {% trans "Escolher Foto" %}
                         </label>
                         <input type="file"
                                name="{{ form.avatar.name }}"
@@ -66,7 +67,7 @@
                         {% endif %}
                     </div>
                     <small class="text-muted">
-                        <i class="bi bi-info-circle"></i> JPG, PNG, GIF, WEBP | Máx: 5MB | 100x100 até 2000x2000px
+                        <i class="bi bi-info-circle"></i> {% trans "JPG, PNG, GIF, WEBP | Máx: 5MB | 100x100 até 2000x2000px" %}
                     </small>
                 </div>
                 </div>
@@ -76,7 +77,7 @@
             <div class="card mb-4 border-0 shadow-sm form-section">
                 <div class="card-header bg-primary text-white p-0">
                     <button type="button" class="section-toggle" data-bs-toggle="collapse" data-bs-target="#sec-pessoais" aria-controls="sec-pessoais" aria-expanded="true">
-                        <h5 class="mb-0"><i class="bi bi-person"></i> Informações Pessoais</h5>
+                        <h5 class="mb-0"><i class="bi bi-person"></i> {% trans "Informações Pessoais" %}</h5>
                         <i class="bi bi-chevron-down section-chevron" aria-hidden="true"></i>
                     </button>
                 </div>
@@ -84,14 +85,14 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <label for="{{ form.person_name.id_for_label }}" class="form-label fw-bold">
-                            <i class="bi bi-person-fill"></i> Nome Completo *
+                            <i class="bi bi-person-fill"></i> {% trans "Nome Completo *" %}
                         </label>
                         <input type="text"
                                name="{{ form.person_name.name }}"
                                class="form-control {% if form.person_name.errors %}is-invalid{% endif %}"
                                id="{{ form.person_name.id_for_label }}"
                                value="{{ form.person_name.value|default:'' }}"
-                               placeholder="Nome completo do aluno"
+                               placeholder="{% trans "Nome completo do aluno" %}"
                                autocomplete="off" autocapitalize="words" required>
                         {% if form.person_name.errors %}
                             <div class="invalid-feedback">{{ form.person_name.errors }}</div>
@@ -101,28 +102,28 @@
                     <div class="row">
                         <div class="col-md-8 mb-3">
                             <label for="{{ form.email.id_for_label }}" class="form-label fw-bold">
-                                <i class="bi bi-envelope"></i> E-mail *
+                                <i class="bi bi-envelope"></i> {% trans "E-mail *" %}
                             </label>
                             <input type="email"
                                    name="{{ form.email.name }}"
                                    class="form-control {% if form.email.errors %}is-invalid{% endif %}"
                                    id="{{ form.email.id_for_label }}"
                                    value="{{ form.email.value|default:'' }}"
-                                   placeholder="email@exemplo.com"
+                                   placeholder="{% trans "email@exemplo.com" %}"
                                    autocomplete="off" inputmode="email" autocapitalize="none" required>
                             {% if form.email.errors %}
                                 <div class="invalid-feedback">{{ form.email.errors }}</div>
                             {% endif %}
                             {% if not form.instance.pk %}
                             <small class="form-text text-muted">
-                                <i class="bi bi-info-circle"></i> Usado no login. Você recebe um link de acesso para enviar ao aluno
+                                <i class="bi bi-info-circle"></i> {% trans "Usado no login. Você recebe um link de acesso para enviar ao aluno" %}
                             </small>
                             {% endif %}
                         </div>
 
                         <div class="col-md-4 mb-3">
                             <label for="{{ form.birth_date.id_for_label }}" class="form-label fw-bold">
-                                <i class="bi bi-calendar"></i> Data de Nascimento
+                                <i class="bi bi-calendar"></i> {% trans "Data de Nascimento" %}
                             </label>
                             <input type="date"
                                    name="{{ form.birth_date.name }}"
@@ -137,7 +138,7 @@
 
                     <div class="mb-3">
                         <label for="{{ form.phone.id_for_label }}" class="form-label fw-bold">
-                            <i class="bi bi-telephone"></i> Telefone
+                            <i class="bi bi-telephone"></i> {% trans "Telefone" %}
                         </label>
                         <input type="tel"
                                name="{{ form.phone.name }}"
@@ -158,7 +159,7 @@
             <div class="card mb-4 border-0 shadow-sm form-section">
                 <div class="card-header bg-primary text-white p-0">
                     <button type="button" class="section-toggle" data-bs-toggle="collapse" data-bs-target="#sec-endereco" aria-controls="sec-endereco" aria-expanded="{% if form.address.errors or form.city.errors or form.state.errors or form.zip_code.errors %}true{% else %}false{% endif %}">
-                        <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Endereço</h5>
+                        <h5 class="mb-0"><i class="bi bi-geo-alt"></i> {% trans "Endereço" %}</h5>
                         <i class="bi bi-chevron-down section-chevron" aria-hidden="true"></i>
                     </button>
                 </div>
@@ -166,14 +167,14 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <label for="{{ form.address.id_for_label }}" class="form-label fw-bold">
-                            <i class="bi bi-house-door"></i> Endereço
+                            <i class="bi bi-house-door"></i> {% trans "Endereço" %}
                         </label>
                         <input type="text"
                                name="{{ form.address.name }}"
                                class="form-control {% if form.address.errors %}is-invalid{% endif %}"
                                id="{{ form.address.id_for_label }}"
                                value="{{ form.address.value|default:'' }}"
-                               placeholder="Rua, número, complemento">
+                               placeholder="{% trans "Rua, número, complemento" %}">
                         {% if form.address.errors %}
                             <div class="invalid-feedback">{{ form.address.errors }}</div>
                         {% endif %}
@@ -182,14 +183,14 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="{{ form.city.id_for_label }}" class="form-label fw-bold">
-                                <i class="bi bi-building"></i> Cidade
+                                <i class="bi bi-building"></i> {% trans "Cidade" %}
                             </label>
                             <input type="text"
                                    name="{{ form.city.name }}"
                                    class="form-control {% if form.city.errors %}is-invalid{% endif %}"
                                    id="{{ form.city.id_for_label }}"
                                    value="{{ form.city.value|default:'' }}"
-                                   placeholder="Nome da cidade">
+                                   placeholder="{% trans "Nome da cidade" %}">
                             {% if form.city.errors %}
                                 <div class="invalid-feedback">{{ form.city.errors }}</div>
                             {% endif %}
@@ -197,14 +198,14 @@
 
                         <div class="col-md-3 mb-3">
                             <label for="{{ form.state.id_for_label }}" class="form-label fw-bold">
-                                <i class="bi bi-map"></i> Estado
+                                <i class="bi bi-map"></i> {% trans "Estado" %}
                             </label>
                             <input type="text"
                                    name="{{ form.state.name }}"
                                    class="form-control {% if form.state.errors %}is-invalid{% endif %}"
                                    id="{{ form.state.id_for_label }}"
                                    value="{{ form.state.value|default:'' }}"
-                                   placeholder="UF"
+                                   placeholder="{% trans "UF" %}"
                                    maxlength="2" autocapitalize="characters" autocomplete="off" data-mask="state">
                             {% if form.state.errors %}
                                 <div class="invalid-feedback">{{ form.state.errors }}</div>
@@ -213,7 +214,7 @@
 
                         <div class="col-md-3 mb-3">
                             <label for="{{ form.zip_code.id_for_label }}" class="form-label fw-bold">
-                                <i class="bi bi-mailbox"></i> CEP
+                                <i class="bi bi-mailbox"></i> {% trans "CEP" %}
                             </label>
                             <input type="text"
                                    name="{{ form.zip_code.name }}"
@@ -235,41 +236,41 @@
             <div class="card mb-4 border-0 shadow-sm form-section">
                 <div class="card-header bg-primary text-white p-0">
                     <button type="button" class="section-toggle" data-bs-toggle="collapse" data-bs-target="#sec-ficha" aria-controls="sec-ficha" aria-expanded="{% if form.goal.errors or form.health_notes.errors or form.emergency_contact_name.errors or form.emergency_contact_phone.errors %}true{% else %}false{% endif %}">
-                        <h5 class="mb-0"><i class="bi bi-person-vcard"></i> Ficha da personal</h5>
+                        <h5 class="mb-0"><i class="bi bi-person-vcard"></i> {% trans "Ficha da personal" %}</h5>
                         <i class="bi bi-chevron-down section-chevron" aria-hidden="true"></i>
                     </button>
                 </div>
                 <div class="collapse section-collapse{% if form.goal.errors or form.health_notes.errors or form.emergency_contact_name.errors or form.emergency_contact_phone.errors %} show{% endif %}" id="sec-ficha">
                 <div class="card-body">
                     <div class="mb-3">
-                        <label for="{{ form.goal.id_for_label }}" class="form-label fw-bold">Objetivo</label>
+                        <label for="{{ form.goal.id_for_label }}" class="form-label fw-bold">{% trans "Objetivo" %}</label>
                         {{ form.goal }}
                         {% if form.goal.errors %}<div class="text-danger small">{{ form.goal.errors }}</div>{% endif %}
                     </div>
                     <div class="mb-3">
-                        <label for="{{ form.health_notes.id_for_label }}" class="form-label fw-bold">Saúde, lesões e restrições</label>
+                        <label for="{{ form.health_notes.id_for_label }}" class="form-label fw-bold">{% trans "Saúde, lesões e restrições" %}</label>
                         {{ form.health_notes }}
-                        {% if form.health_notes.errors %}<div class="text-danger small">{{ form.health_notes.errors }}</div>{% endif %}<div class="form-text">Aparece em destaque na ficha do aluno. O aluno não vê.</div>
+                        {% if form.health_notes.errors %}<div class="text-danger small">{{ form.health_notes.errors }}</div>{% endif %}<div class="form-text">{% trans "Aparece em destaque na ficha do aluno. O aluno não vê." %}</div>
                     </div>
                     <div class="row">
                         <div class="col-md-6">
                     <div class="mb-3">
-                        <label for="{{ form.emergency_contact_name.id_for_label }}" class="form-label fw-bold">Contato de emergência</label>
+                        <label for="{{ form.emergency_contact_name.id_for_label }}" class="form-label fw-bold">{% trans "Contato de emergência" %}</label>
                         {{ form.emergency_contact_name }}
                         {% if form.emergency_contact_name.errors %}<div class="text-danger small">{{ form.emergency_contact_name.errors }}</div>{% endif %}
                     </div>
                         </div>
                         <div class="col-md-6">
                     <div class="mb-3">
-                        <label for="{{ form.emergency_contact_phone.id_for_label }}" class="form-label fw-bold">Telefone de emergência</label>
+                        <label for="{{ form.emergency_contact_phone.id_for_label }}" class="form-label fw-bold">{% trans "Telefone de emergência" %}</label>
                         {{ form.emergency_contact_phone }}
                         {% if form.emergency_contact_phone.errors %}<div class="text-danger small">{{ form.emergency_contact_phone.errors }}</div>{% endif %}
                     </div>
                         </div>
                         <div class="col-12 small text-muted" data-contract-hint>
                             <i class="bi bi-file-earmark-text"></i>
-                            {% if form.instance.pk %}O pacote e os valores combinados ficam em <a href="{% url 'core:student_package_sell' form.instance.pk %}">Vender pacote</a>.
-                            {% else %}O pacote e os valores combinados são definidos depois de cadastrar, na ficha do aluno (<strong>Vender pacote</strong>).{% endif %}
+                            {% if form.instance.pk %}{% trans "O pacote e os valores combinados ficam em" %} <a href="{% url 'core:student_package_sell' form.instance.pk %}">{% trans "Vender pacote" %}</a>.
+                            {% else %}{% blocktrans trimmed %}O pacote e os valores combinados são definidos depois de cadastrar, na ficha do aluno (<strong>Vender pacote</strong>).{% endblocktrans %}{% endif %}
                         </div>
                     </div>
                 </div>
@@ -280,7 +281,7 @@
             <div class="card mb-4 border-0 shadow-sm form-section">
                 <div class="card-header bg-primary text-white p-0">
                     <button type="button" class="section-toggle" data-bs-toggle="collapse" data-bs-target="#sec-notas" aria-controls="sec-notas" aria-expanded="{% if form.notes.errors or form.status.errors %}true{% else %}false{% endif %}">
-                        <h5 class="mb-0"><i class="bi bi-journal-text"></i> Anotações internas</h5>
+                        <h5 class="mb-0"><i class="bi bi-journal-text"></i> {% trans "Anotações internas" %}</h5>
                         <i class="bi bi-chevron-down section-chevron" aria-hidden="true"></i>
                     </button>
                 </div>
@@ -288,13 +289,13 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <label for="{{ form.notes.id_for_label }}" class="form-label fw-bold">
-                            Anotações internas <small class="text-muted fw-normal">(o aluno não vê)</small>
+                            {% blocktrans trimmed %}Anotações internas <small class="text-muted fw-normal">(o aluno não vê)</small>{% endblocktrans %}
                         </label>
                         <textarea name="{{ form.notes.name }}" data-no-draft
                                   class="form-control {% if form.notes.errors %}is-invalid{% endif %}"
                                   id="{{ form.notes.id_for_label }}"
                                   rows="4"
-                                  placeholder="Combinados, preferências, observações da personal...">{{ form.notes.value|default:'' }}</textarea>
+                                  placeholder="{% trans "Combinados, preferências, observações da personal..." %}">{{ form.notes.value|default:'' }}</textarea>
                         {% if form.notes.errors %}
                             <div class="invalid-feedback">{{ form.notes.errors }}</div>
                         {% endif %}
@@ -302,14 +303,14 @@
 
                     {% if form.status %}
                     <div class="mb-0">
-                        <label for="{{ form.status.id_for_label }}" class="form-label fw-bold">Situação inicial</label>
+                        <label for="{{ form.status.id_for_label }}" class="form-label fw-bold">{% trans "Situação inicial" %}</label>
                         {{ form.status }}
-                        <div class="form-text">Para pausar ou encerrar depois, use "Alterar situação" na ficha (fica registrado no histórico).</div>
+                        <div class="form-text">{% trans "Para pausar ou encerrar depois, use \"Alterar situação\" na ficha (fica registrado no histórico)." %}</div>
                     </div>
                     {% else %}
                     <div class="small text-muted">
-                        Situação: <strong>{{ form.instance.get_status_display }}</strong> —
-                        <a href="{% nav_url 'core:student_status' form.instance.pk %}">alterar situação</a>
+                        {% blocktrans trimmed with get_status_display=form.instance.get_status_display %}Situação: <strong>{{ get_status_display }}</strong> —{% endblocktrans %}
+                        <a href="{% nav_url 'core:student_status' form.instance.pk %}">{% trans "alterar situação" %}</a>
                     </div>
                     {% endif %}
                 </div>
@@ -319,7 +320,7 @@
             <!-- Botões de Ação -->
             <div class="form-actions d-flex gap-2 mb-4">
                 <button type="submit" class="btn btn-primary flex-grow-1 flex-lg-grow-0">
-                    <i class="bi bi-check-circle"></i> Salvar Aluno
+                    <i class="bi bi-check-circle"></i> {% trans "Salvar Aluno" %}
                 </button>
                 {% back_button back_default label='Cancelar' css='btn btn-outline-secondary' icon='bi-x-circle' %}
             </div>
@@ -331,39 +332,39 @@
         <!-- Resumo -->
         <div class="card mb-4 border-0 shadow-sm">
             <div class="card-header bg-body">
-                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Informações</h6>
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> {% trans "Informações" %}</h6>
             </div>
             <div class="card-body">
                 {% if form.instance.pk %}
                 <ul class="list-unstyled mb-0">
                     <li class="mb-2">
-                        <small class="text-muted d-block">ID do Aluno</small>
-                        <strong>#{{ form.instance.pk }}</strong>
+                        {% blocktrans trimmed with pk=form.instance.pk %}<small class="text-muted d-block">ID do Aluno</small>
+                        <strong>#{{ pk }}</strong>{% endblocktrans %}
                     </li>
                     <li class="mb-2">
-                        <small class="text-muted d-block">Cadastrado em</small>
-                        <strong>{{ form.instance.created_at|date:"d/m/Y" }}</strong>
+                        {% blocktrans trimmed with created_at=form.instance.created_at|date:"d/m/Y" %}<small class="text-muted d-block">Cadastrado em</small>
+                        <strong>{{ created_at }}</strong>{% endblocktrans %}
                         <br>
                         <small class="text-muted">{{ form.instance.created_at|date:"H:i" }}</small>
                     </li>
                     <li class="mb-2">
-                        <small class="text-muted d-block">Última atualização</small>
-                        <strong>{{ form.instance.updated_at|date:"d/m/Y" }}</strong>
+                        {% blocktrans trimmed with updated_at=form.instance.updated_at|date:"d/m/Y" %}<small class="text-muted d-block">Última atualização</small>
+                        <strong>{{ updated_at }}</strong>{% endblocktrans %}
                         <br>
                         <small class="text-muted">{{ form.instance.updated_at|date:"H:i" }}</small>
                     </li>
                     {% if form.instance.user %}
                     <li>
-                        <small class="text-muted d-block">Conta de usuário</small>
+                        <small class="text-muted d-block">{% trans "Conta de usuário" %}</small>
                         <span class="badge bg-success">
-                            <i class="bi bi-check-circle"></i> Criada
+                            <i class="bi bi-check-circle"></i> {% trans "Criada" %}
                         </span>
                     </li>
                     {% else %}
                     <li>
-                        <small class="text-muted d-block">Conta de usuário</small>
+                        <small class="text-muted d-block">{% trans "Conta de usuário" %}</small>
                         <span class="badge bg-warning">
-                            <i class="bi bi-clock"></i> Pendente
+                            <i class="bi bi-clock"></i> {% trans "Pendente" %}
                         </span>
                     </li>
                     {% endif %}
@@ -371,9 +372,9 @@
                 {% else %}
                 <div class="alert alert-info mb-0" role="alert">
                     <i class="bi bi-info-circle"></i>
-                    <strong>Novo aluno</strong>
+                    <strong>{% trans "Novo aluno" %}</strong>
                     <p class="mb-0 mt-2 small">
-                        Ao salvar, será criada a conta do aluno e você recebe um link de uso único (copiar ou WhatsApp) para ele criar a senha.
+                        {% trans "Ao salvar, será criada a conta do aluno e você recebe um link de uso único (copiar ou WhatsApp) para ele criar a senha." %}
                     </p>
                 </div>
                 {% endif %}
@@ -383,14 +384,14 @@
         <!-- Dicas -->
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-body">
-                <h6 class="mb-0"><i class="bi bi-lightbulb"></i> Dicas</h6>
+                <h6 class="mb-0"><i class="bi bi-lightbulb"></i> {% trans "Dicas" %}</h6>
             </div>
             <div class="card-body">
                 <ul class="small mb-0 ps-3">
-                    <li class="mb-2">Use uma foto clara e recente do aluno</li>
-                    <li class="mb-2">O e-mail será usado para login do aluno</li>
-                    <li class="mb-2">Anote restrições médicas em &quot;Saúde, lesões e restrições&quot;</li>
-                    <li>Mantenha os dados atualizados para melhor acompanhamento</li>
+                    <li class="mb-2">{% trans "Use uma foto clara e recente do aluno" %}</li>
+                    <li class="mb-2">{% trans "O e-mail será usado para login do aluno" %}</li>
+                    <li class="mb-2">{% trans "Anote restrições médicas em &quot;Saúde, lesões e restrições&quot;" %}</li>
+                    <li>{% trans "Mantenha os dados atualizados para melhor acompanhamento" %}</li>
                 </ul>
             </div>
         </div>

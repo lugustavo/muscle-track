@@ -1,25 +1,26 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load navigation %}
 {% load static %}
 
-{% block title %}Meu Histórico - Muscle Track{% endblock %}
+{% block title %}{% blocktrans trimmed %}Meu Histórico - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<h1 class="mb-4"><i class="bi bi-graph-up"></i> Meu Histórico de Treinos</h1>
+<h1 class="mb-4"><i class="bi bi-graph-up"></i> {% trans "Meu Histórico de Treinos" %}</h1>
 
 {% if completed_sessions %}
 <div class="card">
     <div class="card-body">
-        <h5 class="card-title">Sessões Concluídas (últimas 20)</h5>
+        <h5 class="card-title">{% trans "Sessões Concluídas (últimas 20)" %}</h5>
         <div class="table-responsive">
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
-                        <th>Data</th>
-                        <th>Treino</th>
-                        <th>Início</th>
-                        <th>Término</th>
-                        <th>Duração</th>
+                        <th>{% trans "Data" %}</th>
+                        <th>{% trans "Treino" %}</th>
+                        <th>{% trans "Início" %}</th>
+                        <th>{% trans "Término" %}</th>
+                        <th>{% trans "Duração" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -41,7 +42,7 @@
                         </td>
                         <td>
                             {% if session.duration_minutes %}
-                                <span class="badge bg-success">{{ session.duration_minutes }} min</span>
+                                <span class="badge bg-success">{% blocktrans trimmed with duration_minutes=session.duration_minutes %}{{ duration_minutes }} min{% endblocktrans %}</span>
                             {% else %}
                                 <span class="text-muted">-</span>
                             {% endif %}
@@ -58,7 +59,7 @@
                 <div class="card bg-body-tertiary">
                     <div class="card-body text-center">
                         <h3 class="text-primary">{{ completed_sessions.count }}</h3>
-                        <p class="mb-0">Total de Treinos</p>
+                        <p class="mb-0">{% trans "Total de Treinos" %}</p>
                     </div>
                 </div>
             </div>
@@ -68,7 +69,7 @@
                         <h3 class="text-success">
                             {% widthratio completed_sessions|length 1 7 %}
                         </h3>
-                        <p class="mb-0">Treinos/Semana (aprox.)</p>
+                        <p class="mb-0">{% trans "Treinos/Semana (aprox.)" %}</p>
                     </div>
                 </div>
             </div>
@@ -78,7 +79,7 @@
                         <h3 class="text-info">
                             {{ person.routines.count }}
                         </h3>
-                        <p class="mb-0">Treinos Atribuídos</p>
+                        <p class="mb-0">{% trans "Treinos Atribuídos" %}</p>
                     </div>
                 </div>
             </div>
@@ -87,10 +88,10 @@
 </div>
 {% else %}
 <div class="alert alert-info">
-    <i class="bi bi-info-circle"></i> Você ainda não concluiu nenhum treino.
+    <i class="bi bi-info-circle"></i> {% trans "Você ainda não concluiu nenhum treino." %}
     <br><br>
     <a href="{% url 'core:my_workouts' %}" class="btn btn-primary">
-        <i class="bi bi-fire"></i> Iniciar Treino Agora
+        <i class="bi bi-fire"></i> {% trans "Iniciar Treino Agora" %}
     </a>
 </div>
 {% endif %}
@@ -99,15 +100,15 @@
 {% if records %}
 <div class="card mt-4">
     <div class="card-body">
-        <h5 class="card-title"><i class="bi bi-trophy"></i> Meus Recordes de Carga</h5>
+        <h5 class="card-title"><i class="bi bi-trophy"></i> {% trans "Meus Recordes de Carga" %}</h5>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead><tr><th>Exercício</th><th class="text-end">Recorde</th><th class="text-end">Treinos</th><th class="text-end">Último</th></tr></thead>
+                <thead><tr><th>{% trans "Exercício" %}</th><th class="text-end">{% trans "Recorde" %}</th><th class="text-end">{% trans "Treinos" %}</th><th class="text-end">{% trans "Último" %}</th></tr></thead>
                 <tbody>
                 {% for r in records %}
                     <tr>
                         <td><a href="{% nav_url 'core:my_exercise_progress' r.person_routine_exercise__exercise_id %}" class="text-decoration-none">{{ r.person_routine_exercise__exercise__exercise_name }}</a></td>
-                        <td class="text-end"><strong>{{ r.best }} kg</strong></td>
+                        <td class="text-end"><strong>{% blocktrans trimmed with best=r.best %}{{ best }} kg{% endblocktrans %}</strong></td>
                         <td class="text-end">{{ r.sessions }}</td>
                         <td class="text-end">{{ r.last|date:"d/m/Y" }}</td>
                     </tr>
@@ -123,7 +124,7 @@
 {% if completed_sessions %}
 <div class="card mt-4">
     <div class="card-body">
-        <h5 class="card-title"><i class="bi bi-bar-chart"></i> Evolução de Treinos</h5>
+        <h5 class="card-title"><i class="bi bi-bar-chart"></i> {% trans "Evolução de Treinos" %}</h5>
         <div id="workoutChart" style="height: 300px;">
             <canvas id="myChart"></canvas>
         </div>
