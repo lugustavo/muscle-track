@@ -6,25 +6,23 @@
 {% block title %}{% blocktrans trimmed with routine_name=routine.routine_name %}{{ routine_name }} - Detalhes{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="mb-1">{{ routine.routine_name }}</h2>
-                </div>
-                <div>
-                    {% if user.is_staff %}
-                    <a href="{% nav_url 'core:routine_edit' routine.pk %}" class="btn btn-primary">
-                        <i class="bi bi-pencil"></i> {% trans "Editar" %}
-                    </a>
-                    {% endif %}
-                    {% url 'core:routine_list' as back_default %}{% back_button back_default %}
-                </div>
-            </div>
+<div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-calendar-check" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{{ routine.routine_name }}</h1>
+            <p class="ui-sub">{% trans "Modelo de treino" %}</p>
         </div>
     </div>
+    <div class="ui-actions">
+        {% if user.is_staff %}
+        <a href="{% nav_url 'core:routine_edit' routine.pk %}" class="btn btn-primary">
+            <i class="bi bi-pencil"></i> {% trans "Editar" %}
+        </a>
+        {% endif %}
+        {% url 'core:routine_list' as back_default %}{% back_button back_default %}
+    </div>
+</div>
 
     <!-- Statistics Cards -->
     <div class="row g-3 mb-4">
@@ -315,5 +313,4 @@
             {% endif %}
         </div>
     </div>
-</div>
 {% endblock %}

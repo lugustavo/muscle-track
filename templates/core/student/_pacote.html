@@ -75,7 +75,7 @@
         <div class="d-flex flex-wrap gap-2 mt-3">
             {% if cur and cur.is_owner and cur.pending > 0 %}
                 {% if charge_url %}<a href="{{ charge_url }}" target="_blank" rel="noopener" class="btn btn-success"><i class="bi bi-whatsapp"></i> {% trans "Cobrar" %}</a>{% endif %}
-                <a href="{% nav_url 'core:payment_create' student.pk %}" class="btn {% if charge_url %}btn-outline-success{% else %}btn-success{% endif %}"><i class="bi bi-cash-coin"></i> {% trans "Registrar pagamento" %}</a>
+                <a href="{% nav_url 'core:payment_create' student.pk %}" class="btn {% if charge_url %}btn-outline-primary{% else %}btn-primary{% endif %}"><i class="bi bi-cash-coin"></i> {% trans "Registrar pagamento" %}</a>
             {% endif %}
             <a href="{% nav_url 'core:student_package_sell' student.pk %}" class="btn {% if not cur or cur.low %}btn-primary{% else %}btn-outline-primary{% endif %}" data-package-sell><i class="bi bi-plus-circle"></i> {% if cur %}{% trans "Vender novo pacote" %}{% else %}{% trans "Vender pacote" %}{% endif %}</a>
         </div>

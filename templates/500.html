@@ -1,0 +1,23 @@
+{% load i18n static %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'pt-br' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>{% trans "Algo deu errado" %}</title>
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/5.3.0/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/1.11.0/bootstrap-icons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ui.css' %}">
+</head>
+<body>
+<main class="container py-5">
+    <div class="ui-empty mx-auto" style="max-width: 520px;" data-error-page="500">
+        <div class="ui-ico xl"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></div>
+        <h1 class="h3 mt-3">{% trans "Algo deu errado" %}</h1>
+        <p>{% trans "Tivemos um problema do nosso lado. Tente de novo em instantes." %}</p>
+        <a href="/" class="btn btn-primary"><i class="bi bi-house"></i> {% trans "Voltar ao início" %}</a>
+    </div>
+</main>
+</body>
+</html>

@@ -70,3 +70,43 @@ class PageHeaderTests(BaseTestCase):
     def test_the_language_icon_is_light_like_its_neighbours_on_the_dark_bar(self):
         css = (ROOT / 'static/css/theme.css').read_text()
         self.assertIn('.language-menu .nav-link', css)
+
+
+class LeftoverScreensTests(BaseTestCase):
+    def test_error_pages_have_the_app_look(self):
+        self.login(self.trainer)
+        missing = self.client.get('/nao-existe-mesmo/')
+        self.assertContains(missing, 'data-error-page="404"', status_code=404)
+        self.login(self.alice)
+        denied = self.client.get(reverse('core:student_list'))
+        self.assertContains(denied, 'data-error-page="403"', status_code=403)
+
+    def test_server_error_page_is_standalone(self):
+        from django.template.loader import render_to_string
+        html = render_to_string('500.html')
+        self.assertIn('data-error-page="500"', html)
+        self.assertNotIn('csrfmiddlewaretoken', html)
+
+    def test_student_file_and_routine_detail_share_the_header(self):
+        self.login(self.trainer)
+        file = self.client.get(reverse('core:student_detail', kwargs={'pk': self.alice.person.pk})).content.decode()
+        self.assertIn('class="ui-head"', file)
+        self.assertIn('class="ui-avatar"', file)
+        self.assertIn('data-sheet-link-button', file)
+        self.assertIn('data-student-actions', file)
+        detail = self.client.get(reverse('core:routine_detail', kwargs={'pk': self.template.pk})).content.decode()
+        self.assertIn('class="ui-head inline"', detail)
+
+    def test_the_green_button_is_only_for_whatsapp_approve_and_start(self):
+        found = []
+        for path in (ROOT / 'templates').rglob('*.html'):
+            for n, line in enumerate(path.read_text(encoding='utf-8').splitlines(), 1):
+                if 'btn-success' in line and 'whatsapp' not in line.lower():
+                    found.append((path.name, n))
+        allowed = {'workout_execute.html', 'agenda.html', 'my_photo_form.html', 'photo_form.html', '_today_student.html'}
+        self.assertEqual([f for f in found if f[0] not in allowed], [])
+
+    def test_intro_consent_privacy_and_summary_use_the_icon_badge(self):
+        self.login(self.alice)
+        for name in ('core:my_intro', 'core:privacy_policy'):
+            self.assertIn('class="ui-ico', self.client.get(reverse(name)).content.decode(), name)

@@ -5,69 +5,53 @@
 
 {% block title %}{% blocktrans trimmed with person_name=student.person_name %}{{ person_name }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
-{% block extra_css %}
-<style>
-    .student-avatar {
-        width: 120px;
-        height: 120px;
-        object-fit: cover;
-        border-radius: 50%;
-        border: 4px solid var(--bs-body-bg);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .student-header-info {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-    }
-    @media (max-width: 991.98px) {
-        .student-avatar { width: 72px; height: 72px; border-width: 3px; }
-        .student-header-info { gap: .75rem; }
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="d-flex justify-content-between align-items-start flex-wrap flex-lg-nowrap mb-3 mb-lg-4">
-    <div class="student-header-info">
-        <img src="{{ student.get_avatar_url }}" class="student-avatar" alt="{{ student.person_name }}">
-        <div>
-            <h1 class="mb-1"><i class="bi bi-person-circle d-none d-lg-inline"></i> {{ student.person_name }}</h1>
-            <span class="badge {% if student.status == 'active' %}bg-success{% elif student.status == 'trial' %}bg-info text-dark{% elif student.status == 'paused' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ student.get_status_display }}</span>
-            {% if not has_consent %}
-                <span class="badge bg-warning text-dark" title="{% trans "Ainda não aceitou os termos de uso e de dados de saúde" %}"><i class="bi bi-shield-exclamation"></i> {% trans "Sem consentimento" %}</span>
-            {% endif %}
-            {% if erasure_requested %}
-                <span class="badge bg-danger" title="{% trans "O aluno pediu a exclusão dos próprios dados" %}"><i class="bi bi-trash"></i> {% trans "Pediu exclusão" %}</span>
-            {% endif %}
-            {% include 'core/student/_app_badges.html' %}
-            {% if student.has_app and not student.user.has_usable_password %}
-                <span class="badge bg-warning text-dark" title="{% trans "O aluno ainda não criou a senha" %}"><i class="bi bi-hourglass-split"></i> {% trans "Convite pendente" %}</span>
-            {% endif %}
+<div class="ui-head">
+    <div class="ui-title">
+        <img src="{{ student.get_avatar_url }}" class="ui-avatar" alt="{{ student.person_name }}">
+        <div class="min-w-0">
+            <h1>{{ student.person_name }}</h1>
+            <div class="ui-badges">
+                <span class="badge {% if student.status == 'active' %}bg-success{% elif student.status == 'trial' %}bg-info text-dark{% elif student.status == 'paused' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ student.get_status_display }}</span>
+                {% if not has_consent %}
+                    <span class="badge bg-warning text-dark" title="{% trans "Ainda não aceitou os termos de uso e de dados de saúde" %}"><i class="bi bi-shield-exclamation"></i> {% trans "Sem consentimento" %}</span>
+                {% endif %}
+                {% if erasure_requested %}
+                    <span class="badge bg-danger" title="{% trans "O aluno pediu a exclusão dos próprios dados" %}"><i class="bi bi-trash"></i> {% trans "Pediu exclusão" %}</span>
+                {% endif %}
+                {% include 'core/student/_app_badges.html' %}
+                {% if student.has_app and not student.user.has_usable_password %}
+                    <span class="badge bg-warning text-dark" title="{% trans "O aluno ainda não criou a senha" %}"><i class="bi bi-hourglass-split"></i> {% trans "Convite pendente" %}</span>
+                {% endif %}
+            </div>
         </div>
     </div>
-    <div class="d-none d-lg-block">
-        <a href="{% nav_url 'core:person_routine_create' %}&person={{ student.pk }}" class="btn btn-success">
+    <div class="ui-actions d-none d-lg-flex">
+        <a href="{% nav_url 'core:person_routine_create' %}&person={{ student.pk }}" class="btn btn-primary">
             <i class="bi bi-plus-circle"></i> {% trans "Atribuir treino" %}
         </a>
         <a href="{% nav_url 'core:student_sheet' student.pk %}" class="btn btn-outline-primary" data-sheet-link-button title="{% trans "Link só de leitura da ficha de treino, para o aluno ler ou imprimir" %}">
             <i class="bi bi-link-45deg"></i> {% trans "Link da ficha" %}
         </a>
-        {% if student.has_app %}
-        <a href="{% nav_url 'core:student_invite' student.pk %}" class="btn btn-outline-primary">
-            <i class="bi bi-send"></i> {% if student.user.has_usable_password %}{% trans "Redefinir senha" %}{% else %}{% trans "Convite" %}{% endif %}
-        </a>
-        {% endif %}
-        <a href="{% nav_url 'core:student_edit' student.pk %}" class="btn btn-primary">
+        <a href="{% nav_url 'core:student_edit' student.pk %}" class="btn btn-outline-secondary">
             <i class="bi bi-pencil"></i> {% trans "Editar" %}
         </a>
-        <a href="{% nav_url 'core:student_delete' student.pk %}" class="btn btn-outline-danger" title="{% trans "Excluir aluno e todos os dados" %}">
-            <i class="bi bi-trash"></i> {% trans "Excluir" %}
-        </a>
-        {% url 'core:student_list' as back_default %}{% back_button back_default %}
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{% trans "Mais ações" %}"><i class="bi bi-three-dots-vertical"></i></button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                {% if student.has_app %}<li><a class="dropdown-item py-2" href="{% nav_url 'core:student_invite' student.pk %}"><i class="bi bi-send me-2"></i>{% if student.user.has_usable_password %}{% trans "Redefinir senha" %}{% else %}{% trans "Convite" %}{% endif %}</a></li>{% endif %}
+                <li><a class="dropdown-item py-2" href="{% nav_url 'core:student_status' student.pk %}"><i class="bi bi-arrow-repeat me-2"></i>{% trans "Alterar situação" %}</a></li>
+                <li><a class="dropdown-item py-2" href="{% nav_url 'core:student_sheet' student.pk %}"><i class="bi bi-link-45deg me-2"></i>{% trans "Link da ficha" %}</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item py-2 text-danger" href="{% nav_url 'core:student_delete' student.pk %}"><i class="bi bi-trash me-2"></i>{% trans "Excluir aluno" %}</a></li>
+                <li><hr class="dropdown-divider"></li>
+                {% url 'core:student_list' as back_default %}<li><a class="dropdown-item py-2" href="{% back_href back_default %}"><i class="bi bi-arrow-left me-2"></i>{% trans "Voltar" %}</a></li>
+            </ul>
+        </div>
     </div>
-    <div class="d-lg-none d-flex gap-2 w-100 mt-3" data-student-actions>
-        <a href="{% nav_url 'core:person_routine_create' %}&person={{ student.pk }}" class="btn btn-success flex-grow-1">
+</div>
+    <div class="d-lg-none d-flex gap-2 w-100 mb-3" data-student-actions>
+        <a href="{% nav_url 'core:person_routine_create' %}&person={{ student.pk }}" class="btn btn-primary flex-grow-1">
             <i class="bi bi-plus-circle"></i> {% trans "Atribuir treino" %}
         </a>
         <div class="dropdown">
@@ -84,7 +68,6 @@
             </ul>
         </div>
     </div>
-</div>
 
 <!-- Estatísticas: 4 blocos pequenos em uma linha no celular, cartões grandes no desktop -->
 <div class="row g-2 g-md-3 mb-3 mb-md-4 stat-tiles-4">
@@ -167,7 +150,7 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-lightning-charge"></i> {% trans "Treinos ativos" %}</h5>
-                <a href="{% nav_url 'core:person_routine_create' %}&person={{ student.pk }}" class="btn btn-sm btn-success">
+                <a href="{% nav_url 'core:person_routine_create' %}&person={{ student.pk }}" class="btn btn-sm btn-primary">
                     <i class="bi bi-plus-circle"></i> {% trans "Adicionar" %}
                 </a>
             </div>

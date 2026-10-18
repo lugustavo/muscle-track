@@ -6,11 +6,18 @@
 
 {% block content %}
 <div class="mx-auto" style="max-width: 560px;">
-    <h1 class="h3 mb-3"><i class="bi bi-question-circle"></i> {% trans "Como usar o app" %}</h1>
-    <p class="text-muted">{% trans "Três coisas para fazer o treino render. Dá menos de um minuto." %}</p>
+    <div class="ui-head">
+        <div class="ui-title">
+            <span class="ui-ico"><i class="bi bi-question-circle" aria-hidden="true"></i></span>
+            <div class="min-w-0">
+                <h1>{% trans "Como usar o app" %}</h1>
+                <p class="ui-sub">{% trans "Três coisas para fazer o treino render. Dá menos de um minuto." %}</p>
+            </div>
+        </div>
+    </div>
     {% for step in steps %}
     <div class="card mb-3" data-intro-step="{{ forloop.counter }}"><div class="card-body d-flex gap-3">
-        <i class="bi {{ step.icon }} fs-1 text-primary flex-shrink-0"></i>
+        <span class="ui-ico alt flex-shrink-0"><i class="bi {{ step.icon }}" aria-hidden="true"></i></span>
         <div><h2 class="h5">{{ forloop.counter }}. {{ step.title }}</h2><p class="mb-0">{{ step.text }}</p></div>
     </div></div>
     {% endfor %}
