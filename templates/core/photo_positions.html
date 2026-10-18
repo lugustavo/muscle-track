@@ -30,7 +30,7 @@
                         <button class="btn btn-sm btn-outline-secondary" title="{% trans "Salvar o nome" %}"><i class="bi bi-check2"></i><span class="visually-hidden">{% trans "Salvar o nome" %}</span></button>
                     </form>
                     <span class="small text-muted">{% blocktrans trimmed count n=position.photo_count %}{{ n }} foto{% plural %}{{ n }} fotos{% endblocktrans %}</span>
-                    {% if not position.is_active %}<span class="badge bg-secondary">{% trans "Desativada" %}</span>{% endif %}
+                    {% if not position.is_active %}<span class="ui-badge">{% trans "Desativada" %}</span>{% endif %}
                     <div class="d-flex gap-1 ms-auto">
                         <form method="post" action="{% url 'core:photo_position_action' position.pk 'up' %}">{% csrf_token %}<button class="btn btn-sm btn-outline-secondary" title="{% trans "Subir" %}" {% if forloop.first %}disabled{% endif %}><i class="bi bi-arrow-up"></i><span class="visually-hidden">{% trans "Subir" %}</span></button></form>
                         <form method="post" action="{% url 'core:photo_position_action' position.pk 'down' %}">{% csrf_token %}<button class="btn btn-sm btn-outline-secondary" title="{% trans "Descer" %}" {% if forloop.last %}disabled{% endif %}><i class="bi bi-arrow-down"></i><span class="visually-hidden">{% trans "Descer" %}</span></button></form>

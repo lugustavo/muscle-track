@@ -22,12 +22,12 @@
         {% endif %}
 
         <div class="row row-cols-3 g-2 text-center mt-2">
-            <div class="col"><div class="border rounded py-2"><div class="fs-4 fw-bold" data-sum="bought">{{ p.sessions }}</div><div class="small text-muted">{% trans "Compradas" %}</div></div></div>
-            <div class="col"><div class="border rounded py-2"><div class="fs-4 fw-bold" data-sum="done">{{ p.done }}</div><div class="small text-muted">{% trans "Feitas" %}</div></div></div>
-            <div class="col"><div class="border rounded py-2"><div class="fs-4 fw-bold text-success" data-sum="left">{{ p.left }}</div><div class="small text-muted">{% trans "Saldo" %}</div></div></div>
-            <div class="col"><div class="border rounded py-2"><div class="fs-4 fw-bold" data-sum="upcoming">{{ p.upcoming }}</div><div class="small text-muted">{% trans "Marcadas" %}</div></div></div>
-            <div class="col"><div class="border rounded py-2"><div class="fs-4 fw-bold" data-sum="rescheduled">{{ p.rescheduled }}</div><div class="small text-muted">{% trans "Remarcadas" %}</div></div></div>
-            <div class="col"><div class="border rounded py-2"><div class="fs-4 fw-bold" data-sum="cancelled">{{ p.free_cancelled|add:p.late_cancelled }}</div><div class="small text-muted">{% trans "Canceladas" %}</div></div></div>
+            <div class="col"><div class="ui-tile"><div class="ui-tile-n" data-sum="bought">{{ p.sessions }}</div><div class="ui-tile-l">{% trans "Compradas" %}</div></div></div>
+            <div class="col"><div class="ui-tile"><div class="ui-tile-n" data-sum="done">{{ p.done }}</div><div class="ui-tile-l">{% trans "Feitas" %}</div></div></div>
+            <div class="col"><div class="ui-tile"><div class="ui-tile-n text-success" data-sum="left">{{ p.left }}</div><div class="ui-tile-l">{% trans "Saldo" %}</div></div></div>
+            <div class="col"><div class="ui-tile"><div class="ui-tile-n" data-sum="upcoming">{{ p.upcoming }}</div><div class="ui-tile-l">{% trans "Marcadas" %}</div></div></div>
+            <div class="col"><div class="ui-tile"><div class="ui-tile-n" data-sum="rescheduled">{{ p.rescheduled }}</div><div class="ui-tile-l">{% trans "Remarcadas" %}</div></div></div>
+            <div class="col"><div class="ui-tile"><div class="ui-tile-n" data-sum="cancelled">{{ p.free_cancelled|add:p.late_cancelled }}</div><div class="ui-tile-l">{% trans "Canceladas" %}</div></div></div>
         </div>
 
         <ul class="small text-muted mt-3 mb-0 ps-3">
@@ -43,8 +43,8 @@
         </ul>
 
         {% if p.policy %}
-        <div class="small mt-3" data-package-policy>
-            <div class="fw-bold"><i class="bi bi-shield-check"></i> {% trans "Se você precisar cancelar o pacote" %}</div>
+        <div class="small mt-3 p-3 rounded-4 bg-body-tertiary" data-package-policy>
+            <div class="fw-bold ui-sec"><span class="ui-ico sm"><i class="bi bi-shield-check" aria-hidden="true"></i></span> {% trans "Se você precisar cancelar o pacote" %}</div>
             <ul class="text-muted mb-0 ps-3">{% for line in p.policy %}<li>{{ line }}</li>{% endfor %}</ul>
         </div>
         {% endif %}
@@ -56,7 +56,7 @@
                 {% for a in p.classes %}
                 <li class="list-group-item px-0 py-1 d-flex justify-content-between small">
                     <span>{{ a.starts_at|date:_('d/m/Y') }} · {{ a.starts_at|time:"H:i" }}</span>
-                    <span class="text-muted">{{ a.get_status_display }}{% if a.status == 'cancelled' %} {% trans "(tarde)" %}{% endif %}</span>
+                    <span class="ui-badge">{{ a.get_status_display }}{% if a.status == 'cancelled' %} {% trans "(tarde)" %}{% endif %}</span>
                 </li>
                 {% endfor %}
             </ul>

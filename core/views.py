@@ -2072,10 +2072,16 @@ def my_history(request, person):
         last=Max('session__start_time'),
     ).order_by('person_routine_exercise__exercise__exercise_name')
 
+    # Workouts done in the last four weeks, as an average per week
+    recent = WorkoutSession.objects.filter(
+        person_routine__person=person, is_completed=True, start_time__gte=timezone.now() - timedelta(days=28)).count()
     return render(request, 'core/my_history.html', {
         'person': person,
         'completed_sessions': completed_sessions,
         'records': records,
+        'total_done': WorkoutSession.objects.filter(person_routine__person=person, is_completed=True).count(),
+        'per_week': round(recent / 4, 1),
+        'assigned': person.routines.count(),
         'chart_data': json.dumps(_chart_points(completed_sessions, with_workout_name=True))
     })
 

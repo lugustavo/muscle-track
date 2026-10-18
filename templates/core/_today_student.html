@@ -1,12 +1,17 @@
 {% load i18n %}
 {% load navigation static %}
 <div class="mx-auto" style="max-width: 560px;">
-    <div class="mb-3">
-        <h1 class="h3 mb-0">{% trans "Oi" %}{% if today.first_name %}, {{ today.first_name }}{% endif %}!</h1>
-        <div class="text-muted">{{ today.today|date:_("l, j \d\e F")|lower|capfirst }}</div>
+    <div class="ui-head">
+        <div class="ui-title">
+            <span class="ui-ico"><i class="bi bi-lightning-charge-fill" aria-hidden="true"></i></span>
+            <div class="min-w-0">
+                <h1>{% trans "Oi" %}{% if today.first_name %}, {{ today.first_name }}{% endif %}!</h1>
+                <p class="ui-sub">{{ today.today|date:_("l, j \d\e F")|lower|capfirst }}</p>
+            </div>
+        </div>
     </div>
 
-    <div class="card today-hero shadow-sm mb-3 {% if today.state == 'in_progress' %}border-success{% elif today.state == 'ready' %}border-primary{% endif %}">
+    <div class="card today-hero shadow-sm mb-3 {% if today.state == 'in_progress' or today.state == 'done' %}ui-tone ok{% elif today.state == 'ready' %}ui-tone{% endif %}">
         <div class="card-body">
             {% if today.state == 'in_progress' %}
                 <div class="text-success fw-semibold small mb-1"><i class="bi bi-stopwatch"></i> {% trans "Treino em andamento" %}</div>
@@ -19,7 +24,7 @@
                 <p class="text-muted mb-3">{% if today.done_today.duration_minutes %}{% blocktrans trimmed with duration_minutes=today.done_today.duration_minutes %}{{ duration_minutes }} min ·{% endblocktrans %} {% endif %}{% trans "parabéns pela constância!" %}</p>
                 <a href="{% url 'core:my_workouts' %}" class="btn btn-outline-primary w-100">{% trans "Fazer outro treino" %}</a>
             {% elif today.state == 'ready' %}
-                <div class="text-primary fw-semibold small mb-1"><i class="bi bi-star-fill"></i> {% trans "Treino de hoje" %}</div>
+                <div class="text-brand fw-semibold small mb-1"><i class="bi bi-star-fill"></i> {% trans "Treino de hoje" %}</div>
                 <h2 class="h4">{{ today.suggested.routine.routine_name }}</h2>
                 <p class="text-muted mb-3">
                     {% blocktrans trimmed with estimated_duration=today.suggested.routine.estimated_duration count exercise_count=today.suggested.exercise_count %}{{ exercise_count }} exercício
@@ -41,7 +46,7 @@
 
     <a href="{% url 'core:my_agenda' %}" class="card mb-3 text-decoration-none text-body" data-next-class>
         <div class="card-body py-2 d-flex align-items-center gap-3">
-            <i class="bi bi-calendar-week fs-4 text-primary"></i>
+            <span class="ui-ico sm"><i class="bi bi-calendar-week" aria-hidden="true"></i></span>
             <div class="flex-grow-1">
                 {% if today.next_class %}
                 <div class="small text-muted">{% trans "Próxima aula" %}</div>
@@ -136,7 +141,7 @@
         <div class="modal-body text-center px-4">
             {% for step in intro_steps %}
             <div data-intro-step="{{ forloop.counter }}" {% if not forloop.first %}hidden{% endif %}>
-                <i class="bi {{ step.icon }} text-primary" style="font-size: 3.5rem;"></i>
+                <i class="bi {{ step.icon }} text-brand" style="font-size: 3.5rem;"></i>
                 <h3 class="h4 mt-2">{{ step.title }}</h3>
                 <p class="text-muted mb-0">{{ step.text }}</p>
             </div>
