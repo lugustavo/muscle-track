@@ -6,7 +6,14 @@
 {% block title %}{% blocktrans trimmed %}Meu histórico - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<h1 class="mb-4"><i class="bi bi-graph-up"></i> {% trans "Meu histórico de treinos" %}</h1>
+<div class="ui-head">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-graph-up" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{% trans "Meu histórico de treinos" %}</h1>
+        </div>
+    </div>
+</div>
 
 {% if completed_sessions %}
 <div class="card">

@@ -5,7 +5,14 @@
 {% block title %}{% blocktrans trimmed %}Meus treinos - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<h1 class="mb-4"><i class="bi bi-fire"></i> {% trans "Meus treinos ativos" %}</h1>
+<div class="ui-head">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-fire" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{% trans "Meus treinos ativos" %}</h1>
+        </div>
+    </div>
+</div>
 
 {% if routines_with_sessions %}
 <div class="row g-4">

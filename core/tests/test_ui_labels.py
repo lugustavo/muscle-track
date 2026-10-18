@@ -59,3 +59,14 @@ class PageHeaderTests(BaseTestCase):
     def test_form_section_headers_are_not_the_bootstrap_blue(self):
         css = (ROOT / 'static/css/ui.css').read_text()
         self.assertIn('.card-header.bg-primary', css)
+
+    def test_trainer_home_and_student_pages_use_it_too(self):
+        self.login(self.trainer)
+        self.assertIn('class="ui-head"', self.client.get(reverse('core:home')).content.decode())
+        self.login(self.alice)
+        for name in ('core:my_workouts', 'core:my_history'):
+            self.assertIn('class="ui-head"', self.client.get(reverse(name)).content.decode(), name)
+
+    def test_the_language_icon_is_light_like_its_neighbours_on_the_dark_bar(self):
+        css = (ROOT / 'static/css/theme.css').read_text()
+        self.assertIn('.language-menu .nav-link', css)

@@ -31,7 +31,7 @@ body {
 }
 
 .navbar-brand { font-weight: bold; font-size: 1.5rem; }
-.navbar-brand ~ .theme-menu .btn { border: 0; }
+.navbar-brand ~ .theme-menu .btn, .language-menu .btn { border: 0; }
 
 .btn-primary {
     --bs-btn-bg: var(--primary-color);
@@ -56,8 +56,8 @@ a:focus-visible, button:focus-visible, .btn:focus-visible { outline: 2px solid v
 footer { background-color: var(--mt-nav-bg); color: white; padding: 1.5rem 0; margin-top: auto; }
 
 /* Theme selector in the top bar */
-.theme-menu .nav-link, .search-open { color: rgba(255, 255, 255, .75); }
-.theme-menu .nav-link:hover, .theme-menu .nav-link:focus, .theme-menu .nav-link.show, .search-open:hover, .search-open:focus { color: #fff; }
+.theme-menu .nav-link, .language-menu .nav-link, .search-open { color: rgba(255, 255, 255, .75); }
+.theme-menu .nav-link:hover, .theme-menu .nav-link:focus, .theme-menu .nav-link.show, .language-menu .nav-link:hover, .language-menu .nav-link:focus, .language-menu .nav-link.show, .search-open:hover, .search-open:focus { color: #fff; }
 .min-w-0 { min-width: 0; }
 
 /* Dark mode: Bootstrap keeps the saturated semantic colors, which are too dim as text on a dark page (about 3.7:1).
