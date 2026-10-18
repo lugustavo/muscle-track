@@ -44,10 +44,9 @@
                 <li><a class="dropdown-item py-2" href="{% nav_url 'core:student_sheet' student.pk %}"><i class="bi bi-link-45deg me-2"></i>{% trans "Link da ficha" %}</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item py-2 text-danger" href="{% nav_url 'core:student_delete' student.pk %}"><i class="bi bi-trash me-2"></i>{% trans "Excluir aluno" %}</a></li>
-                <li><hr class="dropdown-divider"></li>
-                {% url 'core:student_list' as back_default %}<li><a class="dropdown-item py-2" href="{% back_href back_default %}"><i class="bi bi-arrow-left me-2"></i>{% trans "Voltar" %}</a></li>
             </ul>
         </div>
+        {% url 'core:student_list' as back_default %}{% back_button back_default css='btn btn-outline-secondary' %}
     </div>
 </div>
     <div class="d-lg-none d-flex gap-2 w-100 mb-3" data-student-actions>
