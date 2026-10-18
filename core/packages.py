@@ -342,7 +342,9 @@ def sell(person, package, *, mode='per_session', price_per_session=None, price_t
         per, total = package.price_per_session, package.price_total
     sold = StudentPackage.objects.create(
         person=person, package=package, name=package.name, sessions=package.sessions, valid_days=package.valid_days,
-        price_per_session=per, price_total=total, notes=notes[:200], sold_on=sold_on or timezone.localdate())
+        price_per_session=per, price_total=total, notes=notes[:200], sold_on=sold_on or timezone.localdate(),
+        cancel_fee_percent=package.cancel_fee_percent, cancel_fee_fixed=package.cancel_fee_fixed,
+        cancel_free_days=package.cancel_free_days)
     sold.shared_with.set(members)
     log_event(person, StudentEvent.Kind.PACKAGE, actor,
               ngettext('Pacote vendido: %(name)s (%(n)d aula)', 'Pacote vendido: %(name)s (%(n)d aulas)', sold.sessions)

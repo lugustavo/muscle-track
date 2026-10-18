@@ -547,7 +547,8 @@ def student_package_edit(request, pk, package_pk):
                 changed = refunds.edit_package(
                     package, request.user, name=data['name'], sessions=data['sessions'], valid_days=data['valid_days'],
                     pricing_mode=data['pricing_mode'], price_per_session=data['price_per_session'],
-                    price_total=data['price_total'], notes=data['notes'])
+                    price_total=data['price_total'], notes=data['notes'], cancel_fee_percent=data['cancel_fee_percent'],
+                    cancel_fee_fixed=data['cancel_fee_fixed'], cancel_free_days=data['cancel_free_days'])
                 before = set(package.shared_with.values_list('pk', flat=True))
                 packages.set_members(package, form.members, request.user)
                 changed = changed or before != {m.pk for m in form.members}
@@ -577,12 +578,16 @@ def student_package_cancel(request, pk, package_pk):
         return redirect(_student_tab(request, pk, 'ficha'))
     today = timezone.localdate()
     fee_source = request.POST if request.method == 'POST' else request.GET
-    try:
-        fee = Decimal(fee_source.get('fee') or '0')
-        if fee < 0:
+    policy = refunds.policy_fee(package, today)
+    if 'fee' not in fee_source:   # first time on the page: the fee the package's policy asks (the trainer may change it)
+        fee = policy['fee']
+    else:
+        try:
+            fee = Decimal(fee_source.get('fee') or '0')
+            if fee < 0:
+                fee = Decimal('0')
+        except (InvalidOperation, ValueError):
             fee = Decimal('0')
-    except (InvalidOperation, ValueError):
-        fee = Decimal('0')
     quote = refunds.cancellation_quote(package, fee)
     form = CancelPackageForm(request.POST or None, initial={
         'fee': fee or None, 'amount': quote['suggested'], 'refunded_on': today,
@@ -607,6 +612,7 @@ def student_package_cancel(request, pk, package_pk):
             return redirect(_student_tab(request, pk, 'ficha'))
     return render(request, 'core/student_package_cancel.html', {
         'form': form, 'student': student, 'package': package, 'quote': quote, 'fee': fee, 'title': _('Cancelar pacote'),
+        'policy': policy, 'policy_lines': refunds.policy_lines(package), 'has_policy': refunds.has_policy(package),
         'future': student.appointments.filter(status=Appointment.Status.SCHEDULED, starts_at__gte=timezone.now()).count()})
 
 
@@ -928,6 +934,8 @@ def my_package(request, person):
     """The student's package summary: bought, done, cancelled, moved and the balance (no prices)."""
     data = packages.summary(person)
     rows = data['rows']
+    for row in rows:   # the terms in words: days and percentages, never amounts of money
+        row['policy'] = refunds.policy_lines(row['package'], student=True) if row['state'] in packages.OPEN_STATES else []
     current = data['current']
     others = [r for r in reversed(rows) if r is not current]
     return render(request, 'core/my_package.html', {
@@ -2819,8 +2827,10 @@ def plan_list(request):
         plans = plans.filter(is_active=False)
     elif status != 'all':
         plans = plans.filter(is_active=True)
-    return render(request, 'core/plan_list.html', {
-        'plans': plans.order_by('name'), 'search': search, 'status': status or 'active'})
+    plans = list(plans.order_by('name'))
+    for plan in plans:
+        plan.policy = refunds.policy_lines(plan)
+    return render(request, 'core/plan_list.html', {'plans': plans, 'search': search, 'status': status or 'active'})
 
 
 @staff_required

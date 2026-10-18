@@ -42,6 +42,13 @@
             {% if p.package.extension_days %}<li>{% blocktrans trimmed count extension_days=p.package.extension_days %}Prorrogado em {{ extension_days }} dia.{% plural %}Prorrogado em {{ extension_days }} dias.{% endblocktrans %}</li>{% endif %}
         </ul>
 
+        {% if p.policy %}
+        <div class="small mt-3" data-package-policy>
+            <div class="fw-bold"><i class="bi bi-shield-check"></i> {% trans "Se você precisar cancelar o pacote" %}</div>
+            <ul class="text-muted mb-0 ps-3">{% for line in p.policy %}<li>{{ line }}</li>{% endfor %}</ul>
+        </div>
+        {% endif %}
+
         {% if p.classes %}
         <details class="mt-3"{% if is_current %} open{% endif %}>
             <summary class="small fw-bold">{% blocktrans trimmed with classes=p.classes|length %}Aulas descontadas ({{ classes }}){% endblocktrans %}</summary>

@@ -844,6 +844,18 @@ class Package(models.Model):
                                             validators=[MinValueValidator(0)], verbose_name=_('Valor por aula'))
     price_total = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
                                       validators=[MinValueValidator(0)], verbose_name=_('Valor total'))
+    # Cancellation policy (core/refunds.policy_fee): the fee kept when the package is cancelled. Percent of the value of
+    # the classes not used + a fixed amount; none of it inside the first `cancel_free_days` days after the sale.
+    cancel_fee_percent = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0, blank=True, validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name=_('Taxa sobre as aulas não usadas (%)'),
+        help_text=_('Percentual do valor das aulas que sobraram. 100 = as aulas não usadas não são devolvidas.'))
+    cancel_fee_fixed = models.DecimalField(
+        max_digits=8, decimal_places=2, default=0, blank=True, validators=[MinValueValidator(0)],
+        verbose_name=_('Taxa fixa de cancelamento'))
+    cancel_free_days = models.PositiveSmallIntegerField(
+        default=0, blank=True, validators=[MaxValueValidator(365)], verbose_name=_('Dias sem taxa depois da compra'),
+        help_text=_('Cancelando dentro deste prazo, só as aulas já dadas são descontadas. 0 = sem esse prazo.'))
     is_active = models.BooleanField(default=True, verbose_name=_('Ativo'))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -887,6 +899,18 @@ class StudentPackage(models.Model):
     cancelled_at = models.DateTimeField(null=True, blank=True)
     used_at_cancel = models.PositiveSmallIntegerField(null=True, blank=True)   # classes given when it was cancelled
     cancel_fee = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)   # fee kept when it was cancelled
+    # Cancellation policy copied from the catalog at the sale (core/refunds.policy_fee): the fee kept when the package is cancelled. Percent of the value of
+    # the classes not used + a fixed amount; none of it inside the first `cancel_free_days` days after the sale.
+    cancel_fee_percent = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0, blank=True, validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name=_('Taxa sobre as aulas não usadas (%)'),
+        help_text=_('Percentual do valor das aulas que sobraram. 100 = as aulas não usadas não são devolvidas.'))
+    cancel_fee_fixed = models.DecimalField(
+        max_digits=8, decimal_places=2, default=0, blank=True, validators=[MinValueValidator(0)],
+        verbose_name=_('Taxa fixa de cancelamento'))
+    cancel_free_days = models.PositiveSmallIntegerField(
+        default=0, blank=True, validators=[MaxValueValidator(365)], verbose_name=_('Dias sem taxa depois da compra'),
+        help_text=_('Cancelando dentro deste prazo, só as aulas já dadas são descontadas. 0 = sem esse prazo.'))
     notes = models.CharField(max_length=200, blank=True, verbose_name=_('Observação'))
     created_at = models.DateTimeField(auto_now_add=True)
     # What the reminders already told about this package (core/reminders.py): once each, and a new deadline re-arms them

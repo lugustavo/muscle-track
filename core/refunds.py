@@ -3,6 +3,7 @@
 Money is never edited in place: a refund (or a reversal of a wrong entry) is a new `Refund` row linked to the payment
 and the package; what the student really paid is the payments minus the refunds that were not voided. A wrong refund is
 voided (kept, with the reason). Nothing here is shown to students."""
+from datetime import timedelta
 from decimal import ROUND_HALF_UP, Decimal
 
 from django.db import transaction
@@ -56,6 +57,55 @@ def cancellation_quote(package, fee=None):
     suggested = min(max(paid - used_value - fee, Decimal('0')), max(paid, Decimal('0')))
     return {'paid': paid, 'used': used, 'sessions': package.sessions, 'left': max(package.sessions - used, 0),
             'per_class': per, 'used_value': used_value, 'fee': fee, 'suggested': suggested}
+
+
+def _percent_text(value):
+    return f'{Decimal(value):f}'.rstrip('0').rstrip('.') if Decimal(value) % 1 else str(int(Decimal(value)))
+
+
+def has_policy(package):
+    return bool(package.cancel_fee_percent or package.cancel_fee_fixed or package.cancel_free_days)
+
+
+def policy_fee(package, today=None):
+    """The fee the package's cancellation policy asks if it were cancelled today.
+
+    fee = percent of the value of the classes not used + the fixed fee, and none of it while the sale is within the
+    package's `cancel_free_days` (then only the classes already given are discounted). The fee never goes above what
+    is left of the payment after the classes given. Returns {'fee', 'percent_part', 'fixed_part', 'free', 'free_until'}."""
+    today = today or timezone.localdate()
+    quote = cancellation_quote(package, 0)
+    unused_value = (quote['per_class'] * quote['left']).quantize(CENTS, ROUND_HALF_UP)
+    percent_part = (unused_value * Decimal(package.cancel_fee_percent or 0) / 100).quantize(CENTS, ROUND_HALF_UP)
+    fixed_part = Decimal(package.cancel_fee_fixed or 0)
+    free_until = package.sold_on + timedelta(days=package.cancel_free_days) if package.cancel_free_days else None
+    free = free_until is not None and today <= free_until
+    fee = Decimal('0') if free else percent_part + fixed_part
+    fee = min(fee, max(quote['paid'] - quote['used_value'], Decimal('0')))
+    return {'fee': fee, 'percent_part': percent_part, 'fixed_part': fixed_part, 'free': free, 'free_until': free_until}
+
+
+def policy_lines(package, student=False):
+    """The policy in words, one line each. For the student: percentages and days only (no amounts of money)."""
+    lines = []
+    if package.cancel_free_days:
+        lines.append(ngettext(
+            'Cancelando em até %(n)d dia depois da compra, não há taxa: só as aulas já dadas são descontadas.',
+            'Cancelando em até %(n)d dias depois da compra, não há taxa: só as aulas já dadas são descontadas.',
+            package.cancel_free_days) % {'n': package.cancel_free_days})
+    percent = Decimal(package.cancel_fee_percent or 0)
+    after = package.cancel_free_days > 0
+    if percent >= 100:
+        lines.append(_('Depois disso, as aulas não usadas não são devolvidas.') if after
+                     else _('As aulas não usadas não são devolvidas.'))
+    elif percent > 0:
+        text = (_('Depois disso, taxa de %(p)s%% do valor das aulas não usadas.') if after
+                else _('Taxa de %(p)s%% do valor das aulas não usadas.')) % {'p': _percent_text(percent)}
+        lines.append(text)
+    if package.cancel_fee_fixed:
+        lines.append(_('Mais uma taxa fixa combinada.') if student
+                     else _('Taxa fixa: %(fee)s.') % {'fee': money(package.cancel_fee_fixed)})
+    return lines
 
 
 def quote_text(package, quote, amount):
@@ -174,7 +224,8 @@ def cancel_with_refund(package, actor=None, *, amount=Decimal('0'), method=None,
 
 
 # What changed in an edit, for the history (name, price and notes: only that they changed)
-EDIT_LABELS = {'name': _l('nome alterado'), 'price': _l('valor alterado'), 'notes': _l('observação alterada')}
+EDIT_LABELS = {'name': _l('nome alterado'), 'price': _l('valor alterado'), 'notes': _l('observação alterada'),
+               'policy': _l('política de cancelamento alterada')}
 
 
 def _days_text(days):
@@ -183,9 +234,10 @@ def _days_text(days):
 
 @transaction.atomic
 def edit_package(package, actor=None, *, name, sessions, valid_days, pricing_mode, price_per_session=None, price_total=None,
-                 notes=''):
-    """Change a package already sold (name, number of classes, deadline, agreed price). The classes already given are
-    never taken away: the package cannot have fewer classes than that. Money values never go to the history."""
+                 notes='', cancel_fee_percent=None, cancel_fee_fixed=None, cancel_free_days=None):
+    """Change a package already sold (name, number of classes, deadline, agreed price, cancellation policy). The classes
+    already given are never taken away: the package cannot have fewer classes than that. Money values never go to the
+    history. The policy values are left alone when not given."""
     if package.cancelled_at:
         raise RefundError(_('Um pacote cancelado não pode ser editado.'))
     used = package.appointments.count()
@@ -206,9 +258,16 @@ def edit_package(package, actor=None, *, name, sessions, valid_days, pricing_mod
         changed.append('price')
     if package.notes != notes[:200]:
         changed.append('notes')
+    policy = {'cancel_fee_percent': cancel_fee_percent, 'cancel_fee_fixed': cancel_fee_fixed,
+              'cancel_free_days': cancel_free_days}
+    policy = {k: v for k, v in policy.items() if v is not None}
+    if any(getattr(package, k) != v for k, v in policy.items()):
+        changed.append('policy')
     if not changed:
         return []
     old = {'sessions': package.sessions, 'valid_days': package.valid_days}
+    for key, value in policy.items():
+        setattr(package, key, value)
     package.name, package.sessions, package.valid_days = name, sessions, valid_days
     package.price_per_session, package.price_total, package.notes = per, total, notes[:200]
     package.save()
@@ -217,7 +276,7 @@ def edit_package(package, actor=None, *, name, sessions, valid_days, pricing_mod
         parts.append(_('aulas %(old)d → %(new)d') % {'old': old['sessions'], 'new': sessions})
     if 'valid_days' in changed:
         parts.append(_('prazo %(new)s (era %(old)s)') % {'new': _days_text(valid_days), 'old': _days_text(old['valid_days'])})
-    parts += [str(EDIT_LABELS[c]) for c in changed if c in ('name', 'price', 'notes')]
+    parts += [str(EDIT_LABELS[c]) for c in changed if c in ('name', 'price', 'notes', 'policy')]
     log_event(package.person, StudentEvent.Kind.PACKAGE, actor,
               _('Pacote editado: %(name)s (%(changes)s)') % {'name': package.name, 'changes': '; '.join(parts)},
               {'package': package.pk, 'fields': changed})
