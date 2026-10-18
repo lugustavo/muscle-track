@@ -8,7 +8,7 @@ from django.utils import timezone
 from core import packages
 from core.models import Appointment, Package
 
-from .base import BaseTestCase
+from .base import BaseTestCase, page_text
 
 
 def klass(person, days_ago, status='attended', **extra):
@@ -93,7 +93,7 @@ class PageTests(BaseTestCase):
             self.assertContains(page, f'data-sum="{key}">{value}<')
         self.assertContains(page, 'cancelamento em cima da hora')
         for text in ('187', '1.498', '1498'):
-            self.assertNotContains(page, text)
+            self.assertNotIn(text, page_text(page))
 
     def test_only_my_own_package(self):
         packages.sell(self.bob.person, self.pack)
