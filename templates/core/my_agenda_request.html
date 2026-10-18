@@ -6,10 +6,17 @@
 
 {% block content %}
 <div class="mx-auto" style="max-width: 560px;">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h3 mb-0">{{ title }}</h1>
+<div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-calendar-event" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{{ title }}</h1>
+        </div>
+    </div>
+    <div class="ui-actions">
         {% url 'core:my_agenda' as back_default %}{% back_button back_default %}
     </div>
+</div>
     <div class="card">
         <div class="card-body">
             <p class="mb-3">{% blocktrans trimmed with starts_at=appointment.starts_at|date:_("l, j \d\e F")|lower starts_at2=appointment.starts_at|time:"H:i" %}Aula de <strong>{{ starts_at }}</strong> às <strong>{{ starts_at2 }}</strong>.{% endblocktrans %}</p>
