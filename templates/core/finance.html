@@ -84,7 +84,7 @@
                     </span>
                     <span class="d-flex gap-1">
                         <a href="{{ row.whatsapp }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success" title="{% trans "Cobrar pelo WhatsApp" %}"><i class="bi bi-whatsapp"></i></a>
-                        <a href="{% nav_url 'core:payment_create' row.student.pk %}?package={{ row.package.pk }}" class="btn btn-sm btn-success">{% trans "Registrar" %}</a>
+                        <a href="{% nav_url 'core:payment_create' row.student.pk %}?package={{ row.package.pk }}" class="btn btn-sm btn-primary">{% trans "Registrar" %}</a>
                     </span>
                 </div>
                 {% endfor %}

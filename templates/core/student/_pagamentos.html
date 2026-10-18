@@ -5,7 +5,7 @@
     <h5 class="mb-0"><i class="bi bi-cash-coin"></i> {% trans "Pagamentos" %}</h5>
     <div class="d-flex gap-2">
         <a href="{% nav_url 'core:refund_create' student.pk %}" class="btn btn-outline-secondary btn-sm" data-refund-new><i class="bi bi-arrow-counterclockwise"></i> {% trans "Devolver ou estornar" %}</a>
-        <a href="{% nav_url 'core:payment_create' student.pk %}" class="btn btn-success btn-sm"><i class="bi bi-plus-circle"></i> {% trans "Registrar pagamento" %}</a>
+        <a href="{% nav_url 'core:payment_create' student.pk %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-circle"></i> {% trans "Registrar pagamento" %}</a>
     </div>
 </div>
 <p class="text-muted small"><i class="bi bi-eye-slash"></i> {% trans "Só você vê os valores. O aluno não tem acesso a esta área." %}</p>

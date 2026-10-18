@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% blocktrans trimmed %}Página não encontrada - {{ brand_name }}{% endblocktrans %}{% endblock %}
+
+{% block content %}
+<div class="ui-empty mx-auto mt-4" style="max-width: 520px;" data-error-page="404">
+    <div class="ui-ico xl"><i class="bi bi-compass" aria-hidden="true"></i></div>
+    <h1 class="h3 mt-3">{% trans "Página não encontrada" %}</h1>
+    <p>{% trans "O endereço não existe ou o conteúdo foi removido." %}</p>
+    <a href="{% url 'core:home' %}" class="btn btn-primary"><i class="bi bi-house"></i> {% trans "Voltar ao início" %}</a>
+</div>
+{% endblock %}

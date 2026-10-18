@@ -115,3 +115,39 @@
 .card-header.bg-primary .bi { color: var(--primary-color); }
 .day-col.today .card-header.bg-primary { background: var(--primary-color) !important; color: var(--bs-white) !important; border-left: 0; }
 .day-col.today .card-header.bg-primary .bi { color: inherit; }
+
+/* Global skin for the Bootstrap pieces the pages still use directly: the same rounded surfaces as the landing page */
+.card { --bs-card-border-radius: var(--ui-radius); --bs-card-inner-border-radius: calc(var(--ui-radius) - 1px); --bs-card-cap-bg: var(--bs-tertiary-bg); --bs-card-border-color: var(--bs-border-color); overflow: hidden; }
+.alert { --bs-alert-border-radius: 1rem; }
+.modal-content { --bs-modal-border-radius: var(--ui-radius); --bs-modal-inner-border-radius: calc(var(--ui-radius) - 1px); }
+.dropdown-menu { --bs-dropdown-border-radius: 1rem; }
+.offcanvas-bottom { border-top-left-radius: var(--ui-radius); border-top-right-radius: var(--ui-radius); }
+.list-group { --bs-list-group-border-radius: 1rem; }
+.form-control, .form-select { border-radius: .75rem; }
+.input-group > .form-control, .input-group > .form-select, .input-group > .btn { border-radius: 0; }
+.input-group > :first-child { border-top-left-radius: .75rem !important; border-bottom-left-radius: .75rem !important; }
+.input-group > :last-child { border-top-right-radius: .75rem !important; border-bottom-right-radius: .75rem !important; }
+.btn { --bs-btn-border-radius: .75rem; }
+.btn-sm { --bs-btn-border-radius: .6rem; }
+.badge { --bs-badge-border-radius: 999px; }
+.progress { border-radius: 999px; }
+
+/* Tabs (student file, notification settings): pills like the finance tabs */
+.nav-tabs { border-bottom: 0; gap: .4rem; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+.nav-tabs::-webkit-scrollbar { display: none; }
+.nav-tabs .nav-link { border: 1px solid var(--bs-border-color); border-radius: 999px; background: var(--bs-body-bg); color: var(--bs-body-color); white-space: nowrap; font-size: .92rem; padding: .45rem 1rem; }
+.nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus-visible { background: var(--bs-tertiary-bg); border-color: var(--bs-border-color); color: var(--bs-body-color); isolation: auto; }
+.nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link { background: var(--primary-color); border-color: var(--primary-color); color: var(--bs-white); font-weight: 600; }
+.nav-tabs .nav-link.active .badge { background: var(--bs-white) !important; color: var(--primary-color) !important; }
+
+/* Avatar in a page header (student file) */
+.ui-avatar { flex: 0 0 auto; width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 3px solid var(--bs-body-bg); box-shadow: 0 0 0 2px var(--primary-color); }
+@media (min-width: 992px) { .ui-avatar { width: 84px; height: 84px; } }
+.ui-head .ui-title .ui-badges { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .3rem; }
+
+/* Older cards written as "border-0 shadow-sm" get the same bordered surface as the rest */
+.card.border-0 { border: 1px solid var(--bs-border-color) !important; }
+.card.shadow-sm { box-shadow: none !important; }
+.card.shadow-lg { box-shadow: 0 18px 40px var(--mt-shadow) !important; }
+.card-header.bg-body { background: var(--bs-tertiary-bg) !important; }
+.ui-ico.xl { width: 72px; height: 72px; font-size: 2.2rem; border-radius: 1.4rem; margin: 0 auto; }
