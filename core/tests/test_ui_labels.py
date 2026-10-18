@@ -110,3 +110,21 @@ class LeftoverScreensTests(BaseTestCase):
         self.login(self.alice)
         for name in ('core:my_intro', 'core:privacy_policy'):
             self.assertIn('class="ui-ico', self.client.get(reverse(name)).content.decode(), name)
+
+
+class DashboardLookTests(BaseTestCase):
+    def test_the_dashboard_uses_the_shared_pieces(self):
+        self.login(self.trainer)
+        html = self.client.get(reverse('core:home')).content.decode()
+        for marker in ('class="ui-head"', 'ui-kpi', 'ui-sec', 'data-attention'):
+            self.assertIn(marker, html)
+        # no Bootstrap-colored count badges or outlined chips any more
+        self.assertNotIn('badge bg-', html.split('data-attention', 1)[1].split('{% elif', 1)[0])
+        self.assertNotIn('text-bg-', html)
+
+    def test_a_workout_without_a_duration_does_not_print_none(self):
+        from django.utils import timezone
+        from core.models import WorkoutSession
+        WorkoutSession.objects.create(person_routine=self.alice_routine, is_completed=True, end_time=timezone.now())
+        self.login(self.trainer)
+        self.assertNotIn('None min', self.client.get(reverse('core:home')).content.decode())

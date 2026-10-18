@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-18 15:12-0300\n"
+"POT-Creation-Date: 2026-10-18 16:11-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3273,11 +3273,9 @@ msgstr ""
 "link."
 
 #, python-format
-#| msgid "Agenda - %(brand_name)s"
 msgid "Acesso negado - %(brand_name)s"
 msgstr "Access denied - %(brand_name)s"
 
-#| msgid "Acesso ao app"
 msgid "Acesso negado"
 msgstr "Access denied"
 
@@ -3288,11 +3286,9 @@ msgid "Voltar ao início"
 msgstr "Back to home"
 
 #, python-format
-#| msgid "Minha agenda - %(brand_name)s"
 msgid "Página não encontrada - %(brand_name)s"
 msgstr "Page not found - %(brand_name)s"
 
-#| msgid "Aula não encontrada."
 msgid "Página não encontrada"
 msgstr "Page not found"
 
@@ -4809,6 +4805,10 @@ msgstr "No workout plans ending."
 msgid "Treinos de hoje"
 msgstr "Today's workouts"
 
+#| msgid "Concluído"
+msgid "concluído"
+msgstr "done"
+
 msgid "em andamento"
 msgstr "in progress"
 
@@ -6222,7 +6222,6 @@ msgstr ""
 msgid "%(routine_name)s - Detalhes"
 msgstr "%(routine_name)s - Details"
 
-#| msgid "Modelo de Treino"
 msgid "Modelo de treino"
 msgstr "Workout template"
 
