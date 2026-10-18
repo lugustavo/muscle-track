@@ -62,9 +62,9 @@
   function renderTimer() {
     timerEl.textContent = fmtHMS(currentElapsed());
     timerEl.classList.toggle('text-muted', paused);
-    pauseBtn.innerHTML = paused
-      ? '<i class="bi bi-play-fill"></i> ' + gettext('Retomar')
-      : '<i class="bi bi-pause-fill"></i> ' + gettext('Pausar');
+    var label = paused ? gettext('Retomar') : gettext('Pausar');
+    pauseBtn.innerHTML = '<i class="bi bi-' + (paused ? 'play' : 'pause') + '-fill"></i><span class="d-none d-sm-inline"> ' + label + '</span>';
+    pauseBtn.setAttribute('aria-label', label);
     pauseBtn.classList.toggle('btn-warning', paused);
     pauseBtn.classList.toggle('btn-outline-secondary', !paused);
   }
