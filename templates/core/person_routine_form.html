@@ -3,19 +3,26 @@
 {% load static %}
 {% load navigation %}
 
-{% block title %}{% if is_edit %}{% trans "Editar Treino" %}{% else %}{% trans "Atribuir Treino" %}{% endif %} {% trans "- Muscle Track" %}{% endblock %}
+{% block title %}{% if is_edit %}{% trans "Editar treino" %}{% else %}{% trans "Atribuir treino" %}{% endif %} {% trans "- Muscle Track" %}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-clipboard-plus"></i> {% if is_edit %}{% trans "Editar Treino" %}{% else %}{% trans "Atribuir Treino ao Aluno" %}{% endif %}</h1>
-    {% back_button back_default %}
+<div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-clipboard-plus" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{% if is_edit %}{% trans "Editar treino" %}{% else %}{% trans "Atribuir treino ao aluno" %}{% endif %}</h1>
+        </div>
+    </div>
+    <div class="ui-actions">
+        {% back_button back_default %}
+    </div>
 </div>
 
 <div class="row">
     <div class="col-md-8">
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="bi bi-info-circle"></i> {% trans "Informações do Treino" %}</h5>
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> {% trans "Informações do treino" %}</h5>
             </div>
             <div class="card-body">
                 <form method="post" id="personRoutineForm">
@@ -41,9 +48,9 @@
 
                     {% if not is_edit %}
                     <div class="mb-3">
-                        <label class="form-label">{% trans "Template de Treino" %}</label>
+                        <label class="form-label">{% trans "Template de treino" %}</label>
                         <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#templateModal">
-                            <i class="bi bi-search"></i> <span id="selectedTemplateName">{% trans "Selecionar Template" %}</span>
+                            <i class="bi bi-search"></i> <span id="selectedTemplateName">{% trans "Selecionar template" %}</span>
                         </button>
                     </div>
                     {% endif %}
@@ -136,7 +143,7 @@
         </div>
 
         <button type="button" class="btn btn-primary w-100 mt-3" onclick="submitForm()">
-            <i class="bi bi-check-circle"></i> {% if is_edit %}{% trans "Atualizar Treino" %}{% else %}{% trans "Criar Treino" %}{% endif %}
+            <i class="bi bi-check-circle"></i> {% if is_edit %}{% trans "Atualizar treino" %}{% else %}{% trans "Criar treino" %}{% endif %}
         </button>
     </div>
 </div>
@@ -146,7 +153,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-clipboard-check"></i> {% trans "Selecionar Template de Treino" %}</h5>
+                <h5 class="modal-title"><i class="bi bi-clipboard-check"></i> {% trans "Selecionar template de treino" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -164,7 +171,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-plus-circle"></i> {% trans "Adicionar Exercício" %}</h5>
+                <h5 class="modal-title"><i class="bi bi-plus-circle"></i> {% trans "Adicionar exercício" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -190,7 +197,7 @@
                         </div>
                     </div>
                     <button type="button" class="btn btn-primary w-100 mt-2" onclick="addExercise()">
-                        {% trans "Adicionar ao Treino" %}
+                        {% trans "Adicionar ao treino" %}
                     </button>
                 </div>
             </div>

@@ -5,12 +5,17 @@
 {% block title %}{% blocktrans trimmed with person_name=student.person_name %}Ligar foto a uma avaliação - {{ person_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h2"><i class="bi bi-link-45deg"></i> {% trans "Ligar foto a uma avaliação" %}</h1>
-        <div class="text-muted">{{ student.person_name }}</div>
+<div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-link-45deg" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{% trans "Ligar foto a uma avaliação" %}</h1>
+            <p class="ui-sub text-break">{{ student.person_name }}</p>
+        </div>
     </div>
-    {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default fragment='#tab-avaliacoes' %}
+    <div class="ui-actions">
+        {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default fragment='#tab-avaliacoes' %}
+    </div>
 </div>
 
 <form method="post" class="row" data-photo-link>

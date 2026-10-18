@@ -88,4 +88,4 @@ class StudentFormSectionsTests(BaseTestCase):
         html = self.client.get(self.create_url).content.decode()
         self.assertIn('class="form-actions d-flex gap-2 mb-4"', html)
         self.assertIn('js/forms.js', html)
-        self.assertEqual(html.count('Salvar Aluno'), 1)
+        self.assertEqual(html.count('Salvar aluno'), 1)

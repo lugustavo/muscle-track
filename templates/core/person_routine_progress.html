@@ -6,13 +6,18 @@
 {% block title %}{% blocktrans trimmed with routine_name=person_routine.routine_name %}Progresso - {{ routine_name }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-start gap-2 mb-3 mb-md-4">
-    <div class="min-w-0">
-        <h1 class="h4 page-title-lg mb-1"><i class="bi bi-bar-chart-line"></i> {% trans "Progresso do Treino" %}</h1>
-        <h2 class="h5 text-muted mb-0">{{ person_routine.routine_name }}</h2>
+<div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-bar-chart-line" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{% trans "Progresso do treino" %}</h1>
+            <h2 class="h5 text-muted mb-0">{{ person_routine.routine_name }}</h2>
         <small class="text-muted">{% trans "Aluno:" %} <a href="{% nav_url 'core:student_detail' student.pk %}" class="text-decoration-none">{{ student.person_name }}</a></small>
+        </div>
     </div>
-    {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default compact=True %}
+    <div class="ui-actions">
+        {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default compact=True %}
+    </div>
 </div>
 
 <!-- Informações do Treino -->
@@ -20,7 +25,7 @@
     <div class="card-body">
         <div class="row">
             <div class="col-md-8">
-                <h5><i class="bi bi-info-circle"></i> {% trans "Detalhes do Treino" %}</h5>
+                <h5><i class="bi bi-info-circle"></i> {% trans "Detalhes do treino" %}</h5>
                 <p class="mb-1"><strong>{% trans "Dificuldade:" %}</strong>
                     {% if person_routine.difficulty_level == 'iniciante' %}
                         <span class="badge bg-success">{{ person_routine.get_difficulty_level_display }}</span>
@@ -30,7 +35,7 @@
                         <span class="badge bg-danger">{{ person_routine.get_difficulty_level_display }}</span>
                     {% endif %}
                 </p>
-                <p class="mb-1">{% blocktrans trimmed with estimated_duration=person_routine.estimated_duration %}<strong>Duração Estimada:</strong> {{ estimated_duration }} minutos{% endblocktrans %}</p>
+                <p class="mb-1">{% blocktrans trimmed with estimated_duration=person_routine.estimated_duration %}<strong>Duração estimada:</strong> {{ estimated_duration }} minutos{% endblocktrans %}</p>
                 {% if person_routine.description %}
                 <p class="mb-1">{% blocktrans trimmed with description=person_routine.description %}<strong>Descrição:</strong> {{ description }}{% endblocktrans %}</p>
                 {% endif %}
@@ -66,7 +71,7 @@
             <div class="card-body metric-tile text-center">
                 <i class="bi bi-check-circle-fill text-success metric-icon"></i>
                 <p class="metric-value">{{ total_sessions }}</p>
-                <p class="metric-label text-muted">{% trans "Sessões Concluídas" %}</p>
+                <p class="metric-label text-muted">{% trans "Sessões concluídas" %}</p>
             </div>
         </div>
     </div>
@@ -75,7 +80,7 @@
             <div class="card-body metric-tile text-center">
                 <i class="bi bi-calendar-check text-primary metric-icon"></i>
                 <p class="metric-value">{{ sessions_last_month }}</p>
-                <p class="metric-label text-muted">{% trans "Último Mês" %}</p>
+                <p class="metric-label text-muted">{% trans "Último mês" %}</p>
             </div>
         </div>
     </div>
@@ -84,7 +89,7 @@
             <div class="card-body metric-tile text-center">
                 <i class="bi bi-clock-history text-info metric-icon"></i>
                 <p class="metric-value">{{ avg_duration }}</p>
-                <p class="metric-label text-muted">{% trans "Duração Média (min)" %}</p>
+                <p class="metric-label text-muted">{% trans "Duração média (min)" %}</p>
             </div>
         </div>
     </div>
@@ -93,7 +98,7 @@
             <div class="card-body metric-tile text-center">
                 <i class="bi bi-percent text-warning metric-icon"></i>
                 <p class="metric-value">{{ completion_rate }}%</p>
-                <p class="metric-label text-muted">{% trans "Taxa de Conclusão" %}</p>
+                <p class="metric-label text-muted">{% trans "Taxa de conclusão" %}</p>
             </div>
         </div>
     </div>
@@ -103,7 +108,7 @@
 <!-- Gráfico de Evolução -->
 <div class="card mb-4 border-0 shadow-sm">
     <div class="card-header bg-body">
-        <h5 class="mb-0"><i class="bi bi-graph-up"></i> {% trans "Evolução do Treino" %}</h5>
+        <h5 class="mb-0"><i class="bi bi-graph-up"></i> {% trans "Evolução do treino" %}</h5>
     </div>
     <div class="card-body">
         <canvas id="progressChart" style="max-height: 300px;"></canvas>
@@ -113,7 +118,7 @@
 <!-- Histórico de Sessões -->
 <div class="card mb-4 border-0 shadow-sm">
     <div class="card-header bg-body d-flex justify-content-between align-items-center">
-        <h5 class="mb-0"><i class="bi bi-clock-history"></i> {% trans "Histórico de Sessões" %}</h5>
+        <h5 class="mb-0"><i class="bi bi-clock-history"></i> {% trans "Histórico de sessões" %}</h5>
         <span class="badge bg-primary">{% blocktrans trimmed with count=completed_sessions.count %}{{ count }} sessões{% endblocktrans %}</span>
     </div>
     <div class="card-body">

@@ -6,11 +6,18 @@
 
 {% block content %}
 <div class="mx-auto" style="max-width: 720px;">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-        <h1 class="h3 mb-0"><i class="bi bi-calendar-plus"></i> {% trans "Google Agenda" %}</h1>
-        {% if role == 'trainer' %}{% url 'core:agenda' as back_default %}{% else %}{% url 'core:my_profile' as back_default %}{% endif %}
-        {% back_button back_default %}
+    <div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-calendar-plus" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{% trans "Google Agenda" %}</h1>
+        </div>
     </div>
+    <div class="ui-actions">
+        {% if role == 'trainer' %}{% url 'core:agenda' as back_default %}{% else %}{% url 'core:my_profile' as back_default %}{% endif %}
+            {% back_button back_default %}
+    </div>
+</div>
 
     <p class="text-muted">
         {% if role == 'trainer' %}{% trans "Veja todas as suas aulas no Google Agenda do celular e do computador: o app gera um link só seu e o Google passa a mostrar as aulas como um calendário." %}

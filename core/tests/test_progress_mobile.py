@@ -14,7 +14,7 @@ class ProgressPageMobileTests(BaseTestCase):
         html = self.client.get(self.url).content.decode()
         self.assertIn('row-cols-2 row-cols-md-4', html)
         self.assertEqual(html.count('metric-tile'), 4)
-        for label in ('Sessões Concluídas', 'Último Mês', 'Duração Média (min)', 'Taxa de Conclusão'):
+        for label in ('Sessões concluídas', 'Último mês', 'Duração média (min)', 'Taxa de conclusão'):
             self.assertIn(label, html)
         self.assertNotIn('font-size: 2rem', html)          # sizes live in the stylesheet, not inline
 
@@ -46,7 +46,7 @@ class SessionDetailMobileTests(BaseTestCase):
 
     def test_titles_shrink_on_phones(self):
         html = self.client.get(self.url).content.decode()
-        self.assertIn('page-title-lg', html)
+        self.assertIn('class="ui-head inline"', html)   # the shared header title scales with clamp()
         self.assertEqual(html.count('card-title-lg'), 2)
 
 

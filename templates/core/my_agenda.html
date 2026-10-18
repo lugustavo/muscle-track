@@ -6,10 +6,17 @@
 
 {% block content %}
 <div class="mx-auto" style="max-width: 560px;">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h3 mb-0"><i class="bi bi-calendar-week"></i> {% trans "Minha agenda" %}</h1>
+    <div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-calendar-week" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{% trans "Minha agenda" %}</h1>
+        </div>
+    </div>
+    <div class="ui-actions">
         <a href="{% url 'core:calendar_settings' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-google"></i> {% trans "Google Agenda" %}</a>
     </div>
+</div>
 
     {% if package %}
     <div class="card mb-3" data-my-package>

@@ -7,12 +7,17 @@
 {% block title %}{% blocktrans trimmed %}{{ title }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1><i class="bi bi-clipboard-check"></i> {{ title }}</h1>
+<div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-clipboard-check" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{{ title }}</h1>
+        </div>
     </div>
-    {% if routine %}{% url 'core:routine_detail' routine.id as back_default %}{% else %}{% url 'core:routine_list' as back_default %}{% endif %}
-    {% back_button back_default %}
+    <div class="ui-actions">
+        {% if routine %}{% url 'core:routine_detail' routine.id as back_default %}{% else %}{% url 'core:routine_list' as back_default %}{% endif %}
+        {% back_button back_default %}
+    </div>
 </div>
 
 <form method="post" id="routineForm">
@@ -25,12 +30,12 @@
             <!-- Informações Básicas -->
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> {% trans "Informações Básicas" %}</h5>
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> {% trans "Informações básicas" %}</h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
                         <label for="{{ form.routine_name.id_for_label }}" class="form-label fw-bold">
-                            <i class="bi bi-tag"></i> {% trans "Nome do Treino *" %}
+                            <i class="bi bi-tag"></i> {% trans "Nome do treino *" %}
                         </label>
                         <input type="text"
                                name="{{ form.routine_name.name }}"
@@ -61,7 +66,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="{{ form.difficulty_level.id_for_label }}" class="form-label fw-bold">
-                                <i class="bi bi-speedometer2"></i> {% trans "Nível de Dificuldade *" %}
+                                <i class="bi bi-speedometer2"></i> {% trans "Nível de dificuldade *" %}
                             </label>
                             <select name="{{ form.difficulty_level.name }}"
                                     class="form-select {% if form.difficulty_level.errors %}is-invalid{% endif %}"
@@ -78,7 +83,7 @@
 
                         <div class="col-md-6 mb-3">
                             <label for="{{ form.estimated_duration.id_for_label }}" class="form-label fw-bold">
-                                <i class="bi bi-clock"></i> {% trans "Duração Estimada (min) *" %}
+                                <i class="bi bi-clock"></i> {% trans "Duração estimada (min) *" %}
                             </label>
                             <input type="number"
                                    name="{{ form.estimated_duration.name }}"
@@ -112,7 +117,7 @@
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="bi bi-list-task"></i> {% trans "Exercícios do Treino" %}</h5>
                     <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#exerciseModal">
-                        <i class="bi bi-plus-circle"></i> {% trans "Adicionar Exercícios" %}
+                        <i class="bi bi-plus-circle"></i> {% trans "Adicionar exercícios" %}
                     </button>
                 </div>
                 <div class="card-body p-0">
@@ -121,7 +126,7 @@
                     </div>
                     <div id="emptyExercisesMessage" class="text-center py-5">
                         <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
-                        <p class="text-muted mt-3 mb-0">{% trans "Nenhum exercício adicionado." %}<br>{% trans 'Clique em "Adicionar Exercícios" para começar.' %}</p>
+                        <p class="text-muted mt-3 mb-0">{% trans "Nenhum exercício adicionado." %}<br>{% trans 'Clique em "Adicionar exercícios" para começar.' %}</p>
                     </div>
                 </div>
             </div>
@@ -132,21 +137,21 @@
             <!-- Resumo -->
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-body">
-                    <h6 class="mb-0"><i class="bi bi-bar-chart"></i> {% trans "Resumo do Treino" %}</h6>
+                    <h6 class="mb-0"><i class="bi bi-bar-chart"></i> {% trans "Resumo do treino" %}</h6>
                 </div>
                 <div class="card-body">
                     <div class="mb-4 text-center">
-                        <small class="text-muted d-block mb-2">{% trans "Total de Exercícios" %}</small>
+                        <small class="text-muted d-block mb-2">{% trans "Total de exercícios" %}</small>
                         <h2 id="exerciseCount" class="mb-0 text-primary">0</h2>
                     </div>
                     <div class="mb-4 text-center">
-                        <small class="text-muted d-block mb-2">{% trans "Duração Estimada" %}</small>
+                        <small class="text-muted d-block mb-2">{% trans "Duração estimada" %}</small>
                         <h4 id="estimatedDuration" class="mb-0 text-secondary">{% trans "0 minutos" %}</h4>
                     </div>
                     <hr>
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-success btn-lg">
-                            <i class="bi bi-check-circle"></i> {% trans "Salvar Treino" %}
+                            <i class="bi bi-check-circle"></i> {% trans "Salvar treino" %}
                         </button>
                         {% back_button back_default label=_('Cancelar') css='btn btn-outline-secondary' icon='bi-x-circle' %}
                     </div>
@@ -177,7 +182,7 @@
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="exerciseModalLabel">
-                    <i class="bi bi-search"></i> {% trans "Selecionar Exercícios" %}
+                    <i class="bi bi-search"></i> {% trans "Selecionar exercícios" %}
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{% trans "Close" %}"></button>
             </div>
@@ -218,7 +223,7 @@
                     <i class="bi bi-x-circle"></i> {% trans "Fechar" %}
                 </button>
                 <button type="button" class="btn btn-primary" id="confirmSelection">
-                    <i class="bi bi-check-circle"></i> {% trans "Confirmar Seleção (" %}<span id="selectionCount">0</span>)
+                    <i class="bi bi-check-circle"></i> {% trans "Confirmar seleção (" %}<span id="selectionCount">0</span>)
                 </button>
             </div>
         </div>
@@ -231,7 +236,7 @@
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="editExerciseModalLabel">
-                    <i class="bi bi-sliders"></i> {% trans "Editar Parâmetros" %}
+                    <i class="bi bi-sliders"></i> {% trans "Editar parâmetros" %}
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{% trans "Close" %}"></button>
             </div>

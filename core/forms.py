@@ -286,13 +286,13 @@ class PersonRoutineForm(forms.ModelForm):
 
 class AIWorkoutGenerationForm(forms.Form):
     description = forms.CharField(
-        label=_('Descrição do Treino'),
+        label=_('Descrição do treino'),
         max_length=1000,
         widget=forms.Textarea(attrs={'rows': 4, 'placeholder': _('Ex: Treino para hipertrofia de peito e tríceps, com foco em exercícios compostos')}),
         help_text=_('Descreva o tipo de treino que deseja gerar')
     )
     difficulty_level = forms.ChoiceField(
-        label=_('Nível de Dificuldade'),
+        label=_('Nível de dificuldade'),
         choices=[
             ('iniciante', _('Iniciante')),
             ('intermediario', _('Intermediário')),
@@ -301,7 +301,7 @@ class AIWorkoutGenerationForm(forms.Form):
         initial='intermediario'
     )
     estimated_duration = forms.IntegerField(
-        label=_('Duração Estimada (minutos)'),
+        label=_('Duração estimada (minutos)'),
         min_value=15,
         max_value=180,
         initial=60

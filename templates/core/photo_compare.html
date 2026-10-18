@@ -6,13 +6,18 @@
 
 {% block content %}
 <div class="mx-auto" style="max-width: 860px;">
-    <div class="d-flex justify-content-between align-items-center mb-3 gap-2">
-        <div>
-            <h1 class="h3 mb-0"><i class="bi bi-layout-split"></i> {% trans "Comparar fotos" %}</h1>
+    <div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-layout-split" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{% trans "Comparar fotos" %}</h1>
             {% if student %}<div class="text-muted">{{ student.person_name }}</div>{% endif %}
         </div>
+    </div>
+    <div class="ui-actions">
         {% include 'core/_back_button.html' with url=back_url label=_('Voltar') css='btn btn-sm btn-outline-secondary' icon='bi-arrow-left' compact=True %}
     </div>
+</div>
 
     {% if not data.angles %}
     <div class="card"><div class="card-body text-center text-muted py-4">

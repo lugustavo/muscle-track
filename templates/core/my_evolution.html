@@ -6,13 +6,20 @@
 
 {% block content %}
 <div class="mx-auto" style="max-width: 720px;">
-    <div class="d-flex justify-content-between align-items-center mb-3 gap-2">
-        <h1 class="h3 mb-0"><i class="bi bi-rulers"></i> {% trans "Minha evolução" %}</h1>
-        <div class="d-flex gap-2">
-            {% if can_compare %}<a href="{% url 'core:my_evolution_compare' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-layout-split"></i> {% trans "Comparar fotos" %}</a>{% endif %}
-            <a href="{% nav_url 'core:my_photo_upload' %}" class="btn btn-sm btn-primary" data-add-photo><i class="bi bi-camera"></i> {% trans "Enviar foto" %}</a>
+    <div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-rulers" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{% trans "Minha evolução" %}</h1>
         </div>
     </div>
+    <div class="ui-actions">
+        <div class="d-flex gap-2">
+                {% if can_compare %}<a href="{% url 'core:my_evolution_compare' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-layout-split"></i> {% trans "Comparar fotos" %}</a>{% endif %}
+                <a href="{% nav_url 'core:my_photo_upload' %}" class="btn btn-sm btn-primary" data-add-photo><i class="bi bi-camera"></i> {% trans "Enviar foto" %}</a>
+            </div>
+    </div>
+</div>
 
     {% if assessment_chart %}
     <div class="card mb-3"><div class="card-body">
