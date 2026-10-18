@@ -367,7 +367,7 @@ class TodayScreenTests(BaseTestCase):
         response = self.page()
         today = response.context['today']
         self.assertEqual((today['total_workouts'], today['recent_workouts'], today['avg_duration']), (2, 1, 40))
-        self.assertNotContains(response, 'Total de Treinos')
+        self.assertNotContains(response, 'Total de treinos')
         self.assertContains(response, 'em 30 dias')
 
     def test_week_strip_marks_the_days_of_this_week(self):

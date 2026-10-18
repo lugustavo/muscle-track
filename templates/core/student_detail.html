@@ -48,7 +48,7 @@
     </div>
     <div class="d-none d-lg-block">
         <a href="{% nav_url 'core:person_routine_create' %}&person={{ student.pk }}" class="btn btn-success">
-            <i class="bi bi-plus-circle"></i> {% trans "Atribuir Treino" %}
+            <i class="bi bi-plus-circle"></i> {% trans "Atribuir treino" %}
         </a>
         <a href="{% nav_url 'core:student_sheet' student.pk %}" class="btn btn-outline-primary" data-sheet-link-button title="{% trans "Link só de leitura da ficha de treino, para o aluno ler ou imprimir" %}">
             <i class="bi bi-link-45deg"></i> {% trans "Link da ficha" %}
@@ -95,7 +95,7 @@
                     <i class="bi bi-calendar-check fs-1 text-primary"></i>
                     <h3 class="mt-2">{{ total_sessions }}</h3>
                 </div>
-                <p class="text-muted mb-0"><span class="d-none d-md-inline">{% trans "Sessões Completadas" %}</span><span class="d-md-none">{% trans "Sessões" %}</span></p>
+                <p class="text-muted mb-0"><span class="d-none d-md-inline">{% trans "Sessões completadas" %}</span><span class="d-md-none">{% trans "Sessões" %}</span></p>
             </div>
         </div>
     </div>
@@ -117,7 +117,7 @@
                     <i class="bi bi-clock fs-1 text-info"></i>
                     <h3 class="mt-2">{% if avg_duration %}{% blocktrans trimmed with avg_duration=avg_duration|floatformat:0 %}{{ avg_duration }}<small class="fs-6">min</small>{% endblocktrans %}{% else %}-{% endif %}</h3>
                 </div>
-                <p class="text-muted mb-0"><span class="d-none d-md-inline">{% trans "Duração Média" %}</span><span class="d-md-none">{% trans "Duração" %}</span></p>
+                <p class="text-muted mb-0"><span class="d-none d-md-inline">{% trans "Duração média" %}</span><span class="d-md-none">{% trans "Duração" %}</span></p>
             </div>
         </div>
     </div>
@@ -130,7 +130,7 @@
                         {% if last_session %}<span class="d-none d-md-inline">{{ last_session.start_time|date:_('d/m/Y') }}</span><span class="d-md-none">{{ last_session.start_time|date:_('d/m') }}</span>{% else %}-{% endif %}
                     </h3>
                 </div>
-                <p class="text-muted mb-0"><span class="d-none d-md-inline">{% trans "Última Sessão" %}</span><span class="d-md-none">{% trans "Última" %}</span></p>
+                <p class="text-muted mb-0"><span class="d-none d-md-inline">{% trans "Última sessão" %}</span><span class="d-md-none">{% trans "Última" %}</span></p>
             </div>
         </div>
     </div>
@@ -166,7 +166,7 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="bi bi-lightning-charge"></i> {% trans "Treinos Ativos" %}</h5>
+                <h5 class="mb-0"><i class="bi bi-lightning-charge"></i> {% trans "Treinos ativos" %}</h5>
                 <a href="{% nav_url 'core:person_routine_create' %}&person={{ student.pk }}" class="btn btn-sm btn-success">
                     <i class="bi bi-plus-circle"></i> {% trans "Adicionar" %}
                 </a>
@@ -227,7 +227,7 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="bi bi-archive"></i> {% trans "Treinos Anteriores" %}</h5>
+                <h5 class="mb-0"><i class="bi bi-archive"></i> {% trans "Treinos anteriores" %}</h5>
             </div>
             <div class="card-body">
                 {% if inactive_routines %}
@@ -250,7 +250,7 @@
                     </div>
                     <div class="text-center mt-3">
                         <a href="{% nav_url 'core:student_history' student.pk %}" class="btn btn-sm btn-outline-secondary">
-                            <i class="bi bi-clock-history"></i> {% trans "Ver Histórico Completo" %}
+                            <i class="bi bi-clock-history"></i> {% trans "Ver histórico completo" %}
                         </a>
                     </div>
                 {% else %}
@@ -278,7 +278,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="deactivateModalLabel{{ item.person_routine.pk }}">
-                    <i class="bi bi-exclamation-triangle text-warning"></i> {% trans "Confirmar Remoção" %}
+                    <i class="bi bi-exclamation-triangle text-warning"></i> {% trans "Confirmar remoção" %}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans "Close" %}"></button>
             </div>
@@ -295,7 +295,7 @@
                 <form method="post" action="{% nav_url 'core:person_routine_deactivate' item.person_routine.pk %}" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash"></i> {% trans "Sim, Remover" %}
+                        <i class="bi bi-trash"></i> {% trans "Sim, remover" %}
                     </button>
                 </form>
             </div>

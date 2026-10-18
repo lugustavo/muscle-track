@@ -51,7 +51,7 @@
                             <i class="bi bi-people text-info" style="font-size: 2rem;"></i>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-0 small">{% trans "Total Alunos" %}</h6>
+                            <h6 class="text-muted mb-0 small">{% trans "Total alunos" %}</h6>
                             <h3 class="mb-0">{{ students_with_routine }}</h3>
                         </div>
                     </div>
@@ -66,7 +66,7 @@
                             <i class="bi bi-person-check text-success" style="font-size: 2rem;"></i>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-0 small">{% trans "Alunos Ativos" %}</h6>
+                            <h6 class="text-muted mb-0 small">{% trans "Alunos ativos" %}</h6>
                             <h3 class="mb-0">{{ active_students }}</h3>
                         </div>
                     </div>
@@ -81,7 +81,7 @@
                             <i class="bi bi-calendar-check text-warning" style="font-size: 2rem;"></i>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-0 small">{% trans "Total Treinos" %}</h6>
+                            <h6 class="text-muted mb-0 small">{% trans "Total treinos" %}</h6>
                             <h3 class="mb-0">{{ total_sessions }}</h3>
                         </div>
                     </div>
@@ -111,7 +111,7 @@
                             <i class="bi bi-clock text-secondary" style="font-size: 2rem;"></i>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-0 small">{% trans "Duração Média" %}</h6>
+                            <h6 class="text-muted mb-0 small">{% trans "Duração média" %}</h6>
                             <h3 class="mb-0">
                                 {% if avg_duration %}
                                     {% blocktrans trimmed with avg_duration=avg_duration|floatformat:0 %}{{ avg_duration }}<small class="text-muted">min</small>{% endblocktrans %}
@@ -132,12 +132,12 @@
             <!-- Routine Information -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-body py-3">
-                    <h5 class="mb-0">{% trans "Informações da Rotina" %}</h5>
+                    <h5 class="mb-0">{% trans "Informações da rotina" %}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <strong class="text-muted">{% trans "Nível de Dificuldade:" %}</strong>
+                            <strong class="text-muted">{% trans "Nível de dificuldade:" %}</strong>
                             <div class="mt-1">
                                 {% if routine.difficulty_level == 'iniciante' %}
                                 <span class="badge bg-success">{% trans "Iniciante" %}</span>
@@ -149,7 +149,7 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <strong class="text-muted">{% trans "Duração Estimada:" %}</strong>
+                            <strong class="text-muted">{% trans "Duração estimada:" %}</strong>
                             <div class="mt-1">{% blocktrans trimmed with estimated_duration=routine.estimated_duration %}{{ estimated_duration }} minutos{% endblocktrans %}</div>
                         </div>
                     </div>
@@ -175,7 +175,7 @@
                                 <tr>
                                     <th style="width: 60px;">{% trans "Ordem" %}</th>
                                     <th>{% trans "Exercício" %}</th>
-                                    <th style="width: 150px;">{% trans "Grupo Muscular" %}</th>
+                                    <th style="width: 150px;">{% trans "Grupo muscular" %}</th>
                                     <th style="width: 80px;" class="text-center">{% trans "Séries" %}</th>
                                     <th style="width: 80px;" class="text-center">{% trans "Reps" %}</th>
                                     <th style="width: 100px;" class="text-center">{% trans "Descanso" %}</th>
@@ -215,13 +215,13 @@
             <!-- Analysis -->
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-body py-3">
-                    <h5 class="mb-0">{% trans "Análise de Desempenho" %}</h5>
+                    <h5 class="mb-0">{% trans "Análise de desempenho" %}</h5>
                 </div>
                 <div class="card-body">
                     {% if total_sessions > 0 %}
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <strong>{% trans "Taxa de Conclusão" %}</strong>
+                            <strong>{% trans "Taxa de conclusão" %}</strong>
                             <span class="text-muted">{% blocktrans trimmed %}{{ completed_sessions }} de {{ total_sessions }} treinos{% endblocktrans %}</span>
                         </div>
                         <div class="progress" style="height: 25px;">
@@ -281,7 +281,7 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <strong class="text-muted">{% trans "ID da Rotina:" %}</strong>
+                        <strong class="text-muted">{% trans "ID da rotina:" %}</strong>
                         <div class="mt-1 font-monospace small">{{ routine.id }}</div>
                     </div>
                     <div class="mb-3">
@@ -299,12 +299,12 @@
             {% if user.is_staff %}
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-body py-3">
-                    <h5 class="mb-0">{% trans "Ações Rápidas" %}</h5>
+                    <h5 class="mb-0">{% trans "Ações rápidas" %}</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
                         <a href="{% nav_url 'core:routine_edit' routine.pk %}" class="btn btn-outline-primary">
-                            <i class="bi bi-pencil me-2"></i>{% trans "Editar Rotina" %}
+                            <i class="bi bi-pencil me-2"></i>{% trans "Editar rotina" %}
                         </a>
                         <a href="{% url 'admin:core_routine_change' routine.pk %}" class="btn btn-outline-secondary" target="_blank">
                             <i class="bi bi-gear me-2"></i>{% trans "Editar no Admin" %}

@@ -248,7 +248,7 @@ def student_create(request):
             return redirect('core:student_invite', pk=person.pk)
     else:
         form = PersonForm()
-    return render(request, 'core/student_form.html', {'form': form, 'title': _('Cadastrar Aluno')})
+    return render(request, 'core/student_form.html', {'form': form, 'title': _('Cadastrar aluno')})
 
 
 @staff_required
@@ -720,7 +720,7 @@ def student_edit(request, pk):
             return redirect(after_save_url(request, reverse('core:student_detail', kwargs={'pk': pk})))
     else:
         form = PersonForm(instance=student)
-    return render(request, 'core/student_form.html', {'form': form, 'title': _('Editar Aluno')})
+    return render(request, 'core/student_form.html', {'form': form, 'title': _('Editar aluno')})
 
 
 @staff_required
@@ -881,7 +881,7 @@ def my_profile(request, person):
 
     return render(request, 'core/my_profile.html', {
         'form': form,
-        'title': _('Meu Perfil'),
+        'title': _('Meu perfil'),
         'user_email': request.user.email,
         'person': person
     })
@@ -1087,7 +1087,7 @@ def exercise_create(request):
             return redirect(after_save_url(request, reverse('core:exercise_list'), forward_next=False))
     else:
         form = ExerciseForm()
-    return render(request, 'core/exercise_form.html', {'form': form, 'title': _('Cadastrar Exercício')})
+    return render(request, 'core/exercise_form.html', {'form': form, 'title': _('Cadastrar exercício')})
 
 
 @staff_required
@@ -1145,7 +1145,7 @@ def exercise_edit(request, pk):
             return redirect(after_save_url(request, reverse('core:exercise_detail', kwargs={'pk': pk})))
     else:
         form = ExerciseForm(instance=exercise)
-    return render(request, 'core/exercise_form.html', {'form': form, 'title': _('Editar Exercício')})
+    return render(request, 'core/exercise_form.html', {'form': form, 'title': _('Editar exercício')})
 
 
 # ============= ROUTINE VIEWS =============
@@ -1315,7 +1315,7 @@ def routine_create(request):
         form = RoutineForm()
 
     return render(request, 'core/routine_form.html',
-                  _routine_form_context(form, _('Criar Treino'), None, []))
+                  _routine_form_context(form, _('Criar treino'), None, []))
 
 
 @staff_required
@@ -1376,7 +1376,7 @@ def routine_edit(request, pk):
 
     routine_exercises = routine.exercises.all().select_related('exercise').order_by('order')
     return render(request, 'core/routine_form.html',
-                  _routine_form_context(form, _('Editar Treino'), routine, routine_exercises))
+                  _routine_form_context(form, _('Editar treino'), routine, routine_exercises))
 
 
 # ============= PERSON ROUTINE VIEWS =============
@@ -2169,7 +2169,7 @@ def routine_generate_ai(request):
     else:
         form = AIWorkoutGenerationForm()
 
-    return render(request, 'core/routine_generate_ai.html', {'form': form, 'title': _('Gerar Treino com IA')})
+    return render(request, 'core/routine_generate_ai.html', {'form': form, 'title': _('Gerar treino com IA')})
 
 
 # ============= CALENDAR LINK (Google Agenda, Apple Calendar...) =============

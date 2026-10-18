@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-18 14:28-0300\n"
+"POT-Creation-Date: 2026-10-18 14:45-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -600,8 +600,9 @@ msgstr "Note"
 msgid "Continuar o mesmo horário"
 msgstr "Keep the same time"
 
-msgid "Descrição do Treino"
-msgstr "Workout Description"
+#| msgid "Descrição do Treino"
+msgid "Descrição do treino"
+msgstr "Workout description"
 
 msgid ""
 "Ex: Treino para hipertrofia de peito e tríceps, com foco em exercícios "
@@ -613,8 +614,9 @@ msgstr ""
 msgid "Descreva o tipo de treino que deseja gerar"
 msgstr "Describe the type of workout you want to generate"
 
-msgid "Nível de Dificuldade"
-msgstr "Difficulty Level"
+#| msgid "Nível de Dificuldade"
+msgid "Nível de dificuldade"
+msgstr "Difficulty level"
 
 msgid "Iniciante"
 msgstr "Beginner"
@@ -625,8 +627,9 @@ msgstr "Intermediate"
 msgid "Avançado"
 msgstr "Advanced"
 
-msgid "Duração Estimada (minutos)"
-msgstr "Estimated Duration (minutes)"
+#| msgid "Duração Estimada (minutos)"
+msgid "Duração estimada (minutos)"
+msgstr "Estimated duration (minutes)"
 
 #, python-format
 msgid ""
@@ -1256,6 +1259,9 @@ msgstr "Exercise"
 
 msgid "Nome do Treino"
 msgstr "Workout Name"
+
+msgid "Nível de Dificuldade"
+msgstr "Difficulty Level"
 
 msgid "Duração estimada em minutos"
 msgstr "Estimated duration in minutes"
@@ -2576,8 +2582,9 @@ msgid "Aluno cadastrado! Envie o link de convite para ele criar a senha."
 msgstr ""
 "Student registered! Send the invitation link so they can create a password."
 
-msgid "Cadastrar Aluno"
-msgstr "Add Student"
+#| msgid "Cadastrar Aluno"
+msgid "Cadastrar aluno"
+msgstr "Add student"
 
 msgid "Link criado. Quem o tiver pode ler a ficha, então envie só ao aluno."
 msgstr ""
@@ -2704,8 +2711,9 @@ msgstr ""
 msgid "Aluno atualizado com sucesso!"
 msgstr "Student updated successfully!"
 
-msgid "Editar Aluno"
-msgstr "Edit Student"
+#| msgid "Editar Aluno"
+msgid "Editar aluno"
+msgstr "Edit student"
 
 #, python-format
 msgid "%(name)s e todos os dados foram excluídos."
@@ -2742,9 +2750,6 @@ msgstr "Request sent. Your trainer will delete your data and let you know."
 msgid "Seu perfil foi atualizado com sucesso!"
 msgstr "Your profile was updated successfully!"
 
-msgid "Meu Perfil"
-msgstr "My Profile"
-
 msgid "Autorize o registro de fotos para enviar."
 msgstr "Authorize photo recording to upload."
 
@@ -2768,14 +2773,16 @@ msgstr "Request withdrawn."
 msgid "Exercício cadastrado com sucesso!"
 msgstr "Exercise created successfully!"
 
-msgid "Cadastrar Exercício"
-msgstr "Add Exercise"
+#| msgid "Cadastrar Exercício"
+msgid "Cadastrar exercício"
+msgstr "Add exercise"
 
 msgid "Exercício atualizado com sucesso!"
 msgstr "Exercise updated successfully!"
 
-msgid "Editar Exercício"
-msgstr "Edit Exercise"
+#| msgid "Editar Exercício"
+msgid "Editar exercício"
+msgstr "Edit exercise"
 
 msgid "Erro ao processar exercícios."
 msgstr "Error processing exercises."
@@ -2789,14 +2796,12 @@ msgstr "One of the selected exercises no longer exists."
 msgid "Treino criado com sucesso!"
 msgstr "Workout created successfully!"
 
-msgid "Criar Treino"
-msgstr "Create Workout"
+#| msgid "Criar Treino"
+msgid "Criar treino"
+msgstr "Create workout"
 
 msgid "Treino atualizado com sucesso!"
 msgstr "Workout updated successfully!"
-
-msgid "Editar Treino"
-msgstr "Edit Workout"
 
 #, python-format
 msgid "Treino \"%(routine)s\" atribuído a %(student)s com sucesso!"
@@ -2844,8 +2849,9 @@ msgstr "Workout generated with AI successfully!"
 msgid "Erro ao gerar treino: %(error)s"
 msgstr "Error generating workout: %(error)s"
 
-msgid "Gerar Treino com IA"
-msgstr "Generate Workout with AI"
+#| msgid "Gerar Treino com IA"
+msgid "Gerar treino com IA"
+msgstr "Generate workout with AI"
 
 msgid "Texto padrão restaurado."
 msgstr "Default text restored."
@@ -3317,9 +3323,6 @@ msgstr ""
 
 msgid "Resumo e pagamentos"
 msgstr "Summary and payments"
-
-msgid "Meus Treinos"
-msgstr "My Workouts"
 
 msgid "Entrar"
 msgstr "Log in"
@@ -4183,26 +4186,32 @@ msgstr "request deletion of your data"
 msgid "%(exercise_name)s - %(brand_name)s"
 msgstr "%(exercise_name)s - %(brand_name)s"
 
-msgid "Aluno Ativo"
-msgid_plural "Alunos Ativos"
-msgstr[0] "Active Student"
-msgstr[1] "Active Students"
+#| msgid "Alunos ativos"
+msgid "Aluno ativo"
+msgid_plural "Alunos ativos"
+msgstr[0] "Active student"
+msgstr[1] "Active students"
 
-msgid "Sessões Realizadas"
-msgid_plural "Sessões Realizadas"
-msgstr[0] "Sessions Completed"
-msgstr[1] "Sessions Completed"
+#| msgid "Sessões Realizadas"
+#| msgid_plural "Sessões Realizadas"
+msgid "Sessões realizadas"
+msgid_plural "Sessões realizadas"
+msgstr[0] "Sessions completed"
+msgstr[1] "Sessions completed"
 
-msgid "Execuções Completas"
-msgid_plural "Execuções Completas"
-msgstr[0] "Completed Execution"
-msgstr[1] "Completed Executions"
+#| msgid "Execuções Completas"
+#| msgid_plural "Execuções Completas"
+msgid "Execuções completas"
+msgid_plural "Execuções completas"
+msgstr[0] "Completed execution"
+msgstr[1] "Completed executions"
 
 msgid "Informações"
 msgstr "Information"
 
-msgid "Grupo Muscular:"
-msgstr "Muscle Group:"
+#| msgid "Grupo muscular"
+msgid "Grupo muscular:"
+msgstr "Muscle group:"
 
 msgid "Padrão:"
 msgstr "Default:"
@@ -4228,14 +4237,20 @@ msgstr "Order: %(order)s"
 msgid "Sem imagem"
 msgstr "No image"
 
-msgid "Nome do Exercício *"
-msgstr "Exercise Name *"
+#| msgid "Informações Básicas"
+msgid "Informações básicas"
+msgstr "Basic information"
+
+#| msgid "Nome do Exercício *"
+msgid "Nome do exercício *"
+msgstr "Exercise name *"
 
 msgid "Ex: Supino Reto"
 msgstr "E.g., Bench Press"
 
-msgid "Grupo Muscular *"
-msgstr "Muscle Group *"
+#| msgid "Grupo Muscular *"
+msgid "Grupo muscular *"
+msgstr "Muscle group *"
 
 msgid "Selecione..."
 msgstr "Select..."
@@ -4243,32 +4258,46 @@ msgstr "Select..."
 msgid "Breve descrição do exercício..."
 msgstr "Brief description of the exercise..."
 
-msgid "Séries Padrão *"
-msgstr "Default Sets *"
+#| msgid "Séries Padrão *"
+msgid "Séries padrão *"
+msgstr "Default sets *"
 
-msgid "Repetições Padrão *"
-msgstr "Default Reps *"
+#| msgid "Repetições Padrão *"
+msgid "Repetições padrão *"
+msgstr "Default reps *"
 
-msgid "Mídia do Exercício"
-msgstr "Exercise Media"
+#| msgid "Mídia do Exercício"
+msgid "Mídia do exercício"
+msgstr "Exercise media"
 
-msgid "Arquivo de Mídia"
-msgstr "Media File"
+#| msgid "Tipo de Mídia"
+msgid "Tipo de mídia"
+msgstr "Media type"
+
+#| msgid "Arquivo de Mídia"
+msgid "Arquivo de mídia"
+msgstr "Media file"
 
 msgid "Formatos aceitos: JPG, PNG, GIF, MP4"
 msgstr "Accepted formats: JPG, PNG, GIF, MP4"
 
+#| msgid "URL da Mídia"
+msgid "URL da mídia"
+msgstr "Media URL"
+
 msgid "URL do YouTube, Vimeo ou link direto"
 msgstr "YouTube or Vimeo URL, or a direct link"
 
-msgid "Thumbnail (Miniatura)"
+#| msgid "Thumbnail (Miniatura)"
+msgid "Thumbnail (miniatura)"
 msgstr "Thumbnail"
 
 msgid "Imagem de visualização (recomendado 400x300px)"
 msgstr "Preview image (recommended 400x300px)"
 
-msgid "Instruções de Execução"
-msgstr "Execution Instructions"
+#| msgid "Instruções de Execução"
+msgid "Instruções de execução"
+msgstr "Execution instructions"
 
 msgid "Passo a passo"
 msgstr "Step by step"
@@ -4282,11 +4311,13 @@ msgstr ""
 msgid "Exercício ativo (disponível para uso)"
 msgstr "Active exercise (available for use)"
 
-msgid "Salvar Exercício"
-msgstr "Save Exercise"
+#| msgid "Salvar Exercício"
+msgid "Salvar exercício"
+msgstr "Save exercise"
 
-msgid "Preview da Mídia"
-msgstr "Media Preview"
+#| msgid "Preview da Mídia"
+msgid "Preview da mídia"
+msgstr "Media preview"
 
 msgid "Preview"
 msgstr "Preview"
@@ -4294,12 +4325,16 @@ msgstr "Preview"
 msgid "Nenhuma imagem"
 msgstr "No image"
 
-msgid "Informações do Registro"
-msgstr "Record Information"
+#| msgid "Informações do Registro"
+msgid "Informações do registro"
+msgstr "Record information"
 
 #, python-format
+#| msgid ""
+#| "<small class=\"text-muted d-block\">ID do Exercício</small> "
+#| "<strong>#%(pk)s</strong>"
 msgid ""
-"<small class=\"text-muted d-block\">ID do Exercício</small> "
+"<small class=\"text-muted d-block\">ID do exercício</small> "
 "<strong>#%(pk)s</strong>"
 msgstr ""
 "<small class=\"text-muted d-block\">Exercise ID</small> "
@@ -4388,7 +4423,6 @@ msgstr "You haven't logged a load for this exercise yet."
 msgid "Financeiro - %(brand_name)s"
 msgstr "Finances - %(brand_name)s"
 
-#| msgid "Pagamentos e devoluções"
 msgid "Recebimentos, pacotes e devoluções do mês."
 msgstr "This month's payments, packages and refunds."
 
@@ -5068,35 +5102,41 @@ msgid "As fotos são privadas: só você e a sua personal conseguem abri-las."
 msgstr "Photos are private: only you and your trainer can open them."
 
 #, python-format
-msgid "Meu Histórico - %(brand_name)s"
-msgstr "My History - %(brand_name)s"
+#| msgid "Meu Histórico - %(brand_name)s"
+msgid "Meu histórico - %(brand_name)s"
+msgstr "My history - %(brand_name)s"
 
-msgid "Meu Histórico de Treinos"
-msgstr "My Workout History"
+#| msgid "Meu Histórico de Treinos"
+msgid "Meu histórico de treinos"
+msgstr "My workout history"
 
-msgid "Sessões Concluídas (últimas 20)"
-msgstr "Completed Sessions (last 20)"
+#| msgid "Sessões Concluídas (últimas 20)"
+msgid "Sessões concluídas (últimas 20)"
+msgstr "Completed sessions (last 20)"
 
 msgid "Duração"
 msgstr "Duration"
 
-msgid "Total de Treinos"
-msgstr "Total Workouts"
+msgid "Total de treinos"
+msgstr "Total workouts"
 
 msgid "Treinos/Semana (aprox.)"
 msgstr "Workouts/Week (approx.)"
 
-msgid "Treinos Atribuídos"
-msgstr "Assigned Workouts"
+#| msgid "Treinos Atribuídos"
+msgid "Treinos atribuídos"
+msgstr "Assigned workouts"
 
 msgid "Você ainda não concluiu nenhum treino."
 msgstr "You haven't completed any workouts yet."
 
-msgid "Iniciar Treino Agora"
-msgstr "Start Workout Now"
+#| msgid "Iniciar Treino Agora"
+msgid "Iniciar treino agora"
+msgstr "Start workout now"
 
-msgid "Meus Recordes de Carga"
-msgstr "My Weight Records"
+#| msgid "Meus Recordes de Carga"
+msgid "Meus recordes de carga"
+msgstr "My weight records"
 
 msgid "Recorde"
 msgstr "Record"
@@ -5108,8 +5148,9 @@ msgstr "Last"
 msgid "%(best)s kg"
 msgstr "%(best)s kg"
 
-msgid "Evolução de Treinos"
-msgstr "Workout Progress"
+#| msgid "Evolução de Treinos"
+msgid "Evolução de treinos"
+msgstr "Workout progress"
 
 msgid "Duração (minutos)"
 msgstr "Duration (minutes)"
@@ -5338,18 +5379,21 @@ msgstr ""
 msgid "Metas e motivação"
 msgstr "Goals and motivation"
 
-msgid "Salvar Alterações"
-msgstr "Save Changes"
+#| msgid "Salvar Alterações"
+msgid "Salvar alterações"
+msgstr "Save changes"
 
 msgid "Conta"
 msgstr "Account"
 
 #, python-format
-msgid "Meus Treinos - %(brand_name)s"
-msgstr "My Workouts - %(brand_name)s"
+#| msgid "Meus Treinos - %(brand_name)s"
+msgid "Meus treinos - %(brand_name)s"
+msgstr "My workouts - %(brand_name)s"
 
-msgid "Meus Treinos Ativos"
-msgstr "My Active Workouts"
+#| msgid "Meus Treinos Ativos"
+msgid "Meus treinos ativos"
+msgstr "My active workouts"
 
 msgid "Sessão em andamento"
 msgstr "Session in progress"
@@ -5364,12 +5408,6 @@ msgstr "View exercises"
 #, python-format
 msgid "%(estimated_duration)s min"
 msgstr "%(estimated_duration)s min"
-
-msgid "Continuar Treino"
-msgstr "Continue Workout"
-
-msgid "Iniciar Treino"
-msgstr "Start Workout"
 
 msgid "Close"
 msgstr "Close"
@@ -5628,38 +5666,42 @@ msgstr ""
 "The suggested amount is what's left to pay on the chosen package; you can "
 "change it."
 
-msgid "Atribuir Treino"
-msgstr "Assign Workout"
-
 msgid "- Muscle Track"
 msgstr "- Muscle Track"
 
-msgid "Atribuir Treino ao Aluno"
-msgstr "Assign Workout to Student"
+#| msgid "Atribuir Treino ao Aluno"
+msgid "Atribuir treino ao aluno"
+msgstr "Assign workout to student"
 
-msgid "Informações do Treino"
-msgstr "Workout Information"
+#| msgid "Informações do Treino"
+msgid "Informações do treino"
+msgstr "Workout information"
 
-msgid "Template de Treino"
-msgstr "Workout Template"
+#| msgid "Template de Treino"
+msgid "Template de treino"
+msgstr "Workout template"
 
-msgid "Selecionar Template"
-msgstr "Select Template"
+#| msgid "Selecionar Template"
+msgid "Selecionar template"
+msgstr "Select template"
 
 msgid "Nenhum exercício adicionado"
 msgstr "No exercises added"
 
-msgid "Atualizar Treino"
-msgstr "Update Workout"
+#| msgid "Atualizar Treino"
+msgid "Atualizar treino"
+msgstr "Update workout"
 
-msgid "Selecionar Template de Treino"
-msgstr "Select Workout Template"
+#| msgid "Selecionar Template de Treino"
+msgid "Selecionar template de treino"
+msgstr "Select workout template"
 
 msgid "Buscar template..."
 msgstr "Search template..."
 
-msgid "Adicionar Exercício"
-msgstr "Add Exercise"
+#| msgid "Adicionar Exercício"
+msgid "Adicionar exercício"
+msgstr "Add exercise"
 
 msgid "Buscar exercício..."
 msgstr "Search exercise..."
@@ -5670,8 +5712,9 @@ msgstr "Setup"
 msgid "Descanso (s)"
 msgstr "Rest (s)"
 
-msgid "Adicionar ao Treino"
-msgstr "Add to Workout"
+#| msgid "Adicionar ao Treino"
+msgid "Adicionar ao treino"
+msgstr "Add to workout"
 
 msgid "exercícios"
 msgstr "exercises"
@@ -5680,21 +5723,25 @@ msgstr "exercises"
 msgid "Progresso - %(routine_name)s - %(brand_name)s"
 msgstr "Progress - %(routine_name)s - %(brand_name)s"
 
-msgid "Progresso do Treino"
-msgstr "Workout Progress"
+#| msgid "Progresso do Treino"
+msgid "Progresso do treino"
+msgstr "Workout progress"
 
 msgid "Aluno:"
 msgstr "Student:"
 
-msgid "Detalhes do Treino"
-msgstr "Workout Details"
+#| msgid "Detalhes do Treino"
+msgid "Detalhes do treino"
+msgstr "Workout details"
 
 msgid "Dificuldade:"
 msgstr "Difficulty:"
 
 #, python-format
-msgid "<strong>Duração Estimada:</strong> %(estimated_duration)s minutos"
-msgstr "<strong>Estimated Duration:</strong> %(estimated_duration)s minutes"
+#| msgid ""
+#| "<strong>Duração Estimada:</strong> %(estimated_duration)s minutos"
+msgid "<strong>Duração estimada:</strong> %(estimated_duration)s minutos"
+msgstr "<strong>Estimated duration:</strong> %(estimated_duration)s minutes"
 
 #, python-format
 msgid "<strong>Descrição:</strong> %(description)s"
@@ -5719,23 +5766,29 @@ msgstr "Exercises (%(count)s)"
 msgid "+ %(count)s mais..."
 msgstr "+ %(count)s more..."
 
-msgid "Sessões Concluídas"
-msgstr "Completed Sessions"
+#| msgid "Sessões Concluídas"
+msgid "Sessões concluídas"
+msgstr "Completed sessions"
 
-msgid "Último Mês"
-msgstr "Last Month"
+#| msgid "Último Mês"
+msgid "Último mês"
+msgstr "Last month"
 
-msgid "Duração Média (min)"
-msgstr "Average Duration (min)"
+#| msgid "Duração Média (min)"
+msgid "Duração média (min)"
+msgstr "Average duration (min)"
 
-msgid "Taxa de Conclusão"
-msgstr "Completion Rate"
+#| msgid "Taxa de Conclusão"
+msgid "Taxa de conclusão"
+msgstr "Completion rate"
 
-msgid "Evolução do Treino"
-msgstr "Workout Progress"
+#| msgid "Evolução do Treino"
+msgid "Evolução do treino"
+msgstr "Workout progress"
 
-msgid "Histórico de Sessões"
-msgstr "Session History"
+#| msgid "Histórico de Sessões"
+msgid "Histórico de sessões"
+msgstr "Session history"
 
 #, python-format
 msgid "%(count)s sessões"
@@ -6196,33 +6249,36 @@ msgstr ""
 msgid "%(routine_name)s - Detalhes"
 msgstr "%(routine_name)s - Details"
 
-msgid "Total Alunos"
-msgstr "Total Students"
+#| msgid "Total Alunos"
+msgid "Total alunos"
+msgstr "Total students"
 
-msgid "Alunos Ativos"
-msgstr "Active Students"
-
-msgid "Total Treinos"
-msgstr "Total Workouts"
+#| msgid "Total Treinos"
+msgid "Total treinos"
+msgstr "Total workouts"
 
 msgid "Completados"
 msgstr "Completed"
 
-msgid "Duração Média"
-msgstr "Average Duration"
+#| msgid "Duração Média"
+msgid "Duração média"
+msgstr "Average duration"
 
 #, python-format
 msgid "%(avg_duration)s<small class=\"text-muted\">min</small>"
 msgstr "%(avg_duration)s<small class=\"text-muted\">min</small>"
 
-msgid "Informações da Rotina"
-msgstr "Routine Information"
+#| msgid "Informações da Rotina"
+msgid "Informações da rotina"
+msgstr "Routine information"
 
-msgid "Nível de Dificuldade:"
-msgstr "Difficulty Level:"
+#| msgid "Nível de Dificuldade:"
+msgid "Nível de dificuldade:"
+msgstr "Difficulty level:"
 
-msgid "Duração Estimada:"
-msgstr "Estimated Duration:"
+#| msgid "Duração Estimada:"
+msgid "Duração estimada:"
+msgstr "Estimated duration:"
 
 #, python-format
 msgid "%(estimated_duration)s minutos"
@@ -6240,8 +6296,9 @@ msgstr "Rest"
 msgid "Nenhum exercício cadastrado nesta rotina."
 msgstr "No exercises registered in this routine."
 
-msgid "Análise de Desempenho"
-msgstr "Performance Analysis"
+#| msgid "Análise de Desempenho"
+msgid "Análise de desempenho"
+msgstr "Performance analysis"
 
 #, python-format
 msgid "%(completed_sessions)s de %(total_sessions)s treinos"
@@ -6293,7 +6350,8 @@ msgstr "Active"
 msgid "Inativa"
 msgstr "Inactive"
 
-msgid "ID da Rotina:"
+#| msgid "ID da Rotina:"
+msgid "ID da rotina:"
 msgstr "Routine ID:"
 
 msgid "Criado em:"
@@ -6302,17 +6360,20 @@ msgstr "Created on:"
 msgid "Atualizado em:"
 msgstr "Updated on:"
 
-msgid "Ações Rápidas"
-msgstr "Quick Actions"
+#| msgid "Ações Rápidas"
+msgid "Ações rápidas"
+msgstr "Quick actions"
 
-msgid "Editar Rotina"
-msgstr "Edit Routine"
+#| msgid "Editar Rotina"
+msgid "Editar rotina"
+msgstr "Edit routine"
 
 msgid "Editar no Admin"
 msgstr "Edit in Admin"
 
-msgid "Nome do Treino *"
-msgstr "Workout Name *"
+#| msgid "Nome do Treino *"
+msgid "Nome do treino *"
+msgstr "Workout name *"
 
 msgid "Ex: Treino de Peito e Tríceps"
 msgstr "E.g., Chest and Triceps Workout"
@@ -6320,38 +6381,46 @@ msgstr "E.g., Chest and Triceps Workout"
 msgid "Breve descrição do treino e objetivos..."
 msgstr "Brief description of the workout and goals..."
 
-msgid "Nível de Dificuldade *"
-msgstr "Difficulty Level *"
+#| msgid "Nível de Dificuldade *"
+msgid "Nível de dificuldade *"
+msgstr "Difficulty level *"
 
-msgid "Duração Estimada (min) *"
-msgstr "Estimated Duration (min) *"
+#| msgid "Duração Estimada (min) *"
+msgid "Duração estimada (min) *"
+msgstr "Estimated duration (min) *"
 
 msgid "Treino ativo (disponível para uso)"
 msgstr "Active workout (available for use)"
 
-msgid "Adicionar Exercícios"
-msgstr "Add Exercises"
+#| msgid "Adicionar Exercícios"
+msgid "Adicionar exercícios"
+msgstr "Add exercises"
 
 msgid "Nenhum exercício adicionado."
 msgstr "No exercises added."
 
-msgid "Clique em \"Adicionar Exercícios\" para começar."
-msgstr "Click \"Add Exercises\" to get started."
+#| msgid "Clique em \"Adicionar Exercícios\" para começar."
+msgid "Clique em \"Adicionar exercícios\" para começar."
+msgstr "Click \"Add exercises\" to get started."
 
-msgid "Resumo do Treino"
-msgstr "Workout Summary"
+#| msgid "Resumo do Treino"
+msgid "Resumo do treino"
+msgstr "Workout summary"
 
-msgid "Total de Exercícios"
-msgstr "Total Exercises"
+#| msgid "Total de Exercícios"
+msgid "Total de exercícios"
+msgstr "Total exercises"
 
-msgid "Duração Estimada"
-msgstr "Estimated Duration"
+#| msgid "Duração Estimada"
+msgid "Duração estimada"
+msgstr "Estimated duration"
 
 msgid "0 minutos"
 msgstr "0 minutes"
 
-msgid "Salvar Treino"
-msgstr "Save Workout"
+#| msgid "Salvar Treino"
+msgid "Salvar treino"
+msgstr "Save workout"
 
 msgid "Dicas"
 msgstr "Tips"
@@ -6371,8 +6440,9 @@ msgstr "Group exercises by muscle group"
 msgid "Configure descanso adequado entre séries"
 msgstr "Set adequate rest between sets"
 
-msgid "Selecionar Exercícios"
-msgstr "Select Exercises"
+#| msgid "Selecionar Exercícios"
+msgid "Selecionar exercícios"
+msgstr "Select exercises"
 
 msgid "Pesquisar exercício..."
 msgstr "Search exercise..."
@@ -6386,11 +6456,12 @@ msgstr "Loading..."
 msgid "Carregando exercícios..."
 msgstr "Loading exercises..."
 
-msgid "Confirmar Seleção ("
-msgstr "Confirm Selection ("
+#| msgid "Confirmar Seleção ("
+msgid "Confirmar seleção ("
+msgstr "Confirm selection ("
 
-msgid "Editar Parâmetros"
-msgstr "Edit Parameters"
+msgid "Editar parâmetros"
+msgstr "Edit parameters"
 
 msgid "Descanso (segundos)"
 msgstr "Rest (seconds)"
@@ -6406,9 +6477,6 @@ msgstr "sets"
 
 msgid "reps"
 msgstr "reps"
-
-msgid "Editar parâmetros"
-msgstr "Edit parameters"
 
 msgid "Remover exercício"
 msgstr "Remove exercise"
@@ -6494,11 +6562,13 @@ msgid "Ver todos os %(total)s em %(label)s"
 msgstr "View all %(total)s in %(label)s"
 
 #, python-format
-msgid "Detalhes da Sessão - %(routine_name)s"
-msgstr "Session Details - %(routine_name)s"
+#| msgid "Detalhes da Sessão - %(routine_name)s"
+msgid "Detalhes da sessão - %(routine_name)s"
+msgstr "Session details - %(routine_name)s"
 
-msgid "Detalhes da Sessão"
-msgstr "Session Details"
+#| msgid "Detalhes da Sessão"
+msgid "Detalhes da sessão"
+msgstr "Session details"
 
 msgid "Abrir a ficha do aluno"
 msgstr "Open the student's profile"
@@ -6506,8 +6576,9 @@ msgstr "Open the student's profile"
 msgid "Ver progresso deste treino"
 msgstr "View progress for this workout"
 
-msgid "Informações da Sessão"
-msgstr "Session Information"
+#| msgid "Informações da Sessão"
+msgid "Informações da sessão"
+msgstr "Session information"
 
 msgid "Data:"
 msgstr "Date:"
@@ -7315,8 +7386,9 @@ msgstr "More actions"
 msgid "Excluir aluno"
 msgstr "Delete student"
 
-msgid "Sessões Completadas"
-msgstr "Completed Sessions"
+#| msgid "Sessões Completadas"
+msgid "Sessões completadas"
+msgstr "Completed sessions"
 
 msgid "Sessões"
 msgstr "Sessions"
@@ -7331,8 +7403,9 @@ msgstr "30 days"
 msgid "%(avg_duration)s<small class=\"fs-6\">min</small>"
 msgstr "%(avg_duration)s<small class=\"fs-6\">min</small>"
 
-msgid "Última Sessão"
-msgstr "Last Session"
+#| msgid "Última Sessão"
+msgid "Última sessão"
+msgstr "Last session"
 
 msgid "Última"
 msgstr "Last"
@@ -7360,8 +7433,9 @@ msgstr "Profile"
 msgid "Anotações"
 msgstr "Notes"
 
-msgid "Treinos Ativos"
-msgstr "Active Workouts"
+#| msgid "Treinos Ativos"
+msgid "Treinos ativos"
+msgstr "Active workouts"
 
 #, python-format
 msgid "Iniciado em: %(routine_date)s"
@@ -7395,17 +7469,20 @@ msgstr "No active workouts."
 msgid "Clique aqui para adicionar um treino."
 msgstr "Click here to add a workout."
 
-msgid "Treinos Anteriores"
-msgstr "Previous Workouts"
+#| msgid "Treinos Anteriores"
+msgid "Treinos anteriores"
+msgstr "Previous workouts"
 
-msgid "Ver Histórico Completo"
-msgstr "View Full History"
+#| msgid "Ver Histórico Completo"
+msgid "Ver histórico completo"
+msgstr "View full history"
 
 msgid "Nenhum treino anterior registrado."
 msgstr "No previous workouts recorded."
 
-msgid "Confirmar Remoção"
-msgstr "Confirm Removal"
+#| msgid "Confirmar Remoção"
+msgid "Confirmar remoção"
+msgstr "Confirm removal"
 
 #, python-format
 msgid ""
@@ -7424,8 +7501,9 @@ msgstr ""
 "The workout will be moved to the previous workouts history and will no "
 "longer be shown as active."
 
-msgid "Sim, Remover"
-msgstr "Yes, Remove"
+#| msgid "Sim, Remover"
+msgid "Sim, remover"
+msgstr "Yes, remove"
 
 msgid "Ocultar"
 msgstr "Hide"
@@ -7433,17 +7511,24 @@ msgstr "Hide"
 msgid "Possível cadastro duplicado"
 msgstr "Possible duplicate record"
 
-msgid "Escolher Foto"
-msgstr "Choose Photo"
+#| msgid "Foto de Perfil"
+msgid "Foto de perfil"
+msgstr "Profile photo"
+
+#| msgid "Escolher Foto"
+msgid "Escolher foto"
+msgstr "Choose photo"
 
 msgid "JPG, PNG, GIF, WEBP | Máx: 5MB | 100x100 até 2000x2000px"
 msgstr "JPG, PNG, GIF, WEBP | Max: 5MB | 100x100 to 2000x2000px"
 
-msgid "Informações Pessoais"
-msgstr "Personal Information"
+#| msgid "Informações Pessoais"
+msgid "Informações pessoais"
+msgstr "Personal information"
 
-msgid "Nome Completo *"
-msgstr "Full Name *"
+#| msgid "Nome Completo *"
+msgid "Nome completo *"
+msgstr "Full name *"
 
 msgid ""
 "Com o app, o aluno entra com login para ver treino, agenda e pacote. Sem "
@@ -7468,6 +7553,10 @@ msgstr "Used for login. You get an access link to send to the student"
 
 msgid "Opcional para quem não usa o app."
 msgstr "Optional for students who do not use the app."
+
+#| msgid "Data de Nascimento"
+msgid "Data de nascimento"
+msgstr "Date of birth"
 
 msgid "Rua, número, complemento"
 msgstr "Street, number, unit"
@@ -7524,12 +7613,16 @@ msgstr "Status: <strong>%(get_status_display)s</strong> —"
 msgid "alterar situação"
 msgstr "change status"
 
-msgid "Salvar Aluno"
-msgstr "Save Student"
+#| msgid "Salvar Aluno"
+msgid "Salvar aluno"
+msgstr "Save student"
 
 #, python-format
+#| msgid ""
+#| "<small class=\"text-muted d-block\">ID do Aluno</small> "
+#| "<strong>#%(pk)s</strong>"
 msgid ""
-"<small class=\"text-muted d-block\">ID do Aluno</small> "
+"<small class=\"text-muted d-block\">ID do aluno</small> "
 "<strong>#%(pk)s</strong>"
 msgstr ""
 "<small class=\"text-muted d-block\">Student ID</small> "
@@ -7573,20 +7666,21 @@ msgid "Mantenha os dados atualizados para melhor acompanhamento"
 msgstr "Keep your data up to date for better tracking"
 
 #, python-format
-msgid "Histórico e Progresso de %(person_name)s - %(brand_name)s"
-msgstr "%(person_name)s's History and Progress - %(brand_name)s"
+#| msgid "Histórico e Progresso de %(person_name)s - %(brand_name)s"
+msgid "Histórico e progresso de %(person_name)s - %(brand_name)s"
+msgstr "%(person_name)s's history and progress - %(brand_name)s"
 
-msgid "Histórico e Progresso"
-msgstr "History and Progress"
+#| msgid "Histórico e Progresso"
+msgid "Histórico e progresso"
+msgstr "History and progress"
 
-msgid "Treinos no Último Mês"
-msgstr "Workouts in the Last Month"
+#| msgid "Treinos no Último Mês"
+msgid "Treinos no último mês"
+msgstr "Workouts in the last month"
 
-msgid "Média Semanal (3m)"
-msgstr "Weekly Average (3m)"
-
-msgid "Total de treinos"
-msgstr "Total workouts"
+#| msgid "Média Semanal (3m)"
+msgid "Média semanal (3m)"
+msgstr "Weekly average (3m)"
 
 #, python-format
 msgid "%(active_routines)s Ativos"
@@ -7598,11 +7692,13 @@ msgstr "m/d/Y - g:i A"
 msgid "Nenhuma sessão concluída ainda"
 msgstr "No completed sessions yet"
 
-msgid "Treinos Mais Realizados"
-msgstr "Most Completed Workouts"
+#| msgid "Treinos Mais Realizados"
+msgid "Treinos mais realizados"
+msgstr "Most completed workouts"
 
-msgid "Evolução dos Treinos"
-msgstr "Workouts Progress"
+#| msgid "Evolução dos Treinos"
+msgid "Evolução dos treinos"
+msgstr "Workouts progress"
 
 msgid "Detalhes"
 msgstr "Details"
@@ -7671,8 +7767,6 @@ msgid "Nome, e-mail, telefone ou #ID..."
 msgstr "Name, email, phone or #ID..."
 
 #, python-format
-#| msgid "<strong>%(count)s</strong> treino encontrado"
-#| msgid_plural "<strong>%(count)s</strong> treinos encontrados"
 msgid "<strong>%(count)s</strong> aluno encontrado"
 msgid_plural "<strong>%(count)s</strong> alunos encontrados"
 msgstr[0] "<strong>%(count)s</strong> student found"
@@ -7703,7 +7797,6 @@ msgstr[1] "%(total_workouts)s workouts · last one %(last_workout_at)s ago"
 msgid "Nenhum treino ainda"
 msgstr "No workouts yet"
 
-#| msgid "Nenhum treino com esses filtros."
 msgid "Nenhum aluno com esses filtros."
 msgstr "No students match these filters."
 
@@ -8189,8 +8282,9 @@ msgstr "How was the workout?"
 msgid "Cansaço, dores, o que mudou... (a personal vai ler)"
 msgstr "Fatigue, soreness, what changed... (the trainer will read this)"
 
-msgid "Finalizar Treino"
-msgstr "Finish Workout"
+#| msgid "Finalizar Treino"
+msgid "Finalizar treino"
+msgstr "Finish workout"
 
 msgid "Descartar este treino? Nada do que foi feito nele será guardado."
 msgstr "Discard this workout? Nothing done in it will be saved."

@@ -295,4 +295,4 @@ class DashboardTests(BaseTestCase):
         self.assertNotContains(anon, 'Alunos ativos')  # no numbers for visitors
         self.assertNotContains(anon, reverse('account_signup'))
         self.login(self.alice)
-        self.assertContains(self.client.get(reverse('core:home')), 'Meus Treinos')
+        self.assertContains(self.client.get(reverse('core:home')), 'Meus treinos')

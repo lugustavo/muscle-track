@@ -7,10 +7,17 @@
 {% block title %}{% blocktrans trimmed %}{{ title }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-activity"></i> {{ title }}</h1>
-    {% if form.instance.pk %}{% url 'core:exercise_detail' form.instance.pk as back_default %}{% else %}{% url 'core:exercise_list' as back_default %}{% endif %}
-    {% back_button back_default %}
+<div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-activity" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{{ title }}</h1>
+        </div>
+    </div>
+    <div class="ui-actions">
+        {% if form.instance.pk %}{% url 'core:exercise_detail' form.instance.pk as back_default %}{% else %}{% url 'core:exercise_list' as back_default %}{% endif %}
+        {% back_button back_default %}
+    </div>
 </div>
 
 <div class="row">
@@ -21,13 +28,13 @@
             <!-- Informações Básicas -->
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> {% trans "Informações Básicas" %}</h5>
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> {% trans "Informações básicas" %}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-8 mb-3">
                             <label for="{{ form.exercise_name.id_for_label }}" class="form-label fw-bold">
-                                <i class="bi bi-tag"></i> {% trans "Nome do Exercício *" %}
+                                <i class="bi bi-tag"></i> {% trans "Nome do exercício *" %}
                             </label>
                             <input type="text"
                                    name="{{ form.exercise_name.name }}"
@@ -43,7 +50,7 @@
 
                         <div class="col-md-4 mb-3">
                             <label for="{{ form.muscle_group.id_for_label }}" class="form-label fw-bold">
-                                <i class="bi bi-diagram-3"></i> {% trans "Grupo Muscular *" %}
+                                <i class="bi bi-diagram-3"></i> {% trans "Grupo muscular *" %}
                             </label>
                             <select name="{{ form.muscle_group.name }}"
                                     class="form-select {% if form.muscle_group.errors %}is-invalid{% endif %}"
@@ -79,7 +86,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="{{ form.default_sets.id_for_label }}" class="form-label fw-bold">
-                                <i class="bi bi-bar-chart"></i> {% trans "Séries Padrão *" %}
+                                <i class="bi bi-bar-chart"></i> {% trans "Séries padrão *" %}
                             </label>
                             <input type="number"
                                    name="{{ form.default_sets.name }}"
@@ -95,7 +102,7 @@
 
                         <div class="col-md-6 mb-3">
                             <label for="{{ form.default_reps.id_for_label }}" class="form-label fw-bold">
-                                <i class="bi bi-arrow-repeat"></i> {% trans "Repetições Padrão *" %}
+                                <i class="bi bi-arrow-repeat"></i> {% trans "Repetições padrão *" %}
                             </label>
                             <input type="number"
                                    name="{{ form.default_reps.name }}"
@@ -115,12 +122,12 @@
             <!-- Mídia -->
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-image"></i> {% trans "Mídia do Exercício" %}</h5>
+                    <h5 class="mb-0"><i class="bi bi-image"></i> {% trans "Mídia do exercício" %}</h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
                         <label for="{{ form.media_type.id_for_label }}" class="form-label fw-bold">
-                            <i class="bi bi-collection-play"></i> {% trans "Tipo de Mídia" %}
+                            <i class="bi bi-collection-play"></i> {% trans "Tipo de mídia" %}
                         </label>
                         <select name="{{ form.media_type.name }}"
                                 class="form-select {% if form.media_type.errors %}is-invalid{% endif %}"
@@ -136,7 +143,7 @@
 
                     <div class="mb-3">
                         <label for="{{ form.media_file.id_for_label }}" class="form-label fw-bold">
-                            <i class="bi bi-file-earmark-arrow-up"></i> {% trans "Arquivo de Mídia" %}
+                            <i class="bi bi-file-earmark-arrow-up"></i> {% trans "Arquivo de mídia" %}
                         </label>
                         <input type="file"
                                name="{{ form.media_file.name }}"
@@ -153,7 +160,7 @@
 
                     <div class="mb-3">
                         <label for="{{ form.media_url.id_for_label }}" class="form-label fw-bold">
-                            <i class="bi bi-link-45deg"></i> {% trans "URL da Mídia" %}
+                            <i class="bi bi-link-45deg"></i> {% trans "URL da mídia" %}
                         </label>
                         <input type="url"
                                name="{{ form.media_url.name }}"
@@ -171,7 +178,7 @@
 
                     <div class="mb-3">
                         <label for="{{ form.thumbnail.id_for_label }}" class="form-label fw-bold">
-                            <i class="bi bi-card-image"></i> {% trans "Thumbnail (Miniatura)" %}
+                            <i class="bi bi-card-image"></i> {% trans "Thumbnail (miniatura)" %}
                         </label>
                         <input type="file"
                                name="{{ form.thumbnail.name }}"
@@ -191,7 +198,7 @@
             <!-- Instruções -->
             <div class="card mb-4 border-0 shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-list-check"></i> {% trans "Instruções de Execução" %}</h5>
+                    <h5 class="mb-0"><i class="bi bi-list-check"></i> {% trans "Instruções de execução" %}</h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
@@ -224,7 +231,7 @@
             <!-- Botões de Ação -->
             <div class="d-flex gap-2 mb-4">
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i> {% trans "Salvar Exercício" %}
+                    <i class="bi bi-check-circle"></i> {% trans "Salvar exercício" %}
                 </button>
                 {% back_button back_default label=_('Cancelar') css='btn btn-outline-secondary' icon='bi-x-circle' %}
             </div>
@@ -236,7 +243,7 @@
         <!-- Preview da Mídia -->
         <div class="card mb-4 border-0 shadow-sm">
             <div class="card-header bg-body">
-                <h6 class="mb-0"><i class="bi bi-eye"></i> {% trans "Preview da Mídia" %}</h6>
+                <h6 class="mb-0"><i class="bi bi-eye"></i> {% trans "Preview da mídia" %}</h6>
             </div>
             <div class="card-body">
                 <div id="mediaPreview" class="text-center">
@@ -264,12 +271,12 @@
         {% if form.instance.pk %}
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-body">
-                <h6 class="mb-0"><i class="bi bi-info-circle"></i> {% trans "Informações do Registro" %}</h6>
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> {% trans "Informações do registro" %}</h6>
             </div>
             <div class="card-body">
                 <ul class="list-unstyled mb-0">
                     <li class="mb-2">
-                        {% blocktrans trimmed with pk=form.instance.pk %}<small class="text-muted d-block">ID do Exercício</small>
+                        {% blocktrans trimmed with pk=form.instance.pk %}<small class="text-muted d-block">ID do exercício</small>
                         <strong>#{{ pk }}</strong>{% endblocktrans %}
                     </li>
                     <li class="mb-2">

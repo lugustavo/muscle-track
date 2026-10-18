@@ -6,13 +6,18 @@
 
 {% block content %}
 <div class="mx-auto" style="max-width: 760px;">
-    <div class="d-flex justify-content-between align-items-start mb-3 gap-2">
-        <div>
-            <h1 class="h3 mb-1"><i class="bi bi-person-bounding-box"></i> {% trans "Posições das fotos" %}</h1>
-            <p class="text-muted small mb-0">{% trans "A sequência de fotos que cada avaliação pede, na ordem em que aparece. Desativar uma posição a tira das avaliações novas; as fotos dela ficam guardadas como extras." %}</p>
+    <div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-person-bounding-box" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{% trans "Posições das fotos" %}</h1>
+            <p class="ui-sub text-break">{% trans "A sequência de fotos que cada avaliação pede, na ordem em que aparece. Desativar uma posição a tira das avaliações novas; as fotos dela ficam guardadas como extras." %}</p>
         </div>
+    </div>
+    <div class="ui-actions">
         {% back_button back_default %}
     </div>
+</div>
 
     <div class="card mb-3">
         <ul class="list-group list-group-flush" data-position-list>

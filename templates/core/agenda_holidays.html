@@ -5,12 +5,17 @@
 {% block title %}{% blocktrans trimmed %}Feriados - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-start gap-2 mb-3">
-    <div class="min-w-0">
-        <h1 class="h3 mb-1"><i class="bi bi-flag"></i> {% trans "Feriados" %}</h1>
-        <p class="text-muted mb-0">{% trans "Ao preencher a agenda de um pacote, os dias abaixo ficam sem aula e a próxima data entra no lugar. Na prévia você ainda pode marcar um feriado para dar aula mesmo assim." %}</p>
+<div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-flag" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{% trans "Feriados" %}</h1>
+            <p class="ui-sub text-break">{% trans "Ao preencher a agenda de um pacote, os dias abaixo ficam sem aula e a próxima data entra no lugar. Na prévia você ainda pode marcar um feriado para dar aula mesmo assim." %}</p>
+        </div>
     </div>
-    {% url 'core:agenda' as back_default %}{% back_button back_default %}
+    <div class="ui-actions">
+        {% url 'core:agenda' as back_default %}{% back_button back_default %}
+    </div>
 </div>
 
 <div class="row g-4">

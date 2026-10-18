@@ -9,12 +9,17 @@
 <div class="alert alert-warning"><i class="bi bi-shield-exclamation"></i> {% blocktrans trimmed with person_name=student.person_name %}{{ person_name }} ainda não autorizou as fotos de evolução.
     Registre o consentimento na aba <em>Histórico</em> da ficha antes de guardar fotos.{% endblocktrans %}</div>
 {% endif %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h2"><i class="bi bi-camera"></i> {% trans "Adicionar foto" %}</h1>
-        <div class="text-muted">{{ student.person_name }}</div>
+<div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-camera" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{% trans "Adicionar foto" %}</h1>
+            <p class="ui-sub text-break">{{ student.person_name }}</p>
+        </div>
     </div>
-    {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default fragment='#tab-avaliacoes' %}
+    <div class="ui-actions">
+        {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default fragment='#tab-avaliacoes' %}
+    </div>
 </div>
 
 <form method="post" enctype="multipart/form-data" class="row" data-photo-form>

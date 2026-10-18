@@ -5,12 +5,17 @@
 {% block title %}{% blocktrans trimmed with person_name=student.person_name %}Cancelar pacote - {{ person_name }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3 gap-2">
-    <div class="min-w-0">
-        <h1 class="h3 mb-0"><i class="bi bi-x-octagon"></i> {% trans "Cancelar pacote" %}</h1>
-        <div class="text-muted text-break">{{ student.person_name }} · {{ package.name }}</div>
+<div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-x-octagon" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{% trans "Cancelar pacote" %}</h1>
+            <p class="ui-sub text-break">{{ student.person_name }} · {{ package.name }}</p>
+        </div>
     </div>
-    {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default fragment='#tab-ficha' %}
+    <div class="ui-actions">
+        {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default fragment='#tab-ficha' %}
+    </div>
 </div>
 
 <div class="mx-auto" style="max-width: 640px;">

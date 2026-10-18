@@ -3,15 +3,20 @@
 {% load static %}
 {% load navigation %}
 
-{% block title %}{% blocktrans trimmed with person_name=student.person_name %}Histórico e Progresso de {{ person_name }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
+{% block title %}{% blocktrans trimmed with person_name=student.person_name %}Histórico e progresso de {{ person_name }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1><i class="bi bi-graph-up"></i> {% trans "Histórico e Progresso" %}</h1>
-        <p class="text-muted mb-0">{{ student.person_name }}</p>
+<div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-graph-up" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{% trans "Histórico e progresso" %}</h1>
+            <p class="ui-sub text-break">{{ student.person_name }}</p>
+        </div>
     </div>
-    {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default %}
+    <div class="ui-actions">
+        {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default %}
+    </div>
 </div>
 
 <!-- Estatísticas Principais -->
@@ -21,7 +26,7 @@
             <div class="card-body text-center">
                 <i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"></i>
                 <h2 class="mt-2 mb-0">{{ total_sessions }}</h2>
-                <p class="text-muted mb-0">{% trans "Sessões Concluídas" %}</p>
+                <p class="text-muted mb-0">{% trans "Sessões concluídas" %}</p>
             </div>
         </div>
     </div>
@@ -30,7 +35,7 @@
             <div class="card-body text-center">
                 <i class="bi bi-calendar-month text-primary" style="font-size: 2rem;"></i>
                 <h2 class="mt-2 mb-0">{{ sessions_last_month }}</h2>
-                <p class="text-muted mb-0">{% trans "Treinos no Último Mês" %}</p>
+                <p class="text-muted mb-0">{% trans "Treinos no último mês" %}</p>
             </div>
         </div>
     </div>
@@ -39,7 +44,7 @@
             <div class="card-body text-center">
                 <i class="bi bi-clock-history text-info" style="font-size: 2rem;"></i>
                 <h2 class="mt-2 mb-0">{{ avg_duration }}</h2>
-                <p class="text-muted mb-0">{% trans "Duração Média (min)" %}</p>
+                <p class="text-muted mb-0">{% trans "Duração média (min)" %}</p>
             </div>
         </div>
     </div>
@@ -48,7 +53,7 @@
             <div class="card-body text-center">
                 <i class="bi bi-bar-chart-fill text-warning" style="font-size: 2rem;"></i>
                 <h2 class="mt-2 mb-0">{{ avg_weekly_frequency }}</h2>
-                <p class="text-muted mb-0">{% trans "Média Semanal (3m)" %}</p>
+                <p class="text-muted mb-0">{% trans "Média semanal (3m)" %}</p>
             </div>
         </div>
     </div>
@@ -59,7 +64,7 @@
     <div class="col-md-6">
         <div class="card border-0 shadow-sm">
             <div class="card-body">
-                <h5 class="card-title"><i class="bi bi-clipboard-check"></i> {% trans "Treinos Atribuídos" %}</h5>
+                <h5 class="card-title"><i class="bi bi-clipboard-check"></i> {% trans "Treinos atribuídos" %}</h5>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h3 class="mb-0">{{ total_routines_assigned }}</h3>
@@ -75,7 +80,7 @@
     <div class="col-md-6">
         <div class="card border-0 shadow-sm">
             <div class="card-body">
-                <h5 class="card-title"><i class="bi bi-clock"></i> {% trans "Última Sessão" %}</h5>
+                <h5 class="card-title"><i class="bi bi-clock"></i> {% trans "Última sessão" %}</h5>
                 {% if last_session %}
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
@@ -100,7 +105,7 @@
 {% if sessions_by_routine %}
 <div class="card mb-4 border-0 shadow-sm">
     <div class="card-header bg-body">
-        <h5 class="mb-0"><i class="bi bi-trophy-fill text-warning"></i> {% trans "Treinos Mais Realizados" %}</h5>
+        <h5 class="mb-0"><i class="bi bi-trophy-fill text-warning"></i> {% trans "Treinos mais realizados" %}</h5>
     </div>
     <div class="card-body">
         <div class="row">
@@ -115,7 +120,7 @@
                                 <h4 class="mb-0 text-primary">{{ routine.count }}</h4>
                             </div>
                             <div class="text-end">
-                                <small class="text-muted">{% trans "Duração Média" %}</small>
+                                <small class="text-muted">{% trans "Duração média" %}</small>
                                 <h4 class="mb-0 text-info">{{ routine.avg_duration|floatformat:0|default:"0" }}m</h4>
                             </div>
                         </div>
@@ -131,7 +136,7 @@
 <!-- Gráfico de Evolução -->
 <div class="card mb-4 border-0 shadow-sm">
     <div class="card-header bg-body">
-        <h5 class="mb-0"><i class="bi bi-bar-chart-line"></i> {% trans "Evolução dos Treinos" %}</h5>
+        <h5 class="mb-0"><i class="bi bi-bar-chart-line"></i> {% trans "Evolução dos treinos" %}</h5>
     </div>
     <div class="card-body">
         <canvas id="evolutionChart" style="max-height: 300px;"></canvas>
@@ -141,7 +146,7 @@
 <!-- Histórico de Sessões -->
 <div class="card mb-4 border-0 shadow-sm">
     <div class="card-header bg-body">
-        <h5 class="mb-0"><i class="bi bi-clock-history"></i> {% trans "Histórico de Sessões" %}</h5>
+        <h5 class="mb-0"><i class="bi bi-clock-history"></i> {% trans "Histórico de sessões" %}</h5>
     </div>
     <div class="card-body">
         <div class="table-responsive">

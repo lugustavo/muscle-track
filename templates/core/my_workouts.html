@@ -2,10 +2,10 @@
 {% load i18n %}
 {% load crispy_forms_tags %}
 
-{% block title %}{% blocktrans trimmed %}Meus Treinos - {{ brand_name }}{% endblocktrans %}{% endblock %}
+{% block title %}{% blocktrans trimmed %}Meus treinos - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<h1 class="mb-4"><i class="bi bi-fire"></i> {% trans "Meus Treinos Ativos" %}</h1>
+<h1 class="mb-4"><i class="bi bi-fire"></i> {% trans "Meus treinos ativos" %}</h1>
 
 {% if routines_with_sessions %}
 <div class="row g-4">
@@ -39,13 +39,13 @@
                 </div>
                 {% if item.active_session %}
                 <a href="{% url 'core:workout_execute' item.routine.pk %}" class="btn btn-warning w-100">
-                    <i class="bi bi-arrow-clockwise"></i> {% trans "Continuar Treino" %}
+                    <i class="bi bi-arrow-clockwise"></i> {% trans "Continuar treino" %}
                 </a>
                 {% else %}
                 <form method="post" action="{% url 'core:workout_start' item.routine.pk %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-play-fill"></i> {% trans "Iniciar Treino" %}
+                        <i class="bi bi-play-fill"></i> {% trans "Iniciar treino" %}
                     </button>
                 </form>
                 {% endif %}

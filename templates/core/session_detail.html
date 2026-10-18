@@ -2,30 +2,33 @@
 {% load i18n %}
 {% load navigation %}
 
-{% block title %}{% blocktrans trimmed with routine_name=person_routine.routine_name %}Detalhes da Sessão - {{ routine_name }}{% endblocktrans %}{% endblock %}
+{% block title %}{% blocktrans trimmed with routine_name=person_routine.routine_name %}Detalhes da sessão - {{ routine_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-8 mx-auto">
-        <div class="d-flex justify-content-between align-items-start gap-2 mb-3 mb-md-4">
-            <div class="min-w-0">
-                <h1 class="h4 page-title-lg mb-1"><i class="bi bi-clipboard-data"></i> {% trans "Detalhes da Sessão" %}</h1>
-                <p class="text-muted mb-0">
-                    {% if user.is_staff or user.is_superuser %}
+        <div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-clipboard-data" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{% trans "Detalhes da sessão" %}</h1>
+            <p class="ui-sub text-break">{% if user.is_staff or user.is_superuser %}
                         <a href="{% nav_url 'core:student_detail' student.pk %}" class="text-decoration-none fw-semibold" title="{% trans "Abrir a ficha do aluno" %}"><i class="bi bi-person-circle"></i> {{ student.person_name }}</a>
                         - <a href="{% nav_url 'core:person_routine_detail' person_routine.pk %}" class="text-decoration-none text-muted" title="{% trans "Ver progresso deste treino" %}">{{ person_routine.routine_name }}</a>
                     {% else %}
                         {{ student.person_name }} - {{ person_routine.routine_name }}
-                    {% endif %}
-                </p>
-            </div>
-            {% include 'core/_back_button.html' with url=back_url label=back_label css='btn btn-secondary' icon='bi-arrow-left' compact=True %}
+                    {% endif %}</p>
         </div>
+    </div>
+    <div class="ui-actions">
+        {% include 'core/_back_button.html' with url=back_url label=back_label css='btn btn-secondary' icon='bi-arrow-left' compact=True %}
+    </div>
+</div>
 
         <!-- Session Information -->
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
-                <h3 class="h5 card-title-lg mb-0"><i class="bi bi-info-circle"></i> {% trans "Informações da Sessão" %}</h3>
+                <h3 class="h5 card-title-lg mb-0"><i class="bi bi-info-circle"></i> {% trans "Informações da sessão" %}</h3>
             </div>
             <div class="card-body">
                 <div class="row">
