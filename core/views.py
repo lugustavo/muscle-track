@@ -188,12 +188,14 @@ def _apply_student_filter(students, name):
 @staff_required
 def student_list(request):
     """List students with search, filters, statistics and pagination"""
-    search = request.GET.get('search', '')
+    search = request.GET.get('search', '').strip()
     status = request.GET.get('status', '')
+    if status not in ('active', 'inactive'):
+        status = ''
     filter_name = request.GET.get('filtro', '')
     if filter_name not in STUDENT_FILTERS:
         filter_name = ''
-    view_mode = request.GET.get('view', request.COOKIES.get('student_view_mode', 'grid'))
+    view_mode = list_view_mode(request, 'student_view_mode')
 
     students = apply_student_search(_students_queryset(), search)
     if status == 'active':
@@ -204,10 +206,7 @@ def student_list(request):
 
     page = Paginator(students, STUDENT_PAGE_SIZE).get_page(request.GET.get('page'))
 
-    # Query string that keeps search/filters when changing page or view mode
-    kept = {k: v for k, v in (('search', search), ('status', status), ('filtro', filter_name)) if v}
-    base_qs = urlencode(kept)
-
+    status_label = {'active': _('Ativos'), 'inactive': _('Inativos')}.get(status, '')
     response = render(request, 'core/student_list.html', {
         'students': page,
         'page': page,
@@ -215,16 +214,11 @@ def student_list(request):
         'selected_status': status,
         'selected_filter': filter_name,
         'filters': STUDENT_FILTERS,
-        'base_qs': base_qs,
         'view_mode': view_mode,
+        'tags': filter_tags(search, filtro=STUDENT_FILTERS.get(filter_name, ''), status=status_label),
         'active_filters': bool(status) + bool(filter_name),
     })
-
-    # Salvar view_mode no cookie
-    if 'view' in request.GET:
-        response.set_cookie('student_view_mode', view_mode, max_age=31536000)
-
-    return response
+    return remember_view(request, response, 'student_view_mode', view_mode)
 
 
 @staff_required

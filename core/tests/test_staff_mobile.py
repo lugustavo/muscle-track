@@ -163,10 +163,10 @@ class StudentListMobileTests(BaseTestCase):
         self.login(self.trainer)
         self.url = reverse('core:student_list')
 
-    def test_rows_and_filter_sheet(self):
+    def test_rows_and_filters(self):
         response = self.client.get(self.url)
         self.assertContains(response, 'data-student-rows')
-        self.assertContains(response, 'id="filterSheet"')
+        self.assertContains(response, 'data-student-filters')
         html = response.content.decode()
         rows = html[html.index('data-student-rows'):html.index('<!-- Grid View -->')]
         self.assertIn('Alice', rows)
@@ -175,12 +175,12 @@ class StudentListMobileTests(BaseTestCase):
 
     def test_active_filter_count(self):
         self.assertEqual(self.client.get(self.url).context['active_filters'], 0)
-        self.assertNotContains(self.client.get(self.url), 'data-filter-count')
+        self.assertNotContains(self.client.get(self.url), 'data-active-filters')
         response = self.client.get(self.url, {'status': 'active', 'filtro': 'trial', 'search': 'ali'})
         self.assertEqual(response.context['active_filters'], 2)   # the search box is not a "filter"
-        self.assertContains(response, 'data-filter-count')
+        self.assertContains(response, 'data-active-filters')
 
-    def test_filters_still_apply_and_are_kept_in_the_sheet(self):
+    def test_filters_still_apply_and_are_kept_in_the_form(self):
         response = self.client.get(self.url, {'search': 'alice'})
         self.assertEqual([s.person_name for s in response.context['students']], ['Alice'])
         self.assertContains(response, 'name="search" value="alice"')

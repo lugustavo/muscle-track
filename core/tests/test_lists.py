@@ -163,3 +163,48 @@ class ToolbarMarkupTests(ListBase):
             html = page_text(self.client.get(reverse(name)))
             for marker in ('data-list-filters', 'data-list-region', 'class="ui-head"', 'name="search"', 'list-filters.js'):
                 self.assertIn(marker, html, f'{name}: {marker}')
+
+
+class StudentListTests(ListBase):
+    url = property(lambda self: reverse('core:student_list'))
+
+    def test_same_toolbar_and_toggle_position(self):
+        html = page_text(self.client.get(self.url))
+        for marker in ('data-list-filters', 'data-list-region', 'class="ui-head"', 'list-filters.js', 'name="filtro"'):
+            self.assertIn(marker, html)
+        self.assertEqual(html.count('data-view-toggle'), 1)
+        self.assertLess(html.index('data-count'), html.index('data-view-toggle'))
+        self.assertNotIn('data-view-toggle', html[html.index('class="ui-toolbar"'):html.index('</form>')])
+
+    def test_chips_cover_every_situation(self):
+        html = page_text(self.client.get(self.url))
+        from core.views import STUDENT_FILTERS
+        self.assertEqual(html.count('name="filtro"'), len(STUDENT_FILTERS) + 1)
+
+    def test_status_and_filter_tags(self):
+        page = self.client.get(self.url, {'status': 'active', 'filtro': 'no_app', 'view': 'list'})
+        self.assertEqual(len(page.context['tags']), 2)
+        self.assertEqual(page.cookies['student_view_mode'].value, 'list')
+        self.assertEqual(self.client.get(self.url, {'status': 'weird'}).context['selected_status'], '')
+
+    def test_pagination_link_keeps_filters_and_drops_nothing_else(self):
+        for i in range(30):
+            self._make_student(f'many{i}', f'Many {i}')
+        page = self.client.get(self.url, {'search': 'Many', 'view': 'grid'})
+        self.assertContains(page, '?search=Many&amp;view=grid&amp;page=2')
+
+
+class FinanceAndAgendaTests(ListBase):
+    def test_pages_share_the_header_and_period_navigator(self):
+        for name in ('core:finance', 'core:finance_refunds'):
+            html = page_text(self.client.get(reverse(name)))
+            for marker in ('class="ui-head"', 'class="ui-period"', 'data-finance-tabs', 'class="ui-tabs"'):
+                self.assertIn(marker, html, f'{name}: {marker}')
+        html = page_text(self.client.get(reverse('core:agenda')))
+        for marker in ('class="ui-head"', 'class="ui-period"', 'class="ui-seg"', 'data-agenda-views'):
+            self.assertIn(marker, html)
+
+    def test_refund_search_is_a_toolbar(self):
+        html = page_text(self.client.get(reverse('core:finance_refunds'), {'aluno': 'ali'}))
+        self.assertIn('data-list-filters', html)
+        self.assertIn('data-search name="aluno" value="ali"', html)

@@ -6,31 +6,36 @@
 {% block title %}{% blocktrans trimmed %}Financeiro - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-    <h1 class="mb-0"><i class="bi bi-cash-coin"></i> {% trans "Financeiro" %}</h1>
-    <div class="btn-group">
-        <a href="?mes={{ prev_month }}" class="btn btn-outline-secondary" title="{% trans "Mês anterior" %}"><i class="bi bi-chevron-left"></i></a>
-        <span class="btn disabled bg-body-tertiary text-body fw-bold">{{ month_label|date:_("F \d\e Y") }}</span>
-        <a href="?mes={{ next_month }}" class="btn btn-outline-secondary" title="{% trans "Próximo mês" %}"><i class="bi bi-chevron-right"></i></a>
-        {% if not is_current_month %}<a href="{% url 'core:finance' %}" class="btn btn-outline-primary">{% trans "Mês atual" %}</a>{% endif %}
+<div class="ui-head">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-cash-coin" aria-hidden="true"></i></span>
+        <div>
+            <h1>{% trans "Financeiro" %}</h1>
+            <p class="ui-sub">{% trans "Recebimentos, pacotes e devoluções do mês." %}</p>
+        </div>
+    </div>
+    <div class="ui-period" data-finance-month>
+        <a href="?mes={{ prev_month }}" class="ui-period-btn" title="{% trans "Mês anterior" %}"><i class="bi bi-chevron-left"></i><span class="visually-hidden">{% trans "Mês anterior" %}</span></a>
+        <span class="ui-period-label">{{ month_label|date:_("F \d\e Y") }}</span>
+        <a href="?mes={{ next_month }}" class="ui-period-btn" title="{% trans "Próximo mês" %}"><i class="bi bi-chevron-right"></i><span class="visually-hidden">{% trans "Próximo mês" %}</span></a>
+        {% if not is_current_month %}<a href="{% url 'core:finance' %}" class="ui-period-today">{% trans "Mês atual" %}</a>{% endif %}
     </div>
 </div>
-
 {% include 'core/_finance_tabs.html' with active='summary' month=month_value %}
 
 <div class="row g-3 mb-4">
-    <div class="col-md-4"><div class="card text-center h-100"><div class="card-body">
+    <div class="col-md-4"><div class="ui-card flat h-100 ui-stat"><div class="card-body">
         <div class="text-muted small">{% trans "Recebido no mês" %}</div>
         <div class="fs-2 fw-bold text-success">{{ summary.received|money }}</div>
         <div class="small text-muted">{% blocktrans trimmed count payments=summary.payments|length %}{{ payments }} pagamento{% plural %}{{ payments }} pagamentos{% endblocktrans %}</div>
         {% if refund_totals %}<div class="small text-muted" data-refund-line>{% blocktrans trimmed with given_back=refund_totals.given_back|money net=refund_totals.net|money %}− {{ given_back }} devolvidos · líquido <strong>{{ net }}</strong> ·{% endblocktrans %} <a href="{% url 'core:finance_refunds' %}?mes={{ month_value }}">{% trans "ver" %}</a></div>{% endif %}
     </div></div></div>
-    <div class="col-md-4"><div class="card text-center h-100"><div class="card-body">
+    <div class="col-md-4"><div class="ui-card flat h-100 ui-stat"><div class="card-body">
         <div class="text-muted small">{% trans "Pacotes vendidos no mês" %}</div>
         <div class="fs-2 fw-bold">{{ summary.sold_total|money }}</div>
         <div class="small text-muted">{% blocktrans trimmed count sold_count=summary.sold_count %}{{ sold_count }} pacote{% plural %}{{ sold_count }} pacotes{% endblocktrans %}{% if summary.sold_unpriced %} {% blocktrans trimmed with sold_unpriced=summary.sold_unpriced %}· {{ sold_unpriced }} sem valor definido{% endblocktrans %}{% endif %}</div>
     </div></div></div>
-    <div class="col-md-4"><div class="card text-center h-100 {% if pending %}border-warning{% endif %}"><div class="card-body">
+    <div class="col-md-4"><div class="ui-card flat h-100 ui-stat {% if pending %}border-warning{% endif %}"><div class="card-body">
         <div class="text-muted small">{% trans "A receber agora" %}</div>
         <div class="fs-2 fw-bold {% if pending %}text-warning-emphasis{% endif %}">{{ pending_total|money }}</div>
         <div class="small text-muted">{% blocktrans trimmed count pending=pending|length %}{{ pending }} pacote sem pagamento completo (primeira aula dada ou valor alterado){% plural %}{{ pending }} pacotes sem pagamento completo (primeira aula dada ou valor alterado){% endblocktrans %}</div>
@@ -43,7 +48,7 @@
     <a href="{% url 'core:finance_service_export' %}?mes={{ month_value }}" class="btn btn-sm btn-outline-secondary" data-service-export><i class="bi bi-filetype-csv"></i> {% trans "Exportar CSV" %}</a>
 </div>
 <div class="row g-3 mb-4" data-service-report>
-    <div class="col-md-6"><div class="card h-100">
+    <div class="col-md-6"><div class="ui-card flat h-100">
         <div class="card-body text-center">
             <div class="text-muted small">{% trans "Aulas dadas no mês (valor realizado)" %}</div>
             <div class="fs-3 fw-bold" data-given-total>{{ service.given_total|money }}</div>
@@ -53,7 +58,7 @@
             {% for r in service.given_rows %}<li class="list-group-item d-flex justify-content-between"><a href="{% nav_url 'core:student_detail' r.student.pk %}" class="text-decoration-none">{{ r.student.person_name }}</a><span class="text-muted">{% blocktrans trimmed with amount=r.amount|money count classes=r.classes %}{{ classes }} aula · {{ amount }}{% plural %}{{ classes }} aulas · {{ amount }}{% endblocktrans %}</span></li>{% endfor %}
         </ul>{% endif %}
     </div></div>
-    <div class="col-md-6"><div class="card h-100">
+    <div class="col-md-6"><div class="ui-card flat h-100">
         <div class="card-body text-center">
             <div class="text-muted small">{% trans "Aulas a executar (pacotes em aberto, hoje)" %}</div>
             <div class="fs-3 fw-bold" data-owed-total>{{ service.owed_total|money }}</div>
@@ -67,7 +72,7 @@
 
 <div class="row g-4">
     <div class="col-lg-6">
-        <div class="card mb-4">
+        <div class="ui-card flat mb-4">
             <div class="card-header"><strong><i class="bi bi-exclamation-triangle text-warning"></i> {% trans "Pagamentos pendentes" %}</strong></div>
             <div class="list-group list-group-flush" data-pending-list>
                 {% for row in pending %}
@@ -98,7 +103,7 @@
             </div>
         </div>
 
-        <div class="card mb-4">
+        <div class="ui-card flat mb-4">
             <div class="card-header"><strong><i class="bi bi-arrow-repeat text-primary"></i> {% trans "Pacotes para renovar" %}</strong></div>
             <div class="list-group list-group-flush" data-renewals-list>
                 {% for row in renewals %}
@@ -114,7 +119,7 @@
             </div>
         </div>
 
-        <div class="card">
+        <div class="ui-card flat">
             <div class="card-header"><strong>{% trans "Por forma de pagamento" %}</strong></div>
             <ul class="list-group list-group-flush">
                 {% for m in summary.by_method %}
@@ -127,7 +132,7 @@
     </div>
 
     <div class="col-lg-6">
-        <div class="card">
+        <div class="ui-card flat">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <strong>{% trans "Pagamentos do mês" %}</strong>
                 <a href="{% url 'core:finance_export' %}?mes={{ month_value }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-filetype-csv"></i> {% trans "Exportar CSV" %}</a>

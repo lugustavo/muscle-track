@@ -6,7 +6,7 @@
     var region = document.querySelector('[data-list-region]');
     if (!form || !region || !window.fetch || !window.URLSearchParams) return;
 
-    var search = form.querySelector('input[name="search"]');
+    var search = form.querySelector('input[data-search]');
     var timer = null;
     var controller = null;
 

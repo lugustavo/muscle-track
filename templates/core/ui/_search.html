@@ -1,6 +1,6 @@
 {% load i18n %}
 <div class="ui-search">
     <i class="bi bi-search" aria-hidden="true"></i>
-    <input type="search" class="form-control" name="search" value="{{ search }}" placeholder="{{ placeholder }}" aria-label="{{ placeholder }}" autocomplete="off" enterkeyhint="search">
+    <input type="search" class="form-control" data-search name="{{ field|default:'search' }}" value="{{ search }}" placeholder="{{ placeholder }}" aria-label="{{ placeholder }}" autocomplete="off" enterkeyhint="search">
     <button type="button" class="ui-search-clear" data-search-clear aria-label="{% trans "Limpar busca" %}"><i class="bi bi-x-lg"></i></button>
 </div>
