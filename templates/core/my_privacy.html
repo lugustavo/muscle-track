@@ -29,7 +29,7 @@
                         <button class="btn btn-sm {% if granted %}btn-outline-danger{% else %}btn-outline-success{% endif %}">{% if granted %}{% trans "Retirar" %}{% else %}{% trans "Autorizar" %}{% endif %}</button>
                     </form>
                     {% else %}
-                    <span class="badge {% if granted %}bg-success{% else %}bg-warning text-dark{% endif %}">{% if granted %}{% trans "ok" %}{% else %}{% trans "pendente" %}{% endif %}</span>
+                    <span class="ui-badge {% if granted %}ok{% else %}warn{% endif %}">{% if granted %}{% trans "ok" %}{% else %}{% trans "pendente" %}{% endif %}</span>
                     {% endif %}
                 </li>
                 {% endfor %}

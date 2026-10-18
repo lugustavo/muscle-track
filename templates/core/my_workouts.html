@@ -18,10 +18,10 @@
 <div class="row g-4">
     {% for item in routines_with_sessions %}
     <div class="col-md-6 col-lg-4">
-        <div class="card exercise-card {% if item.active_session %}border-warning{% elif item.suggested %}border-primary border-2{% endif %}">
+        <div class="card exercise-card {% if item.active_session %}ui-tone warn{% elif item.suggested %}ui-tone{% endif %}">
             <div class="card-body">
                 {% if item.suggested and not item.active_session %}
-                <span class="badge bg-primary mb-2"><i class="bi bi-star-fill"></i> {% trans "Treino de hoje" %}</span>
+                <span class="ui-badge brand mb-2"><i class="bi bi-star-fill" aria-hidden="true"></i> {% trans "Treino de hoje" %}</span>
                 {% endif %}
                 {% if item.last_done and not item.active_session %}
                 <div class="text-muted small mb-2"><i class="bi bi-calendar-check"></i> {% blocktrans trimmed with last_done=item.last_done|date:_('d/m') %}Último: {{ last_done }}{% endblocktrans %}</div>
@@ -35,13 +35,13 @@
                 {% endif %}
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <h5 class="card-title mb-0">{{ item.routine.routine_name }}</h5>
-                    <a href="#" class="text-primary" title="{% trans "Ver exercícios" %}" data-bs-toggle="modal" data-bs-target="#exercisesModal{{ item.routine.pk }}">
+                    <a href="#" class="text-brand" title="{% trans "Ver exercícios" %}" data-bs-toggle="modal" data-bs-target="#exercisesModal{{ item.routine.pk }}">
                         <i class="bi bi-list-ul"></i>
                     </a>
                 </div>
                 <p class="card-text">{{ item.routine.description|truncatewords:20 }}</p>
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="badge bg-info">{{ item.routine.get_difficulty_level_display }}</span>
+                    <span class="ui-badge {% if item.routine.difficulty_level == 'iniciante' %}ok{% elif item.routine.difficulty_level == 'intermediario' %}warn{% else %}bad{% endif %}">{{ item.routine.get_difficulty_level_display }}</span>
                     <span class="text-muted"><i class="bi bi-clock"></i> {% blocktrans trimmed with estimated_duration=item.routine.estimated_duration %}{{ estimated_duration }} min{% endblocktrans %}</span>
                 </div>
                 {% if item.active_session %}

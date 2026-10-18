@@ -11,14 +11,19 @@
     <link href="{% static 'vendor/bootstrap/5.3.0/bootstrap.min.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/1.11.0/bootstrap-icons.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ui.css' %}">
     <style>
         .sheet-ex { break-inside: avoid; }
-        .sheet-ex .num { width: 2rem; height: 2rem; border-radius: 50%; background: var(--primary-color); color: var(--bs-white); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; flex: 0 0 auto; }
+        .sheet-ex .num { width: 2.1rem; height: 2.1rem; border-radius: .7rem; background: linear-gradient(135deg, var(--primary-color), var(--ui-violet)); color: var(--bs-white); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; flex: 0 0 auto; }
         .sheet-ex img { width: 72px; height: 72px; object-fit: cover; }
+        .sheet-ex .sheet-note { background: var(--bs-tertiary-bg); border-radius: .75rem; padding: .4rem .65rem; }
+        .sheet-ex summary { cursor: pointer; }
+        .sheet-brand { display: flex; align-items: center; gap: .55rem; font-weight: 700; letter-spacing: .02em; color: var(--primary-color); }
         .sheet-routine { break-before: auto; }
         @media print {
             .no-print { display: none !important; }
             .sheet-routine + .sheet-routine { break-before: page; }
+            .sheet-ex { box-shadow: none !important; transform: none !important; }
             .sheet-ex .num { background: transparent; color: var(--bs-body-color); border: 1px solid var(--bs-border-color); }
             details > summary { list-style: none; }
             a { text-decoration: none; }
@@ -27,46 +32,52 @@
 </head>
 <body>
 <main class="container py-3" style="max-width: 760px;">
+    <div class="sheet-brand mb-3"><img src="{% static 'images/favicon.svg' %}" alt="" width="28" height="28"> {{ brand_name }}</div>
     {% if invalid %}
-    <div class="text-center py-5" data-sheet-invalid>
-        <i class="bi bi-link-45deg display-4 text-muted"></i>
-        <h1 class="h4 mt-2">{% trans "Esta ficha não está disponível" %}</h1>
-        <p class="text-muted">{% trans "O link foi trocado ou desativado. Peça um novo à sua personal." %}</p>
+    <div class="ui-empty" data-sheet-invalid>
+        <div class="ui-ico alt"><i class="bi bi-link-45deg" aria-hidden="true"></i></div>
+        <h1 class="h4">{% trans "Esta ficha não está disponível" %}</h1>
+        <p>{% trans "O link foi trocado ou desativado. Peça um novo à sua personal." %}</p>
     </div>
     {% else %}
-    <header class="d-flex justify-content-between align-items-start gap-2 mb-3">
-        <div class="min-w-0">
-            <div class="text-muted small text-uppercase">{{ brand_name }}</div>
-            <h1 class="h3 mb-0 text-break" data-sheet-title>{% blocktrans trimmed with name=first_name %}Ficha de treino de {{ name }}{% endblocktrans %}</h1>
+    <header class="ui-head inline">
+        <div class="ui-title">
+            <span class="ui-ico"><i class="bi bi-clipboard-check" aria-hidden="true"></i></span>
+            <div class="min-w-0">
+                <h1 class="text-break" data-sheet-title>{% blocktrans trimmed with name=first_name %}Ficha de treino de {{ name }}{% endblocktrans %}</h1>
+            </div>
         </div>
-        <button type="button" class="btn btn-outline-secondary btn-sm no-print" data-print><i class="bi bi-printer"></i> {% trans "Imprimir" %}</button>
+        <div class="ui-actions no-print">
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-print><i class="bi bi-printer"></i> {% trans "Imprimir" %}</button>
+        </div>
     </header>
 
     {% for item in routines %}
     <section class="sheet-routine mb-4" data-sheet-routine>
         <h2 class="h5 mb-1 text-break">{{ item.routine.routine_name }}</h2>
-        <div class="small text-muted mb-2">
-            {{ item.routine.get_difficulty_level_display }} · {% blocktrans trimmed with minutes=item.routine.estimated_duration %}{{ minutes }} min{% endblocktrans %}
+        <div class="ui-meta mb-2">
+            <span class="ui-badge {% if item.routine.difficulty_level == 'iniciante' %}ok{% elif item.routine.difficulty_level == 'intermediario' %}warn{% else %}bad{% endif %}">{{ item.routine.get_difficulty_level_display }}</span>
+            <span class="ui-badge info"><i class="bi bi-clock" aria-hidden="true"></i> {% blocktrans trimmed with minutes=item.routine.estimated_duration %}{{ minutes }} min{% endblocktrans %}</span>
         </div>
         {% if item.routine.description %}<p class="small mb-2">{{ item.routine.description|linebreaksbr }}</p>{% endif %}
-        <ol class="list-unstyled mb-0">
+        <ol class="list-unstyled mb-0 d-grid gap-2">
             {% for e in item.exercises %}
-            <li class="sheet-ex card mb-2" data-sheet-exercise>
-                <div class="card-body py-2">
-                    <div class="d-flex gap-2 align-items-start">
+            <li class="sheet-ex ui-card flat" data-sheet-exercise>
+                <div class="card-body py-3">
+                    <div class="d-flex gap-3 align-items-start">
                         <span class="num">{{ forloop.counter }}</span>
                         <div class="flex-grow-1 min-w-0">
-                            <div class="fw-semibold text-break">{{ e.name }}</div>
-                            <div class="small text-muted">{{ e.group }}</div>
-                            <div class="mt-1">
-                                <span class="badge bg-body-secondary text-body border">{% blocktrans trimmed with sets=e.sets reps=e.reps %}{{ sets }} × {{ reps }}{% endblocktrans %}</span>
-                                {% if e.rest_seconds %}<span class="small text-muted ms-1"><i class="bi bi-stopwatch"></i> {% blocktrans trimmed with seconds=e.rest_seconds %}descanso {{ seconds }}s{% endblocktrans %}</span>{% endif %}
+                            <div class="fw-bold text-break">{{ e.name }}</div>
+                            <div class="ui-meta mt-1">
+                                <span class="ui-badge brand">{{ e.group }}</span>
+                                <span class="ui-badge">{% blocktrans trimmed with sets=e.sets reps=e.reps %}{{ sets }} × {{ reps }}{% endblocktrans %}</span>
+                                {% if e.rest_seconds %}<span class="ui-badge"><i class="bi bi-stopwatch" aria-hidden="true"></i> {% blocktrans trimmed with seconds=e.rest_seconds %}descanso {{ seconds }}s{% endblocktrans %}</span>{% endif %}
                             </div>
-                            {% if e.notes %}<div class="small mt-1"><i class="bi bi-chat-left-text"></i> {{ e.notes }}</div>{% endif %}
-                            {% if e.instructions %}<details class="small mt-1"><summary class="text-muted">{% trans "Como fazer" %}</summary><div class="mt-1">{{ e.instructions|linebreaksbr }}</div></details>{% endif %}
-                            {% if e.video %}<a class="small no-print" href="{{ e.video }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-play-circle"></i> {% trans "Ver execução" %}</a>{% endif %}
+                            {% if e.notes %}<div class="small mt-2 sheet-note"><i class="bi bi-chat-left-text"></i> {{ e.notes }}</div>{% endif %}
+                            {% if e.instructions %}<details class="small mt-2"><summary class="text-muted">{% trans "Como fazer" %}</summary><div class="mt-1">{{ e.instructions|linebreaksbr }}</div></details>{% endif %}
+                            {% if e.video %}<a class="btn btn-sm btn-outline-primary mt-2 no-print" href="{{ e.video }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-play-circle"></i> {% trans "Ver execução" %}</a>{% endif %}
                         </div>
-                        {% if e.image %}<img src="{{ e.image }}" alt="" class="rounded" loading="lazy">{% endif %}
+                        {% if e.image %}<img src="{{ e.image }}" alt="" class="rounded-3" loading="lazy">{% endif %}
                     </div>
                 </div>
             </li>
@@ -74,10 +85,13 @@
         </ol>
     </section>
     {% empty %}
-    <div class="text-center text-muted py-5" data-sheet-empty>{% trans "Nenhum treino em uso no momento." %}</div>
+    <div class="ui-empty" data-sheet-empty>
+        <div class="ui-ico alt"><i class="bi bi-clipboard" aria-hidden="true"></i></div>
+        <p>{% trans "Nenhum treino em uso no momento." %}</p>
+    </div>
     {% endfor %}
 
-    <p class="small text-muted border-top pt-2 mt-4 no-print"><i class="bi bi-lock"></i> {% trans "Link pessoal: não envie a outras pessoas. Em caso de dúvida sobre os exercícios, fale com a sua personal." %}</p>
+    <p class="small text-muted mt-4 no-print"><i class="bi bi-lock"></i> {% trans "Link pessoal: não envie a outras pessoas. Em caso de dúvida sobre os exercícios, fale com a sua personal." %}</p>
     {% endif %}
 </main>
 <script src="{% static 'js/sheet.js' %}"></script>

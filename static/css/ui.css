@@ -72,7 +72,7 @@
 .ui-card.muted { background: var(--bs-tertiary-bg); }
 .ui-meta { display: flex; flex-wrap: wrap; gap: .35rem; }
 .ui-badge { white-space: nowrap; display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .65rem; border-radius: 999px; font-size: .78rem; font-weight: 500; background: var(--bs-secondary-bg); color: var(--bs-body-color); }
-.ui-badge.brand { background: var(--bs-primary-bg-subtle); color: var(--bs-primary-text-emphasis); }
+.ui-badge.brand { background: color-mix(in srgb, var(--primary-color) 16%, transparent); color: color-mix(in srgb, var(--primary-color) 65%, var(--bs-body-color)); }
 .ui-badge.ok { background: var(--bs-success-bg-subtle); color: var(--bs-success-text-emphasis); }
 .ui-badge.warn { background: var(--bs-warning-bg-subtle); color: var(--bs-warning-text-emphasis); }
 .ui-badge.bad { background: var(--bs-danger-bg-subtle); color: var(--bs-danger-text-emphasis); }
@@ -192,3 +192,12 @@
 .form-check-input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 .2rem rgba(255, 107, 107, .25); }
 .form-control:focus, .form-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 .2rem rgba(255, 107, 107, .2); }
 input[type="radio"], input[type="checkbox"], input[type="range"] { accent-color: var(--primary-color); }
+
+/* Small number + label tile (counters on the student screens) */
+.ui-tile { height: 100%; padding: .7rem .4rem; border-radius: 1rem; border: 1px solid var(--bs-border-color); background: var(--bs-body-bg); }
+.ui-tile .ui-tile-n { font-size: 1.5rem; font-weight: 800; line-height: 1.15; }
+.ui-tile .ui-tile-n small { font-size: .8rem; font-weight: 600; color: var(--bs-secondary-color); }
+.ui-tile .ui-tile-l { font-size: .75rem; color: var(--bs-secondary-color); line-height: 1.2; }
+.ui-tile.ok .ui-tile-n { color: var(--bs-success-text-emphasis); }
+.text-brand { color: var(--primary-color) !important; }
+.bg-brand { background-color: var(--primary-color) !important; }

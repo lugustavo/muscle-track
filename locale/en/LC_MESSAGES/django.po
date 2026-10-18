@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-18 16:11-0300\n"
+"POT-Creation-Date: 2026-10-18 19:26-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4805,7 +4805,6 @@ msgstr "No workout plans ending."
 msgid "Treinos de hoje"
 msgstr "Today's workouts"
 
-#| msgid "Concluído"
 msgid "concluído"
 msgstr "done"
 
@@ -5109,20 +5108,18 @@ msgstr "My history - %(brand_name)s"
 msgid "Meu histórico de treinos"
 msgstr "My workout history"
 
-msgid "Sessões concluídas (últimas 20)"
-msgstr "Completed sessions (last 20)"
-
-msgid "Duração"
-msgstr "Duration"
-
 msgid "Total de treinos"
 msgstr "Total workouts"
 
-msgid "Treinos/Semana (aprox.)"
-msgstr "Workouts/Week (approx.)"
+#| msgid "Treinos no último mês"
+msgid "Treinos por semana (últimas 4)"
+msgstr "Workouts per week (last 4)"
 
 msgid "Treinos atribuídos"
 msgstr "Assigned workouts"
+
+msgid "Sessões concluídas (últimas 20)"
+msgstr "Completed sessions (last 20)"
 
 msgid "Você ainda não concluiu nenhum treino."
 msgstr "You haven't completed any workouts yet."
@@ -5766,6 +5763,9 @@ msgstr "Session history"
 #, python-format
 msgid "%(count)s sessões"
 msgstr "%(count)s sessions"
+
+msgid "Duração"
+msgstr "Duration"
 
 msgid "Status"
 msgstr "Status"

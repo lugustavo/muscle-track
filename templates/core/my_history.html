@@ -16,90 +16,30 @@
 </div>
 
 {% if completed_sessions %}
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title">{% trans "Sessões concluídas (últimas 20)" %}</h5>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>{% trans "Data" %}</th>
-                        <th>{% trans "Treino" %}</th>
-                        <th>{% trans "Início" %}</th>
-                        <th>{% trans "Término" %}</th>
-                        <th>{% trans "Duração" %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for session in completed_sessions %}
-                    <tr>
-                        <td>{{ session.start_time|date:_('d/m/Y') }}</td>
-                        <td>
-                            <strong>{{ session.person_routine.routine_name }}</strong>
-                            <br>
-                            <small class="text-muted">{{ session.person_routine.get_difficulty_level_display }}</small>
-                        </td>
-                        <td>{{ session.start_time|date:"H:i" }}</td>
-                        <td>
-                            {% if session.end_time %}
-                                {{ session.end_time|date:"H:i" }}
-                            {% else %}
-                                <span class="text-muted">-</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if session.duration_minutes %}
-                                <span class="badge bg-success">{% blocktrans trimmed with duration_minutes=session.duration_minutes %}{{ duration_minutes }} min{% endblocktrans %}</span>
-                            {% else %}
-                                <span class="text-muted">-</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+<div class="row g-2 g-md-3 mb-3 text-center" data-history-stats>
+    <div class="col-4"><div class="ui-tile"><div class="ui-tile-n">{{ total_done }}</div><div class="ui-tile-l">{% trans "Total de treinos" %}</div></div></div>
+    <div class="col-4"><div class="ui-tile"><div class="ui-tile-n">{{ per_week|floatformat:"-1" }}</div><div class="ui-tile-l">{% trans "Treinos por semana (últimas 4)" %}</div></div></div>
+    <div class="col-4"><div class="ui-tile"><div class="ui-tile-n">{{ assigned }}</div><div class="ui-tile-l">{% trans "Treinos atribuídos" %}</div></div></div>
+</div>
 
-        <!-- Estatísticas Resumidas -->
-        <div class="row mt-4">
-            <div class="col-md-4">
-                <div class="card bg-body-tertiary">
-                    <div class="card-body text-center">
-                        <h3 class="text-primary">{{ completed_sessions.count }}</h3>
-                        <p class="mb-0">{% trans "Total de treinos" %}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card bg-body-tertiary">
-                    <div class="card-body text-center">
-                        <h3 class="text-success">
-                            {% widthratio completed_sessions|length 1 7 %}
-                        </h3>
-                        <p class="mb-0">{% trans "Treinos/Semana (aprox.)" %}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card bg-body-tertiary">
-                    <div class="card-body text-center">
-                        <h3 class="text-info">
-                            {{ person.routines.count }}
-                        </h3>
-                        <p class="mb-0">{% trans "Treinos atribuídos" %}</p>
-                    </div>
-                </div>
-            </div>
+<h2 class="ui-h2">{% trans "Sessões concluídas (últimas 20)" %}</h2>
+<div class="d-grid gap-2" data-history-list>
+    {% for session in completed_sessions %}
+    <div class="card"><div class="card-body py-2 d-flex align-items-center gap-3">
+        <div class="ui-date" aria-hidden="true"><span class="ui-date-wd">{{ session.start_time|date:"D" }}</span><span class="ui-date-d">{{ session.start_time|date:"j" }}</span><span class="ui-date-m">{{ session.start_time|date:"M" }}</span></div>
+        <div class="flex-grow-1 min-w-0">
+            <strong class="d-block text-truncate">{{ session.person_routine.routine_name }}</strong>
+            <small class="text-muted">{{ session.person_routine.get_difficulty_level_display }} · {{ session.start_time|date:"H:i" }}{% if session.end_time %} – {{ session.end_time|date:"H:i" }}{% endif %}</small>
         </div>
-    </div>
+        {% if session.duration_minutes %}<span class="ui-badge ok">{% blocktrans trimmed with duration_minutes=session.duration_minutes %}{{ duration_minutes }} min{% endblocktrans %}</span>{% endif %}
+    </div></div>
+    {% endfor %}
 </div>
 {% else %}
-<div class="alert alert-info">
-    <i class="bi bi-info-circle"></i> {% trans "Você ainda não concluiu nenhum treino." %}
-    <br><br>
-    <a href="{% url 'core:my_workouts' %}" class="btn btn-primary">
-        <i class="bi bi-fire"></i> {% trans "Iniciar treino agora" %}
-    </a>
+<div class="ui-empty" data-empty>
+    <div class="ui-ico alt"><i class="bi bi-fire" aria-hidden="true"></i></div>
+    <p>{% trans "Você ainda não concluiu nenhum treino." %}</p>
+    <a href="{% url 'core:my_workouts' %}" class="btn btn-primary"><i class="bi bi-fire"></i> {% trans "Iniciar treino agora" %}</a>
 </div>
 {% endif %}
 
@@ -107,7 +47,7 @@
 {% if records %}
 <div class="card mt-4">
     <div class="card-body">
-        <h5 class="card-title"><i class="bi bi-trophy"></i> {% trans "Meus recordes de carga" %}</h5>
+        <h5 class="card-title ui-sec"><span class="ui-ico sm warn"><i class="bi bi-trophy" aria-hidden="true"></i></span> {% trans "Meus recordes de carga" %}</h5>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead><tr><th>{% trans "Exercício" %}</th><th class="text-end">{% trans "Recorde" %}</th><th class="text-end">{% trans "Treinos" %}</th><th class="text-end">{% trans "Último" %}</th></tr></thead>
@@ -131,7 +71,7 @@
 {% if completed_sessions %}
 <div class="card mt-4">
     <div class="card-body">
-        <h5 class="card-title"><i class="bi bi-bar-chart"></i> {% trans "Evolução de treinos" %}</h5>
+        <h5 class="card-title ui-sec"><span class="ui-ico sm alt"><i class="bi bi-bar-chart" aria-hidden="true"></i></span> {% trans "Evolução de treinos" %}</h5>
         <div id="workoutChart" style="height: 300px;">
             <canvas id="myChart"></canvas>
         </div>

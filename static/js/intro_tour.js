@@ -14,7 +14,7 @@ function startIntroTour() {
     function show(i) {
         index = i;
         steps.forEach(function (s, n) { s.hidden = n !== i; });
-        dots.forEach(function (d, n) { d.className = 'rounded-circle ' + (n === i ? 'bg-primary' : 'bg-secondary-subtle'); });
+        dots.forEach(function (d, n) { d.className = 'rounded-circle ' + (n === i ? 'bg-brand' : 'bg-secondary-subtle'); });
         back.style.visibility = i === 0 ? 'hidden' : 'visible';
         next.textContent = i === steps.length - 1 ? gettext('Entendi') : gettext('Próximo');
     }

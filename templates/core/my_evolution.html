@@ -38,7 +38,7 @@
             </div>
             <div class="row row-cols-3 g-2 text-center mt-1">
                 {% for label, value, unit in a.shown_measures %}
-                <div class="col"><div class="border rounded py-1"><div class="fw-bold">{{ value }}<small class="text-muted"> {{ unit }}</small></div><div class="small text-muted">{{ label }}</div></div></div>
+                <div class="col"><div class="ui-tile"><div class="ui-tile-n">{{ value }}<small> {{ unit }}</small></div><div class="ui-tile-l">{{ label }}</div></div></div>
                 {% endfor %}
             </div>
             {% if not a.shown_measures %}<div class="small text-muted mt-1">{% trans "Sem medidas nesta avaliação." %}</div>{% endif %}

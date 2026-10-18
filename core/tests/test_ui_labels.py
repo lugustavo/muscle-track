@@ -153,3 +153,48 @@ class StudentScheduleLookTests(BaseTestCase):
 def timezone_now():
     from django.utils import timezone
     return timezone.now()
+
+
+class StudentScreensLookTests(BaseTestCase):
+    def test_history_numbers_are_real(self):
+        from datetime import timedelta
+        from django.utils import timezone
+        from core.models import WorkoutSession
+        for days in (1, 3, 5, 40):
+            session = WorkoutSession.objects.create(person_routine=self.alice_routine, is_completed=True)
+            WorkoutSession.objects.filter(pk=session.pk).update(start_time=timezone.now() - timedelta(days=days))   # auto_now_add
+        self.login(self.alice)
+        page = self.client.get(reverse('core:my_history'))
+        self.assertEqual(page.context['total_done'], 4)
+        self.assertEqual(page.context['per_week'], 0.8)   # 3 workouts in the last 4 weeks
+        html = page.content.decode()
+        for marker in ('data-history-stats', 'ui-tile', 'data-history-list', 'ui-date'):
+            self.assertIn(marker, html)
+
+    def test_history_without_workouts_has_an_empty_state(self):
+        self.login(self.alice)
+        self.assertIn('data-empty', self.client.get(reverse('core:my_history')).content.decode())
+
+    def test_public_sheet_uses_the_shared_look(self):
+        from django.test import Client
+        from core import sheet_link
+        link = sheet_link.enable(self.alice.person, self.trainer)
+        html = Client().get(reverse('core:public_sheet', kwargs={'token': link.token})).content.decode()
+        for marker in ('css/ui.css', 'ui-head', 'ui-badge', 'data-sheet-exercise', 'data-print'):
+            self.assertIn(marker, html)
+        invalid = Client().get(reverse('core:public_sheet', kwargs={'token': 'nope'}))
+        self.assertContains(invalid, 'ui-empty', status_code=404)
+
+    def test_student_today_and_tour_use_the_brand_color(self):
+        self.login(self.alice)
+        html = self.client.get(reverse('core:home')).content.decode()
+        self.assertIn('class="ui-head"', html)
+        js = (ROOT / 'static/js/intro_tour.js').read_text()
+        self.assertIn('bg-brand', js)
+        self.assertNotIn("'bg-primary'", js)
+
+    def test_package_card_tiles(self):
+        css = (ROOT / 'static/css/ui.css').read_text()
+        self.assertIn('.ui-tile', css)
+        card = (ROOT / 'templates/core/_my_package_card.html').read_text()
+        self.assertNotIn('border rounded py-2', card)
