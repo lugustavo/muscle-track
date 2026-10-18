@@ -7,7 +7,7 @@
             {% for slot in slots %}
             <li class="list-group-item p-0 swipe-row" data-swipe-row data-slot="{{ slot.pk }}">
                 <div class="swipe-content px-3 py-2">
-                    {% blocktrans trimmed with get_weekday_display=slot.get_weekday_display start_time=slot.start_time|time:"H:i" %}<strong>{{ get_weekday_display }}</strong> às {{ start_time }}{% endblocktrans %} <small class="text-muted">{% blocktrans trimmed with duration_minutes=slot.duration_minutes %}({{ duration_minutes }} min){% endblocktrans %}{% if slot.interval_weeks > 1 %} {% blocktrans trimmed with interval_weeks=slot.interval_weeks %}· a cada {{ interval_weeks }} semanas{% endblocktrans %}{% endif %}{% if slot.valid_until %} {% blocktrans trimmed with valid_until=slot.valid_until|date:_('d/m/Y') %}· até {{ valid_until }}{% endblocktrans %}{% endif %}</small>
+                    {% blocktrans trimmed with get_weekday_display=slot.get_weekday_display start_time=slot.start_time|time:"H:i" %}<strong>{{ get_weekday_display }}</strong> às {{ start_time }}{% endblocktrans %} <small class="text-muted">{% blocktrans trimmed with duration_minutes=slot.duration_minutes %}({{ duration_minutes }} min){% endblocktrans %}{% if slot.month_rule %} · {{ slot.monthly_text }}{% elif slot.interval_weeks > 1 %} {% blocktrans trimmed with interval_weeks=slot.interval_weeks %}· a cada {{ interval_weeks }} semanas{% endblocktrans %}{% endif %}{% if slot.valid_until %} {% blocktrans trimmed with valid_until=slot.valid_until|date:_('d/m/Y') %}· até {{ valid_until }}{% endblocktrans %}{% endif %}</small>
                 </div>
                 <div class="swipe-actions">
                     <a href="{% nav_url 'core:slot_edit' slot.pk %}" class="btn btn-sm btn-link swipe-edit" title="{% trans "Editar" %}" data-slot-edit>
@@ -71,13 +71,13 @@
         <form method="post" action="{% nav_url 'core:slot_add' student.pk %}" class="card card-body bg-body-tertiary" data-recurrence-form>
             {% csrf_token %}
             <div class="small fw-bold mb-2">{% trans "Novo horário fixo" %}</div>
-            <div class="mb-2">{% include 'core/_weekday_pills.html' with field=slot_form.weekdays %}</div>
+            <div class="mb-2" data-weekly-only>{% include 'core/_weekday_pills.html' with field=slot_form.weekdays %}</div>
             <div class="row g-2 mb-2">
                 <div class="col-6"><label class="form-label small mb-0" for="{{ slot_form.start_time.id_for_label }}">{% trans "Horário" %}</label>{{ slot_form.start_time }}</div>
                 <div class="col-6"><label class="form-label small mb-0" for="{{ slot_form.duration_minutes.id_for_label }}">{% trans "Duração" %}</label>{{ slot_form.duration_minutes }}</div>
             </div>
             <details class="mb-2"{% if slot_plan %} open{% endif %}>
-                <summary class="small text-primary" style="cursor: pointer;">{% trans "Repetição personalizada (a cada N semanas, início e fim)" %}</summary>
+                <summary class="small text-primary" style="cursor: pointer;">{% trans "Repetição personalizada (a cada N semanas ou todo mês, início e fim)" %}</summary>
                 <div class="mt-2">{% include 'core/_recurrence_options.html' with rec=slot_form with_start=True %}</div>
             </details>
             <button class="btn btn-primary"><i class="bi bi-plus-lg"></i> {% trans "Adicionar horário" %}</button>

@@ -1,4 +1,5 @@
 """Calendar: generation of classes from fixed slots, the week / day / month / list views, conflicts and attendance."""
+import calendar
 from datetime import date, datetime, timedelta
 
 from django.db import transaction
@@ -30,6 +31,44 @@ def on_week_cycle(day, valid_from, interval_weeks):
     return weeks >= 0 and weeks % max(interval_weeks, 1) == 0
 
 
+def on_month_cycle(day, valid_from, interval_months):
+    """True when `day` falls in a month of the cycle that starts at the month of `valid_from` (1 = every month)."""
+    months = (day.year * 12 + day.month) - (valid_from.year * 12 + valid_from.month)
+    return months >= 0 and months % max(interval_months, 1) == 0
+
+
+def monthly_match(day, anchor, rule, interval_months=1):
+    """Does `day` belong to the monthly series whose first class is `anchor`?
+
+    'day': the same day of the month (a month without that day, e.g. the 31st, has no class); 'nth': the same weekday
+    in the same week of the month (the 2nd Tuesday...); 'last': the last such weekday of the month."""
+    if not on_month_cycle(day, anchor, interval_months):
+        return False
+    if rule == 'day':
+        return day.day == anchor.day
+    if day.weekday() != anchor.weekday():
+        return False
+    if rule == 'nth':
+        return (day.day - 1) // 7 == (anchor.day - 1) // 7
+    if rule == 'last':
+        return day.day + 7 > calendar.monthrange(day.year, day.month)[1]
+    return False
+
+
+def slot_matches(slot, day):
+    """Is `day` one of the days a fixed time repeats on? (the cycle only: not its dates, not the skipped days)"""
+    if slot.month_rule:
+        return monthly_match(day, slot.valid_from, slot.month_rule, slot.interval_months)
+    return slot.weekday == day.weekday() and on_week_cycle(day, slot.valid_from, slot.interval_weeks)
+
+
+def slot_on(slot, day):
+    """Is there a class of this fixed time on `day`? (inside its dates, weekly or monthly; skipped days aside)"""
+    if day < slot.valid_from or (slot.valid_until and day > slot.valid_until):
+        return False
+    return slot_matches(slot, day)
+
+
 def at(day, clock):
     return timezone.make_aware(datetime.combine(day, clock))
 
@@ -53,11 +92,7 @@ def ensure_appointments(start, end, today=None):
     day = start
     while day <= end:
         for slot in slots:
-            if slot.weekday != day.weekday() or day < slot.valid_from:
-                continue
-            if slot.valid_until and day > slot.valid_until:
-                continue
-            if not on_week_cycle(day, slot.valid_from, slot.interval_weeks):
+            if not slot_on(slot, day):
                 continue
             if slot.skipped_dates and day.isoformat() in slot.skipped_dates:
                 continue

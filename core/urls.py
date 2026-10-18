@@ -72,6 +72,7 @@ urlpatterns = [
     path('appointments/<int:pk>/delete/', views.appointment_delete, name='appointment_delete'),
     path('appointments/<int:pk>/remove/', views.appointment_remove, name='appointment_remove'),
     path('students/<int:pk>/slots/add/', views.slot_add, name='slot_add'),
+    path('agenda/month-rules/', views.month_rules, name='month_rules'),
     path('students/<int:pk>/slots/preview/', views.slot_preview, name='slot_preview'),
     path('students/<int:pk>/slots/fill/', views.slot_fill, name='slot_fill'),
     path('students/<int:pk>/slots/top-up/', views.slot_topup, name='slot_topup'),

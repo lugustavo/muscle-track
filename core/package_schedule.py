@@ -13,7 +13,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from . import holidays
-from .agenda import at, on_week_cycle
+from .agenda import at, slot_matches
 from .models import Appointment, ScheduleSlot
 from .recurrence import occurrence_dates
 
@@ -37,7 +37,7 @@ def previous_pattern(person):
 
     The latest series is the one that ends last (no end = running now); its slots share package and end date. None when
     the student never had one, or when its times differ (then the trainer picks them by hand)."""
-    slots = list(person.slots.all())
+    slots = [s for s in person.slots.all() if not s.month_rule]   # a monthly time is not a weekly pattern to continue
     if not slots:
         return None
     key = lambda s: (s.valid_until is None, s.valid_until or s.valid_from, s.valid_from)
@@ -180,7 +180,7 @@ def top_up(person, plan, now=None):
     new, day, limit = [], start, start + timedelta(days=HORIZON_DAYS)
     while len(new) < wanted and day <= limit:
         for slot in sorted(slots, key=lambda s: s.start_time):
-            if slot.weekday != day.weekday() or not on_week_cycle(day, slot.valid_from, slot.interval_weeks):
+            if not slot_matches(slot, day):
                 continue
             if day in off or day.isoformat() in (slot.skipped_dates or []) or at(day, slot.start_time) in live:
                 continue

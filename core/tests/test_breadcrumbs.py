@@ -20,6 +20,7 @@ LINK = re.compile(r'<a href="([^"]+)">(.*?)</a>', re.S)
 NOT_PAGES = {
     'calendar_feed', 'calendar_rotate', 'calendar_style',
     'search_suggest',
+    'month_rules',
     'api_exercises_list', 'api_routine_exercises', 'api_routines_list', 'assessment_delete', 'healthz',
     'note_add', 'note_delete', 'offline', 'person_routine_deactivate', 'photo_delete', 'photo_file',
     'photo_thumb', 'pwa_manifest', 'service_worker', 'workout_end', 'workout_exercise_notes',
