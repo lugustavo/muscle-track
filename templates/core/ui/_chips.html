@@ -1,0 +1,11 @@
+{% load i18n %}
+{# options: [(value, label)]; selected: the chosen value ("" = all). One exclusive choice, sent as ?name=value. #}
+<div class="ui-filter-row">
+    <span class="ui-filter-label" id="chips-{{ name }}">{{ label }}</span>
+    <div class="ui-chips" role="radiogroup" aria-labelledby="chips-{{ name }}">
+        <label class="ui-chip"><input type="radio" name="{{ name }}" value="" {% if not selected %}checked{% endif %}><span>{{ all_label }}</span></label>
+        {% for value, text in options %}
+        <label class="ui-chip"><input type="radio" name="{{ name }}" value="{{ value }}" {% if selected == value|stringformat:"s" %}checked{% endif %}><span>{{ text }}</span></label>
+        {% endfor %}
+    </div>
+</div>

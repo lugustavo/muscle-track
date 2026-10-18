@@ -1,0 +1,5 @@
+{% load i18n ui %}
+<div class="ui-seg" role="group" aria-label="{% trans "Visualização" %}" data-view-toggle>
+    <a href="{% qs view='grid' %}" class="{% if view_mode == 'grid' %}active{% endif %}" {% if view_mode == 'grid' %}aria-current="true"{% endif %}><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i> {% trans "Grade" %}</a>
+    <a href="{% qs view='list' %}" class="{% if view_mode == 'list' %}active{% endif %}" {% if view_mode == 'list' %}aria-current="true"{% endif %}><i class="bi bi-list-ul" aria-hidden="true"></i> {% trans "Lista" %}</a>
+</div>
