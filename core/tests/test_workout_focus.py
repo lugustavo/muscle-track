@@ -133,9 +133,20 @@ class QueueOrderTests(BaseTestCase):
         self.assertIn('id="prefSound"', text)
         self.assertIn('id="prefVibrate"', text)
         self.assertIn('data-order="1"', text)
-        self.assertIn('body > .navbar { display: none; }', text)  # the site's top menu gives way on phones
+        self.assertIn('css/workout.css', text)
         self.assertIn('class="tabbar d-lg-none"', text)           # the bottom bar stays
         self.assertNotIn('SÉRI', text)
+
+    def test_focus_mode_css_lives_in_its_own_file(self):
+        from pathlib import Path
+        css = (Path(__file__).resolve().parents[2] / 'static' / 'css' / 'workout.css').read_text()
+        self.assertIn('body > .navbar { display: none; }', css)   # the site's top menu gives way on phones
+        self.assertIn('var(--bs-success)', css)                   # theme colors, no fixed hex
+
+    def test_the_pause_button_is_icon_only_on_phones(self):
+        text = self.client.get(self.url).content.decode()
+        self.assertIn('id="pauseBtn"', text)
+        self.assertIn('class="d-none d-sm-inline"', text)
 
     def test_javascript_is_served_and_has_no_syntax_problems(self):
         from pathlib import Path
