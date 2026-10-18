@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 21:52-0300\n"
+"POT-Creation-Date: 2026-10-17 23:03-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -714,6 +714,30 @@ msgstr "On a date"
 msgid "Após um número de aulas"
 msgstr "After a number of classes"
 
+msgid "Por semana"
+msgstr "Weekly"
+
+msgid "Por mês"
+msgstr "Monthly"
+
+msgid "Repete"
+msgstr "Repeats"
+
+msgid "Todo mês, em qual dia?"
+msgstr "Every month, on which day?"
+
+msgid "Mesmo dia do mês"
+msgstr "Same day of the month"
+
+msgid "Mesmo dia da semana, na mesma semana do mês"
+msgstr "Same weekday, in the same week of the month"
+
+msgid "Último dia da semana do mês"
+msgstr "Last such weekday of the month"
+
+msgid "Repete a cada (meses)"
+msgstr "Repeats every (months)"
+
 msgid "Repete a cada (semanas)"
 msgstr "Repeats every (weeks)"
 
@@ -728,6 +752,15 @@ msgstr "Ends on"
 
 msgid "Número de aulas"
 msgstr "Number of classes"
+
+msgid "Escolha em qual dia do mês a aula se repete."
+msgstr "Choose which day of the month the class repeats on."
+
+#, python-format
+msgid ""
+"Essa opção não vale para %(date)s: escolha outra ou mude a data de início."
+msgstr ""
+"That option does not fit %(date)s: choose another or change the start date."
 
 msgid "Informe a data final."
 msgstr "Enter the end date."
@@ -1554,6 +1587,18 @@ msgstr "Valid from"
 msgid "Vale até"
 msgstr "Valid until"
 
+msgid "Semanal"
+msgstr "Weekly"
+
+msgid "Mesma semana do mês"
+msgstr "Same week of the month"
+
+msgid "Última semana do mês"
+msgstr "Last week of the month"
+
+msgid "Repetição mensal"
+msgstr "Monthly repeat"
+
 msgid "Horário fixo"
 msgstr "Recurring slot"
 
@@ -1623,16 +1668,13 @@ msgstr "Failed"
 msgid "Não enviada"
 msgstr "Not sent"
 
-#| msgid "Abrir a ficha do aluno"
 msgid "Link da ficha de treino"
 msgstr "Workout sheet link"
 
-#| msgid "Links de calendário"
 msgid "Links das fichas de treino"
 msgstr "Workout sheet links"
 
 #, python-format
-#| msgid "Ficha da personal"
 msgid "Ficha de %(person)s"
 msgstr "Sheet of %(person)s"
 
@@ -1673,7 +1715,6 @@ msgstr "Back to student history"
 msgid "Voltar ao convite"
 msgstr "Back to invitation"
 
-#| msgid "Voltar ao login"
 msgid "Voltar ao link da ficha"
 msgstr "Back to the sheet link"
 
@@ -2132,6 +2173,32 @@ msgstr "Package canceled: %(name)s"
 msgid "Você não está cadastrado como aluno."
 msgstr "You are not registered as a student."
 
+#, python-format
+msgid "Todo dia %(day)d do mês"
+msgstr "Day %(day)d of every month"
+
+#, python-format
+#| msgid "Toda %(weekday)s da %(n)dª semana do mês"
+msgid "%(weekday)s da %(n)dª semana do mês"
+msgstr "%(weekday)s of week %(n)d of the month"
+
+#, python-format
+#| msgid "Toda %(weekday)s da última semana do mês"
+msgid "%(weekday)s da última semana do mês"
+msgstr "%(weekday)s of the last week of the month"
+
+#| msgid "todo mês"
+msgid "Todo mês"
+msgstr "Every month"
+
+#, python-format
+msgid "a cada %(n)d meses"
+msgstr "every %(n)d months"
+
+#, python-format
+msgid "%(rule)s às %(time)s"
+msgstr "%(rule)s at %(time)s"
+
 msgid "toda semana"
 msgstr "every week"
 
@@ -2142,6 +2209,13 @@ msgstr "every %(n)d weeks"
 #, python-format
 msgid "até %(date)s"
 msgstr "until %(date)s"
+
+msgid ""
+"Este aluno já tem um horário mensal nesse dia da semana e horário: edite ou "
+"remova o que existe."
+msgstr ""
+"This student already has a monthly time on that weekday and time: edit or "
+"remove the existing one."
 
 msgid "A data final não pode ser antes do início da mudança."
 msgstr "The end date can't be before the start of the change."
@@ -2280,7 +2354,6 @@ msgstr "Inactive"
 msgid "Link da ficha de treino criado"
 msgstr "Workout sheet link created"
 
-#| msgid "Link de acesso revogado e gerado de novo"
 msgid "Link da ficha de treino gerado de novo"
 msgstr "Workout sheet link regenerated"
 
@@ -2447,9 +2520,6 @@ msgstr ""
 "Link created. Whoever has it can read the sheet, so send it only to the "
 "student."
 
-#| msgid ""
-#| "Novo link gerado. O anterior deixou de funcionar: adicione o novo no Google "
-#| "Agenda."
 msgid "Novo link gerado. O anterior deixou de funcionar."
 msgstr "New link created. The previous one stopped working."
 
@@ -3827,11 +3897,12 @@ msgstr ""
 "\"rescheduled\"."
 
 msgid ""
-"A primeira aula é na data escolhida; as outras seguem os dias marcados. Só "
-"vale para aulas do tipo \"Aula\"."
+"A primeira aula é na data escolhida; as outras seguem os dias marcados (ou o"
+" dia do mês, se repetir por mês). Só vale para aulas do tipo \"Aula\"."
 msgstr ""
-"The first class is on the chosen date; the others follow the selected days. "
-"Only applies to classes of type \"Class\"."
+"The first class is on the chosen date; the others follow the marked days (or"
+" the day of the month, when repeating monthly). Only for classes of type "
+"\"Class\"."
 
 msgid "Salvar"
 msgstr "Save"
@@ -5949,12 +6020,10 @@ msgstr ""
 "Default app text. The responsible trainer should review it (preferably with "
 "legal support) before using it as an official document."
 
-#| msgid "Aula de treino"
 msgid "Ficha de treino"
 msgstr "Workout sheet"
 
 #, python-format
-#| msgid "Aula de treino (%(kind)s)"
 msgid "Ficha de treino - %(name)s"
 msgstr "Workout sheet - %(name)s"
 
@@ -5965,32 +6034,26 @@ msgid "O link foi trocado ou desativado. Peça um novo à sua personal."
 msgstr "The link was replaced or turned off. Ask your trainer for a new one."
 
 #, python-format
-#| msgid "Aula de treino (%(kind)s)"
 msgid "Ficha de treino de %(name)s"
 msgstr "Workout sheet for %(name)s"
 
-#| msgid "primeiro."
 msgid "Imprimir"
 msgstr "Print"
 
 #, python-format
-#| msgid "%(sets)s séries x %(reps)s reps"
 msgid "%(sets)s × %(reps)s"
 msgstr "%(sets)s × %(reps)s"
 
 #, python-format
-#| msgid "· descanso %(rest_seconds)ss"
 msgid "descanso %(seconds)ss"
 msgstr "rest %(seconds)ss"
 
-#| msgid "Como funciona"
 msgid "Como fazer"
 msgstr "How to do it"
 
 msgid "Ver execução"
 msgstr "View run"
 
-#| msgid "Nenhum treino ativo."
 msgid "Nenhum treino em uso no momento."
 msgstr "No workout in use at the moment."
 
@@ -6419,6 +6482,14 @@ msgstr "Edit fixed time slot - %(person_name)s"
 
 #, python-format
 msgid ""
+"%(person_name)s · hoje: %(monthly)s às %(start_time)s (%(duration_minutes)s "
+"min)"
+msgstr ""
+"%(person_name)s · today: %(monthly)s at %(start_time)s (%(duration_minutes)s"
+" min)"
+
+#, python-format
+msgid ""
 "%(person_name)s · hoje: %(get_weekday_display)s às %(start_time)s "
 "(%(duration_minutes)s min)"
 msgstr ""
@@ -6547,8 +6618,8 @@ msgstr "Advanced: time slot without a package or custom repeat"
 msgid "Novo horário fixo"
 msgstr "New fixed time"
 
-msgid "Repetição personalizada (a cada N semanas, início e fim)"
-msgstr "Custom repeat (every N weeks, start and end)"
+msgid "Repetição personalizada (a cada N semanas ou todo mês, início e fim)"
+msgstr "Custom repeat (every N weeks or every month, start and end)"
 
 msgid "Adicionar horário"
 msgstr "Add time slot"
@@ -7816,12 +7887,10 @@ msgstr ""
 "confirm."
 
 #, python-format
-#| msgid "Link de acesso - %(person_name)s - %(brand_name)s"
 msgid "Link da ficha - %(person_name)s - %(brand_name)s"
 msgstr "Sheet link - %(person_name)s - %(brand_name)s"
 
 #, python-format
-#| msgid "Situação de %(person_name)s"
 msgid "Ficha de %(person_name)s para consulta"
 msgstr "Read-only sheet of %(person_name)s"
 
@@ -7835,25 +7904,16 @@ msgstr ""
 "reps, rest and notes), for the student to read on the phone or print. It "
 "needs no login and shows no health data, internal notes, contacts or prices."
 
-#| msgid "Abrir a ficha do aluno"
 msgid "Abrir a ficha"
 msgstr "Open the sheet"
 
 #, python-format
-#| msgid ""
-#| "O Google ou outro app buscou este link pela última vez em "
-#| "<strong>%(last_fetched_at)s</strong>."
 msgid "Aberta pela última vez em <strong>%(last_viewed_at)s</strong>."
 msgstr "Last opened on <strong>%(last_viewed_at)s</strong>."
 
 msgid "Ainda ninguém abriu este link."
 msgstr "Nobody has opened this link yet."
 
-#| msgid ""
-#| "Quem tiver este link consegue entrar como o aluno até ele ser usado, então "
-#| "envie só para o próprio aluno. Depois de usado o link deixa de funcionar. "
-#| "Enviou para a pessoa errada? Revogue: o link atual para de funcionar e um "
-#| "novo é gerado."
 msgid ""
 "Quem tiver este link lê a ficha, então envie só ao aluno. Enviou à pessoa "
 "errada? Gere um novo link (o atual para de funcionar) ou desative."
@@ -7868,29 +7928,24 @@ msgstr "Create a new link? The current one stops working."
 msgid "Desativar o link? Ninguém mais abre a ficha por ele."
 msgstr "Turn the link off? Nobody will be able to open the sheet with it."
 
-#| msgid "Desativar"
 msgid "Desativar o link"
 msgstr "Turn the link off"
 
-#| msgid "Este aluno ainda não tem pacote."
 msgid "Este aluno ainda não tem link da ficha."
 msgstr "This student has no sheet link yet."
 
 msgid "Criar o link da ficha"
 msgstr "Create the sheet link"
 
-#| msgid "Aula que o aluno faltou"
 msgid "O que o aluno vê"
 msgstr "What the student sees"
 
 #, python-format
-#| msgid "exercícios"
 msgid "%(n)s exercício"
 msgid_plural "%(n)s exercícios"
 msgstr[0] "%(n)s exercise"
 msgstr[1] "%(n)s exercises"
 
-#| msgid "Este aluno não tem pacote em uso. Venda um pacote primeiro."
 msgid ""
 "Este aluno não tem treino em uso: a ficha abriria vazia. Atribua um treino "
 "primeiro."

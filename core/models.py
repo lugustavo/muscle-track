@@ -998,6 +998,14 @@ class ScheduleSlot(models.Model):
     # Repeats every N weeks, counted from the week of `valid_from` (1 = every week)
     interval_weeks = models.PositiveSmallIntegerField(
         default=1, validators=[MinValueValidator(1), MaxValueValidator(8)], verbose_name=_('Repete a cada (semanas)'))
+    # Monthly series (core/agenda.slot_on): blank = weekly. The rule is anchored on `valid_from`: 'day' = that day of
+    # the month, 'nth' = the same weekday of the same week of the month (e.g. the 2nd Tuesday), 'last' = the last
+    # such weekday of the month. `weekday` is then the weekday of `valid_from`; `interval_months` = every N months.
+    MONTH_RULES = [('', _('Semanal')), ('day', _('Mesmo dia do mês')), ('nth', _('Mesma semana do mês')),
+                   ('last', _('Última semana do mês'))]
+    month_rule = models.CharField(max_length=5, choices=MONTH_RULES, blank=True, default='', verbose_name=_('Repetição mensal'))
+    interval_months = models.PositiveSmallIntegerField(
+        default=1, validators=[MinValueValidator(1), MaxValueValidator(12)], verbose_name=_('Repete a cada (meses)'))
     # The package this series fills (core/package_schedule.py): "mark more classes" and renewals follow it
     package = models.ForeignKey('StudentPackage', on_delete=models.SET_NULL, null=True, blank=True,
                                 related_name='slots', verbose_name=_('Pacote'))
@@ -1008,10 +1016,16 @@ class ScheduleSlot(models.Model):
         verbose_name = _('Horário fixo')
         verbose_name_plural = _('Horários fixos')
         ordering = ['weekday', 'start_time']
-        constraints = [models.UniqueConstraint(fields=['person', 'weekday', 'start_time'], name='unique_slot')]
+        constraints = [models.UniqueConstraint(fields=['person', 'weekday', 'start_time', 'month_rule'], name='unique_slot')]
 
     def __str__(self):
         return f'{self.get_weekday_display()} {self.start_time:%H:%M}'
+
+    @property
+    def monthly_text(self):
+        """For a monthly series, how it repeats in words ("todo dia 15 do mês"); empty for a weekly one."""
+        from .recurrence import monthly_phrase
+        return monthly_phrase(self.month_rule, self.valid_from, self.interval_months) if self.month_rule else ''
 
 
 class Appointment(models.Model):

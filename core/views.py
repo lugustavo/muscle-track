@@ -60,7 +60,7 @@ from .models import (
 from .navigation import after_save_url, back_label, safe_next_url, with_next
 from .onboarding import trainer_steps
 from .package_schedule import MAX_SKIPS, FillError, build_preview, continue_from, fill_series, previous_pattern, top_up
-from .recurrence import SeriesError, create_series, describe, edit_series, end_series_from
+from .recurrence import SeriesError, create_series, describe, describe_slot, edit_series, end_series_from, month_rule_options
 from .permissions import is_trainer, staff_required, student_required
 from .search import apply_student_search, phone_digits, search_all
 from .today import MAX_SESSION_MINUTES, student_today, suggest_index
@@ -3014,7 +3014,10 @@ def appointment_create(request):
                 if data['kind'] != Appointment.Kind.REGULAR:
                     form.add_error('kind', _('Só aulas do tipo "Aula" podem se repetir.'))
                 else:
-                    return _create_series_from_form(request, data, repeat)
+                    response = _create_series_from_form(request, data, repeat)
+                    if response is not None:
+                        return response
+                    form.add_error(None, ' '.join(repeat.non_field_errors()))
             else:
                 starts = at(data['date'], data['time'])
                 if live_class_at(data['person'], starts) is not None:
@@ -3034,11 +3037,17 @@ def _create_series_from_form(request, data, repeat):
     cleaned = repeat.cleaned_data
     weekdays = cleaned['weekdays']
     until = repeat.series_end(weekdays, start)
-    create_series(data['person'], weekdays, data['time'], data['duration_minutes'], start, cleaned['interval_weeks'], until)
+    try:
+        create_series(data['person'], weekdays, data['time'], data['duration_minutes'], start, cleaned['interval_weeks'],
+                      until, cleaned['month_rule'], cleaned['interval_months'])
+    except SeriesError as error:
+        repeat.add_error(None, str(error))
+        return None
     today = timezone.localdate()
-    ensure_appointments(max(start, today), max(start, today) + timedelta(weeks=4), today)
+    ensure_appointments(max(start, today), max(start, today) + timedelta(weeks=_generation_weeks(cleaned)), today)
     messages.success(request, _('Aulas repetidas criadas: %(description)s.') % {
-        'description': describe(weekdays, data['time'], cleaned['interval_weeks'], until)})
+        'description': describe(weekdays, data['time'], cleaned['interval_weeks'], until, cleaned['month_rule'],
+                                cleaned['interval_months'], start)})
     return redirect(after_save_url(request, _agenda_url_for(start), forward_next=False))
 
 
@@ -3230,6 +3239,24 @@ def appointment_remove(request, pk):
     return redirect(_student_tab(request, person.pk, 'agenda'))
 
 
+def _generation_weeks(data):
+    """How far ahead to create the classes of a new series: a month's worth is a few weeks, a monthly one needs more."""
+    return 14 if data.get('month_rule') else 4
+
+
+@staff_required
+@require_safe
+def month_rules(request):
+    """The monthly repeat choices for a class on ?date=YYYY-MM-DD (the form shows the ones that fit that day)."""
+    try:
+        day = date.fromisoformat(request.GET.get('date', ''))
+    except ValueError:
+        return JsonResponse({'options': {}}, status=400)
+    response = JsonResponse({'options': month_rule_options(day)})
+    response['Cache-Control'] = 'no-store'
+    return response
+
+
 @staff_required
 @require_POST
 def slot_add(request, pk):
@@ -3241,10 +3268,16 @@ def slot_add(request, pk):
         start = data.get('starts_on') or today
         weekdays = data['all_weekdays']
         until = form.series_end(weekdays, start)
-        create_series(student, weekdays, data['start_time'], data['duration_minutes'], start, data['interval_weeks'], until)
-        ensure_appointments(today, today + timedelta(weeks=4), today)
+        try:
+            create_series(student, weekdays, data['start_time'], data['duration_minutes'], start, data['interval_weeks'],
+                          until, data['month_rule'], data['interval_months'])
+        except SeriesError as error:
+            messages.error(request, str(error))
+            return redirect(_student_tab(request, student.pk, 'agenda'))
+        ensure_appointments(today, today + timedelta(weeks=_generation_weeks(data)), today)
         messages.success(request, _('Horário fixo: %(description)s.') % {
-            'description': describe(weekdays, data['start_time'], data['interval_weeks'], until)})
+            'description': describe(weekdays, data['start_time'], data['interval_weeks'], until, data['month_rule'],
+                                    data['interval_months'], start)})
     else:
         messages.error(request, _('Horário inválido: %(errors)s') % {
             'errors': ' '.join(e for errs in form.errors.values() for e in errs)})
@@ -3357,6 +3390,8 @@ def slot_edit(request, pk):
     form = SlotEditForm(request.POST or None, initial={
         'weekday': slot.weekday, 'start_time': slot.start_time, 'duration_minutes': slot.duration_minutes,
         'from_day': today, 'valid_until': slot.valid_until})
+    if slot.month_rule:
+        form.fields['weekday'].disabled = True   # a monthly time hangs on the weekday of its first class
     if request.method == 'POST' and form.is_valid():
         data = form.cleaned_data
         try:
@@ -3365,9 +3400,8 @@ def slot_edit(request, pk):
         except SeriesError as error:
             form.add_error(None, str(error))
         else:
-            ensure_appointments(today, today + timedelta(weeks=4), today)
-            text = _('Horário fixo atualizado: %(description)s.') % {'description': describe(
-                [current.weekday], current.start_time, current.interval_weeks, current.valid_until)}
+            ensure_appointments(today, today + timedelta(weeks=_generation_weeks({'month_rule': slot.month_rule})), today)
+            text = _('Horário fixo atualizado: %(description)s.') % {'description': describe_slot(current)}
             if removed:
                 text += ' ' + _('%(n)d aula(s) marcada(s) foram recriadas no novo horário.') % {'n': removed}
             messages.success(request, text)

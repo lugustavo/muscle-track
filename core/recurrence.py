@@ -3,13 +3,16 @@
 A series is a set of ScheduleSlot rows (one per weekday) sharing time, duration, interval and period; the
 calendar generates the concrete classes lazily (core/agenda.ensure_appointments). "Ends after N classes" is
 turned into an end date when the series is created, so the slots only ever store a date."""
+import calendar
 from datetime import datetime, timedelta
 
 from django.db import transaction
-from django.utils import timezone
-from django.utils.translation import gettext
+from django.db.models import Q
+from django.utils import dateformat, timezone
+from django.utils.text import capfirst
+from django.utils.translation import get_language, gettext
 
-from .agenda import at, on_week_cycle
+from .agenda import at, monthly_match, on_week_cycle, slot_matches
 from .i18n import short_date
 from .models import Appointment, ScheduleSlot
 
@@ -19,14 +22,21 @@ MAX_OCCURRENCES = 200
 MAX_SPAN_DAYS = 3 * 366
 
 
-def occurrence_dates(starts_on, weekdays, interval_weeks=1, limit=None, until=None):
-    """Yield the dates of a series in order (at most `limit`, up to `until`; one of them must be given)."""
+def occurrence_dates(starts_on, weekdays, interval_weeks=1, limit=None, until=None, month_rule='', interval_months=1):
+    """Yield the dates of a series in order (at most `limit`, up to `until`; one of them must be given).
+
+    Weekly by default; with `month_rule` ('day', 'nth', 'last', see agenda.monthly_match) a monthly series anchored on
+    `starts_on`, every `interval_months` months."""
     if limit is None and until is None:
         raise ValueError('limit or until is required')
     weekdays = set(weekdays)
     day, count = starts_on, 0
     while until is None or day <= until:
-        if day.weekday() in weekdays and on_week_cycle(day, starts_on, interval_weeks):
+        if month_rule:
+            hit = monthly_match(day, starts_on, month_rule, interval_months)
+        else:
+            hit = day.weekday() in weekdays and on_week_cycle(day, starts_on, interval_weeks)
+        if hit:
             yield day
             count += 1
             if limit is not None and count >= limit:
@@ -36,45 +46,91 @@ def occurrence_dates(starts_on, weekdays, interval_weeks=1, limit=None, until=No
             return
 
 
-def end_date(starts_on, weekdays, interval_weeks, ends, ends_on=None, ends_after=None):
+def end_date(starts_on, weekdays, interval_weeks, ends, ends_on=None, ends_after=None, month_rule='', interval_months=1):
     """The last day of the series: None (never), the given date, or the date of the N-th class."""
     if ends == 'on':
         return ends_on
     if ends == 'after':
         last = None
-        for last in occurrence_dates(starts_on, weekdays, interval_weeks, limit=ends_after):
+        for last in occurrence_dates(starts_on, weekdays, interval_weeks, limit=ends_after, month_rule=month_rule,
+                                     interval_months=interval_months):
             pass
         return last
     return None
 
 
-def describe(weekdays, start_time, interval_weeks, valid_until=None):
+def month_rule_options(day):
+    """The monthly rules a class on `day` can start, as {rule: text}: the same day of the month, the same weekday of
+    the same week (not for a 5th one: that is the last), and the last such weekday (only when `day` is it)."""
+    weekday = dateformat.format(day, 'l')   # as the language writes it: Portuguese in lower case, English capitalized
+    if get_language().startswith('pt'):
+        weekday = weekday.lower()
+    options = {'day': gettext('Todo dia %(day)d do mês') % {'day': day.day}}
+    nth = (day.day - 1) // 7 + 1
+    if nth <= 4:
+        options['nth'] = capfirst(gettext('%(weekday)s da %(n)dª semana do mês') % {'weekday': weekday, 'n': nth})
+    if day.day + 7 > calendar.monthrange(day.year, day.month)[1]:
+        options['last'] = capfirst(gettext('%(weekday)s da última semana do mês') % {'weekday': weekday})
+    return options
+
+
+def monthly_phrase(rule, first_day, interval_months=1):
+    """"todo dia 15 do mês" / "toda ter da 2ª semana do mês", plus "a cada N meses" when it is not every month."""
+    text = month_rule_options(first_day).get(rule, '') or gettext('Todo mês')
+    if interval_months > 1:
+        text += ', ' + gettext('a cada %(n)d meses') % {'n': interval_months}
+    return text
+
+
+def describe(weekdays, start_time, interval_weeks, valid_until=None, month_rule='', interval_months=1, starts_on=None):
     names = {value: str(label) for value, label in ScheduleSlot.WEEKDAYS}
-    days = ', '.join(names[d][:3].lower() for d in sorted(weekdays))
-    parts = [gettext('%(days)s às %(time)s') % {'days': days, 'time': f'{start_time:%H:%M}'}]
-    parts.append(gettext('toda semana') if interval_weeks == 1
-                 else gettext('a cada %(n)d semanas') % {'n': interval_weeks})
+    if month_rule and starts_on is not None:
+        parts = [gettext('%(rule)s às %(time)s') % {'rule': monthly_phrase(month_rule, starts_on, interval_months),
+                                                    'time': f'{start_time:%H:%M}'}]
+    else:
+        days = ', '.join(names[d][:3].lower() for d in sorted(weekdays))
+        parts = [gettext('%(days)s às %(time)s') % {'days': days, 'time': f'{start_time:%H:%M}'}]
+        parts.append(gettext('toda semana') if interval_weeks == 1
+                     else gettext('a cada %(n)d semanas') % {'n': interval_weeks})
     if valid_until:
         parts.append(gettext('até %(date)s') % {'date': short_date(valid_until)})
     return ', '.join(parts)
 
 
+def describe_slot(slot):
+    """The same words for a slot already saved (the first class is its `valid_from`)."""
+    return describe([slot.weekday], slot.start_time, slot.interval_weeks, slot.valid_until, slot.month_rule,
+                    slot.interval_months, slot.valid_from)
+
+
 @transaction.atomic
-def create_series(person, weekdays, start_time, duration_minutes, starts_on, interval_weeks=1, valid_until=None):
+def create_series(person, weekdays, start_time, duration_minutes, starts_on, interval_weeks=1, valid_until=None,
+                  month_rule='', interval_months=1):
     """One slot per weekday. A slot that already exists for the same weekday and time is updated and reactivated.
 
-    Returns (slots, number of slots created)."""
+    A monthly series is a single slot on the weekday of its first class; one that is still running with the same
+    weekday and time is refused (it would be overwritten). Returns (slots, number of slots created)."""
+    if month_rule:
+        weekdays = [starts_on.weekday()]
     slots, created_count = [], 0
     for weekday in sorted(set(weekdays)):
+        if month_rule:
+            running = ScheduleSlot.objects.filter(person=person, weekday=weekday, start_time=start_time,
+                                                  month_rule=month_rule, is_active=True).filter(
+                Q(valid_until__isnull=True) | Q(valid_until__gte=timezone.localdate())).exists()
+            if running:
+                raise SeriesError(gettext('Este aluno já tem um horário mensal nesse dia da semana e horário: '
+                                          'edite ou remova o que existe.'))
         slot, created = ScheduleSlot.objects.get_or_create(
-            person=person, weekday=weekday, start_time=start_time,
+            person=person, weekday=weekday, start_time=start_time, month_rule=month_rule,
             defaults={'duration_minutes': duration_minutes, 'valid_from': starts_on, 'valid_until': valid_until,
-                      'interval_weeks': interval_weeks})
+                      'interval_weeks': interval_weeks, 'interval_months': interval_months})
         if not created:
             slot.duration_minutes = duration_minutes
             slot.valid_from = starts_on
             slot.valid_until = valid_until
             slot.interval_weeks = interval_weeks
+            slot.interval_months = interval_months
             slot.is_active = True
             slot.save()
         else:
@@ -123,6 +179,8 @@ def edit_series(slot, weekday, start_time, duration_minutes, valid_until, from_d
     now = now or timezone.now()
     today = timezone.localdate(now)
     from_day = max(from_day, today)
+    if slot.month_rule:
+        weekday = slot.weekday   # a monthly rule hangs on the weekday of its first class: only the time and the end change
     if valid_until and valid_until < from_day:
         raise SeriesError(gettext('A data final não pode ser antes do início da mudança.'))
     if slot.valid_until and slot.valid_until < from_day:
@@ -149,16 +207,24 @@ def edit_series(slot, weekday, start_time, duration_minutes, valid_until, from_d
         slot.weekday, slot.start_time, slot.duration_minutes, slot.valid_until = weekday, start_time, duration_minutes, valid_until
         slot.save()
         return slot, removed
-    first = from_day   # first date of the new day that falls on the old week cycle
-    for _ in range(7 * slot.interval_weeks):
-        if first.weekday() == weekday and on_week_cycle(first, slot.valid_from, slot.interval_weeks):
-            break
-        first += timedelta(days=1)
+    first = from_day   # first date of the new day that falls on the old cycle
+    if slot.month_rule:
+        for _ in range(31 * 12 * slot.interval_months + 31):
+            if slot_matches(slot, first):
+                break
+            first += timedelta(days=1)
+        weekday = first.weekday()
+    else:
+        for _ in range(7 * slot.interval_weeks):
+            if first.weekday() == weekday and on_week_cycle(first, slot.valid_from, slot.interval_weeks):
+                break
+            first += timedelta(days=1)
     if valid_until and valid_until < first:
         raise SeriesError(gettext('A data final fica antes da primeira aula no novo dia.'))
     slot.valid_until = from_day - timedelta(days=1)
     slot.save(update_fields=['valid_until'])
     new = ScheduleSlot.objects.create(
         person=slot.person, weekday=weekday, start_time=start_time, duration_minutes=duration_minutes,
-        valid_from=first, valid_until=valid_until, interval_weeks=slot.interval_weeks, package=slot.package)
+        valid_from=first, valid_until=valid_until, interval_weeks=slot.interval_weeks, month_rule=slot.month_rule,
+        interval_months=slot.interval_months, package=slot.package)
     return new, removed

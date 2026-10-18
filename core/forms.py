@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.utils.translation import gettext, gettext_lazy as _, ngettext
 from .i18n import short_date
 from . import photo_positions
-from .recurrence import MAX_INTERVAL, MAX_OCCURRENCES, MAX_SPAN_DAYS, end_date
+from .recurrence import MAX_INTERVAL, MAX_OCCURRENCES, MAX_SPAN_DAYS, end_date, month_rule_options
 from .validators import normalize_phone, normalize_state, normalize_zip_code, validate_birth_date, digits_only
 from .models import (
     Appointment, Holiday, Payment, Package, Refund, ScheduleSlot, StudentPackage,
@@ -546,8 +546,21 @@ class PaymentForm(forms.ModelForm):
 
 
 class RecurrenceMixin(forms.Form):
-    """Repeat every N weeks, from a start date, ending never / on a date / after N classes."""
+    """Repeat every N weeks (or every N months on the same day / week of the month), from a start date, ending never /
+    on a date / after N classes."""
     ENDS = (('never', _('Nunca')), ('on', _('Em uma data')), ('after', _('Após um número de aulas')))
+    FREQUENCIES = (('weekly', _('Por semana')), ('monthly', _('Por mês')))
+
+    frequency = forms.ChoiceField(label=_('Repete'), choices=FREQUENCIES, initial='weekly', required=False,
+                                  widget=forms.RadioSelect)
+    month_rule = forms.ChoiceField(
+        label=_('Todo mês, em qual dia?'), required=False,
+        choices=[('day', _('Mesmo dia do mês')), ('nth', _('Mesmo dia da semana, na mesma semana do mês')),
+                 ('last', _('Último dia da semana do mês'))],
+        widget=forms.Select(attrs={'class': 'form-select'}))
+    interval_months = forms.IntegerField(
+        label=_('Repete a cada (meses)'), min_value=1, max_value=12, initial=1, required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': '12', 'inputmode': 'numeric'}))
 
     interval_weeks = forms.IntegerField(
         label=_('Repete a cada (semanas)'), min_value=1, max_value=MAX_INTERVAL, initial=1, required=False,
@@ -570,11 +583,31 @@ class RecurrenceMixin(forms.Form):
     def clean_interval_weeks(self):
         return self.cleaned_data.get('interval_weeks') or 1
 
+    def clean_interval_months(self):
+        return self.cleaned_data.get('interval_months') or 1
+
+    @property
+    def monthly(self):
+        return self.cleaned_data.get('frequency') == 'monthly'
+
     def clean(self):
         cleaned = super().clean()
         ends = cleaned.get('ends') or 'never'
         cleaned['ends'] = ends
         start = cleaned.get('starts_on') or self.start_hint or timezone.localdate()
+        cleaned['frequency'] = 'monthly' if cleaned.get('frequency') == 'monthly' else 'weekly'
+        if cleaned['frequency'] == 'monthly':
+            rule = cleaned.get('month_rule')
+            options = month_rule_options(start)
+            if not rule:
+                self.add_error('month_rule', gettext('Escolha em qual dia do mês a aula se repete.'))
+            elif rule not in options:
+                self.add_error('month_rule', gettext(
+                    'Essa opção não vale para %(date)s: escolha outra ou mude a data de início.')
+                    % {'date': short_date(start)})
+        else:
+            cleaned['month_rule'] = ''
+            cleaned['interval_months'] = 1
         if ends == 'on':
             if not cleaned.get('ends_on'):
                 self.add_error('ends_on', gettext('Informe a data final.'))
@@ -590,7 +623,7 @@ class RecurrenceMixin(forms.Form):
         """Last day of the series for the chosen ending (None = never)."""
         cleaned = self.cleaned_data
         return end_date(start, weekdays, cleaned['interval_weeks'], cleaned['ends'], cleaned.get('ends_on'),
-                        cleaned.get('ends_after'))
+                        cleaned.get('ends_after'), cleaned['month_rule'], cleaned['interval_months'])
 
 
 class ScheduleSlotForm(RecurrenceMixin):
@@ -625,7 +658,9 @@ class ScheduleSlotForm(RecurrenceMixin):
         days = set(cleaned.get('weekdays') or [])
         if cleaned.get('weekday') not in (None, ''):
             days.add(cleaned['weekday'])
-        if not days:
+        if cleaned.get('frequency') == 'monthly':   # a monthly time is on the weekday of its first class
+            days = {(cleaned.get('starts_on') or timezone.localdate()).weekday()}
+        elif not days:
             self.add_error('weekdays', gettext('Escolha pelo menos um dia da semana.'))
         cleaned['all_weekdays'] = sorted(days)
         if cleaned.get('ends') == 'package':
@@ -642,7 +677,8 @@ class ScheduleSlotForm(RecurrenceMixin):
         if self.cleaned_data['ends'] != 'package':
             return super().series_end(weekdays, start)
         last = end_date(start, weekdays, self.cleaned_data['interval_weeks'], 'after',
-                        ends_after=self.plan['to_schedule'])
+                        ends_after=self.plan['to_schedule'], month_rule=self.cleaned_data['month_rule'],
+                        interval_months=self.cleaned_data['interval_months'])
         ends_on = self.plan['ends_on']
         return min(last, ends_on) if last and ends_on else (last or ends_on)
 
@@ -699,7 +735,9 @@ class RepeatForm(RecurrenceMixin):
         if not self.cleaned_data.get('enabled'):
             return self.cleaned_data   # nothing to validate: it is a single class
         cleaned = super().clean()
-        if not cleaned.get('weekdays'):
+        if cleaned.get('frequency') == 'monthly':
+            cleaned['weekdays'] = [self.start_hint.weekday()] if self.start_hint else []
+        elif not cleaned.get('weekdays'):
             self.add_error('weekdays', gettext('Escolha pelo menos um dia da semana.'))
         return cleaned
 

@@ -1,10 +1,32 @@
 {% load i18n %}
 {# Repeat options: every N weeks, start, how it ends. `rec` is a RecurrenceMixin form; `with_start` shows "Começa em". #}
-<div class="row g-3" data-recurrence>
-    <div class="col-sm-6">
+<div class="row g-3" data-recurrence data-month-url="{% url 'core:month_rules' %}">
+    <div class="col-12">
+        <div class="form-label small mb-1">{{ rec.frequency.label }}</div>
+        <div class="d-flex flex-wrap gap-3">
+            {% for radio in rec.frequency %}
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="{{ radio.data.name }}" value="{{ radio.data.value }}" id="{{ radio.id_for_label }}"
+                       {% if radio.data.selected or not rec.frequency.value and radio.data.value == 'weekly' %}checked{% endif %} data-frequency-choice>
+                <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-sm-6" data-weekly-only>
         <label class="form-label small mb-1" for="{{ rec.interval_weeks.id_for_label }}">{% trans "Repete a cada (semanas)" %}</label>
         {{ rec.interval_weeks }}
         {% if rec.interval_weeks.errors %}<div class="text-danger small">{{ rec.interval_weeks.errors|join:" " }}</div>{% endif %}
+    </div>
+    <div class="col-sm-6" data-monthly-only hidden>
+        <label class="form-label small mb-1" for="{{ rec.month_rule.id_for_label }}">{{ rec.month_rule.label }}</label>
+        {{ rec.month_rule }}
+        {% if rec.month_rule.errors %}<div class="text-danger small">{{ rec.month_rule.errors|join:" " }}</div>{% endif %}
+    </div>
+    <div class="col-sm-6" data-monthly-only hidden>
+        <label class="form-label small mb-1" for="{{ rec.interval_months.id_for_label }}">{% trans "Repete a cada (meses)" %}</label>
+        {{ rec.interval_months }}
+        {% if rec.interval_months.errors %}<div class="text-danger small">{{ rec.interval_months.errors|join:" " }}</div>{% endif %}
     </div>
     {% if with_start %}
     <div class="col-sm-6">
