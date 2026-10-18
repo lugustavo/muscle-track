@@ -46,7 +46,7 @@ class SessionDetailMobileTests(BaseTestCase):
 
     def test_titles_shrink_on_phones(self):
         html = self.client.get(self.url).content.decode()
-        self.assertIn('page-title-lg', html)
+        self.assertIn('class="ui-head inline"', html)   # the shared header title scales with clamp()
         self.assertEqual(html.count('card-title-lg'), 2)
 
 
