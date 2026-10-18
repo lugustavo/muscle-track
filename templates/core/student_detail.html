@@ -50,6 +50,9 @@
         <a href="{% nav_url 'core:person_routine_create' %}&person={{ student.pk }}" class="btn btn-success">
             <i class="bi bi-plus-circle"></i> {% trans "Atribuir Treino" %}
         </a>
+        <a href="{% nav_url 'core:student_sheet' student.pk %}" class="btn btn-outline-primary" data-sheet-link-button title="{% trans "Link só de leitura da ficha de treino, para o aluno ler ou imprimir" %}">
+            <i class="bi bi-link-45deg"></i> {% trans "Link da ficha" %}
+        </a>
         {% if student.has_app %}
         <a href="{% nav_url 'core:student_invite' student.pk %}" class="btn btn-outline-primary">
             <i class="bi bi-send"></i> {% if student.user.has_usable_password %}{% trans "Redefinir senha" %}{% else %}{% trans "Convite" %}{% endif %}
@@ -73,6 +76,7 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item py-2" href="{% nav_url 'core:student_edit' student.pk %}"><i class="bi bi-pencil me-2"></i>{% trans "Editar" %}</a></li>
+                <li><a class="dropdown-item py-2" href="{% nav_url 'core:student_sheet' student.pk %}"><i class="bi bi-link-45deg me-2"></i>{% trans "Link da ficha" %}</a></li>
                 {% if student.has_app %}<li><a class="dropdown-item py-2" href="{% nav_url 'core:student_invite' student.pk %}"><i class="bi bi-send me-2"></i>{% if student.user.has_usable_password %}{% trans "Redefinir senha" %}{% else %}{% trans "Convite" %}{% endif %}</a></li>{% endif %}
                 <li><a class="dropdown-item py-2" href="{% nav_url 'core:student_status' student.pk %}"><i class="bi bi-arrow-repeat me-2"></i>{% trans "Alterar situação" %}</a></li>
                 <li><hr class="dropdown-divider"></li>

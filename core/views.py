@@ -43,7 +43,7 @@ from .agenda import (
 from .billing import (
     charge_message, delete_payment, money, month_bounds, month_summary, overdue_rows, parse_month, register_payment, service_report,
 )
-from . import app_access, class_requests, evolution, holidays, intro, notifications, packages, refunds, whatsapp_messages
+from . import app_access, sheet_link, class_requests, evolution, holidays, intro, notifications, packages, refunds, whatsapp_messages
 from .consistency import celebrations
 from .calendar_feed import build_ics, feed_for_token, get_or_create_feed, mark_fetched, rotate
 from .consent import (
@@ -54,7 +54,7 @@ from .exports import build_export
 from .history import log_event, log_profile_edit
 from .invites import build_invite_url, get_user_from_invite, revoke_invites
 from .models import (
-    Appointment, AppointmentRequest, Assessment, CalendarFeed, Holiday, Refund, NotificationPreference, PhotoPosition, PushSubscription, WhatsAppTemplate, ConsentRecord, Exercise, MuscleGroup, Payment, Package, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
+    Appointment, AppointmentRequest, Assessment, CalendarFeed, SheetLink, Holiday, Refund, NotificationPreference, PhotoPosition, PushSubscription, WhatsAppTemplate, ConsentRecord, Exercise, MuscleGroup, Payment, Package, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
     Routine, RoutineExercise, SessionExercise, SessionSet, StudentEvent, StudentNote, WorkoutSession,
 )
 from .navigation import after_save_url, back_label, safe_next_url, with_next
@@ -254,6 +254,49 @@ def student_create(request):
     else:
         form = PersonForm()
     return render(request, 'core/student_form.html', {'form': form, 'title': _('Cadastrar Aluno')})
+
+
+@staff_required
+def student_sheet(request, pk):
+    """The student's workout sheet as a private read-only link (to read on the phone or print): create, copy, send by
+    WhatsApp, make a new one (the old stops working) or turn it off."""
+    student = get_object_or_404(Person.objects.select_related('user'), pk=pk)
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        link = SheetLink.objects.filter(person=student).first()
+        if action == 'enable':
+            sheet_link.enable(student, request.user)
+            messages.success(request, _('Link criado. Quem o tiver pode ler a ficha, então envie só ao aluno.'))
+        elif action == 'rotate' and link:
+            sheet_link.rotate(link, request.user)
+            messages.success(request, _('Novo link gerado. O anterior deixou de funcionar.'))
+        elif action == 'disable' and link:
+            sheet_link.disable(student, request.user)
+            messages.success(request, _('Link desativado: ninguém mais abre a ficha por ele.'))
+        else:
+            return HttpResponseBadRequest(_('Ação inválida'))
+        return redirect('core:student_sheet', pk=pk)
+    link = SheetLink.objects.filter(person=student).first()
+    url = f"{_public_base(request)}{sheet_link.public_path(link)}" if link else ''
+    data = sheet_link.sheet(student)
+    return render(request, 'core/student_sheet.html', {
+        'student': student, 'link': link, 'sheet_url': url, 'routines': data['routines'],
+        'whatsapp_url': whatsapp_url(student.phone, sheet_link.whatsapp_text(student, url)) if link else ''})
+
+
+@require_safe
+def public_sheet(request, token):
+    """The private sheet link: no login, the long random token is the credential. Read-only, never cached or indexed."""
+    link = sheet_link.link_for_token(token)
+    if link is None:
+        response = render(request, 'core/public_sheet.html', {'invalid': True}, status=404)
+    else:
+        sheet_link.mark_viewed(link)
+        response = render(request, 'core/public_sheet.html', {**sheet_link.sheet(link.person), 'link': link})
+    response['Cache-Control'] = 'no-store'
+    response['X-Robots-Tag'] = 'noindex, nofollow'
+    response['Referrer-Policy'] = 'no-referrer'
+    return response
 
 
 @staff_required

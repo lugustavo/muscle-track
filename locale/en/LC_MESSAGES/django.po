@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 21:26-0300\n"
+"POT-Creation-Date: 2026-10-17 21:52-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -298,6 +298,9 @@ msgstr "Reschedule class"
 
 msgid "Convite"
 msgstr "Invitation"
+
+msgid "Link da ficha"
+msgstr "Sheet link"
 
 msgid "Excluir"
 msgstr "Delete"
@@ -1620,6 +1623,19 @@ msgstr "Failed"
 msgid "Não enviada"
 msgstr "Not sent"
 
+#| msgid "Abrir a ficha do aluno"
+msgid "Link da ficha de treino"
+msgstr "Workout sheet link"
+
+#| msgid "Links de calendário"
+msgid "Links das fichas de treino"
+msgstr "Workout sheet links"
+
+#, python-format
+#| msgid "Ficha da personal"
+msgid "Ficha de %(person)s"
+msgstr "Sheet of %(person)s"
+
 msgid "Primeiro nome do aluno"
 msgstr "Student's first name"
 
@@ -1656,6 +1672,10 @@ msgstr "Back to student history"
 
 msgid "Voltar ao convite"
 msgstr "Back to invitation"
+
+#| msgid "Voltar ao login"
+msgid "Voltar ao link da ficha"
+msgstr "Back to the sheet link"
 
 msgid "Voltar à agenda"
 msgstr "Back to schedule"
@@ -2257,6 +2277,24 @@ msgstr "Amount refunded (difference): %(amount)s"
 msgid "Inativo"
 msgstr "Inactive"
 
+msgid "Link da ficha de treino criado"
+msgstr "Workout sheet link created"
+
+#| msgid "Link de acesso revogado e gerado de novo"
+msgid "Link da ficha de treino gerado de novo"
+msgstr "Workout sheet link regenerated"
+
+msgid "Link da ficha de treino desativado"
+msgstr "Workout sheet link turned off"
+
+#, python-format
+msgid ""
+"Olá, %(name)s! Aqui está a sua ficha de treino, para ler no celular ou "
+"imprimir: %(link)s"
+msgstr ""
+"Hi, %(name)s! Here is your workout sheet, to read on your phone or print: "
+"%(link)s"
+
 #, python-format
 msgid ""
 "Olá! Para receber os avisos do %(brand)s aqui, abra Notificações no app e "
@@ -2404,6 +2442,23 @@ msgstr ""
 msgid "Cadastrar Aluno"
 msgstr "Add Student"
 
+msgid "Link criado. Quem o tiver pode ler a ficha, então envie só ao aluno."
+msgstr ""
+"Link created. Whoever has it can read the sheet, so send it only to the "
+"student."
+
+#| msgid ""
+#| "Novo link gerado. O anterior deixou de funcionar: adicione o novo no Google "
+#| "Agenda."
+msgid "Novo link gerado. O anterior deixou de funcionar."
+msgstr "New link created. The previous one stopped working."
+
+msgid "Link desativado: ninguém mais abre a ficha por ele."
+msgstr "Link turned off: nobody can open the sheet with it anymore."
+
+msgid "Ação inválida"
+msgstr "Invalid action"
+
 msgid ""
 "Este aluno não usa o app. Para dar acesso, marque \"Usa o app\" ao editar o "
 "aluno."
@@ -2452,9 +2507,6 @@ msgstr "Package extended by %(days)d days."
 
 msgid "Pacote cancelado."
 msgstr "Package canceled."
-
-msgid "Ação inválida"
-msgstr "Invalid action"
 
 msgid "Pacote atualizado."
 msgstr "Package updated."
@@ -5897,6 +5949,58 @@ msgstr ""
 "Default app text. The responsible trainer should review it (preferably with "
 "legal support) before using it as an official document."
 
+#| msgid "Aula de treino"
+msgid "Ficha de treino"
+msgstr "Workout sheet"
+
+#, python-format
+#| msgid "Aula de treino (%(kind)s)"
+msgid "Ficha de treino - %(name)s"
+msgstr "Workout sheet - %(name)s"
+
+msgid "Esta ficha não está disponível"
+msgstr "This sheet is not available"
+
+msgid "O link foi trocado ou desativado. Peça um novo à sua personal."
+msgstr "The link was replaced or turned off. Ask your trainer for a new one."
+
+#, python-format
+#| msgid "Aula de treino (%(kind)s)"
+msgid "Ficha de treino de %(name)s"
+msgstr "Workout sheet for %(name)s"
+
+#| msgid "primeiro."
+msgid "Imprimir"
+msgstr "Print"
+
+#, python-format
+#| msgid "%(sets)s séries x %(reps)s reps"
+msgid "%(sets)s × %(reps)s"
+msgstr "%(sets)s × %(reps)s"
+
+#, python-format
+#| msgid "· descanso %(rest_seconds)ss"
+msgid "descanso %(seconds)ss"
+msgstr "rest %(seconds)ss"
+
+#| msgid "Como funciona"
+msgid "Como fazer"
+msgstr "How to do it"
+
+msgid "Ver execução"
+msgstr "View run"
+
+#| msgid "Nenhum treino ativo."
+msgid "Nenhum treino em uso no momento."
+msgstr "No workout in use at the moment."
+
+msgid ""
+"Link pessoal: não envie a outras pessoas. Em caso de dúvida sobre os "
+"exercícios, fale com a sua personal."
+msgstr ""
+"Personal link: do not send it to other people. If you have doubts about the "
+"exercises, talk to your trainer."
+
 #, python-format
 msgid "Devolução - %(person_name)s - %(brand_name)s"
 msgstr "Refund - %(person_name)s - %(brand_name)s"
@@ -7046,6 +7150,9 @@ msgstr "Requested deletion"
 msgid "O aluno ainda não criou a senha"
 msgstr "The student hasn't created a password yet"
 
+msgid "Link só de leitura da ficha de treino, para o aluno ler ou imprimir"
+msgstr "Read-only link to the workout sheet, for the student to read or print"
+
 msgid "Redefinir senha"
 msgstr "Reset password"
 
@@ -7709,6 +7816,89 @@ msgstr ""
 "confirm."
 
 #, python-format
+#| msgid "Link de acesso - %(person_name)s - %(brand_name)s"
+msgid "Link da ficha - %(person_name)s - %(brand_name)s"
+msgstr "Sheet link - %(person_name)s - %(brand_name)s"
+
+#, python-format
+#| msgid "Situação de %(person_name)s"
+msgid "Ficha de %(person_name)s para consulta"
+msgstr "Read-only sheet of %(person_name)s"
+
+msgid ""
+"Um link só de leitura com a lista de exercícios dos treinos em uso (séries, "
+"repetições, descanso e observações), para o aluno ler no celular ou "
+"imprimir. Não precisa de login e não mostra saúde, anotações internas, "
+"contatos nem valores."
+msgstr ""
+"A read-only link with the list of exercises of the workouts in use (sets, "
+"reps, rest and notes), for the student to read on the phone or print. It "
+"needs no login and shows no health data, internal notes, contacts or prices."
+
+#| msgid "Abrir a ficha do aluno"
+msgid "Abrir a ficha"
+msgstr "Open the sheet"
+
+#, python-format
+#| msgid ""
+#| "O Google ou outro app buscou este link pela última vez em "
+#| "<strong>%(last_fetched_at)s</strong>."
+msgid "Aberta pela última vez em <strong>%(last_viewed_at)s</strong>."
+msgstr "Last opened on <strong>%(last_viewed_at)s</strong>."
+
+msgid "Ainda ninguém abriu este link."
+msgstr "Nobody has opened this link yet."
+
+#| msgid ""
+#| "Quem tiver este link consegue entrar como o aluno até ele ser usado, então "
+#| "envie só para o próprio aluno. Depois de usado o link deixa de funcionar. "
+#| "Enviou para a pessoa errada? Revogue: o link atual para de funcionar e um "
+#| "novo é gerado."
+msgid ""
+"Quem tiver este link lê a ficha, então envie só ao aluno. Enviou à pessoa "
+"errada? Gere um novo link (o atual para de funcionar) ou desative."
+msgstr ""
+"Whoever has this link can read the sheet, so send it only to the student. "
+"Sent it to the wrong person? Create a new link (the current one stops "
+"working) or turn it off."
+
+msgid "Gerar um novo link? O atual deixa de funcionar."
+msgstr "Create a new link? The current one stops working."
+
+msgid "Desativar o link? Ninguém mais abre a ficha por ele."
+msgstr "Turn the link off? Nobody will be able to open the sheet with it."
+
+#| msgid "Desativar"
+msgid "Desativar o link"
+msgstr "Turn the link off"
+
+#| msgid "Este aluno ainda não tem pacote."
+msgid "Este aluno ainda não tem link da ficha."
+msgstr "This student has no sheet link yet."
+
+msgid "Criar o link da ficha"
+msgstr "Create the sheet link"
+
+#| msgid "Aula que o aluno faltou"
+msgid "O que o aluno vê"
+msgstr "What the student sees"
+
+#, python-format
+#| msgid "exercícios"
+msgid "%(n)s exercício"
+msgid_plural "%(n)s exercícios"
+msgstr[0] "%(n)s exercise"
+msgstr[1] "%(n)s exercises"
+
+#| msgid "Este aluno não tem pacote em uso. Venda um pacote primeiro."
+msgid ""
+"Este aluno não tem treino em uso: a ficha abriria vazia. Atribua um treino "
+"primeiro."
+msgstr ""
+"This student has no workout in use: the sheet would open empty. Assign a "
+"workout first."
+
+#, python-format
 msgid "Situação - %(person_name)s - %(brand_name)s"
 msgstr "Status - %(person_name)s - %(brand_name)s"
 
@@ -7796,9 +7986,6 @@ msgstr "Last time: <strong>%(previous_weight)s kg</strong>"
 #, python-format
 msgid "Recorde: <strong>%(record)s kg</strong>"
 msgstr "Record: <strong>%(record)s kg</strong>"
-
-msgid "Ver execução"
-msgstr "View run"
 
 #, python-format
 msgid "Diminuir a carga da série %(n)s"

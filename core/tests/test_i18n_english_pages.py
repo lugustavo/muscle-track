@@ -65,8 +65,10 @@ class EnglishPagesTests(RichDataMixin, BaseTestCase):
                 self.assertEqual(leaks(visible(page)), [], url)
 
     def test_trainer_pages(self):
+        from core import sheet_link
         self.login(self.trainer)
         pk = self.person.pk
+        link = sheet_link.enable(self.person, self.trainer)
         tabs = ['', '?tab=agenda', '?tab=avaliacoes', '?tab=financeiro', '?tab=treinos', '?tab=historico', '?tab=pacotes']
         self.check([
             reverse('core:home'), reverse('core:search') + '?q=ali',
@@ -74,6 +76,7 @@ class EnglishPagesTests(RichDataMixin, BaseTestCase):
             *[reverse('core:student_detail', kwargs={'pk': pk}) + tab for tab in tabs],
             reverse('core:student_edit', kwargs={'pk': pk}), reverse('core:student_invite', kwargs={'pk': pk}),
             reverse('core:student_history', kwargs={'pk': pk}),
+            reverse('core:student_sheet', kwargs={'pk': pk}), reverse('core:public_sheet', kwargs={'token': link.token}),
             reverse('core:assessment_create', kwargs={'pk': pk}), reverse('core:student_package_sell', kwargs={'pk': pk}),
             reverse('core:payment_create', kwargs={'pk': pk}), reverse('core:refund_create', kwargs={'pk': pk}),
             reverse('core:finance'), reverse('core:finance_refunds'), reverse('core:plan_list'), reverse('core:plan_create'),
