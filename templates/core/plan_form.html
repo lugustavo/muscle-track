@@ -51,6 +51,30 @@
                     </div>
                     <div class="col-12 form-text mt-0">{% trans "Digite um dos dois: o outro é calculado." %}</div>
                 </div>
+                <div class="border rounded p-3 mb-3 bg-body-tertiary" data-cancel-policy>
+                    <div class="fw-bold mb-1"><i class="bi bi-shield-check"></i> {% trans "Política de cancelamento (opcional)" %}</div>
+                    <p class="small text-muted mb-2">{% trans "O que fica retido se o aluno cancelar o pacote. Vira a taxa já calculada na hora de cancelar (você ainda pode mudar o valor, por exemplo por doença) e é copiada para cada pacote vendido." %}</p>
+                    <div class="d-flex flex-wrap gap-1 mb-3" data-policy-presets>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-preset="0,0,0">{% trans "Sem política" %}</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-preset="7,20,0">{% trans "7 dias sem taxa, depois 20%" %}</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-preset="0,100,0">{% trans "Aulas não usadas não são devolvidas" %}</button>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-sm-4">
+                            <label for="{{ form.cancel_free_days.id_for_label }}" class="form-label small fw-bold mb-1">{{ form.cancel_free_days.label }}</label>{{ form.cancel_free_days }}
+                            {% if form.cancel_free_days.errors %}<div class="text-danger small">{{ form.cancel_free_days.errors|join:" " }}</div>{% endif %}
+                        </div>
+                        <div class="col-sm-4">
+                            <label for="{{ form.cancel_fee_percent.id_for_label }}" class="form-label small fw-bold mb-1">{{ form.cancel_fee_percent.label }}</label>{{ form.cancel_fee_percent }}
+                            {% if form.cancel_fee_percent.errors %}<div class="text-danger small">{{ form.cancel_fee_percent.errors|join:" " }}</div>{% endif %}
+                        </div>
+                        <div class="col-sm-4">
+                            <label for="{{ form.cancel_fee_fixed.id_for_label }}" class="form-label small fw-bold mb-1"><i class="bi bi-lock"></i> {{ form.cancel_fee_fixed.label }}</label>{{ form.cancel_fee_fixed }}
+                            {% if form.cancel_fee_fixed.errors %}<div class="text-danger small">{{ form.cancel_fee_fixed.errors|join:" " }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="form-text mt-2">{% trans "Os dias valem a partir da data da compra. A taxa nunca passa do que sobra do pagamento depois das aulas dadas. O aluno vê só os dias e a porcentagem, nunca valores." %}</div>
+                </div>
                 <div class="mb-3">
                     <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">{{ form.description.label }}</label>{{ form.description }}
                 </div>
@@ -78,6 +102,18 @@
 
 {% block extra_js %}
 <script src="{% static 'js/package-prices.js' %}"></script>
+<script>
+(function () {
+    // preset buttons fill: days without fee, percent of the unused classes, fixed fee
+    var ids = ['{{ form.cancel_free_days.id_for_label }}', '{{ form.cancel_fee_percent.id_for_label }}', '{{ form.cancel_fee_fixed.id_for_label }}'];
+    document.querySelectorAll('[data-preset]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var values = button.getAttribute('data-preset').split(',');
+            ids.forEach(function (id, i) { var field = document.getElementById(id); if (field) { field.value = values[i]; } });
+        });
+    });
+})();
+</script>
 <script>
 (function () {
     var box = document.getElementById('{{ form.no_deadline.id_for_label }}');

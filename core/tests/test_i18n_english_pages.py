@@ -69,6 +69,15 @@ class EnglishPagesTests(RichDataMixin, BaseTestCase):
         self.login(self.trainer)
         pk = self.person.pk
         link = sheet_link.enable(self.person, self.trainer)
+        from decimal import Decimal
+        from core.models import Package, StudentPackage
+        with_policy = Package.objects.create(name='Policy 10', sessions=10, valid_days=60, pricing_mode='per_session',
+                                             price_per_session=Decimal('50'), cancel_free_days=7,
+                                             cancel_fee_percent=Decimal('20'), cancel_fee_fixed=Decimal('10'))
+        sold = StudentPackage.objects.create(   # not through packages.sell: its history line is stored in Portuguese
+            person=self.person, package=with_policy, name='Policy 10', sessions=10, valid_days=60,
+            price_per_session=Decimal('50'), price_total=Decimal('500'), cancel_free_days=7,
+            cancel_fee_percent=Decimal('20'), cancel_fee_fixed=Decimal('10'))
         tabs = ['', '?tab=agenda', '?tab=avaliacoes', '?tab=financeiro', '?tab=treinos', '?tab=historico', '?tab=pacotes']
         self.check([
             reverse('core:home'), reverse('core:search') + '?q=ali',
@@ -76,6 +85,9 @@ class EnglishPagesTests(RichDataMixin, BaseTestCase):
             *[reverse('core:student_detail', kwargs={'pk': pk}) + tab for tab in tabs],
             reverse('core:student_edit', kwargs={'pk': pk}), reverse('core:student_invite', kwargs={'pk': pk}),
             reverse('core:student_history', kwargs={'pk': pk}),
+            reverse('core:student_package_cancel', kwargs={'pk': pk, 'package_pk': sold.pk}),
+            reverse('core:student_package_edit', kwargs={'pk': pk, 'package_pk': sold.pk}),
+            reverse('core:plan_edit', kwargs={'pk': with_policy.pk}),
             reverse('core:student_sheet', kwargs={'pk': pk}), reverse('core:public_sheet', kwargs={'token': link.token}),
             reverse('core:assessment_create', kwargs={'pk': pk}), reverse('core:student_package_sell', kwargs={'pk': pk}),
             reverse('core:payment_create', kwargs={'pk': pk}), reverse('core:refund_create', kwargs={'pk': pk}),

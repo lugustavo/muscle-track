@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 23:03-0300\n"
+"POT-Creation-Date: 2026-10-18 09:33-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -882,6 +882,16 @@ msgstr "Classes"
 msgid "Prazo (dias)"
 msgstr "Validity (days)"
 
+msgid "Dias sem taxa depois da compra"
+msgstr "Fee-free days after the purchase"
+
+msgid "Taxa sobre as aulas não usadas (%)"
+msgstr "Fee on the unused classes (%)"
+
+#| msgid "Data de Nascimento"
+msgid "Taxa fixa de cancelamento"
+msgstr "Fixed cancellation fee"
+
 msgid "Pagamento"
 msgstr "Payment"
 
@@ -1499,6 +1509,20 @@ msgstr "Classes in package"
 
 msgid "Conta a partir da primeira aula."
 msgstr "Counts from the first class."
+
+msgid ""
+"Percentual do valor das aulas que sobraram. 100 = as aulas não usadas não "
+"são devolvidas."
+msgstr ""
+"Percentage of the value of the classes left. 100 = unused classes are not "
+"refunded."
+
+msgid ""
+"Cancelando dentro deste prazo, só as aulas já dadas são descontadas. 0 = sem"
+" esse prazo."
+msgstr ""
+"Cancelling within this period, only the classes already given are "
+"discounted. 0 = no such period."
 
 msgid "Dividido com"
 msgstr "Shared with"
@@ -2178,16 +2202,13 @@ msgid "Todo dia %(day)d do mês"
 msgstr "Day %(day)d of every month"
 
 #, python-format
-#| msgid "Toda %(weekday)s da %(n)dª semana do mês"
 msgid "%(weekday)s da %(n)dª semana do mês"
 msgstr "%(weekday)s of week %(n)d of the month"
 
 #, python-format
-#| msgid "Toda %(weekday)s da última semana do mês"
 msgid "%(weekday)s da última semana do mês"
 msgstr "%(weekday)s of the last week of the month"
 
-#| msgid "todo mês"
 msgid "Todo mês"
 msgstr "Every month"
 
@@ -2232,6 +2253,43 @@ msgstr ""
 
 msgid "A data final fica antes da primeira aula no novo dia."
 msgstr "The end date falls before the first class on the new day."
+
+#, python-format
+msgid ""
+"Cancelando em até %(n)d dia depois da compra, não há taxa: só as aulas já "
+"dadas são descontadas."
+msgid_plural ""
+"Cancelando em até %(n)d dias depois da compra, não há taxa: só as aulas já "
+"dadas são descontadas."
+msgstr[0] ""
+"Cancelling within %(n)d day of the purchase carries no fee: only the classes"
+" already given are discounted."
+msgstr[1] ""
+"Cancelling within %(n)d days of the purchase carries no fee: only the "
+"classes already given are discounted."
+
+msgid "Depois disso, as aulas não usadas não são devolvidas."
+msgstr "After that, unused classes are not refunded."
+
+msgid "As aulas não usadas não são devolvidas."
+msgstr "Unused classes are not refunded."
+
+#, python-format
+msgid "Depois disso, taxa de %(p)s%% do valor das aulas não usadas."
+msgstr "After that, a fee of %(p)s%% of the value of the unused classes."
+
+#, python-format
+msgid "Taxa de %(p)s%% do valor das aulas não usadas."
+msgstr "Fee of %(p)s%% of the value of the unused classes."
+
+#| msgid "Taxa ou multa combinada"
+msgid "Mais uma taxa fixa combinada."
+msgstr "Plus an agreed fixed fee."
+
+#, python-format
+#| msgid "Taxa combinada: %(fee)s"
+msgid "Taxa fixa: %(fee)s."
+msgstr "Fixed fee: %(fee)s."
 
 #, python-format
 msgid "Aulas dadas: %(used)d de %(sessions)d x %(per_class)s = %(used_value)s"
@@ -2304,6 +2362,9 @@ msgstr "amount changed"
 
 msgid "observação alterada"
 msgstr "note changed"
+
+msgid "política de cancelamento alterada"
+msgstr "cancellation policy changed"
 
 msgid "sem prazo"
 msgstr "no deadline"
@@ -3481,6 +3542,9 @@ msgid "Prorrogado em %(extension_days)s dia."
 msgid_plural "Prorrogado em %(extension_days)s dias."
 msgstr[0] "Extended by %(extension_days)s day."
 msgstr[1] "Extended by %(extension_days)s days."
+
+msgid "Se você precisar cancelar o pacote"
+msgstr "If you need to cancel the package"
 
 #, python-format
 msgid "Aulas descontadas (%(classes)s)"
@@ -5826,6 +5890,38 @@ msgstr ""
 msgid "Digite um dos dois: o outro é calculado."
 msgstr "Enter one of the two: the other is calculated."
 
+msgid "Política de cancelamento (opcional)"
+msgstr "Cancellation policy (optional)"
+
+msgid ""
+"O que fica retido se o aluno cancelar o pacote. Vira a taxa já calculada na "
+"hora de cancelar (você ainda pode mudar o valor, por exemplo por doença) e é"
+" copiada para cada pacote vendido."
+msgstr ""
+"What is kept if the student cancels the package. It becomes the fee already "
+"worked out when cancelling (you can still change it, for example for "
+"illness) and is copied to each package sold."
+
+#| msgid "Sem pacote"
+msgid "Sem política"
+msgstr "No policy"
+
+#, python-format
+msgid "7 dias sem taxa, depois 20%%"
+msgstr "7 days with no fee, then 20%%"
+
+msgid "Aulas não usadas não são devolvidas"
+msgstr "Unused classes are not refunded"
+
+msgid ""
+"Os dias valem a partir da data da compra. A taxa nunca passa do que sobra do"
+" pagamento depois das aulas dadas. O aluno vê só os dias e a porcentagem, "
+"nunca valores."
+msgstr ""
+"The days count from the purchase date. The fee never exceeds what is left of"
+" the payment after the classes given. The student sees only the days and the"
+" percentage, never amounts."
+
 msgid "(pacotes inativos não aparecem para vender)"
 msgstr "(inactive packages don't appear for sale)"
 
@@ -7711,6 +7807,40 @@ msgstr "Next &raquo;"
 msgid "Cancelar pacote - %(person_name)s - %(brand_name)s"
 msgstr "Cancel package - %(person_name)s - %(brand_name)s"
 
+#| msgid "Cancelamento do pacote"
+msgid "Política de cancelamento deste pacote"
+msgstr "Cancellation policy of this package"
+
+#, python-format
+msgid "Está dentro do prazo sem taxa (até %(until)s): a taxa começa em zero."
+msgstr ""
+"It is within the fee-free period (until %(until)s): the fee starts at zero."
+
+#, python-format
+#| msgid ""
+#| "Aberta pela última vez em <strong>%(last_viewed_at)s</strong>."
+msgid "Taxa pela política hoje: <strong>%(fee)s</strong>."
+msgstr "Fee under the policy today: <strong>%(fee)s</strong>."
+
+#, python-format
+msgid "%(part)s das aulas não usadas"
+msgstr "%(part)s of the unused classes"
+
+#, python-format
+msgid "%(part)s fixos"
+msgstr "%(part)s fixed"
+
+msgid ""
+"A taxa abaixo já vem preenchida com isso; mude se for abrir uma exceção "
+"(doença, mudança de cidade...)."
+msgstr ""
+"The fee below is already filled in with this; change it to make an exception"
+" (illness, moving away...)."
+
+#| msgid "Voltar à agenda"
+msgid "Voltar à taxa da política"
+msgstr "Back to the policy fee"
+
 msgid "Cálculo da devolução"
 msgstr "Refund calculation"
 
@@ -7790,6 +7920,12 @@ msgstr ""
 
 msgid "Valor combinado (sigiloso)"
 msgstr "Agreed amount (confidential)"
+
+msgid ""
+"Veio do modelo do catálogo na venda; mudar aqui vale só para este pacote."
+msgstr ""
+"It came from the catalog template at the sale; changing it here applies only"
+" to this package."
 
 msgid ""
 "Os pagamentos já registrados não mudam. Para devolver dinheiro, use "

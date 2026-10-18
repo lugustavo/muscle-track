@@ -494,7 +494,8 @@ class PackageForm(forms.ModelForm):
 
     class Meta:
         model = Package
-        fields = ['name', 'description', 'sessions', 'valid_days', 'pricing_mode', 'price_per_session', 'price_total', 'is_active']
+        fields = ['name', 'description', 'sessions', 'valid_days', 'pricing_mode', 'price_per_session', 'price_total',
+                  'cancel_free_days', 'cancel_fee_percent', 'cancel_fee_fixed', 'is_active']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Ex.: Pacote 10 aulas')}),
             'description': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
@@ -503,7 +504,19 @@ class PackageForm(forms.ModelForm):
             'pricing_mode': forms.RadioSelect,
             'price_per_session': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'inputmode': 'decimal'}),
             'price_total': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'inputmode': 'decimal'}),
+            'cancel_free_days': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'max': '365', 'inputmode': 'numeric'}),
+            'cancel_fee_percent': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'max': '100', 'inputmode': 'decimal'}),
+            'cancel_fee_fixed': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'inputmode': 'decimal'}),
         }
+
+    def clean_cancel_free_days(self):
+        return self.cleaned_data.get('cancel_free_days') or 0
+
+    def clean_cancel_fee_percent(self):
+        return self.cleaned_data.get('cancel_fee_percent') or Decimal('0')
+
+    def clean_cancel_fee_fixed(self):
+        return self.cleaned_data.get('cancel_fee_fixed') or Decimal('0')
 
     def clean(self):
         cleaned = super().clean()
@@ -816,6 +829,28 @@ class PackageEditForm(SharedWithMixin):
                                      label=_('Valor total'), widget=forms.NumberInput(attrs=MONEY_ATTRS))
     notes = forms.CharField(required=False, max_length=200, label=_('Observação'),
                             widget=forms.TextInput(attrs={'class': 'form-control'}))
+    cancel_free_days = forms.IntegerField(required=False, min_value=0, max_value=365, label=_('Dias sem taxa depois da compra'),
+                                          widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'max': '365', 'inputmode': 'numeric'}))
+    cancel_fee_percent = forms.DecimalField(required=False, min_value=0, max_value=100, max_digits=5, decimal_places=2,
+                                            label=_('Taxa sobre as aulas não usadas (%)'),
+                                            widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'max': '100', 'inputmode': 'decimal'}))
+    cancel_fee_fixed = forms.DecimalField(required=False, min_value=0, max_digits=8, decimal_places=2,
+                                          label=_('Taxa fixa de cancelamento'), widget=forms.NumberInput(attrs=MONEY_ATTRS))
+
+    def _policy_value(self, name, zero):
+        """A field left empty means none; a field not sent at all (None) leaves the package's policy as it is."""
+        if self.add_prefix(name) not in self.data:
+            return None
+        return self.cleaned_data.get(name) or zero
+
+    def clean_cancel_free_days(self):
+        return self._policy_value('cancel_free_days', 0)
+
+    def clean_cancel_fee_percent(self):
+        return self._policy_value('cancel_fee_percent', Decimal('0'))
+
+    def clean_cancel_fee_fixed(self):
+        return self._policy_value('cancel_fee_fixed', Decimal('0'))
 
     @classmethod
     def for_package(cls, package, data=None):
@@ -823,7 +858,9 @@ class PackageEditForm(SharedWithMixin):
         initial = {'name': package.name, 'sessions': package.sessions, 'valid_days': package.valid_days,
                    'no_deadline': package.valid_days is None, 'pricing_mode': 'per_session',
                    'price_per_session': package.price_per_session, 'price_total': package.price_total,
-                   'notes': package.notes, 'member_1': current[0].pk if current else None,
+                   'notes': package.notes, 'cancel_free_days': package.cancel_free_days,
+                   'cancel_fee_percent': package.cancel_fee_percent, 'cancel_fee_fixed': package.cancel_fee_fixed,
+                   'member_1': current[0].pk if current else None,
                    'member_2': current[1].pk if len(current) > 1 else None}
         form = cls(data, initial=initial)
         form.limit_members(package.person, current)

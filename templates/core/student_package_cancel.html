@@ -14,6 +14,23 @@
 </div>
 
 <div class="mx-auto" style="max-width: 640px;">
+    {% if has_policy %}
+    <section class="card mb-3 border-info-subtle" data-policy-box>
+        <div class="card-body">
+            <h2 class="h6 text-uppercase text-muted"><i class="bi bi-shield-check"></i> {% trans "Política de cancelamento deste pacote" %}</h2>
+            <ul class="small mb-2">{% for line in policy_lines %}<li>{{ line }}</li>{% endfor %}</ul>
+            {% if policy.free %}
+            <div class="small text-success-emphasis" data-policy-free><i class="bi bi-check-circle"></i> {% blocktrans trimmed with until=policy.free_until|date:_('d/m/Y') %}Está dentro do prazo sem taxa (até {{ until }}): a taxa começa em zero.{% endblocktrans %}</div>
+            {% else %}
+            <div class="small" data-policy-fee>{% blocktrans trimmed with fee=policy.fee|money %}Taxa pela política hoje: <strong>{{ fee }}</strong>.{% endblocktrans %}
+                {% if policy.percent_part or policy.fixed_part %}<span class="text-muted">({% if policy.percent_part %}{% blocktrans trimmed with part=policy.percent_part|money %}{{ part }} das aulas não usadas{% endblocktrans %}{% endif %}{% if policy.percent_part and policy.fixed_part %} + {% endif %}{% if policy.fixed_part %}{% blocktrans trimmed with part=policy.fixed_part|money %}{{ part }} fixos{% endblocktrans %}{% endif %})</span>{% endif %}
+            </div>
+            {% endif %}
+            <div class="small text-muted mt-1">{% trans "A taxa abaixo já vem preenchida com isso; mude se for abrir uma exceção (doença, mudança de cidade...)." %}{% if fee != policy.fee %} <a href="?fee={{ policy.fee }}" data-use-policy>{% trans "Voltar à taxa da política" %}</a>{% endif %}</div>
+        </div>
+    </section>
+    {% endif %}
+
     <section class="card mb-3" data-quote>
         <div class="card-body">
             <h2 class="h6 text-uppercase text-muted">{% trans "Cálculo da devolução" %}</h2>
