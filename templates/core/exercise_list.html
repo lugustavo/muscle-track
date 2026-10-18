@@ -5,220 +5,106 @@
 
 {% block title %}{% blocktrans trimmed %}Exercícios - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
-{% block extra_css %}
-<style>
-    .exercise-thumbnail {
-        width: 80px;
-        height: 80px;
-        object-fit: cover;
-        border-radius: 8px;
-    }
-    .list-view .exercise-card {
-        margin-bottom: 1rem;
-    }
-    .list-view .card-body {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-    .list-view .exercise-info {
-        flex: 1;
-    }
-    .grid-view .exercise-card {
-        height: 100%;
-    }
-    .grid-view .exercise-thumbnail {
-        width: 100%;
-        height: 200px;
-    }
-    .filter-section {
-        background: var(--bs-tertiary-bg);
-        padding: 1.5rem;
-        border-radius: 10px;
-        margin-bottom: 2rem;
-    }
-    .view-toggle {
-        display: flex;
-        gap: 0.5rem;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-activity"></i> {% trans "Exercícios" %}</h1>
-    <a href="{% nav_url 'core:exercise_create' %}" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> {% trans "Novo Exercício" %}
-    </a>
-</div>
-
-<!-- Filtros -->
-<div class="filter-section">
-    <form method="get" action="{% url 'core:exercise_list' %}" id="filterForm">
-        <div class="row g-3">
-            <div class="col-md-5">
-                <label for="search" class="form-label"><i class="bi bi-search"></i> {% trans "Buscar Exercício" %}</label>
-                <input type="text"
-                       class="form-control"
-                       id="search"
-                       name="search"
-                       value="{{ search }}"
-                       placeholder="{% trans "Digite o nome ou descrição..." %}"
-                       autocomplete="off">
-            </div>
-            <div class="col-md-4">
-                <label for="muscle_group" class="form-label"><i class="bi bi-filter"></i> {% trans "Grupo Muscular" %}</label>
-                <select class="form-select" id="muscle_group" name="muscle_group" onchange="document.getElementById('filterForm').submit();">
-                    <option value="">{% trans "Todos os grupos" %}</option>
-                    {% for muscle_group in muscle_groups %}
-                        <option value="{{ muscle_group.id }}" {% if selected_muscle_group == muscle_group.id|stringformat:"s" %}selected{% endif %}>
-                            {{ muscle_group.label }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label"><i class="bi bi-grid-3x3"></i> {% trans "Visualização" %}</label>
-                <div class="view-toggle">
-                    <a href="?search={{ search }}&muscle_group={{ selected_muscle_group }}&view=grid"
-                       class="btn {% if view_mode == 'grid' %}btn-primary{% else %}btn-outline-primary{% endif %} flex-fill">
-                        <i class="bi bi-grid-3x3-gap"></i> {% trans "Grade" %}
-                    </a>
-                    <a href="?search={{ search }}&muscle_group={{ selected_muscle_group }}&view=list"
-                       class="btn {% if view_mode == 'list' %}btn-primary{% else %}btn-outline-primary{% endif %} flex-fill">
-                        <i class="bi bi-list-ul"></i> {% trans "Lista" %}
-                    </a>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
-
-<!-- Resultados -->
-<div class="mb-3">
-    <small class="text-muted">
-        <i class="bi bi-info-circle"></i>
-        {% blocktrans trimmed with count=exercises.count %}Encontrados <strong>{{ count }}</strong> exercício(s){% endblocktrans %}
-        {% if search %}
-            {% blocktrans trimmed %}para "<strong>{{ search }}</strong>"{% endblocktrans %}
-        {% endif %}
-        {% if selected_muscle_group_label %}
-            {% blocktrans trimmed with selected_muscle_group=selected_muscle_group_label %}no grupo <strong>{{ selected_muscle_group }}</strong>{% endblocktrans %}
-        {% endif %}
-    </small>
-</div>
-
-<!-- Visualização Grid -->
-{% if view_mode == 'grid' %}
-<div class="row g-4 grid-view">
-    {% for exercise in exercises %}
-    <div class="col-md-6 col-lg-2">
-        <div class="card exercise-card">
-            {% if exercise.thumbnail %}
-                <img src="{{ exercise.thumbnail.url }}" class="card-img-top exercise-thumbnail" alt="{{ exercise.exercise_name }}" onerror="this.src='{% static 'images/no-image.svg' %}'">
-            {% elif exercise.media_url %}
-                <img src="{{ exercise.media_url }}" class="card-img-top exercise-thumbnail" alt="{{ exercise.exercise_name }}" onerror="this.src='{% static 'images/no-image.svg' %}'">
-            {% else %}
-                <img src="{% static 'images/no-image.svg' %}" class="card-img-top exercise-thumbnail" alt="{% trans "Sem imagem" %}">
-            {% endif %}
-            <div class="card-body">
-                <h5 class="card-title">{{ exercise.exercise_name }}</h5>
-                <div class="mb-2">
-                    <span class="badge bg-secondary">{{ exercise.muscle_group.label }}</span>
-                    <span class="badge bg-info">{{ exercise.default_sets }}x{{ exercise.default_reps }}</span>
-                </div>
-                <p class="card-text text-muted small">{{ exercise.description|truncatewords:15 }}</p>
-                <div class="d-flex gap-2">
-                    <a href="{% nav_url 'core:exercise_detail' exercise.pk %}" class="btn btn-sm btn-outline-primary flex-fill">
-                        <i class="bi bi-eye"></i> {% trans "Ver" %}
-                    </a>
-                    <a href="{% nav_url 'core:exercise_edit' exercise.pk %}" class="btn btn-sm btn-outline-secondary flex-fill">
-                        <i class="bi bi-pencil"></i> {% trans "Editar" %}
-                    </a>
-                </div>
-            </div>
+<div class="ui-head">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-activity" aria-hidden="true"></i></span>
+        <div>
+            <h1>{% trans "Exercícios" %}</h1>
+            <p class="ui-sub">{% trans "A biblioteca que você usa para montar os treinos." %}</p>
         </div>
     </div>
-    {% empty %}
-    <div class="col-12">
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle"></i> {% trans "Nenhum exercício encontrado com os filtros selecionados." %}
+    <div class="ui-actions">
+        <a href="{% nav_url 'core:exercise_create' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> {% trans "Novo exercício" %}</a>
+    </div>
+</div>
+
+<form method="get" action="{% url 'core:exercise_list' %}" class="ui-toolbar" data-list-filters>
+    <input type="hidden" name="view" value="{{ view_mode }}">
+    {% trans "Buscar por nome ou descrição" as placeholder %}
+    {% include 'core/ui/_search.html' with placeholder=placeholder %}
+    {% trans "Grupo muscular" as group_label %}{% trans "Todos" as all_label %}
+    {% include 'core/ui/_chips.html' with name='muscle_group' label=group_label all_label=all_label options=muscle_groups selected=selected_muscle_group %}
+    <noscript><button class="btn btn-primary mt-3">{% trans "Filtrar" %}</button></noscript>
+</form>
+
+<div data-list-region>
+{% include 'core/ui/_tags.html' with clear_url=request.path %}
+
+<div class="ui-results">
+    <div class="ui-count" data-count>{% blocktrans trimmed count count=exercises|length %}<strong>{{ count }}</strong> exercício encontrado{% plural %}<strong>{{ count }}</strong> exercícios encontrados{% endblocktrans %}</div>
+    {% include 'core/ui/_view_toggle.html' %}
+</div>
+
+{% if not exercises %}
+    {% if tags %}
+        {% trans "Nenhum exercício com esses filtros." as empty_text %}
+        {% include 'core/ui/_empty.html' with icon='bi-search' text=empty_text %}
+    {% else %}
+        {% trans "Nenhum exercício cadastrado ainda." as empty_text %}{% trans "Novo exercício" as new_label %}
+        {% url 'core:exercise_create' as create_url %}
+        {% include 'core/ui/_empty.html' with icon='bi-activity' text=empty_text action_url=create_url action_label=new_label %}
+    {% endif %}
+{% elif view_mode == 'grid' %}
+<div class="row g-3 grid-view">
+    {% for exercise in exercises %}
+    <div class="col-6 col-md-4 col-xl-3">
+        <div class="ui-card d-flex flex-column">
+            {% if exercise.thumbnail %}
+                <img src="{{ exercise.thumbnail.url }}" class="ui-thumb" alt="{{ exercise.exercise_name }}" loading="lazy" onerror="this.src='{% static 'images/no-image.svg' %}'">
+            {% elif exercise.media_url %}
+                <img src="{{ exercise.media_url }}" class="ui-thumb" alt="{{ exercise.exercise_name }}" loading="lazy" onerror="this.src='{% static 'images/no-image.svg' %}'">
+            {% else %}
+                <img src="{% static 'images/no-image.svg' %}" class="ui-thumb" alt="{% trans "Sem imagem" %}">
+            {% endif %}
+            <div class="card-body d-flex flex-column flex-grow-1">
+                <h2 class="h6 fw-bold mb-2">{{ exercise.exercise_name }}</h2>
+                <div class="ui-meta mb-2">
+                    <span class="ui-badge brand">{{ exercise.muscle_group.label }}</span>
+                    <span class="ui-badge">{{ exercise.default_sets }}x{{ exercise.default_reps }}</span>
+                </div>
+                <p class="text-muted small flex-grow-1">{{ exercise.description|truncatewords:15 }}</p>
+                <div class="d-flex gap-2">
+                    <a href="{% nav_url 'core:exercise_detail' exercise.pk %}" class="btn btn-sm btn-outline-primary flex-fill"><i class="bi bi-eye"></i> {% trans "Ver" %}</a>
+                    <a href="{% nav_url 'core:exercise_edit' exercise.pk %}" class="btn btn-sm btn-outline-secondary flex-fill"><i class="bi bi-pencil"></i> {% trans "Editar" %}</a>
+                </div>
+            </div>
         </div>
     </div>
     {% endfor %}
 </div>
-{% endif %}
-
-<!-- Visualização Lista -->
-{% if view_mode == 'list' %}
-<div class="list-view">
+{% else %}
+<div class="d-grid gap-3 list-view">
     {% for exercise in exercises %}
-    <div class="card exercise-card">
-        <div class="card-body">
-            <div class="exercise-thumbnail-container">
-                {% if exercise.thumbnail %}
-                    <img src="{{ exercise.thumbnail.url }}" class="exercise-thumbnail" alt="{{ exercise.exercise_name }}" onerror="this.src='{% static 'images/no-image.svg' %}'">
-                {% elif exercise.media_url %}
-                    <img src="{{ exercise.media_url }}" class="exercise-thumbnail" alt="{{ exercise.exercise_name }}" onerror="this.src='{% static 'images/no-image.svg' %}'">
-                {% else %}
-                    <img src="{% static 'images/no-image.svg' %}" class="exercise-thumbnail" alt="{% trans "Sem imagem" %}">
-                {% endif %}
-            </div>
-            <div class="exercise-info">
-                <h5 class="mb-1">{{ exercise.exercise_name }}</h5>
-                <div class="mb-2">
-                    <span class="badge bg-secondary">{{ exercise.muscle_group.label }}</span>
-                    <span class="badge bg-info">{% blocktrans trimmed with default_sets=exercise.default_sets default_reps=exercise.default_reps %}{{ default_sets }} séries x {{ default_reps }} reps{% endblocktrans %}</span>
+    <div class="ui-card">
+        <div class="card-body ui-row">
+            {% if exercise.thumbnail %}
+                <img src="{{ exercise.thumbnail.url }}" class="ui-thumb" alt="{{ exercise.exercise_name }}" loading="lazy" onerror="this.src='{% static 'images/no-image.svg' %}'">
+            {% elif exercise.media_url %}
+                <img src="{{ exercise.media_url }}" class="ui-thumb" alt="{{ exercise.exercise_name }}" loading="lazy" onerror="this.src='{% static 'images/no-image.svg' %}'">
+            {% else %}
+                <img src="{% static 'images/no-image.svg' %}" class="ui-thumb" alt="{% trans "Sem imagem" %}">
+            {% endif %}
+            <div class="ui-grow">
+                <h2 class="h6 fw-bold mb-1">{{ exercise.exercise_name }}</h2>
+                <div class="ui-meta mb-1">
+                    <span class="ui-badge brand">{{ exercise.muscle_group.label }}</span>
+                    <span class="ui-badge">{% blocktrans trimmed with default_sets=exercise.default_sets default_reps=exercise.default_reps %}{{ default_sets }} séries x {{ default_reps }} reps{% endblocktrans %}</span>
                 </div>
                 <p class="text-muted small mb-0">{{ exercise.description|truncatewords:25 }}</p>
             </div>
-            <div class="exercise-actions d-flex flex-column gap-2">
-                <a href="{% nav_url 'core:exercise_detail' exercise.pk %}" class="btn btn-sm btn-outline-primary">
-                    <i class="bi bi-eye"></i> {% trans "Ver Detalhes" %}
-                </a>
-                <a href="{% nav_url 'core:exercise_edit' exercise.pk %}" class="btn btn-sm btn-outline-secondary">
-                    <i class="bi bi-pencil"></i> {% trans "Editar" %}
-                </a>
+            <div class="ui-side">
+                <a href="{% nav_url 'core:exercise_detail' exercise.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> {% trans "Ver" %}</a>
+                <a href="{% nav_url 'core:exercise_edit' exercise.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i> {% trans "Editar" %}</a>
             </div>
         </div>
-    </div>
-    {% empty %}
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle"></i> {% trans "Nenhum exercício encontrado com os filtros selecionados." %}
     </div>
     {% endfor %}
 </div>
 {% endif %}
-
+</div>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-// Auto-submit do formulário ao digitar (com delay)
-let searchTimeout;
-const searchInput = document.getElementById('search');
-
-// Restaurar foco após reload
-if (searchInput.value) {
-    searchInput.focus();
-    // Posicionar cursor no final
-    searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
-}
-
-searchInput.addEventListener('input', function() {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(function() {
-        // Salvar posição do cursor antes do submit
-        sessionStorage.setItem('searchFocus', 'true');
-        document.getElementById('filterForm').submit();
-    }, 500);
-});
-
-// Se veio de um submit de busca, focar no campo
-if (sessionStorage.getItem('searchFocus') === 'true') {
-    sessionStorage.removeItem('searchFocus');
-    searchInput.focus();
-    searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
-}
-</script>
+<script src="{% static 'js/list-filters.js' %}"></script>
 {% endblock %}

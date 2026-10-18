@@ -1,0 +1,9 @@
+{% load i18n ui %}
+{% if tags %}
+<div class="ui-tags" data-active-filters>
+    {% for tag in tags %}
+    <a class="ui-tag" href="{% qs_remove tag.key %}" title="{% trans "Remover filtro" %}">{{ tag.label }} <i class="bi bi-x" aria-hidden="true"></i><span class="visually-hidden">{% trans "Remover filtro" %}</span></a>
+    {% endfor %}
+    <a class="ui-clear" href="{{ clear_url }}">{% trans "Limpar filtros" %}</a>
+</div>
+{% endif %}

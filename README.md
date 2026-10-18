@@ -163,6 +163,8 @@ Bootstrap, ícones, Chart.js e SortableJS são servidos localmente de `static/ve
 
 **Botão Voltar compacto:** todo `{% back_button url %}` com texto "Voltar ao …" gerado mostra só a seta no celular (botões com texto próprio, como "Cancelar", mantêm o texto; `compact=True` força) (o nome fica para leitores de tela e no `title`) e o texto completo a partir de `md`; usado em **Progresso do Treino** e **Detalhes da Sessão**, onde os quatro cartões de estatística (`metric-tile`) também ficam em grade 2×2 no celular.
 
+**Listas e filtros (padrão visual):** as listas (Exercícios, Treinos, Pacotes) seguem o mesmo molde, com o visual da página inicial (`static/css/ui.css`): cabeçalho com ícone + título + ação principal; uma barra de filtros com **busca** e **chips** (uma escolha por grupo; `core/ui/_search.html`, `_chips.html`); as escolhas curtas (situação) usam o controle segmentado; abaixo, os filtros ativos viram **tags removíveis** com "Limpar filtros" (`_tags.html`); e a **barra de resultados** traz a contagem à esquerda e o seletor **Grade/Lista à direita**, sempre no mesmo lugar (`_view_toggle.html`). `static/js/list-filters.js` atualiza os resultados no lugar (sem recarregar; sem JavaScript o formulário envia normalmente) e o modo de visualização escolhido fica num cookie (`core/listing.py`). Tela de lista nova = reaproveitar esses pedaços; o rótulo dos botões é em minúsculas depois da primeira palavra ("Novo exercício", "Novo treino").
+
 Formulários ficam sem `action` (o POST mantém o `?next=`). O teste `core/tests/test_navigation_global.py` percorre todos os links com `next=` e confere o botão de voltar de cada página.
 
 ## Idiomas (Português do Brasil e English)

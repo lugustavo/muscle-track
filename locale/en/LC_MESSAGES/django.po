@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-18 09:33-0300\n"
+"POT-Creation-Date: 2026-10-18 14:09-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -888,7 +888,6 @@ msgstr "Fee-free days after the purchase"
 msgid "Taxa sobre as aulas não usadas (%)"
 msgstr "Fee on the unused classes (%)"
 
-#| msgid "Data de Nascimento"
 msgid "Taxa fixa de cancelamento"
 msgstr "Fixed cancellation fee"
 
@@ -2282,12 +2281,10 @@ msgstr "After that, a fee of %(p)s%% of the value of the unused classes."
 msgid "Taxa de %(p)s%% do valor das aulas não usadas."
 msgstr "Fee of %(p)s%% of the value of the unused classes."
 
-#| msgid "Taxa ou multa combinada"
 msgid "Mais uma taxa fixa combinada."
 msgstr "Plus an agreed fixed fee."
 
 #, python-format
-#| msgid "Taxa combinada: %(fee)s"
 msgid "Taxa fixa: %(fee)s."
 msgstr "Fixed fee: %(fee)s."
 
@@ -2783,6 +2780,12 @@ msgstr "Invalid exercise in the list."
 msgid "Um dos exercícios selecionados não existe mais."
 msgstr "One of the selected exercises no longer exists."
 
+msgid "Ativos"
+msgstr "Active"
+
+msgid "Inativos"
+msgstr "Inactive"
+
 msgid "Treino criado com sucesso!"
 msgstr "Workout created successfully!"
 
@@ -2987,6 +2990,9 @@ msgstr "Realized"
 
 msgid "A executar"
 msgstr "To be held"
+
+msgid "Todos"
+msgstr "All"
 
 #, python-format
 msgid "Pacote \"%(name)s\" criado."
@@ -4316,48 +4322,38 @@ msgstr ""
 msgid "Exercícios - %(brand_name)s"
 msgstr "Exercises - %(brand_name)s"
 
-msgid "Novo Exercício"
-msgstr "New Exercise"
+#| msgid "Digite o nome ou descrição..."
+msgid "Buscar por nome ou descrição"
+msgstr "Search by name or description"
 
-msgid "Buscar Exercício"
-msgstr "Search Exercise"
+#| msgid "Grupo Muscular"
+msgid "Grupo muscular"
+msgstr "Muscle group"
 
-msgid "Digite o nome ou descrição..."
-msgstr "Type a name or description..."
-
-msgid "Todos os grupos"
-msgstr "All groups"
-
-msgid "Visualização"
-msgstr "View"
-
-msgid "Grade"
-msgstr "Grid"
+msgid "Filtrar"
+msgstr "Filter"
 
 #, python-format
-msgid "Encontrados <strong>%(count)s</strong> exercício(s)"
-msgstr "Found <strong>%(count)s</strong> exercise(s)"
+#| msgid "Encontrados <strong>%(count)s</strong> exercício(s)"
+msgid "<strong>%(count)s</strong> exercício encontrado"
+msgid_plural "<strong>%(count)s</strong> exercícios encontrados"
+msgstr[0] "<strong>%(count)s</strong> exercise found"
+msgstr[1] "<strong>%(count)s</strong> exercises found"
 
-#, python-format
-msgid "para \"<strong>%(search)s</strong>\""
-msgstr "for \"<strong>%(search)s</strong>\""
+#| msgid "Nenhum exercício encontrado"
+msgid "Nenhum exercício com esses filtros."
+msgstr "No exercises match these filters."
 
-#, python-format
-msgid "no grupo <strong>%(selected_muscle_group)s</strong>"
-msgstr "in the <strong>%(selected_muscle_group)s</strong> group"
+#| msgid "Nenhum exercício cadastrado nesta rotina."
+msgid "Nenhum exercício cadastrado ainda."
+msgstr "No exercises yet."
 
 msgid "Ver"
 msgstr "View"
 
-msgid "Nenhum exercício encontrado com os filtros selecionados."
-msgstr "No exercises found with the selected filters."
-
 #, python-format
 msgid "%(default_sets)s séries x %(default_reps)s reps"
 msgstr "%(default_sets)s sets x %(default_reps)s reps"
-
-msgid "Ver Detalhes"
-msgstr "View Details"
 
 #, python-format
 msgid "%(exercise_name)s - Evolução"
@@ -4615,9 +4611,6 @@ msgstr[1] "%(name)s · canceled · paid %(paid)s · %(used)s classes given"
 
 msgid "Filtrar por aluno..."
 msgstr "Filter by student..."
-
-msgid "Filtrar"
-msgstr "Filter"
 
 msgid "Lançamentos do mês"
 msgstr "Entries this month"
@@ -5902,7 +5895,6 @@ msgstr ""
 "worked out when cancelling (you can still change it, for example for "
 "illness) and is copied to each package sold."
 
-#| msgid "Sem pacote"
 msgid "Sem política"
 msgstr "No policy"
 
@@ -5968,6 +5960,9 @@ msgstr[1] ""
 msgid "Pacotes - %(brand_name)s"
 msgstr "Packages - %(brand_name)s"
 
+msgid "O catálogo que você vende aos alunos."
+msgstr "The catalog you sell to your students."
+
 msgid ""
 "O pacote é o modelo do catálogo: uma quantidade de aulas, um prazo (contado "
 "a partir da primeira aula) e um valor por aula ou total. Ao vender um pacote"
@@ -5979,17 +5974,12 @@ msgstr ""
 " a package to a student, the numbers are copied to them: changing the "
 "template later doesn't affect those who already bought."
 
-msgid "Buscar pacote..."
-msgstr "Search package..."
-
-msgid "Ativos"
-msgstr "Active"
-
-msgid "Inativos"
-msgstr "Inactive"
-
-msgid "Todos"
-msgstr "All"
+#, python-format
+#| msgid "Encontrados <strong>%(count)s</strong> treino(s)"
+msgid "<strong>%(count)s</strong> pacote encontrado"
+msgid_plural "<strong>%(count)s</strong> pacotes encontrados"
+msgstr[0] "<strong>%(count)s</strong> package found"
+msgstr[1] "<strong>%(count)s</strong> packages found"
 
 msgid "inativo"
 msgstr "inactive"
@@ -6015,17 +6005,13 @@ msgid_plural "%(sold_count)s vendidos"
 msgstr[0] "%(sold_count)s sold"
 msgstr[1] "%(sold_count)s sold"
 
-msgid "Nenhum pacote"
-msgstr "No packages"
+#| msgid "Nenhum pacote precisando de atenção."
+msgid "Nenhum pacote com esses filtros."
+msgstr "No packages match these filters."
 
-msgid "encontrado"
-msgstr "found"
-
-msgid "cadastrado ainda"
-msgstr "registered yet"
-
-msgid "Crie o primeiro"
-msgstr "Create the first one"
+#| msgid "Nenhum exercício cadastrado nesta rotina."
+msgid "Nenhum pacote cadastrado ainda."
+msgstr "No packages yet."
 
 #, python-format
 msgid "Política de privacidade - %(brand_name)s"
@@ -6444,28 +6430,29 @@ msgstr "Page content"
 msgid "Treinos - %(brand_name)s"
 msgstr "Workouts - %(brand_name)s"
 
-msgid "Novo Treino"
-msgstr "New Workout"
-
-msgid "Buscar Treino"
-msgstr "Search Workout"
+msgid "Modelos de treino para atribuir aos alunos."
+msgstr "Workout templates to assign to your students."
 
 msgid "Dificuldade"
 msgstr "Difficulty"
 
-msgid "Todas as dificuldades"
-msgstr "All difficulties"
+msgid "Todas"
+msgstr "All"
 
 #, python-format
-msgid "Encontrados <strong>%(count)s</strong> treino(s)"
-msgstr "Found <strong>%(count)s</strong> workout(s)"
+#| msgid "Encontrados <strong>%(count)s</strong> treino(s)"
+msgid "<strong>%(count)s</strong> treino encontrado"
+msgid_plural "<strong>%(count)s</strong> treinos encontrados"
+msgstr[0] "<strong>%(count)s</strong> workout found"
+msgstr[1] "<strong>%(count)s</strong> workouts found"
 
-#, python-format
-msgid "com dificuldade <strong>%(selected_difficulty)s</strong>"
-msgstr "with <strong>%(selected_difficulty)s</strong> difficulty"
+#| msgid "Nenhum treino anterior registrado."
+msgid "Nenhum treino com esses filtros."
+msgstr "No workouts match these filters."
 
-msgid "Nenhum treino encontrado com os filtros selecionados."
-msgstr "No workouts found with the selected filters."
+#| msgid "Nenhum treino ainda"
+msgid "Nenhum treino cadastrado ainda."
+msgstr "No workouts yet."
 
 #, python-format
 msgid "%(exercise_count)s exercícios"
@@ -7693,9 +7680,6 @@ msgstr "Search students"
 msgid "Filtros"
 msgstr "Filters"
 
-msgid "Todas"
-msgstr "All"
-
 msgid "Limpar"
 msgstr "Clear"
 
@@ -7713,6 +7697,9 @@ msgid "%(count)s aluno encontrado"
 msgid_plural "%(count)s alunos encontrados"
 msgstr[0] "%(count)s student found"
 msgstr[1] "%(count)s students found"
+
+msgid "Grade"
+msgstr "Grid"
 
 msgid "pacote vencido"
 msgstr "package expired"
@@ -7774,6 +7761,9 @@ msgstr "No workouts"
 msgid "Nenhuma aula"
 msgstr "No classes"
 
+msgid "Ver Detalhes"
+msgstr "View Details"
+
 msgid "ID"
 msgstr "ID"
 
@@ -7807,7 +7797,6 @@ msgstr "Next &raquo;"
 msgid "Cancelar pacote - %(person_name)s - %(brand_name)s"
 msgstr "Cancel package - %(person_name)s - %(brand_name)s"
 
-#| msgid "Cancelamento do pacote"
 msgid "Política de cancelamento deste pacote"
 msgstr "Cancellation policy of this package"
 
@@ -7817,8 +7806,6 @@ msgstr ""
 "It is within the fee-free period (until %(until)s): the fee starts at zero."
 
 #, python-format
-#| msgid ""
-#| "Aberta pela última vez em <strong>%(last_viewed_at)s</strong>."
 msgid "Taxa pela política hoje: <strong>%(fee)s</strong>."
 msgstr "Fee under the policy today: <strong>%(fee)s</strong>."
 
@@ -7837,7 +7824,6 @@ msgstr ""
 "The fee below is already filled in with this; change it to make an exception"
 " (illness, moving away...)."
 
-#| msgid "Voltar à agenda"
 msgid "Voltar à taxa da política"
 msgstr "Back to the policy fee"
 
@@ -8122,6 +8108,17 @@ msgstr ""
 msgid "Quer apagar tudo? Use <em>Excluir</em> na ficha do aluno."
 msgstr ""
 "Want to delete everything? Use <em>Delete</em> on the student's profile."
+
+#| msgid "Limpar"
+msgid "Limpar busca"
+msgstr "Clear search"
+
+#| msgid "Remover foto"
+msgid "Remover filtro"
+msgstr "Remove filter"
+
+msgid "Visualização"
+msgstr "View"
 
 #, python-format
 msgid "Treino - %(routine_name)s"

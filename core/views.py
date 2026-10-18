@@ -30,6 +30,7 @@ from allauth.account.models import EmailAddress
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, last_activity, trainer_dashboard
 from . import photo_positions, telegram
 from .i18n import short_date
+from .listing import filter_tags, remember_view, view_mode as list_view_mode
 from .forms import (
     AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ClassRequestForm, ConsentForm, SaleForm, ExerciseForm, PaymentForm,
     CancelPackageForm, HolidayForm, MyPhotoForm, PackageEditForm, PersonForm, RefundForm, PersonRoutineForm, PackageForm, RepeatForm, ScheduleSlotForm, SlotEditForm, SlotFillForm,
@@ -1048,36 +1049,37 @@ def my_agenda_request_withdraw(request, person, pk):
 @staff_required
 def exercise_list(request):
     """List all exercises"""
-    search = request.GET.get('search', '')
+    search = request.GET.get('search', '').strip()
     muscle_group = request.GET.get('muscle_group', '')
-    view_mode = request.GET.get('view', 'grid')  # grid ou list
+    view_mode = list_view_mode(request, 'exercise_view_mode')
 
     exercises = Exercise.objects.filter(is_active=True).select_related('muscle_group')
 
-    # Filtro por busca
     if search:
         exercises = exercises.filter(
             Q(exercise_name__icontains=search) |
             Q(description__icontains=search)
         )
 
-    # Filtro por grupo muscular
-    if muscle_group:
+    if muscle_group.isdigit():
         exercises = exercises.filter(muscle_group_id=muscle_group)
+    else:
+        muscle_group = ''
 
-    exercises = exercises.order_by('exercise_name', 'muscle_group__order')
+    exercises = list(exercises.order_by('exercise_name', 'muscle_group__order'))
 
-    # Buscar grupos musculares ativos
-    muscle_groups = MuscleGroup.objects.filter(is_active=True).order_by('name')
+    muscle_groups = list(MuscleGroup.objects.filter(is_active=True).order_by('name'))
+    group_label = next((g.label for g in muscle_groups if str(g.pk) == muscle_group), '')
 
-    return render(request, 'core/exercise_list.html', {
+    response = render(request, 'core/exercise_list.html', {
         'exercises': exercises,
-        'muscle_groups': muscle_groups,
+        'muscle_groups': [(g.pk, g.label) for g in muscle_groups],
         'search': search,
         'selected_muscle_group': muscle_group,
-        'selected_muscle_group_label': next((g.label for g in muscle_groups if str(g.pk) == str(muscle_group)), ''),
-        'view_mode': view_mode
+        'tags': filter_tags(search, muscle_group=group_label),
+        'view_mode': view_mode,
     })
+    return remember_view(request, response, 'exercise_view_mode', view_mode)
 
 
 @staff_required
@@ -1251,27 +1253,28 @@ def _routine_form_context(form, title, routine, routine_exercises):
 @staff_required
 def routine_list(request):
     """List all routines"""
-    search = request.GET.get('search', '')
+    search = request.GET.get('search', '').strip()
     difficulty = request.GET.get('difficulty', '')
     status = request.GET.get('status', '')
+    view_mode = list_view_mode(request, 'routine_view_mode')
+    difficulty_choices = list(Routine._meta.get_field('difficulty_level').choices)
+    difficulty_label = dict(difficulty_choices).get(difficulty, '')
+    if not difficulty_label:
+        difficulty = ''
+    if status not in ('active', 'inactive'):
+        status = ''
 
-    # Pegar view_mode do cookie ou GET, padrão é 'grid'
-    view_mode = request.GET.get('view', request.COOKIES.get('routine_view_mode', 'grid'))
-    #is_active=active
     routines = Routine.objects.filter().prefetch_related('exercises')
 
-    # Filtro por busca
     if search:
         routines = routines.filter(
             Q(routine_name__icontains=search) |
             Q(description__icontains=search)
         )
 
-    # Filtro por dificuldade
     if difficulty:
         routines = routines.filter(difficulty_level=difficulty)
 
-    # Filtro por status
     if status == 'active':
         routines = routines.filter(is_active=True)
     elif status == 'inactive':
@@ -1285,21 +1288,17 @@ def routine_list(request):
         exercise_count=Count('exercises', distinct=True)
     )
 
+    status_label = {'active': _('Ativos'), 'inactive': _('Inativos')}.get(status, '')
     response = render(request, 'core/routine_list.html', {
-        'routines': routines,
+        'routines': list(routines),
         'search': search,
         'selected_difficulty': difficulty,
-        'selected_difficulty_label': dict(Routine._meta.get_field('difficulty_level').choices).get(difficulty, ''),
         'selected_status': status,
+        'tags': filter_tags(search, difficulty=difficulty_label, status=status_label),
         'view_mode': view_mode,
-        'difficulty_choices': Routine._meta.get_field('difficulty_level').choices
+        'difficulty_choices': difficulty_choices,
     })
-
-    # Salvar view_mode no cookie se foi especificado no GET
-    if 'view' in request.GET:
-        response.set_cookie('routine_view_mode', view_mode, max_age=31536000)  # 1 ano
-
-    return response
+    return remember_view(request, response, 'routine_view_mode', view_mode)
 
 
 @staff_required
@@ -2820,17 +2819,21 @@ def plan_list(request):
     """Package templates, like the exercise catalog"""
     search = request.GET.get('search', '').strip()
     status = request.GET.get('status', '')
+    if status not in ('inactive', 'all'):
+        status = 'active'
     plans = Package.objects.annotate(sold_count=Count('sold'))
     if search:
         plans = plans.filter(Q(name__icontains=search) | Q(description__icontains=search))
     if status == 'inactive':
         plans = plans.filter(is_active=False)
-    elif status != 'all':
+    elif status == 'active':
         plans = plans.filter(is_active=True)
     plans = list(plans.order_by('name'))
     for plan in plans:
         plan.policy = refunds.policy_lines(plan)
-    return render(request, 'core/plan_list.html', {'plans': plans, 'search': search, 'status': status or 'active'})
+    status_label = {'inactive': _('Inativos'), 'all': _('Todos')}.get(status, '')
+    return render(request, 'core/plan_list.html', {
+        'plans': plans, 'search': search, 'status': status, 'tags': filter_tags(search, status=status_label)})
 
 
 @staff_required

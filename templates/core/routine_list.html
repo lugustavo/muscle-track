@@ -5,286 +5,110 @@
 
 {% block title %}{% blocktrans trimmed %}Treinos - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
-{% block extra_css %}
-<style>
-    .routine-card {
-        transition: transform 0.2s, box-shadow 0.2s;
-        height: 100%;
-    }
-    .routine-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-    .list-view .routine-card {
-        margin-bottom: 1rem;
-    }
-    .list-view .card-body {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-    }
-    .list-view .routine-info {
-        flex: 1;
-    }
-    .filter-section {
-        background: var(--bs-tertiary-bg);
-        padding: 1.5rem;
-        border-radius: 10px;
-        margin-bottom: 2rem;
-    }
-    .view-toggle {
-        display: flex;
-        gap: 0.5rem;
-    }
-    .difficulty-badge {
-        font-size: 0.85rem;
-        padding: 0.4rem 0.8rem;
-    }
-    .stats-badge {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.5rem;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-calendar-check"></i> {% trans "Treinos" %}</h1>
-    <div>
-        <a href="{% nav_url 'core:routine_generate_ai' %}" class="btn btn-success me-2">
-            <i class="bi bi-magic"></i> {% trans "Gerar com IA" %}
-        </a>
-        <a href="{% nav_url 'core:routine_create' %}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> {% trans "Novo Treino" %}
-        </a>
-    </div>
-</div>
-
-<!-- Filtros -->
-<div class="filter-section">
-    <form method="get" action="{% url 'core:routine_list' %}" id="filterForm">
-        <div class="row g-3">
-            <div class="col-md-4">
-                <label for="search" class="form-label"><i class="bi bi-search"></i> {% trans "Buscar Treino" %}</label>
-                <input type="text"
-                       class="form-control"
-                       id="search"
-                       name="search"
-                       value="{{ search }}"
-                       placeholder="{% trans "Digite o nome ou descrição..." %}"
-                       autocomplete="off">
-            </div>
-            <div class="col-md-3">
-                <label for="difficulty" class="form-label"><i class="bi bi-filter"></i> {% trans "Dificuldade" %}</label>
-                <select class="form-select" id="difficulty" name="difficulty" onchange="document.getElementById('filterForm').submit();">
-                    <option value="">{% trans "Todas as dificuldades" %}</option>
-                    {% for value, label in difficulty_choices %}
-                        <option value="{{ value }}" {% if selected_difficulty == value %}selected{% endif %}>
-                            {{ label }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-                <div class="col-md-2">
-                    <label for="status" class="form-label small text-muted">{% trans "Status" %}</label>
-                    <select class="form-select" id="status" name="status" onchange="this.form.submit()">
-                        <option value="">{% trans "Todos" %}</option>
-                        <option value="active" {% if selected_status == 'active' %}selected{% endif %}>{% trans "Ativos" %}</option>
-                        <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>{% trans "Inativos" %}</option>
-                    </select>
-                </div>
-            <!--<div class="col-md-2">
-                <label class="form-label"><i class="bi bi-grid-3x3"></i> Visualização</label>
-                <div class="view-toggle">
-                    <a href="?search={{ search }}&difficulty={{ selected_difficulty }}&view=grid"
-                       class="btn {% if view_mode == 'grid' %}btn-primary{% else %}btn-outline-primary{% endif %} flex-fill">
-                        <i class="bi bi-grid-3x3-gap"></i> Grade
-                    </a>
-                    <a href="?search={{ search }}&difficulty={{ selected_difficulty }}&view=list"
-                       class="btn {% if view_mode == 'list' %}btn-primary{% else %}btn-outline-primary{% endif %} flex-fill">
-                        <i class="bi bi-list-ul"></i> Lista
-                    </a>
-                </div>
-            </div>-->
+<div class="ui-head">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-calendar-check" aria-hidden="true"></i></span>
+        <div>
+            <h1>{% trans "Treinos" %}</h1>
+            <p class="ui-sub">{% trans "Modelos de treino para atribuir aos alunos." %}</p>
         </div>
-    </form>
-</div>
-
-<!-- Resultados -->
-<!--<div class="mb-3">
-    <small class="text-muted">
-        <i class="bi bi-info-circle"></i>
-        Encontrados <strong>{{ routines.count }}</strong> treino(s)
-        {% if search %}
-            para "<strong>{{ search }}</strong>"
-        {% endif %}
-        {% if selected_difficulty %}
-            com dificuldade <strong>{{ selected_difficulty|title }}</strong>
-        {% endif %}
-    </small>
-</div> -->
-
-<!-- View Toggle and Count -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div class="mb-3">
-        <small class="text-muted">
-            <i class="bi bi-info-circle"></i>
-            {% blocktrans trimmed with count=routines.count %}Encontrados <strong>{{ count }}</strong> treino(s){% endblocktrans %}
-            {% if search %}
-                {% blocktrans trimmed %}para "<strong>{{ search }}</strong>"{% endblocktrans %}
-            {% endif %}
-            {% if selected_difficulty_label %}
-                {% blocktrans trimmed with selected_difficulty=selected_difficulty_label %}com dificuldade <strong>{{ selected_difficulty }}</strong>{% endblocktrans %}
-            {% endif %}
-        </small>
     </div>
-    <div class="btn-group" role="group">
-        <a href="?{% if search %}search={{ search }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}view=grid"
-            class="btn btn-sm {% if view_mode == 'grid' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-            <i class="bi bi-grid-3x3-gap"></i> {% trans "Grade" %}
-        </a>
-        <a href="?{% if search %}search={{ search }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}view=list"
-            class="btn btn-sm {% if view_mode == 'list' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-            <i class="bi bi-list-ul"></i> {% trans "Lista" %}
-        </a>
+    <div class="ui-actions">
+        <a href="{% nav_url 'core:routine_generate_ai' %}" class="btn btn-outline-primary"><i class="bi bi-magic"></i> {% trans "Gerar com IA" %}</a>
+        <a href="{% nav_url 'core:routine_create' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> {% trans "Novo treino" %}</a>
     </div>
 </div>
 
-<!-- Visualização Grid -->
-{% if view_mode == 'grid' %}
-<div class="row g-4 grid-view">
+<form method="get" action="{% url 'core:routine_list' %}" class="ui-toolbar" data-list-filters>
+    <input type="hidden" name="view" value="{{ view_mode }}">
+    {% trans "Buscar por nome ou descrição" as placeholder %}
+    {% include 'core/ui/_search.html' with placeholder=placeholder %}
+    {% trans "Dificuldade" as difficulty_label %}{% trans "Todas" as all_label %}
+    {% include 'core/ui/_chips.html' with name='difficulty' label=difficulty_label all_label=all_label options=difficulty_choices selected=selected_difficulty %}
+    <div class="ui-filter-row">
+        <span class="ui-filter-label">{% trans "Situação" %}</span>
+        <div class="ui-seg" role="radiogroup" aria-label="{% trans "Situação" %}">
+            <label><input type="radio" name="status" value="" {% if not selected_status %}checked{% endif %}>{% trans "Todos" %}</label>
+            <label><input type="radio" name="status" value="active" {% if selected_status == 'active' %}checked{% endif %}>{% trans "Ativos" %}</label>
+            <label><input type="radio" name="status" value="inactive" {% if selected_status == 'inactive' %}checked{% endif %}>{% trans "Inativos" %}</label>
+        </div>
+    </div>
+    <noscript><button class="btn btn-primary mt-3">{% trans "Filtrar" %}</button></noscript>
+</form>
+
+<div data-list-region>
+{% include 'core/ui/_tags.html' with clear_url=request.path %}
+
+<div class="ui-results">
+    <div class="ui-count" data-count>{% blocktrans trimmed count count=routines|length %}<strong>{{ count }}</strong> treino encontrado{% plural %}<strong>{{ count }}</strong> treinos encontrados{% endblocktrans %}</div>
+    {% include 'core/ui/_view_toggle.html' %}
+</div>
+
+{% if not routines %}
+    {% if tags %}
+        {% trans "Nenhum treino com esses filtros." as empty_text %}
+        {% include 'core/ui/_empty.html' with icon='bi-search' text=empty_text %}
+    {% else %}
+        {% trans "Nenhum treino cadastrado ainda." as empty_text %}{% trans "Novo treino" as new_label %}
+        {% url 'core:routine_create' as create_url %}
+        {% include 'core/ui/_empty.html' with icon='bi-calendar-check' text=empty_text action_url=create_url action_label=new_label %}
+    {% endif %}
+{% elif view_mode == 'grid' %}
+<div class="row g-3 grid-view">
     {% for routine in routines %}
-    <div class="col-md-6 col-lg-4">
-        <div class="card routine-card">
-            <div class="card-body">
-                <h5 class="card-title mb-3">{{ routine.routine_name }}</h5>
-                <div class="mb-3">
-                    {% if routine.difficulty_level == 'iniciante' %}
-                        <span class="badge bg-success difficulty-badge">
-                            <i class="bi bi-star"></i> {{ routine.get_difficulty_level_display }}
-                        </span>
-                    {% elif routine.difficulty_level == 'intermediario' %}
-                        <span class="badge bg-warning difficulty-badge">
-                            <i class="bi bi-star-fill"></i> {{ routine.get_difficulty_level_display }}
-                        </span>
-                    {% else %}
-                        <span class="badge bg-danger difficulty-badge">
-                            <i class="bi bi-star-fill"></i> {{ routine.get_difficulty_level_display }}
-                        </span>
-                    {% endif %}
-                    <span class="badge bg-info difficulty-badge">
-                        <i class="bi bi-clock"></i> {% blocktrans trimmed with estimated_duration=routine.estimated_duration %}{{ estimated_duration }} min{% endblocktrans %}
-                    </span>
+    <div class="col-md-6 col-xl-4">
+        <div class="ui-card routine-card {% if not routine.is_active %}muted{% endif %}">
+            <div class="card-body d-flex flex-column h-100">
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                    <h2 class="h6 fw-bold mb-0">{{ routine.routine_name }}</h2>
+                    {% if not routine.is_active %}<span class="ui-badge">{% trans "inativo" %}</span>{% endif %}
                 </div>
-                <p class="card-text text-muted small">{{ routine.description|truncatewords:20 }}</p>
-
+                <div class="ui-meta mb-2">
+                    <span class="ui-badge {% if routine.difficulty_level == 'iniciante' %}ok{% elif routine.difficulty_level == 'intermediario' %}warn{% else %}bad{% endif %}"><i class="bi bi-star{% if routine.difficulty_level != 'iniciante' %}-fill{% endif %}" aria-hidden="true"></i> {{ routine.get_difficulty_level_display }}</span>
+                    <span class="ui-badge info"><i class="bi bi-clock" aria-hidden="true"></i> {% blocktrans trimmed with estimated_duration=routine.estimated_duration %}{{ estimated_duration }} min{% endblocktrans %}</span>
+                </div>
+                <p class="text-muted small flex-grow-1">{{ routine.description|truncatewords:20 }}</p>
                 <div class="row g-2 mb-3">
-                    <div class="col-6">
-                        <div class="text-center bg-body-tertiary p-2 rounded">
-                            <div class="fw-bold text-primary">{{ routine.exercise_count }}</div>
-                            <small class="text-muted">{% trans "Exercícios" %}</small>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="text-center bg-body-tertiary p-2 rounded">
-                            <div class="fw-bold text-success">{{ routine.student_count }}</div>
-                            <small class="text-muted">{% trans "Alunos" %}</small>
-                        </div>
-                    </div>
+                    <div class="col-6"><div class="text-center bg-body-tertiary p-2 rounded-3"><div class="fw-bold">{{ routine.exercise_count }}</div><small class="text-muted">{% trans "Exercícios" %}</small></div></div>
+                    <div class="col-6"><div class="text-center bg-body-tertiary p-2 rounded-3"><div class="fw-bold">{{ routine.student_count }}</div><small class="text-muted">{% trans "Alunos" %}</small></div></div>
                 </div>
-
                 <div class="d-flex gap-2">
-                    <a href="{% nav_url 'core:routine_detail' routine.pk %}" class="btn btn-sm btn-outline-primary flex-fill">
-                        <i class="bi bi-eye"></i> {% trans "Ver" %}
-                    </a>
-                    <a href="{% nav_url 'core:routine_edit' routine.pk %}" class="btn btn-sm btn-outline-secondary flex-fill">
-                        <i class="bi bi-pencil"></i> {% trans "Editar" %}
-                    </a>
+                    <a href="{% nav_url 'core:routine_detail' routine.pk %}" class="btn btn-sm btn-outline-primary flex-fill"><i class="bi bi-eye"></i> {% trans "Ver" %}</a>
+                    <a href="{% nav_url 'core:routine_edit' routine.pk %}" class="btn btn-sm btn-outline-secondary flex-fill"><i class="bi bi-pencil"></i> {% trans "Editar" %}</a>
                 </div>
             </div>
-        </div>
-    </div>
-    {% empty %}
-    <div class="col-12">
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle"></i> {% trans "Nenhum treino encontrado com os filtros selecionados." %}
         </div>
     </div>
     {% endfor %}
 </div>
-{% endif %}
-
-<!-- Visualização Lista -->
-{% if view_mode == 'list' %}
-<div class="list-view">
+{% else %}
+<div class="d-grid gap-3 list-view">
     {% for routine in routines %}
-    <div class="card routine-card">
-        <div class="card-body">
-            <div class="routine-info">
-                <h5 class="mb-2">{{ routine.routine_name }}</h5>
-                <div class="mb-2">
-                    {% if routine.difficulty_level == 'iniciante' %}
-                        <span class="badge bg-success">{{ routine.get_difficulty_level_display }}</span>
-                    {% elif routine.difficulty_level == 'intermediario' %}
-                        <span class="badge bg-warning">{{ routine.get_difficulty_level_display }}</span>
-                    {% else %}
-                        <span class="badge bg-danger">{{ routine.get_difficulty_level_display }}</span>
-                    {% endif %}
-                    <span class="badge bg-info"><i class="bi bi-clock"></i> {% blocktrans trimmed with estimated_duration=routine.estimated_duration %}{{ estimated_duration }} min{% endblocktrans %}</span>
-                    <span class="badge bg-secondary stats-badge">
-                        <i class="bi bi-activity"></i> {% blocktrans trimmed with exercise_count=routine.exercise_count %}{{ exercise_count }} exercícios{% endblocktrans %}
-                    </span>
-                    <span class="badge bg-secondary stats-badge">
-                        <i class="bi bi-people"></i> {% blocktrans trimmed with student_count=routine.student_count %}{{ student_count }} alunos{% endblocktrans %}
-                    </span>
+    <div class="ui-card routine-card {% if not routine.is_active %}muted{% endif %}">
+        <div class="card-body ui-row">
+            <div class="ui-grow">
+                <h2 class="h6 fw-bold mb-2">{{ routine.routine_name }}{% if not routine.is_active %} <span class="ui-badge">{% trans "inativo" %}</span>{% endif %}</h2>
+                <div class="ui-meta mb-2">
+                    <span class="ui-badge {% if routine.difficulty_level == 'iniciante' %}ok{% elif routine.difficulty_level == 'intermediario' %}warn{% else %}bad{% endif %}">{{ routine.get_difficulty_level_display }}</span>
+                    <span class="ui-badge info"><i class="bi bi-clock" aria-hidden="true"></i> {% blocktrans trimmed with estimated_duration=routine.estimated_duration %}{{ estimated_duration }} min{% endblocktrans %}</span>
+                    <span class="ui-badge"><i class="bi bi-activity" aria-hidden="true"></i> {% blocktrans trimmed with exercise_count=routine.exercise_count %}{{ exercise_count }} exercícios{% endblocktrans %}</span>
+                    <span class="ui-badge"><i class="bi bi-people" aria-hidden="true"></i> {% blocktrans trimmed with student_count=routine.student_count %}{{ student_count }} alunos{% endblocktrans %}</span>
                 </div>
                 <p class="text-muted small mb-0">{{ routine.description|truncatewords:30 }}</p>
             </div>
-            <div class="routine-actions d-flex flex-column gap-2">
-                <a href="{% nav_url 'core:routine_detail' routine.pk %}" class="btn btn-sm btn-outline-primary">
-                    <i class="bi bi-eye"></i> {% trans "Ver Detalhes" %}
-                </a>
-                <a href="{% nav_url 'core:routine_edit' routine.pk %}" class="btn btn-sm btn-outline-secondary">
-                    <i class="bi bi-pencil"></i> {% trans "Editar" %}
-                </a>
+            <div class="ui-side">
+                <a href="{% nav_url 'core:routine_detail' routine.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> {% trans "Ver" %}</a>
+                <a href="{% nav_url 'core:routine_edit' routine.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i> {% trans "Editar" %}</a>
             </div>
         </div>
-    </div>
-    {% empty %}
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle"></i> {% trans "Nenhum treino encontrado com os filtros selecionados." %}
     </div>
     {% endfor %}
 </div>
 {% endif %}
-
+</div>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-// Auto-submit do formulário ao digitar (com delay)
-let searchTimeout;
-const searchInput = document.getElementById('search');
-
-// Restaurar foco após reload
-if (searchInput.value) {
-    searchInput.focus();
-    searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
-}
-
-searchInput.addEventListener('input', function() {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(function() {
-        sessionStorage.setItem('searchFocus', 'true');
-        document.getElementById('filterForm').submit();
-    }, 500);
-});
-
-// Se veio de um submit de busca, focar no campo
-if (sessionStorage.getItem('searchFocus') === 'true') {
-    sessionStorage.removeItem('searchFocus');
-    searchInput.focus();
-    searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
-}
-</script>
+<script src="{% static 'js/list-filters.js' %}"></script>
 {% endblock %}
