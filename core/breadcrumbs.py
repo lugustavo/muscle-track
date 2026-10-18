@@ -227,6 +227,7 @@ TRAILS = {
     'student_detail': _student_detail,
     'student_edit': _student_edit,
     'student_invite': _student_page(_l('Convite')),
+    'student_sheet': _student_page(_l('Link da ficha')),
     'student_delete': _student_page(_l('Excluir')),
     'student_status': _student_page(_l('Situação')),
     'student_package_sell': _student_page(_l('Vender pacote')),
@@ -262,6 +263,7 @@ NO_BREADCRUMB = {
     'workout_execute',      # focused workout screen (sticky header with the timer)
     'workout_summary',      # what you just did: a focused screen right after the workout
     'accept_invite',        # public invitation page
+    'public_sheet',         # the student's read-only sheet link: a standalone page, no app navigation
     'consent',              # first-access screen, the student must decide before using the app
     'privacy_policy',       # public text page
 }

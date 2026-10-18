@@ -25,6 +25,7 @@ BACK_LABELS = {
     'student_detail': _l('Voltar ao aluno'),
     'student_history': _l('Voltar ao histórico do aluno'),
     'student_invite': _l('Voltar ao convite'),
+    'student_sheet': _l('Voltar ao link da ficha'),
     'agenda': _l('Voltar à agenda'),
     'agenda_holidays': _l('Voltar aos feriados'),
     'finance': _l('Voltar ao financeiro'),

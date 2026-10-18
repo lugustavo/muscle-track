@@ -743,6 +743,7 @@ class StudentEvent(models.Model):
         ERASURE_REQUEST = 'erasure_request', _('Pedido de exclusão')
         PACKAGE = 'package', _('Pacote')
         APP_ACCESS = 'app_access', _('Acesso ao app')
+        SHEET_LINK = 'sheet_link', _('Link da ficha')
 
     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='events', verbose_name=_('Aluno'))
     actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+', verbose_name=_('Quem'))
@@ -1190,6 +1191,24 @@ class NotificationLog(models.Model):
 
     class Meta:
         ordering = ['-created_at', '-pk']
+
+
+class SheetLink(models.Model):
+    """The private link to a student's workout sheet, read-only (core/sheet_link.py): the exercises of the routines in
+    use, to read on any phone or print, with no login. One per student; no row = no link. Whoever has the link can read
+    the sheet, so it is treated like a password: long random token, and a new link kills the old one."""
+    person = models.OneToOneField(Person, on_delete=models.CASCADE, related_name='sheet_link')
+    token = models.CharField(max_length=64, unique=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    rotated_at = models.DateTimeField(null=True, blank=True)
+    last_viewed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = _('Link da ficha de treino')
+        verbose_name_plural = _('Links das fichas de treino')
+
+    def __str__(self):
+        return gettext('Ficha de %(person)s') % {'person': self.person_id}
 
 
 class CalendarFeed(models.Model):

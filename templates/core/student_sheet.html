@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load navigation %}
+
+{% block title %}{% blocktrans trimmed with person_name=student.person_name %}Link da ficha - {{ person_name }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h1 class="h3 mb-0"><i class="bi bi-link-45deg"></i> {% blocktrans trimmed with person_name=student.person_name %}Ficha de {{ person_name }} para consulta{% endblocktrans %}</h1>
+    {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default %}
+</div>
+
+<div class="row">
+<div class="col-lg-8">
+    <p class="text-muted">{% blocktrans trimmed %}Um link só de leitura com a lista de exercícios dos treinos em uso (séries, repetições, descanso e observações), para o aluno ler no celular ou imprimir. Não precisa de login e não mostra saúde, anotações internas, contatos nem valores.{% endblocktrans %}</p>
+
+    {% if link %}
+    <div class="card mb-3" data-sheet-link>
+        <div class="card-body">
+            <label for="sheetUrl" class="form-label fw-bold">{% trans "Link da ficha" %}</label>
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" id="sheetUrl" value="{{ sheet_url }}" readonly>
+                <button class="btn btn-primary" type="button" data-copy-target="#sheetUrl"><i class="bi bi-clipboard"></i> <span>{% trans "Copiar" %}</span></button>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ whatsapp_url }}" target="_blank" rel="noopener" class="btn btn-success"><i class="bi bi-whatsapp"></i> {% trans "Enviar pelo WhatsApp" %}</a>
+                <a href="{{ sheet_url }}" target="_blank" rel="noopener" class="btn btn-outline-primary"><i class="bi bi-box-arrow-up-right"></i> {% trans "Abrir a ficha" %}</a>
+            </div>
+            {% if not student.phone %}<small class="text-muted d-block mt-2">{% trans "Sem telefone cadastrado: o WhatsApp vai pedir para você escolher o contato." %}</small>{% endif %}
+            <div class="small text-muted mt-3">
+                {% if link.last_viewed_at %}<i class="bi bi-check-circle text-success"></i> {% blocktrans trimmed with last_viewed_at=link.last_viewed_at|date:_('d/m/Y H:i') %}Aberta pela última vez em <strong>{{ last_viewed_at }}</strong>.{% endblocktrans %}
+                {% else %}<i class="bi bi-clock"></i> {% trans "Ainda ninguém abriu este link." %}{% endif %}
+                {% if link.rotated_at %}<br>{% blocktrans trimmed with rotated_at=link.rotated_at|date:_('d/m/Y H:i') %}Link gerado de novo em {{ rotated_at }}.{% endblocktrans %}{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <p class="text-muted"><i class="bi bi-shield-lock"></i> {% trans "Quem tiver este link lê a ficha, então envie só ao aluno. Enviou à pessoa errada? Gere um novo link (o atual para de funcionar) ou desative." %}</p>
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <form method="post" onsubmit="return confirm('{% filter escapejs %}{% trans "Gerar um novo link? O atual deixa de funcionar." %}{% endfilter %}');">
+            {% csrf_token %}<input type="hidden" name="action" value="rotate">
+            <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-arrow-repeat"></i> {% trans "Gerar novo link" %}</button>
+        </form>
+        <form method="post" onsubmit="return confirm('{% filter escapejs %}{% trans "Desativar o link? Ninguém mais abre a ficha por ele." %}{% endfilter %}');">
+            {% csrf_token %}<input type="hidden" name="action" value="disable">
+            <button class="btn btn-outline-danger" type="submit" data-sheet-disable><i class="bi bi-slash-circle"></i> {% trans "Desativar o link" %}</button>
+        </form>
+    </div>
+    {% else %}
+    <div class="card mb-4" data-sheet-off>
+        <div class="card-body">
+            <p class="mb-3">{% trans "Este aluno ainda não tem link da ficha." %}</p>
+            <form method="post">
+                {% csrf_token %}<input type="hidden" name="action" value="enable">
+                <button class="btn btn-primary" type="submit"><i class="bi bi-link-45deg"></i> {% trans "Criar o link da ficha" %}</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <h2 class="h6 text-uppercase text-muted">{% trans "O que o aluno vê" %}</h2>
+    {% for item in routines %}
+    <div class="card mb-2">
+        <div class="card-body py-2">
+            <strong>{{ item.routine.routine_name }}</strong>
+            <span class="small text-muted">· {% blocktrans trimmed count n=item.exercises|length %}{{ n }} exercício{% plural %}{{ n }} exercícios{% endblocktrans %}</span>
+        </div>
+    </div>
+    {% empty %}
+    <div class="alert alert-warning small" data-sheet-no-routine><i class="bi bi-exclamation-triangle"></i> {% trans "Este aluno não tem treino em uso: a ficha abriria vazia. Atribua um treino primeiro." %}</div>
+    {% endfor %}
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('[data-copy-target]').forEach(function (button) {
+    button.addEventListener('click', async function () {
+        var field = document.querySelector(button.getAttribute('data-copy-target'));
+        field.select();
+        try { await navigator.clipboard.writeText(field.value); } catch (e) { document.execCommand('copy'); }
+        var label = button.querySelector('span');
+        var old = label.textContent;
+        label.textContent = "{% trans 'Copiado!' as js_msg %}{{ js_msg|escapejs }}";
+        setTimeout(function () { label.textContent = old; }, 1800);
+    });
+});
+</script>
+{% endblock %}
