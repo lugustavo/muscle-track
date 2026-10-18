@@ -9,6 +9,7 @@
             </div>
             <div class="card-body">
                 <div class="row g-3">
+                    <div class="col-md-6"><strong>{% trans "Acompanhamento" %}</strong><br>{{ student.get_modality_display|default:"-" }}</div>
                     <div class="col-md-6"><strong>{% trans "E-mail" %}</strong><br>{{ student.user.email|default:"-" }}</div>
                     <div class="col-md-6"><strong>{% trans "Telefone" %}</strong><br>{{ student.phone|default:"-" }}</div>
                     <div class="col-md-6"><strong>{% trans "Nascimento" %}</strong><br>{% if student.birth_date %}{% blocktrans trimmed with birth_date=student.birth_date|date:_('d/m/Y') age=student.age %}{{ birth_date }} ({{ age }} anos){% endblocktrans %}{% else %}-{% endif %}</div>
@@ -20,7 +21,9 @@
                         <br><a href="{% nav_url 'core:student_status' student.pk %}" class="small"><i class="bi bi-arrow-repeat"></i> {% trans "Alterar situação" %}</a>
                     </div>
                     <div class="col-md-6"><strong>{% trans "Acesso ao app" %}</strong><br>
-                        {% if not student.user.has_usable_password %}<span class="text-warning-emphasis"><i class="bi bi-hourglass-split"></i> {% trans "Aguardando convite" %}</span>
+                        {% if not student.has_app %}<span data-app-state="none"><i class="bi bi-phone-flip"></i> {% trans "Não usa o app (só ficha)" %}</span>
+                        <br><a href="{% nav_url 'core:student_edit' student.pk %}" class="small"><i class="bi bi-phone"></i> {% trans "Ativar o app" %}</a>
+                        {% elif not student.user.has_usable_password %}<span class="text-warning-emphasis"><i class="bi bi-hourglass-split"></i> {% trans "Aguardando convite" %}</span>
                         {% elif student.user.last_login %}{% blocktrans trimmed with last_login=student.user.last_login|date:_('d/m/Y H:i') %}Último acesso em {{ last_login }}{% endblocktrans %}
                         {% else %}<span class="text-muted">{% trans "Senha criada, ainda sem acesso" %}</span>{% endif %}
                     </div>

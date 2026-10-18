@@ -99,10 +99,25 @@
                         {% endif %}
                     </div>
 
+                    <div class="card bg-body-tertiary border-0 mb-3" data-app-section>
+                        <div class="card-body py-2">
+                            <div class="form-check form-switch">
+                                {{ form.has_app }}
+                                <label for="{{ form.has_app.id_for_label }}" class="form-check-label fw-bold"><i class="bi bi-phone"></i> {% trans "Usa o app" %}</label>
+                            </div>
+                            <small class="form-text text-muted d-block">{% trans "Com o app, o aluno entra com login para ver treino, agenda e pacote. Sem ele, o aluno fica só com a ficha (você cuida de tudo e nada é enviado a ele)." %}</small>
+                            <div class="mt-2">
+                                <label for="{{ form.modality.id_for_label }}" class="form-label fw-bold small mb-1">{% trans "Acompanhamento" %}</label>
+                                {{ form.modality }}
+                            </div>
+                            {% if form.instance.pk %}<small class="form-text text-muted d-block mt-2" data-app-warning hidden>{% trans "Desmarcar bloqueia o login do aluno e revoga os convites; nada é apagado." %}</small>{% endif %}
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-8 mb-3">
                             <label for="{{ form.email.id_for_label }}" class="form-label fw-bold">
-                                <i class="bi bi-envelope"></i> {% trans "E-mail *" %}
+                                <i class="bi bi-envelope"></i> {% trans "E-mail" %}<span data-email-star> *</span>
                             </label>
                             <input type="email"
                                    name="{{ form.email.name }}"
@@ -114,11 +129,12 @@
                             {% if form.email.errors %}
                                 <div class="invalid-feedback">{{ form.email.errors }}</div>
                             {% endif %}
-                            {% if not form.instance.pk %}
-                            <small class="form-text text-muted">
-                                <i class="bi bi-info-circle"></i> {% trans "Usado no login. Você recebe um link de acesso para enviar ao aluno" %}
+                            <small class="form-text text-muted" data-email-hint>
+                                <i class="bi bi-info-circle"></i> {% if form.instance.pk %}{% trans "Usado no login do aluno." %}{% else %}{% trans "Usado no login. Você recebe um link de acesso para enviar ao aluno" %}{% endif %}
                             </small>
-                            {% endif %}
+                            <small class="form-text text-muted" data-email-hint-local hidden>
+                                <i class="bi bi-info-circle"></i> {% trans "Opcional para quem não usa o app." %}
+                            </small>
                         </div>
 
                         <div class="col-md-4 mb-3">
@@ -402,6 +418,28 @@
 
 {% block extra_js %}
 <script src="{% static 'js/forms.js' %}"></script>
+<script>
+// "Usa o app": o e-mail só é obrigatório para quem tem login
+(function () {
+    var box = document.querySelector('[data-app-toggle]');
+    var email = document.getElementById('{{ form.email.id_for_label }}');
+    if (!box || !email) return;
+    var star = document.querySelector('[data-email-star]');
+    var hint = document.querySelector('[data-email-hint]');
+    var hintLocal = document.querySelector('[data-email-hint-local]');
+    var warning = document.querySelector('[data-app-warning]');
+    var initial = box.checked;
+    function sync() {
+        email.required = box.checked;
+        if (star) star.hidden = !box.checked;
+        if (hint) hint.hidden = !box.checked;
+        if (hintLocal) hintLocal.hidden = box.checked;
+        if (warning) warning.hidden = !(initial && !box.checked);
+    }
+    box.addEventListener('change', sync);
+    sync();
+})();
+</script>
 <script>
 // Preview avatar ao selecionar arquivo
 const avatarInput = document.getElementById('{{ form.avatar.id_for_label }}');

@@ -1,3 +1,5 @@
+import re
+
 from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
 from django.utils import translation
@@ -7,6 +9,12 @@ from core.models import (
     Exercise, MuscleGroup, Person, PersonRoutine, PersonRoutineExercise, Routine,
     RoutineExercise,
 )
+
+
+def page_text(response):
+    """The page as text without the CSRF tokens: they are random, so a short number can show up inside one by chance
+    (never assert that a number is absent from the raw page)."""
+    return re.sub(r'csrfmiddlewaretoken" value="[^"]*"', 'csrfmiddlewaretoken" value=""', response.content.decode())
 
 
 @override_settings(HOLIDAYS_REGION='')   # no national holidays unless a test asks for them (dates are relative to today)

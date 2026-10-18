@@ -35,7 +35,7 @@ class ContactValidationMixin:
 
 class PersonForm(ContactValidationMixin, forms.ModelForm):
     email = forms.EmailField(
-        required=True,
+        required=False,
         widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': _('email@exemplo.com')}),
         label=_('Email'),
         max_length=150,
@@ -47,10 +47,12 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
 
     class Meta:
         model = Person
-        fields = ['person_name', 'email', 'avatar', 'address', 'city', 'state', 'zip_code',
+        fields = ['person_name', 'email', 'has_app', 'modality', 'avatar', 'address', 'city', 'state', 'zip_code',
                   'phone', 'birth_date', 'notes', 'goal', 'health_notes', 'emergency_contact_name',
                   'emergency_contact_phone', 'status']
         widgets = {
+            'has_app': forms.CheckboxInput(attrs={'class': 'form-check-input', 'data-app-toggle': ''}),
+            'modality': forms.Select(attrs={'class': 'form-select'}),
             'birth_date': forms.DateInput(
                 attrs={'type': 'date', 'class': 'form-control'},
                 format='%Y-%m-%d'
@@ -78,6 +80,8 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.duplicates = []
+        self.fields['modality'].choices = [('', gettext('— não informado —')), *Person.Modality.choices]
+        self.fields['modality'].required = False
         if self.instance.pk:
             # Changing the lifecycle goes through "Alterar situação" (history + reason)
             del self.fields['status']
@@ -91,7 +95,9 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
             self.fields['email'].initial = self.instance.user.email
 
     def clean_email(self):
-        email = self.cleaned_data.get('email', '').strip().lower()
+        email = (self.cleaned_data.get('email') or '').strip().lower()
+        if not email:   # only a student with the app needs one: see clean()
+            return ''
         if len(email) > 150:
             raise forms.ValidationError(gettext('O e-mail pode ter no máximo 150 caracteres.'))
         # Verificar se o email já está em uso (exceto pelo usuário atual em edição)
@@ -128,6 +134,9 @@ class PersonForm(ContactValidationMixin, forms.ModelForm):
     def clean(self):
         cleaned = super().clean()
         if self.errors:
+            return cleaned
+        if cleaned.get('has_app') and not cleaned.get('email'):
+            self.add_error('email', gettext('Informe o e-mail para o aluno usar o app (ou desmarque "Usa o app").'))
             return cleaned
         self.duplicates = self._find_duplicates()
         if self.duplicates and not cleaned.get('confirm_duplicate'):

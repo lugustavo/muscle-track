@@ -11,11 +11,10 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Avg, Count, Exists, F, Max, OuterRef, Prefetch, Q, Subquery
+from django.db.models import Avg, Case, Count, Exists, F, IntegerField, Max, OuterRef, Prefetch, Q, Subquery, When
 from django.db.models.functions import Coalesce
 from django.http import FileResponse, Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.templatetags.static import static
@@ -28,7 +27,7 @@ from django.views.decorators.http import require_POST, require_safe
 
 from allauth.account.models import EmailAddress
 
-from .dashboard import INACTIVE_DAYS, INVITE_PENDING, trainer_dashboard
+from .dashboard import INACTIVE_DAYS, INVITE_PENDING, last_activity, trainer_dashboard
 from . import photo_positions, telegram
 from .i18n import short_date
 from .forms import (
@@ -44,7 +43,7 @@ from .agenda import (
 from .billing import (
     charge_message, delete_payment, money, month_bounds, month_summary, overdue_rows, parse_month, register_payment, service_report,
 )
-from . import class_requests, evolution, holidays, intro, notifications, packages, refunds, whatsapp_messages
+from . import app_access, class_requests, evolution, holidays, intro, notifications, packages, refunds, whatsapp_messages
 from .consistency import celebrations
 from .calendar_feed import build_ics, feed_for_token, get_or_create_feed, mark_fetched, rotate
 from .consent import (
@@ -128,17 +127,27 @@ STUDENT_FILTERS = {
     'inactive_7d': _l('Sem treinar há 7+ dias'),
     'no_routine': _l('Sem treino ativo'),
     'invite_pending': _l('Convite pendente'),
+    'no_app': _l('Sem app (só ficha)'),
+    'with_app': _l('Usa o app'),
+    'in_person': _l('Presencial'),
+    'online': _l('Online'),
+    'hybrid': _l('Híbrido'),
 }
 
 
 def _students_queryset():
-    """Students with the list statistics computed in the same query (no per-row queries)."""
+    """Students with the list statistics computed in the same query (no per-row queries).
+
+    `last_workout_at` / `total_workouts` count the workouts done in the app; for a student without the app, the
+    classes attended (that is how the trainer sees them train)."""
     sessions = WorkoutSession.objects.filter(person_routine__person=OuterRef('pk'), is_completed=True)
-    last_workout = sessions.order_by('-start_time').values('start_time')[:1]
     total = sessions.order_by().values('person_routine__person').annotate(c=Count('pk')).values('c')
+    lessons = Appointment.objects.filter(person=OuterRef('pk'), status=Appointment.Status.ATTENDED
+                                         ).order_by().values('person').annotate(c=Count('pk')).values('c')
     return Person.objects.select_related('user').annotate(
-        last_workout_at=Subquery(last_workout),
-        total_workouts=Coalesce(Subquery(total), 0),
+        last_workout_at=last_activity('pk'),
+        total_workouts=Case(When(has_app=False, then=Coalesce(Subquery(lessons), 0)),
+                            default=Coalesce(Subquery(total), 0), output_field=IntegerField()),
         has_routine=Exists(PersonRoutine.objects.filter(person=OuterRef('pk'), is_active=True)),
         phone_digits=phone_digits(F('phone')),
     )
@@ -159,6 +168,12 @@ def _apply_student_filter(students, name):
         return students.filter(is_active=True, has_routine=False)
     if name == 'invite_pending':
         return students.filter(INVITE_PENDING)
+    if name == 'no_app':
+        return students.filter(has_app=False)
+    if name == 'with_app':
+        return students.filter(has_app=True)
+    if name in Person.Modality.values:
+        return students.filter(modality=name)
     if name in ('trial', 'paused', 'former'):
         return students.filter(status=name)
     if name == 'consent_pending':
@@ -220,20 +235,20 @@ def student_create(request):
             email = form.cleaned_data['email']
 
             with transaction.atomic():
-                # Account without a password: the student chooses it through the invite link
-                user = User(username=email, email=email, is_active=True)
-                user.set_unusable_password()
-                user.save()
+                # Account without a password: the student chooses it through the invite link (a dormant one without the app)
+                user = app_access.new_account(email, form.cleaned_data['has_app'])
 
                 person = form.save(commit=False)
                 person.user = user
                 person.status_changed_at = timezone.now()
                 person.save()
 
-                EmailAddress.objects.create(user=user, email=email, primary=True, verified=False)
                 log_event(person, StudentEvent.Kind.CREATED, request.user,
                           _('Cadastro criado (%(status)s)') % {'status': person.get_status_display()})
 
+            if not person.has_app:
+                messages.success(request, _('Aluno cadastrado! Ele fica só com a ficha: sem login no app.'))
+                return redirect('core:student_detail', pk=person.pk)
             messages.success(request, _('Aluno cadastrado! Envie o link de convite para ele criar a senha.'))
             return redirect('core:student_invite', pk=person.pk)
     else:
@@ -245,6 +260,9 @@ def student_create(request):
 def student_invite(request, pk):
     """Show the one-time link (and a WhatsApp shortcut) the student uses to set a password"""
     student = get_object_or_404(Person.objects.select_related('user'), pk=pk)
+    if not student.has_app:
+        messages.info(request, _('Este aluno não usa o app. Para dar acesso, marque "Usa o app" ao editar o aluno.'))
+        return redirect('core:student_detail', pk=pk)
     if request.method == 'POST':
         revoke_invites(student)
         log_event(student, StudentEvent.Kind.INVITE_REVOKED, request.user, _('Link de acesso revogado e gerado de novo'))
@@ -268,7 +286,7 @@ def accept_invite(request, uidb64, token):
     user = get_user_from_invite(uidb64, token)
     if user is None:
         return render(request, 'core/accept_invite.html', {'invalid': True}, status=400)
-    if not user.person.is_active:
+    if not user.person.is_active or not user.person.has_app:
         return render(request, 'core/accept_invite.html', {'invalid': True, 'inactive': True}, status=403)
 
     if request.method == 'POST':
@@ -636,23 +654,22 @@ def student_edit(request, pk):
     """Edit student"""
     student = get_object_or_404(Person.objects.select_related('user'), pk=pk)
     if request.method == 'POST':
+        was_app, old_email = student.has_app, student.user.email
         form = PersonForm(request.POST, request.FILES, instance=student)
         if form.is_valid():
             email = form.cleaned_data['email']
-            user = student.user
-            email_changed = user.email != email
 
             with transaction.atomic():
                 person = form.save()
-                if email_changed:
-                    user.email = email
-                    user.username = email
-                    user.save()
-                    EmailAddress.objects.update_or_create(
-                        user=user, primary=True, defaults={'email': email, 'verified': False})
+                turned_on = app_access.apply(person, email, was_app, request.user)
                 log_profile_edit(person, form, request.user)
 
-            if email_changed:
+            if turned_on:
+                messages.success(request, _('App ativado! Envie o link de convite para o aluno criar a senha.'))
+                return redirect('core:student_invite', pk=pk)
+            if was_app and not person.has_app:
+                messages.success(request, _('Aluno atualizado! O login no app foi desativado: ele fica só com a ficha.'))
+            elif person.has_app and old_email != email:
                 messages.success(request, _('Aluno atualizado! O e-mail de login mudou: confira o convite se o aluno ainda não criou a senha.'))
             else:
                 messages.success(request, _('Aluno atualizado com sucesso!'))

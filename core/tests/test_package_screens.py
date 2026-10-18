@@ -7,7 +7,7 @@ from django.utils import timezone
 from core import packages
 from core.models import Appointment, Package, StudentPackage
 
-from .base import BaseTestCase
+from .base import BaseTestCase, page_text
 
 
 def make_package(name='Pacote 10', sessions=10, days=60, per='50', **extra):
@@ -307,7 +307,7 @@ class StudentSideTests(BaseTestCase):
         self.assertContains(page, 'Meu pacote')
         self.assertContains(page, '1</strong> de 10 aulas usadas')
         self.assertContains(page, 'conta como aula dada')
-        self.assertNotContains(page, '187')
+        self.assertNotIn('187', page_text(page))
 
     def test_no_card_without_a_package(self):
         self.client.force_login(self.alice)

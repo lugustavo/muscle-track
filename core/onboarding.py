@@ -16,10 +16,13 @@ def trainer_steps(here=None):
         return with_next(url, here) if here else url
 
     students = Person.objects.filter(user__is_staff=False, user__is_superuser=False)
-    pending = students.filter(user__password__startswith=UNUSABLE_PASSWORD_PREFIX).order_by('created_at').first()
+    with_app = students.filter(has_app=True)
+    pending = with_app.filter(user__password__startswith=UNUSABLE_PASSWORD_PREFIX).order_by('created_at').first()
     first_student = students.order_by('created_at').first()
     has_students = first_student is not None
-    has_access = students.exclude(user__password__startswith=UNUSABLE_PASSWORD_PREFIX).exists()
+    # a trainer who only keeps files (no student uses the app) has no access to hand out
+    has_access = with_app.exclude(user__password__startswith=UNUSABLE_PASSWORD_PREFIX).exists() or (
+        has_students and not with_app.exists())
 
     steps = [
         {'key': 'exercises', 'title': _('Cadastre seus exercícios'), 'hint': _('A biblioteca que você usa para montar os treinos.'),

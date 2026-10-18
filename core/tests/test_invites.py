@@ -22,7 +22,7 @@ class StudentCreationTests(BaseTestCase):
 
     def create(self, **extra):
         data = {'person_name': 'Carla Souza', 'email': 'Carla@Example.com', 'phone': '(11) 98765-4321',
-                'is_active': 'on'}
+                'is_active': 'on', 'has_app': 'on'}
         data.update(extra)
         return self.client.post(reverse('core:student_create'), data)
 
@@ -140,7 +140,7 @@ class StudentEditTests(BaseTestCase):
         self.login(self.trainer)
 
     def edit(self, student, **extra):
-        data = {'person_name': student.person.person_name, 'email': student.email, 'is_active': 'on'}
+        data = {'person_name': student.person.person_name, 'email': student.email, 'is_active': 'on', 'has_app': 'on'}
         data.update(extra)
         return self.client.post(reverse('core:student_edit', kwargs={'pk': student.person.pk}), data)
 

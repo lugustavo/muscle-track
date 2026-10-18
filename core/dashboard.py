@@ -2,7 +2,7 @@
 from datetime import datetime, time, timedelta
 
 from django.contrib.auth.hashers import UNUSABLE_PASSWORD_PREFIX
-from django.db.models import Exists, OuterRef, Q, Subquery
+from django.db.models import Case, DateTimeField, Exists, OuterRef, Q, Subquery, When
 from django.utils import dateformat, timezone, translation
 from django.utils.translation import gettext as _, gettext_lazy as _l
 
@@ -34,8 +34,19 @@ PRIORITY = (
 )
 INFO_CARDS = ('sessions', 'comments')   # worth reading, never "to do": ordered after the ones above, outside the strip
 
-# Student account that never set a password, i.e. never accepted the invite
-INVITE_PENDING = Q(user__password__startswith=UNUSABLE_PASSWORD_PREFIX)
+# Student with the app whose account never got a password, i.e. never accepted the invite (a student without the app
+# has no invite to wait for)
+INVITE_PENDING = Q(has_app=True, user__password__startswith=UNUSABLE_PASSWORD_PREFIX)
+
+
+def last_activity(person_ref):
+    """When the student last trained: the last completed workout in the app, or for a student without the app (who
+    does not log workouts) the last class attended."""
+    workout = WorkoutSession.objects.filter(person_routine__person=OuterRef(person_ref), is_completed=True
+                                            ).order_by('-start_time').values('start_time')[:1]
+    lesson = Appointment.objects.filter(person=OuterRef(person_ref), status=Appointment.Status.ATTENDED
+                                        ).order_by('-starts_at').values('starts_at')[:1]
+    return Case(When(has_app=False, then=Subquery(lesson)), default=Subquery(workout), output_field=DateTimeField())
 
 
 def _start_of_today():
@@ -48,13 +59,9 @@ def inactive_students(now=None):
     Students who never accepted the invite are not here: they cannot train yet (see pending_invites)."""
     now = now or timezone.now()
     cutoff = now - timedelta(days=INACTIVE_DAYS)
-    last_session = WorkoutSession.objects.filter(
-        person_routine__person=OuterRef('pk'), is_completed=True
-    ).order_by('-start_time').values('start_time')[:1]
-
     students = Person.objects.filter(is_active=True).annotate(
         has_routine=Exists(PersonRoutine.objects.filter(person=OuterRef('pk'), is_active=True)),
-        last_session_at=Subquery(last_session),
+        last_session_at=last_activity('pk'),
     ).filter(has_routine=True).exclude(INVITE_PENDING).filter(
         Q(last_session_at__lt=cutoff) | Q(last_session_at__isnull=True, created_at__lt=cutoff)
     )

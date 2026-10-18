@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 17:34-0300\n"
+"POT-Creation-Date: 2026-10-17 21:26-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -140,6 +140,12 @@ msgstr ""
 
 msgid "Treino gerado por IA"
 msgstr "AI-generated workout"
+
+msgid "App ativado: o aluno passa a ter login"
+msgstr "App turned on: the student now has a login"
+
+msgid "App desativado: o aluno só tem ficha com você"
+msgstr "App turned off: the student only has a file with you"
 
 #, python-format
 msgid "Pagamento registrado (%(method)s) — %(package)s"
@@ -534,6 +540,9 @@ msgstr ""
 msgid "Anotações internas (o aluno não vê)"
 msgstr "Internal notes (student can't see)"
 
+msgid "— não informado —"
+msgstr "— not set —"
+
 msgid "O e-mail pode ter no máximo 150 caracteres."
 msgstr "Email can be at most 150 characters."
 
@@ -546,6 +555,11 @@ msgstr "same name"
 msgid "mesmo telefone"
 msgstr "same phone"
 
+msgid "Informe o e-mail para o aluno usar o app (ou desmarque \"Usa o app\")."
+msgstr ""
+"Enter the e-mail for the student to use the app (or uncheck \"Uses the "
+"app\")."
+
 msgid ""
 "Já existe aluno com dados parecidos (veja abaixo). Se for outra pessoa, "
 "marque a confirmação e salve de novo."
@@ -556,7 +570,6 @@ msgstr ""
 msgid "— ninguém —"
 msgstr "— nobody —"
 
-#| msgid "Segunda"
 msgid "Segunda pessoa"
 msgstr "Second person"
 
@@ -1137,6 +1150,25 @@ msgstr "My weekly workout goal"
 msgid "Usada quando o seu plano não define uma meta. De 1 a 7."
 msgstr "Used when your plan doesn't set a goal. From 1 to 7."
 
+msgid "Presencial"
+msgstr "In person"
+
+msgid "Online"
+msgstr "Online"
+
+msgid "Híbrido"
+msgstr "Hybrid"
+
+msgid "Acompanhamento"
+msgstr "Coaching type"
+
+msgid "Usa o app"
+msgstr "Uses the app"
+
+msgid "Desmarque para um aluno que só tem ficha com você, sem login no app."
+msgstr ""
+"Uncheck for a student who only has a file with you, with no app login."
+
 #, python-format
 msgid "Situação: %(old)s → %(new)s"
 msgstr "Status: %(old)s → %(new)s"
@@ -1377,6 +1409,9 @@ msgstr "Data export"
 
 msgid "Pedido de exclusão"
 msgstr "Deletion request"
+
+msgid "Acesso ao app"
+msgstr "App access"
 
 msgid "Quem"
 msgstr "Who"
@@ -2010,7 +2045,6 @@ msgid "Só alunos ativos podem dividir um pacote."
 msgstr "Only active students can share a package."
 
 #, python-format
-#| msgid "Pacote editado: %(name)s (%(changes)s)"
 msgid "Pacote dividido com você: %(name)s (pago por %(owner)s)"
 msgstr "Package shared with you: %(name)s (paid by %(owner)s)"
 
@@ -2353,9 +2387,15 @@ msgstr "No active workout"
 msgid "Convite pendente"
 msgstr "Invitation pending"
 
+msgid "Sem app (só ficha)"
+msgstr "No app (file only)"
+
 #, python-format
 msgid "Cadastro criado (%(status)s)"
 msgstr "Registration created (%(status)s)"
+
+msgid "Aluno cadastrado! Ele fica só com a ficha: sem login no app."
+msgstr "Student registered! Only a file, no app login."
 
 msgid "Aluno cadastrado! Envie o link de convite para ele criar a senha."
 msgstr ""
@@ -2363,6 +2403,13 @@ msgstr ""
 
 msgid "Cadastrar Aluno"
 msgstr "Add Student"
+
+msgid ""
+"Este aluno não usa o app. Para dar acesso, marque \"Usa o app\" ao editar o "
+"aluno."
+msgstr ""
+"This student does not use the app. To give access, check \"Uses the app\" "
+"when editing the student."
 
 msgid "Link de acesso revogado e gerado de novo"
 msgstr "Access link revoked and regenerated"
@@ -2452,6 +2499,14 @@ msgstr ""
 
 msgid "Devolução anulada: continua registrada, mas não conta mais."
 msgstr "Refund voided: it stays on record, but no longer counts."
+
+msgid "App ativado! Envie o link de convite para o aluno criar a senha."
+msgstr ""
+"App turned on! Send the invite link so the student can create a password."
+
+msgid ""
+"Aluno atualizado! O login no app foi desativado: ele fica só com a ficha."
+msgstr "Student updated! App login was turned off: only the file remains."
 
 msgid ""
 "Aluno atualizado! O e-mail de login mudou: confira o convite se o aluno "
@@ -3215,7 +3270,6 @@ msgstr "%(left)s left over"
 msgid "Aulas usadas do pacote"
 msgstr "Package classes used"
 
-#| msgid "pacote vencido"
 msgid "Pacote dividido."
 msgstr "Shared package."
 
@@ -3224,7 +3278,6 @@ msgid "Você usou %(used)s."
 msgstr "You used %(used)s."
 
 #, python-format
-#| msgid "%(kind)s de %(date)s anulada"
 msgid "%(name)s · %(used)s usada"
 msgid_plural "%(name)s · %(used)s usadas"
 msgstr[0] "%(name)s · %(used)s used"
@@ -6439,6 +6492,12 @@ msgstr "No classes scheduled."
 msgid "Deslize a aula para a esquerda para editar ou remover."
 msgstr "Swipe the class left to edit or remove."
 
+msgid "Só tem ficha com você: sem login no app"
+msgstr "Only has a file with you: no app login"
+
+msgid "Sem app"
+msgstr "No app"
+
 msgid ""
 "Cada avaliação tem as fotos das posições (frente, lados e costas). As fotos "
 "são privadas: só você e o próprio aluno conseguem abrir."
@@ -6515,8 +6574,11 @@ msgstr "since %(status_changed_at)s"
 msgid "Alterar situação"
 msgstr "Change status"
 
-msgid "Acesso ao app"
-msgstr "App access"
+msgid "Não usa o app (só ficha)"
+msgstr "Does not use the app (file only)"
+
+msgid "Ativar o app"
+msgstr "Turn the app on"
 
 #, python-format
 msgid "Último acesso em %(last_login)s"
@@ -7126,11 +7188,29 @@ msgstr "Personal Information"
 msgid "Nome Completo *"
 msgstr "Full Name *"
 
-msgid "E-mail *"
-msgstr "Email *"
+msgid ""
+"Com o app, o aluno entra com login para ver treino, agenda e pacote. Sem "
+"ele, o aluno fica só com a ficha (você cuida de tudo e nada é enviado a "
+"ele)."
+msgstr ""
+"With the app, the student signs in to see workouts, schedule and package. "
+"Without it, the student only has a file (you handle everything and nothing "
+"is sent to them)."
+
+msgid ""
+"Desmarcar bloqueia o login do aluno e revoga os convites; nada é apagado."
+msgstr ""
+"Unchecking blocks the student's login and revokes invites; nothing is "
+"deleted."
+
+msgid "Usado no login do aluno."
+msgstr "Used for the student's login."
 
 msgid "Usado no login. Você recebe um link de acesso para enviar ao aluno"
 msgstr "Used for login. You get an access link to send to the student"
+
+msgid "Opcional para quem não usa o app."
+msgstr "Optional for students who do not use the app."
 
 msgid "Rua, número, complemento"
 msgstr "Street, number, unit"
@@ -7368,6 +7448,15 @@ msgid "vence em %(days_to_plan_expiry)sd"
 msgstr "expires in %(days_to_plan_expiry)sd"
 
 #, python-format
+msgid "%(total_workouts)s aula · última há %(last_workout_at)s"
+msgid_plural "%(total_workouts)s aulas · última há %(last_workout_at)s"
+msgstr[0] "%(total_workouts)s class · last %(last_workout_at)s ago"
+msgstr[1] "%(total_workouts)s classes · last %(last_workout_at)s ago"
+
+msgid "Nenhuma aula ainda"
+msgstr "No classes yet"
+
+#, python-format
 msgid "%(total_workouts)s treino · último há %(last_workout_at)s"
 msgid_plural "%(total_workouts)s treinos · último há %(last_workout_at)s"
 msgstr[0] "%(total_workouts)s workout · last one %(last_workout_at)s ago"
@@ -7402,8 +7491,14 @@ msgstr "%(age)s years old"
 msgid "Último treino"
 msgstr "Last workout"
 
+msgid "Última aula"
+msgstr "Last class"
+
 msgid "Nenhum treino"
 msgstr "No workouts"
+
+msgid "Nenhuma aula"
+msgstr "No classes"
 
 msgid "ID"
 msgstr "ID"
@@ -7525,7 +7620,6 @@ msgstr ""
 "Payments already recorded don't change. To refund money, use <em>Cancel with"
 " refund</em> or <em>Refund or reverse</em>."
 
-#| msgid "Motivo (opcional)"
 msgid "Dividir com (opcional)"
 msgstr "Share with (optional)"
 
