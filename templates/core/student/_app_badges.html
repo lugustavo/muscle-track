@@ -1,0 +1,3 @@
+{% load i18n %}{# Badges for how the student is followed: without the app, and the modality. Needs `student`. #}
+{% if not student.has_app %}<span class="badge bg-secondary" data-no-app title="{% trans "Só tem ficha com você: sem login no app" %}"><i class="bi bi-phone-flip"></i> {% trans "Sem app" %}</span>{% endif %}
+{% if student.modality %}<span class="badge bg-body-secondary text-body border" data-modality="{{ student.modality }}">{{ student.get_modality_display }}</span>{% endif %}

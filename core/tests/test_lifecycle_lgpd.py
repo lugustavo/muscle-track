@@ -140,7 +140,7 @@ class HistoryTests(BaseTestCase):
         self.edit_url = reverse('core:student_edit', kwargs={'pk': self.person.pk})
 
     def trainer_edit(self, **extra):
-        data = {'person_name': 'Alice', 'email': self.alice.email}
+        data = {'person_name': 'Alice', 'email': self.alice.email, 'has_app': 'on'}
         data.update(extra)
         return self.client.post(self.edit_url, data)
 

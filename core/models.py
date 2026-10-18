@@ -109,6 +109,18 @@ class Person(models.Model):
         null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(7)],
         verbose_name=_('Minha meta de treinos por semana'),
         help_text=_('Usada quando o seu plano não define uma meta. De 1 a 7.'))
+    class Modality(models.TextChoices):
+        IN_PERSON = 'in_person', _('Presencial')
+        ONLINE = 'online', _('Online')
+        HYBRID = 'hybrid', _('Híbrido')
+
+    # How the student is followed (a label for the trainer; blank = not said)
+    modality = models.CharField(max_length=10, choices=Modality.choices, blank=True, default='',
+                                verbose_name=_('Acompanhamento'))
+    # Does the student use the app? Without it the file is only the trainer's: the login account stays dormant
+    # (no password, cannot sign in; see core/app_access.py) and nothing is ever sent to the student
+    has_app = models.BooleanField(default=True, verbose_name=_('Usa o app'),
+                                  help_text=_('Desmarque para um aluno que só tem ficha com você, sem login no app.'))
     # Bumped to revoke invite links already handed out (see core/invites.py)
     invite_version = models.PositiveIntegerField(default=0, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -164,7 +176,7 @@ class Person(models.Model):
             sessions_closed = close_open(self, now)
         self.save(update_fields=['status', 'status_reason', 'status_changed_at', 'is_active',
                                  'deactivated_at', 'updated_at'])
-        User.objects.filter(pk=self.user_id).update(is_active=self.is_active)
+        User.objects.filter(pk=self.user_id).update(is_active=self.is_active and self.has_app)
         labels = dict(self.Status.choices)
         StudentEvent.objects.create(
             person=self, actor=actor, kind=StudentEvent.Kind.STATUS,
@@ -730,6 +742,7 @@ class StudentEvent(models.Model):
         DATA_EXPORT = 'data_export', _('Exportação de dados')
         ERASURE_REQUEST = 'erasure_request', _('Pedido de exclusão')
         PACKAGE = 'package', _('Pacote')
+        APP_ACCESS = 'app_access', _('Acesso ao app')
 
     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='events', verbose_name=_('Aluno'))
     actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+', verbose_name=_('Quem'))

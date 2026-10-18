@@ -40,7 +40,8 @@
             {% if erasure_requested %}
                 <span class="badge bg-danger" title="{% trans "O aluno pediu a exclusão dos próprios dados" %}"><i class="bi bi-trash"></i> {% trans "Pediu exclusão" %}</span>
             {% endif %}
-            {% if not student.user.has_usable_password %}
+            {% include 'core/student/_app_badges.html' %}
+            {% if student.has_app and not student.user.has_usable_password %}
                 <span class="badge bg-warning text-dark" title="{% trans "O aluno ainda não criou a senha" %}"><i class="bi bi-hourglass-split"></i> {% trans "Convite pendente" %}</span>
             {% endif %}
         </div>
@@ -49,9 +50,11 @@
         <a href="{% nav_url 'core:person_routine_create' %}&person={{ student.pk }}" class="btn btn-success">
             <i class="bi bi-plus-circle"></i> {% trans "Atribuir Treino" %}
         </a>
+        {% if student.has_app %}
         <a href="{% nav_url 'core:student_invite' student.pk %}" class="btn btn-outline-primary">
             <i class="bi bi-send"></i> {% if student.user.has_usable_password %}{% trans "Redefinir senha" %}{% else %}{% trans "Convite" %}{% endif %}
         </a>
+        {% endif %}
         <a href="{% nav_url 'core:student_edit' student.pk %}" class="btn btn-primary">
             <i class="bi bi-pencil"></i> {% trans "Editar" %}
         </a>
@@ -70,7 +73,7 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item py-2" href="{% nav_url 'core:student_edit' student.pk %}"><i class="bi bi-pencil me-2"></i>{% trans "Editar" %}</a></li>
-                <li><a class="dropdown-item py-2" href="{% nav_url 'core:student_invite' student.pk %}"><i class="bi bi-send me-2"></i>{% if student.user.has_usable_password %}{% trans "Redefinir senha" %}{% else %}{% trans "Convite" %}{% endif %}</a></li>
+                {% if student.has_app %}<li><a class="dropdown-item py-2" href="{% nav_url 'core:student_invite' student.pk %}"><i class="bi bi-send me-2"></i>{% if student.user.has_usable_password %}{% trans "Redefinir senha" %}{% else %}{% trans "Convite" %}{% endif %}</a></li>{% endif %}
                 <li><a class="dropdown-item py-2" href="{% nav_url 'core:student_status' student.pk %}"><i class="bi bi-arrow-repeat me-2"></i>{% trans "Alterar situação" %}</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item py-2 text-danger" href="{% nav_url 'core:student_delete' student.pk %}"><i class="bi bi-trash me-2"></i>{% trans "Excluir aluno" %}</a></li>
