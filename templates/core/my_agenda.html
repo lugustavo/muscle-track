@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load i18n %}
 {% load navigation %}
+{% load ui %}
 
 {% block title %}{% blocktrans trimmed %}Minha agenda - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
@@ -22,8 +23,8 @@
     <div class="card mb-3" data-my-package>
         <div class="card-body py-2">
             <div class="d-flex justify-content-between align-items-start gap-2">
-                <div><div class="small text-muted"><i class="bi bi-box-seam"></i> {% trans "Meu pacote" %}</div><strong>{{ package.package.name }}</strong></div>
-                <span class="badge bg-{{ package.css }}">{{ package.label }}</span>
+                <div><div class="small text-muted ui-sec d-flex"><span class="ui-ico sm"><i class="bi bi-box-seam" aria-hidden="true"></i></span> {% trans "Meu pacote" %}</div><strong>{{ package.package.name }}</strong></div>
+                <span class="ui-badge {{ package.css|tone }}">{{ package.label }}</span>
             </div>
             <div class="d-flex justify-content-between small mt-2"><span>{% blocktrans trimmed with used=package.used sessions=package.sessions %}<strong>{{ used }}</strong> de {{ sessions }} aulas usadas{% endblocktrans %}</span><span class="text-muted">{% blocktrans trimmed with left=package.left %}{{ left }} sobrando{% endblocktrans %}</span></div>
             <div class="progress mt-1" style="height: 6px;" role="progressbar" aria-valuenow="{{ package.percent }}" aria-valuemin="0" aria-valuemax="100" aria-label="{% trans "Aulas usadas do pacote" %}"><div class="progress-bar bg-success" style="width: {{ package.percent }}%"></div></div>
@@ -36,16 +37,17 @@
     </div>
     {% endif %}
 
-    <h2 class="h6 text-uppercase text-muted">{% trans "Próximas aulas" %}</h2>
+    <h2 class="ui-h2">{% trans "Próximas aulas" %}</h2>
     {% for a in upcoming %}
     <div class="card mb-2 {% if a.status == 'rescheduled' %}opacity-75{% endif %}" data-my-class="{{ a.pk }}">
         <div class="card-body py-2">
-            <div class="d-flex justify-content-between align-items-start gap-2">
-                <div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="ui-date {% if a.status == 'cancelled' or a.status == 'rescheduled' %}off{% endif %}" aria-hidden="true"><span class="ui-date-wd">{{ a.starts_at|date:"D" }}</span><span class="ui-date-d">{{ a.starts_at|date:"j" }}</span><span class="ui-date-m">{{ a.starts_at|date:"M" }}</span></div>
+                <div class="flex-grow-1 min-w-0">
                     <strong>{{ a.starts_at|date:_("l, j \d\e F")|lower|capfirst }}</strong>
                     <div class="text-muted">{% blocktrans trimmed with starts_at=a.starts_at|time:"H:i" duration_minutes=a.duration_minutes %}{{ starts_at }} · {{ duration_minutes }} min{% endblocktrans %}</div>
                 </div>
-                <span class="badge {% if a.status == 'cancelled' or a.status == 'rescheduled' %}bg-secondary{% else %}bg-body-secondary text-body border{% endif %}">{{ a.get_status_display }}</span>
+                <span class="ui-badge {% if a.status == 'scheduled' %}brand{% endif %}">{{ a.get_status_display }}</span>
             </div>
             {% include 'core/_class_history.html' %}
             {% if a.status == 'scheduled' %}
@@ -76,7 +78,7 @@
     <p class="small text-muted">{% blocktrans trimmed count notice_hours=notice_hours %}Pedidos pelo app: até {{ notice_hours }} hora antes da aula. Depois disso, fale direto com a sua personal. Faltar ou cancelar com menos de {{ notice_hours }} h conta como aula dada no pacote.{% plural %}Pedidos pelo app: até {{ notice_hours }} horas antes da aula. Depois disso, fale direto com a sua personal. Faltar ou cancelar com menos de {{ notice_hours }} h conta como aula dada no pacote.{% endblocktrans %}</p>
 
     {% if recent %}
-    <h2 class="h6 text-uppercase text-muted mt-4">{% trans "Últimos 30 dias" %}</h2>
+    <h2 class="ui-h2">{% trans "Últimos 30 dias" %}</h2>
     <ul class="list-group mb-3">
         {% for a in recent %}
         <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -84,7 +86,7 @@
                 {{ a.starts_at|date:_('D, d/m') }} · {{ a.starts_at|time:"H:i" }}
                 {% include 'core/_class_history.html' with compact=True %}
             </span>
-            <span class="badge {% if a.status == 'attended' %}bg-success{% elif a.status == 'missed' %}bg-danger{% elif a.status == 'cancelled' or a.status == 'rescheduled' %}bg-secondary{% else %}bg-body-secondary text-body border{% endif %}">{{ a.get_status_display }}</span>
+            <span class="ui-badge {% if a.status == 'attended' %}ok{% elif a.status == 'missed' %}bad{% endif %}">{{ a.get_status_display }}</span>
         </li>
         {% endfor %}
     </ul>

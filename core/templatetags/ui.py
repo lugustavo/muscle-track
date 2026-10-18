@@ -19,3 +19,12 @@ def qs_remove(context, *keys):
     """The current query string without these filters (and without the page number)."""
     params = [(key, value) for key, value in context['request'].GET.items() if key not in keys and key != 'page']
     return '?' + urlencode(params) if params else '?'
+
+
+_TONES = {'success': 'ok', 'warning': 'warn', 'danger': 'bad', 'info': 'info', 'primary': 'brand'}
+
+
+@register.filter
+def tone(value):
+    """The `ui-badge` tone for a Bootstrap color name ("success" -> "ok"); unknown or neutral names give no tone."""
+    return _TONES.get(value, '')
