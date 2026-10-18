@@ -415,7 +415,7 @@ class StudentListTests(BaseTestCase):
         response = self.client.get(self.url, {'search': 'Aluno'})
         self.assertEqual(response.context['page'].paginator.count, 30)
         self.assertEqual(len(response.context['students']), 24)
-        self.assertContains(response, 'search=Aluno&view=grid&page=2')
+        self.assertContains(response, '?search=Aluno&amp;page=2')
         second = self.client.get(self.url, {'search': 'Aluno', 'page': 2})
         self.assertEqual(len(second.context['students']), 6)
         self.assertEqual(self.client.get(self.url, {'page': 'nope'}).status_code, 200)

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-18 14:09-0300\n"
+"POT-Creation-Date: 2026-10-18 14:28-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2559,6 +2559,12 @@ msgstr "Invitation pending"
 msgid "Sem app (só ficha)"
 msgstr "No app (file only)"
 
+msgid "Ativos"
+msgstr "Active"
+
+msgid "Inativos"
+msgstr "Inactive"
+
 #, python-format
 msgid "Cadastro criado (%(status)s)"
 msgstr "Registration created (%(status)s)"
@@ -2779,12 +2785,6 @@ msgstr "Invalid exercise in the list."
 
 msgid "Um dos exercícios selecionados não existe mais."
 msgstr "One of the selected exercises no longer exists."
-
-msgid "Ativos"
-msgstr "Active"
-
-msgid "Inativos"
-msgstr "Inactive"
 
 msgid "Treino criado com sucesso!"
 msgstr "Workout created successfully!"
@@ -3770,6 +3770,9 @@ msgstr "Your login will be the email <strong>%(email)s</strong>."
 msgid "Agenda - %(brand_name)s"
 msgstr "Schedule - %(brand_name)s"
 
+msgid "Aulas marcadas, pedidos dos alunos e horários fixos."
+msgstr "Booked classes, student requests and fixed slots."
+
 msgid "Ver a agenda no Google Agenda"
 msgstr "View schedule in Google Calendar"
 
@@ -4322,11 +4325,9 @@ msgstr ""
 msgid "Exercícios - %(brand_name)s"
 msgstr "Exercises - %(brand_name)s"
 
-#| msgid "Digite o nome ou descrição..."
 msgid "Buscar por nome ou descrição"
 msgstr "Search by name or description"
 
-#| msgid "Grupo Muscular"
 msgid "Grupo muscular"
 msgstr "Muscle group"
 
@@ -4334,17 +4335,14 @@ msgid "Filtrar"
 msgstr "Filter"
 
 #, python-format
-#| msgid "Encontrados <strong>%(count)s</strong> exercício(s)"
 msgid "<strong>%(count)s</strong> exercício encontrado"
 msgid_plural "<strong>%(count)s</strong> exercícios encontrados"
 msgstr[0] "<strong>%(count)s</strong> exercise found"
 msgstr[1] "<strong>%(count)s</strong> exercises found"
 
-#| msgid "Nenhum exercício encontrado"
 msgid "Nenhum exercício com esses filtros."
 msgstr "No exercises match these filters."
 
-#| msgid "Nenhum exercício cadastrado nesta rotina."
 msgid "Nenhum exercício cadastrado ainda."
 msgstr "No exercises yet."
 
@@ -4389,6 +4387,10 @@ msgstr "You haven't logged a load for this exercise yet."
 #, python-format
 msgid "Financeiro - %(brand_name)s"
 msgstr "Finances - %(brand_name)s"
+
+#| msgid "Pagamentos e devoluções"
+msgid "Recebimentos, pacotes e devoluções do mês."
+msgstr "This month's payments, packages and refunds."
 
 msgid "Mês anterior"
 msgstr "Previous month"
@@ -5975,7 +5977,6 @@ msgstr ""
 "template later doesn't affect those who already bought."
 
 #, python-format
-#| msgid "Encontrados <strong>%(count)s</strong> treino(s)"
 msgid "<strong>%(count)s</strong> pacote encontrado"
 msgid_plural "<strong>%(count)s</strong> pacotes encontrados"
 msgstr[0] "<strong>%(count)s</strong> package found"
@@ -6005,11 +6006,9 @@ msgid_plural "%(sold_count)s vendidos"
 msgstr[0] "%(sold_count)s sold"
 msgstr[1] "%(sold_count)s sold"
 
-#| msgid "Nenhum pacote precisando de atenção."
 msgid "Nenhum pacote com esses filtros."
 msgstr "No packages match these filters."
 
-#| msgid "Nenhum exercício cadastrado nesta rotina."
 msgid "Nenhum pacote cadastrado ainda."
 msgstr "No packages yet."
 
@@ -6440,17 +6439,14 @@ msgid "Todas"
 msgstr "All"
 
 #, python-format
-#| msgid "Encontrados <strong>%(count)s</strong> treino(s)"
 msgid "<strong>%(count)s</strong> treino encontrado"
 msgid_plural "<strong>%(count)s</strong> treinos encontrados"
 msgstr[0] "<strong>%(count)s</strong> workout found"
 msgstr[1] "<strong>%(count)s</strong> workouts found"
 
-#| msgid "Nenhum treino anterior registrado."
 msgid "Nenhum treino com esses filtros."
 msgstr "No workouts match these filters."
 
-#| msgid "Nenhum treino ainda"
 msgid "Nenhum treino cadastrado ainda."
 msgstr "No workouts yet."
 
@@ -7668,38 +7664,19 @@ msgstr ""
 msgid "Revogar e gerar novo link"
 msgstr "Revoke and generate new link"
 
-msgid "Novo Aluno"
-msgstr "New Student"
+msgid "Quem você acompanha, com situação, pacote e último treino."
+msgstr "Everyone you coach, with status, package and last workout."
 
 msgid "Nome, e-mail, telefone ou #ID..."
 msgstr "Name, email, phone or #ID..."
 
-msgid "Pesquisar alunos"
-msgstr "Search students"
-
-msgid "Filtros"
-msgstr "Filters"
-
-msgid "Limpar"
-msgstr "Clear"
-
-msgid "Aplicar"
-msgstr "Apply"
-
-msgid "Pesquisar"
-msgstr "Search"
-
-msgid "Limpar filtros"
-msgstr "Clear filters"
-
 #, python-format
-msgid "%(count)s aluno encontrado"
-msgid_plural "%(count)s alunos encontrados"
-msgstr[0] "%(count)s student found"
-msgstr[1] "%(count)s students found"
-
-msgid "Grade"
-msgstr "Grid"
+#| msgid "<strong>%(count)s</strong> treino encontrado"
+#| msgid_plural "<strong>%(count)s</strong> treinos encontrados"
+msgid "<strong>%(count)s</strong> aluno encontrado"
+msgid_plural "<strong>%(count)s</strong> alunos encontrados"
+msgstr[0] "<strong>%(count)s</strong> student found"
+msgstr[1] "<strong>%(count)s</strong> students found"
 
 msgid "pacote vencido"
 msgstr "package expired"
@@ -7726,8 +7703,9 @@ msgstr[1] "%(total_workouts)s workouts · last one %(last_workout_at)s ago"
 msgid "Nenhum treino ainda"
 msgstr "No workouts yet"
 
-msgid "Nenhum aluno encontrado."
-msgstr "No students found."
+#| msgid "Nenhum treino com esses filtros."
+msgid "Nenhum aluno com esses filtros."
+msgstr "No students match these filters."
 
 #, python-format
 msgid "ID: #%(id)s"
@@ -7761,17 +7739,11 @@ msgstr "No workouts"
 msgid "Nenhuma aula"
 msgstr "No classes"
 
-msgid "Ver Detalhes"
-msgstr "View Details"
-
 msgid "ID"
 msgstr "ID"
 
 msgid "Idade"
 msgstr "Age"
-
-msgid "Último Treino"
-msgstr "Last Workout"
 
 #, python-format
 msgid "%(last_workout_at)s atrás"
@@ -8109,16 +8081,20 @@ msgid "Quer apagar tudo? Use <em>Excluir</em> na ficha do aluno."
 msgstr ""
 "Want to delete everything? Use <em>Delete</em> on the student's profile."
 
-#| msgid "Limpar"
 msgid "Limpar busca"
 msgstr "Clear search"
 
-#| msgid "Remover foto"
 msgid "Remover filtro"
 msgstr "Remove filter"
 
+msgid "Limpar filtros"
+msgstr "Clear filters"
+
 msgid "Visualização"
 msgstr "View"
+
+msgid "Grade"
+msgstr "Grid"
 
 #, python-format
 msgid "Treino - %(routine_name)s"

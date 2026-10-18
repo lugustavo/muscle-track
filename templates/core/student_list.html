@@ -2,133 +2,50 @@
 {% load i18n %}
 {% load navigation %}
 {% load static %}
+{% load ui %}
 
 {% block title %}{% trans "Alunos" %}{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="mb-1"><i class="bi bi-people"></i> {% trans "Alunos" %}</h2>
-                </div>
-                <div class="d-none d-lg-block">
-                    {% if user.is_staff %}
-                    <a href="{% nav_url 'core:student_create' %}" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-1"></i> {% trans "Novo Aluno" %}
-                    </a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filters (phone: search bar + filter sheet, see below) -->
-    <div class="d-lg-none mb-3" data-student-filters>
-        <form method="get" class="d-flex gap-2">
-            {% if selected_status %}<input type="hidden" name="status" value="{{ selected_status }}">{% endif %}
-            {% if selected_filter %}<input type="hidden" name="filtro" value="{{ selected_filter }}">{% endif %}
-            <input type="search" class="form-control" name="search" value="{{ search }}" placeholder="{% trans "Nome, e-mail, telefone ou #ID..." %}" aria-label="{% trans "Pesquisar alunos" %}">
-            <button type="button" class="btn btn-outline-secondary position-relative flex-shrink-0" data-bs-toggle="offcanvas" data-bs-target="#filterSheet" aria-controls="filterSheet" aria-label="{% trans "Filtros" %}">
-                <i class="bi bi-sliders"></i>
-                {% if active_filters %}<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" data-filter-count>{{ active_filters }}</span>{% endif %}
-            </button>
-        </form>
-    </div>
-    <div class="offcanvas offcanvas-bottom d-lg-none" tabindex="-1" id="filterSheet" aria-labelledby="filterSheetLabel" style="height: auto;">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="filterSheetLabel">{% trans "Filtros" %}</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{% trans "Fechar" %}"></button>
-        </div>
-        <div class="offcanvas-body pt-0" style="padding-bottom: calc(1rem + env(safe-area-inset-bottom));">
-            <form method="get">
-                {% if search %}<input type="hidden" name="search" value="{{ search }}">{% endif %}
-                <div class="mb-3">
-                    <label for="m-status" class="form-label small text-muted">{% trans "Status" %}</label>
-                    <select class="form-select" id="m-status" name="status">
-                        <option value="">{% trans "Todos" %}</option>
-                        <option value="active" {% if selected_status == 'active' %}selected{% endif %}>{% trans "Ativos" %}</option>
-                        <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>{% trans "Inativos" %}</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="m-filtro" class="form-label small text-muted">{% trans "Situação" %}</label>
-                    <select class="form-select" id="m-filtro" name="filtro">
-                        <option value="">{% trans "Todas" %}</option>
-                        {% for key, label in filters.items %}
-                        <option value="{{ key }}" {% if selected_filter == key %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="d-flex gap-2">
-                    <a href="{% url 'core:student_list' %}" class="btn btn-outline-secondary flex-fill">{% trans "Limpar" %}</a>
-                    <button type="submit" class="btn btn-primary flex-fill">{% trans "Aplicar" %}</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="card border-0 shadow-sm mb-4 d-none d-lg-block">
-        <div class="card-body">
-            <form method="get" id="filterForm" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label for="search" class="form-label small text-muted">{% trans "Pesquisar" %}</label>
-                    <input type="text"
-                           class="form-control"
-                           id="search"
-                           name="search"
-                           value="{{ search }}"
-                           placeholder="{% trans "Nome, e-mail, telefone ou #ID..." %}">
-                </div>
-                <div class="col-md-2">
-                    <label for="status" class="form-label small text-muted">{% trans "Status" %}</label>
-                    <select class="form-select" id="status" name="status" onchange="this.form.submit()">
-                        <option value="">{% trans "Todos" %}</option>
-                        <option value="active" {% if selected_status == 'active' %}selected{% endif %}>{% trans "Ativos" %}</option>
-                        <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>{% trans "Inativos" %}</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label for="filtro" class="form-label small text-muted">{% trans "Situação" %}</label>
-                    <select class="form-select" id="filtro" name="filtro" onchange="this.form.submit()">
-                        <option value="">{% trans "Todas" %}</option>
-                        {% for key, label in filters.items %}
-                        <option value="{{ key }}" {% if selected_filter == key %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-1">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-search"></i><span class="visually-hidden">{% trans "Filtrar" %}</span>
-                    </button>
-                </div>
-                <div class="col-md-1">
-                    <a href="{% url 'core:student_list' %}" class="btn btn-outline-secondary w-100" title="{% trans "Limpar filtros" %}">
-                        <i class="bi bi-x-circle"></i><span class="visually-hidden">{% trans "Limpar" %}</span>
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- View Toggle and Count -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
+<div class="ui-head">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-people" aria-hidden="true"></i></span>
         <div>
-            <span class="text-muted">{% blocktrans trimmed count count=page.paginator.count %}{{ count }} aluno encontrado{% plural %}{{ count }} alunos encontrados{% endblocktrans %}</span>
-        </div>
-        <div class="btn-group d-none d-lg-inline-flex" role="group">
-            <a href="?{% if base_qs %}{{ base_qs }}&{% endif %}view=grid"
-               class="btn btn-sm {% if view_mode == 'grid' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                <i class="bi bi-grid-3x3-gap"></i> {% trans "Grade" %}
-            </a>
-            <a href="?{% if base_qs %}{{ base_qs }}&{% endif %}view=list"
-               class="btn btn-sm {% if view_mode == 'list' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                <i class="bi bi-list-ul"></i> {% trans "Lista" %}
-            </a>
+            <h1>{% trans "Alunos" %}</h1>
+            <p class="ui-sub">{% trans "Quem você acompanha, com situação, pacote e último treino." %}</p>
         </div>
     </div>
+    {% if user.is_staff %}
+    <div class="ui-actions d-none d-lg-flex">
+        <a href="{% nav_url 'core:student_create' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> {% trans "Novo aluno" %}</a>
+    </div>
+    {% endif %}
+</div>
+
+<form method="get" action="{% url 'core:student_list' %}" class="ui-toolbar" data-list-filters data-student-filters>
+    <input type="hidden" name="view" value="{{ view_mode }}">
+    {% trans "Nome, e-mail, telefone ou #ID..." as placeholder %}
+    {% include 'core/ui/_search.html' with placeholder=placeholder %}
+    {% trans "Situação" as situation_label %}{% trans "Todas" as all_label %}
+    {% include 'core/ui/_chips.html' with name='filtro' label=situation_label all_label=all_label options=filters.items selected=selected_filter %}
+    <div class="ui-filter-row">
+        <span class="ui-filter-label">{% trans "Status" %}</span>
+        <div class="ui-seg" role="radiogroup" aria-label="{% trans "Status" %}">
+            <label><input type="radio" name="status" value="" {% if not selected_status %}checked{% endif %}>{% trans "Todos" %}</label>
+            <label><input type="radio" name="status" value="active" {% if selected_status == 'active' %}checked{% endif %}>{% trans "Ativos" %}</label>
+            <label><input type="radio" name="status" value="inactive" {% if selected_status == 'inactive' %}checked{% endif %}>{% trans "Inativos" %}</label>
+        </div>
+    </div>
+    <noscript><button class="btn btn-primary mt-3">{% trans "Filtrar" %}</button></noscript>
+</form>
+
+<div data-list-region>
+{% include 'core/ui/_tags.html' with clear_url=request.path %}
+
+<div class="ui-results">
+    <div class="ui-count" data-count>{% blocktrans trimmed count count=page.paginator.count %}<strong>{{ count }}</strong> aluno encontrado{% plural %}<strong>{{ count }}</strong> alunos encontrados{% endblocktrans %}</div>
+    <div class="d-none d-lg-block">{% include 'core/ui/_view_toggle.html' %}</div>
+</div>
 
     <!-- Phone: compact rows -->
     <div class="list-group d-lg-none mb-3" data-student-rows>
@@ -150,7 +67,7 @@
             <i class="bi bi-chevron-right text-muted"></i>
         </a>
         {% empty %}
-        <div class="list-group-item text-center text-muted py-4"><i class="bi bi-info-circle me-2"></i>{% trans "Nenhum aluno encontrado." %}</div>
+        <div class="list-group-item text-center text-muted py-4"><i class="bi bi-info-circle me-2"></i>{% trans "Nenhum aluno com esses filtros." %}</div>
         {% endfor %}
     </div>
 
@@ -160,7 +77,7 @@
     <div class="row g-3">
         {% for student in students %}
         <div class="col-md-6 col-lg-4 col-xl-3">
-            <div class="card h-100 border-0 shadow-sm hover-shadow">
+            <div class="ui-card">
                 <div class="card-body">
                     <div class="text-center mb-3">
                         <img src="{{ student.get_avatar_url }}" alt="{{ student.person_name }}" class="student-avatar-grid">
@@ -224,7 +141,7 @@
 
                     <div class="mt-3">
                         <a href="{% nav_url 'core:student_detail' student.pk %}" class="btn btn-sm btn-outline-primary w-100">
-                            {% trans "Ver Detalhes" %}
+                            {% trans "Ver detalhes" %}
                         </a>
                     </div>
                 </div>
@@ -232,10 +149,8 @@
         </div>
         {% empty %}
         <div class="col-12">
-            <div class="alert alert-info text-center mb-0">
-                <i class="bi bi-info-circle me-2"></i>
-                {% trans "Nenhum aluno encontrado." %}
-            </div>
+            {% trans "Nenhum aluno com esses filtros." as empty_text %}
+            {% include 'core/ui/_empty.html' with icon='bi-search' text=empty_text %}
         </div>
         {% endfor %}
     </div>
@@ -243,7 +158,7 @@
 
     <!-- List View -->
     {% if view_mode == 'list' %}
-    <div class="card border-0 shadow-sm">
+    <div class="ui-card flat">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
                 <thead class="bg-body-tertiary">
@@ -255,7 +170,7 @@
                         <th>{% trans "Email" %}</th>
                         <th>{% trans "Telefone" %}</th>
                         <th style="width: 100px;" class="text-center">{% trans "Treinos" %}</th>
-                        <th style="width: 150px;">{% trans "Último Treino" %}</th>
+                        <th style="width: 150px;">{% trans "Último treino" %}</th>
                         <th style="width: 100px;" class="text-center">{% trans "Status" %}</th>
                         <th style="width: 120px;" class="text-center">{% trans "Ações" %}</th>
                     </tr>
@@ -309,7 +224,7 @@
                             {% elif student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark" title="{% blocktrans trimmed with date=student.plan_expires_on|date:_('d/m/Y') %}Vence em {{ date }}{% endblocktrans %}">{% blocktrans trimmed with days_to_plan_expiry=student.days_to_plan_expiry %}pacote vence em {{ days_to_plan_expiry }}d{% endblocktrans %}</span>{% endif %}
                         </td>
                         <td class="text-center">
-                            <a href="{% nav_url 'core:student_detail' student.pk %}" class="btn btn-sm btn-outline-primary" title="{% trans "Ver Detalhes" %}">
+                            <a href="{% nav_url 'core:student_detail' student.pk %}" class="btn btn-sm btn-outline-primary" title="{% trans "Ver detalhes" %}">
                                 <i class="bi bi-eye"></i>
                             </a>
                             {% if user.is_staff %}
@@ -321,9 +236,9 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="9" class="text-center py-4 text-muted">
+                        <td colspan="10" class="text-center py-4 text-muted">
                             <i class="bi bi-info-circle me-2"></i>
-                            {% trans "Nenhum aluno encontrado." %}
+                            {% trans "Nenhum aluno com esses filtros." %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -338,11 +253,11 @@
     <nav aria-label="{% trans "Paginação" %}" class="mt-4">
         <ul class="pagination justify-content-center flex-wrap">
             {% if page.has_previous %}
-            <li class="page-item"><a class="page-link" href="?{% if base_qs %}{{ base_qs }}&{% endif %}view={{ view_mode }}&page={{ page.previous_page_number }}">{% trans "&laquo; Anterior" %}</a></li>
+            <li class="page-item"><a class="page-link" href="{% qs page=page.previous_page_number %}">{% trans "&laquo; Anterior" %}</a></li>
             {% endif %}
             <li class="page-item disabled"><span class="page-link">{% blocktrans trimmed with number=page.number num_pages=page.paginator.num_pages %}Página {{ number }} de {{ num_pages }}{% endblocktrans %}</span></li>
             {% if page.has_next %}
-            <li class="page-item"><a class="page-link" href="?{% if base_qs %}{{ base_qs }}&{% endif %}view={{ view_mode }}&page={{ page.next_page_number }}">{% trans "Próxima &raquo;" %}</a></li>
+            <li class="page-item"><a class="page-link" href="{% qs page=page.next_page_number %}">{% trans "Próxima &raquo;" %}</a></li>
             {% endif %}
         </ul>
     </nav>
@@ -350,13 +265,6 @@
 </div>
 
 <style>
-.hover-shadow {
-    transition: all 0.3s;
-}
-.hover-shadow:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1) !important;
-}
 .student-avatar-grid {
     width: 80px;
     height: 80px;
@@ -372,4 +280,8 @@
     border: 2px solid var(--bs-border-color);
 }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/list-filters.js' %}"></script>
 {% endblock %}
