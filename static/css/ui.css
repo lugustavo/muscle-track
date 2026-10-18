@@ -71,7 +71,7 @@
 .ui-card .card-body { padding: 1.1rem; }
 .ui-card.muted { background: var(--bs-tertiary-bg); }
 .ui-meta { display: flex; flex-wrap: wrap; gap: .35rem; }
-.ui-badge { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .65rem; border-radius: 999px; font-size: .78rem; font-weight: 500; background: var(--bs-secondary-bg); color: var(--bs-body-color); }
+.ui-badge { white-space: nowrap; display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .65rem; border-radius: 999px; font-size: .78rem; font-weight: 500; background: var(--bs-secondary-bg); color: var(--bs-body-color); }
 .ui-badge.brand { background: var(--bs-primary-bg-subtle); color: var(--bs-primary-text-emphasis); }
 .ui-badge.ok { background: var(--bs-success-bg-subtle); color: var(--bs-success-text-emphasis); }
 .ui-badge.warn { background: var(--bs-warning-bg-subtle); color: var(--bs-warning-text-emphasis); }
@@ -178,3 +178,17 @@
 .ui-pill.warning { border-color: var(--bs-warning-border-subtle); }
 .ui-progress .progress-bar { background: linear-gradient(90deg, var(--primary-color), var(--ui-violet)); }
 .ui-kpi .ui-ico { margin: 0 auto .45rem; }
+
+/* Student schedule: a date tile and small section titles */
+.ui-h2 { margin: 1.25rem 0 .6rem; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--bs-secondary-color); }
+.ui-date { flex: 0 0 auto; width: 52px; padding: .35rem 0; border-radius: .9rem; text-align: center; background: var(--bs-tertiary-bg); border: 1px solid var(--bs-border-color); line-height: 1.1; }
+.ui-date .ui-date-wd { display: block; font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; color: var(--bs-secondary-color); }
+.ui-date .ui-date-d { display: block; font-size: 1.35rem; font-weight: 800; }
+.ui-date .ui-date-m { display: block; font-size: .68rem; color: var(--bs-secondary-color); text-transform: uppercase; }
+.ui-date.off { opacity: .55; }
+
+/* Checkboxes, radios and switches in the brand color (Bootstrap's default is its own blue) */
+.form-check-input:checked { background-color: var(--primary-color); border-color: var(--primary-color); }
+.form-check-input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 .2rem rgba(255, 107, 107, .25); }
+.form-control:focus, .form-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 .2rem rgba(255, 107, 107, .2); }
+input[type="radio"], input[type="checkbox"], input[type="range"] { accent-color: var(--primary-color); }

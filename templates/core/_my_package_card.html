@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n ui %}
 <div class="card mb-3" data-package-summary="{{ p.package.pk }}">
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-start gap-2">
@@ -6,7 +6,7 @@
                 <strong class="fs-5">{{ p.package.name }}</strong>
                 <div class="small text-muted">{% blocktrans trimmed with sold_on=p.package.sold_on|date:_('d/m/Y') %}Comprado em {{ sold_on }}{% endblocktrans %}</div>
             </div>
-            <span class="badge bg-{{ p.css }}">{{ p.label }}</span>
+            <span class="ui-badge {{ p.css|tone }}">{{ p.label }}</span>
         </div>
 
         <div class="d-flex justify-content-between small mt-3"><span>{% blocktrans trimmed with used=p.used sessions=p.sessions %}<strong>{{ used }}</strong> de {{ sessions }} aulas usadas{% endblocktrans %}</span><span class="text-muted">{% blocktrans trimmed with left=p.left %}{{ left }} sobrando{% endblocktrans %}</span></div>

@@ -128,3 +128,28 @@ class DashboardLookTests(BaseTestCase):
         WorkoutSession.objects.create(person_routine=self.alice_routine, is_completed=True, end_time=timezone.now())
         self.login(self.trainer)
         self.assertNotIn('None min', self.client.get(reverse('core:home')).content.decode())
+
+
+class StudentScheduleLookTests(BaseTestCase):
+    def test_my_agenda_uses_the_shared_pieces(self):
+        from datetime import timedelta
+        from core.models import Appointment
+        Appointment.objects.create(person=self.alice.person, starts_at=timezone_now() + timedelta(days=3), status='scheduled')
+        self.login(self.alice)
+        html = self.client.get(reverse('core:my_agenda')).content.decode()
+        for marker in ('class="ui-head inline"', 'ui-date', 'ui-h2', 'data-my-class'):
+            self.assertIn(marker, html)
+        self.assertNotIn('class="badge', html)
+
+    def test_the_tone_filter_maps_bootstrap_names(self):
+        from core.templatetags.ui import tone
+        self.assertEqual([tone(x) for x in ('success', 'warning', 'danger', 'secondary', 'nope')], ['ok', 'warn', 'bad', '', ''])
+
+    def test_native_checks_and_radios_use_the_brand_color(self):
+        css = (ROOT / 'static/css/ui.css').read_text()
+        self.assertIn('accent-color: var(--primary-color)', css)
+
+
+def timezone_now():
+    from django.utils import timezone
+    return timezone.now()
