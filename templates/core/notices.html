@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load ui %}
+
+{% block title %}{% blocktrans trimmed %}Centro de avisos - {{ brand_name }}{% endblocktrans %}{% endblock %}
+
+{% block content %}
+<div class="mx-auto" style="max-width: 640px;">
+    <div class="ui-head inline">
+        <div class="ui-title">
+            <span class="ui-ico"><i class="bi bi-bell" aria-hidden="true"></i></span>
+            <div class="min-w-0">
+                <h1>{% trans "Centro de avisos" %}</h1>
+                <div class="ui-sub">{% if unread %}{% blocktrans trimmed count n=unread %}{{ n }} não lido{% plural %}{{ n }} não lidos{% endblocktrans %}{% else %}{% trans "Tudo lido" %}{% endif %}</div>
+            </div>
+        </div>
+        <div class="ui-actions">
+            {% if unread %}
+            <form method="post" action="{% url 'core:notices_read_all' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-secondary btn-sm" data-read-all><i class="bi bi-check2-all"></i> {% trans "Marcar tudo como lido" %}</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if notices %}
+    <div class="list-group mb-3" data-notices>
+        {% for notice in notices %}
+        <a href="{% url 'core:notice_open' notice.pk %}" class="list-group-item list-group-item-action d-flex gap-3 align-items-start{% if not notice.read_at %} notice-unread{% endif %}" data-notice{% if not notice.read_at %} data-unread{% endif %}>
+            <span class="ui-ico sm {{ notice.kind|notice_tone }} flex-shrink-0"><i class="bi {{ notice.kind|notice_icon }}" aria-hidden="true"></i></span>
+            <span class="flex-grow-1 min-w-0">
+                <span class="d-flex justify-content-between gap-2">
+                    <span class="{% if not notice.read_at %}fw-bold{% endif %}">{{ notice.title }}</span>
+                    <small class="text-muted text-nowrap">{{ notice.created_at|date:"d/m H:i" }}</small>
+                </span>
+                {% if notice.body %}<span class="d-block text-muted small">{{ notice.body }}</span>{% endif %}
+            </span>
+            {% if not notice.read_at %}<span class="notice-dot flex-shrink-0" aria-hidden="true"></span><span class="visually-hidden">{% trans "não lido" %}</span>{% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    {% url 'core:notification_settings' as settings_url %}
+    <p class="text-muted small">{% blocktrans trimmed with days=kept_days %}Os avisos ficam aqui por {{ days }} dias. Para receber também por e-mail, no aparelho ou no Telegram, veja as <a href="{{ settings_url }}">configurações de notificações</a>.{% endblocktrans %}</p>
+    {% else %}
+    <div class="ui-empty" data-notices-empty>
+        <span class="ui-ico"><i class="bi bi-bell-slash" aria-hidden="true"></i></span>
+        <h2>{% trans "Nenhum aviso por enquanto" %}</h2>
+        <p>{% if is_trainer %}{% trans "Quando um aluno pedir para remarcar ou cancelar uma aula, ou um pacote precisar de renovação, aparece aqui." %}{% else %}{% trans "Quando sua personal remarcar ou cancelar uma aula, ou o seu pacote estiver acabando, aparece aqui." %}{% endif %}</p>
+        <a href="{% url 'core:notification_settings' %}" class="btn btn-outline-secondary btn-sm">{% trans "Receber também por e-mail ou no aparelho" %}</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

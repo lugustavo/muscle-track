@@ -1,4 +1,5 @@
-"""Automatic reminders, sent only to people who turned a channel on and kept that kind of reminder on.
+"""Automatic reminders: every student (and the trainer) who kept that kind of reminder on gets it in the app's notice
+centre, and also by e-mail, push or Telegram on the channels they turned on.
 
 `run()` is idempotent and meant to be called every few minutes (management command `send_reminders`, run by the
 `scheduler` service of docker-compose): each class, each plan expiry and each package alert is told once (`Appointment.reminder_sent_at`,
@@ -9,7 +10,7 @@ from django.conf import settings
 from django.db.models import F, Q
 from django.utils import timezone
 
-from . import notifications, packages, workout_sessions
+from . import inbox, notifications, packages, workout_sessions
 from .agenda import ensure_appointments
 from .models import Appointment, Person
 
@@ -18,9 +19,10 @@ MIN_LEAD = timedelta(hours=1)
 
 
 def _wants(prefix, flag):
-    """Filter on the person's account preferences: a channel on and the given per-type switch on."""
+    """Filter on the person's account preferences: the given per-type switch on (a person who never opened their
+    settings has no row and gets everything, as in core/inbox.py)."""
     base = 'user__notification_preference__' if prefix == 'person' else 'person__user__notification_preference__'
-    return Q(**{f'{base}{flag}': True}) & (Q(**{f'{base}email_enabled': True}) | Q(**{f'{base}push_enabled': True}) | Q(**{f'{base}telegram_enabled': True}))
+    return Q(**{f'{base}{flag}': True}) | Q(**{f'{base}isnull': True})
 
 
 def send_class_reminders(now):
@@ -79,6 +81,7 @@ def run(now=None):
     now = now or timezone.now()
     today = timezone.localdate(now)
     ensure_appointments(today, today + timedelta(days=3), today)
+    inbox.prune(now)
     return {'classes': send_class_reminders(now), 'plans': send_plan_reminders(today),
             'packages': send_package_reminders(now, today),
             'sessions': workout_sessions.close_stale(now=now)}

@@ -28,3 +28,23 @@ _TONES = {'success': 'ok', 'warning': 'warn', 'danger': 'bad', 'info': 'info', '
 def tone(value):
     """The `ui-badge` tone for a Bootstrap color name ("success" -> "ok"); unknown or neutral names give no tone."""
     return _TONES.get(value, '')
+
+
+# The icon and colour of each kind of notice in the notice centre (core/notifications.py kinds)
+_NOTICE_LOOK = {
+    'request_new': ('bi-hand-index', 'warn'), 'request_answered': ('bi-reply', 'info'),
+    'class_moved': ('bi-calendar2-event', 'warn'), 'class_cancelled': ('bi-calendar-x', 'bad'),
+    'move_undone': ('bi-arrow-counterclockwise', 'info'), 'class_reminder': ('bi-alarm', 'info'),
+    'plan_expiry': ('bi-hourglass-split', 'warn'), 'package_low': ('bi-box-seam', 'warn'),
+    'package_attention': ('bi-box-seam', 'warn'),
+}
+
+
+@register.filter
+def notice_icon(kind):
+    return _NOTICE_LOOK.get(kind, ('bi-bell', ''))[0]
+
+
+@register.filter
+def notice_tone(kind):
+    return _NOTICE_LOOK.get(kind, ('bi-bell', ''))[1]

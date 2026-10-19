@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 13:52-0300\n"
+"POT-Creation-Date: 2026-10-19 14:03-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -280,6 +280,10 @@ msgstr "Google Calendar"
 
 msgid "Busca"
 msgstr "Search"
+
+#| msgid "Tentar de novo"
+msgid "Centro de avisos"
+msgstr "Notification center"
 
 msgid "Notificações"
 msgstr "Notifications"
@@ -5505,6 +5509,56 @@ msgstr ""
 " plan."
 
 #, python-format
+#| msgid "Avisos - %(brand_name)s"
+msgid "Centro de avisos - %(brand_name)s"
+msgstr "Notification center - %(brand_name)s"
+
+#, python-format
+msgid "%(n)s não lido"
+msgid_plural "%(n)s não lidos"
+msgstr[0] "%(n)s unread"
+msgstr[1] "%(n)s unread"
+
+msgid "Tudo lido"
+msgstr "All read"
+
+msgid "Marcar tudo como lido"
+msgstr "Mark all as read"
+
+msgid "não lido"
+msgstr "unread"
+
+#, python-format
+msgid ""
+"Os avisos ficam aqui por %(days)s dias. Para receber também por e-mail, no "
+"aparelho ou no Telegram, veja as <a href=\"%(settings_url)s\">configurações "
+"de notificações</a>."
+msgstr ""
+"Notices stay here for %(days)s days. To also get them by e-mail, on your "
+"device or on Telegram, see the <a href=\"%(settings_url)s\">notification "
+"settings</a>."
+
+msgid "Nenhum aviso por enquanto"
+msgstr "No notices yet"
+
+msgid ""
+"Quando um aluno pedir para remarcar ou cancelar uma aula, ou um pacote "
+"precisar de renovação, aparece aqui."
+msgstr ""
+"When a student asks to move or cancel a class, or a package needs renewing, "
+"it shows up here."
+
+msgid ""
+"Quando sua personal remarcar ou cancelar uma aula, ou o seu pacote estiver "
+"acabando, aparece aqui."
+msgstr ""
+"When your trainer moves or cancels a class, or your package is running out, "
+"it shows up here."
+
+msgid "Receber também por e-mail ou no aparelho"
+msgstr "Also get them by e-mail or on your device"
+
+#, python-format
 msgid "Notificações - %(brand_name)s"
 msgstr "Notifications - %(brand_name)s"
 
@@ -5528,13 +5582,15 @@ msgstr ""
 " is about to expire."
 
 msgid ""
-"Tudo começa <strong>desligado</strong>: você escolhe o que quer receber e "
-"pode desligar quando quiser. Os avisos não trazem dados de saúde nem "
-"valores."
+"Os avisos sempre aparecem no sino do app. Receber também por e-mail, no "
+"aparelho ou no Telegram começa <strong>desligado</strong>: você escolhe o "
+"que quer e pode desligar quando quiser. Os avisos não trazem dados de saúde "
+"nem valores."
 msgstr ""
-"Everything starts <strong>off</strong>: you choose what you want to receive "
-"and can turn it off whenever you like. Notifications never include health "
-"data or amounts."
+"Notices always show up on the bell in the app. Also getting them by e-mail, "
+"on your device or on Telegram starts <strong>off</strong>: you choose what "
+"you want and can turn it off whenever you like. Notices carry no health data"
+" or amounts."
 
 msgid "Avisos por e-mail"
 msgstr "Email notifications"
@@ -8416,6 +8472,12 @@ msgstr ""
 "First time here? Use the <strong>invitation link</strong> your trainer sent."
 " If the recovery email doesn't arrive, ask your trainer for a new access "
 "link."
+
+#, python-format
+msgid "Avisos: %(n)s não lido"
+msgid_plural "Avisos: %(n)s não lidos"
+msgstr[0] "Notices: %(n)s unread"
+msgstr[1] "Notices: %(n)s unread"
 
 msgid "Buscar (atalho: barra /)"
 msgstr "Search (shortcut: slash /)"
