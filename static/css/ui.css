@@ -118,6 +118,8 @@
 
 /* Global skin for the Bootstrap pieces the pages still use directly: the same rounded surfaces as the landing page */
 .card { --bs-card-border-radius: var(--ui-radius); --bs-card-inner-border-radius: calc(var(--ui-radius) - 1px); --bs-card-cap-bg: var(--bs-tertiary-bg); --bs-card-border-color: var(--bs-border-color); overflow: hidden; }
+/* a card clips its corners (overflow: hidden), but a menu opened from inside it must be able to leave it */
+.card:has(.dropdown-menu.show), .ui-card:has(.dropdown-menu.show) { overflow: visible; }
 .alert { --bs-alert-border-radius: 1rem; }
 .modal-content { --bs-modal-border-radius: var(--ui-radius); --bs-modal-inner-border-radius: calc(var(--ui-radius) - 1px); }
 .dropdown-menu { --bs-dropdown-border-radius: 1rem; }

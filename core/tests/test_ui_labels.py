@@ -235,3 +235,12 @@ class TrainerScreensLookTests(BaseTestCase):
             if path.name in ('landing.html', 'workout_execute.html'):   # mock preview / execution screen keep their own markup
                 continue
             self.assertIsNone(pattern.search(path.read_text()), path.name)
+
+
+class MenuInsideCardTests(BaseTestCase):
+    def test_a_menu_opened_inside_a_card_is_not_clipped(self):
+        # Cards clip their corners (overflow: hidden); the gear menu of the workout screen and the class menu of the
+        # agenda sit inside one, so an open menu must lift that clipping.
+        css = (ROOT / 'static/css/ui.css').read_text()
+        self.assertIn('.card:has(.dropdown-menu.show)', css)
+        self.assertIn('overflow: visible', css.split('.card:has(.dropdown-menu.show)')[1].split('}')[0])
