@@ -412,6 +412,12 @@ class WorkoutSession(models.Model):
     paused_at = models.DateTimeField(null=True, blank=True, verbose_name=_('Pausado em'))
     paused_seconds = models.PositiveIntegerField(default=0, verbose_name=_('Segundos em pausa'))
 
+    # Offline workouts (core/workout_offline.py): the id the device gave the workout, so a replayed sync finds the same
+    # session; and whether the server closed it for being idle (a device that was offline can reopen it, one the
+    # student finished herself stays closed)
+    client_uuid = models.UUIDField(null=True, blank=True, unique=True, editable=False)
+    auto_closed = models.BooleanField(default=False, editable=False)
+
     class Meta:
         verbose_name = _('Sessão de Treino')
         verbose_name_plural = _('Sessões de Treino')

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load static %}
 {% load crispy_forms_tags %}
 
 {% block title %}{% blocktrans trimmed %}Meus treinos - {{ brand_name }}{% endblocktrans %}{% endblock %}
@@ -137,4 +138,17 @@
     Entre em contato com seu instrutor para receber um plano de treino.{% endblocktrans %}
 </div>
 {% endif %}
+
+{# What can be started or continued with no connection: kept on this device and prefetched (static/js/my_workouts_offline.js) #}
+<div hidden data-offline-routines data-assets="{% static 'js/workout.js' %} {% static 'css/workout.css' %}">
+    {% for item in routines_with_sessions %}
+    <span data-routine="{{ item.routine.pk }}" data-name="{{ item.routine.routine_name }}"
+          data-draft="{% url 'core:workout_offline_start' item.routine.pk %}"{% if item.active_session %}
+          data-execute="{% url 'core:workout_execute' item.routine.pk %}"{% endif %}></span>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/my_workouts_offline.js' %}"></script>
 {% endblock %}

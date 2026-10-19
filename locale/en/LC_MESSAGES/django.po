@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 09:48-0300\n"
+"POT-Creation-Date: 2026-10-19 11:11-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2834,6 +2834,10 @@ msgstr "Invalid data"
 msgid "Valor inválido"
 msgstr "Invalid amount"
 
+#| msgid "Página não encontrada"
+msgid "Treino não encontrado"
+msgstr "Workout not found"
+
 msgid "Treino gerado com IA com sucesso!"
 msgstr "Workout generated with AI successfully!"
 
@@ -3442,11 +3446,9 @@ msgstr "breadcrumb"
 msgid "Câmera com guias de enquadramento"
 msgstr "Camera with framing guides"
 
-#| msgid "Sem imagem"
 msgid "Sem contagem"
 msgstr "No countdown"
 
-#| msgid "Pacotes anteriores"
 msgid "Foto anterior"
 msgstr "Previous photo"
 
@@ -8141,6 +8143,14 @@ msgstr "Grid"
 msgid "Treino - %(routine_name)s"
 msgstr "Workout - %(routine_name)s"
 
+#| msgid "Sem conexão. Algumas telas só abrem quando a internet voltar."
+msgid ""
+"Treino iniciado sem conexão. Tudo fica guardado neste aparelho e é enviado "
+"quando a internet voltar."
+msgstr ""
+"Workout started without a connection. Everything is kept on this device and "
+"sent when the internet is back."
+
 msgid "Salvo"
 msgstr "Saved"
 
@@ -8238,6 +8248,21 @@ msgstr "Discard this workout? Nothing done in it will be saved."
 
 msgid "Descartar treino"
 msgstr "Discard workout"
+
+#| msgid "Ativar neste aparelho"
+msgid "Treino guardado neste aparelho"
+msgstr "Workout saved on this device"
+
+msgid ""
+"Sem conexão agora. Vamos enviar assim que a internet voltar; pode fechar o "
+"app, nada se perde."
+msgstr ""
+"No connection right now. We'll send it as soon as the internet is back; you "
+"can close the app, nothing is lost."
+
+#| msgid "Treinar agora"
+msgid "Enviar agora"
+msgstr "Send now"
 
 msgid "Descanso <strong id=\"restTime\" class=\"font-monospace fs-5\">00:00</strong>"
 msgstr "Rest <strong id=\"restTime\" class=\"font-monospace fs-5\">00:00</strong>"
@@ -8434,3 +8459,10 @@ msgstr ""
 
 msgid "Tentar de novo"
 msgstr "Try again"
+
+msgid "Treinos finalizados aguardando envio:"
+msgstr "Finished workouts waiting to be sent:"
+
+#| msgid "Continuar o treino em andamento"
+msgid "Começar um treino sem conexão:"
+msgstr "Start a workout without a connection:"

@@ -1,7 +1,11 @@
 /* Workout screen: session timer (pause/resume), per-set tracking with an
  * offline-tolerant queue, rest countdown (beep + vibration), records and
  * screen wake lock. Server calls are absolute-state updates, so replaying
- * queued requests is always safe. */
+ * queued requests is always safe.
+ *
+ * Offline: the whole workout (timer, sets, comments) is also kept in this device's storage (static/js/workout_offline.js),
+ * so the screen can be reopened with no connection (the service worker keeps the page), a workout can be started or
+ * finished offline, and the device sends everything when the connection is back (core/workout_offline.py). */
 (function () {
   'use strict';
 
@@ -16,9 +20,14 @@
   var root = document.getElementById('workout');
   if (!root) return;
 
-  var csrf = root.dataset.csrf;
+  var MT = window.MTWorkout;
+  var csrf = (MT && MT.csrf()) || root.dataset.csrf;   // the cookie first: a kept copy of this page may carry an old token
   var QUEUE_KEY = 'mt-queue-v1';
   var REST_KEY = 'mt-rest-v1';
+  var routineId = root.dataset.routine;
+  var sessionId = root.dataset.session || null;
+  var isDraft = root.dataset.draft === 'true';        // a workout the server does not know yet (started offline)
+  var offlineCopy = root.hasAttribute('data-offline-copy');   // this page came from the service worker's copy
 
   // ---------- helpers ----------
   function pad(n) { return String(n).padStart(2, '0'); }
@@ -48,18 +57,57 @@
     prefVibrate.addEventListener('change', function () { prefs.vibrate = prefVibrate.checked; savePrefs(); });
   }
 
+  // ---------- the workout kept on this device ----------
+  // state: see workout_offline.js. It is the truth for the timer while offline; a page fresh from the server refreshes it.
+  var hadState = false;
+  var state = MT.active();
+  function hasProgress(st) {
+    return Object.keys(st.exercises || {}).some(function (prx) {
+      return Object.keys(st.exercises[prx].sets || {}).some(function (n) { return st.exercises[prx].sets[n].d; });
+    });
+  }
+  if (state && String(state.routine) !== String(routineId)) {
+    // another workout was left on this device: if it never reached the server, do not lose it
+    if (state.draft && !state.finished && hasProgress(state)) MT.addPending(MT.payloadFrom(state, false));
+    state = null;
+  }
+  if (state && !isDraft && state.session && String(state.session) !== String(sessionId)) state = null;   // an older session of this routine
+  hadState = !!state;
+  var pageElapsed = parseInt(root.dataset.elapsed, 10) || 0;
+  var pagePausedSeconds = parseInt(root.dataset.pausedSeconds, 10) || 0;
+  var pageRendered = parseInt(root.dataset.rendered, 10) || Date.now();
+  var pagePaused = root.dataset.paused === 'true';
+  if (!state) {
+    var reference = offlineCopy ? pageRendered : Date.now();   // a kept page shows the elapsed time of when it was kept
+    state = {
+      uuid: MT.uuid(), routine: routineId, routineName: root.dataset.routineName || '', session: sessionId, draft: isDraft,
+      startedAt: isDraft ? Date.now() : reference - (pageElapsed + pagePausedSeconds) * 1000,
+      pausedSeconds: isDraft ? 0 : pagePausedSeconds, pausedAt: !isDraft && pagePaused ? reference : null,
+      notes: '', finished: false, exercises: {}, url: root.dataset.executeUrl
+    };
+  } else if (!offlineCopy && !isDraft) {
+    // fresh from the server: it knows the real session and its timer (a draft that was just sent is now this session)
+    state.session = sessionId; state.draft = false;
+    state.startedAt = Date.now() - (pageElapsed + pagePausedSeconds) * 1000;
+    state.pausedSeconds = pagePausedSeconds;
+    state.pausedAt = pagePaused ? Date.now() : null;
+  }
+  state.routineName = root.dataset.routineName || state.routineName;
+  state.url = (isDraft ? root.dataset.draftUrl : root.dataset.executeUrl) || state.url;   // where the offline page sends the student back to
+  var times = {};   // when each set was marked done (device time), kept in the state
+
   // ---------- session timer ----------
   var timerEl = $('#timer');
   var pauseBtn = $('#pauseBtn');
-  var elapsedBase = parseInt(root.dataset.elapsed, 10) || 0;
-  var paused = root.dataset.paused === 'true';
-  var measuredAt = Date.now();
-  var staleDeadline = Date.now() + (parseInt(root.dataset.staleIn, 10) || 0) * 1000;
 
   function currentElapsed() {
-    return elapsedBase + (paused ? 0 : Math.floor((Date.now() - measuredAt) / 1000));
+    var now = Date.now();
+    var seconds = (now - state.startedAt) / 1000 - (state.pausedSeconds || 0) - (state.pausedAt ? (now - state.pausedAt) / 1000 : 0);
+    return Math.max(0, Math.floor(seconds));
   }
+  function isPaused() { return !!state.pausedAt; }
   function renderTimer() {
+    var paused = isPaused();
     timerEl.textContent = fmtHMS(currentElapsed());
     timerEl.classList.toggle('text-muted', paused);
     var label = paused ? gettext('Retomar') : gettext('Pausar');
@@ -68,26 +116,36 @@
     pauseBtn.classList.toggle('btn-warning', paused);
     pauseBtn.classList.toggle('btn-outline-secondary', !paused);
   }
-  setInterval(function () {
-    renderTimer();
-    // Same limit the server enforces: after it the session is closed automatically.
-    if (Date.now() >= staleDeadline) {
-      window.location.href = root.dataset.myWorkoutsUrl;
-    }
-  }, 500);
+  // No redirect when the server's idle limit passes: a workout done offline would be thrown away. If the server did close
+  // the session meanwhile, the next sync reopens it (core/workout_offline.py).
+  setInterval(renderTimer, 500);
   renderTimer();
 
+  function setPauseLocally() {
+    var now = Date.now();
+    if (state.pausedAt) { state.pausedSeconds = (state.pausedSeconds || 0) + (now - state.pausedAt) / 1000; state.pausedAt = null; }
+    else { state.pausedAt = now; }
+    state.timerLocal = true;   // the server never heard of this pause: the workout is finished through the full sync
+    renderTimer();
+    snapshot();
+  }
+
   pauseBtn.addEventListener('click', function () {
+    var paused = isPaused();
     var url = paused ? root.dataset.resumeUrl : root.dataset.pauseUrl;
+    if (!url || navigator.onLine === false) { setPauseLocally(); return; }
     fetch(url, { method: 'POST', headers: { 'X-CSRFToken': csrf } })
       .then(function (r) { if (!r.ok) throw new Error('fail'); return r.json(); })
       .then(function (d) {
-        elapsedBase = d.elapsed_seconds;
-        measuredAt = Date.now();
-        paused = d.paused;
+        var now = Date.now();
+        if (paused) { state.pausedSeconds = (state.pausedSeconds || 0) + (now - state.pausedAt) / 1000; state.pausedAt = null; }
+        else { state.pausedAt = now; }
+        // line the device up with the server's own count
+        state.startedAt = now - (d.elapsed_seconds + (state.pausedSeconds || 0)) * 1000;
         renderTimer();
+        snapshot();
       })
-      .catch(function () { alert(gettext('Sem conexão: não foi possível pausar agora.')); });
+      .catch(function () { setPauseLocally(); });   // no connection: pause on the device, the server is told later
   });
 
   // ---------- offline-tolerant queue ----------
@@ -95,6 +153,7 @@
   try { queue = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]'); } catch (e) { queue = []; }
   queue.forEach(function (item) { item.inflight = false; });
   var flushing = false;
+  var unreachable = false;   // the last try failed with no answer: the device says it is online, the server is not reachable
   var syncEl = $('#syncState');
 
   function saveQueue() {
@@ -102,10 +161,13 @@
   }
   function renderSync() {
     var pending = queue.length;
-    if (!pending && !flushing) {
+    if (isDraft) {
+      syncEl.className = 'badge bg-info text-dark';
+      syncEl.innerHTML = '<i class="bi bi-phone"></i> ' + gettext('Guardado neste aparelho');
+    } else if (!pending && !flushing) {
       syncEl.className = 'badge bg-success-subtle text-success-emphasis';
       syncEl.innerHTML = '<i class="bi bi-cloud-check"></i> ' + gettext('Salvo');
-    } else if (!navigator.onLine) {
+    } else if (!navigator.onLine || unreachable) {
       syncEl.className = 'badge bg-warning text-dark';
       syncEl.innerHTML = '<i class="bi bi-cloud-slash"></i> ' + interpolate(gettext('Offline · %s pendente(s)'), [pending]);
     } else {
@@ -116,12 +178,32 @@
 
   function onRejected(status) {
     if (status === 404 || status === 403) {
-      alert(gettext('Esta sessão de treino já foi encerrada ou expirou. Vou recarregar a página.'));
-      window.location.href = root.dataset.myWorkoutsUrl;
+      // the server no longer has this session (closed for being idle, or deleted): send it everything the device kept
+      repairFromDevice();
     } else {
       alert(gettext('Um valor não foi aceito pelo servidor. Vou recarregar a página para sincronizar.'));
       window.location.reload();
     }
+  }
+
+  var repairing = false;
+  function repairFromDevice() {
+    if (repairing) return;
+    repairing = true;
+    snapshot();
+    MT.send(MT.payloadFrom(state, false)).then(function (result) {
+      repairing = false;
+      if (!result.ok) {
+        if (result.status === 0) return;   // no connection after all: the queue and the state are still here
+        alert(gettext('Esta sessão de treino já foi encerrada ou expirou. Vou recarregar a página.'));
+        window.location.href = root.dataset.myWorkoutsUrl;
+        return;
+      }
+      queue.length = 0; saveQueue();
+      if (result.data.finished) { MT.clearActive(); window.location.href = result.data.summary_url; return; }
+      state.session = String(result.data.session); state.draft = false; MT.saveActive(state);
+      if (String(result.data.session) !== String(sessionId)) window.location.replace(result.data.execute_url);
+    });
   }
 
   function flush() {
@@ -139,6 +221,8 @@
         body: JSON.stringify(item.body)
       }).then(function (resp) {
         item.inflight = false;
+        if (resp.redirected) { unreachable = true; return false; }   // sent to the login page: keep it, nothing was saved
+        unreachable = false;
         if (resp.ok) {
           queue.shift(); saveQueue();
           return step();
@@ -149,6 +233,7 @@
         return false;
       }, function () {
         item.inflight = false; // network error: keep it queued
+        unreachable = true;
         return false;
       });
     }
@@ -160,6 +245,8 @@
   }
 
   function enqueue(url, body) {
+    if (!url) { snapshot(); return; }   // a draft has no session on the server yet: the state is what is kept
+    snapshot();
     // merge into a not-yet-sent request for the same target (later values win)
     var pending = queue.filter(function (i) { return i.url === url && !i.inflight; })[0];
     if (pending) Object.assign(pending.body, body);
@@ -175,9 +262,6 @@
     if (document.visibilityState === 'visible' && queue.length) flush();
   });
   setInterval(function () { if (queue.length) flush(); }, 10000);
-  window.addEventListener('beforeunload', function (e) {
-    if (queue.length) { e.preventDefault(); e.returnValue = ''; }
-  });
   renderSync();
   if (queue.length) flush();
 
@@ -437,6 +521,7 @@
       var card = row.closest('[data-exercise-card]');
       var nowDone = row.dataset.done !== 'true';
       row.dataset.done = nowDone ? 'true' : 'false';
+      times[card.dataset.prx + ':' + row.dataset.n] = nowDone ? Date.now() : undefined;
       var isRecord = refreshRow(row);
       sendSet(row, { done: nowDone });
       refreshCard(card, true);
@@ -468,9 +553,71 @@
     }
   });
 
+  // ---------- the device's copy of the workout ----------
+  var sessionNotes = $('#sessionNotes');
+
+  // DOM -> state (written to this device's storage on every change)
+  function snapshot() {
+    state.exercises = {};
+    $$('[data-exercise-card]').forEach(function (card) {
+      var prx = card.dataset.prx;
+      var exercise = { notes: $('.exercise-notes', card).value, sets: {} };
+      $$('.set-row', card).forEach(function (row) {
+        var done = row.dataset.done === 'true';
+        var key = prx + ':' + row.dataset.n;
+        exercise.sets[row.dataset.n] = {
+          w: readInput($('.set-weight', row)), r: readInput($('.set-reps', row)), d: done,
+          t: done ? (times[key] || (times[key] = Date.now())) : undefined
+        };
+      });
+      state.exercises[prx] = exercise;
+    });
+    state.notes = sessionNotes ? sessionNotes.value : '';
+    MT.saveActive(state);
+  }
+
+  // state -> DOM (a screen opened offline from the service worker's copy, or a draft reopened)
+  function restore() {
+    $$('[data-exercise-card]').forEach(function (card) {
+      var saved = state.exercises[card.dataset.prx];
+      if (!saved) return;
+      $$('.set-row', card).forEach(function (row) {
+        var set = saved.sets[row.dataset.n];
+        if (!set) return;
+        $('.set-weight', row).value = set.w === null || set.w === undefined ? '' : set.w;
+        $('.set-reps', row).value = set.r === null || set.r === undefined ? '' : set.r;
+        row.dataset.done = set.d ? 'true' : 'false';
+        if (set.d && set.t) times[card.dataset.prx + ':' + row.dataset.n] = set.t;
+      });
+      $('.exercise-notes', card).value = saved.notes || '';
+    });
+    if (sessionNotes) sessionNotes.value = state.notes || '';
+  }
+
+  // changes made here that the server has not received yet (the one-set queue), shown on a page fresh from the server
+  function applyQueue() {
+    queue.forEach(function (item) {
+      var row = $$('.set-row').filter(function (r) { return r.dataset.url === item.url; })[0];
+      if (row) {
+        if ('weight' in item.body) $('.set-weight', row).value = item.body.weight === null ? '' : item.body.weight;
+        if ('reps' in item.body) $('.set-reps', row).value = item.body.reps === null ? '' : item.body.reps;
+        if ('done' in item.body) row.dataset.done = item.body.done ? 'true' : 'false';
+      }
+      var note = $$('.exercise-notes').filter(function (t) { return t.dataset.url === item.url; })[0];
+      if (note && 'notes' in item.body) note.value = item.body.notes;
+    });
+  }
+
+  if (hadState && (offlineCopy || isDraft)) restore();
+  else applyQueue();
+
   $$('.set-row').forEach(refreshRow);
   $$('[data-exercise-card]').forEach(function (c) { refreshCard(c, false); });
   reorderQueue(false);
+  snapshot();
+  if (sessionNotes) sessionNotes.addEventListener('input', function () { clearTimeout(snapshot.t); snapshot.t = setTimeout(snapshot, 300); });
+  window.addEventListener('pagehide', snapshot);
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') snapshot(); });
 
   // The "Treino iniciado!" notice goes away by itself
   $$('.alert-dismissible').forEach(function (el) {
@@ -479,22 +626,91 @@
 
   // ---------- finish ----------
   var finishForm = $('#finishForm');
+  var donePanel = $('#offlineDone');
+  var lastTouch = Date.now();
+  ['click', 'input', 'keydown', 'touchstart'].forEach(function (name) {
+    root.addEventListener(name, function () { lastTouch = Date.now(); }, { passive: true });
+  });
+
+  function showDonePanel() {
+    $$('#queue, #finishForm, .workout-header, [data-draft-note]').forEach(function (el) { el.classList.add('d-none'); });
+    var discard = $('[data-discard-draft]'); if (discard) discard.parentNode.classList.add('d-none');
+    var form = root.querySelector('form[action*="discard"]'); if (form) form.classList.add('d-none');
+    donePanel.classList.remove('d-none');
+    hideRest();
+    window.scrollTo(0, 0);
+  }
+
+  // Send the finished workout; when it is accepted, go to the summary the server made of it
+  function deliver() {
+    var button = $('[data-offline-send]', donePanel);
+    button.disabled = true;
+    MT.flushPending().then(function (delivered) {
+      button.disabled = false;
+      var mine = delivered.filter(function (d) { return d.payload.uuid === state.uuid; })[0];
+      if (mine && mine.data.summary_url) { MT.clearActive(); window.location.href = mine.data.summary_url; }
+    });
+  }
+
+  function finishLocally() {
+    state.finished = true;
+    state.endedAt = Date.now();
+    if (state.pausedAt) { state.pausedSeconds = (state.pausedSeconds || 0) + (state.endedAt - state.pausedAt) / 1000; state.pausedAt = null; }
+    snapshot();
+    MT.addPending(MT.payloadFrom(state, true));
+    showDonePanel();
+    deliver();
+  }
+
   finishForm.addEventListener('submit', function (e) {
     e.preventDefault();
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     // let the blur's change events enqueue, then make sure everything reached the server
     setTimeout(function () {
+      var pending = pendingSets();
+      if (pending > 0 && !confirm(interpolate(gettext('Faltam %s série(s). Finalizar mesmo assim?'), [pending]))) return;
+      // A draft, a pause the server never heard of or a lost connection: the whole workout goes in one full sync.
+      // Otherwise the usual way: make sure every set arrived, then end the session on the server.
+      if (isDraft || state.timerLocal || navigator.onLine === false) { finishLocally(); return; }
       flush().then(function (ok) {
-        if (!ok) {
-          alert(gettext('Ainda há alterações sem sincronizar (sem conexão?). Aguarde a internet voltar e tente finalizar de novo.'));
-          return;
-        }
-        var pending = pendingSets();
-        if (pending > 0 && !confirm(interpolate(gettext('Faltam %s série(s). Finalizar mesmo assim?'), [pending]))) return;
+        if (!ok) { finishLocally(); return; }
+        state.finished = true; state.endedAt = Date.now(); snapshot();   // until the summary page confirms it
         finishForm.submit();
       });
     }, 50);
   });
+  if (donePanel) $('[data-offline-send]', donePanel).addEventListener('click', deliver);
+  window.addEventListener('online', function () { if (state.finished) deliver(); });
+  setInterval(function () { if (state.finished && navigator.onLine !== false) deliver(); }, 15000);
+  if (state.finished) showDonePanel();
+
+  var discardDraft = $('[data-discard-draft]');
+  if (discardDraft) discardDraft.addEventListener('click', function () {
+    if (!confirm(gettext('Descartar este treino? Nada do que foi feito nele será guardado.'))) return;
+    MT.removePending(state.uuid); MT.clearActive();
+    window.location.href = root.dataset.myWorkoutsUrl;
+  });
+
+  // ---------- a draft is sent as soon as there is a connection, then the screen continues as the real session ----------
+  var syncingDraft = false;
+  function syncDraft() {
+    if (!isDraft || syncingDraft || state.finished || navigator.onLine === false) return;
+    if (Date.now() - lastTouch < 4000) return;   // do not swap the screen under the student's fingers
+    syncingDraft = true;
+    snapshot();
+    MT.send(MT.payloadFrom(state, false)).then(function (result) {
+      syncingDraft = false;
+      if (!result.ok) return;
+      state.session = String(result.data.session); state.draft = false; MT.saveActive(state);
+      if (result.data.finished) window.location.href = result.data.summary_url;
+      else window.location.replace(result.data.execute_url);
+    });
+  }
+  if (isDraft) {
+    window.addEventListener('online', syncDraft);
+    setInterval(syncDraft, 8000);
+    syncDraft();
+  }
 
   // ---------- toast ----------
   function showToast(text) {

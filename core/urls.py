@@ -126,6 +126,7 @@ urlpatterns = [
     path('my-workouts/', views.my_workouts, name='my_workouts'),
     path('my-workouts/<int:pk>/start/', views.workout_start, name='workout_start'),
     path('my-workouts/<int:pk>/execute/', views.workout_execute, name='workout_execute'),
+    path('my-workouts/<int:pk>/offline/', views.workout_offline_start, name='workout_offline_start'),
     path('my-workouts/session/<int:pk>/end/', views.workout_end, name='workout_end'),
 
     path('my-workouts/session/<int:pk>/summary/', views.workout_summary, name='workout_summary'),
@@ -136,6 +137,7 @@ urlpatterns = [
 
     # Workout tracking API (per set / per exercise comment)
     path('api/sets/<int:pk>/', views.workout_set_update, name='workout_set_update'),
+    path('api/workout-sync/', views.workout_sync, name='workout_sync'),
     path('api/session-exercise/<int:pk>/notes/', views.workout_exercise_notes, name='workout_exercise_notes'),
 
     # PWA

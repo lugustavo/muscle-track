@@ -14,6 +14,9 @@
         h1 { color: #FF6B6B; }
         @media (prefers-color-scheme: dark) { body { background: #151b23; color: #e6edf3; } h1 { color: #FF7B7B; } }
         button { background: #FF6B6B; color: #fff; border: 0; border-radius: .5rem; padding: .75rem 1.5rem; font-size: 1rem; }
+        a.alt { display: block; margin: .4rem auto; max-width: 20rem; border: 2px solid #FF6B6B; color: #FF6B6B; border-radius: .5rem;
+                padding: .7rem 1rem; text-decoration: none; font-weight: 600; }
+        [hidden] { display: none !important; }
     </style>
 </head>
 <body>
@@ -21,6 +24,48 @@
         <h1>{% trans "Sem conexão" %}</h1>
         <p>{% trans "Não foi possível carregar esta página. Se você estava treinando, o que já foi marcado será enviado quando a internet voltar." %}</p>
         <button onclick="location.reload()">{% trans "Tentar de novo" %}</button>
+
+        <!-- A workout can go on, or start, with no connection (static/js/workout.js); filled in by the script below -->
+        <div id="workoutLinks" hidden style="margin-top: 1.5rem;">
+            <p id="waitingNote" hidden>{% trans "Treinos finalizados aguardando envio:" %} <strong id="waitingCount"></strong></p>
+            <p><a id="continueLink" class="alt" hidden>{% trans "Continuar o treino em andamento" %}</a></p>
+            <div id="startList" hidden>
+                <p>{% trans "Começar um treino sem conexão:" %}</p>
+                <div id="startLinks"></div>
+            </div>
+        </div>
     </div>
+    <script>
+    (function () {
+        function read(key, fallback) { try { var v = localStorage.getItem(key); return v === null ? fallback : JSON.parse(v); } catch (e) { return fallback; } }
+        var box = document.getElementById('workoutLinks');
+        function show(id) { document.getElementById(id).hidden = false; box.hidden = false; }
+        var active = read('mt-wo-active-v1', null);
+        var pending = read('mt-wo-pending-v1', []);
+        if (pending.length) { document.getElementById('waitingCount').textContent = pending.length; show('waitingNote'); }
+        if (active && active.url) {
+            var link = document.getElementById('continueLink');
+            link.href = active.url;
+            link.textContent = link.textContent + (active.routineName ? ': ' + active.routineName : '');
+            show('continueLink');
+        }
+        // only the workouts whose screen the service worker really kept can be started
+        var routines = read('mt-wo-routines-v1', []);
+        if (routines.length && window.caches) {
+            caches.open('muscle-track-workout-v1').then(function (cache) {
+                routines.forEach(function (routine) {
+                    cache.match(routine.draft).then(function (hit) {
+                        if (!hit) return;
+                        var a = document.createElement('a');
+                        a.className = 'alt'; a.href = routine.draft; a.textContent = routine.name;
+                        document.getElementById('startLinks').appendChild(a);
+                        show('startList');
+                    });
+                });
+            }).catch(function () {});
+        }
+        window.addEventListener('online', function () { location.reload(); });
+    })();
+    </script>
 </body>
 </html>
