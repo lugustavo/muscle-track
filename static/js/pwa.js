@@ -4,6 +4,7 @@
 
     // Django's JS catalog (/jsi18n/); identity fallback if it has not loaded
     var gettext = window.gettext || function (s) { return s; };
+    var interpolate = window.interpolate || function (s, values) { var i = 0; return s.replace(/%s/g, function () { return values[i++]; }); };
 
     // ---- Offline notice ---------------------------------------------------------------------------------
     var banner = document.querySelector('[data-offline-banner]');
@@ -14,6 +15,11 @@
         banner.classList.toggle('d-none', !offline);
         if (offline && text && document.querySelector('[data-workout-page]')) {
             text.textContent = gettext('Sem conexão. Pode continuar treinando: as séries ficam salvas no aparelho e são enviadas quando a internet voltar.');
+        } else if (text && document.body.dataset.cachedAt && Number(document.body.dataset.cachedAt) > 0) {
+            // a copy kept by the service worker (templates/pwa/sw.js), served because the connection is weak or gone
+            var when = new Date(Number(document.body.dataset.cachedAt)).toLocaleString([], {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
+            text.textContent = interpolate(gettext('Sem conexão. Você está vendo a cópia salva em %s; pode estar desatualizada.'), [when]);
+            banner.classList.remove('d-none');
         }
     }
     window.addEventListener('online', renderConnection);

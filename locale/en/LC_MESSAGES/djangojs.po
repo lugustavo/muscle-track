@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 11:11-0300\n"
+"POT-Creation-Date: 2026-10-19 11:59-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -109,6 +109,12 @@ msgstr ""
 "and sent when the internet comes back."
 
 #, javascript-format
+msgid ""
+"Sem conexão. Você está vendo a cópia salva em %s; pode estar desatualizada."
+msgstr ""
+"No connection. You are seeing the copy saved on %s; it may be out of date."
+
+#, javascript-format
 msgid "ver todos (%s)"
 msgstr "see all (%s)"
 
@@ -187,6 +193,39 @@ msgstr "%s set(s) remaining."
 
 msgid "🏆 Novo recorde de carga!"
 msgstr "🏆 New load record!"
+
+msgid "Enviando..."
+msgstr "Sending..."
+
+msgid ""
+"Sua sessão expirou. Entre de novo no app para enviar; o treino continua "
+"guardado neste aparelho."
+msgstr ""
+"Your session expired. Sign in to the app again to send it; the workout is "
+"still saved on this device."
+
+msgid ""
+"Não consegui falar com o servidor. O treino continua guardado; tente de novo"
+" em instantes."
+msgstr ""
+"Could not reach the server. The workout is still saved; try again in a "
+"moment."
+
+#, javascript-format
+msgid ""
+"O servidor teve um problema (erro %s). O treino continua guardado; tente de "
+"novo em instantes."
+msgstr ""
+"The server had a problem (error %s). The workout is still saved; try again "
+"in a moment."
+
+#, javascript-format
+msgid ""
+"O servidor não aceitou este treino (erro %s). Ele continua guardado neste "
+"aparelho; avise sua personal."
+msgstr ""
+"The server did not accept this workout (error %s). It is still saved on this"
+" device; tell your trainer."
 
 #, javascript-format
 msgid "Faltam %s série(s). Finalizar mesmo assim?"

@@ -2,6 +2,7 @@ import json
 import uuid
 from datetime import timedelta
 
+from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -234,6 +235,31 @@ class OfflinePagesTests(WorkoutTestMixin, BaseTestCase):
                      "url.pathname.endsWith('/accounts/logout/')", 'caches.delete(WORKOUT_CACHE)', "'/jsi18n/'", 'data-offline-copy'):
             self.assertIn(rule, sw)
         self.assertNotIn('{{', sw)
+
+    def test_the_student_marker_exists_only_on_a_students_pages(self):
+        """The service worker keeps a page only if it carries the marker, so nothing of a trainer is ever kept."""
+        for name in ('core:home', 'core:my_workouts', 'core:my_agenda', 'core:my_history'):
+            self.assertIn('data-student-app', self.client.get(reverse(name)).content.decode(), name)
+        self.client.logout()
+        self.assertNotIn('data-student-app', self.client.get(reverse('core:home')).content.decode())
+        self.login(self.trainer)
+        for name in ('core:home', 'core:student_list'):
+            self.assertNotIn('data-student-app', self.client.get(reverse(name)).content.decode(), name)
+
+    def test_the_service_worker_keeps_the_students_main_screens_only_without_a_query(self):
+        sw = self.client.get(reverse('core:service_worker')).content.decode()
+        for rule in ("STUDENT_PAGE = /^\\/(my-workouts\\/|my-agenda\\/|my-package\\/|my-history\\/)?$/", 'PAGE_TTL',
+                     "body.includes('data-student-app')", '!url.search', 'data-cached-at'):
+            self.assertIn(rule, sw)
+        for private in ('my-profile', 'my-privacy', 'my-evolution', 'photo'):
+            self.assertNotIn(private, sw.split('STUDENT_PAGE =')[1].split('\n')[0])
+
+    def test_the_offline_scripts_warm_the_main_screens_and_tell_when_a_copy_is_old(self):
+        js = (settings.BASE_DIR / 'static/js/workout_offline.js').read_text()
+        for page in ("'/'", "'/my-workouts/'", "'/my-agenda/'", "'/my-package/'", "'/my-history/'"):
+            self.assertIn(page, js)
+        self.assertIn('navigator.connection.saveData', js)
+        self.assertIn('cachedAt', (settings.BASE_DIR / 'static/js/pwa.js').read_text())
 
     def test_the_offline_page_offers_to_continue_or_start_a_workout(self):
         html = self.client.get(reverse('core:offline')).content.decode()

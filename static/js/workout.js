@@ -641,14 +641,37 @@
     window.scrollTo(0, 0);
   }
 
-  // Send the finished workout; when it is accepted, go to the summary the server made of it
-  function deliver() {
+  // Send the finished workout; when it is accepted, go to the summary the server made of it.
+  // `manual` is the student pressing the button: it tries even if the phone still says it is offline, and always answers.
+  var doneText = $('[data-offline-done-text]', donePanel);
+  var doneDefault = doneText ? doneText.textContent : '';
+  function say(text) { if (doneText) doneText.textContent = text; }
+  function deliver(manual) {
     var button = $('[data-offline-send]', donePanel);
+    if (button.disabled) return;
     button.disabled = true;
-    MT.flushPending().then(function (delivered) {
-      button.disabled = false;
+    if (manual === true) say(gettext('Enviando...'));
+    MT.flushPending(manual === true).then(function (delivered) {
       var mine = delivered.filter(function (d) { return d.payload.uuid === state.uuid; })[0];
-      if (mine && mine.data.summary_url) { MT.clearActive(); window.location.href = mine.data.summary_url; }
+      if (mine) return {ok: true, data: mine.data};
+      var queued = MT.pending().filter(function (p) { return p.uuid === state.uuid; })[0];
+      if (!queued && !delivered.failure) {
+        // it left the waiting list but this screen did not see it arrive (another page of the app sent it): sending the
+        // same workout again changes nothing on the server and gives the summary
+        return MT.send(MT.payloadFrom(state, true));
+      }
+      var failure = delivered.failure;
+      if (!failure && queued && queued.error) failure = {kind: 'refused', status: queued.error};
+      return {ok: false, failure: failure};
+    }).then(function (result) {
+      button.disabled = false;
+      if (result.ok && result.data.summary_url) { MT.clearActive(); window.location.href = result.data.summary_url; return; }
+      var failure = result.failure || (result.ok === false && result.kind ? {kind: result.kind, status: result.status} : null);
+      if (!failure) { say(doneDefault); return; }
+      if (failure.kind === 'login') say(gettext('Sua sessão expirou. Entre de novo no app para enviar; o treino continua guardado neste aparelho.'));
+      else if (failure.kind === 'network') say(gettext('Não consegui falar com o servidor. O treino continua guardado; tente de novo em instantes.'));
+      else if (failure.kind === 'server') say(interpolate(gettext('O servidor teve um problema (erro %s). O treino continua guardado; tente de novo em instantes.'), [failure.status]));
+      else say(interpolate(gettext('O servidor não aceitou este treino (erro %s). Ele continua guardado neste aparelho; avise sua personal.'), [failure.status]));
     });
   }
 
@@ -679,7 +702,7 @@
       });
     }, 50);
   });
-  if (donePanel) $('[data-offline-send]', donePanel).addEventListener('click', deliver);
+  if (donePanel) $('[data-offline-send]', donePanel).addEventListener('click', function () { deliver(true); });
   window.addEventListener('online', function () { if (state.finished) deliver(); });
   setInterval(function () { if (state.finished && navigator.onLine !== false) deliver(); }, 15000);
   if (state.finished) showDonePanel();

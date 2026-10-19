@@ -72,16 +72,23 @@
     }
 
     // ---- sending ------------------------------------------------------------------------------------------------------
-    // Resolves {ok, status, data}. ok means the server really applied it (not a login page after a lost session).
+    // Resolves {ok, status, data, kind}. ok means the server really applied it (not a login page after a lost session).
+    // kind says why it did not: 'network' (no answer / timed out), 'login' (the session is gone), 'refused' (400/403/404), 'server'.
     function send(payload, url) {
+        var controller = window.AbortController ? new AbortController() : null;
+        var timer = controller ? setTimeout(function () { controller.abort(); }, 25000) : null;   // a half-open connection must not hang forever
         return fetch(url || SYNC_URL, {
-            method: 'POST', credentials: 'same-origin',
+            method: 'POST', credentials: 'same-origin', signal: controller ? controller.signal : undefined,
             headers: {'X-CSRFToken': csrf(), 'Content-Type': 'application/json'}, body: JSON.stringify(payload)
         }).then(function (response) {
+            clearTimeout(timer);
+            if (response.redirected || response.status === 401) return {ok: false, status: response.status, data: {}, kind: 'login'};
             return response.json().then(function (data) {
-                return {ok: response.ok && !response.redirected && data.success === true, status: response.status, data: data};
-            }, function () { return {ok: false, status: response.status, data: {}}; });
-        }, function () { return {ok: false, status: 0, data: {}}; });
+                var ok = response.ok && data.success === true;
+                var kind = ok ? '' : (response.status >= 500 ? 'server' : 'refused');
+                return {ok: ok, status: response.status, data: data, kind: kind};
+            }, function () { return {ok: false, status: response.status, data: {}, kind: response.status >= 500 ? 'server' : 'refused'}; });
+        }, function () { clearTimeout(timer); return {ok: false, status: 0, data: {}, kind: 'network'}; });
     }
 
     function pending() { return read(PENDING, []); }
@@ -95,13 +102,16 @@
     }
 
     var flushing = null;
-    // Send every waiting workout, one at a time. Resolves the list of {payload, data} the server accepted.
-    function flushPending() {
+    // Send every waiting workout, one at a time. Resolves the list of {payload, data} the server accepted; its `failure`
+    // property says why the last one was not ({kind, status}). A workout the server refused stays on the device (marked
+    // with the error, so it is not retried over and over) and is only tried again when `force` is set (the student asked).
+    // `force` also ignores navigator.onLine, which some phones leave stale after the connection comes back.
+    function flushPending(force) {
         if (flushing) return flushing;
         var delivered = [];
         function next() {
-            var list = pending();
-            if (!list.length || navigator.onLine === false) return Promise.resolve(delivered);
+            var list = pending().filter(function (item) { return force || !item.error; });
+            if (!list.length || (!force && navigator.onLine === false)) return Promise.resolve(delivered);
             var payload = list[0];
             return send(payload).then(function (result) {
                 if (result.ok) {
@@ -111,11 +121,11 @@
                     delivered.push({payload: payload, data: result.data});
                     return next();
                 }
-                if (result.status === 400 || result.status === 404) {   // it can never be accepted: do not block the others
-                    removePending(payload.uuid);
-                    var rejected = active();
-                    if (rejected && rejected.uuid === payload.uuid) clearActive();
-                    return next();
+                delivered.failure = {kind: result.kind, status: result.status};
+                if (result.kind === 'refused' && result.status !== 403 && result.status !== 429) {   // it will not be accepted as it is
+                    payload.error = result.status;
+                    addPending(payload);
+                    if (!force) return next();   // do not block the others
                 }
                 return delivered;   // no connection, server busy or not logged in: try again later
             });
@@ -158,6 +168,69 @@
         }).catch(function () { /* ignore */ });
     }
 
+    // ---- the app ready for no connection ------------------------------------------------------------------------------
+    // The student's main screens and the workouts' screens are fetched through the service worker (it keeps them,
+    // templates/pwa/sw.js) so the app opens at the gym with no signal. Quietly, one at a time, at most every 20 minutes.
+    var WARMED = 'mt-warm-v1';
+    var WARM_EVERY = 20 * 60 * 1000;
+    var PAGES = ['/', '/my-workouts/', '/my-agenda/', '/my-package/', '/my-history/'];
+    var FILES = /\/(?:static|media\/exercises)\/[^"'\s)<>]+/g;   // code, styles, charts and exercise pictures a screen uses
+
+    // The workouts listed on "Meus treinos" (from its HTML), kept for starting them with no connection
+    function learnRoutines(html) {
+        var box = new DOMParser().parseFromString(html, 'text/html').querySelector('[data-offline-routines]');
+        if (!box) return [];
+        var list = Array.prototype.map.call(box.querySelectorAll('[data-routine]'), function (el) {
+            return {id: el.dataset.routine, name: el.dataset.name, draft: el.dataset.draft, execute: el.dataset.execute || ''};
+        });
+        saveRoutines(list);
+        var urls = [];
+        list.forEach(function (routine) { urls.push(routine.draft); if (routine.execute) urls.push(routine.execute); });
+        return urls;
+    }
+
+    // Fetch each screen in turn (a weak signal is not asked for everything at once), then the files they use that the
+    // service worker does not have yet. Resolves when done.
+    function warmUrls(urls) {
+        var queue = urls.slice(), files = {};
+        function offline() { return navigator.onLine === false; }
+        function nextPage() {
+            var url = queue.shift();
+            if (!url || offline()) return Promise.resolve();
+            return fetch(url, {credentials: 'same-origin', headers: {'X-Workout-Prefetch': '1'}}).then(function (response) {
+                var type = response.headers.get('Content-Type') || '';
+                if (!response.ok || type.indexOf('text/html') === -1) return;
+                return response.text().then(function (html) {
+                    (html.match(FILES) || []).forEach(function (f) { files[f] = true; });
+                    if (url === '/my-workouts/') learnRoutines(html).forEach(function (u) { if (queue.indexOf(u) === -1) queue.push(u); });
+                });
+            }).catch(function () { /* offline: later */ }).then(nextPage);
+        }
+        function nextFile() {
+            var url = Object.keys(files).shift();
+            if (!url || offline()) return Promise.resolve();
+            delete files[url];
+            var have = window.caches ? caches.match(url) : Promise.resolve(null);
+            return have.then(function (hit) { return hit ? null : fetch(url, {credentials: 'same-origin'}); })
+                .catch(function () { /* later */ }).then(nextFile);
+        }
+        return nextPage().then(nextFile);
+    }
+
+    function warm(extra, force) {
+        if (navigator.onLine === false) return;
+        if (navigator.connection && navigator.connection.saveData) return;   // the student asked the phone to spare data
+        var last = Number(read(WARMED, 0));
+        if (!force && Date.now() - last < WARM_EVERY) return;
+        write(WARMED, Date.now());
+        var here = window.location.pathname;
+        var urls = PAGES.filter(function (page) { return page !== here; });
+        // the list of workouts comes first: its screens are the ones that matter at the gym
+        urls.sort(function (x, y) { return (y === '/my-workouts/') - (x === '/my-workouts/'); });
+        (extra || []).forEach(function (url) { if (urls.indexOf(url) === -1) urls.push(url); });
+        warmUrls(urls);
+    }
+
     // ---- notices on any page ------------------------------------------------------------------------------------------
     function notice(text, href, linkText) {
         var box = document.createElement('div');
@@ -187,7 +260,15 @@
         });
     }
 
+    // The workouts the student can start: kept from "Meus treinos" (their screens are fetched along with the main ones)
+    function routineUrls() {
+        var urls = [];
+        routines().forEach(function (routine) { urls.push(routine.draft); if (routine.execute) urls.push(routine.execute); });
+        return urls;
+    }
+
     window.MTWorkout = {
+        warm: warm, routineUrls: routineUrls, warmUrls: warmUrls,
         uuid: uuid, csrf: csrf, active: active, saveActive: saveActive, clearActive: clearActive, payloadFrom: payloadFrom,
         send: send, pending: pending, addPending: addPending, removePending: removePending, flushPending: flushPending,
         routines: routines, saveRoutines: saveRoutines, clearCopies: clearCopies, notice: notice
@@ -203,4 +284,9 @@
 
     autoFlush();
     window.addEventListener('online', autoFlush);
+    // not while a workout is open (it must have the connection for itself), and after the page has settled
+    if (!document.getElementById('workout')) {
+        setTimeout(function () { warm(routineUrls()); }, 4000);
+        window.addEventListener('online', function () { setTimeout(function () { warm(routineUrls()); }, 2000); });
+    }
 })();

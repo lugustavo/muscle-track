@@ -8,13 +8,19 @@
         return {id: el.dataset.routine, name: el.dataset.name, draft: el.dataset.draft, execute: el.dataset.execute || ''};
     });
     window.MTWorkout.saveRoutines(routines);
+    // With no connection "Iniciar treino" (a POST) cannot work: start the draft kept on this device instead
+    document.addEventListener('submit', function (event) {
+        var match = /\/my-workouts\/(\d+)\/start\/$/.exec(event.target.getAttribute('action') || '');
+        if (!match || navigator.onLine !== false) return;
+        var routine = routines.filter(function (r) { return r.id === match[1]; })[0];
+        if (!routine) return;
+        event.preventDefault();
+        window.location.href = routine.draft;
+    });
     if (navigator.onLine === false) return;
-    // one at a time, so a weak signal is not asked for everything at once
-    var urls = (box.dataset.assets || '').split(' ').filter(Boolean);   // the code and styles of the workout screen
-    routines.forEach(function (routine) { urls.push(routine.draft); if (routine.execute) urls.push(routine.execute); });
-    (function next() {
-        var url = urls.shift();
-        if (!url) return;
-        fetch(url, {credentials: 'same-origin', headers: {'X-Workout-Prefetch': '1'}}).catch(function () { /* offline: later */ }).then(next, next);
-    })();
+    // the code and styles of the workout screen first, then the screens of the workouts (and their pictures), now
+    var assets = (box.dataset.assets || '').split(' ').filter(Boolean);
+    assets.reduce(function (chain, url) {
+        return chain.then(function () { return fetch(url, {credentials: 'same-origin'}).catch(function () { /* offline: later */ }); });
+    }, Promise.resolve()).then(function () { window.MTWorkout.warm(window.MTWorkout.routineUrls(), true); });
 })();
