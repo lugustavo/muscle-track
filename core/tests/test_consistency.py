@@ -88,7 +88,6 @@ class MotivationScreenTests(BaseTestCase):
 
     def test_ring_streak_and_milestone_on_hoje(self):
         Person.objects.filter(pk=self.person.pk).update(weekly_goal=2)
-        now = timezone.now()
         today = timezone.localdate()
         monday = today - timedelta(days=today.weekday())
         for week in (1, 2):
@@ -191,7 +190,6 @@ class SummaryCelebrationTests(BaseTestCase):
 
     def test_the_workout_that_reaches_the_weekly_goal(self):
         Person.objects.filter(pk=self.alice.person.pk).update(weekly_goal=2)
-        now = timezone.now()
         today = timezone.localdate()
         monday = today - timedelta(days=today.weekday())
         first = finish(self.alice_routine, at(monday, 7))
