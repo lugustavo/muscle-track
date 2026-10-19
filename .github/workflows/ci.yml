@@ -35,8 +35,9 @@ jobs:
           docker build -t muscle-track-backup ./backup
           docker network create bk
           docker run -d --name pg --network bk -e POSTGRES_PASSWORD=x postgres:16-alpine
-          until docker exec pg pg_isready -U postgres; do sleep 1; done
-          docker exec pg psql -U postgres -c "create table t(id int primary key); insert into t select generate_series(1,50);"
+          # the first start of the image runs a temporary server on the socket only: wait for the real one, over TCP
+          until docker exec pg psql -h 127.0.0.1 -U postgres -c 'select 1' >/dev/null 2>&1; do sleep 1; done
+          docker exec pg psql -h 127.0.0.1 -U postgres -c "create table t(id int primary key); insert into t select generate_series(1,50);"
           docker volume create bk-media
           docker run --rm -v bk-media:/media alpine sh -c 'echo photo > /media/a.jpg'
           mkdir -p "$PWD/bk-out"
@@ -44,8 +45,8 @@ jobs:
             -v "$PWD/bk-out:/backups" -v bk-media:/media muscle-track-backup "$@"; }
           run_backup once
           grep '"ok": true' bk-out/status.json
-          docker exec pg psql -U postgres -c "drop table t"
+          docker exec pg psql -h 127.0.0.1 -U postgres -c "drop table t"
           docker run --rm -v bk-media:/media alpine rm /media/a.jpg
           run_backup restore latest
-          test "$(docker exec pg psql -U postgres -tAc 'select count(*) from t')" = 50
+          test "$(docker exec pg psql -h 127.0.0.1 -U postgres -tAc 'select count(*) from t')" = 50
           docker run --rm -v bk-media:/media alpine cat /media/a.jpg | grep photo
