@@ -1,0 +1,43 @@
+/* Full-screen camera with framing guides (photo forms). Colours: Bootstrap/theme variables only. */
+html.cam-open, html.cam-open body { overflow: hidden; }
+.cam { position: fixed; inset: 0; z-index: 2000; display: flex; flex-direction: column; background: var(--bs-black); color: var(--bs-white);
+       padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+.cam[hidden] { display: none; }
+.cam-top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .5rem .75rem; }
+.cam-title { text-align: center; line-height: 1.15; min-width: 0; }
+.cam-title strong { display: block; font-size: 1rem; }
+.cam-title small { display: block; opacity: .75; font-size: .75rem; }
+.cam-btn { width: 2.6rem; height: 2.6rem; border-radius: 50%; border: 0; background: color-mix(in srgb, var(--bs-white) 16%, transparent); color: var(--bs-white); font-size: 1.15rem; display: inline-flex; align-items: center; justify-content: center; }
+.cam-btn[hidden] { display: none; }
+.cam-btn:focus-visible, .cam-chip:focus-visible, .cam-shutter:focus-visible { outline: 3px solid var(--primary-color); outline-offset: 2px; }
+.cam-stage { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.cam-frame { position: relative; overflow: hidden; border-radius: .75rem; background: var(--bs-dark); }   /* size set by photo_capture.js: the 3:4 frame */
+.cam-frame video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cam-frame.mirror video { transform: scaleX(-1); }
+.cam-ghost { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .35; pointer-events: none; }
+.cam-ghost[hidden] { display: none; }
+.cam-guides { position: absolute; inset: 0; pointer-events: none; }
+.cam-guides[hidden] { display: none; }
+.cam-guides svg { width: 100%; height: 100%; display: block; }
+.cam-guides .pg-line, .cam-guides .pg-shadow { fill: none; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; }
+.cam-guides .pg-shadow { stroke: color-mix(in srgb, var(--bs-black) 55%, transparent); stroke-width: 4px; }
+.cam-guides .pg-line { stroke: color-mix(in srgb, var(--bs-white) 85%, transparent); stroke-width: 1.5px; }
+.cam-guides .pg-grid .pg-line { stroke: color-mix(in srgb, var(--bs-white) 45%, transparent); stroke-width: 1px; }
+.cam-guides .pg-grid .pg-shadow { stroke-width: 2px; }
+.cam-guides .pg-dash { stroke-dasharray: 8 6; }
+.cam-guides .pg-body .pg-line { stroke-dasharray: 7 5; stroke-width: 2.2px; stroke: var(--bs-white); }
+.cam-guides .pg-level.pg-floor, .cam-guides .pg-level.pg-head { stroke: var(--primary-color); }
+.cam-count { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 7rem; font-weight: 800; text-shadow: 0 2px 18px color-mix(in srgb, var(--bs-black) 70%, transparent); }
+.cam-count[hidden] { display: none; }
+.cam-flash { animation: cam-flash .25s ease-out; }
+@keyframes cam-flash { from { box-shadow: inset 0 0 0 100vmax color-mix(in srgb, var(--bs-white) 80%, transparent); } to { box-shadow: inset 0 0 0 100vmax transparent; } }
+@media (prefers-reduced-motion: reduce) { .cam-flash { animation: none; } }
+.cam-tools { display: flex; justify-content: center; flex-wrap: wrap; gap: .4rem; padding: .5rem .75rem 0; }
+.cam-chip { border: 1px solid color-mix(in srgb, var(--bs-white) 35%, transparent); background: transparent; color: var(--bs-white); border-radius: 999px; padding: .3rem .8rem; font-size: .82rem; display: inline-flex; align-items: center; gap: .35rem; }
+.cam-chip[aria-pressed="true"], .cam-chip.on { background: color-mix(in srgb, var(--primary-color) 70%, transparent); border-color: var(--primary-color); }
+.cam-chip[hidden] { display: none; }
+.cam-bar { display: flex; flex-direction: column; align-items: center; gap: .4rem; padding: .5rem .75rem .9rem; }
+.cam-tip { font-size: .76rem; opacity: .75; text-align: center; max-width: 28rem; }
+.cam-shutter { width: 4.2rem; height: 4.2rem; border-radius: 50%; border: 4px solid var(--bs-white); background: color-mix(in srgb, var(--bs-white) 25%, transparent); padding: 0; position: relative; }
+.cam-shutter::after { content: ''; position: absolute; inset: 5px; border-radius: 50%; background: var(--bs-white); }
+.cam-shutter.counting::after { background: var(--bs-danger); border-radius: .5rem; inset: 14px; }

@@ -3,7 +3,7 @@
 // - pages: always network; when offline, show /offline/
 // Authenticated pages are deliberately NOT cached (shared phones / after logout).
 // Offline set updates are queued by the page itself (static/js/workout.js).
-const CACHE = 'muscle-track-v3'; // bump to drop old caches (v1 also cached CDN files)
+const CACHE = 'muscle-track-v4'; // bump to drop old caches (v1 also cached CDN files)
 const OFFLINE_URL = '/offline/';
 
 self.addEventListener('install', (event) => {

@@ -28,7 +28,7 @@ from django.views.decorators.http import require_POST, require_safe
 from allauth.account.models import EmailAddress
 
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, last_activity, trainer_dashboard
-from . import photo_positions, telegram
+from . import photo_guides, photo_positions, telegram
 from .i18n import short_date
 from .listing import filter_tags, remember_view, view_mode as list_view_mode
 from .forms import (
@@ -971,7 +971,7 @@ def my_photo_upload(request, person):
         return redirect(after_save_url(request, reverse('core:my_evolution')))
     return render(request, 'core/my_photo_form.html', {
         'form': form, 'photos_consent': consent, 'title': _('Enviar foto'),
-        'back_default': reverse('core:my_evolution')})
+        'back_default': reverse('core:my_evolution'), 'camera_guides': photo_guides.config(person)})
 
 
 @student_required
@@ -2585,7 +2585,7 @@ def photo_upload(request, pk):
     chosen = form['assessment'].value()
     return render(request, 'core/photo_form.html', {
         'form': form, 'student': student, 'photos_consent': photos_consent,
-        'has_assessment': bool(chosen)})
+        'has_assessment': bool(chosen), 'camera_guides': photo_guides.config(student)})
 
 
 @staff_required

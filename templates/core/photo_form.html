@@ -4,6 +4,8 @@
 
 {% block title %}{% blocktrans trimmed with person_name=student.person_name %}Adicionar foto - {{ person_name }}{% endblocktrans %}{% endblock %}
 
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/camera_guides.css' %}">{% endblock %}
+
 {% block content %}
 {% if not photos_consent %}
 <div class="alert alert-warning"><i class="bi bi-shield-exclamation"></i> {% blocktrans trimmed with person_name=student.person_name %}{{ person_name }} ainda não autorizou as fotos de evolução.
@@ -42,14 +44,9 @@
                 <div class="d-flex flex-wrap gap-2 mb-2" data-capture-buttons hidden>
                     <button type="button" class="btn btn-primary" data-take><i class="bi bi-camera"></i> {% trans "Tirar foto" %}</button>
                     <button type="button" class="btn btn-outline-secondary" data-gallery><i class="bi bi-images"></i> {% trans "Escolher da galeria" %}</button>
+                    <button type="button" class="btn btn-outline-secondary" data-native-camera hidden><i class="bi bi-phone"></i> {% trans "Câmera do aparelho (sem guias)" %}</button>
                 </div>
-                <div data-live hidden class="mb-2">
-                    <video playsinline muted class="w-100 rounded bg-body-secondary" style="max-height: 60vh;"></video>
-                    <div class="d-flex gap-2 mt-2">
-                        <button type="button" class="btn btn-success" data-shoot><i class="bi bi-record-circle"></i> {% trans "Capturar" %}</button>
-                        <button type="button" class="btn btn-outline-secondary" data-cancel-live>{% trans "Cancelar" %}</button>
-                    </div>
-                </div>
+                {% include 'core/_camera_live.html' %}
                 <div data-picked hidden class="mb-2">
                     <img alt="{% trans "Pré-visualização da foto" %}" class="rounded border" style="max-height: 280px; max-width: 100%;">
                 </div>
@@ -74,5 +71,7 @@
         {% back_button back_default label=_('Cancelar') css='btn btn-outline-secondary' icon='' fragment='#tab-avaliacoes' %}
     </div>
 </form>
+{{ camera_guides|json_script:"camera-guides" }}
+<script src="{% static 'js/photo_guides.js' %}"></script>
 <script src="{% static 'js/photo_capture.js' %}"></script>
 {% endblock %}

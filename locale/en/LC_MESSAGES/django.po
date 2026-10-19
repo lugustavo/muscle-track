@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-18 22:05-0300\n"
+"POT-Creation-Date: 2026-10-19 09:48-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3439,6 +3439,40 @@ msgstr "remove"
 msgid "breadcrumb"
 msgstr "breadcrumb"
 
+msgid "Câmera com guias de enquadramento"
+msgstr "Camera with framing guides"
+
+#| msgid "Sem imagem"
+msgid "Sem contagem"
+msgstr "No countdown"
+
+#| msgid "Pacotes anteriores"
+msgid "Foto anterior"
+msgstr "Previous photo"
+
+msgid ""
+"Celular na vertical, na altura do peito e a cerca de 2 metros. Pés na linha "
+"de baixo, cabeça na linha de cima."
+msgstr ""
+"Phone upright, at chest height and about 2 meters away. Feet on the bottom "
+"line, head on the top line."
+
+msgid "Celular na vertical. A foto sai sempre na mesma proporção (3:4)."
+msgstr ""
+"Phone upright. The photo always comes out in the same proportion (3:4)."
+
+msgid "Fechar a câmera"
+msgstr "Close the camera"
+
+msgid "Trocar de câmera"
+msgstr "Switch camera"
+
+msgid "Guias"
+msgstr "Guides"
+
+msgid "Capturar"
+msgstr "Capture"
+
 msgid "D, d/m \\à\\s H:i"
 msgstr "D, M j \\a\\t g:i A"
 
@@ -5221,8 +5255,8 @@ msgstr "Take photo"
 msgid "Escolher da galeria"
 msgstr "Choose from gallery"
 
-msgid "Capturar"
-msgstr "Capture"
+msgid "Câmera do aparelho (sem guias)"
+msgstr "Device camera (no guides)"
 
 msgid "Pré-visualização da foto"
 msgstr "Photo preview"
@@ -6522,7 +6556,6 @@ msgstr "Open the student's profile"
 msgid "Ver progresso deste treino"
 msgstr "View progress for this workout"
 
-#| msgid "Começa em"
 msgid "Começo"
 msgstr "Start"
 
