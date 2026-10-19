@@ -401,7 +401,7 @@ class StudentListTests(BaseTestCase):
         self.make_students(20, start=3)
         many = {mode: self.count_queries(view=mode) for mode in ('grid', 'list')}
         self.assertEqual(few, many)
-        self.assertLessEqual(many['list'], 10)  # constant, plus the bottom bar's badge counts
+        self.assertLessEqual(many['list'], 11)  # constant, plus the bottom bar's badge counts and the bell's unread count
 
     def test_statistics_are_annotated(self):
         self.make_students(1)
