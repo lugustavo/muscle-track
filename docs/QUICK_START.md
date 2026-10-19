@@ -17,7 +17,7 @@ cp .env.example .env   # e ajuste: DEBUG=True (somente local)
 ```bash
 python manage.py migrate
 python manage.py createsuperuser   # conta da personal
-python populate_db.py              # exercícios e treinos modelo (use --demo para alunos de exemplo)
+python populate_db.py              # exercícios e treinos modelo (use --demo para um estúdio de exemplo: 18 alunos, pacotes, aulas, pagamentos, treinos)
 ```
 
 ### 3. Inicie o servidor
@@ -33,7 +33,7 @@ Abra seu navegador em: **http://localhost:8000**
 ## 🔑 Login
 
 - **Personal trainer:** a conta criada com `createsuperuser`.
-- **Alunos:** não há mais senhas fixas. Com `python populate_db.py --demo` a senha dos alunos de exemplo vem de `DEMO_PASSWORD` ou é gerada e exibida na hora.
+- **Demo (`python populate_db.py --demo`):** se não houver personal, cria `personal@example.com`; alunos de exemplo como `ana.ferreira@example.com`, `carla.mendes@example.com` e `olivia.torres@example.com` (a lista dos casos está em `core/demo_data.py`). Não há senhas fixas: a senha vem de `DEMO_PASSWORD` ou é gerada e exibida uma única vez.
 
 ---
 
