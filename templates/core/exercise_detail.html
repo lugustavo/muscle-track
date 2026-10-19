@@ -35,7 +35,7 @@
         <div class="card text-center stat-tile h-100">
             <div class="card-body">
                 <div class="stat-top">
-                    <i class="bi bi-calendar-check fs-1 text-primary"></i>
+                    <i class="bi bi-calendar-check fs-1 text-brand"></i>
                     <h3 class="mt-2">{{ routines_count }}</h3>
                 </div>
                 <p class="text-muted mb-0">{% blocktrans trimmed count routines_count=routines_count %}Treino{% plural %}Treinos{% endblocktrans %}</p>
@@ -88,11 +88,11 @@
                 <div class="row mb-3">
                     <div class="col-6">
                         <strong>{% trans "Grupo muscular:" %}</strong><br>
-                        <span class="badge bg-secondary mt-1">{{ exercise.muscle_group.label }}</span>
+                        <span class="ui-badge mt-1">{{ exercise.muscle_group.label }}</span>
                     </div>
                     <div class="col-6">
                         <strong>{% trans "Padrão:" %}</strong><br>
-                        <span class="badge bg-info mt-1">{{ exercise.default_sets }}x{{ exercise.default_reps }}</span>
+                        <span class="ui-badge info mt-1">{{ exercise.default_sets }}x{{ exercise.default_reps }}</span>
                     </div>
                 </div>
                 <div class="mb-2">
@@ -122,7 +122,7 @@
                                     {% endif %}
                                 </small>
                             </div>
-                            <span class="badge bg-primary">{% blocktrans trimmed with order=routine_exercise.order %}Ordem: {{ order }}{% endblocktrans %}</span>
+                            <span class="ui-badge brand">{% blocktrans trimmed with order=routine_exercise.order %}Ordem: {{ order }}{% endblocktrans %}</span>
                         </div>
                     </a>
                     {% endfor %}

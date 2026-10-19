@@ -1,5 +1,5 @@
 {% load i18n %}
-{% load navigation money_tags %}
+{% load navigation money_tags ui %}
 {# "Pacote", in the Ficha tab: the package being used (classes left, deadline, payment) and the previous ones. Needs `pkg` (core.packages.overview). #}
 {% with cur=pkg.current %}
 <div class="card package-card mb-4 {% if cur %}border-{{ cur.css }}{% endif %}" data-package-card {% if cur %}data-package-state="{{ cur.state }}"{% else %}data-package-state="none"{% endif %}>
@@ -9,13 +9,13 @@
                 <div class="text-muted small text-uppercase"><i class="bi bi-box-seam"></i> {% trans "Pacote" %}</div>
                 <div class="fs-5 fw-semibold text-break">{% if cur %}{{ cur.package.name }}{% else %}{% trans "Sem pacote" %}{% endif %}</div>
             </div>
-            {% if cur %}<span class="badge fs-6 bg-{{ cur.css }}" data-package-label>{{ cur.label }}</span>{% endif %}
+            {% if cur %}<span class="ui-badge fs-6 {{ cur.css|tone }}" data-package-label>{{ cur.label }}</span>{% endif %}
         </div>
         {% if cur.shared %}
         <div class="small mt-2" data-package-people>
             <i class="bi bi-people"></i>
             {% if not cur.is_owner %}{% url 'core:student_detail' cur.owner.pk as owner_url %}{% blocktrans trimmed with owner=cur.owner.person_name %}Pacote de <a href="{{ owner_url }}">{{ owner }}</a>, dividido com você.{% endblocktrans %}{% else %}{% trans "Dividido com" %}{% endif %}
-            {% for p in cur.people %}{% if cur.is_owner and not p.is_owner or not cur.is_owner and not p.is_me %}<span class="badge bg-body-secondary text-body border">{% blocktrans trimmed with name=p.person.person_name count used=p.used %}{{ name }} · {{ used }} usada{% plural %}{{ name }} · {{ used }} usadas{% endblocktrans %}</span> {% endif %}{% endfor %}
+            {% for p in cur.people %}{% if cur.is_owner and not p.is_owner or not cur.is_owner and not p.is_me %}<span class="ui-badge">{% blocktrans trimmed with name=p.person.person_name count used=p.used %}{{ name }} · {{ used }} usada{% plural %}{{ name }} · {{ used }} usadas{% endblocktrans %}</span> {% endif %}{% endfor %}
             <div class="text-muted">{% blocktrans trimmed %}O saldo é um só: quem marca primeiro usa primeiro. Cada aula de cada pessoa gasta uma aula.{% endblocktrans %}</div>
         </div>
         {% endif %}
@@ -128,7 +128,7 @@
                 <span>{{ row.package.name }}{% if row.shared %} <i class="bi bi-people" title="{% trans "Dividido" %}"></i>{% endif %} <span class="text-muted">{% blocktrans trimmed with used=row.used sessions=row.sessions %}· {{ used }}/{{ sessions }} aulas{% endblocktrans %}{% if row.starts_on %} · {{ row.starts_on|date:_('d/m/y') }}{% endif %}</span></span>
                 <span class="d-flex align-items-center gap-2">
                     {% if row.is_owner and row.state != 'cancelled' %}<a href="{% nav_url 'core:student_package_edit' student.pk row.package.pk %}" class="small" title="{% trans "Editar este pacote" %}"><i class="bi bi-pencil-square"></i><span class="visually-hidden">{% blocktrans trimmed with name=row.package.name %}Editar {{ name }}{% endblocktrans %}</span></a>{% endif %}
-                    <span class="badge bg-secondary">{{ row.label }}</span>
+                    <span class="ui-badge">{{ row.label }}</span>
                 </span>
             </li>
             {% endif %}{% endfor %}

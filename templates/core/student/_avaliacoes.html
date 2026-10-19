@@ -109,7 +109,7 @@
                 <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" class="card-img-top" alt="{% blocktrans trimmed with date=photo.date|date:_('d/m/Y') %}Foto de {{ date }}{% endblocktrans %}" style="aspect-ratio: 3/4; object-fit: cover;">
             </a>
             <div class="card-body py-1 small">
-                <div class="fw-bold">{{ photo.date|date:_('d/m/Y') }}{% if photo.uploaded_by_student %} <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" data-by-student title="{% trans "Enviada pelo aluno" %}"><i class="bi bi-person"></i></span>{% endif %}</div>
+                <div class="fw-bold">{{ photo.date|date:_('d/m/Y') }}{% if photo.uploaded_by_student %} <span class="ui-badge info" data-by-student title="{% trans "Enviada pelo aluno" %}"><i class="bi bi-person"></i></span>{% endif %}</div>
                 {% if photo.angle != 'other' %}<div class="text-muted">{{ photo.angle_label }}</div>{% endif %}
                 {% if photo.caption %}<div class="text-muted">{{ photo.caption }}</div>{% endif %}
             </div>

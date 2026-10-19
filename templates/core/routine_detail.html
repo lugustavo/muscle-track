@@ -31,7 +31,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
-                            <i class="bi bi-list-task text-primary" style="font-size: 2rem;"></i>
+                            <i class="bi bi-list-task text-brand" style="font-size: 2rem;"></i>
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <h6 class="text-muted mb-0 small">{% trans "Exercícios" %}</h6>
@@ -138,11 +138,11 @@
                             <strong class="text-muted">{% trans "Nível de dificuldade:" %}</strong>
                             <div class="mt-1">
                                 {% if routine.difficulty_level == 'iniciante' %}
-                                <span class="badge bg-success">{% trans "Iniciante" %}</span>
+                                <span class="ui-badge ok">{% trans "Iniciante" %}</span>
                                 {% elif routine.difficulty_level == 'intermediario' %}
-                                <span class="badge bg-warning">{% trans "Intermediário" %}</span>
+                                <span class="ui-badge warn">{% trans "Intermediário" %}</span>
                                 {% elif routine.difficulty_level == 'avancado' %}
-                                <span class="badge bg-danger">{% trans "Avançado" %}</span>
+                                <span class="ui-badge bad">{% trans "Avançado" %}</span>
                                 {% endif %}
                             </div>
                         </div>
@@ -183,7 +183,7 @@
                                 {% for routine_exercise in routine_exercises %}
                                 <tr>
                                     <td class="text-center">
-                                        <span class="badge bg-primary">{{ routine_exercise.order }}</span>
+                                        <span class="ui-badge brand">{{ routine_exercise.order }}</span>
                                     </td>
                                     <td>
                                         <a href="{% nav_url 'core:exercise_detail' routine_exercise.exercise.pk %}" class="text-decoration-none">
@@ -191,7 +191,7 @@
                                         </a>
                                     </td>
                                     <td>
-                                        <span class="badge bg-secondary">{{ routine_exercise.exercise.muscle_group.label }}</span>
+                                        <span class="ui-badge">{{ routine_exercise.exercise.muscle_group.label }}</span>
                                     </td>
                                     <td class="text-center">{{ routine_exercise.sets }}</td>
                                     <td class="text-center">{{ routine_exercise.reps }}</td>
@@ -272,9 +272,9 @@
                         <strong class="text-muted">{% trans "Estado:" %}</strong>
                         <div class="mt-1">
                             {% if routine.is_active %}
-                            <span class="badge bg-success">{% trans "Ativa" %}</span>
+                            <span class="ui-badge ok">{% trans "Ativa" %}</span>
                             {% else %}
-                            <span class="badge bg-secondary">{% trans "Inativa" %}</span>
+                            <span class="ui-badge">{% trans "Inativa" %}</span>
                             {% endif %}
                         </div>
                     </div>

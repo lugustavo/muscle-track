@@ -198,3 +198,40 @@ class StudentScreensLookTests(BaseTestCase):
         self.assertIn('.ui-tile', css)
         card = (ROOT / 'templates/core/_my_package_card.html').read_text()
         self.assertNotIn('border rounded py-2', card)
+
+
+class TrainerScreensLookTests(BaseTestCase):
+    def _done_session(self):
+        from core.models import WorkoutSession
+        return WorkoutSession.objects.create(person_routine=self.alice_routine, is_completed=True, duration_minutes=40)
+
+    def test_student_history_uses_tiles_and_a_session_list(self):
+        self._done_session()
+        self.login(self.trainer)
+        html = self.client.get(reverse('core:student_history', kwargs={'pk': self.alice.person.pk})).content.decode()
+        for marker in ('data-history-stats', 'ui-tile', 'data-history-list', 'ui-date', 'ui-badge ok'):
+            self.assertIn(marker, html)
+        self.assertNotIn('<table', html)
+
+    def test_student_history_without_sessions_has_an_empty_state(self):
+        self.login(self.trainer)
+        html = self.client.get(reverse('core:student_history', kwargs={'pk': self.alice.person.pk})).content.decode()
+        self.assertIn('data-empty', html)
+
+    def test_routine_progress_and_session_use_the_shared_look(self):
+        session = self._done_session()
+        self.login(self.trainer)
+        progress = self.client.get(reverse('core:person_routine_detail', kwargs={'pk': self.alice_routine.pk})).content.decode()
+        for marker in ('data-progress-stats', 'ui-tile', 'data-history-list'):
+            self.assertIn(marker, progress)
+        detail = self.client.get(reverse('core:session_detail', kwargs={'pk': session.pk})).content.decode()
+        self.assertIn('data-session-info', detail)
+        self.assertNotIn('card-header bg-primary', detail)
+
+    def test_trainer_templates_have_no_bootstrap_badges_or_primary_text(self):
+        import re
+        pattern = re.compile(r'class="[^"]*(?<![\w-])badge\b|(?<![\w-])badge bg-|\btext-primary\b')
+        for path in sorted((ROOT / 'templates/core').rglob('*.html')):
+            if path.name in ('landing.html', 'workout_execute.html'):   # mock preview / execution screen keep their own markup
+                continue
+            self.assertIsNone(pattern.search(path.read_text()), path.name)

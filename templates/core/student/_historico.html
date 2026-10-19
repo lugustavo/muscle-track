@@ -8,7 +8,7 @@
         <div class="card mb-2">
             <div class="card-body py-2">
                 <div class="d-flex justify-content-between flex-wrap">
-                    <span><span class="badge bg-body-secondary text-body border">{{ event.get_kind_display }}</span> {{ event.summary }}</span>
+                    <span><span class="ui-badge">{{ event.get_kind_display }}</span> {{ event.summary }}</span>
                     <small class="text-muted">{{ event.at|date:_('d/m/Y H:i') }}{% if event.actor %} · {{ event.actor.email }}{% endif %}</small>
                 </div>
                 {% if event.kind == 'profile_edit' and event.changes %}
@@ -40,11 +40,11 @@
                     <span>{{ label }}{% if required %} <small class="text-muted">{% trans "(obrigatório)" %}</small>{% endif %}
                         {% if record %}<br><small class="text-muted">{% blocktrans trimmed with at=record.at|date:_('d/m/Y') version=record.version get_source_display=record.get_source_display %}{{ at }} · texto {{ version }} · {{ get_source_display }}{% endblocktrans %}</small>{% endif %}
                     </span>
-                    {% if granted %}<span class="badge bg-success">{% trans "ok" %}</span>
-                    {% elif record and not record.granted %}<span class="badge bg-secondary">{% trans "retirado" %}</span>
-                    {% elif record %}<span class="badge bg-warning text-dark">{% trans "texto novo" %}</span>
-                    {% elif required %}<span class="badge bg-warning text-dark">{% trans "pendente" %}</span>
-                    {% else %}<span class="badge bg-secondary">{% trans "não autorizado" %}</span>{% endif %}
+                    {% if granted %}<span class="ui-badge ok">{% trans "ok" %}</span>
+                    {% elif record and not record.granted %}<span class="ui-badge">{% trans "retirado" %}</span>
+                    {% elif record %}<span class="ui-badge warn">{% trans "texto novo" %}</span>
+                    {% elif required %}<span class="ui-badge warn">{% trans "pendente" %}</span>
+                    {% else %}<span class="ui-badge">{% trans "não autorizado" %}</span>{% endif %}
                 </li>
                 {% endfor %}
             </ul>
