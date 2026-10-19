@@ -29,7 +29,7 @@ from django.views.decorators.http import require_POST, require_safe
 from allauth.account.models import EmailAddress
 
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, last_activity, trainer_dashboard
-from . import photo_guides, photo_positions, telegram, workout_offline
+from . import backup_status, photo_guides, photo_positions, telegram, workout_offline
 from .i18n import short_date
 from .listing import filter_tags, remember_view, view_mode as list_view_mode
 from .forms import (
@@ -82,6 +82,7 @@ def home(request):
         context['dashboard'] = trainer_dashboard()
         onboarding = trainer_steps(request.get_full_path())
         context['onboarding'] = None if onboarding['complete'] else onboarding
+        context['backup_problem'] = backup_status.problem()
     elif user.is_authenticated:
         person = Person.objects.filter(user=user).first()
         if person:

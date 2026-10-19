@@ -94,13 +94,29 @@ docker compose exec web python populate_db.py
 | Parar | `docker compose down` (os dados ficam nos volumes) |
 | Abrir um shell Django | `docker compose exec web python manage.py shell` |
 
-Os dados vivem em volumes do Docker: `pgdata` (banco), `media` (fotos e mídia dos exercícios) e `caddy_data` (certificados).
+Os dados vivem em volumes do Docker: `pgdata` (banco), `media` (fotos e mídia dos exercícios) e `caddy_data` (certificados). Os backups ficam na pasta `./backups`.
 
-> ⚠️ **Backup ainda não está automatizado** (está no backlog abaixo). Enquanto isso, o volume `pgdata` é a única cópia dos seus dados. Um backup manual rápido:
-> ```bash
-> docker compose exec -T db pg_dump -U muscle_track muscle_track > backup-$(date +%F).sql
-> docker run --rm -v muscle-track_media:/m -v "$PWD":/b alpine tar czf /b/media-$(date +%F).tgz -C /m .
-> ```
+### Backup
+
+O serviço `backup` (sobe junto com o resto) guarda **todo dia, depois das 3h** (`BACKUP_HOUR`, no fuso `TZ`), uma cópia do **banco** (`pg_dump`) e da pasta **`media`** (fotos de progresso, que são dados sensíveis) em `./backups` (`BACKUP_DIR`). Uma instalação nova ganha o primeiro backup em ~30 s. Cada backup é uma pasta `AAAA-MM-DD_HHMMSS` com `db.dump`, `media.tgz` e `SHA256SUMS`, montada à parte e só "publicada" no fim (um backup que falhou não deixa nada pela metade); o dump é conferido (`pg_restore --list`) na hora, e os arquivos ficam legíveis só pelo dono. **Retenção:** o mais novo de cada um dos últimos 7 dias + os últimos 4 domingos (`BACKUP_KEEP_DAILY`, `BACKUP_KEEP_WEEKLY`).
+
+Se o último backup falhar ou ficar velho (mais de 36 h, `BACKUP_MAX_AGE_HOURS`), a tela inicial da personal mostra um aviso vermelho. O resultado da última execução fica em `backups/status.json`.
+
+**Copie para fora do servidor.** Se o servidor for perdido, os backups que estão nele também são. Defina `BACKUP_RCLONE_REMOTE` (qualquer destino do [rclone](https://rclone.org): Backblaze B2, S3, Google Drive...) e o `.env` com as credenciais, no formato `RCLONE_CONFIG_<NOME>_...` (exemplo no `.env.example`); cada backup é enviado ao terminar, e os que saem da retenção também são removidos de lá. Se a cópia falhar, o backup local continua e a tela inicial avisa. Para guardar criptografado, use um remote `crypt` do rclone.
+
+| Tarefa | Comando |
+|---|---|
+| Backup agora | `docker compose exec backup backup.sh once` |
+| Ver os backups | `docker compose exec backup backup.sh list` |
+| Logs | `docker compose logs backup` |
+
+**Restaurar** (substitui o banco e a pasta `media` atuais; **ensaie numa cópia do sistema antes de precisar**):
+```bash
+docker compose stop web scheduler            # ninguém grava durante a restauração
+docker compose exec backup backup.sh restore latest      # ou o nome da pasta, ex.: 2026-10-19_030000
+docker compose start web scheduler
+```
+A restauração confere os `SHA256SUMS` antes de mexer em qualquer coisa. Num servidor novo: instale o app, copie o seu `.env` e a pasta `backups` (ou baixe do rclone para `./backups`), suba com `docker compose up -d --build`, e rode o comando acima. **Guarde o `.env` num lugar seguro** (sem o `SECRET_KEY` e a senha do banco não há como restaurar).
 
 ### Checklist pós-instalação
 - [ ] `https://SEU-DOMINIO` abre com cadeado e `http://` redireciona para `https://`
@@ -211,7 +227,7 @@ Cada botão só existe quando as duas chaves do provedor estão no `.env` (sem e
 - Nenhuma senha fixa; `SECRET_KEY` obrigatório
 
 ## Backlog
-- **Backup automático** (pg_dump diário + `media`, retenção e restauração testada; cópia fora do servidor) — a pasta `media` inclui as fotos de progresso, que são dados sensíveis
+- ~~**Backup automático**~~ *(feito: serviço `backup`, banco + `media` por dia, retenção 7 dias + 4 domingos, cópia fora do servidor via rclone, restauração com conferência e aviso na tela inicial da personal; ver "Backup" acima)*. Falta: backup criptografado por padrão e restauração com um clique pela tela.
 - ~~Configurar SMTP no servidor~~ *(feito: basta preencher `EMAIL_HOST_USER` e `EMAIL_HOST_PASSWORD` no `.env`; o "esqueci minha senha" também passa a chegar por e-mail)*
 - Revisar o texto da política de privacidade (`templates/core/privacy_policy.html`, é um modelo) com apoio jurídico; subir `CURRENT_VERSION` em `core/consent.py` quando o texto mudar
 - Cobrança automática com gateway (Pix/cartão)

@@ -33,11 +33,14 @@ services:
       - ${WEB_DNS_2:-8.8.8.8}
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-muscle_track}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-muscle_track}
+      BACKUP_STATUS_FILE: /backups/status.json
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - media:/app/media
+      # the result of the last backup (read only): the app warns the trainer when backups are old or failing
+      - ${BACKUP_DIR:-./backups}:/backups:ro
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
       interval: 30s
@@ -61,6 +64,26 @@ services:
         condition: service_healthy
     entrypoint: []
     command: ["sh", "-c", "while true; do python manage.py send_reminders || true; sleep 600; done"]
+
+  # Automatic backups: the database (pg_dump) and the media folder, once a day, kept in ./backups (BACKUP_DIR) with
+  # retention, and optionally copied off the server (BACKUP_RCLONE_REMOTE). Restore: see "Backup" in the README.
+  backup:
+    build: ./backup
+    image: muscle-track-backup
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER:-muscle_track}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB:-muscle_track}
+      TZ: ${TZ:-America/Sao_Paulo}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ${BACKUP_DIR:-./backups}:/backups
+      - media:/media
 
   caddy:
     image: caddy:2-alpine
