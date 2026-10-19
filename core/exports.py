@@ -98,6 +98,8 @@ def build_data(person, include_internal_notes):
         'history': [
             {'at': e.at, 'kind': e.kind, 'summary': e.summary, 'by': getattr(e.actor, 'email', '')}
             for e in person.events.select_related('actor')],
+        'notices': [{'at': n.created_at, 'read_at': n.read_at, 'title': n.title, 'text': n.body}
+                    for n in person.user.notices.all()],
     }
     if include_internal_notes:
         data['trainer_notes'] = [{'at': n.created_at, 'text': n.text} for n in person.trainer_notes.all()]

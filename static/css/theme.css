@@ -202,3 +202,13 @@ footer { background-color: var(--mt-nav-bg); color: white; padding: 1.5rem 0; ma
 @media (min-width: 1200px) { .page-title-lg { font-size: 2.5rem; } }
 @media (min-width: 768px) { .card-title-lg { font-size: calc(1.3rem + .6vw); } }
 @media (min-width: 1200px) { .card-title-lg { font-size: 1.75rem; } }
+
+/* Notice centre: the bell in the top bar (same look as the other icons there) and the unread marks */
+.notice-bell { position: relative; color: rgba(255, 255, 255, .75); }
+.notice-bell:hover, .notice-bell:focus { color: #fff; }
+.notice-bell .notice-count {
+    position: absolute; top: 0; right: -2px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px;
+    background: var(--bs-danger); color: #fff; font-size: .62rem; font-weight: 700; line-height: 16px; text-align: center;
+}
+.notice-dot { width: 10px; height: 10px; margin-top: .4rem; border-radius: 50%; background: var(--primary-color); }
+.notice-unread { background: color-mix(in srgb, var(--primary-color) 8%, transparent); }

@@ -46,6 +46,7 @@
             </a>
             <div class="d-flex align-items-center ms-auto ms-lg-2 order-lg-last me-2 me-lg-0">
                 {% if user.is_staff or user.is_superuser %}{% include 'includes/_search_box.html' %}{% endif %}
+                {% if user.is_authenticated %}{% include 'includes/_notice_bell.html' %}{% endif %}
                 {% include 'includes/_language_menu.html' %}
                 {% include 'includes/_theme_menu.html' %}
             </div>

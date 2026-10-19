@@ -1,4 +1,5 @@
-"""Notifications by e-mail and web push, only on the channels each person turned on (everything starts off).
+"""Notifications: always in the app's notice centre (core/inbox.py), and by e-mail, web push or Telegram only on the
+channels each person turned on (those start off).
 
 `notify(users, message)` is the single entry point; the senders never raise (a failed notification must not break
 the action that caused it) and every attempt is written to NotificationLog (kind and result, never the text).
@@ -23,7 +24,7 @@ from django.urls import reverse
 from django.utils import formats, timezone, translation
 from django.utils.translation import gettext as _, ngettext
 
-from . import telegram
+from . import inbox, telegram
 from .i18n import language_for, lazy_text
 from .models import NotificationLog, NotificationPreference, StudentEvent
 
@@ -273,7 +274,14 @@ def set_channel(user, person, pref, channel, enabled):
 
 def notify(users, message, sync=False):
     """Send `message` to each user on the channels they enabled (and for the kinds they want). Returns without
-    waiting when running async; `sync=True` (the reminders command) always sends inline."""
+    waiting when running async; `sync=True` (the reminders command) always sends inline.
+
+    The notice centre gets the message first, for everyone who wants that kind, whatever channels they have on."""
+    users = [u for u in users if u is not None]
+    try:
+        inbox.add(users, message)
+    except Exception:   # a notice that cannot be kept must not break the action that caused it
+        logger.exception('could not keep a notice')
     prefs = NotificationPreference.objects.filter(
         user__in=[u for u in users if u is not None], user__is_active=True).filter(
         Q(email_enabled=True) | Q(push_enabled=True) | Q(telegram_enabled=True))

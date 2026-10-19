@@ -5,7 +5,7 @@ from django.urls import NoReverseMatch, reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from . import packages
+from . import inbox, packages
 from .class_requests import pending_for_trainer
 from .models import Appointment, Person, StudentEvent
 from .navigation import with_next
@@ -157,6 +157,14 @@ def app_nav(request):
 
 
 APP_NAME = 'Muscle Track'
+
+
+def notice_bell(request):
+    """How many unread notices the signed-in person has (the number on the bell in the top bar)."""
+    user = getattr(request, 'user', None)
+    if user is None or not user.is_authenticated:
+        return {}
+    return {'notice_unread': inbox.unread_count(user)}
 
 
 def branding(request):

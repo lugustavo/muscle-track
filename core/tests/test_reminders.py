@@ -74,19 +74,24 @@ class ClassReminderTests(BaseTestCase):
             self.appointment(5 + len(status) / 100, status=status)
         self.assertEqual(self.run_classes(), 0)
 
-    def test_needs_a_channel_and_the_switch(self):
+    def test_no_channel_still_reminds_in_the_app_but_the_switch_is_respected(self):
         self.appointment(5)
         turn_on(self.alice, email_enabled=False, push_enabled=False)
-        self.assertEqual(self.run_classes(), 0)
-        turn_on(self.alice, notify_class_reminder=False)
-        self.assertEqual(self.run_classes(), 0)
+        self.assertEqual(self.run_classes(), 1)                      # the notice centre needs no channel
         self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(self.alice.notices.filter(kind='class_reminder').count(), 1)
+        self.appointment(6, notes='second')
+        turn_on(self.alice, notify_class_reminder=False)
+        self.assertEqual(self.run_classes(), 0)                      # that kind switched off: nothing at all
+        self.assertEqual(self.alice.notices.count(), 1)
         turn_on(self.alice, notify_class_reminder=True)
         self.assertEqual(self.run_classes(), 1)
 
-    def test_student_without_any_preference_is_ignored(self):
+    def test_student_without_any_preference_gets_it_in_the_app_only(self):
         Appointment.objects.create(person=self.bob.person, starts_at=starts(5))
-        self.assertEqual(self.run_classes(), 0)
+        self.assertEqual(self.run_classes(), 1)
+        self.assertEqual(self.bob.notices.count(), 1)
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_inactive_student_is_ignored(self):
         self.appointment(5)

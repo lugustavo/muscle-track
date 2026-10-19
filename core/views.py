@@ -29,7 +29,7 @@ from django.views.decorators.http import require_POST, require_safe
 from allauth.account.models import EmailAddress
 
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, last_activity, trainer_dashboard
-from . import backup_status, photo_guides, photo_positions, telegram, workout_offline
+from . import backup_status, inbox, photo_guides, photo_positions, telegram, workout_offline
 from .i18n import short_date
 from .listing import filter_tags, remember_view, view_mode as list_view_mode
 from .forms import (
@@ -94,6 +94,37 @@ def home(request):
     if not user.is_authenticated:
         return render(request, 'core/landing.html', context)
     return render(request, 'core/home.html', context)
+
+
+# ============= NOTICE CENTRE =============
+
+@login_required
+def notices(request):
+    """The bell: what the app told this person, newest first, unread ones marked."""
+    items = inbox.recent(request.user)
+    return render(request, 'core/notices.html', {
+        'notices': items, 'unread': sum(1 for n in items if n.read_at is None), 'kept_days': inbox.KEEP_DAYS,
+        'is_trainer': is_trainer(request.user),
+    })
+
+
+@login_required
+def notice_open(request, pk):
+    """Open a notice: mark it read and go where it leads (an address inside the app, never anywhere else)."""
+    notice = inbox.mark_read(request.user, pk)
+    if notice is None:
+        raise Http404
+    path = notice.path
+    if not path.startswith('/') or path.startswith('//'):
+        path = reverse('core:notices')
+    return redirect(path)
+
+
+@login_required
+@require_POST
+def notices_read_all(request):
+    inbox.mark_read(request.user)
+    return redirect('core:notices')
 
 
 # ============= SEARCH =============

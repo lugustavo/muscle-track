@@ -1237,6 +1237,26 @@ class NotificationLog(models.Model):
         ordering = ['-created_at', '-pk']
 
 
+class Notice(models.Model):
+    """One entry of a person's notice centre (the bell in the top bar): what the app told them, shown inside the app
+    whatever channels they turned on. Written in the language the person uses; holds the same short texts that go out by
+    push or e-mail (no health data, no amounts). Old ones are dropped (core/inbox.py)."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notices')
+    kind = models.CharField(max_length=30)
+    title = models.CharField(max_length=120)
+    body = models.CharField(max_length=400, blank=True)
+    path = models.CharField(max_length=200, blank=True)   # where it leads inside the app (an absolute path)
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at', '-pk']
+        indexes = [models.Index(fields=['user', 'read_at'])]
+
+    def __str__(self):
+        return f'{self.user_id} {self.kind}'
+
+
 class SheetLink(models.Model):
     """The private link to a student's workout sheet, read-only (core/sheet_link.py): the exercises of the routines in
     use, to read on any phone or print, with no login. One per student; no row = no link. Whoever has the link can read

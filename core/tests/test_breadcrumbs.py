@@ -19,7 +19,7 @@ LINK = re.compile(r'<a href="([^"]+)">(.*?)</a>', re.S)
 # Names that are not HTML pages (APIs, POST-only actions, files, PWA, probes)
 NOT_PAGES = {
     'calendar_feed', 'calendar_rotate', 'calendar_style',
-    'search_suggest',
+    'search_suggest', 'notice_open', 'notices_read_all',
     'month_rules',
     'api_exercises_list', 'api_routine_exercises', 'api_routines_list', 'assessment_delete', 'healthz',
     'note_add', 'note_delete', 'offline', 'person_routine_deactivate', 'photo_delete', 'photo_file',
