@@ -13,11 +13,23 @@
 <div id="workout" class="mx-auto" style="max-width: 720px;" data-workout-page
      data-csrf="{{ csrf_token }}"
      data-elapsed="{{ elapsed_seconds }}"
-     data-paused="{{ active_session.is_paused|yesno:'true,false' }}"
+     data-paused-seconds="{{ paused_seconds }}"
+     data-paused="{% if active_session %}{{ active_session.is_paused|yesno:'true,false' }}{% else %}false{% endif %}"
      data-stale-in="{{ stale_in_seconds }}"
      data-my-workouts-url="{% url 'core:my_workouts' %}"
+     data-routine="{{ person_routine.pk }}" data-routine-name="{{ person_routine.routine_name }}"
+     data-sync-url="{{ sync_url }}" data-rendered="{{ rendered_at }}"
+     data-execute-url="{% url 'core:workout_execute' person_routine.pk %}" data-draft-url="{% url 'core:workout_offline_start' person_routine.pk %}"
+     {% if active_session %}data-session="{{ active_session.pk }}"
      data-pause-url="{% url 'core:workout_pause' active_session.pk %}"
-     data-resume-url="{% url 'core:workout_resume' active_session.pk %}">
+     data-resume-url="{% url 'core:workout_resume' active_session.pk %}"{% else %}data-draft="true"{% endif %}>
+
+    {% if draft %}
+    <div class="alert alert-warning d-flex gap-2 align-items-start" role="status" data-draft-note>
+        <i class="bi bi-cloud-slash"></i>
+        <div>{% trans "Treino iniciado sem conexão. Tudo fica guardado neste aparelho e é enviado quando a internet voltar." %}</div>
+    </div>
+    {% endif %}
 
     <div class="card workout-header mb-3 shadow-sm">
         <div class="card-body py-2">
@@ -61,7 +73,7 @@
     <div id="queue">
     {% for e in exercises %}
     {% ifchanged e.complete %}{% if e.complete %}<div id="doneDivider" class="done-divider"><span>{% trans "Concluídos" %}</span></div>{% endif %}{% endifchanged %}
-    <div class="card mb-3 {% if e.complete %}border-success{% endif %}" data-exercise-card
+    <div class="card mb-3 {% if e.complete %}border-success{% endif %}" data-exercise-card data-prx="{{ e.prx.pk }}"
          data-order="{{ e.prx.order }}" data-name="{{ e.prx.exercise.exercise_name }}"
          data-rest="{{ e.prx.rest_seconds }}"
          data-record="{% if e.record is not None %}{{ e.record|unlocalize }}{% endif %}"
@@ -106,7 +118,7 @@
                     <span class="head text-center">{% trans "Reps" %}</span><span class="head text-center">{% trans "Feita" %}</span><span></span>
                 </div>
                 {% for s in e.sets %}
-                <div class="set-grid set-row mb-2" data-url="{% url 'core:workout_set_update' s.pk %}" data-done="{{ s.is_done|yesno:'true,false' }}">
+                <div class="set-grid set-row mb-2" {% if s.pk %}data-url="{% url 'core:workout_set_update' s.pk %}" {% endif %}data-n="{{ s.number }}" data-done="{{ s.is_done|yesno:'true,false' }}">
                     <span class="set-num">{{ s.number }}</span>
                     <div class="weight-cell">
                         <button type="button" class="btn btn-outline-secondary step-btn" data-step="-1" aria-label="{% blocktrans trimmed with n=s.number %}Diminuir a carga da série {{ n }}{% endblocktrans %}">−</button>
@@ -122,7 +134,7 @@
                 {% endfor %}
 
                 <textarea class="form-control form-control-sm mt-2 exercise-notes" rows="1" maxlength="1000"
-                          data-url="{% url 'core:workout_exercise_notes' e.log.pk %}"
+                          {% if e.log %}data-url="{% url 'core:workout_exercise_notes' e.log.pk %}"{% endif %}
                           placeholder="{% trans "Observação sobre este exercício (dor, ajuste, sensação...)" %}">{{ e.log.notes }}</textarea>
             </div>
         </div>
@@ -132,22 +144,37 @@
     {% endfor %}
     </div>
 
-    <form id="finishForm" method="post" action="{% url 'core:workout_end' active_session.pk %}" class="card mb-4">
+    <form id="finishForm" method="post" {% if active_session %}action="{% url 'core:workout_end' active_session.pk %}"{% endif %} class="card mb-4">
         {% csrf_token %}
         <div class="card-body">
             <label for="sessionNotes" class="form-label fw-bold">{% trans "Como foi o treino?" %}</label>
             <textarea id="sessionNotes" name="notes" class="form-control mb-2" rows="2" maxlength="2000"
-                      placeholder="{% trans "Cansaço, dores, o que mudou... (a personal vai ler)" %}">{{ active_session.notes }}</textarea>
+                      placeholder="{% trans "Cansaço, dores, o que mudou... (a personal vai ler)" %}">{{ active_session.notes|default:"" }}</textarea>
             <div id="finishHint" class="small text-muted mb-3"></div>
             <button type="submit" class="btn btn-success btn-lg w-100"><i class="bi bi-check-circle"></i> {% trans "Finalizar treino" %}</button>
         </div>
     </form>
 
+    {% if active_session %}
     <form method="post" action="{% url 'core:workout_discard' active_session.pk %}" class="text-center mb-5"
           onsubmit="return confirm('{% filter escapejs %}{% trans "Descartar este treino? Nada do que foi feito nele será guardado." %}{% endfilter %}');">
         {% csrf_token %}
         <button type="submit" class="btn btn-link text-danger btn-sm"><i class="bi bi-trash"></i> {% trans "Descartar treino" %}</button>
     </form>
+    {% else %}
+    <div class="text-center mb-5">
+        <button type="button" class="btn btn-link text-danger btn-sm" data-discard-draft><i class="bi bi-trash"></i> {% trans "Descartar treino" %}</button>
+    </div>
+    {% endif %}
+
+    <div id="offlineDone" class="card border-success mb-5 d-none" data-offline-done role="status">
+        <div class="card-body text-center">
+            <div class="fs-1 text-success"><i class="bi bi-cloud-check" aria-hidden="true"></i></div>
+            <h2 class="h5">{% trans "Treino guardado neste aparelho" %}</h2>
+            <p class="text-muted mb-3" data-offline-done-text>{% trans "Sem conexão agora. Vamos enviar assim que a internet voltar; pode fechar o app, nada se perde." %}</p>
+            <button type="button" class="btn btn-success" data-offline-send><i class="bi bi-cloud-arrow-up"></i> {% trans "Enviar agora" %}</button>
+        </div>
+    </div>
 </div>
 
 <div id="restBar" class="rest-bar d-none" role="timer" aria-live="off">

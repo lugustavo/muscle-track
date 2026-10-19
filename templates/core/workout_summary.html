@@ -5,7 +5,7 @@
 {% block title %}{% blocktrans trimmed %}Treino concluído - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<div class="mx-auto" style="max-width: 560px;">
+<div class="mx-auto" style="max-width: 560px;" data-workout-summary data-session="{{ session.pk }}">
     <div class="text-center mb-4">
         <span class="ui-ico xl"><i class="bi bi-check-lg" aria-hidden="true"></i></span>
         <h1 class="h3 mt-3 mb-1">{% trans "Treino concluído!" %}</h1>

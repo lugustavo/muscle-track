@@ -261,6 +261,7 @@ TRAILS = {
 NO_BREADCRUMB = {
     'home',                 # the root
     'workout_execute',      # focused workout screen (sticky header with the timer)
+    'workout_offline_start',  # the same screen, started with no connection
     'workout_summary',      # what you just did: a focused screen right after the workout
     'accept_invite',        # public invitation page
     'public_sheet',         # the student's read-only sheet link: a standalone page, no app navigation

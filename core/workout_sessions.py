@@ -40,13 +40,17 @@ def _has_content(session):
             or bool(session.notes.strip()) or session.exercise_logs.exclude(notes='').exists())
 
 
-def end_or_drop(session, now=None):
-    """Finish a running session at its last sign of life, or delete it when nothing was logged. 'closed'/'deleted'."""
+def end_or_drop(session, now=None, auto=False):
+    """Finish a running session at its last sign of life, or delete it when nothing was logged. 'closed'/'deleted'.
+    `auto`: it was idle (not the student's choice), so a device that was offline can still reopen it."""
     now = now or timezone.now()
     if not _has_content(session):
         session.delete()
         return 'deleted'
     session.end_session(at=min(now, last_activity(session)))
+    if auto:
+        WorkoutSession.objects.filter(pk=session.pk).update(auto_closed=True)
+        session.auto_closed = True
     return 'closed'
 
 
@@ -56,7 +60,7 @@ def close_if_stale(session, now=None):
         return False
     if not is_stale(session, now):
         return False
-    end_or_drop(session, now)
+    end_or_drop(session, now, auto=True)
     return True
 
 

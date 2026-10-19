@@ -162,7 +162,7 @@
     </nav>
 
     <!-- Offline notice (static/js/pwa.js shows it while the device has no connection) -->
-    <div class="offline-banner d-none" role="status" data-offline-banner>
+    <div class="offline-banner d-none" role="status" data-offline-banner{% if user.is_authenticated and not user.is_staff and not user.is_superuser %} data-student-app{% endif %}>
         <i class="bi bi-wifi-off"></i> <span data-offline-text>{% trans "Sem conexão. Algumas telas só abrem quando a internet voltar." %}</span>
     </div>
 
@@ -209,6 +209,7 @@
     </script>
 
     <script src="{% static 'js/pwa.js' %}"></script>
+    {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}<script src="{% static 'js/workout_offline.js' %}"></script>{% endif %}
     {% if user.is_staff or user.is_superuser %}<script src="{% static 'js/search.js' %}"></script>{% endif %}
     {% block extra_js %}{% endblock %}
 </body>
