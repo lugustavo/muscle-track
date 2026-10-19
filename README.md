@@ -81,7 +81,7 @@ Opcional — grupos musculares, exercícios e treinos modelo prontos:
 docker compose exec web python populate_db.py
 ```
 
-(`populate_db.py --demo` cria também alunos de exemplo; **não use em produção**.)
+(`populate_db.py --demo` cria também um estúdio de exemplo, **não use em produção**: 8 pacotes, 44 exercícios, 8 treinos modelo e 18 alunos que cobrem cada situação do sistema — pacote vencendo, vencido com aulas sobrando, congelado, compartilhado por três, pagamento parcial e a mais (devolução), cancelado com devolução, pedido de remarcação e de cancelamento, aluno pausado, ex-aluno, experimental, sem app, convite pendente, pedido de exclusão, horário mensal, reposição, avaliações com fotos, treino em andamento e comentários. As datas são relativas a hoje, então a demo sempre parece "viva". Se ainda não houver uma personal, cria `personal@example.com`; a senha vem de `DEMO_PASSWORD` ou é gerada e exibida uma vez. A lista completa dos casos está no topo de `core/demo_data.py`.)
 
 ### Operação do dia a dia
 
@@ -142,7 +142,7 @@ pip install -r requirements.txt
 cp .env.example .env            # deixe DOMAIN vazio e defina DEBUG=True (usa SQLite)
 python manage.py migrate
 python manage.py createsuperuser
-python populate_db.py           # opcional
+python populate_db.py           # opcional (--demo: estúdio de exemplo com 18 alunos)
 python manage.py runserver
 python manage.py test           # suíte de testes
 ```
