@@ -16,7 +16,7 @@
         <div class="small mt-2" data-package-people>
             <i class="bi bi-people"></i> {% trans "Pacote dividido." %}
             {% for q in p.people %}{% if q.is_me %}{% blocktrans trimmed with used=q.used %}Você usou {{ used }}.{% endblocktrans %}{% endif %}{% endfor %}
-            {% for q in p.people %}{% if not q.is_me %}<span class="badge bg-body-secondary text-body border">{% blocktrans trimmed with name=q.name count used=q.used %}{{ name }} · {{ used }} usada{% plural %}{{ name }} · {{ used }} usadas{% endblocktrans %}</span> {% endif %}{% endfor %}
+            {% for q in p.people %}{% if not q.is_me %}<span class="ui-badge">{% blocktrans trimmed with name=q.name count used=q.used %}{{ name }} · {{ used }} usada{% plural %}{{ name }} · {{ used }} usadas{% endblocktrans %}</span> {% endif %}{% endfor %}
             <div class="text-muted">{% trans "O saldo é um só: quem marca primeiro usa primeiro." %}</div>
         </div>
         {% endif %}

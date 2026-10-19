@@ -64,7 +64,7 @@
             <div><a href="{% nav_url 'core:student_detail' r.appointment.person.pk %}" class="fw-bold text-decoration-none">{{ r.appointment.person.person_name }}</a>
                 {% blocktrans trimmed with starts_at=r.appointment.starts_at|date:_("D, d/m \à\s H:i") %}· aula de {{ starts_at }}{% endblocktrans %}</div>
             <div class="small">
-                {% if r.kind == 'cancel' %}<span class="badge bg-secondary">{% trans "Quer cancelar" %}</span>{% else %}<span class="badge bg-primary">{% trans "Quer remarcar" %}</span> {% blocktrans trimmed with proposed_starts_at=r.proposed_starts_at|date:_("D, d/m \à\s H:i") %}para <strong>{{ proposed_starts_at }}</strong>{% endblocktrans %}{% endif %}
+                {% if r.kind == 'cancel' %}<span class="ui-badge">{% trans "Quer cancelar" %}</span>{% else %}<span class="ui-badge brand">{% trans "Quer remarcar" %}</span> {% blocktrans trimmed with proposed_starts_at=r.proposed_starts_at|date:_("D, d/m \à\s H:i") %}para <strong>{{ proposed_starts_at }}</strong>{% endblocktrans %}{% endif %}
                 {% if r.message %}<em class="text-muted">“{{ r.message }}”</em>{% endif %}
             </div>
             <form method="post" action="{% url 'core:appointment_request_decide' r.pk %}" class="d-flex flex-wrap gap-2 mt-2">
@@ -140,7 +140,7 @@
            class="month-cell {% if not cell.in_month %}out{% endif %} {% if cell.is_today %}today{% endif %}"
            aria-label="{% blocktrans trimmed count n=cell.live with day=cell.date|date:_('j \d\e F')|lower %}{{ day }}: {{ n }} aula{% plural %}{{ day }}: {{ n }} aulas{% endblocktrans %}">
             <span class="num">{{ cell.date|date:"j" }}</span>
-            {% if cell.live %}<span class="badge bg-primary month-count d-md-none">{{ cell.live }}</span>{% endif %}
+            {% if cell.live %}<span class="ui-badge brand month-count d-md-none">{{ cell.live }}</span>{% endif %}
             {% if cell.conflict %}<i class="bi bi-exclamation-triangle text-warning-emphasis small" title="{% trans "Aulas sobrepostas" %}"></i>{% endif %}
             <span class="d-none d-md-block">
                 {% for a in cell.items|slice:":3" %}<span class="month-chip s-{{ a.status }}"
@@ -159,7 +159,7 @@
     <h2 class="h6 text-uppercase text-muted mb-2">{% blocktrans trimmed with month=month|date:"F"|lower %}Próximas aulas de {{ month }}{% endblocktrans %}</h2>
     {% for day in month_days %}
     <section class="mb-3" data-month-day="{{ day.date|date:'Y-m-d' }}">
-        <h3 class="small fw-bold mb-1 {% if day.is_today %}text-primary{% else %}text-muted{% endif %}">
+        <h3 class="small fw-bold mb-1 {% if day.is_today %}text-brand{% else %}text-muted{% endif %}">
             <a href="{% url 'core:agenda' %}?vista=dia&dia={{ day.date|date:'Y-m-d' }}" class="text-reset text-decoration-none">{{ day.weekday }}, {{ day.date|date:_("j \d\e F")|lower }}{% if day.is_today %} {% trans "· hoje" %}{% endif %}</a>
         </h3>
         <div class="list-group list-group-flush rounded border">
@@ -168,7 +168,7 @@
                 <span class="fw-bold text-nowrap" style="min-width: 3rem;">{{ a.starts_at|time:"H:i" }}</span>
                 <span class="status-dot rounded-circle flex-shrink-0 {% if a.status == 'attended' %}bg-success{% elif a.status == 'missed' %}bg-danger{% elif a.status == 'cancelled' or a.status == 'rescheduled' %}bg-secondary{% else %}bg-primary{% endif %}" style="width: .6rem; height: .6rem;"></span>
                 <a href="{% nav_url 'core:student_detail' a.person_id %}#tab-agenda" class="flex-grow-1 text-reset text-truncate {% if a.status == 'cancelled' or a.status == 'rescheduled' %}text-decoration-line-through{% endif %}" title="{% blocktrans trimmed with name=a.person.person_name %}Abrir a agenda de {{ name }}{% endblocktrans %}">{{ a.person.person_name }}</a>
-                {% if a.status != 'scheduled' %}<span class="badge bg-body-secondary text-body border">{{ a.get_status_display }}</span>{% endif %}
+                {% if a.status != 'scheduled' %}<span class="ui-badge">{{ a.get_status_display }}</span>{% endif %}
                 <span class="small text-muted d-none d-sm-inline">{% blocktrans trimmed with duration_minutes=a.duration_minutes %}{{ duration_minutes }} min{% endblocktrans %}</span>
             </div>
             {% endfor %}
@@ -183,7 +183,7 @@
 <div data-agenda-view="{{ view }}">
     {% for day in days %}
     <section class="mb-4" data-agenda-day="{{ day.date|date:'Y-m-d' }}">
-        <h2 class="h6 text-uppercase text-muted mb-2 {% if day.is_today %}text-primary{% endif %}">
+        <h2 class="h6 text-uppercase text-muted mb-2 {% if day.is_today %}text-brand{% endif %}">
             {{ day.weekday }}, {{ day.date|date:_("j \d\e F")|lower }}{% if day.is_today %} {% trans "· hoje" %}{% endif %}
         </h2>
         <div class="row g-2">

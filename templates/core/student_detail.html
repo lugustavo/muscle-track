@@ -12,16 +12,16 @@
         <div class="min-w-0">
             <h1>{{ student.person_name }}</h1>
             <div class="ui-badges">
-                <span class="badge {% if student.status == 'active' %}bg-success{% elif student.status == 'trial' %}bg-info text-dark{% elif student.status == 'paused' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ student.get_status_display }}</span>
+                <span class="ui-badge {% if student.status == 'active' %}ok{% elif student.status == 'trial' %}info{% elif student.status == 'paused' %}warn{% else %}{% endif %}">{{ student.get_status_display }}</span>
                 {% if not has_consent %}
-                    <span class="badge bg-warning text-dark" title="{% trans "Ainda não aceitou os termos de uso e de dados de saúde" %}"><i class="bi bi-shield-exclamation"></i> {% trans "Sem consentimento" %}</span>
+                    <span class="ui-badge warn" title="{% trans "Ainda não aceitou os termos de uso e de dados de saúde" %}"><i class="bi bi-shield-exclamation"></i> {% trans "Sem consentimento" %}</span>
                 {% endif %}
                 {% if erasure_requested %}
-                    <span class="badge bg-danger" title="{% trans "O aluno pediu a exclusão dos próprios dados" %}"><i class="bi bi-trash"></i> {% trans "Pediu exclusão" %}</span>
+                    <span class="ui-badge bad" title="{% trans "O aluno pediu a exclusão dos próprios dados" %}"><i class="bi bi-trash"></i> {% trans "Pediu exclusão" %}</span>
                 {% endif %}
                 {% include 'core/student/_app_badges.html' %}
                 {% if student.has_app and not student.user.has_usable_password %}
-                    <span class="badge bg-warning text-dark" title="{% trans "O aluno ainda não criou a senha" %}"><i class="bi bi-hourglass-split"></i> {% trans "Convite pendente" %}</span>
+                    <span class="ui-badge warn" title="{% trans "O aluno ainda não criou a senha" %}"><i class="bi bi-hourglass-split"></i> {% trans "Convite pendente" %}</span>
                 {% endif %}
             </div>
         </div>
@@ -74,7 +74,7 @@
         <div class="card text-center stat-tile h-100">
             <div class="card-body">
                 <div class="stat-top">
-                    <i class="bi bi-calendar-check fs-1 text-primary"></i>
+                    <i class="bi bi-calendar-check fs-1 text-brand"></i>
                     <h3 class="mt-2">{{ total_sessions }}</h3>
                 </div>
                 <p class="text-muted mb-0"><span class="d-none d-md-inline">{% trans "Sessões completadas" %}</span><span class="d-md-none">{% trans "Sessões" %}</span></p>
@@ -133,11 +133,11 @@
 <ul class="nav nav-tabs mb-4 tabs-sticky hide-scrollbar" id="studentTabs" role="tablist">
     <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-treinos" type="button" role="tab"><i class="bi bi-lightning-charge"></i> {% trans "Treinos" %}</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-ficha" type="button" role="tab"><i class="bi bi-person-vcard"></i> {% trans "Ficha" %}</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-avaliacoes" type="button" role="tab"><i class="bi bi-rulers"></i> {% trans "Avaliações" %} <span class="badge bg-secondary">{{ assessments|length }}</span>{% if photo_count %} <i class="bi bi-camera text-muted" title="{% blocktrans trimmed count n=photo_count %}{{ n }} foto{% plural %}{{ n }} fotos{% endblocktrans %}"></i>{% endif %}</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-avaliacoes" type="button" role="tab"><i class="bi bi-rulers"></i> {% trans "Avaliações" %} <span class="ui-badge">{{ assessments|length }}</span>{% if photo_count %} <i class="bi bi-camera text-muted" title="{% blocktrans trimmed count n=photo_count %}{{ n }} foto{% plural %}{{ n }} fotos{% endblocktrans %}"></i>{% endif %}</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-agenda" type="button" role="tab"><i class="bi bi-calendar-week"></i> {% trans "Agenda" %}</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pagamentos" type="button" role="tab"><i class="bi bi-cash-coin"></i> {% trans "Pagamentos" %} <span class="badge bg-secondary">{{ payments|length }}</span></button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pagamentos" type="button" role="tab"><i class="bi bi-cash-coin"></i> {% trans "Pagamentos" %} <span class="ui-badge">{{ payments|length }}</span></button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-historico" type="button" role="tab"><i class="bi bi-clock-history"></i> {% trans "Histórico" %}</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-notas" type="button" role="tab"><i class="bi bi-journal-text"></i> {% trans "Anotações" %} <span class="badge bg-secondary">{{ notes|length }}</span></button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-notas" type="button" role="tab"><i class="bi bi-journal-text"></i> {% trans "Anotações" %} <span class="ui-badge">{{ notes|length }}</span></button></li>
 </ul>
 
 <div class="tab-content">
@@ -188,9 +188,9 @@
                                 </div>
                             </div>
                             <div class="d-flex flex-wrap gap-2">
-                                <span class="badge bg-info">{% blocktrans trimmed count exercise_count=item.exercise_count %}{{ exercise_count }} exercício{% plural %}{{ exercise_count }} exercícios{% endblocktrans %}</span>
-                                <span class="badge bg-success">{% blocktrans trimmed count sessions_count=item.sessions_count %}{{ sessions_count }} sessões completas{% plural %}{{ sessions_count }} sessões completas{% endblocktrans %}</span>
-                                <span class="badge bg-secondary">{{ item.person_routine.get_difficulty_level_display }}</span>
+                                <span class="ui-badge info">{% blocktrans trimmed count exercise_count=item.exercise_count %}{{ exercise_count }} exercício{% plural %}{{ exercise_count }} exercícios{% endblocktrans %}</span>
+                                <span class="ui-badge ok">{% blocktrans trimmed count sessions_count=item.sessions_count %}{{ sessions_count }} sessões completas{% plural %}{{ sessions_count }} sessões completas{% endblocktrans %}</span>
+                                <span class="ui-badge">{{ item.person_routine.get_difficulty_level_display }}</span>
                             </div>
                         </div>
                         {% endfor %}

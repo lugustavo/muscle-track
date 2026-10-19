@@ -7,7 +7,7 @@
     <div class="card-body p-2">
         <div class="d-flex justify-content-between">
             <strong>{{ a.starts_at|time:"H:i" }}</strong>
-            <span class="badge {% if a.status == 'attended' %}bg-success{% elif a.status == 'missed' %}bg-danger{% elif a.status == 'scheduled' %}bg-body-secondary text-body border{% else %}bg-secondary{% endif %}">{{ a.get_status_display }}</span>
+            <span class="ui-badge {% if a.status == 'attended' %}ok{% elif a.status == 'missed' %}bad{% elif a.status == 'scheduled' %}{% else %}{% endif %}">{{ a.get_status_display }}</span>
         </div>
         <a href="{% nav_url 'core:student_detail' a.person.pk %}" class="text-decoration-none d-block text-truncate">{{ a.person.person_name }}</a>
         <small class="text-muted">{% blocktrans trimmed with get_kind_display=a.get_kind_display duration_minutes=a.duration_minutes %}{{ get_kind_display }} · {{ duration_minutes }} min{% endblocktrans %}</small>
@@ -17,8 +17,8 @@
         {% if a.status == 'cancelled' or a.status == 'missed' %}
         <form method="post" action="{% nav_url 'core:appointment_counts' a.pk %}" class="small mt-1" data-package-count>
             {% csrf_token %}
-            {% if a.counts_against_package %}<span class="badge bg-warning text-dark">{% trans "desconta do pacote" %}</span> <button name="counts" value="no" class="btn btn-link btn-sm p-0 align-baseline">{% trans "Não descontar" %}</button>
-            {% else %}<span class="badge bg-body-secondary text-body border">{% trans "não desconta" %}</span> <button name="counts" value="yes" class="btn btn-link btn-sm p-0 align-baseline">{% trans "Descontar" %}</button>{% endif %}
+            {% if a.counts_against_package %}<span class="ui-badge warn">{% trans "desconta do pacote" %}</span> <button name="counts" value="no" class="btn btn-link btn-sm p-0 align-baseline">{% trans "Não descontar" %}</button>
+            {% else %}<span class="ui-badge">{% trans "não desconta" %}</span> <button name="counts" value="yes" class="btn btn-link btn-sm p-0 align-baseline">{% trans "Descontar" %}</button>{% endif %}
         </form>
         {% endif %}
         {% if a.status != 'rescheduled' %}

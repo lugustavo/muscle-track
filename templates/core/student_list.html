@@ -55,10 +55,10 @@
             <span class="meta">
                 <span class="name d-block text-truncate">{{ student.person_name }}</span>
                 <span class="d-block">
-                    <span class="badge {% if student.status == 'active' %}bg-success{% elif student.status == 'trial' %}bg-info text-dark{% elif student.status == 'paused' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ student.get_status_display }}</span>
+                    <span class="ui-badge {% if student.status == 'active' %}ok{% elif student.status == 'trial' %}info{% elif student.status == 'paused' %}warn{% else %}{% endif %}">{{ student.get_status_display }}</span>
                     {% include 'core/student/_app_badges.html' %}
-                    {% if student.plan_status == 'expired' %}<span class="badge bg-danger">{% trans "pacote vencido" %}</span>
-                    {% elif student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark">{% blocktrans trimmed with days_to_plan_expiry=student.days_to_plan_expiry %}vence em {{ days_to_plan_expiry }}d{% endblocktrans %}</span>{% endif %}
+                    {% if student.plan_status == 'expired' %}<span class="ui-badge bad">{% trans "pacote vencido" %}</span>
+                    {% elif student.plan_status == 'expiring' %}<span class="ui-badge warn">{% blocktrans trimmed with days_to_plan_expiry=student.days_to_plan_expiry %}vence em {{ days_to_plan_expiry }}d{% endblocktrans %}</span>{% endif %}
                 </span>
                 <small class="text-muted">{% if student.phone %}{{ student.phone }}{% else %}{{ student.user.email }}{% endif %}</small>
                 <small class="text-muted">{% if not student.has_app %}{% if student.last_workout_at %}{% blocktrans trimmed with last_workout_at=student.last_workout_at|timesince count total_workouts=student.total_workouts %}{{ total_workouts }} aula · última há {{ last_workout_at }}{% plural %}{{ total_workouts }} aulas · última há {{ last_workout_at }}{% endblocktrans %}{% else %}{% trans "Nenhuma aula ainda" %}{% endif %}
@@ -92,10 +92,10 @@
                             <small class="text-muted">{% blocktrans trimmed with id=student.id %}ID: #{{ id }}{% endblocktrans %}</small>
                         </div>
                         <div>
-                            <span class="badge {% if student.status == 'active' %}bg-success{% elif student.status == 'trial' %}bg-info text-dark{% elif student.status == 'paused' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ student.get_status_display }}</span>
+                            <span class="ui-badge {% if student.status == 'active' %}ok{% elif student.status == 'trial' %}info{% elif student.status == 'paused' %}warn{% else %}{% endif %}">{{ student.get_status_display }}</span>
                             {% include 'core/student/_app_badges.html' %}
-                            {% if student.plan_status == 'expired' %}<span class="badge bg-danger" title="{% blocktrans trimmed with date=student.plan_expires_on|date:_('d/m/Y') %}Pacote vencido em {{ date }}{% endblocktrans %}">{% trans "pacote vencido" %}</span>
-                            {% elif student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark" title="{% blocktrans trimmed with date=student.plan_expires_on|date:_('d/m/Y') %}Vence em {{ date }}{% endblocktrans %}">{% blocktrans trimmed with days_to_plan_expiry=student.days_to_plan_expiry %}pacote vence em {{ days_to_plan_expiry }}d{% endblocktrans %}</span>{% endif %}
+                            {% if student.plan_status == 'expired' %}<span class="ui-badge bad" title="{% blocktrans trimmed with date=student.plan_expires_on|date:_('d/m/Y') %}Pacote vencido em {{ date }}{% endblocktrans %}">{% trans "pacote vencido" %}</span>
+                            {% elif student.plan_status == 'expiring' %}<span class="ui-badge warn" title="{% blocktrans trimmed with date=student.plan_expires_on|date:_('d/m/Y') %}Vence em {{ date }}{% endblocktrans %}">{% blocktrans trimmed with days_to_plan_expiry=student.days_to_plan_expiry %}pacote vence em {{ days_to_plan_expiry }}d{% endblocktrans %}</span>{% endif %}
                         </div>
                     </div>
 
@@ -121,7 +121,7 @@
                     <div class="border-top pt-3">
                         <div class="row text-center">
                             <div class="col-6 border-end">
-                                <div class="text-primary fw-bold">{{ student.total_workouts }}</div>
+                                <div class="text-brand fw-bold">{{ student.total_workouts }}</div>
                                 <small class="text-muted">{% if student.has_app %}{% trans "Treinos" %}{% else %}{% trans "Aulas" %}{% endif %}</small>
                             </div>
                             <div class="col-6">
@@ -205,7 +205,7 @@
                             {% endif %}
                         </td>
                         <td class="text-center">
-                            <span class="badge bg-primary">{{ student.total_workouts }}</span>
+                            <span class="ui-badge brand">{{ student.total_workouts }}</span>
                         </td>
                         <td>
                             {% if student.last_workout_at %}
@@ -218,10 +218,10 @@
                             {% endif %}
                         </td>
                         <td class="text-center">
-                            <span class="badge {% if student.status == 'active' %}bg-success{% elif student.status == 'trial' %}bg-info text-dark{% elif student.status == 'paused' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ student.get_status_display }}</span>
+                            <span class="ui-badge {% if student.status == 'active' %}ok{% elif student.status == 'trial' %}info{% elif student.status == 'paused' %}warn{% else %}{% endif %}">{{ student.get_status_display }}</span>
                             {% include 'core/student/_app_badges.html' %}
-                            {% if student.plan_status == 'expired' %}<span class="badge bg-danger" title="{% blocktrans trimmed with date=student.plan_expires_on|date:_('d/m/Y') %}Pacote vencido em {{ date }}{% endblocktrans %}">{% trans "pacote vencido" %}</span>
-                            {% elif student.plan_status == 'expiring' %}<span class="badge bg-warning text-dark" title="{% blocktrans trimmed with date=student.plan_expires_on|date:_('d/m/Y') %}Vence em {{ date }}{% endblocktrans %}">{% blocktrans trimmed with days_to_plan_expiry=student.days_to_plan_expiry %}pacote vence em {{ days_to_plan_expiry }}d{% endblocktrans %}</span>{% endif %}
+                            {% if student.plan_status == 'expired' %}<span class="ui-badge bad" title="{% blocktrans trimmed with date=student.plan_expires_on|date:_('d/m/Y') %}Pacote vencido em {{ date }}{% endblocktrans %}">{% trans "pacote vencido" %}</span>
+                            {% elif student.plan_status == 'expiring' %}<span class="ui-badge warn" title="{% blocktrans trimmed with date=student.plan_expires_on|date:_('d/m/Y') %}Vence em {{ date }}{% endblocktrans %}">{% blocktrans trimmed with days_to_plan_expiry=student.days_to_plan_expiry %}pacote vence em {{ days_to_plan_expiry }}d{% endblocktrans %}</span>{% endif %}
                         </td>
                         <td class="text-center">
                             <a href="{% nav_url 'core:student_detail' student.pk %}" class="btn btn-sm btn-outline-primary" title="{% trans "Ver detalhes" %}">

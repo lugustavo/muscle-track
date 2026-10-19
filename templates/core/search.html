@@ -39,7 +39,7 @@
     <div class="card mb-3">
         <div class="card-header d-flex justify-content-between align-items-center">
             <strong><i class="bi {{ group.icon }}"></i> {{ group.label }}</strong>
-            <span class="badge bg-secondary">{{ group.total }}</span>
+            <span class="ui-badge">{{ group.total }}</span>
         </div>
         <div class="list-group list-group-flush">
             {% for item in group.items %}
@@ -48,7 +48,7 @@
                     <span class="d-block fw-semibold text-truncate">{{ item.title }}</span>
                     {% if item.subtitle %}<small class="text-muted d-block text-truncate">{{ item.subtitle }}</small>{% endif %}
                 </span>
-                {% if item.badge %}<span class="badge bg-body-secondary text-body border flex-shrink-0">{{ item.badge }}</span>{% endif %}
+                {% if item.badge %}<span class="ui-badge flex-shrink-0">{{ item.badge }}</span>{% endif %}
             </a>
             {% endfor %}
         </div>

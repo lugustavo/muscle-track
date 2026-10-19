@@ -20,11 +20,11 @@
                 <span {% if row.state != 'new' %}class="text-decoration-line-through"{% endif %}>{{ row.date|date:_('D d/m') }}{% if start_time %} · {{ start_time|time:"H:i" }}{% endif %}</span>
             </label>
             <span class="text-end">
-                {% if row.state == 'exists' %}<span class="badge bg-secondary">{% trans "já tem aula" %}</span>{% endif %}
-                {% if row.state == 'skipped' %}<span class="badge bg-secondary">{% trans "sem aula" %}</span>{% endif %}
-                {% if row.state == 'holiday' or row.kept %}<span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" title="{% trans "Feriado: sem aula (marque para dar aula mesmo assim)" %}"><i class="bi bi-flag"></i> {{ row.holiday }}</span>{% endif %}
-                {% if row.beyond %}<span class="badge bg-warning text-dark" title="{% trans "Depois da validade do pacote" %}">{% trans "depois da validade" %}</span>{% endif %}
-                {% if row.overlap %}<span class="badge bg-warning text-dark" title="{% blocktrans trimmed with overlap=row.overlap|join:', ' %}Sobrepõe a aula de {{ overlap }}{% endblocktrans %}">{% blocktrans trimmed with overlap=row.overlap|join:", " %}sobrepõe {{ overlap }}{% endblocktrans %}</span>{% endif %}
+                {% if row.state == 'exists' %}<span class="ui-badge">{% trans "já tem aula" %}</span>{% endif %}
+                {% if row.state == 'skipped' %}<span class="ui-badge">{% trans "sem aula" %}</span>{% endif %}
+                {% if row.state == 'holiday' or row.kept %}<span class="ui-badge info" title="{% trans "Feriado: sem aula (marque para dar aula mesmo assim)" %}"><i class="bi bi-flag"></i> {{ row.holiday }}</span>{% endif %}
+                {% if row.beyond %}<span class="ui-badge warn" title="{% trans "Depois da validade do pacote" %}">{% trans "depois da validade" %}</span>{% endif %}
+                {% if row.overlap %}<span class="ui-badge warn" title="{% blocktrans trimmed with overlap=row.overlap|join:', ' %}Sobrepõe a aula de {{ overlap }}{% endblocktrans %}">{% blocktrans trimmed with overlap=row.overlap|join:", " %}sobrepõe {{ overlap }}{% endblocktrans %}</span>{% endif %}
             </span>
         </li>
         {% endfor %}

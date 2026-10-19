@@ -88,12 +88,12 @@ class MotivationScreenTests(BaseTestCase):
 
     def test_ring_streak_and_milestone_on_hoje(self):
         Person.objects.filter(pk=self.person.pk).update(weekly_goal=2)
-        now = timezone.now()
-        monday = now.date() - timedelta(days=now.date().weekday())
+        today = timezone.localdate()
+        monday = today - timedelta(days=today.weekday())
         for week in (1, 2):
             for day in (0, 2):
                 finish(self.alice_routine, at(monday - timedelta(weeks=week) + timedelta(days=day)))
-        finish(self.alice_routine, at(monday))      # one this week
+        finish(self.alice_routine, at(monday, hour=0))      # one this week (midnight, so it is never in the future)
         html = self.client.get(self.url).content.decode()
         self.assertIn('data-motivation', html)
         self.assertIn('Meta da semana: 1 de 2 treinos', html)
@@ -190,8 +190,8 @@ class SummaryCelebrationTests(BaseTestCase):
 
     def test_the_workout_that_reaches_the_weekly_goal(self):
         Person.objects.filter(pk=self.alice.person.pk).update(weekly_goal=2)
-        now = timezone.now()
-        monday = now.date() - timedelta(days=now.date().weekday())
+        today = timezone.localdate()
+        monday = today - timedelta(days=today.weekday())
         first = finish(self.alice_routine, at(monday, 7))
         second = finish(self.alice_routine, at(monday, 18))
         self.assertNotIn('Meta da semana batida', self.summary(first))

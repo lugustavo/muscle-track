@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-18 19:26-0300\n"
+"POT-Creation-Date: 2026-10-18 22:05-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -5111,7 +5111,6 @@ msgstr "My workout history"
 msgid "Total de treinos"
 msgstr "Total workouts"
 
-#| msgid "Treinos no último mês"
 msgid "Treinos por semana (últimas 4)"
 msgstr "Workouts per week (last 4)"
 
@@ -5764,15 +5763,6 @@ msgstr "Session history"
 msgid "%(count)s sessões"
 msgstr "%(count)s sessions"
 
-msgid "Duração"
-msgstr "Duration"
-
-msgid "Status"
-msgstr "Status"
-
-msgid "Ações"
-msgstr "Actions"
-
 msgid "Ver detalhes"
 msgstr "View details"
 
@@ -6310,6 +6300,9 @@ msgstr "(within expected range)"
 msgid "Ainda não há dados suficientes para análise."
 msgstr "Not enough data for analysis yet."
 
+msgid "Status"
+msgstr "Status"
+
 msgid "Estado:"
 msgstr "Status:"
 
@@ -6529,20 +6522,12 @@ msgstr "Open the student's profile"
 msgid "Ver progresso deste treino"
 msgstr "View progress for this workout"
 
-msgid "Informações da sessão"
-msgstr "Session information"
+#| msgid "Começa em"
+msgid "Começo"
+msgstr "Start"
 
-msgid "Data:"
-msgstr "Date:"
-
-msgid "Início:"
-msgstr "Start:"
-
-msgid "Término:"
-msgstr "End:"
-
-msgid "Duração:"
-msgstr "Duration:"
+msgid "Duração"
+msgstr "Duration"
 
 msgid "Comentário do aluno sobre o treino:"
 msgstr "Student's comment on the workout:"
@@ -7764,6 +7749,9 @@ msgstr "ID"
 
 msgid "Idade"
 msgstr "Age"
+
+msgid "Ações"
+msgstr "Actions"
 
 #, python-format
 msgid "%(last_workout_at)s atrás"

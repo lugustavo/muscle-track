@@ -12,8 +12,9 @@ class ProgressPageMobileTests(BaseTestCase):
 
     def test_stats_are_compact_tiles_in_a_two_column_grid(self):
         html = self.client.get(self.url).content.decode()
-        self.assertIn('row-cols-2 row-cols-md-4', html)
-        self.assertEqual(html.count('metric-tile'), 4)
+        self.assertIn('data-progress-stats', html)
+        self.assertIn('col-6 col-md-3', html)
+        self.assertEqual(html.count('class="ui-tile"'), 4)
         for label in ('Sessões concluídas', 'Último mês', 'Duração média (min)', 'Taxa de conclusão'):
             self.assertIn(label, html)
         self.assertNotIn('font-size: 2rem', html)          # sizes live in the stylesheet, not inline
@@ -47,7 +48,8 @@ class SessionDetailMobileTests(BaseTestCase):
     def test_titles_shrink_on_phones(self):
         html = self.client.get(self.url).content.decode()
         self.assertIn('class="ui-head inline"', html)   # the shared header title scales with clamp()
-        self.assertEqual(html.count('card-title-lg'), 2)
+        self.assertIn('data-session-info', html)       # the stats are shared tiles, not a Bootstrap card header
+        self.assertEqual(html.count('class="ui-tile"'), 4)
 
 
 class BackButtonTagTests(BaseTestCase):

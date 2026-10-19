@@ -33,7 +33,7 @@
             {% for r in refund_rows %}
             <tr class="{% if r.is_voided %}text-muted{% endif %}" data-refund-row="{{ r.pk }}">
                 <td>{{ r.refunded_on|date:_('d/m/Y') }}</td>
-                <td>{{ r.get_kind_display }}{% if r.student_package %} · {{ r.student_package.name }}{% endif %}{% if r.is_voided %} <span class="badge bg-secondary">{% trans "anulada" %}</span>{% endif %}{% if r.reason %}<br><small class="text-muted">{{ r.reason }}</small>{% endif %}</td>
+                <td>{{ r.get_kind_display }}{% if r.student_package %} · {{ r.student_package.name }}{% endif %}{% if r.is_voided %} <span class="ui-badge">{% trans "anulada" %}</span>{% endif %}{% if r.reason %}<br><small class="text-muted">{{ r.reason }}</small>{% endif %}</td>
                 <td>{{ r.get_method_display }}</td>
                 <td class="text-end {% if r.is_voided %}text-decoration-line-through{% endif %}">− {{ r.amount|money }}</td>
                 <td class="text-end"><a href="{% url 'core:refund_detail' r.pk %}" class="small" title="{% trans "Resumo" %}"><i class="bi bi-file-text"></i><span class="visually-hidden">{% trans "Resumo" %}</span></a></td>

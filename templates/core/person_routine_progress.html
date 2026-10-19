@@ -20,19 +20,18 @@
     </div>
 </div>
 
-<!-- Informações do Treino -->
-<div class="card mb-4 border-0 shadow-sm">
+<div class="card mb-3">
     <div class="card-body">
-        <div class="row">
+        <div class="row g-3">
             <div class="col-md-8">
-                <h5><i class="bi bi-info-circle"></i> {% trans "Detalhes do treino" %}</h5>
+                <h2 class="h5 ui-sec mb-2"><span class="ui-ico sm info"><i class="bi bi-info-circle" aria-hidden="true"></i></span> {% trans "Detalhes do treino" %}</h2>
                 <p class="mb-1"><strong>{% trans "Dificuldade:" %}</strong>
                     {% if person_routine.difficulty_level == 'iniciante' %}
-                        <span class="badge bg-success">{{ person_routine.get_difficulty_level_display }}</span>
+                        <span class="ui-badge ok">{{ person_routine.get_difficulty_level_display }}</span>
                     {% elif person_routine.difficulty_level == 'intermediario' %}
-                        <span class="badge bg-warning">{{ person_routine.get_difficulty_level_display }}</span>
+                        <span class="ui-badge warn">{{ person_routine.get_difficulty_level_display }}</span>
                     {% else %}
-                        <span class="badge bg-danger">{{ person_routine.get_difficulty_level_display }}</span>
+                        <span class="ui-badge bad">{{ person_routine.get_difficulty_level_display }}</span>
                     {% endif %}
                 </p>
                 <p class="mb-1">{% blocktrans trimmed with estimated_duration=person_routine.estimated_duration %}<strong>Duração estimada:</strong> {{ estimated_duration }} minutos{% endblocktrans %}</p>
@@ -48,7 +47,7 @@
                 </p>
             </div>
             <div class="col-md-4">
-                <h5><i class="bi bi-list-check"></i> {% blocktrans trimmed with count=routine_exercises.count %}Exercícios ({{ count }}){% endblocktrans %}</h5>
+                <h2 class="h5 ui-sec mb-2"><span class="ui-ico sm"><i class="bi bi-list-check" aria-hidden="true"></i></span> {% blocktrans trimmed with count=routine_exercises.count %}Exercícios ({{ count }}){% endblocktrans %}</h2>
                 <ul class="list-unstyled mb-0">
                     {% for ex in routine_exercises|slice:":5" %}
                     <li class="mb-1">
@@ -64,117 +63,38 @@
     </div>
 </div>
 
-<!-- Estatísticas do Progresso -->
-<div class="row row-cols-2 row-cols-md-4 g-2 g-md-3 mb-4">
-    <div class="col">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body metric-tile text-center">
-                <i class="bi bi-check-circle-fill text-success metric-icon"></i>
-                <p class="metric-value">{{ total_sessions }}</p>
-                <p class="metric-label text-muted">{% trans "Sessões concluídas" %}</p>
-            </div>
-        </div>
-    </div>
-    <div class="col">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body metric-tile text-center">
-                <i class="bi bi-calendar-check text-primary metric-icon"></i>
-                <p class="metric-value">{{ sessions_last_month }}</p>
-                <p class="metric-label text-muted">{% trans "Último mês" %}</p>
-            </div>
-        </div>
-    </div>
-    <div class="col">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body metric-tile text-center">
-                <i class="bi bi-clock-history text-info metric-icon"></i>
-                <p class="metric-value">{{ avg_duration }}</p>
-                <p class="metric-label text-muted">{% trans "Duração média (min)" %}</p>
-            </div>
-        </div>
-    </div>
-    <div class="col">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body metric-tile text-center">
-                <i class="bi bi-percent text-warning metric-icon"></i>
-                <p class="metric-value">{{ completion_rate }}%</p>
-                <p class="metric-label text-muted">{% trans "Taxa de conclusão" %}</p>
-            </div>
-        </div>
-    </div>
+<div class="row g-2 g-md-3 mb-4 text-center" data-progress-stats>
+    <div class="col-6 col-md-3"><div class="ui-tile"><div class="ui-tile-n">{{ total_sessions }}</div><div class="ui-tile-l">{% trans "Sessões concluídas" %}</div></div></div>
+    <div class="col-6 col-md-3"><div class="ui-tile"><div class="ui-tile-n">{{ sessions_last_month }}</div><div class="ui-tile-l">{% trans "Último mês" %}</div></div></div>
+    <div class="col-6 col-md-3"><div class="ui-tile"><div class="ui-tile-n">{{ avg_duration }}</div><div class="ui-tile-l">{% trans "Duração média (min)" %}</div></div></div>
+    <div class="col-6 col-md-3"><div class="ui-tile"><div class="ui-tile-n">{{ completion_rate }}<small>%</small></div><div class="ui-tile-l">{% trans "Taxa de conclusão" %}</div></div></div>
 </div>
 
 {% if completed_sessions %}
-<!-- Gráfico de Evolução -->
-<div class="card mb-4 border-0 shadow-sm">
-    <div class="card-header bg-body">
-        <h5 class="mb-0"><i class="bi bi-graph-up"></i> {% trans "Evolução do treino" %}</h5>
-    </div>
+<div class="card mb-4">
     <div class="card-body">
+        <h2 class="h5 ui-sec mb-2"><span class="ui-ico sm alt"><i class="bi bi-graph-up" aria-hidden="true"></i></span> {% trans "Evolução do treino" %}</h2>
         <canvas id="progressChart" style="max-height: 300px;"></canvas>
     </div>
 </div>
 
-<!-- Histórico de Sessões -->
-<div class="card mb-4 border-0 shadow-sm">
-    <div class="card-header bg-body d-flex justify-content-between align-items-center">
-        <h5 class="mb-0"><i class="bi bi-clock-history"></i> {% trans "Histórico de sessões" %}</h5>
-        <span class="badge bg-primary">{% blocktrans trimmed with count=completed_sessions.count %}{{ count }} sessões{% endblocktrans %}</span>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>{% trans "Data" %}</th>
-                        <th>{% trans "Início" %}</th>
-                        <th>{% trans "Término" %}</th>
-                        <th>{% trans "Duração" %}</th>
-                        <th>{% trans "Status" %}</th>
-                        <th>{% trans "Ações" %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for session in completed_sessions %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ session.start_time|date:_('d/m/Y') }}</td>
-                        <td>{{ session.start_time|date:"H:i" }}</td>
-                        <td>
-                            {% if session.end_time %}
-                                {{ session.end_time|date:"H:i" }}
-                            {% else %}
-                                <span class="text-muted">-</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if session.duration_minutes %}
-                                <span class="badge bg-info">{% blocktrans trimmed with duration_minutes=session.duration_minutes %}{{ duration_minutes }} min{% endblocktrans %}</span>
-                            {% else %}
-                                <span class="text-muted">-</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if session.is_completed %}
-                                <span class="badge bg-success">{% trans "Concluído" %}</span>
-                            {% else %}
-                                <span class="badge bg-warning">{% trans "Em andamento" %}</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <a href="{% nav_url 'core:session_detail' session.pk %}"
-                               class="btn btn-sm btn-outline-primary"
-                               title="{% trans "Ver detalhes" %}">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h2 class="h5 ui-sec mb-0"><span class="ui-ico sm"><i class="bi bi-clock-history" aria-hidden="true"></i></span> {% trans "Histórico de sessões" %}</h2>
+    <span class="ui-badge brand">{% blocktrans trimmed with count=completed_sessions.count %}{{ count }} sessões{% endblocktrans %}</span>
+</div>
+<div class="d-grid gap-2 mb-4" data-history-list>
+    {% for session in completed_sessions %}
+    <div class="card"><div class="card-body py-2 d-flex align-items-center gap-3">
+        <div class="ui-date" aria-hidden="true"><span class="ui-date-wd">{{ session.start_time|date:"D" }}</span><span class="ui-date-d">{{ session.start_time|date:"j" }}</span><span class="ui-date-m">{{ session.start_time|date:"M" }}</span></div>
+        <div class="flex-grow-1 min-w-0">
+            <strong class="d-block">{{ session.start_time|date:_('d/m/Y') }}</strong>
+            <small class="text-muted">{{ session.start_time|date:"H:i" }}{% if session.end_time %} – {{ session.end_time|date:"H:i" }}{% endif %}</small>
         </div>
-    </div>
+        {% if session.duration_minutes %}<span class="ui-badge info">{% blocktrans trimmed with duration_minutes=session.duration_minutes %}{{ duration_minutes }} min{% endblocktrans %}</span>{% endif %}
+        {% if session.is_completed %}<span class="ui-badge ok d-none d-sm-inline-flex">{% trans "Concluído" %}</span>{% else %}<span class="ui-badge warn">{% trans "Em andamento" %}</span>{% endif %}
+        <a href="{% nav_url 'core:session_detail' session.pk %}" class="btn btn-sm btn-outline-primary" title="{% trans "Ver detalhes" %}"><i class="bi bi-eye"></i></a>
+    </div></div>
+    {% endfor %}
 </div>
 
 <script src="{% static 'vendor/chartjs/4.4.0/chart.umd.js' %}"></script>
