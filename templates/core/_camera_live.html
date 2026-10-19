@@ -1,0 +1,28 @@
+{% load i18n %}
+{# Full-screen camera with framing guides (see static/js/photo_capture.js). Needs {{ camera_guides|json_script:"camera-guides" }} on the page. #}
+<div class="cam" data-live hidden role="dialog" aria-modal="true" aria-label="{% trans "Câmera com guias de enquadramento" %}"
+     data-text-no-timer="{% trans "Sem contagem" %}" data-text-previous="{% trans "Foto anterior" %}" data-text-guides-tip="{% trans "Celular na vertical, na altura do peito e a cerca de 2 metros. Pés na linha de baixo, cabeça na linha de cima." %}"
+     data-text-free-tip="{% trans "Celular na vertical. A foto sai sempre na mesma proporção (3:4)." %}">
+    <div class="cam-top">
+        <button type="button" class="cam-btn" data-cancel-live aria-label="{% trans "Fechar a câmera" %}"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+        <div class="cam-title"><strong data-cam-position></strong><small data-cam-note></small></div>
+        <button type="button" class="cam-btn" data-flip aria-label="{% trans "Trocar de câmera" %}" hidden><i class="bi bi-arrow-repeat" aria-hidden="true"></i></button>
+    </div>
+    <div class="cam-stage" data-stage>
+        <div class="cam-frame" data-frame>
+            <video playsinline muted autoplay></video>
+            <img class="cam-ghost" data-ghost alt="" hidden>
+            <div class="cam-guides" data-guides></div>
+            <div class="cam-count" data-count hidden aria-live="assertive"></div>
+        </div>
+    </div>
+    <div class="cam-tools">
+        <button type="button" class="cam-chip" data-toggle-guides aria-pressed="true"><i class="bi bi-grid-3x3" aria-hidden="true"></i> {% trans "Guias" %}</button>
+        <button type="button" class="cam-chip" data-toggle-ghost aria-pressed="true" hidden><i class="bi bi-layers" aria-hidden="true"></i> <span data-ghost-label>{% trans "Foto anterior" %}</span></button>
+        <button type="button" class="cam-chip" data-timer><i class="bi bi-stopwatch" aria-hidden="true"></i> <span data-timer-label>{% trans "Sem contagem" %}</span></button>
+    </div>
+    <div class="cam-bar">
+        <div class="cam-tip" data-tip></div>
+        <button type="button" class="cam-shutter" data-shoot aria-label="{% trans "Capturar" %}"></button>
+    </div>
+</div>
