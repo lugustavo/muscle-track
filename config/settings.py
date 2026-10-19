@@ -283,6 +283,11 @@ AGENDA_NOTICE_HOURS = config('AGENDA_NOTICE_HOURS', default=24, cast=int)
 # The trainer's own days are added in Agenda -> Feriados.
 HOLIDAYS_REGION = config('HOLIDAYS_REGION', default='PT').strip().upper()
 
+# Where the backup service (backup/backup.sh) writes the result of its last run. The app only reads it, to warn the
+# trainer when backups are old or failing. Empty (the default outside Docker) turns the warning off.
+BACKUP_STATUS_FILE = config('BACKUP_STATUS_FILE', default='')
+BACKUP_MAX_AGE_HOURS = config('BACKUP_MAX_AGE_HOURS', default=36, cast=int)
+
 # Site URL
 # Public address of the app, used to build invitation links. Leave empty to use
 # the address the trainer is browsing from.

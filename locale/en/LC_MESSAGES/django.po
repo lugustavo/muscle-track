@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 11:59-0300\n"
+"POT-Creation-Date: 2026-10-19 13:52-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -146,6 +146,48 @@ msgstr "App turned on: the student now has a login"
 
 msgid "App desativado: o aluno só tem ficha com você"
 msgstr "App turned off: the student only has a file with you"
+
+msgid ""
+"Ainda não há nenhum backup. Se isso continuar, confira se o serviço "
+"\"backup\" está rodando (docker compose ps)."
+msgstr ""
+"There is no backup yet. If this goes on, check that the \"backup\" service "
+"is running (docker compose ps)."
+
+msgid ""
+"Não consegui ler o estado dos backups. Confira o serviço \"backup\" (docker "
+"compose logs backup)."
+msgstr ""
+"Could not read the state of the backups. Check the \"backup\" service "
+"(docker compose logs backup)."
+
+msgid "O último backup falhou."
+msgstr "The last backup failed."
+
+#, python-format
+msgid "O último que deu certo foi em %(when)s."
+msgstr "The last one that worked was on %(when)s."
+
+msgid "Ainda não houve nenhum backup bem-sucedido."
+msgstr "There has been no successful backup yet."
+
+msgid "Veja: docker compose logs backup"
+msgstr "See: docker compose logs backup"
+
+#, python-format
+msgid ""
+"O último backup tem mais de %(hours)s horas. Confira o serviço \"backup\" "
+"(docker compose logs backup)."
+msgstr ""
+"The last backup is more than %(hours)s hours old. Check the \"backup\" "
+"service (docker compose logs backup)."
+
+msgid ""
+"O backup foi feito, mas a cópia para fora do servidor falhou. Veja: docker "
+"compose logs backup"
+msgstr ""
+"The backup was made, but the copy off the server failed. See: docker compose"
+" logs backup"
 
 #, python-format
 msgid "Pagamento registrado (%(method)s) — %(package)s"
@@ -4735,6 +4777,9 @@ msgstr "Dismiss the first steps"
 
 msgid "Dispensar"
 msgstr "Dismiss"
+
+msgid "Backup"
+msgstr "Backup"
 
 msgid "Atenção agora"
 msgstr "Needs attention now"
