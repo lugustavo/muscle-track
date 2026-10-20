@@ -252,3 +252,100 @@ class AgendaViewsTests(BaseTestCase):
         self.assertEqual(response.context['monday'], monday)
         self.assertEqual(len(response.context['days']), 7)
         self.assertEqual(response.content.decode().count('data-day-pane="'), 7)
+
+
+class AgendaStudentFilterTests(BaseTestCase):
+    def setUp(self):
+        self.login(self.trainer)
+        self.url = reverse('core:agenda')
+        self.today = timezone.localdate()
+        self.day = self.today + timedelta(days=2)
+        self.alice_class = Appointment.objects.create(person=self.alice.person, starts_at=when(self.day, 9))
+        self.bob_class = Appointment.objects.create(person=self.bob.person, starts_at=when(self.day, 10))
+
+    def names(self, response):
+        return sorted(a.person.person_name for d in response.context['days'] for a in d['items'])
+
+    def test_without_a_filter_everyone_is_shown_and_the_selector_lists_the_students(self):
+        response = self.client.get(self.url, {'vista': 'lista'})
+        self.assertEqual(self.names(response), ['Alice', 'Bob'])
+        self.assertIsNone(response.context['student'])
+        self.assertContains(response, 'data-agenda-student-filter')
+        self.assertContains(response, 'Todos os alunos')
+        self.assertContains(response, f'<option value="{self.alice.person.pk}">Alice</option>')
+        self.assertNotContains(response, 'data-agenda-student-note')
+
+    def test_every_view_shows_only_that_students_classes(self):
+        for params in ({'vista': 'dia', 'dia': self.day.isoformat()}, {'vista': 'lista'}, {'vista': 'semana', 'semana': week_start(self.day).isoformat()}):
+            response = self.client.get(self.url, {**params, 'aluno': self.alice.person.pk})
+            self.assertEqual(self.names(response), ['Alice'], params)
+            self.assertEqual(response.context['student'], self.alice.person)
+        month = self.client.get(self.url, {'vista': 'mes', 'mes': self.day.strftime('%Y-%m'), 'aluno': self.bob.person.pk})
+        cell = next(c for w in month.context['weeks'] for c in w if c['date'] == self.day)
+        self.assertEqual([a.person.person_name for a in cell['items']], ['Bob'])
+
+    def test_the_note_says_who_and_how_many(self):
+        response = self.client.get(self.url, {'vista': 'lista', 'aluno': self.alice.person.pk})
+        self.assertContains(response, 'data-agenda-student-note')
+        self.assertContains(response, '<strong>Alice</strong>')
+        self.assertEqual(response.context['student_total'], 1)
+        self.assertContains(response, 'data-agenda-student-clear')
+        self.assertContains(response, f'<option value="{self.alice.person.pk}" selected>Alice</option>')
+
+    def test_cancelled_classes_stay_visible_but_do_not_count(self):
+        Appointment.objects.filter(pk=self.alice_class.pk).update(status=Appointment.Status.CANCELLED)
+        response = self.client.get(self.url, {'vista': 'lista', 'aluno': self.alice.person.pk})
+        self.assertEqual(self.names(response), ['Alice'])
+        self.assertEqual(response.context['student_total'], 0)
+
+    def test_the_filter_survives_navigation_and_view_changes(self):
+        aluno = self.alice.person.pk
+        for view in ('semana', 'dia', 'mes', 'lista'):
+            response = self.client.get(self.url, {'vista': view, 'aluno': aluno})
+            for key in ('prev_url', 'next_url'):
+                self.assertIn(f'aluno={aluno}', response.context[key], (view, key))
+            self.assertTrue(all(f'aluno={aluno}' in url for _, _, url, _ in response.context['view_links']), view)
+        month = self.client.get(self.url, {'vista': 'mes', 'mes': self.day.strftime('%Y-%m'), 'aluno': aluno})
+        self.assertContains(month, f'?vista=dia&dia={self.day.isoformat()}&amp;aluno={aluno}')
+
+    def test_changing_the_student_keeps_the_period(self):
+        response = self.client.get(self.url, {'vista': 'dia', 'dia': self.day.isoformat(), 'aluno': self.alice.person.pk})
+        self.assertEqual(response.context['filter_params'], [('vista', 'dia'), ('dia', self.day.isoformat())])
+        self.assertContains(response, f'<input type="hidden" name="dia" value="{self.day.isoformat()}">')
+
+    def test_the_list_of_one_student_looks_further_ahead(self):
+        far = self.today + timedelta(days=45)
+        Appointment.objects.create(person=self.alice.person, starts_at=when(far, 9))
+        Appointment.objects.create(person=self.bob.person, starts_at=when(far, 10))
+        everyone = self.client.get(self.url, {'vista': 'lista'})
+        self.assertNotIn(far, [d['date'] for d in everyone.context['days']])          # beyond the usual 14 days
+        mine = self.client.get(self.url, {'vista': 'lista', 'aluno': self.alice.person.pk})
+        self.assertIn(far, [d['date'] for d in mine.context['days']])
+        self.assertEqual(mine.context['list_days'], 60)
+        self.assertIn((self.today + timedelta(days=60)).isoformat(), mine.context['next_url'])
+
+    def test_a_bad_or_unknown_student_is_ignored(self):
+        for bad in ('abc', '99999', '', '-1', '1; drop table'):
+            response = self.client.get(self.url, {'vista': 'lista', 'aluno': bad})
+            self.assertEqual(response.status_code, 200, bad)
+            self.assertIsNone(response.context['student'], bad)
+            self.assertEqual(self.names(response), ['Alice', 'Bob'], bad)
+
+    def test_an_inactive_student_can_still_be_filtered_and_is_marked(self):
+        self.bob.person.is_active = False
+        self.bob.person.save()
+        plain = self.client.get(self.url, {'vista': 'lista'})
+        self.assertNotContains(plain, f'<option value="{self.bob.person.pk}"')
+        response = self.client.get(self.url, {'vista': 'lista', 'aluno': self.bob.person.pk})
+        self.assertContains(response, f'<option value="{self.bob.person.pk}" selected>Bob (inativo)</option>')
+
+    def test_the_selector_costs_the_same_queries_whatever_the_number_of_students(self):
+        with CaptureQueriesContext(connection) as few:
+            self.client.get(self.url, {'vista': 'lista'})
+        from django.contrib.auth.models import User
+        from core.models import Person
+        for n in range(20):
+            Person.objects.create(user=User.objects.create_user(f'extra{n}', f'extra{n}@example.com', 'pw'), person_name=f'Extra {n}')
+        with CaptureQueriesContext(connection) as many:
+            self.client.get(self.url, {'vista': 'lista'})
+        self.assertLessEqual(len(many), len(few))

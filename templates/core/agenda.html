@@ -97,6 +97,28 @@
     </div>
 </div>
 
+<form method="get" action="{% url 'core:agenda' %}" class="d-flex flex-wrap align-items-center gap-2 mb-3" data-agenda-student-filter>
+    {% for key, value in filter_params %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
+    <label for="agendaStudent" class="small text-muted mb-0"><i class="bi bi-person" aria-hidden="true"></i> {% trans "Aluno" %}</label>
+    <select id="agendaStudent" name="aluno" class="form-select form-select-sm w-auto" style="max-width: 16rem;" onchange="this.form.submit()">
+        <option value="">{% trans "Todos os alunos" %}</option>
+        {% for p in students %}<option value="{{ p.pk }}"{% if student and p.pk == student.pk %} selected{% endif %}>{{ p.person_name }}{% if not p.is_active %} ({% trans "inativo" %}){% endif %}</option>{% endfor %}
+    </select>
+    <noscript><button type="submit" class="btn btn-sm btn-outline-secondary">{% trans "Filtrar" %}</button></noscript>
+    {% if student %}
+    <a href="{% url 'core:agenda' %}?{% for key, value in filter_params %}{{ key }}={{ value|urlencode }}{% if not forloop.last %}&{% endif %}{% endfor %}" class="btn btn-sm btn-outline-secondary" data-agenda-student-clear><i class="bi bi-x-lg"></i> {% trans "Ver todos" %}</a>
+    {% endif %}
+</form>
+{% if student %}
+<div class="alert alert-info py-2 small mb-3" data-agenda-student-note role="status">
+    <div>
+        {% blocktrans trimmed with name=student.person_name total=student_total %}Só as aulas de <strong>{{ name }}</strong> neste período: {{ total }} marcada(s).{% endblocktrans %}
+        {% if view == 'lista' %}{% blocktrans trimmed with days=list_days %}A lista mostra {{ days }} dias.{% endblocktrans %}{% endif %}
+        <a href="{% url 'core:student_detail' student.pk %}#tab-agenda">{% trans "Abrir a agenda na ficha" %}</a>
+    </div>
+</div>
+{% endif %}
+
 {% if view == 'semana' %}
 <div class="day-strip mb-3" role="tablist" aria-label="{% trans "Dias da semana" %}" data-day-strip>
     {% for day in days %}
@@ -136,7 +158,7 @@
     {% for week in weeks %}
     <div class="month-row" role="row">
         {% for cell in week %}
-        <a href="{% url 'core:agenda' %}?vista=dia&dia={{ cell.date|date:'Y-m-d' }}" role="gridcell" data-agenda-day="{{ cell.date|date:'Y-m-d' }}"
+        <a href="{% url 'core:agenda' %}?vista=dia&dia={{ cell.date|date:'Y-m-d' }}{{ student_qs }}" role="gridcell" data-agenda-day="{{ cell.date|date:'Y-m-d' }}"
            class="month-cell {% if not cell.in_month %}out{% endif %} {% if cell.is_today %}today{% endif %}"
            aria-label="{% blocktrans trimmed count n=cell.live with day=cell.date|date:_('j \d\e F')|lower %}{{ day }}: {{ n }} aula{% plural %}{{ day }}: {{ n }} aulas{% endblocktrans %}">
             <span class="num">{{ cell.date|date:"j" }}</span>
@@ -160,7 +182,7 @@
     {% for day in month_days %}
     <section class="mb-3" data-month-day="{{ day.date|date:'Y-m-d' }}">
         <h3 class="small fw-bold mb-1 {% if day.is_today %}text-brand{% else %}text-muted{% endif %}">
-            <a href="{% url 'core:agenda' %}?vista=dia&dia={{ day.date|date:'Y-m-d' }}" class="text-reset text-decoration-none">{{ day.weekday }}, {{ day.date|date:_("j \d\e F")|lower }}{% if day.is_today %} {% trans "· hoje" %}{% endif %}</a>
+            <a href="{% url 'core:agenda' %}?vista=dia&dia={{ day.date|date:'Y-m-d' }}{{ student_qs }}" class="text-reset text-decoration-none">{{ day.weekday }}, {{ day.date|date:_("j \d\e F")|lower }}{% if day.is_today %} {% trans "· hoje" %}{% endif %}</a>
         </h3>
         <div class="list-group list-group-flush rounded border">
             {% for a in day.items %}

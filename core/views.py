@@ -38,7 +38,7 @@ from .forms import (
     PhotoLinkForm, PhotoPositionForm, ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
 )
 from .agenda import (
-    DEFAULT_VIEW as DEFAULT_AGENDA_VIEW, LIST_DAYS, VIEWS as AGENDA_VIEWS, add_months, at, attendance_stats,
+    DEFAULT_VIEW as DEFAULT_AGENDA_VIEW, LIST_DAYS, LIST_DAYS_STUDENT, VIEWS as AGENDA_VIEWS, add_months, at, attendance_stats,
     MoveError, annotate_history, conflicting_ids, live_class_at, ensure_appointments, month_cells, move_appointment, overlap_names, parse_week,
     undo_move, view_range,
 )
@@ -2980,23 +2980,30 @@ def _agenda_url(**params):
     return f"{reverse('core:agenda')}?{urlencode(params)}"
 
 
-def _agenda_nav(view, pivot, today):
-    """(previous url, next url, "today" url, is the current period) of a view."""
+def _agenda_nav(view, pivot, today, student=None, list_days=LIST_DAYS):
+    """(previous url, next url, "today" url, is the current period) of a view; the student filter, if any, is kept."""
+    extra = {'aluno': student.pk} if student else {}
     if view == 'mes':
-        return (_agenda_url(vista='mes', mes=add_months(pivot, -1).strftime('%Y-%m')),
-                _agenda_url(vista='mes', mes=add_months(pivot, 1).strftime('%Y-%m')),
-                _agenda_url(vista='mes'), pivot == today.replace(day=1))
+        return (_agenda_url(vista='mes', mes=add_months(pivot, -1).strftime('%Y-%m'), **extra),
+                _agenda_url(vista='mes', mes=add_months(pivot, 1).strftime('%Y-%m'), **extra),
+                _agenda_url(vista='mes', **extra), pivot == today.replace(day=1))
     if view == 'dia':
-        return (_agenda_url(vista='dia', dia=(pivot - timedelta(days=1)).isoformat()),
-                _agenda_url(vista='dia', dia=(pivot + timedelta(days=1)).isoformat()),
-                _agenda_url(vista='dia'), pivot == today)
+        return (_agenda_url(vista='dia', dia=(pivot - timedelta(days=1)).isoformat(), **extra),
+                _agenda_url(vista='dia', dia=(pivot + timedelta(days=1)).isoformat(), **extra),
+                _agenda_url(vista='dia', **extra), pivot == today)
     if view == 'lista':
-        return (_agenda_url(vista='lista', inicio=(pivot - timedelta(days=LIST_DAYS)).isoformat()),
-                _agenda_url(vista='lista', inicio=(pivot + timedelta(days=LIST_DAYS)).isoformat()),
-                _agenda_url(vista='lista'), pivot == today)
-    return (_agenda_url(vista='semana', semana=(pivot - timedelta(days=7)).isoformat()),
-            _agenda_url(vista='semana', semana=(pivot + timedelta(days=7)).isoformat()),
-            _agenda_url(vista='semana'), pivot == parse_week(None, today))
+        return (_agenda_url(vista='lista', inicio=(pivot - timedelta(days=list_days)).isoformat(), **extra),
+                _agenda_url(vista='lista', inicio=(pivot + timedelta(days=list_days)).isoformat(), **extra),
+                _agenda_url(vista='lista', **extra), pivot == today)
+    return (_agenda_url(vista='semana', semana=(pivot - timedelta(days=7)).isoformat(), **extra),
+            _agenda_url(vista='semana', semana=(pivot + timedelta(days=7)).isoformat(), **extra),
+            _agenda_url(vista='semana', **extra), pivot == parse_week(None, today))
+
+
+def _agenda_student(request):
+    """The student the agenda is filtered to (?aluno=<id>), or None; an unknown or invalid id means no filter."""
+    raw = request.GET.get('aluno', '')
+    return Person.objects.filter(pk=int(raw)).first() if raw.isdigit() else None
 
 
 @staff_required
@@ -3008,23 +3015,35 @@ def agenda(request):
     requested = request.GET.get('vista')
     remembered = request.COOKIES.get('agenda_vista')
     view = requested if requested in AGENDA_VIEWS else (remembered if remembered in AGENDA_VIEWS else DEFAULT_AGENDA_VIEW)
-    view, start, end, pivot = view_range(view, request.GET, today)
+    student = _agenda_student(request)
+    list_days = LIST_DAYS_STUDENT if student else LIST_DAYS
+    view, start, end, pivot = view_range(view, request.GET, today, list_days)
     ensure_appointments(start, end, today)
-    items = list(Appointment.objects.filter(
-        starts_at__gte=at(start, time.min), starts_at__lt=at(end + timedelta(days=1), time.min)
-    ).select_related('person', 'rescheduled_to', 'rescheduled_from'))
+    appointments = Appointment.objects.filter(
+        starts_at__gte=at(start, time.min), starts_at__lt=at(end + timedelta(days=1), time.min))
+    if student:
+        appointments = appointments.filter(person=student)
+    items = list(appointments.select_related('person', 'rescheduled_to', 'rescheduled_from'))
     conflicts = conflicting_ids(items)
     by_day = {}
     for item in items:
         by_day.setdefault(timezone.localtime(item.starts_at).date(), []).append(item)
 
-    prev_url, next_url, today_url, is_current = _agenda_nav(view, pivot, today)
+    prev_url, next_url, today_url, is_current = _agenda_nav(view, pivot, today, student, list_days)
+    student_qs = f'&aluno={student.pk}' if student else ''
     context = {
         'view': view, 'conflicts': conflicts, 'statuses': Appointment.Status,
         'calendar_style': CalendarFeed.objects.filter(user=request.user).values_list('name_style', flat=True).first() or 'first',
         'range_start': start, 'range_end': end, 'pivot': pivot,
         'prev_url': prev_url, 'next_url': next_url, 'today_url': today_url, 'is_current': is_current,
-        'view_links': [(key, label, _agenda_url(vista=key), key == view) for key, label in AGENDA_VIEW_LABELS],
+        'view_links': [(key, label, _agenda_url(vista=key, **({'aluno': student.pk} if student else {})), key == view)
+                       for key, label in AGENDA_VIEW_LABELS],
+        # the student filter: who, the whole list for the selector, the current period to keep when it changes
+        'student': student, 'student_qs': student_qs, 'list_days': list_days,
+        'students': Person.objects.filter(Q(is_active=True) | Q(pk=student.pk if student else None)).order_by('person_name'),
+        'filter_params': [(k, v) for k, v in [('vista', view), ('semana', request.GET.get('semana')), ('dia', request.GET.get('dia')),
+                                              ('mes', request.GET.get('mes')), ('inicio', request.GET.get('inicio'))] if v],
+        'student_total': len([a for a in items if a.status not in (Appointment.Status.CANCELLED, Appointment.Status.RESCHEDULED)]) if student else 0,
         'pending_requests': list(class_requests.pending_for_trainer()),
     }
     if view == 'semana':
