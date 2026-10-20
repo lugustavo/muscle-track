@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 14:03-0300\n"
+"POT-Creation-Date: 2026-10-20 06:40-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -281,7 +281,6 @@ msgstr "Google Calendar"
 msgid "Busca"
 msgstr "Search"
 
-#| msgid "Tentar de novo"
 msgid "Centro de avisos"
 msgstr "Notification center"
 
@@ -3919,6 +3918,37 @@ msgstr "Previous"
 msgid "F \\d\\e Y"
 msgstr "F Y"
 
+#| msgid "Todos os Santos"
+msgid "Todos os alunos"
+msgstr "All students"
+
+msgid "inativo"
+msgstr "inactive"
+
+msgid "Filtrar"
+msgstr "Filter"
+
+#| msgid "Ver alunos"
+msgid "Ver todos"
+msgstr "Show all"
+
+#, python-format
+msgid ""
+"Só as aulas de <strong>%(name)s</strong> neste período: %(total)s "
+"marcada(s)."
+msgstr ""
+"Only <strong>%(name)s</strong>'s classes in this period: %(total)s "
+"scheduled."
+
+#, python-format
+#| msgid "faltam %(days_left)s dias"
+msgid "A lista mostra %(days)s dias."
+msgstr "The list shows %(days)s days."
+
+#| msgid "Abrir a ficha"
+msgid "Abrir a agenda na ficha"
+msgstr "Open the schedule on the student's file"
+
 #, python-format
 msgid "%(items)s aula"
 msgid_plural "%(items)s aulas"
@@ -4443,9 +4473,6 @@ msgstr "Search by name or description"
 
 msgid "Grupo muscular"
 msgstr "Muscle group"
-
-msgid "Filtrar"
-msgstr "Filter"
 
 #, python-format
 msgid "<strong>%(count)s</strong> exercício encontrado"
@@ -5509,7 +5536,6 @@ msgstr ""
 " plan."
 
 #, python-format
-#| msgid "Avisos - %(brand_name)s"
 msgid "Centro de avisos - %(brand_name)s"
 msgstr "Notification center - %(brand_name)s"
 
@@ -6133,9 +6159,6 @@ msgid "<strong>%(count)s</strong> pacote encontrado"
 msgid_plural "<strong>%(count)s</strong> pacotes encontrados"
 msgstr[0] "<strong>%(count)s</strong> package found"
 msgstr[1] "<strong>%(count)s</strong> packages found"
-
-msgid "inativo"
-msgstr "inactive"
 
 #, python-format
 msgid "%(sessions)s aulas ·"

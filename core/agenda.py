@@ -230,6 +230,7 @@ def attendance_stats(person, days=30, today=None):
 VIEWS = ('semana', 'dia', 'mes', 'lista')
 DEFAULT_VIEW = 'semana'
 LIST_DAYS = 14
+LIST_DAYS_STUDENT = 60   # the list of one student's classes looks further ahead
 
 
 def parse_day(value, today=None):
@@ -263,7 +264,7 @@ def month_range(first):
     return week_start(first), week_start(last) + timedelta(days=6)
 
 
-def view_range(view, params, today):
+def view_range(view, params, today, list_days=LIST_DAYS):
     """(view, first day, last day, pivot) for a view and the request's parameters."""
     if view == 'mes':
         first = parse_month(params.get('mes'), today)
@@ -274,7 +275,7 @@ def view_range(view, params, today):
         return view, day, day, day
     if view == 'lista':
         day = parse_day(params.get('inicio'), today)
-        return view, day, day + timedelta(days=LIST_DAYS - 1), day
+        return view, day, day + timedelta(days=list_days - 1), day
     monday = parse_week(params.get('semana'), today)
     return 'semana', monday, monday + timedelta(days=6), monday
 
