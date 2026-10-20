@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 06:40-0300\n"
+"POT-Creation-Date: 2026-10-20 19:05-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3918,7 +3918,6 @@ msgstr "Previous"
 msgid "F \\d\\e Y"
 msgstr "F Y"
 
-#| msgid "Todos os Santos"
 msgid "Todos os alunos"
 msgstr "All students"
 
@@ -3928,7 +3927,6 @@ msgstr "inactive"
 msgid "Filtrar"
 msgstr "Filter"
 
-#| msgid "Ver alunos"
 msgid "Ver todos"
 msgstr "Show all"
 
@@ -3941,11 +3939,9 @@ msgstr ""
 "scheduled."
 
 #, python-format
-#| msgid "faltam %(days_left)s dias"
 msgid "A lista mostra %(days)s dias."
 msgstr "The list shows %(days)s days."
 
-#| msgid "Abrir a ficha"
 msgid "Abrir a agenda na ficha"
 msgstr "Open the schedule on the student's file"
 
@@ -5230,6 +5226,10 @@ msgstr "Assigned workouts"
 
 msgid "Sessões concluídas (últimas 20)"
 msgstr "Completed sessions (last 20)"
+
+#, python-format
+msgid "Ver os detalhes de %(name)s, %(day)s"
+msgstr "See the details of %(name)s, %(day)s"
 
 msgid "Você ainda não concluiu nenhum treino."
 msgstr "You haven't completed any workouts yet."
@@ -6690,6 +6690,10 @@ msgstr "Duration"
 msgid "Comentário do aluno sobre o treino:"
 msgstr "Student's comment on the workout:"
 
+#| msgid "Comentário do aluno sobre o treino:"
+msgid "Seu comentário sobre o treino:"
+msgstr "Your comment on the workout:"
+
 msgid "Exercícios Executados"
 msgstr "Exercises Performed"
 
@@ -6714,6 +6718,11 @@ msgstr "%(weight)s kg"
 #, python-format
 msgid "<strong>Observação do aluno:</strong> %(notes)s"
 msgstr "<strong>Student note:</strong> %(notes)s"
+
+#, python-format
+#| msgid "<strong>Observação do aluno:</strong> %(notes)s"
+msgid "<strong>Sua observação:</strong> %(notes)s"
+msgstr "<strong>Your note:</strong> %(notes)s"
 
 msgid "Concluído em:"
 msgstr "Completed on:"

@@ -34,7 +34,7 @@
 
         {% if session.notes %}
         <div class="alert alert-secondary mb-4">
-            <i class="bi bi-chat-left-text"></i> <strong>{% trans "Comentário do aluno sobre o treino:" %}</strong><br>{{ session.notes|linebreaksbr }}
+            <i class="bi bi-chat-left-text"></i> <strong>{% if user.is_staff or user.is_superuser %}{% trans "Comentário do aluno sobre o treino:" %}{% else %}{% trans "Seu comentário sobre o treino:" %}{% endif %}</strong><br>{{ session.notes|linebreaksbr }}
         </div>
         {% endif %}
 
@@ -84,7 +84,7 @@
                         </table>
                         {% endif %}
                         {% if item.notes %}
-                        <div class="alert alert-secondary py-2 small mb-2"><i class="bi bi-chat-left-text"></i> {% blocktrans trimmed with notes=item.notes %}<strong>Observação do aluno:</strong> {{ notes }}{% endblocktrans %}</div>
+                        <div class="alert alert-secondary py-2 small mb-2"><i class="bi bi-chat-left-text"></i> {% if user.is_staff or user.is_superuser %}{% blocktrans trimmed with notes=item.notes %}<strong>Observação do aluno:</strong> {{ notes }}{% endblocktrans %}{% else %}{% blocktrans trimmed with notes=item.notes %}<strong>Sua observação:</strong> {{ notes }}{% endblocktrans %}{% endif %}</div>
                         {% endif %}
 
                         {% if item.is_completed and not item.sets %}

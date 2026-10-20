@@ -25,14 +25,15 @@
 <h2 class="ui-h2">{% trans "Sessões concluídas (últimas 20)" %}</h2>
 <div class="d-grid gap-2" data-history-list>
     {% for session in completed_sessions %}
-    <div class="card"><div class="card-body py-2 d-flex align-items-center gap-3">
+    <a href="{% nav_url 'core:session_detail' session.pk %}" class="card text-reset text-decoration-none" data-history-item aria-label="{% blocktrans trimmed with name=session.person_routine.routine_name day=session.start_time|date:_('d/m/Y') %}Ver os detalhes de {{ name }}, {{ day }}{% endblocktrans %}"><div class="card-body py-2 d-flex align-items-center gap-3">
         <div class="ui-date" aria-hidden="true"><span class="ui-date-wd">{{ session.start_time|date:"D" }}</span><span class="ui-date-d">{{ session.start_time|date:"j" }}</span><span class="ui-date-m">{{ session.start_time|date:"M" }}</span></div>
         <div class="flex-grow-1 min-w-0">
             <strong class="d-block text-truncate">{{ session.person_routine.routine_name }}</strong>
             <small class="text-muted">{{ session.person_routine.get_difficulty_level_display }} · {{ session.start_time|date:"H:i" }}{% if session.end_time %} – {{ session.end_time|date:"H:i" }}{% endif %}</small>
         </div>
         {% if session.duration_minutes %}<span class="ui-badge ok">{% blocktrans trimmed with duration_minutes=session.duration_minutes %}{{ duration_minutes }} min{% endblocktrans %}</span>{% endif %}
-    </div></div>
+        <i class="bi bi-chevron-right text-muted" aria-hidden="true"></i>
+    </div></a>
     {% endfor %}
 </div>
 {% else %}
