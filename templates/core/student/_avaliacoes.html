@@ -22,9 +22,24 @@
 {% if assessments %}
 <ul class="list-group assessment-list" data-assessments>
     {% for a in assessments %}
-    <li class="list-group-item p-0 swipe-row" data-swipe-row data-assessment="{{ a.pk }}">
-        <div class="swipe-content px-3 py-2">
-            <div class="fw-semibold mb-1">{{ a.date|date:_('d/m/Y') }}{% if a.notes %} <i class="bi bi-chat-left-text text-muted" title="{{ a.notes }}"></i>{% endif %}</div>
+    <li class="list-group-item" data-assessment="{{ a.pk }}">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <div class="fw-semibold">{{ a.date|date:_('d/m/Y') }}{% if a.notes %} <i class="bi bi-chat-left-text text-muted" title="{{ a.notes }}"></i>{% endif %}</div>
+                <div class="small text-muted text-truncate">{% if a.weight_kg is not None %}{{ a.weight_kg }} kg{% endif %}{% if a.weight_kg is not None and a.bmi is not None %} · {% endif %}{% if a.bmi is not None %}{% trans "IMC" %} {{ a.bmi }}{% endif %}</div>
+                <div class="dropdown row-menu ms-auto" data-assessment-menu>
+                    <button class="btn btn-sm btn-link text-body-secondary px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{% trans "Ações da avaliação" %}"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% nav_url 'core:assessment_edit' a.pk %}" title="{% trans "Editar" %}"><i class="bi bi-pencil" aria-hidden="true"></i> <span class="menu-label">{% trans "Editar" %}</span></a></li>
+                        <li>
+                            <form method="post" action="{% nav_url 'core:assessment_delete' a.pk %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta avaliação?" %}{% endfilter %}');">
+                                {% csrf_token %}
+                                <button class="dropdown-item text-danger" title="{% trans "Remover" %}"><i class="bi bi-trash" aria-hidden="true"></i> <span class="menu-label">{% trans "Remover" %}</span></button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
             <dl class="assessment-measures small mb-2">
                 <div class="{% if a.weight_kg is None %}is-empty{% endif %}"><dt>{% trans "Peso" %}</dt><dd>{{ a.weight_kg|default_if_none:"-" }}</dd></div>
                 <div class="{% if a.height_cm is None %}is-empty{% endif %}"><dt>{% trans "Altura" %}</dt><dd>{{ a.height_cm|default_if_none:"-" }}</dd></div>
@@ -73,18 +88,9 @@
 
             </div>
         </div>
-        <div class="swipe-actions">
-            <a href="{% nav_url 'core:assessment_edit' a.pk %}" class="btn btn-sm btn-link swipe-edit" title="{% trans "Editar" %}">
-                <i class="bi bi-pencil" aria-hidden="true"></i><span class="swipe-label">{% trans "Editar" %}</span></a>
-            <form method="post" action="{% nav_url 'core:assessment_delete' a.pk %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta avaliação?" %}{% endfilter %}');">
-                {% csrf_token %}
-                <button class="btn btn-sm btn-link swipe-remove" title="{% trans "Remover" %}"><i class="bi bi-trash" aria-hidden="true"></i><span class="swipe-label">{% trans "Remover" %}</span></button>
-            </form>
-        </div>
     </li>
     {% endfor %}
 </ul>
-{% include 'core/ui/_swipe_hint.html' %}
 <p class="text-muted small mt-2">{% trans "Medidas em cm, peso em kg. Altura e peso geram o IMC." %}</p>
 {% else %}
 <div class="alert alert-info"><i class="bi bi-info-circle"></i> {% trans "Nenhuma avaliação registrada ainda." %}</div>

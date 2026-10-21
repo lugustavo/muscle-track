@@ -222,3 +222,13 @@ input[type="radio"], input[type="checkbox"], input[type="range"] { accent-color:
 .assessment-measures dd { margin: 0; font-weight: 600; }
 @media (max-width: 767.98px) { .assessment-measures .is-empty { display: none; } }
 @media (min-width: 768px) { .assessment-measures { grid-template-columns: repeat(9, minmax(0, 1fr)); } }
+
+/* Row menu for tall cards: a ⋮ with the actions on a phone; from md up the toggle goes away and the actions sit inline as icons */
+.row-menu .dropdown-item { display: flex; align-items: center; gap: .5rem; }
+.row-menu form { margin: 0; }
+@media (min-width: 768px) {
+    .row-menu .dropdown-toggle, .row-menu > .btn { display: none; }
+    .row-menu .dropdown-menu { display: flex; position: static; transform: none; inset: auto; margin: 0; padding: 0; min-width: 0; border: 0; background: transparent; gap: .5rem; }
+    .row-menu .dropdown-item { padding: .15rem; width: auto; background: transparent; }
+    .row-menu .dropdown-item .menu-label { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+}

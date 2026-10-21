@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 18:44-0300\n"
+"POT-Creation-Date: 2026-10-21 19:31-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -6262,7 +6262,6 @@ msgstr "Select template"
 msgid "Nenhum exercício adicionado"
 msgstr "No exercises added"
 
-#| msgid "Arraste os exercícios para reordenar"
 msgid "Arraste pela alça para reordenar."
 msgstr "Drag by the handle to reorder."
 
@@ -7362,11 +7361,18 @@ msgstr ""
 "Each assessment has photos of the positions (front, sides and back). The "
 "photos are private: only you and the student can open them."
 
-msgid "Altura"
-msgstr "Height"
-
 msgid "IMC"
 msgstr "BMI"
+
+#| msgid "Editar avaliação"
+msgid "Ações da avaliação"
+msgstr "Assessment actions"
+
+msgid "Remover esta avaliação?"
+msgstr "Remove this assessment?"
+
+msgid "Altura"
+msgstr "Height"
 
 #, python-format
 msgid "%% gordura"
@@ -7385,9 +7391,6 @@ msgstr "Remove photo"
 
 msgid "Adicionar outra foto a esta avaliação"
 msgstr "Add another photo to this assessment"
-
-msgid "Remover esta avaliação?"
-msgstr "Remove this assessment?"
 
 msgid "Medidas em cm, peso em kg. Altura e peso geram o IMC."
 msgstr "Measurements in cm, weight in kg. Height and weight give the BMI."
