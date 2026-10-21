@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 09:30-0300\n"
+"POT-Creation-Date: 2026-10-21 15:35-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -265,6 +265,10 @@ msgstr "Schedule"
 
 msgid "Novo exercício"
 msgstr "New exercise"
+
+#| msgid "Informações"
+msgid "Importar animações"
+msgstr "Import animations"
 
 msgid "Novo treino"
 msgstr "New workout"
@@ -573,7 +577,6 @@ msgstr "Loose photo"
 msgid "Lenta"
 msgstr "Slow"
 
-#| msgid "Forma"
 msgid "Normal"
 msgstr "Normal"
 
@@ -668,15 +671,12 @@ msgstr "Keep the same time"
 msgid "Remover a imagem / mídia do exercício"
 msgstr "Remove the exercise's image / media"
 
-#| msgid "Situação inicial"
 msgid "Foto da posição inicial"
 msgstr "Starting position photo"
 
-#| msgid "Nome da posição"
 msgid "Foto da posição final"
 msgstr "Finishing position photo"
 
-#| msgid "Cidade"
 msgid "Velocidade"
 msgstr "Speed"
 
@@ -2885,6 +2885,38 @@ msgstr "Exercise updated successfully!"
 msgid "Editar exercício"
 msgstr "Edit exercise"
 
+#, python-format
+msgid "%(name)s: informe o nome e o grupo muscular."
+msgstr "%(name)s: enter the name and the muscle group."
+
+#, python-format
+msgid ""
+"%(name)s: já existe um exercício com esse nome. Use-o como destino ou mude o"
+" nome."
+msgstr ""
+"%(name)s: an exercise with that name already exists. Use it as the "
+"destination or change the name."
+
+#, python-format
+#| msgid "Um dos exercícios selecionados não existe mais."
+msgid "%(name)s: o exercício de destino não está mais disponível."
+msgstr "%(name)s: the destination exercise is no longer available."
+
+#, python-format
+msgid ""
+"Foram importados no máximo %(n)d de cada vez; escolha os demais de novo."
+msgstr "At most %(n)d are imported at a time; pick the others again."
+
+#, python-format
+#| msgid "Avaliação registrada."
+msgid "%(n)d animação importada."
+msgid_plural "%(n)d animações importadas."
+msgstr[0] "%(n)d animation imported."
+msgstr[1] "%(n)d animations imported."
+
+msgid "Nada foi escolhido para importar."
+msgstr "Nothing was picked to import."
+
 msgid "Erro ao processar exercícios."
 msgstr "Error processing exercises."
 
@@ -3293,6 +3325,42 @@ msgstr "Holiday not saved: %(errors)s"
 msgid "%(name)s saiu da lista."
 msgstr "%(name)s was removed from the list."
 
+msgid "Endereço fora do wger.de: não foi acessado."
+msgstr "Address outside wger.de: it was not fetched."
+
+msgid ""
+"Não foi possível falar com o wger.de agora. Verifique a internet do servidor"
+" e tente de novo."
+msgstr ""
+"Could not reach wger.de right now. Check the server's internet connection "
+"and try again."
+
+#, python-format
+msgid "O wger.de respondeu com erro (%(code)s). Tente de novo mais tarde."
+msgstr "wger.de answered with an error (%(code)s). Try again later."
+
+msgid "O wger.de respondeu algo que não foi entendido."
+msgstr "wger.de answered something that could not be understood."
+
+msgid "Uma imagem do wger.de é grande demais e foi ignorada."
+msgstr "An image from wger.de is too large and was skipped."
+
+#| msgid "Não foi possível enviar: %(detail)s."
+msgid "Não foi possível baixar a imagem do wger.de."
+msgstr "Could not download the image from wger.de."
+
+msgid "Uma imagem do wger.de não pôde ser lida."
+msgstr "An image from wger.de could not be read."
+
+#, python-format
+msgid "%(author)s, via wger.de; as duas imagens foram unidas em uma animação"
+msgstr ""
+"%(author)s, via wger.de; the two images were joined into one animation"
+
+#| msgid "Não foi possível enviar: %(detail)s."
+msgid "Não foi possível montar a animação."
+msgstr "Could not build the animation."
+
 #, python-brace-format
 msgid ""
 "Olá, {nome}! Passando para lembrar do pagamento do pacote {pacote}.\n"
@@ -3613,11 +3681,9 @@ msgstr "Canceled on %(status_changed_at)s,"
 msgid "Remarcada de <strong>%(starts_at)s</strong>"
 msgstr "Rescheduled from <strong>%(starts_at)s</strong>"
 
-#| msgid "Remover a imagem / mídia do exercício"
 msgid "Câmera guiada da animação do exercício"
 msgstr "Guided camera for the exercise animation"
 
-#| msgid "Situação inicial"
 msgid "1 de 2 · Posição inicial"
 msgstr "1 of 2 · Starting position"
 
@@ -3644,7 +3710,6 @@ msgstr "Vertical"
 msgid "Horizontal"
 msgstr "Horizontal"
 
-#| msgid "Situação inicial"
 msgid "Foto inicial"
 msgstr "Starting photo"
 
@@ -4519,7 +4584,6 @@ msgstr ""
 "Deletes the file, the thumbnail and the link when you save. If you upload "
 "another file now, it takes their place."
 
-#| msgid "Escreva o motivo da anulação."
 msgid "Gravar o movimento (animação)"
 msgstr "Record the movement (animation)"
 
@@ -4535,15 +4599,12 @@ msgstr ""
 msgid "Gravar com a câmera (guiado)"
 msgstr "Record with the camera (guided)"
 
-#| msgid "Situação inicial"
 msgid "Posição inicial"
 msgstr "Starting position"
 
-#| msgid "Posição"
 msgid "Posição final"
 msgstr "Finishing position"
 
-#| msgid "Última avaliação"
 msgid "Prévia da animação"
 msgstr "Animation preview"
 
@@ -4650,6 +4711,101 @@ msgid ""
 msgstr ""
 "<small class=\"text-muted d-block\">Last updated</small> "
 "<strong>%(updated_at)s</strong>"
+
+#, python-format
+#| msgid "Notificações - %(brand_name)s"
+msgid "Importar animações - %(brand_name)s"
+msgstr "Import animations - %(brand_name)s"
+
+msgid "Desenhos livres de exercícios, prontos para usar."
+msgstr "Free exercise drawings, ready to use."
+
+msgid "Tentar de novo"
+msgstr "Try again"
+
+msgid ""
+"São desenhos do projeto <strong>Everkinetic</strong> (Greg Priday), "
+"publicados no wger.de sob a licença <strong>CC BY-SA</strong>. Cada "
+"exercício mostra o início e o fim do movimento: ao importar, as duas imagens"
+" viram uma animação."
+msgstr ""
+"These are drawings by the <strong>Everkinetic</strong> project (Greg "
+"Priday), published on wger.de under the <strong>CC BY-SA</strong> licence. "
+"Each exercise shows the start and the end of the movement: on import, the "
+"two images become one animation."
+
+msgid ""
+"O crédito do autor, a licença e o link de origem ficam gravados no exercício"
+" e aparecem na página de créditos. Nada é salvo até você confirmar. Os "
+"exercícios que você já tem não são alterados: a animação só entra em um "
+"exercício seu que ainda está sem imagem."
+msgstr ""
+"The author's credit, the licence and the source link are saved with the "
+"exercise and shown on the credits page. Nothing is saved until you confirm. "
+"Exercises you already have are not changed: the animation only goes into one"
+" of yours that has no picture yet."
+
+msgid ""
+"A prévia carrega as miniaturas direto do wger.de. Os nomes vêm do wger (em "
+"inglês, quando não há tradução): ajuste como preferir antes de importar."
+msgstr ""
+"The preview loads the thumbnails straight from wger.de. The names come from "
+"wger (in English when there is no translation): adjust them as you like "
+"before importing."
+
+msgid "O wger.de não tem imagens que passem nos critérios agora."
+msgstr "wger.de has no images that meet the criteria right now."
+
+msgid "1 selecionado"
+msgstr "1 selected"
+
+#, python-brace-format
+msgid "{n} selecionados"
+msgstr "{n} selected"
+
+#, python-brace-format
+msgid "No máximo {max} de cada vez."
+msgstr "At most {max} at a time."
+
+#, python-format
+#| msgid "<strong>%(count)s</strong> exercício encontrado"
+#| msgid_plural "<strong>%(count)s</strong> exercícios encontrados"
+msgid "<strong>%(count)s</strong> exercício disponível"
+msgid_plural "<strong>%(count)s</strong> exercícios disponíveis"
+msgstr[0] "<strong>%(count)s</strong> exercise available"
+msgstr[1] "<strong>%(count)s</strong> exercises available"
+
+#| msgid "Marcadas"
+msgid "Marcar todos"
+msgstr "Select all"
+
+#| msgid "Remarcar"
+msgid "Desmarcar"
+msgstr "Clear"
+
+msgid "Já importado."
+msgstr "Already imported."
+
+msgid "Importar este"
+msgstr "Import this one"
+
+msgid "Onde colocar"
+msgstr "Where to put it"
+
+#| msgid "Editar exercício"
+msgid "Criar um exercício novo"
+msgstr "Create a new exercise"
+
+msgid "Usar em um exercício meu (sem imagem)"
+msgstr "Use in one of my exercises (no picture)"
+
+#| msgid "Voltar ao exercício"
+msgid "Grupo muscular (para o exercício novo)"
+msgstr "Muscle group (for the new exercise)"
+
+#| msgid "Voltar aos feriados"
+msgid "Importar selecionados"
+msgstr "Import selected"
 
 #, python-format
 msgid "Exercícios - %(brand_name)s"
@@ -8784,9 +8940,6 @@ msgid ""
 msgstr ""
 "Couldn't load this page. If you were working out, what you've already marked"
 " will be sent when the internet is back."
-
-msgid "Tentar de novo"
-msgstr "Try again"
 
 msgid "Treinos finalizados aguardando envio:"
 msgstr "Finished workouts waiting to be sent:"

@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load navigation static %}
+
+{% block title %}{% blocktrans trimmed %}Importar animações - {{ brand_name }}{% endblocktrans %}{% endblock %}
+
+{% block content %}
+<div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-cloud-arrow-down" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{% trans "Importar animações" %}</h1>
+            <p class="ui-sub">{% trans "Desenhos livres de exercícios, prontos para usar." %}</p>
+        </div>
+    </div>
+    <div class="ui-actions">
+        {% url 'core:exercise_list' as back_default %}{% back_button back_default %}
+    </div>
+</div>
+
+{% if error %}
+    <div class="alert alert-warning" role="alert">
+        <i class="bi bi-wifi-off" aria-hidden="true"></i> {{ error }}
+        <a href="{% url 'core:exercise_import' %}?refresh=1" class="alert-link ms-1">{% trans "Tentar de novo" %}</a>
+    </div>
+{% else %}
+<div class="card mb-3"><div class="card-body small">
+    <p class="mb-2">{% blocktrans trimmed %}
+        São desenhos do projeto <strong>Everkinetic</strong> (Greg Priday), publicados no wger.de sob a licença <strong>CC BY-SA</strong>.
+        Cada exercício mostra o início e o fim do movimento: ao importar, as duas imagens viram uma animação.
+    {% endblocktrans %}</p>
+    <p class="mb-2">{% blocktrans trimmed %}
+        O crédito do autor, a licença e o link de origem ficam gravados no exercício e aparecem na página de créditos.
+        Nada é salvo até você confirmar. Os exercícios que você já tem não são alterados: a animação só entra em um exercício seu que ainda está sem imagem.
+    {% endblocktrans %}</p>
+    <p class="mb-0 text-body-secondary">{% blocktrans trimmed %}
+        A prévia carrega as miniaturas direto do wger.de. Os nomes vêm do wger (em inglês, quando não há tradução): ajuste como preferir antes de importar.
+    {% endblocktrans %}</p>
+</div></div>
+
+{% if not rows %}
+    {% trans "O wger.de não tem imagens que passem nos critérios agora." as empty_text %}
+    {% include 'core/ui/_empty.html' with icon='bi-cloud-slash' text=empty_text %}
+{% else %}
+<form method="post" data-wger-import data-max="{{ max_at_once }}" data-text-one="{% trans "1 selecionado" %}" data-text-many="{% trans "{n} selecionados" %}" data-text-limit="{% trans "No máximo {max} de cada vez." %}">
+    {% csrf_token %}
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+        <div class="ui-count">{% blocktrans trimmed count count=rows|length %}<strong>{{ count }}</strong> exercício disponível{% plural %}<strong>{{ count }}</strong> exercícios disponíveis{% endblocktrans %}</div>
+        <button type="button" class="btn btn-sm btn-outline-secondary ms-auto" data-select-all>{% trans "Marcar todos" %}</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-select-none>{% trans "Desmarcar" %}</button>
+    </div>
+
+    <div class="row g-3">
+    {% for row in rows %}
+        <div class="col-12 col-md-6 col-xl-4">
+            <div class="ui-card flat {% if row.done %}muted{% endif %}">
+                <div class="card-body">
+                    <div class="wger-anim mb-3" aria-hidden="true">
+                        {% for image in row.images %}<img src="{{ image.thumb }}" alt="" loading="lazy" referrerpolicy="no-referrer">{% endfor %}
+                    </div>
+                    {% if row.done %}
+                        <h2 class="h6 mb-1">{{ row.name }}</h2>
+                        <p class="small text-body-secondary mb-0"><i class="bi bi-check-circle" aria-hidden="true"></i> {% trans "Já importado." %}</p>
+                    {% else %}
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" name="pick" value="{{ row.id }}" id="pick_{{ row.id }}" data-pick>
+                            <label class="form-check-label fw-semibold" for="pick_{{ row.id }}">{% trans "Importar este" %}</label>
+                        </div>
+                        <label class="form-label small mb-1" for="name_{{ row.id }}">{% trans "Nome" %}</label>
+                        <input type="text" class="form-control form-control-sm mb-2" name="name_{{ row.id }}" id="name_{{ row.id }}" value="{{ row.name }}" maxlength="200">
+                        <label class="form-label small mb-1" for="target_{{ row.id }}">{% trans "Onde colocar" %}</label>
+                        <select class="form-select form-select-sm mb-2" name="target_{{ row.id }}" id="target_{{ row.id }}">
+                            <option value="new">{% trans "Criar um exercício novo" %}</option>
+                            {% if targets %}<optgroup label="{% trans 'Usar em um exercício meu (sem imagem)' %}">
+                                {% for target in targets %}<option value="{{ target.pk }}" {% if target.pk == row.match %}selected{% endif %}>{{ target.exercise_name }}</option>{% endfor %}
+                            </optgroup>{% endif %}
+                        </select>
+                        <label class="form-label small mb-1" for="group_{{ row.id }}">{% trans "Grupo muscular (para o exercício novo)" %}</label>
+                        <select class="form-select form-select-sm" name="group_{{ row.id }}" id="group_{{ row.id }}">
+                            {% for pk, label in groups %}<option value="{{ pk }}" {% if pk == row.group_pk %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                        </select>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+
+    <div class="wger-import-bar mt-3">
+        <div class="card shadow-sm"><div class="card-body d-flex flex-wrap align-items-center gap-2 py-2">
+            <span class="small text-body-secondary" data-count-label aria-live="polite"></span>
+            <button type="submit" class="btn btn-primary ms-auto" data-submit disabled><i class="bi bi-cloud-arrow-down" aria-hidden="true"></i> {% trans "Importar selecionados" %}</button>
+        </div></div>
+    </div>
+</form>
+<script src="{% static 'js/exercise_import.js' %}" defer></script>
+{% endif %}
+{% endif %}
+{% endblock %}

@@ -83,6 +83,7 @@ urlpatterns = [
     # Exercises
     path('exercises/', views.exercise_list, name='exercise_list'),
     path('exercises/create/', views.exercise_create, name='exercise_create'),
+    path('exercises/import/', views.exercise_import, name='exercise_import'),
     path('exercises/<int:pk>/', views.exercise_detail, name='exercise_detail'),
     path('exercises/<int:pk>/edit/', views.exercise_edit, name='exercise_edit'),
 

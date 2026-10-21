@@ -151,6 +151,10 @@ def _exercise_create(request, ctx):
     return [_home(), _exercises(), (_('Novo exercício'), None)]
 
 
+def _exercise_import(request, ctx):
+    return [_home(), _exercises(), (_('Importar animações'), None)]
+
+
 def _exercise_detail(request, ctx):
     return [_home(), _exercises(), (ctx['exercise'].exercise_name, None)]
 
@@ -245,6 +249,7 @@ TRAILS = {
     'session_detail': _session_detail,
     'exercise_list': _exercise_list,
     'exercise_create': _exercise_create,
+    'exercise_import': _exercise_import,
     'exercise_detail': _exercise_detail,
     'exercise_edit': _exercise_edit,
     'routine_list': _routine_list,

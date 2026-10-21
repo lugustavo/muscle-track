@@ -29,7 +29,7 @@ from django.views.decorators.http import require_POST, require_safe
 from allauth.account.models import EmailAddress
 
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, last_activity, trainer_dashboard
-from . import backup_status, credits, inbox, photo_guides, photo_positions, telegram, workout_offline
+from . import backup_status, credits, inbox, photo_guides, photo_positions, telegram, wger_import, workout_offline
 from .i18n import short_date
 from .listing import filter_tags, remember_view, view_mode as list_view_mode
 from .forms import (
@@ -1188,6 +1188,78 @@ def exercise_edit(request, pk):
     else:
         form = ExerciseForm(instance=exercise)
     return render(request, 'core/exercise_form.html', {'form': form, 'title': _('Editar exercício')})
+
+
+def _import_targets():
+    """The trainer's active exercises that have no picture yet: where an imported animation may go."""
+    return Exercise.objects.filter(is_active=True, media_url='').filter(Q(media_file='') | Q(media_file__isnull=True)).order_by('exercise_name')
+
+
+@staff_required
+def exercise_import(request):
+    """Animations for the exercises from wger (open drawings): a preview first, nothing is saved until confirmed."""
+    refresh = request.method == 'GET' and request.GET.get('refresh') == '1'
+    try:
+        entries = wger_import.catalog(refresh=refresh)
+    except wger_import.WgerError as error:
+        return render(request, 'core/exercise_import.html', {'error': str(error)})
+
+    groups = list(MuscleGroup.objects.filter(is_active=True).order_by('order', 'name'))
+    targets = {e.pk: e for e in _import_targets()}
+
+    if request.method == 'POST':
+        done = wger_import.imported_urls()
+        taken = {wger_import.normalize(n) for n in Exercise.objects.filter(is_active=True).values_list('exercise_name', flat=True)}
+        group_by_pk = {str(g.pk): g for g in groups}
+        picked = [e for e in entries if str(e['id']) in set(request.POST.getlist('pick')) and e['page_url'] not in done]
+        plan, problems = [], []
+        for entry in picked[:wger_import.MAX_IMPORT_AT_ONCE]:
+            name = (request.POST.get(f'name_{entry["id"]}') or entry['name']).strip()[:200]
+            choice = request.POST.get(f'target_{entry["id"]}', 'new')
+            if choice == 'new':
+                group = group_by_pk.get(request.POST.get(f'group_{entry["id"]}', ''))
+                if not name or group is None:
+                    problems.append(_('%(name)s: informe o nome e o grupo muscular.') % {'name': entry['name']})
+                elif wger_import.normalize(name) in taken:
+                    problems.append(_('%(name)s: já existe um exercício com esse nome. Use-o como destino ou mude o nome.') % {'name': name})
+                else:
+                    taken.add(wger_import.normalize(name))
+                    plan.append((entry, name, group, None))
+            elif choice.isdigit() and int(choice) in targets:
+                plan.append((entry, name, None, targets.pop(int(choice))))
+            else:
+                problems.append(_('%(name)s: o exercício de destino não está mais disponível.') % {'name': entry['name']})
+        saved = 0
+        for (entry, built), (_entry, name, group, target) in zip(wger_import.build_all([p[0] for p in plan]), plan):
+            if isinstance(built, wger_import.WgerError):
+                problems.append(f'{entry["name"]}: {built}')
+                continue
+            with transaction.atomic():
+                wger_import.store(entry, built[0], built[1], name, group, target)
+            saved += 1
+        if len(picked) > wger_import.MAX_IMPORT_AT_ONCE:
+            problems.append(_('Foram importados no máximo %(n)d de cada vez; escolha os demais de novo.') % {'n': wger_import.MAX_IMPORT_AT_ONCE})
+        if saved:
+            messages.success(request, ngettext('%(n)d animação importada.', '%(n)d animações importadas.', saved) % {'n': saved})
+        for problem in problems:
+            messages.warning(request, problem)
+        if not saved and not problems:
+            messages.info(request, _('Nada foi escolhido para importar.'))
+        return redirect('core:exercise_list' if saved and not problems else 'core:exercise_import')
+
+    done = wger_import.imported_urls()
+    by_name = {}
+    for pk, exercise in targets.items():
+        by_name.setdefault(wger_import.normalize(exercise.exercise_name), pk)
+    group_by_name = {g.name: g.pk for g in groups}
+    rows = []
+    for entry in entries:
+        match = by_name.get(wger_import.normalize(entry['name'])) or by_name.get(wger_import.normalize(entry['english']))
+        rows.append({**entry, 'done': entry['page_url'] in done, 'match': match, 'group_pk': group_by_name.get(entry['group'])})
+    return render(request, 'core/exercise_import.html', {
+        'rows': rows, 'groups': [(g.pk, g.label) for g in groups], 'targets': list(targets.values()),
+        'pending': sum(1 for r in rows if not r['done']), 'max_at_once': wger_import.MAX_IMPORT_AT_ONCE,
+    })
 
 
 # ============= ROUTINE VIEWS =============
