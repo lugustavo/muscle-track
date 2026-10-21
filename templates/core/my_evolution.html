@@ -6,20 +6,18 @@
 
 {% block content %}
 <div class="mx-auto" style="max-width: 720px;">
-    <div class="ui-head inline">
-    <div class="ui-title">
-        <span class="ui-ico"><i class="bi bi-rulers" aria-hidden="true"></i></span>
-        <div class="min-w-0">
-            <h1>{% trans "Minha evolução" %}</h1>
+    <div class="ui-head">
+        <div class="ui-title">
+            <span class="ui-ico"><i class="bi bi-rulers" aria-hidden="true"></i></span>
+            <div class="min-w-0">
+                <h1>{% trans "Minha evolução" %}</h1>
+            </div>
+        </div>
+        <div class="ui-actions fill">
+            {% if can_compare %}<a href="{% url 'core:my_evolution_compare' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-layout-split"></i> {% trans "Comparar fotos" %}</a>{% endif %}
+            <a href="{% nav_url 'core:my_photo_upload' %}" class="btn btn-sm btn-primary" data-add-photo><i class="bi bi-camera"></i> {% trans "Enviar foto" %}</a>
         </div>
     </div>
-    <div class="ui-actions">
-        <div class="d-flex gap-2">
-                {% if can_compare %}<a href="{% url 'core:my_evolution_compare' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-layout-split"></i> {% trans "Comparar fotos" %}</a>{% endif %}
-                <a href="{% nav_url 'core:my_photo_upload' %}" class="btn btn-sm btn-primary" data-add-photo><i class="bi bi-camera"></i> {% trans "Enviar foto" %}</a>
-            </div>
-    </div>
-</div>
 
     {% if assessment_chart %}
     <div class="card mb-3"><div class="card-body">
@@ -44,13 +42,13 @@
             {% if not a.shown_measures %}<div class="small text-muted mt-1">{% trans "Sem medidas nesta avaliação." %}</div>{% endif %}
             <div class="d-flex flex-wrap gap-2 mt-3">
                 {% for slot in a.photo_slots %}{% if slot.photo %}
-                <a href="{% url 'core:photo_file' slot.photo.pk %}" target="_blank" rel="noopener" class="text-center text-decoration-none" style="width: 76px;">
+                <a href="{% url 'core:photo_file' slot.photo.pk %}" data-photo-view class="text-center text-decoration-none" style="width: 76px;">
                     <img src="{% url 'core:photo_thumb' slot.photo.pk %}" loading="lazy" alt="{% blocktrans trimmed with label=slot.label date=a.date|date:_('d/m/Y') %}{{ label }} em {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
                     <div class="small text-muted lh-sm">{{ slot.label }}</div>
                 </a>
                 {% endif %}{% endfor %}
                 {% for photo in a.other_photos %}
-                <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener" class="text-center text-decoration-none" style="width: 76px;">
+                <a href="{% url 'core:photo_file' photo.pk %}" data-photo-view class="text-center text-decoration-none" style="width: 76px;">
                     <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="{% blocktrans trimmed with date=a.date|date:_('d/m/Y') %}Foto de {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
                     <div class="small text-muted lh-sm">{{ photo.caption|default:photo.angle_label }}</div>
                 </a>
@@ -70,7 +68,7 @@
     <div class="d-flex flex-wrap gap-2" data-loose-photos>
         {% for photo in loose_photos %}
         <div class="text-center" style="width: 76px;" data-loose-photo="{{ photo.pk }}">
-            <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener" class="text-decoration-none">
+            <a href="{% url 'core:photo_file' photo.pk %}" data-photo-view class="text-decoration-none">
                 <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="{% blocktrans trimmed with date=photo.date|date:_('d/m/Y') %}Foto de {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
                 <div class="small text-muted lh-sm">{{ photo.date|date:_('d/m/Y') }}{% if photo.angle != 'other' %}<br>{{ photo.angle_label }}{% endif %}</div>
             </a>

@@ -57,7 +57,7 @@
                 {% for slot in a.photo_slots %}
                 <div class="text-center photo-tile" data-angle="{{ slot.angle }}">
                     {% if slot.photo %}
-                    <a href="{% url 'core:photo_file' slot.photo.pk %}" target="_blank" rel="noopener" title="{% blocktrans trimmed with label=slot.label %}Abrir foto: {{ label }}{% endblocktrans %}">
+                    <a href="{% url 'core:photo_file' slot.photo.pk %}" data-photo-view title="{% blocktrans trimmed with label=slot.label %}Abrir foto: {{ label }}{% endblocktrans %}">
                         <img src="{% url 'core:photo_thumb' slot.photo.pk %}" loading="lazy" alt="{% blocktrans trimmed with label=slot.label date=a.date|date:_('d/m/Y') %}{{ label }} em {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
                     </a>
                     {% else %}
@@ -76,7 +76,7 @@
                 {% endfor %}
                 {% for photo in a.other_photos %}
                 <div class="text-center photo-tile">
-                    <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener"><img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="{% blocktrans trimmed with date=a.date|date:_('d/m/Y') %}Foto de {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;"></a>
+                    <a href="{% url 'core:photo_file' photo.pk %}" data-photo-view><img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="{% blocktrans trimmed with date=a.date|date:_('d/m/Y') %}Foto de {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;"></a>
                     <div class="small text-muted lh-sm mt-1">{{ photo.caption|default:photo.angle_label }}</div>
                     <form method="post" action="{% nav_url 'core:photo_delete' photo.pk %}" class="d-inline" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta foto?" %}{% endfilter %}');">
                         {% csrf_token %}
@@ -103,7 +103,7 @@
     {% for photo in loose_photos %}
     <div class="col-4 col-md-3 col-lg-2">
         <div class="card h-100">
-            <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener">
+            <a href="{% url 'core:photo_file' photo.pk %}" data-photo-view>
                 <img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" class="card-img-top" alt="{% blocktrans trimmed with date=photo.date|date:_('d/m/Y') %}Foto de {{ date }}{% endblocktrans %}" style="aspect-ratio: 3/4; object-fit: cover;">
             </a>
             <div class="card-body py-1 small">
