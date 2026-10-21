@@ -7,6 +7,7 @@ import requests
 from django.core.cache import cache
 from django.test import SimpleTestCase, override_settings
 from django.urls import reverse
+from django.utils import translation
 from PIL import Image
 
 from core import wger_import
@@ -34,7 +35,15 @@ def png(color, size=(120, 60), alpha=255):
     return out.getvalue()
 
 
-class SelectionTests(SimpleTestCase):
+class PortugueseMixin:
+    """The messages are asserted in Portuguese: a test run earlier must not leave another language active."""
+    def setUp(self):
+        super().setUp()
+        translation.activate('pt-br')
+        self.addCleanup(translation.deactivate)
+
+
+class SelectionTests(PortugueseMixin, SimpleTestCase):
     def pairs(self, *rows):
         return wger_import.trusted_pairs(list(rows))
 
@@ -94,7 +103,7 @@ class FakeResponse:
         pass
 
 
-class NetworkSafetyTests(SimpleTestCase):
+class NetworkSafetyTests(PortugueseMixin, SimpleTestCase):
     def test_only_wger_addresses_are_fetched(self):
         with mock.patch('core.wger_import.requests.get') as get:
             for url in ('https://evil.example/media/x.png', 'http://wger.de/media/x.png', 'https://wger.de.evil.example/media/x.png',
