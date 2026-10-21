@@ -6,6 +6,8 @@
 
 {% block title %}{% blocktrans trimmed %}{{ title }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/camera_guides.css' %}">{% endblock %}
+
 {% block content %}
 <div class="ui-head inline">
     <div class="ui-title">
@@ -139,6 +141,45 @@
                         </div>
                     </div>
                     {% endif %}
+
+                    <!-- Animação a partir de duas fotos (câmera guiada: static/js/exercise_capture.js) -->
+                    <div class="border rounded p-3 mb-3" data-anim>
+                        <div class="fw-bold mb-1"><i class="bi bi-camera-reels"></i> {% trans "Gravar o movimento (animação)" %}</div>
+                        <p class="small text-muted mb-2">{% trans "Tire duas fotos do mesmo lugar: a posição inicial e a final do exercício. O app junta as duas numa animação que repete sozinha. Apoie o celular (ou peça a alguém) para ele não mexer entre as fotos." %}</p>
+                        <div class="mb-2" data-anim-record hidden>
+                            <button type="button" class="btn btn-primary" data-anim-open><i class="bi bi-camera"></i> {% trans "Gravar com a câmera (guiado)" %}</button>
+                        </div>
+                        <div class="small text-muted mb-2" data-anim-help role="status" hidden></div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label for="{{ form.anim_start.id_for_label }}" class="form-label small fw-bold mb-1">{% trans "Posição inicial" %}</label>
+                                <input type="file" name="{{ form.anim_start.name }}" id="{{ form.anim_start.id_for_label }}" accept="image/*" class="form-control form-control-sm {% if form.anim_start.errors %}is-invalid{% endif %}" data-anim-start>
+                                {% if form.anim_start.errors %}<div class="invalid-feedback">{{ form.anim_start.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-6">
+                                <label for="{{ form.anim_end.id_for_label }}" class="form-label small fw-bold mb-1">{% trans "Posição final" %}</label>
+                                <input type="file" name="{{ form.anim_end.name }}" id="{{ form.anim_end.id_for_label }}" accept="image/*" class="form-control form-control-sm {% if form.anim_end.errors %}is-invalid{% endif %}" data-anim-end>
+                                {% if form.anim_end.errors %}<div class="invalid-feedback">{{ form.anim_end.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+                        <div class="text-center mb-2" data-anim-preview hidden>
+                            <img alt="{% trans "Prévia da animação" %}" class="rounded" style="max-height: 14rem; max-width: 100%;" data-anim-img>
+                        </div>
+                        <div class="d-flex flex-wrap gap-3 align-items-end">
+                            <div>
+                                <label for="{{ form.anim_speed.id_for_label }}" class="form-label small mb-1">{% trans "Velocidade" %}</label>
+                                <select name="{{ form.anim_speed.name }}" id="{{ form.anim_speed.id_for_label }}" class="form-select form-select-sm">
+                                    {% for value, label in form.anim_speed.field.choices %}<option value="{{ value }}" {% if value == 'normal' %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-check mb-1">
+                                <input class="form-check-input" type="checkbox" name="{{ form.anim_smooth.name }}" id="{{ form.anim_smooth.id_for_label }}" value="on">
+                                <label class="form-check-label small" for="{{ form.anim_smooth.id_for_label }}">{% trans "Transição suave entre as posições" %}</label>
+                            </div>
+                        </div>
+                        <div class="form-text">{% trans "Ao salvar, a animação substitui a mídia atual deste exercício." %}</div>
+                    </div>
+                    {% include 'core/_exercise_camera.html' %}
 
                     <div class="mb-3">
                         <label for="{{ form.media_type.id_for_label }}" class="form-label fw-bold">
@@ -341,6 +382,8 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/photo_guides.js' %}"></script>
+<script src="{% static 'js/exercise_capture.js' %}"></script>
 <script>
 // Preview de imagem ao selecionar arquivo thumbnail
 const thumbnailInput = document.getElementById('{{ form.thumbnail.id_for_label }}');

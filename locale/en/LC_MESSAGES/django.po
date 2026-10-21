@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 09:16-0300\n"
+"POT-Creation-Date: 2026-10-21 09:30-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -570,6 +570,16 @@ msgstr "Sent by the student"
 msgid "Foto avulsa"
 msgstr "Loose photo"
 
+msgid "Lenta"
+msgstr "Slow"
+
+#| msgid "Forma"
+msgid "Normal"
+msgstr "Normal"
+
+msgid "Rápida"
+msgstr "Fast"
+
 msgid "email@exemplo.com"
 msgstr "email@example.com"
 
@@ -655,9 +665,30 @@ msgstr "Note"
 msgid "Continuar o mesmo horário"
 msgstr "Keep the same time"
 
-#| msgid "Mídia do exercício"
 msgid "Remover a imagem / mídia do exercício"
 msgstr "Remove the exercise's image / media"
+
+#| msgid "Situação inicial"
+msgid "Foto da posição inicial"
+msgstr "Starting position photo"
+
+#| msgid "Nome da posição"
+msgid "Foto da posição final"
+msgstr "Finishing position photo"
+
+#| msgid "Cidade"
+msgid "Velocidade"
+msgstr "Speed"
+
+msgid "Transição suave entre as posições"
+msgstr "Smooth transition between the positions"
+
+msgid "Envie as duas fotos: a posição inicial e a final."
+msgstr "Send both photos: the starting and the finishing position."
+
+msgid "Escolha só uma: um arquivo de mídia ou a animação das duas fotos."
+msgstr ""
+"Choose only one: a media file or the animation made of the two photos."
 
 msgid "Descrição do treino"
 msgstr "Workout description"
@@ -3582,6 +3613,44 @@ msgstr "Canceled on %(status_changed_at)s,"
 msgid "Remarcada de <strong>%(starts_at)s</strong>"
 msgstr "Rescheduled from <strong>%(starts_at)s</strong>"
 
+#| msgid "Remover a imagem / mídia do exercício"
+msgid "Câmera guiada da animação do exercício"
+msgstr "Guided camera for the exercise animation"
+
+#| msgid "Situação inicial"
+msgid "1 de 2 · Posição inicial"
+msgstr "1 of 2 · Starting position"
+
+msgid "2 de 2 · Posição final"
+msgstr "2 of 2 · Finishing position"
+
+msgid ""
+"Apoie o celular e enquadre o corpo inteiro. Fique na posição de partida do "
+"exercício."
+msgstr ""
+"Prop up the phone and frame the whole body. Get into the starting position "
+"of the exercise."
+
+msgid ""
+"Não mexa o celular: vá até a posição final e alinhe com o contorno da foto "
+"anterior."
+msgstr ""
+"Do not move the phone: go to the finishing position and line up with the "
+"outline of the previous photo."
+
+msgid "Vertical"
+msgstr "Vertical"
+
+msgid "Horizontal"
+msgstr "Horizontal"
+
+#| msgid "Situação inicial"
+msgid "Foto inicial"
+msgstr "Starting photo"
+
+msgid "Refazer a inicial"
+msgstr "Redo the starting one"
+
 #, python-format
 msgid "Comprado em %(sold_on)s"
 msgstr "Purchased on %(sold_on)s"
@@ -4449,6 +4518,37 @@ msgid ""
 msgstr ""
 "Deletes the file, the thumbnail and the link when you save. If you upload "
 "another file now, it takes their place."
+
+#| msgid "Escreva o motivo da anulação."
+msgid "Gravar o movimento (animação)"
+msgstr "Record the movement (animation)"
+
+msgid ""
+"Tire duas fotos do mesmo lugar: a posição inicial e a final do exercício. O "
+"app junta as duas numa animação que repete sozinha. Apoie o celular (ou peça"
+" a alguém) para ele não mexer entre as fotos."
+msgstr ""
+"Take two photos from the same spot: the starting and the finishing position "
+"of the exercise. The app joins them into an animation that loops by itself. "
+"Prop up the phone (or ask someone) so it does not move between the photos."
+
+msgid "Gravar com a câmera (guiado)"
+msgstr "Record with the camera (guided)"
+
+#| msgid "Situação inicial"
+msgid "Posição inicial"
+msgstr "Starting position"
+
+#| msgid "Posição"
+msgid "Posição final"
+msgstr "Finishing position"
+
+#| msgid "Última avaliação"
+msgid "Prévia da animação"
+msgstr "Animation preview"
+
+msgid "Ao salvar, a animação substitui a mídia atual deste exercício."
+msgstr "When you save, the animation replaces this exercise's current media."
 
 msgid "Tipo de mídia"
 msgstr "Media type"
