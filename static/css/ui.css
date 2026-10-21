@@ -237,3 +237,18 @@ input[type="radio"], input[type="checkbox"], input[type="range"] { accent-color:
 .photo-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 84px)); gap: .5rem .4rem; align-items: start; }
 .photo-tile { min-width: 0; }
 .photo-tile .small { overflow-wrap: anywhere; }
+
+/* One title bar for every content card: soft surface, brand accent, a bold 1rem title and a brand-colored leading icon.
+   The dashboard tiles (icon-chip titles) and the semantic bars (warning) keep their own look. */
+.card > .card-header:not([class*="bg-warning"]):not(:has(.ui-sec)) { border-left: 4px solid var(--primary-color); font-weight: 600; }
+.card-header :is(h5, h6) { font-size: 1rem; font-weight: 700; margin: 0; }
+.card-header :is(h5, h6, strong) > .bi:first-child:not([class*="text-"]) { color: var(--primary-color); }
+
+/* Long cards fold up when their title bar is clicked (static/js/card-collapse.js) */
+.card-toggle { cursor: pointer; user-select: none; }
+.card-toggle .card-toggle-main { flex: 1 1 auto; min-width: 0; }
+.card-toggle .card-chevron { flex: 0 0 auto; margin-left: .5rem; color: var(--bs-secondary-color); transition: transform .2s; }
+.card-toggle[aria-expanded="false"] .card-chevron { transform: rotate(-90deg); }
+.card-toggle:focus-visible { outline: 2px solid var(--primary-color); outline-offset: -2px; }
+.card.is-collapsed { height: auto !important; }
+.card.is-collapsed > .card-header { border-bottom: 0; }
