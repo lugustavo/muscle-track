@@ -53,6 +53,18 @@ class SwipeListsTests(RichDataMixin, BaseTestCase):
         self.assertIn('data-bs-toggle="dropdown"', section)
         self.assertIn('60,00 kg', section)                      # the header carries the weight
 
+    def test_adding_a_photo_is_in_the_menu_and_the_photos_sit_in_a_four_column_grid(self):
+        section = self.page.split('data-assessments', 1)[1].split('</ul>\n<p class="text-muted small mt-2">', 1)[0]
+        menu = section.split('data-assessment-menu', 1)[1].split('</ul>', 1)[0]
+        self.assertIn('data-assessment-add-photo', menu)
+        self.assertIn(f'assessment={self.assessment.pk}&amp;angle=other', menu)
+        self.assertLess(menu.index('data-assessment-add-photo'), menu.index(reverse('core:assessment_edit', kwargs={'pk': self.assessment.pk})))
+        strip = section.split('data-photo-strip', 1)[1]
+        self.assertIn('photo-grid', strip)
+        self.assertNotIn('angle=other', strip)                      # no loose "Foto" button among the photos
+        self.assertNotIn('width: 84px', strip)                      # the tile width comes from the grid
+        self.assertIn('repeat(4, minmax(0, 84px))', static_text('css/ui.css'))
+
     def test_the_menu_becomes_inline_icons_from_md_up(self):
         css = static_text('css/ui.css')
         self.assertIn('.row-menu .dropdown-menu { display: flex; position: static;', css)

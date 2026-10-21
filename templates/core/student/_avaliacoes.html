@@ -30,6 +30,7 @@
                 <div class="dropdown row-menu ms-auto" data-assessment-menu>
                     <button class="btn btn-sm btn-link text-body-secondary px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{% trans "Ações da avaliação" %}"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button>
                     <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% nav_url 'core:photo_upload' student.pk %}&amp;assessment={{ a.pk }}&amp;angle=other" title="{% trans "Adicionar outra foto a esta avaliação" %}" data-assessment-add-photo><i class="bi bi-camera" aria-hidden="true"></i> <span class="menu-label">{% trans "Adicionar foto" %}</span></a></li>
                         <li><a class="dropdown-item" href="{% nav_url 'core:assessment_edit' a.pk %}" title="{% trans "Editar" %}"><i class="bi bi-pencil" aria-hidden="true"></i> <span class="menu-label">{% trans "Editar" %}</span></a></li>
                         <li>
                             <form method="post" action="{% nav_url 'core:assessment_delete' a.pk %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta avaliação?" %}{% endfilter %}');">
@@ -52,9 +53,9 @@
                 <div class="{% if a.thigh_cm is None %}is-empty{% endif %}"><dt>{% trans "Coxa" %}</dt><dd>{{ a.thigh_cm|default_if_none:"-" }}</dd></div>
             </dl>
             <div class="bg-body-tertiary rounded p-2" data-photo-strip="{{ a.pk }}">
-            <div class="d-flex flex-wrap gap-2 align-items-start">
+            <div class="photo-grid">
                 {% for slot in a.photo_slots %}
-                <div class="text-center" style="width: 84px;" data-angle="{{ slot.angle }}">
+                <div class="text-center photo-tile" data-angle="{{ slot.angle }}">
                     {% if slot.photo %}
                     <a href="{% url 'core:photo_file' slot.photo.pk %}" target="_blank" rel="noopener" title="{% blocktrans trimmed with label=slot.label %}Abrir foto: {{ label }}{% endblocktrans %}">
                         <img src="{% url 'core:photo_thumb' slot.photo.pk %}" loading="lazy" alt="{% blocktrans trimmed with label=slot.label date=a.date|date:_('d/m/Y') %}{{ label }} em {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
@@ -74,7 +75,7 @@
                 </div>
                 {% endfor %}
                 {% for photo in a.other_photos %}
-                <div class="text-center" style="width: 84px;">
+                <div class="text-center photo-tile">
                     <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener"><img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="{% blocktrans trimmed with date=a.date|date:_('d/m/Y') %}Foto de {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;"></a>
                     <div class="small text-muted lh-sm mt-1">{{ photo.caption|default:photo.angle_label }}</div>
                     <form method="post" action="{% nav_url 'core:photo_delete' photo.pk %}" class="d-inline" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta foto?" %}{% endfilter %}');">
@@ -83,7 +84,6 @@
                     </form>
                 </div>
                 {% endfor %}
-                <a href="{% nav_url 'core:photo_upload' student.pk %}&amp;assessment={{ a.pk }}&amp;angle=other" class="btn btn-sm btn-outline-secondary ms-auto" title="{% trans "Adicionar outra foto a esta avaliação" %}"><i class="bi bi-camera"></i> {% trans "Foto" %}</a>
             </div>
 
             </div>
