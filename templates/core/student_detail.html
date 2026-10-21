@@ -5,6 +5,8 @@
 
 {% block title %}{% blocktrans trimmed with person_name=student.person_name %}{{ person_name }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/swipe-rows.css' %}">{% endblock %}
+
 {% block content %}
 <div class="ui-head">
     <div class="ui-title">
@@ -288,6 +290,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/swipe-rows.js' %}"></script>
 <script src="{% static 'js/recurrence.js' %}"></script>
 <script src="{% static 'vendor/chartjs/4.4.0/chart.umd.js' %}"></script>
 <script src="{% static 'js/chart-theme.js' %}"></script>

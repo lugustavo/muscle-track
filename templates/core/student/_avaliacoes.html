@@ -20,79 +20,71 @@
 {% endif %}
 
 {% if assessments %}
-<div class="card">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead>
-                <tr>
-                    <th>{% trans "Data" %}</th><th class="text-end">{% trans "Peso" %}</th><th class="text-end">{% trans "Altura" %}</th><th class="text-end">{% trans "IMC" %}</th>
-                    <th class="text-end">{% trans "% gordura" %}</th><th class="text-end">{% trans "Peito" %}</th><th class="text-end">{% trans "Cintura" %}</th>
-                    <th class="text-end">{% trans "Quadril" %}</th><th class="text-end">{% trans "Braço" %}</th><th class="text-end">{% trans "Coxa" %}</th><th></th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for a in assessments %}
-                <tr>
-                    <td>{{ a.date|date:_('d/m/Y') }}{% if a.notes %} <i class="bi bi-chat-left-text text-muted" title="{{ a.notes }}"></i>{% endif %}</td>
-                    <td class="text-end">{{ a.weight_kg|default_if_none:"-" }}</td>
-                    <td class="text-end">{{ a.height_cm|default_if_none:"-" }}</td>
-                    <td class="text-end">{{ a.bmi|default_if_none:"-" }}</td>
-                    <td class="text-end">{{ a.body_fat_pct|default_if_none:"-" }}</td>
-                    <td class="text-end">{{ a.chest_cm|default_if_none:"-" }}</td>
-                    <td class="text-end">{{ a.waist_cm|default_if_none:"-" }}</td>
-                    <td class="text-end">{{ a.hip_cm|default_if_none:"-" }}</td>
-                    <td class="text-end">{{ a.arm_cm|default_if_none:"-" }}</td>
-                    <td class="text-end">{{ a.thigh_cm|default_if_none:"-" }}</td>
-                    <td class="text-end text-nowrap">
-                        <a href="{% nav_url 'core:assessment_edit' a.pk %}" class="btn btn-sm btn-outline-secondary" title="{% trans "Editar" %}"><i class="bi bi-pencil"></i></a>
-                        <form method="post" action="{% nav_url 'core:assessment_delete' a.pk %}" class="d-inline" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta avaliação?" %}{% endfilter %}');">
-                            {% csrf_token %}
-                            <button class="btn btn-sm btn-outline-danger" title="{% trans "Remover" %}"><i class="bi bi-trash"></i></button>
-                        </form>
-                    </td>
-                </tr>
-                <tr data-photo-strip="{{ a.pk }}">
-                    <td colspan="11" class="bg-body-tertiary py-2">
-                        <div class="d-flex flex-wrap gap-2 align-items-start">
-                            {% for slot in a.photo_slots %}
-                            <div class="text-center" style="width: 84px;" data-angle="{{ slot.angle }}">
-                                {% if slot.photo %}
-                                <a href="{% url 'core:photo_file' slot.photo.pk %}" target="_blank" rel="noopener" title="{% blocktrans trimmed with label=slot.label %}Abrir foto: {{ label }}{% endblocktrans %}">
-                                    <img src="{% url 'core:photo_thumb' slot.photo.pk %}" loading="lazy" alt="{% blocktrans trimmed with label=slot.label date=a.date|date:_('d/m/Y') %}{{ label }} em {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
-                                </a>
-                                {% else %}
-                                <a href="{% nav_url 'core:photo_upload' student.pk %}&amp;assessment={{ a.pk }}&amp;angle={{ slot.angle }}" class="d-flex flex-column align-items-center justify-content-center rounded border border-2 border-dashed text-muted text-decoration-none w-100" style="aspect-ratio: 3/4;" title="{% blocktrans trimmed with label=slot.label %}Adicionar foto: {{ label }}{% endblocktrans %}">
-                                    <i class="bi bi-plus-lg fs-5"></i>
-                                </a>
-                                {% endif %}
-                                <div class="small text-muted lh-sm mt-1">{{ slot.label }}</div>
-                                {% if slot.photo %}
-                                <form method="post" action="{% nav_url 'core:photo_delete' slot.photo.pk %}" class="d-inline" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta foto?" %}{% endfilter %}');">
-                                    {% csrf_token %}
-                                    <button class="btn btn-link btn-sm text-danger p-0" title="{% trans "Remover foto" %}"><i class="bi bi-trash"></i></button>
-                                </form>
-                                {% endif %}
-                            </div>
-                            {% endfor %}
-                            {% for photo in a.other_photos %}
-                            <div class="text-center" style="width: 84px;">
-                                <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener"><img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="{% blocktrans trimmed with date=a.date|date:_('d/m/Y') %}Foto de {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;"></a>
-                                <div class="small text-muted lh-sm mt-1">{{ photo.caption|default:photo.angle_label }}</div>
-                                <form method="post" action="{% nav_url 'core:photo_delete' photo.pk %}" class="d-inline" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta foto?" %}{% endfilter %}');">
-                                    {% csrf_token %}
-                                    <button class="btn btn-link btn-sm text-danger p-0" title="{% trans "Remover foto" %}"><i class="bi bi-trash"></i></button>
-                                </form>
-                            </div>
-                            {% endfor %}
-                            <a href="{% nav_url 'core:photo_upload' student.pk %}&amp;assessment={{ a.pk }}&amp;angle=other" class="btn btn-sm btn-outline-secondary ms-auto" title="{% trans "Adicionar outra foto a esta avaliação" %}"><i class="bi bi-camera"></i> {% trans "Foto" %}</a>
-                        </div>
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
+<ul class="list-group assessment-list" data-assessments>
+    {% for a in assessments %}
+    <li class="list-group-item p-0 swipe-row" data-swipe-row data-assessment="{{ a.pk }}">
+        <div class="swipe-content px-3 py-2">
+            <div class="fw-semibold mb-1">{{ a.date|date:_('d/m/Y') }}{% if a.notes %} <i class="bi bi-chat-left-text text-muted" title="{{ a.notes }}"></i>{% endif %}</div>
+            <dl class="assessment-measures small mb-2">
+                <div class="{% if a.weight_kg is None %}is-empty{% endif %}"><dt>{% trans "Peso" %}</dt><dd>{{ a.weight_kg|default_if_none:"-" }}</dd></div>
+                <div class="{% if a.height_cm is None %}is-empty{% endif %}"><dt>{% trans "Altura" %}</dt><dd>{{ a.height_cm|default_if_none:"-" }}</dd></div>
+                <div class="{% if a.bmi is None %}is-empty{% endif %}"><dt>{% trans "IMC" %}</dt><dd>{{ a.bmi|default_if_none:"-" }}</dd></div>
+                <div class="{% if a.body_fat_pct is None %}is-empty{% endif %}"><dt>{% trans "% gordura" %}</dt><dd>{{ a.body_fat_pct|default_if_none:"-" }}</dd></div>
+                <div class="{% if a.chest_cm is None %}is-empty{% endif %}"><dt>{% trans "Peito" %}</dt><dd>{{ a.chest_cm|default_if_none:"-" }}</dd></div>
+                <div class="{% if a.waist_cm is None %}is-empty{% endif %}"><dt>{% trans "Cintura" %}</dt><dd>{{ a.waist_cm|default_if_none:"-" }}</dd></div>
+                <div class="{% if a.hip_cm is None %}is-empty{% endif %}"><dt>{% trans "Quadril" %}</dt><dd>{{ a.hip_cm|default_if_none:"-" }}</dd></div>
+                <div class="{% if a.arm_cm is None %}is-empty{% endif %}"><dt>{% trans "Braço" %}</dt><dd>{{ a.arm_cm|default_if_none:"-" }}</dd></div>
+                <div class="{% if a.thigh_cm is None %}is-empty{% endif %}"><dt>{% trans "Coxa" %}</dt><dd>{{ a.thigh_cm|default_if_none:"-" }}</dd></div>
+            </dl>
+            <div class="bg-body-tertiary rounded p-2" data-photo-strip="{{ a.pk }}">
+            <div class="d-flex flex-wrap gap-2 align-items-start">
+                {% for slot in a.photo_slots %}
+                <div class="text-center" style="width: 84px;" data-angle="{{ slot.angle }}">
+                    {% if slot.photo %}
+                    <a href="{% url 'core:photo_file' slot.photo.pk %}" target="_blank" rel="noopener" title="{% blocktrans trimmed with label=slot.label %}Abrir foto: {{ label }}{% endblocktrans %}">
+                        <img src="{% url 'core:photo_thumb' slot.photo.pk %}" loading="lazy" alt="{% blocktrans trimmed with label=slot.label date=a.date|date:_('d/m/Y') %}{{ label }} em {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;">
+                    </a>
+                    {% else %}
+                    <a href="{% nav_url 'core:photo_upload' student.pk %}&amp;assessment={{ a.pk }}&amp;angle={{ slot.angle }}" class="d-flex flex-column align-items-center justify-content-center rounded border border-2 border-dashed text-muted text-decoration-none w-100" style="aspect-ratio: 3/4;" title="{% blocktrans trimmed with label=slot.label %}Adicionar foto: {{ label }}{% endblocktrans %}">
+                        <i class="bi bi-plus-lg fs-5"></i>
+                    </a>
+                    {% endif %}
+                    <div class="small text-muted lh-sm mt-1">{{ slot.label }}</div>
+                    {% if slot.photo %}
+                    <form method="post" action="{% nav_url 'core:photo_delete' slot.photo.pk %}" class="d-inline" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta foto?" %}{% endfilter %}');">
+                        {% csrf_token %}
+                        <button class="btn btn-link btn-sm text-danger p-0" title="{% trans "Remover foto" %}"><i class="bi bi-trash"></i></button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% for photo in a.other_photos %}
+                <div class="text-center" style="width: 84px;">
+                    <a href="{% url 'core:photo_file' photo.pk %}" target="_blank" rel="noopener"><img src="{% url 'core:photo_thumb' photo.pk %}" loading="lazy" alt="{% blocktrans trimmed with date=a.date|date:_('d/m/Y') %}Foto de {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;"></a>
+                    <div class="small text-muted lh-sm mt-1">{{ photo.caption|default:photo.angle_label }}</div>
+                    <form method="post" action="{% nav_url 'core:photo_delete' photo.pk %}" class="d-inline" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta foto?" %}{% endfilter %}');">
+                        {% csrf_token %}
+                        <button class="btn btn-link btn-sm text-danger p-0" title="{% trans "Remover foto" %}"><i class="bi bi-trash"></i></button>
+                    </form>
+                </div>
+                {% endfor %}
+                <a href="{% nav_url 'core:photo_upload' student.pk %}&amp;assessment={{ a.pk }}&amp;angle=other" class="btn btn-sm btn-outline-secondary ms-auto" title="{% trans "Adicionar outra foto a esta avaliação" %}"><i class="bi bi-camera"></i> {% trans "Foto" %}</a>
+            </div>
+
+            </div>
+        </div>
+        <div class="swipe-actions">
+            <a href="{% nav_url 'core:assessment_edit' a.pk %}" class="btn btn-sm btn-link swipe-edit" title="{% trans "Editar" %}">
+                <i class="bi bi-pencil" aria-hidden="true"></i><span class="swipe-label">{% trans "Editar" %}</span></a>
+            <form method="post" action="{% nav_url 'core:assessment_delete' a.pk %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta avaliação?" %}{% endfilter %}');">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-link swipe-remove" title="{% trans "Remover" %}"><i class="bi bi-trash" aria-hidden="true"></i><span class="swipe-label">{% trans "Remover" %}</span></button>
+            </form>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+{% include 'core/ui/_swipe_hint.html' %}
 <p class="text-muted small mt-2">{% trans "Medidas em cm, peso em kg. Altura e peso geram o IMC." %}</p>
 {% else %}
 <div class="alert alert-info"><i class="bi bi-info-circle"></i> {% trans "Nenhuma avaliação registrada ainda." %}</div>

@@ -174,7 +174,7 @@ body.kbd-open .fab { display: none; }
         white-space: nowrap;
         margin-left: -.75rem;
         margin-right: -.75rem;
-        padding: 0 .75rem;
+        padding: 2px .75rem;
     }
     .tabs-sticky .nav-link { white-space: nowrap; }
 

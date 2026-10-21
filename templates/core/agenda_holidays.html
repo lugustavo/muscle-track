@@ -1,8 +1,10 @@
 {% extends 'base.html' %}
 {% load i18n %}
-{% load navigation %}
+{% load navigation static %}
 
 {% block title %}{% blocktrans trimmed %}Feriados - {{ brand_name }}{% endblocktrans %}{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/swipe-rows.css' %}">{% endblock %}
 
 {% block content %}
 <div class="ui-head inline">
@@ -33,17 +35,20 @@
 
         <ul class="list-group mb-3" data-own-holidays>
             {% for h in own %}
-            <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
-                <span><strong>{{ h.date|date:_('D d/m/Y') }}</strong> · {{ h.name }}</span>
-                <form method="post" action="{% nav_url 'core:agenda_holiday_delete' h.pk %}" onsubmit="return confirm('{% autoescape off %}{% blocktrans trimmed asvar confirm_msg with name=h.name %}Tirar {{ name }} da lista?{% endblocktrans %}{% endautoescape %}{{ confirm_msg|escapejs }}');">
-                    {% csrf_token %}
-                    <button class="btn btn-sm btn-outline-danger btn-icon" title="{% trans "Remover" %}"><i class="bi bi-trash"></i><span class="visually-hidden">{% blocktrans trimmed with name=h.name %}Remover {{ name }}{% endblocktrans %}</span></button>
-                </form>
+            <li class="list-group-item p-0 swipe-row" data-swipe-row data-holiday="{{ h.pk }}">
+                <div class="swipe-content px-3 py-2"><strong>{{ h.date|date:_('D d/m/Y') }}</strong> · {{ h.name }}</div>
+                <div class="swipe-actions">
+                    <form method="post" action="{% nav_url 'core:agenda_holiday_delete' h.pk %}" onsubmit="return confirm('{% autoescape off %}{% blocktrans trimmed asvar confirm_msg with name=h.name %}Tirar {{ name }} da lista?{% endblocktrans %}{% endautoescape %}{{ confirm_msg|escapejs }}');">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-link swipe-remove" title="{% trans "Remover" %}"><i class="bi bi-trash" aria-hidden="true"></i><span class="swipe-label" aria-hidden="true">{% trans "Remover" %}</span><span class="visually-hidden">{% blocktrans trimmed with name=h.name %}Remover {{ name }}{% endblocktrans %}</span></button>
+                    </form>
+                </div>
             </li>
             {% empty %}
             <li class="list-group-item text-muted">{% trans "Nenhum dia adicionado." %}</li>
             {% endfor %}
         </ul>
+        {% if own %}{% include 'core/ui/_swipe_hint.html' %}{% endif %}
         {% if past %}
         <details class="small text-muted">
             <summary>{% blocktrans trimmed with past=past|length %}Dias que já passaram ({{ past }}){% endblocktrans %}</summary>
@@ -69,3 +74,5 @@
     </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}<script src="{% static 'js/swipe-rows.js' %}"></script>{% endblock %}

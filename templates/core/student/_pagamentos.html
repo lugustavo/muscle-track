@@ -9,36 +9,44 @@
     </div>
 </div>
 <p class="text-muted small"><i class="bi bi-eye-slash"></i> {% trans "Só você vê os valores. O aluno não tem acesso a esta área." %}</p>
-<div class="table-responsive">
-    <table class="table table-sm align-middle">
-        <thead class="bg-body-tertiary"><tr><th>{% trans "Data" %}</th><th>{% trans "Pacote" %}</th><th>{% trans "Forma" %}</th><th class="text-end">{% trans "Valor" %}</th><th></th></tr></thead>
-        <tbody>
-            {% for p in payments %}
-            <tr>
-                <td>{{ p.paid_on|date:_('d/m/Y') }}</td>
-                <td>{% if p.student_package %}{{ p.student_package.name }}{% else %}{{ p.plan_name|default:"—" }}{% endif %}{% if p.period_end %} <small class="text-muted">{% blocktrans trimmed with period_end=p.period_end|date:_('d/m/y') %}(até {{ period_end }}){% endblocktrans %}</small>{% endif %}{% if p.notes %}<br><small class="text-muted">{{ p.notes }}</small>{% endif %}</td>
-                <td>{{ p.get_method_display }}</td>
-                <td class="text-end">{{ p.amount|money }}</td>
-                <td class="text-end text-nowrap">
-                    <a href="{% nav_url 'core:refund_create' student.pk %}&payment={{ p.pk }}" class="btn btn-sm btn-link p-0 me-1" title="{% trans "Devolver ou estornar" %}" data-payment-refund><i class="bi bi-arrow-counterclockwise"></i><span class="visually-hidden">{% trans "Devolver ou estornar" %}</span></a>
-                    <form method="post" action="{% nav_url 'core:payment_delete' p.pk %}" class="d-inline" onsubmit="return confirm('{% filter escapejs %}{% trans "Excluir este pagamento? " %}{% endfilter %}');">
-                        {% csrf_token %}
-                        <button class="btn btn-sm btn-link text-danger p-0" title="{% trans "Excluir" %}"><i class="bi bi-trash"></i></button>
-                    </form>
-                </td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="5" class="text-muted text-center py-3">{% trans "Nenhum pagamento registrado." %}</td></tr>
-            {% endfor %}
-            {% for r in refund_rows %}
-            <tr class="{% if r.is_voided %}text-muted{% endif %}" data-refund-row="{{ r.pk }}">
-                <td>{{ r.refunded_on|date:_('d/m/Y') }}</td>
-                <td>{{ r.get_kind_display }}{% if r.student_package %} · {{ r.student_package.name }}{% endif %}{% if r.is_voided %} <span class="ui-badge">{% trans "anulada" %}</span>{% endif %}{% if r.reason %}<br><small class="text-muted">{{ r.reason }}</small>{% endif %}</td>
-                <td>{{ r.get_method_display }}</td>
-                <td class="text-end {% if r.is_voided %}text-decoration-line-through{% endif %}">− {{ r.amount|money }}</td>
-                <td class="text-end"><a href="{% url 'core:refund_detail' r.pk %}" class="small" title="{% trans "Resumo" %}"><i class="bi bi-file-text"></i><span class="visually-hidden">{% trans "Resumo" %}</span></a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+<ul class="list-group" data-payments>
+    {% for p in payments %}
+    <li class="list-group-item p-0 swipe-row" data-swipe-row data-payment="{{ p.pk }}">
+        <div class="swipe-content d-flex justify-content-between align-items-start gap-3 px-3 py-2">
+            <div class="min-w-0">
+                <div><strong>{{ p.paid_on|date:_('d/m/Y') }}</strong> <span class="text-muted">· {{ p.get_method_display }}</span></div>
+                <div class="small">{% if p.student_package %}{{ p.student_package.name }}{% else %}{{ p.plan_name|default:"—" }}{% endif %}{% if p.period_end %} <span class="text-muted">{% blocktrans trimmed with period_end=p.period_end|date:_('d/m/y') %}(até {{ period_end }}){% endblocktrans %}</span>{% endif %}</div>
+                {% if p.notes %}<div class="small text-muted">{{ p.notes }}</div>{% endif %}
+            </div>
+            <div class="fw-semibold text-nowrap">{{ p.amount|money }}</div>
+        </div>
+        <div class="swipe-actions">
+            <a href="{% nav_url 'core:refund_create' student.pk %}&payment={{ p.pk }}" class="btn btn-sm btn-link swipe-edit" title="{% trans "Devolver ou estornar" %}" data-payment-refund>
+                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i><span class="swipe-label">{% trans "Devolver" %}</span></a>
+            <form method="post" action="{% nav_url 'core:payment_delete' p.pk %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Excluir este pagamento? " %}{% endfilter %}');">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-link swipe-remove" title="{% trans "Excluir" %}"><i class="bi bi-trash" aria-hidden="true"></i><span class="swipe-label">{% trans "Excluir" %}</span></button>
+            </form>
+        </div>
+    </li>
+    {% empty %}
+    <li class="list-group-item text-muted text-center py-3">{% trans "Nenhum pagamento registrado." %}</li>
+    {% endfor %}
+    {% for r in refund_rows %}
+    <li class="list-group-item p-0 swipe-row {% if r.is_voided %}text-muted{% endif %}" data-swipe-row data-refund-row="{{ r.pk }}">
+        <div class="swipe-content d-flex justify-content-between align-items-start gap-3 px-3 py-2">
+            <div class="min-w-0">
+                <div><strong>{{ r.refunded_on|date:_('d/m/Y') }}</strong> <span class="text-muted">· {{ r.get_method_display }}</span></div>
+                <div class="small">{{ r.get_kind_display }}{% if r.student_package %} · {{ r.student_package.name }}{% endif %}{% if r.is_voided %} <span class="ui-badge">{% trans "anulada" %}</span>{% endif %}</div>
+                {% if r.reason %}<div class="small text-muted">{{ r.reason }}</div>{% endif %}
+            </div>
+            <div class="fw-semibold text-nowrap {% if r.is_voided %}text-decoration-line-through{% endif %}">− {{ r.amount|money }}</div>
+        </div>
+        <div class="swipe-actions">
+            <a href="{% url 'core:refund_detail' r.pk %}" class="btn btn-sm btn-link swipe-edit" title="{% trans "Resumo" %}">
+                <i class="bi bi-file-text" aria-hidden="true"></i><span class="swipe-label">{% trans "Resumo" %}</span></a>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+{% if payments or refund_rows %}{% include 'core/ui/_swipe_hint.html' %}{% endif %}
