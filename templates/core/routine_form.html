@@ -6,6 +6,8 @@
 
 {% block title %}{% blocktrans trimmed %}{{ title }} - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/swipe-rows.css' %}">{% endblock %}
+
 {% block content %}
 <div class="ui-head inline">
     <div class="ui-title">
@@ -124,6 +126,7 @@
                     <div id="selectedExercisesList" class="list-group list-group-flush">
                         <!-- Exercícios serão inseridos aqui via JavaScript -->
                     </div>
+                    <div id="swipeHint" class="px-3 pb-2" style="display: none;">{% include 'core/ui/_swipe_hint.html' %}</div>
                     <div id="emptyExercisesMessage" class="text-center py-5">
                         <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
                         <p class="text-muted mt-3 mb-0">{% trans "Nenhum exercício adicionado." %}<br>{% trans 'Clique em "Adicionar exercícios" para começar.' %}</p>
@@ -279,6 +282,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/swipe-rows.js' %}"></script>
 <script>
 const T_LOAD_ERROR = "{% trans 'Erro ao carregar exercícios. Tente novamente.' as js_msg %}{{ js_msg|escapejs }}";
 const T_NONE_FOUND = "{% trans 'Nenhum exercício encontrado' as js_msg %}{{ js_msg|escapejs }}";
@@ -288,6 +292,8 @@ const T_EDIT_PARAMS = "{% trans 'Editar parâmetros' as js_msg %}{{ js_msg|escap
 const T_REMOVE_EXERCISE = "{% trans 'Remover exercício' as js_msg %}{{ js_msg|escapejs }}";
 const T_CONFIRM_REMOVE = "{% trans 'Remover este exercício do treino?' as js_msg %}{{ js_msg|escapejs }}";
 const T_MINUTES = "{% trans 'minutos' as js_msg %}{{ js_msg|escapejs }}";
+const T_EDIT = "{% trans 'Editar' as js_msg %}{{ js_msg|escapejs }}";
+const T_REMOVE = "{% trans 'Remover' as js_msg %}{{ js_msg|escapejs }}";
 // Estado global
 let selectedExercises = [];
 let allExercises = [];
@@ -447,6 +453,11 @@ document.getElementById('confirmSelection').addEventListener('click', function()
     bootstrap.Modal.getInstance(document.getElementById('exerciseModal')).hide();
 });
 
+// Text that goes into innerHTML (an exercise name is typed by the trainer)
+function escapeHtml(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+}
+
 // Atualizar lista de exercícios selecionados
 function updateSelectedExercisesList() {
     const list = document.getElementById('selectedExercisesList');
@@ -457,6 +468,7 @@ function updateSelectedExercisesList() {
     if (selectedExercises.length === 0) {
         emptyMessage.style.display = 'block';
         list.style.display = 'none';
+        document.getElementById('swipeHint').style.display = 'none';
         return;
     }
 
@@ -465,40 +477,42 @@ function updateSelectedExercisesList() {
 
     selectedExercises.forEach((exercise, index) => {
         const item = document.createElement('div');
-        item.className = 'list-group-item';
+        item.className = 'list-group-item p-0 swipe-row';
+        item.setAttribute('data-swipe-row', '');
         item.setAttribute('data-exercise-id', exercise.id);
         item.innerHTML = `
-            <div class="d-flex align-items-center py-2">
-                <div class="me-3" style="cursor: grab;">
+            <div class="swipe-content d-flex align-items-center px-3 py-2">
+                <div class="me-3 drag-handle" style="cursor: grab; touch-action: none;">
                     <i class="bi bi-grip-vertical text-muted fs-4"></i>
                 </div>
                 <div class="me-3">
                     <span class="ui-badge brand rounded-circle" style="width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;">${index + 1}</span>
                 </div>
                 <div class="me-3">
-                    <img src="${exercise.thumbnail}" class="rounded shadow-sm" style="width: 50px; height: 50px; object-fit: cover;" alt="${exercise.name}">
+                    <img src="${escapeHtml(exercise.thumbnail)}" class="rounded shadow-sm" style="width: 50px; height: 50px; object-fit: cover;" alt="${escapeHtml(exercise.name)}">
                 </div>
-                <div class="flex-grow-1">
-                    <h6 class="mb-1">${exercise.name}</h6>
+                <div class="flex-grow-1 min-w-0">
+                    <h6 class="mb-1">${escapeHtml(exercise.name)}</h6>
                     <small class="text-muted">
-                        <i class="bi bi-diagram-3"></i> ${exercise.muscle_group} |
+                        <i class="bi bi-diagram-3"></i> ${escapeHtml(exercise.muscle_group)} |
                         <i class="bi bi-bar-chart"></i> ${exercise.sets} ${T_SETS} ×
                         <i class="bi bi-arrow-repeat"></i> ${exercise.reps} ${T_REPS} |
                         <i class="bi bi-clock"></i> ${exercise.rest}s
                     </small>
                 </div>
-                <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="editExercise(${exercise.id})" title="${T_EDIT_PARAMS}">
-                        <i class="bi bi-pencil"></i>
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeExercise(${exercise.id})" title="${T_REMOVE_EXERCISE}">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
+            </div>
+            <div class="swipe-actions">
+                <button type="button" class="btn btn-sm btn-link swipe-edit" onclick="editExercise(${exercise.id})" title="${T_EDIT_PARAMS}">
+                    <i class="bi bi-pencil" aria-hidden="true"></i><span class="swipe-label">${T_EDIT}</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-link swipe-remove" onclick="removeExercise(${exercise.id})" title="${T_REMOVE_EXERCISE}">
+                    <i class="bi bi-trash" aria-hidden="true"></i><span class="swipe-label">${T_REMOVE}</span>
+                </button>
             </div>
         `;
         list.appendChild(item);
     });
+    document.getElementById('swipeHint').style.display = 'block';
 
     // Inicializar Sortable para drag and drop
     initializeSortable();
@@ -507,10 +521,10 @@ function updateSelectedExercisesList() {
 // Inicializar drag and drop com SortableJS
 function initializeSortable() {
     const list = document.getElementById('selectedExercisesList');
-    if (list && selectedExercises.length > 0) {
+    if (list && selectedExercises.length > 0 && !Sortable.get(list)) {
         new Sortable(list, {
             animation: 150,
-            handle: '.bi-grip-vertical',
+            handle: '.drag-handle',
             ghostClass: 'bg-body-tertiary',
             onEnd: function(evt) {
                 // Reordenar array

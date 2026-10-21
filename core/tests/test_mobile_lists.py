@@ -78,3 +78,46 @@ class PhoneLayoutTests(BaseTestCase):
         stats = page.split('routine-stats', 1)[1].split('<div class="row">', 1)[0]
         self.assertEqual(len(re.findall(r'class="col-4 col-md-2"', stats)), 6)
         self.assertNotIn('class="col-md-2"', stats)
+
+
+class RoutineFormListTests(BaseTestCase):
+    """The exercise lists of the two routine forms: swipe for the actions, and (student routine) drag to reorder."""
+    def setUp(self):
+        super().setUp()
+        self.login(self.trainer)
+
+    def test_the_swipe_script_works_on_rows_added_later(self):
+        # the forms draw their rows with JavaScript: the script listens on the document instead of binding rows at load
+        script = static_text('js/swipe-rows.js')
+        self.assertIn('capture: true', script)
+        self.assertNotIn('if (!rows.length) return', script)
+
+    def test_routine_template_rows_swipe_and_keep_the_drag_handle(self):
+        page = self.client.get(reverse('core:routine_edit', kwargs={'pk': self.template.pk})).content.decode()
+        self.assertIn('css/swipe-rows.css', page)
+        self.assertIn('js/swipe-rows.js', page)
+        self.assertIn('swipe-row', page)
+        self.assertIn("handle: '.drag-handle'", page)
+        self.assertIn('id="swipeHint"', page)
+        self.assertIn('escapeHtml(exercise.name)', page)           # a name typed by the trainer never goes in as HTML
+
+    def test_student_routine_rows_reorder_and_swipe(self):
+        row = self.alice_routine.exercises.first()
+        row.notes = 'cuidado com o ombro'
+        row.save()
+        page = self.client.get(reverse('core:person_routine_edit', kwargs={'pk': self.alice_routine.pk})).content.decode()
+        self.assertIn('vendor/sortablejs/1.15.0/Sortable.min.js', page)
+        self.assertIn('js/swipe-rows.js', page)
+        self.assertIn("handle: '.drag-handle'", page)
+        self.assertIn('Arraste pela alça para reordenar', page)
+        self.assertIn('data-remove-exercise', page)
+        self.assertIn('escapeHtml(ex.name)', page)
+        # the notes of each exercise travel with the list, so saving after a reorder does not wipe them
+        self.assertIn('notes: "cuidado com o ombro"', page)
+        # no server-drawn rows with a dead remove button any more
+        self.assertNotIn('remove-exercise">', page)
+
+    def test_a_new_student_routine_starts_empty_and_draws_nothing_by_itself(self):
+        page = self.client.get(reverse('core:person_routine_create')).content.decode()
+        self.assertIn('id="exercisesList"', page)
+        self.assertIn('id="noExercises"', page)

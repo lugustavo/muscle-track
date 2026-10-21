@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 18:07-0300\n"
+"POT-Creation-Date: 2026-10-21 18:44-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -6262,6 +6262,10 @@ msgstr "Select template"
 msgid "Nenhum exercício adicionado"
 msgstr "No exercises added"
 
+#| msgid "Arraste os exercícios para reordenar"
+msgid "Arraste pela alça para reordenar."
+msgstr "Drag by the handle to reorder."
+
 msgid "Atualizar treino"
 msgstr "Update workout"
 
@@ -6288,6 +6292,9 @@ msgstr "Add to workout"
 
 msgid "exercícios"
 msgstr "exercises"
+
+msgid "Remover exercício"
+msgstr "Remove exercise"
 
 #, python-format
 msgid "Progresso - %(routine_name)s - %(brand_name)s"
@@ -7010,9 +7017,6 @@ msgstr "sets"
 
 msgid "reps"
 msgstr "reps"
-
-msgid "Remover exercício"
-msgstr "Remove exercise"
 
 msgid "Remover este exercício do treino?"
 msgstr "Remove this exercise from the workout?"
@@ -8680,7 +8684,6 @@ msgstr ""
 msgid "Limpar busca"
 msgstr "Clear search"
 
-#| msgid "Deslize a aula para a esquerda para editar ou remover."
 msgid "Deslize um item para a esquerda para ver as ações."
 msgstr "Swipe an item to the left to see its actions."
 
