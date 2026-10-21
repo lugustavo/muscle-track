@@ -232,3 +232,8 @@ input[type="radio"], input[type="checkbox"], input[type="range"] { accent-color:
     .row-menu .dropdown-item { padding: .15rem; width: auto; background: transparent; }
     .row-menu .dropdown-item .menu-label { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
 }
+
+/* The photos of an assessment: four to a row (the tiles share the width on a phone, up to 84px each; extra photos start a new row) */
+.photo-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 84px)); gap: .5rem .4rem; align-items: start; }
+.photo-tile { min-width: 0; }
+.photo-tile .small { overflow-wrap: anywhere; }
