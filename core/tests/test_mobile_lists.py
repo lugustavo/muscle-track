@@ -41,11 +41,25 @@ class SwipeListsTests(RichDataMixin, BaseTestCase):
         self.assertEqual(self.rows('data-notes'), 1)
         self.assertIn(reverse('core:note_delete', kwargs={'pk': self.note.pk}), self.page)
 
-    def test_assessments_swipe_with_edit_and_delete_and_keep_one_photo_strip(self):
-        self.assertEqual(self.rows('data-assessments'), 1)
+    def test_assessments_have_a_menu_not_a_swipe_and_keep_one_photo_strip(self):
+        # a tall card (measures and photos) gets a menu in its header: swiping it made two giant buttons
+        section = self.page.split('data-assessments', 1)[1].split('</ul>\n<p class="text-muted small mt-2">', 1)[0]
+        self.assertEqual(section.count('data-assessment-menu'), 1)
+        self.assertNotIn('data-swipe-row', section)
+        self.assertNotIn('swipe-actions', section)
         self.assertEqual(self.page.count(f'data-photo-strip="{self.assessment.pk}"'), 1)
-        self.assertIn(reverse('core:assessment_edit', kwargs={'pk': self.assessment.pk}), self.page)
-        self.assertIn(reverse('core:assessment_delete', kwargs={'pk': self.assessment.pk}), self.page)
+        self.assertIn(reverse('core:assessment_edit', kwargs={'pk': self.assessment.pk}), section)
+        self.assertIn(reverse('core:assessment_delete', kwargs={'pk': self.assessment.pk}), section)
+        self.assertIn('data-bs-toggle="dropdown"', section)
+        self.assertIn('60,00 kg', section)                      # the header carries the weight
+
+    def test_the_menu_becomes_inline_icons_from_md_up(self):
+        css = static_text('css/ui.css')
+        self.assertIn('.row-menu .dropdown-menu { display: flex; position: static;', css)
+
+    def test_swipe_buttons_never_grow_into_slabs_on_a_tall_row(self):
+        css = static_text('css/swipe-rows.css')
+        self.assertRegex(css, r'max-height: 6rem;\s+align-self: center')
 
     def test_only_the_measures_taken_show_on_a_phone(self):
         # the empty ones carry a class that hides them below md; the weight, taken, does not
