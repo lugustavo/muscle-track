@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 08:51-0300\n"
+"POT-Creation-Date: 2026-10-21 09:16-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -654,6 +654,10 @@ msgstr "Note"
 
 msgid "Continuar o mesmo horário"
 msgstr "Keep the same time"
+
+#| msgid "Mídia do exercício"
+msgid "Remover a imagem / mídia do exercício"
+msgstr "Remove the exercise's image / media"
 
 msgid "Descrição do treino"
 msgstr "Workout description"
@@ -4438,6 +4442,13 @@ msgstr "Default reps *"
 
 msgid "Mídia do exercício"
 msgstr "Exercise media"
+
+msgid ""
+"Apaga o arquivo, a miniatura e o link ao salvar. Se você enviar outro "
+"arquivo agora, ele fica no lugar."
+msgstr ""
+"Deletes the file, the thumbnail and the link when you save. If you upload "
+"another file now, it takes their place."
 
 msgid "Tipo de mídia"
 msgstr "Media type"
@@ -8412,7 +8423,6 @@ msgid "Créditos das imagens e vídeos"
 msgstr "Image and video credits"
 
 #, python-format
-#| msgid "Devolução de %(amount)s"
 msgid "Execução de %(name)s"
 msgstr "How to do %(name)s"
 
