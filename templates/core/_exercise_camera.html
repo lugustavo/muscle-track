@@ -1,0 +1,32 @@
+{% load i18n %}
+{# Full-screen camera that guides the two photos of an exercise animation (see static/js/exercise_capture.js). #}
+<div class="cam" data-anim-live hidden role="dialog" aria-modal="true" aria-label="{% trans "Câmera guiada da animação do exercício" %}"
+     data-text-start="{% trans "1 de 2 · Posição inicial" %}" data-text-end="{% trans "2 de 2 · Posição final" %}"
+     data-text-start-tip="{% trans "Apoie o celular e enquadre o corpo inteiro. Fique na posição de partida do exercício." %}"
+     data-text-end-tip="{% trans "Não mexa o celular: vá até a posição final e alinhe com o contorno da foto anterior." %}"
+     data-text-no-timer="{% trans "Sem contagem" %}" data-text-vertical="{% trans "Vertical" %}" data-text-horizontal="{% trans "Horizontal" %}">
+    <div class="cam-top">
+        <button type="button" class="cam-btn" data-anim-close aria-label="{% trans "Fechar a câmera" %}"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+        <div class="cam-title"><strong data-anim-title></strong><small data-anim-note></small></div>
+        <button type="button" class="cam-btn" data-anim-flip aria-label="{% trans "Trocar de câmera" %}" hidden><i class="bi bi-arrow-repeat" aria-hidden="true"></i></button>
+    </div>
+    <div class="cam-stage" data-anim-stage>
+        <div class="cam-frame" data-anim-frame>
+            <video playsinline muted autoplay></video>
+            <img class="cam-ghost" data-anim-ghost alt="" hidden>
+            <div class="cam-guides" data-anim-guides></div>
+            <div class="cam-count" data-anim-count hidden aria-live="assertive"></div>
+        </div>
+    </div>
+    <div class="cam-tools">
+        <button type="button" class="cam-chip" data-anim-toggle-guides aria-pressed="true"><i class="bi bi-grid-3x3" aria-hidden="true"></i> {% trans "Guias" %}</button>
+        <button type="button" class="cam-chip" data-anim-toggle-ghost aria-pressed="true" hidden><i class="bi bi-layers" aria-hidden="true"></i> {% trans "Foto inicial" %}</button>
+        <button type="button" class="cam-chip" data-anim-orient><i class="bi bi-phone" aria-hidden="true"></i> <span data-anim-orient-label></span></button>
+        <button type="button" class="cam-chip" data-anim-timer><i class="bi bi-stopwatch" aria-hidden="true"></i> <span data-anim-timer-label></span></button>
+        <button type="button" class="cam-chip" data-anim-retake hidden><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> {% trans "Refazer a inicial" %}</button>
+    </div>
+    <div class="cam-bar">
+        <div class="cam-tip" data-anim-tip></div>
+        <button type="button" class="cam-shutter" data-anim-shoot aria-label="{% trans "Capturar" %}"></button>
+    </div>
+</div>

@@ -1,14 +1,17 @@
 from decimal import Decimal
 
 from django import forms
+from django.core.files.base import ContentFile
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext, gettext_lazy as _, ngettext
 from .i18n import short_date
-from . import photo_positions
+from . import exercise_animation, photo_positions
 from .recurrence import MAX_INTERVAL, MAX_OCCURRENCES, MAX_SPAN_DAYS, end_date, month_rule_options
-from .validators import normalize_phone, normalize_state, normalize_zip_code, validate_birth_date, digits_only
+from .validators import (
+    normalize_phone, normalize_state, normalize_zip_code, validate_birth_date, digits_only, validate_photo_image,
+)
 from .models import (
     Appointment, Holiday, Payment, Package, Refund, ScheduleSlot, StudentPackage,
     Assessment, Exercise, Person, PersonRoutine, PhotoPosition, ProgressPhoto, Routine, RoutineExercise, StudentNote,
@@ -227,6 +230,11 @@ class StudentProfileForm(ContactValidationMixin, forms.ModelForm):
 
 class ExerciseForm(forms.ModelForm):
     remove_media = forms.BooleanField(required=False, label=_('Remover a imagem / mídia do exercício'))
+    # An animation made from two photos (start and finish of the movement, from the guided camera or the gallery)
+    anim_start = forms.ImageField(required=False, validators=[validate_photo_image], label=_('Foto da posição inicial'))
+    anim_end = forms.ImageField(required=False, validators=[validate_photo_image], label=_('Foto da posição final'))
+    anim_speed = forms.ChoiceField(required=False, choices=exercise_animation.SPEED_CHOICES, initial='normal', label=_('Velocidade'))
+    anim_smooth = forms.BooleanField(required=False, label=_('Transição suave entre as posições'))
 
     class Meta:
         model = Exercise
@@ -237,6 +245,15 @@ class ExerciseForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 3}),
             'instructions': forms.Textarea(attrs={'rows': 4}),
         }
+
+    def clean(self):
+        data = super().clean()
+        start, end = data.get('anim_start'), data.get('anim_end')
+        if bool(start) != bool(end):
+            self.add_error('anim_end' if start else 'anim_start', _('Envie as duas fotos: a posição inicial e a final.'))
+        elif start and 'media_file' in self.files:
+            self.add_error('media_file', _('Escolha só uma: um arquivo de mídia ou a animação das duas fotos.'))
+        return data
 
     def save(self, commit=True):
         """"Remover a imagem" empties the picture, the thumbnail and the link; a file or thumbnail sent in the same
@@ -252,6 +269,13 @@ class ExerciseForm(forms.ModelForm):
                 instance.media_url = ''
             if not instance.media_file and not instance.media_url:
                 instance.media_credit, instance.media_license, instance.media_source_url = '', '', ''
+        start, end = self.cleaned_data.get('anim_start'), self.cleaned_data.get('anim_end')
+        if start and end:
+            data, extension = exercise_animation.build(start, end, self.cleaned_data.get('anim_speed') or 'normal',
+                                                       self.cleaned_data.get('anim_smooth'))
+            instance.media_file.save(f'animacao.{extension}', ContentFile(data), save=False)
+            instance.media_type = 'gif'
+            instance.media_license = instance.media_license or 'own'   # recorded by the trainer: their own production
         if commit:
             instance.save()
             self.save_m2m()
