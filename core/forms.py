@@ -226,6 +226,8 @@ class StudentProfileForm(ContactValidationMixin, forms.ModelForm):
 
 
 class ExerciseForm(forms.ModelForm):
+    remove_media = forms.BooleanField(required=False, label=_('Remover a imagem / mídia do exercício'))
+
     class Meta:
         model = Exercise
         fields = ['exercise_name', 'description', 'muscle_group', 'default_reps',
@@ -235,6 +237,25 @@ class ExerciseForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 3}),
             'instructions': forms.Textarea(attrs={'rows': 4}),
         }
+
+    def save(self, commit=True):
+        """"Remover a imagem" empties the picture, the thumbnail and the link; a file or thumbnail sent in the same
+        submit is a replacement and is kept. With no media left, its credit goes too (the files are dropped from the disk
+        by core/signals.py)."""
+        instance = super().save(commit=False)
+        if self.cleaned_data.get('remove_media'):
+            if 'media_file' not in self.files:
+                instance.media_file = None
+            if 'thumbnail' not in self.files:
+                instance.thumbnail = None
+            if self.initial.get('media_url') == self.cleaned_data.get('media_url'):   # not retyped: it is the old link
+                instance.media_url = ''
+            if not instance.media_file and not instance.media_url:
+                instance.media_credit, instance.media_license, instance.media_source_url = '', '', ''
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance
 
 
 class RoutineForm(forms.ModelForm):

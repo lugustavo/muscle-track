@@ -59,7 +59,7 @@
                                 <option value="">{% trans "Selecione..." %}</option>
                                 {% for value, label in form.muscle_group.field.choices %}
                                     {% if value %}
-                                    <option value="{{ value }}" {% if form.muscle_group.value == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                                    <option value="{{ value }}" {% if form.muscle_group.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
                                     {% endif %}
                                 {% endfor %}
                             </select>
@@ -125,6 +125,21 @@
                     <h5 class="mb-0"><i class="bi bi-image"></i> {% trans "Mídia do exercício" %}</h5>
                 </div>
                 <div class="card-body">
+                    {% if form.instance.pk and form.instance.media_info or form.instance.thumbnail %}
+                    <div class="d-flex flex-wrap align-items-center gap-3 mb-3 p-2 border rounded" data-media-current>
+                        {% with media=form.instance.media_info %}
+                        {% if media.kind == 'image' %}<img src="{{ media.url }}" alt="" class="rounded" style="width: 96px; height: 72px; object-fit: cover;">
+                        {% elif form.instance.thumbnail %}<img src="{{ form.instance.thumbnail.url }}" alt="" class="rounded" style="width: 96px; height: 72px; object-fit: cover;">
+                        {% elif media.kind == 'video' %}<i class="bi bi-film fs-2 text-muted" aria-hidden="true"></i>{% endif %}
+                        {% endwith %}
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" name="{{ form.remove_media.name }}" id="{{ form.remove_media.id_for_label }}" value="on" data-remove-media>
+                            <label class="form-check-label" for="{{ form.remove_media.id_for_label }}">{% trans "Remover a imagem / mídia do exercício" %}</label>
+                            <div class="form-text">{% trans "Apaga o arquivo, a miniatura e o link ao salvar. Se você enviar outro arquivo agora, ele fica no lugar." %}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+
                     <div class="mb-3">
                         <label for="{{ form.media_type.id_for_label }}" class="form-label fw-bold">
                             <i class="bi bi-collection-play"></i> {% trans "Tipo de mídia" %}
