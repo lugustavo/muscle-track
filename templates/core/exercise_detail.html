@@ -146,6 +146,11 @@
                 {% else %}
                     <img src="{% static 'images/no-image.svg' %}" class="img-fluid rounded exercise-hero" alt="{% trans "Sem imagem" %}">
                 {% endif %}
+                {% if exercise.has_credit %}
+                <p class="small text-muted mt-2 mb-0 text-start" data-media-credit><i class="bi bi-award"></i> {% blocktrans trimmed with credit=credit_label %}Mídia: {{ credit }}{% endblocktrans %}{% if exercise.media_source_url %} · <a href="{{ exercise.media_source_url }}" target="_blank" rel="noopener noreferrer">{% trans "origem" %}</a>{% endif %}</p>
+                {% elif exercise.thumbnail or exercise.media_url or exercise.media_file %}
+                <p class="small text-muted mt-2 mb-0 text-start" data-media-no-credit><i class="bi bi-info-circle"></i> {% trans "Mídia sem crédito informado." %}</p>
+                {% endif %}
             </div>
         </div>
     </div>

@@ -248,6 +248,19 @@ class Exercise(models.Model):
     media_url = models.URLField(blank=True, verbose_name=_('URL da Mídia'))
     thumbnail = models.ImageField(upload_to='exercises/thumbnails/', blank=True, null=True, verbose_name=_('Miniatura'))
 
+    # Where the picture / video comes from and under what terms it may be used (shown as a credit, see core/credits.py)
+    LICENSE_CHOICES = [
+        ('own', _('Produção própria')),
+        ('cc0', _('Domínio público (CC0, Unlicense)')),
+        ('cc-by', 'CC BY'),
+        ('cc-by-sa', 'CC BY-SA'),
+        ('permission', _('Uso autorizado pelo autor')),
+        ('other', _('Outra')),
+    ]
+    media_credit = models.CharField(max_length=200, blank=True, verbose_name=_('Autor ou fonte da mídia'))
+    media_license = models.CharField(max_length=20, blank=True, choices=LICENSE_CHOICES, verbose_name=_('Licença da mídia'))
+    media_source_url = models.URLField(blank=True, verbose_name=_('Link de origem da mídia'))
+
     instructions = models.TextField(blank=True, verbose_name=_('Instruções'))
     is_active = models.BooleanField(default=True, verbose_name=_('Ativo'))
     created_at = models.DateTimeField(auto_now_add=True)
@@ -257,6 +270,10 @@ class Exercise(models.Model):
         verbose_name = _('Exercício')
         verbose_name_plural = _('Exercícios')
         ordering = ['exercise_name']
+
+    @property
+    def has_credit(self):
+        return bool(self.media_credit or self.media_license or self.media_source_url)
 
     def __str__(self):
         return f"{self.exercise_name} ({self.muscle_group.label})"

@@ -12,6 +12,7 @@ from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.translation import gettext as _
 
+from . import credits
 from .history import log_event
 from .models import SheetLink, StudentEvent
 from .whatsapp_messages import language_of
@@ -87,6 +88,7 @@ def sheet(person):
                 'sets': item.sets, 'reps': item.reps, 'rest_seconds': item.rest_seconds, 'notes': item.notes,
                 'instructions': exercise.instructions or exercise.description,
                 'image': exercise.thumbnail.url if exercise.thumbnail else '',
+                'credit': credits.sheet_credit(exercise),
                 'video': _web_url(exercise.media_url) or (exercise.media_file.url if exercise.media_file else ''),
             })
         routines.append({'routine': routine, 'exercises': exercises})

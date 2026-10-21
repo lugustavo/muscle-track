@@ -111,6 +111,7 @@
                     {% elif e.prx.exercise.media_file %}
                     <a href="{{ e.prx.exercise.media_file.url }}" target="_blank" rel="noopener" class="text-decoration-none"><i class="bi bi-play-circle"></i> {% trans "Ver execução" %}</a>
                     {% endif %}
+                    {% if e.prx.exercise.has_credit %}<a href="{% url 'core:credits' %}" class="text-muted text-decoration-none ms-2" data-media-credit title="{% trans "Créditos das imagens e vídeos" %}"><i class="bi bi-award"></i> {% trans "Créditos" %}</a>{% endif %}
                 </div>
 
                 <div class="set-grid mb-1">

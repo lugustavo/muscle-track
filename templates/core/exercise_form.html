@@ -192,6 +192,31 @@
                             <i class="bi bi-info-circle"></i> {% trans "Imagem de visualização (recomendado 400x300px)" %}
                         </small>
                     </div>
+
+                    <div class="border-top pt-3 mt-3" data-media-credit>
+                        <div class="fw-bold mb-1"><i class="bi bi-award"></i> {% trans "Crédito da mídia" %}</div>
+                        <p class="small text-muted">{% trans "De onde veio a imagem ou o vídeo e com que licença pode ser usado. Mídias de bancos livres (CC BY, CC BY-SA) exigem citar o autor: o crédito aparece ao lado da mídia e na página de créditos. Se foi você quem gravou, escolha “Produção própria”." %}</p>
+                        <div class="row g-3">
+                            <div class="col-md-7">
+                                <label for="{{ form.media_credit.id_for_label }}" class="form-label fw-bold">{% trans "Autor ou fonte" %}</label>
+                                <input type="text" name="{{ form.media_credit.name }}" maxlength="200" class="form-control {% if form.media_credit.errors %}is-invalid{% endif %}" id="{{ form.media_credit.id_for_label }}" value="{{ form.media_credit.value|default:'' }}" placeholder="{% trans "Ex.: Everkinetic, Maria Silva..." %}">
+                                {% if form.media_credit.errors %}<div class="invalid-feedback">{{ form.media_credit.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-5">
+                                <label for="{{ form.media_license.id_for_label }}" class="form-label fw-bold">{% trans "Licença" %}</label>
+                                <select name="{{ form.media_license.name }}" class="form-select {% if form.media_license.errors %}is-invalid{% endif %}" id="{{ form.media_license.id_for_label }}">
+                                    <option value="">{% trans "Não informada" %}</option>
+                                    {% for value, label in form.media_license.field.choices %}{% if value %}<option value="{{ value }}" {% if form.media_license.value == value %}selected{% endif %}>{{ label }}</option>{% endif %}{% endfor %}
+                                </select>
+                                {% if form.media_license.errors %}<div class="invalid-feedback">{{ form.media_license.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label for="{{ form.media_source_url.id_for_label }}" class="form-label fw-bold">{% trans "Link de origem" %}</label>
+                                <input type="url" name="{{ form.media_source_url.name }}" class="form-control {% if form.media_source_url.errors %}is-invalid{% endif %}" id="{{ form.media_source_url.id_for_label }}" value="{{ form.media_source_url.value|default:'' }}" placeholder="https://...">
+                                {% if form.media_source_url.errors %}<div class="invalid-feedback">{{ form.media_source_url.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
