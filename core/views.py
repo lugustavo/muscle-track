@@ -1190,6 +1190,45 @@ def exercise_edit(request, pk):
     return render(request, 'core/exercise_form.html', {'form': form, 'title': _('Editar exercício')})
 
 
+def _exercise_usage(exercise):
+    """How much the exercise is used: the routine templates, and the students' own routines (their history)."""
+    given = PersonRoutineExercise.objects.filter(exercise=exercise)
+    return {
+        'templates': exercise.routines.values('routine').distinct().count(),
+        'student_routines': given.values('person_routine').distinct().count(),
+        'students': given.values('person_routine__person').distinct().count(),
+        'sessions': SessionExercise.objects.filter(person_routine_exercise__in=given).values('session').distinct().count(),
+    }
+
+
+@staff_required
+def exercise_delete(request, pk):
+    """Delete an exercise nobody has trained yet, or deactivate one with history.
+
+    An exercise already given to a student is part of that student's workouts and sessions: deleting it would wipe
+    their history, so it can only be hidden (deactivated). One only in routine templates can go; it leaves them."""
+    exercise = get_object_or_404(Exercise, pk=pk)
+    usage = _exercise_usage(exercise)
+    blocked = usage['student_routines'] > 0
+    if request.method == 'POST':
+        if request.POST.get('action') == 'deactivate':
+            if exercise.is_active:
+                exercise.is_active = False
+                exercise.save(update_fields=['is_active', 'updated_at'])
+            messages.success(request, _('Exercício desativado: ele não aparece mais para novos treinos, e o histórico fica.'))
+            return redirect(after_save_url(request, reverse('core:exercise_detail', kwargs={'pk': pk})))
+        if blocked:
+            messages.error(request, _('Este exercício já está nos treinos de alunos e não pode ser excluído. Desative-o.'))
+            return redirect(request.get_full_path())
+        name = exercise.exercise_name
+        with transaction.atomic():
+            exercise.delete()
+        logger.info('Exercise #%s deleted by user #%s', pk, request.user.pk)
+        messages.success(request, _('Exercício "%(name)s" excluído.') % {'name': name})
+        return redirect('core:exercise_list')
+    return render(request, 'core/exercise_delete.html', {'exercise': exercise, 'usage': usage, 'blocked': blocked})
+
+
 def _import_targets():
     """The trainer's active exercises that have no picture yet: where an imported animation may go."""
     return Exercise.objects.filter(is_active=True, media_url='').filter(Q(media_file='') | Q(media_file__isnull=True)).order_by('exercise_name')

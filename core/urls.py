@@ -86,6 +86,7 @@ urlpatterns = [
     path('exercises/import/', views.exercise_import, name='exercise_import'),
     path('exercises/<int:pk>/', views.exercise_detail, name='exercise_detail'),
     path('exercises/<int:pk>/edit/', views.exercise_edit, name='exercise_edit'),
+    path('exercises/<int:pk>/delete/', views.exercise_delete, name='exercise_delete'),
 
     # Routines
     path('routines/', views.routine_list, name='routine_list'),

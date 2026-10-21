@@ -159,6 +159,10 @@ def _exercise_detail(request, ctx):
     return [_home(), _exercises(), (ctx['exercise'].exercise_name, None)]
 
 
+def _exercise_delete(request, ctx):
+    return [_home(), _exercises(), _exercise(ctx['exercise']), (_('Excluir'), None)]
+
+
 def _exercise_edit(request, ctx):
     return [_home(), _exercises(), _exercise(_instance(ctx)), (_('Editar'), None)]
 
@@ -252,6 +256,7 @@ TRAILS = {
     'exercise_import': _exercise_import,
     'exercise_detail': _exercise_detail,
     'exercise_edit': _exercise_edit,
+    'exercise_delete': _exercise_delete,
     'routine_list': _routine_list,
     'routine_create': _routine_create,
     'routine_detail': _routine_detail,

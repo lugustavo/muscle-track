@@ -24,6 +24,9 @@
             <a href="{% nav_url 'core:exercise_edit' exercise.pk %}" class="btn btn-primary">
                 <i class="bi bi-pencil"></i> {% trans "Editar" %}
             </a>
+            <a href="{% nav_url 'core:exercise_delete' exercise.pk %}" class="btn btn-outline-danger" title="{% trans "Excluir" %}" aria-label="{% trans "Excluir exercício" %}">
+                <i class="bi bi-trash"></i><span class="d-none d-md-inline"> {% trans "Excluir" %}</span>
+            </a>
             {% url 'core:exercise_list' as back_default %}{% back_button back_default %}
         </div>
     </div>

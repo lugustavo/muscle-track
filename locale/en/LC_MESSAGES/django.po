@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 15:35-0300\n"
+"POT-Creation-Date: 2026-10-21 17:26-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -266,9 +266,11 @@ msgstr "Schedule"
 msgid "Novo exercício"
 msgstr "New exercise"
 
-#| msgid "Informações"
 msgid "Importar animações"
 msgstr "Import animations"
+
+msgid "Excluir"
+msgstr "Delete"
 
 msgid "Novo treino"
 msgstr "New workout"
@@ -356,9 +358,6 @@ msgstr "Invitation"
 
 msgid "Link da ficha"
 msgstr "Sheet link"
-
-msgid "Excluir"
-msgstr "Delete"
 
 msgid "Situação"
 msgstr "Status"
@@ -2885,6 +2884,25 @@ msgstr "Exercise updated successfully!"
 msgid "Editar exercício"
 msgstr "Edit exercise"
 
+msgid ""
+"Exercício desativado: ele não aparece mais para novos treinos, e o histórico"
+" fica."
+msgstr ""
+"Exercise deactivated: it no longer shows up for new workouts, and the "
+"history stays."
+
+msgid ""
+"Este exercício já está nos treinos de alunos e não pode ser excluído. "
+"Desative-o."
+msgstr ""
+"This exercise is already in students' workouts and cannot be deleted. "
+"Deactivate it."
+
+#, python-format
+#| msgid "exercícios concluídos"
+msgid "Exercício \"%(name)s\" excluído."
+msgstr "Exercise \"%(name)s\" deleted."
+
 #, python-format
 msgid "%(name)s: informe o nome e o grupo muscular."
 msgstr "%(name)s: enter the name and the muscle group."
@@ -2898,7 +2916,6 @@ msgstr ""
 "destination or change the name."
 
 #, python-format
-#| msgid "Um dos exercícios selecionados não existe mais."
 msgid "%(name)s: o exercício de destino não está mais disponível."
 msgstr "%(name)s: the destination exercise is no longer available."
 
@@ -2908,7 +2925,6 @@ msgid ""
 msgstr "At most %(n)d are imported at a time; pick the others again."
 
 #, python-format
-#| msgid "Avaliação registrada."
 msgid "%(n)d animação importada."
 msgid_plural "%(n)d animações importadas."
 msgstr[0] "%(n)d animation imported."
@@ -3345,7 +3361,6 @@ msgstr "wger.de answered something that could not be understood."
 msgid "Uma imagem do wger.de é grande demais e foi ignorada."
 msgstr "An image from wger.de is too large and was skipped."
 
-#| msgid "Não foi possível enviar: %(detail)s."
 msgid "Não foi possível baixar a imagem do wger.de."
 msgstr "Could not download the image from wger.de."
 
@@ -3357,7 +3372,6 @@ msgid "%(author)s, via wger.de; as duas imagens foram unidas em uma animação"
 msgstr ""
 "%(author)s, via wger.de; the two images were joined into one animation"
 
-#| msgid "Não foi possível enviar: %(detail)s."
 msgid "Não foi possível montar a animação."
 msgstr "Could not build the animation."
 
@@ -4496,8 +4510,100 @@ msgid "Nenhuma mídia com crédito por enquanto."
 msgstr "No media with a credit yet."
 
 #, python-format
+#| msgid "Excluir %(person_name)s - %(brand_name)s"
+msgid "Excluir %(exercise_name)s - %(brand_name)s"
+msgstr "Delete %(exercise_name)s - %(brand_name)s"
+
+#, python-format
+#| msgid "Excluir %(person_name)s"
+msgid "Excluir %(exercise_name)s"
+msgstr "Delete %(exercise_name)s"
+
+msgid ""
+"<strong>Este exercício não pode ser excluído:</strong> ele já faz parte dos "
+"treinos de alunos, e apagá-lo apagaria o histórico deles."
+msgstr ""
+"<strong>This exercise cannot be deleted:</strong> it is already part of "
+"students' workouts, and deleting it would erase their history."
+
+#, python-format
+#| msgid "Remover este exercício do treino?"
+msgid "%(n)s aluno com este exercício no treino"
+msgid_plural "%(n)s alunos com este exercício no treino"
+msgstr[0] "%(n)s student with this exercise in their workout"
+msgstr[1] "%(n)s students with this exercise in their workout"
+
+#, python-format
+#| msgid "Treino do Aluno"
+msgid "%(n)s treino de aluno"
+msgid_plural "%(n)s treinos de alunos"
+msgstr[0] "%(n)s student workout"
+msgstr[1] "%(n)s student workouts"
+
+#, python-format
+#| msgid "%(sessions)s sessão de treino registrada"
+#| msgid_plural "%(sessions)s sessões de treino registradas"
+msgid "%(n)s sessão de treino registrada"
+msgid_plural "%(n)s sessões de treino registradas"
+msgstr[0] "%(n)s workout session recorded"
+msgstr[1] "%(n)s workout sessions recorded"
+
+msgid ""
+"Para tirá-lo de circulação, <strong>desative</strong>: ele deixa de aparecer"
+" na lista e nos novos treinos, e o histórico dos alunos continua como está. "
+"Quer mesmo excluir? Retire-o antes dos treinos dos alunos."
+msgstr ""
+"To take it out of circulation, <strong>deactivate</strong> it: it stops "
+"showing in the list and in new workouts, and the students' history stays as "
+"it is. Really want to delete it? Remove it from the students' workouts "
+"first."
+
+#| msgid "Salvar exercício"
+msgid "Desativar exercício"
+msgstr "Deactivate exercise"
+
+#| msgid "Este dia já está na lista."
+msgid "Este exercício já está desativado."
+msgstr "This exercise is already deactivated."
+
+#| msgid ""
+#| "<strong>Esta ação não pode ser desfeita.</strong> O acesso do aluno e todos "
+#| "os dados abaixo serão apagados definitivamente, inclusive os arquivos de "
+#| "fotos."
+msgid ""
+"<strong>Esta ação não pode ser desfeita.</strong> O exercício e a imagem ou "
+"animação dele serão apagados."
+msgstr ""
+"<strong>This cannot be undone.</strong> The exercise and its picture or "
+"animation will be deleted."
+
+#, python-format
+msgid "Ele será retirado de <strong>%(n)s</strong> modelo de treino."
+msgid_plural "Ele será retirado de <strong>%(n)s</strong> modelos de treino."
+msgstr[0] "It will be removed from <strong>%(n)s</strong> workout template."
+msgstr[1] "It will be removed from <strong>%(n)s</strong> workout templates."
+
+#| msgid "Treinos com este exercício"
+msgid "Nenhum treino usa este exercício."
+msgstr "No workout uses this exercise."
+
+msgid "Só quer escondê-lo, sem apagar? Em vez de excluir,"
+msgstr "Just want to hide it, without deleting? Instead of deleting,"
+
+#| msgid "Mídia do exercício"
+msgid "desative o exercício"
+msgstr "deactivate the exercise"
+
+msgid "Excluir definitivamente"
+msgstr "Delete permanently"
+
+#, python-format
 msgid "%(exercise_name)s - %(brand_name)s"
 msgstr "%(exercise_name)s - %(brand_name)s"
+
+#| msgid "Editar exercício"
+msgid "Excluir exercício"
+msgstr "Delete exercise"
 
 msgid "Aluno ativo"
 msgid_plural "Alunos ativos"
@@ -4713,7 +4819,6 @@ msgstr ""
 "<strong>%(updated_at)s</strong>"
 
 #, python-format
-#| msgid "Notificações - %(brand_name)s"
 msgid "Importar animações - %(brand_name)s"
 msgstr "Import animations - %(brand_name)s"
 
@@ -4768,18 +4873,14 @@ msgid "No máximo {max} de cada vez."
 msgstr "At most {max} at a time."
 
 #, python-format
-#| msgid "<strong>%(count)s</strong> exercício encontrado"
-#| msgid_plural "<strong>%(count)s</strong> exercícios encontrados"
 msgid "<strong>%(count)s</strong> exercício disponível"
 msgid_plural "<strong>%(count)s</strong> exercícios disponíveis"
 msgstr[0] "<strong>%(count)s</strong> exercise available"
 msgstr[1] "<strong>%(count)s</strong> exercises available"
 
-#| msgid "Marcadas"
 msgid "Marcar todos"
 msgstr "Select all"
 
-#| msgid "Remarcar"
 msgid "Desmarcar"
 msgstr "Clear"
 
@@ -4792,18 +4893,15 @@ msgstr "Import this one"
 msgid "Onde colocar"
 msgstr "Where to put it"
 
-#| msgid "Editar exercício"
 msgid "Criar um exercício novo"
 msgstr "Create a new exercise"
 
 msgid "Usar em um exercício meu (sem imagem)"
 msgstr "Use in one of my exercises (no picture)"
 
-#| msgid "Voltar ao exercício"
 msgid "Grupo muscular (para o exercício novo)"
 msgstr "Muscle group (for the new exercise)"
 
-#| msgid "Voltar aos feriados"
 msgid "Importar selecionados"
 msgstr "Import selected"
 
@@ -7794,9 +7892,6 @@ msgstr ""
 
 msgid "desative o aluno"
 msgstr "deactivate the student"
-
-msgid "Excluir definitivamente"
-msgstr "Delete permanently"
 
 #, python-format
 msgid "%(person_name)s - %(brand_name)s"
