@@ -6,7 +6,6 @@ no login (the long random token is the credential) and shows nothing but the she
 no contact data, no prices, no history; the student appears by first name only."""
 import secrets
 from datetime import timedelta
-from urllib.parse import urlparse
 
 from django.urls import reverse
 from django.utils import timezone, translation
@@ -68,11 +67,6 @@ def public_path(link):
     return reverse('core:public_sheet', kwargs={'token': link.token})
 
 
-def _web_url(value):
-    """A link to open only when it is a real web address (the field is free text)."""
-    return value if urlparse(value or '').scheme in ('http', 'https') else ''
-
-
 def sheet(person):
     """What the page shows: `{'first_name', 'routines': [{'routine', 'exercises': [...]}]}`; the routines in use, each
     exercise with its numbers, notes and a picture / video link when it has one."""
@@ -89,7 +83,7 @@ def sheet(person):
                 'instructions': exercise.instructions or exercise.description,
                 'image': exercise.thumbnail.url if exercise.thumbnail else '',
                 'credit': credits.sheet_credit(exercise),
-                'video': _web_url(exercise.media_url) or (exercise.media_file.url if exercise.media_file else ''),
+                'video': (exercise.media_info or {}).get('url', ''),
             })
         routines.append({'routine': routine, 'exercises': exercises})
     names = (person.person_name or '').split()

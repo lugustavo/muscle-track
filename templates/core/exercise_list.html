@@ -52,8 +52,8 @@
         <div class="ui-card d-flex flex-column">
             {% if exercise.thumbnail %}
                 <img src="{{ exercise.thumbnail.url }}" class="ui-thumb" alt="{{ exercise.exercise_name }}" loading="lazy" onerror="this.src='{% static 'images/no-image.svg' %}'">
-            {% elif exercise.media_url %}
-                <img src="{{ exercise.media_url }}" class="ui-thumb" alt="{{ exercise.exercise_name }}" loading="lazy" onerror="this.src='{% static 'images/no-image.svg' %}'">
+            {% elif exercise.media_info.kind == 'image' %}
+                <img src="{{ exercise.media_info.url }}" class="ui-thumb" alt="{{ exercise.exercise_name }}" loading="lazy" onerror="this.src='{% static 'images/no-image.svg' %}'">
             {% else %}
                 <img src="{% static 'images/no-image.svg' %}" class="ui-thumb" alt="{% trans "Sem imagem" %}">
             {% endif %}
@@ -80,8 +80,8 @@
         <div class="card-body ui-row">
             {% if exercise.thumbnail %}
                 <img src="{{ exercise.thumbnail.url }}" class="ui-thumb" alt="{{ exercise.exercise_name }}" loading="lazy" onerror="this.src='{% static 'images/no-image.svg' %}'">
-            {% elif exercise.media_url %}
-                <img src="{{ exercise.media_url }}" class="ui-thumb" alt="{{ exercise.exercise_name }}" loading="lazy" onerror="this.src='{% static 'images/no-image.svg' %}'">
+            {% elif exercise.media_info.kind == 'image' %}
+                <img src="{{ exercise.media_info.url }}" class="ui-thumb" alt="{{ exercise.exercise_name }}" loading="lazy" onerror="this.src='{% static 'images/no-image.svg' %}'">
             {% else %}
                 <img src="{% static 'images/no-image.svg' %}" class="ui-thumb" alt="{% trans "Sem imagem" %}">
             {% endif %}

@@ -106,13 +106,22 @@
                     {% if e.record is not None %}
                     <a href="{% nav_url 'core:my_exercise_progress' e.prx.exercise.pk %}" class="me-3 text-decoration-none"><i class="bi bi-trophy"></i> {% blocktrans trimmed with record=e.record|unlocalize %}Recorde: <strong>{{ record }} kg</strong>{% endblocktrans %}</a>
                     {% endif %}
-                    {% if e.prx.exercise.media_url %}
-                    <a href="{{ e.prx.exercise.media_url }}" target="_blank" rel="noopener" class="text-decoration-none"><i class="bi bi-play-circle"></i> {% trans "Ver execução" %}</a>
-                    {% elif e.prx.exercise.media_file %}
-                    <a href="{{ e.prx.exercise.media_file.url }}" target="_blank" rel="noopener" class="text-decoration-none"><i class="bi bi-play-circle"></i> {% trans "Ver execução" %}</a>
-                    {% endif %}
                     {% if e.prx.exercise.has_credit %}<a href="{% url 'core:credits' %}" class="text-muted text-decoration-none ms-2" data-media-credit title="{% trans "Créditos das imagens e vídeos" %}"><i class="bi bi-award"></i> {% trans "Créditos" %}</a>{% endif %}
                 </div>
+
+                {% with media=e.prx.exercise.media_info %}
+                {% if media.kind == 'link' %}
+                <div class="mb-2"><a href="{{ media.url }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none small" data-exercise-media-link><i class="bi bi-play-circle"></i> {% trans "Ver execução" %}</a></div>
+                {% elif media %}
+                <details class="exercise-media mb-2" data-exercise-media>
+                    <summary class="small"><i class="bi bi-play-circle"></i> {% trans "Ver execução" %}</summary>
+                    <div class="text-center mt-2">
+                        {% if media.kind == 'image' %}<img src="{{ media.url }}" alt="{% blocktrans trimmed with name=e.prx.exercise.exercise_name %}Execução de {{ name }}{% endblocktrans %}" class="img-fluid rounded" loading="lazy">
+                        {% else %}<video src="{{ media.url }}" class="img-fluid rounded" controls muted loop playsinline preload="none"{% if e.prx.exercise.thumbnail %} poster="{{ e.prx.exercise.thumbnail.url }}"{% endif %}></video>{% endif %}
+                    </div>
+                </details>
+                {% endif %}
+                {% endwith %}
 
                 <div class="set-grid mb-1">
                     <span class="head text-center">{% trans "Série" %}</span><span class="head text-center">{% trans "Carga (kg)" %}</span>
