@@ -589,13 +589,13 @@ function updateSummary() {
 
 // Salvar formulário
 document.getElementById('routineForm').addEventListener('submit', function(e) {
-    // Preparar dados dos exercícios para envio
-    const exercisesData = selectedExercises.map((ex, index) => ({
-        exercise_id: ex.id,
-        order: index + 1,
+    // Preparar dados dos exercícios para envio: as chaves são as que o servidor lê (id, sets, reps, rest);
+    // a ordem é a da lista
+    const exercisesData = selectedExercises.map(ex => ({
+        id: ex.id,
         sets: ex.sets,
         reps: ex.reps,
-        rest_seconds: ex.rest
+        rest: ex.rest
     }));
 
     document.getElementById('exercisesData').value = JSON.stringify(exercisesData);

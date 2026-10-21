@@ -1,5 +1,6 @@
 """Phone layout of the student file lists and the routine counters: the lists swipe like the agenda tab, the
 counters are three to a row, and the file tabs keep their bottom edge."""
+import json
 import re
 from datetime import timedelta
 from decimal import Decimal
@@ -121,3 +122,33 @@ class RoutineFormListTests(BaseTestCase):
         page = self.client.get(reverse('core:person_routine_create')).content.decode()
         self.assertIn('id="exercisesList"', page)
         self.assertIn('id="noExercises"', page)
+
+
+class RoutineTemplateSaveContractTests(BaseTestCase):
+    """What the template form's JavaScript sends is what the server reads (the page once sent `exercise_id` and
+    `rest_seconds` while the view read `id` and `rest`: every save, reorder included, was refused)."""
+    def setUp(self):
+        super().setUp()
+        self.login(self.trainer)
+
+    def js_keys(self, page):
+        body = re.search(r'selectedExercises\.map\(ex => \(\{(.*?)\}\)\)', page, re.S).group(1)
+        return re.findall(r'(\w+):', body)
+
+    def test_the_submit_script_sends_the_keys_the_view_reads(self):
+        page = self.client.get(reverse('core:routine_edit', kwargs={'pk': self.template.pk})).content.decode()
+        keys = self.js_keys(page)
+        self.assertEqual(sorted(keys), ['id', 'reps', 'rest', 'sets'])
+
+    def test_a_payload_built_from_those_keys_saves_the_new_order_and_values(self):
+        page = self.client.get(reverse('core:routine_edit', kwargs={'pk': self.template.pk})).content.decode()
+        values = {'id': None, 'sets': 5, 'reps': 7, 'rest': 75}
+        rows = [dict(values, id=self.crucifixo.pk), dict(values, id=self.supino.pk)]
+        payload = [{key: row[key] for key in self.js_keys(page)} for row in rows]     # reordered: crucifixo first
+        response = self.client.post(reverse('core:routine_edit', kwargs={'pk': self.template.pk}), {
+            'routine_name': 'Treino A', 'difficulty_level': 'intermediario', 'estimated_duration': 45,
+            'is_active': 'on', 'exercises_data': json.dumps(payload)})
+        self.assertRedirects(response, reverse('core:routine_detail', kwargs={'pk': self.template.pk}), fetch_redirect_response=False)
+        self.assertEqual(
+            list(self.template.exercises.order_by('order').values_list('exercise_id', 'order', 'sets', 'reps', 'rest_seconds')),
+            [(self.crucifixo.pk, 1, 5, 7, 75), (self.supino.pk, 2, 5, 7, 75)])
