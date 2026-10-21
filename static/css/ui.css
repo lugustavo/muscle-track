@@ -237,3 +237,10 @@ input[type="radio"], input[type="checkbox"], input[type="range"] { accent-color:
 .photo-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 84px)); gap: .5rem .4rem; align-items: start; }
 .photo-tile { min-width: 0; }
 .photo-tile .small { overflow-wrap: anywhere; }
+
+/* In-app photo viewer (static/js/photo-viewer.js): the picture fits the screen, can be pinched, and has arrows to walk the gallery */
+.photo-viewer .photo-viewer-img { max-width: 100%; max-height: calc(100vh - 9rem); object-fit: contain; touch-action: pan-x pan-y pinch-zoom; }
+.photo-viewer .photo-viewer-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 2.6rem; height: 2.6rem; border: 0; border-radius: 50%; background: rgba(0, 0, 0, .45); color: var(--bs-white); font-size: 1.3rem; display: flex; align-items: center; justify-content: center; }
+.photo-viewer .photo-viewer-nav.prev { left: .5rem; }
+.photo-viewer .photo-viewer-nav.next { right: .5rem; }
+.photo-viewer .photo-viewer-nav:focus-visible { outline: 2px solid var(--bs-white); }
