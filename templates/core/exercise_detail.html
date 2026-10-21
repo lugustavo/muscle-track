@@ -133,22 +133,29 @@
     </div>
 
     <!-- Imagem do Exercício -->
-    <div class="col-md-4 order-1 order-md-2 mb-3 mb-md-0{% if not exercise.thumbnail and not exercise.media_url %} d-none d-md-block{% endif %}">
+    <div class="col-md-4 order-1 order-md-2 mb-3 mb-md-0{% if not exercise.thumbnail and not exercise.media_info %} d-none d-md-block{% endif %}">
         <div class="card">
             <div class="card-header d-none d-md-block">
                 <h5 class="mb-0"><i class="bi bi-image"></i> {% trans "Imagem" %}</h5>
             </div>
             <div class="card-body text-center">
-                {% if exercise.thumbnail %}
+                {% with media=exercise.media_info %}
+                {% if media.kind == 'image' %}
+                    <img src="{{ media.url }}" class="img-fluid rounded exercise-hero" alt="{{ exercise.exercise_name }}" data-exercise-media onerror="this.src='{% static 'images/no-image.svg' %}'">
+                {% elif media.kind == 'video' %}
+                    <video src="{{ media.url }}" class="img-fluid rounded exercise-hero" controls muted loop playsinline preload="metadata"{% if exercise.thumbnail %} poster="{{ exercise.thumbnail.url }}"{% endif %} data-exercise-media></video>
+                {% elif exercise.thumbnail %}
                     <img src="{{ exercise.thumbnail.url }}" class="img-fluid rounded exercise-hero" alt="{{ exercise.exercise_name }}" onerror="this.src='{% static 'images/no-image.svg' %}'">
-                {% elif exercise.media_url %}
-                    <img src="{{ exercise.media_url }}" class="img-fluid rounded exercise-hero" alt="{{ exercise.exercise_name }}" onerror="this.src='{% static 'images/no-image.svg' %}'">
                 {% else %}
                     <img src="{% static 'images/no-image.svg' %}" class="img-fluid rounded exercise-hero" alt="{% trans "Sem imagem" %}">
                 {% endif %}
+                {% if media.kind == 'link' %}
+                    <a href="{{ media.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary btn-sm mt-2" data-exercise-media-link><i class="bi bi-play-circle"></i> {% trans "Ver execução" %}</a>
+                {% endif %}
+                {% endwith %}
                 {% if exercise.has_credit %}
                 <p class="small text-muted mt-2 mb-0 text-start" data-media-credit><i class="bi bi-award"></i> {% blocktrans trimmed with credit=credit_label %}Mídia: {{ credit }}{% endblocktrans %}{% if exercise.media_source_url %} · <a href="{{ exercise.media_source_url }}" target="_blank" rel="noopener noreferrer">{% trans "origem" %}</a>{% endif %}</p>
-                {% elif exercise.thumbnail or exercise.media_url or exercise.media_file %}
+                {% elif exercise.thumbnail or exercise.media_info %}
                 <p class="small text-muted mt-2 mb-0 text-start" data-media-no-credit><i class="bi bi-info-circle"></i> {% trans "Mídia sem crédito informado." %}</p>
                 {% endif %}
             </div>

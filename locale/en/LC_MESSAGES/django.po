@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 08:34-0300\n"
+"POT-Creation-Date: 2026-10-21 08:51-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -44,7 +44,6 @@ msgstr "Default Settings"
 msgid "Mídia"
 msgstr "Media"
 
-#| msgid "Tipo de mídia"
 msgid "Crédito da mídia"
 msgstr "Media credit"
 
@@ -288,7 +287,6 @@ msgstr "Search"
 msgid "Centro de avisos"
 msgstr "Notification center"
 
-#| msgid "Arquivo de mídia"
 msgid "Créditos das mídias"
 msgstr "Media credits"
 
@@ -1314,22 +1312,18 @@ msgstr "Own production"
 msgid "Domínio público (CC0, Unlicense)"
 msgstr "Public domain (CC0, Unlicense)"
 
-#| msgid "não autorizado"
 msgid "Uso autorizado pelo autor"
 msgstr "Used with the author's permission"
 
 msgid "Outra"
 msgstr "Other"
 
-#| msgid "Arquivo de mídia"
 msgid "Autor ou fonte da mídia"
 msgstr "Media author or source"
 
-#| msgid "URL da mídia"
 msgid "Licença da mídia"
 msgstr "Media license"
 
-#| msgid "Preview da mídia"
 msgid "Link de origem da mídia"
 msgstr "Media source link"
 
@@ -4347,7 +4341,6 @@ msgid "pedir a exclusão dos seus dados"
 msgstr "request deletion of your data"
 
 #, python-format
-#| msgid "Centro de avisos - %(brand_name)s"
 msgid "Créditos das mídias - %(brand_name)s"
 msgstr "Media credits - %(brand_name)s"
 
@@ -4361,7 +4354,6 @@ msgstr ""
 msgid "origem"
 msgstr "source"
 
-#| msgid "Nenhum aviso por enquanto"
 msgid "Nenhuma mídia com crédito por enquanto."
 msgstr "No media with a credit yet."
 
@@ -4413,6 +4405,9 @@ msgstr "Order: %(order)s"
 
 msgid "Sem imagem"
 msgstr "No image"
+
+msgid "Ver execução"
+msgstr "View run"
 
 msgid "Mídia sem crédito informado."
 msgstr "Media with no credit given."
@@ -4476,7 +4471,6 @@ msgstr ""
 "author: the credit is shown next to the media and on the credits page. If "
 "you recorded it yourself, choose “Own production”."
 
-#| msgid "Autorizar fotos"
 msgid "Autor ou fonte"
 msgstr "Author or source"
 
@@ -4486,11 +4480,9 @@ msgstr "E.g. Everkinetic, Maria Silva..."
 msgid "Licença"
 msgstr "License"
 
-#| msgid "Não enviada"
 msgid "Não informada"
 msgstr "Not given"
 
-#| msgid "Link de calendário"
 msgid "Link de origem"
 msgstr "Source link"
 
@@ -6394,9 +6386,6 @@ msgstr "rest %(seconds)ss"
 
 msgid "Como fazer"
 msgstr "How to do it"
-
-msgid "Ver execução"
-msgstr "View run"
 
 msgid "Nenhum treino em uso no momento."
 msgstr "No workout in use at the moment."
@@ -8421,6 +8410,11 @@ msgstr "Record: <strong>%(record)s kg</strong>"
 
 msgid "Créditos das imagens e vídeos"
 msgstr "Image and video credits"
+
+#, python-format
+#| msgid "Devolução de %(amount)s"
+msgid "Execução de %(name)s"
+msgstr "How to do %(name)s"
 
 #, python-format
 msgid "Diminuir a carga da série %(n)s"

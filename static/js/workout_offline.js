@@ -174,7 +174,7 @@
     var WARMED = 'mt-warm-v1';
     var WARM_EVERY = 20 * 60 * 1000;
     var PAGES = ['/', '/my-workouts/', '/my-agenda/', '/my-package/', '/my-history/'];
-    var FILES = /\/(?:static|media\/exercises)\/[^"'\s)<>]+/g;   // code, styles, charts and exercise pictures a screen uses
+    var FILES = /\/(?:static|media\/exercises\/thumbnails)\/[^"'\s)<>]+/g;   // code, styles, charts and exercise thumbnails a screen uses (not the animations: they are big and load when opened)
 
     // The workouts listed on "Meus treinos" (from its HTML), kept for starting them with no connection
     function learnRoutines(html) {

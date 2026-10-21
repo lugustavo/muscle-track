@@ -14,6 +14,7 @@ from django.utils.translation import gettext, gettext_lazy as _
 
 from PIL import Image, ImageOps
 
+from . import exercise_media
 from .validators import validate_avatar_image, validate_photo_image
 
 
@@ -274,6 +275,31 @@ class Exercise(models.Model):
     @property
     def has_credit(self):
         return bool(self.media_credit or self.media_license or self.media_source_url)
+
+    @property
+    def media_info(self):
+        """{'kind': 'image'|'video'|'link', 'url'} of the media to show (the uploaded file wins over the link), or None."""
+        return exercise_media.describe(self)
+
+    def save(self, *args, **kwargs):
+        # No thumbnail uploaded: make one from the first frame of the media file (an image, GIF or WebP). A thumbnail made
+        # this way (named auto_...) is remade when the file is replaced; one the trainer uploaded is never touched.
+        if self.media_file and exercise_media.kind_of(self.media_file.name) == 'image':
+            auto = bool(self.thumbnail) and self.thumbnail.name.rsplit('/', 1)[-1].startswith(exercise_media.AUTO_PREFIX)
+            changed = getattr(self, '_media_file_name', None) != self.media_file.name
+            if not self.thumbnail or (auto and changed):
+                data = exercise_media.first_frame_thumbnail(self.media_file)
+                if data:
+                    self.thumbnail.save(f'{exercise_media.AUTO_PREFIX}{uuid.uuid4().hex}.jpg', ContentFile(data), save=False)
+        super().save(*args, **kwargs)
+        self._media_file_name = self.media_file.name if self.media_file else ''
+
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        instance = super().from_db(db, field_names, values)
+        if 'media_file' in field_names:
+            instance._media_file_name = instance.media_file.name if instance.media_file else ''
+        return instance
 
     def __str__(self):
         return f"{self.exercise_name} ({self.muscle_group.label})"

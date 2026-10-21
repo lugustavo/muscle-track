@@ -31,3 +31,8 @@
 @media (prefers-reduced-motion: reduce) {
     [data-exercise-card] { transition: none; }
 }
+
+/* "Ver execução": the exercise's picture / animation / video, opened inside the card */
+.exercise-media summary { cursor: pointer; color: var(--bs-link-color); list-style: none; }
+.exercise-media summary::-webkit-details-marker { display: none; }
+.exercise-media img, .exercise-media video { max-height: 18rem; }
