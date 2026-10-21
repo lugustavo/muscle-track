@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 17:26-0300\n"
+"POT-Creation-Date: 2026-10-21 18:07-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2899,7 +2899,6 @@ msgstr ""
 "Deactivate it."
 
 #, python-format
-#| msgid "exercícios concluídos"
 msgid "Exercício \"%(name)s\" excluído."
 msgstr "Exercise \"%(name)s\" deleted."
 
@@ -4510,12 +4509,10 @@ msgid "Nenhuma mídia com crédito por enquanto."
 msgstr "No media with a credit yet."
 
 #, python-format
-#| msgid "Excluir %(person_name)s - %(brand_name)s"
 msgid "Excluir %(exercise_name)s - %(brand_name)s"
 msgstr "Delete %(exercise_name)s - %(brand_name)s"
 
 #, python-format
-#| msgid "Excluir %(person_name)s"
 msgid "Excluir %(exercise_name)s"
 msgstr "Delete %(exercise_name)s"
 
@@ -4527,22 +4524,18 @@ msgstr ""
 "students' workouts, and deleting it would erase their history."
 
 #, python-format
-#| msgid "Remover este exercício do treino?"
 msgid "%(n)s aluno com este exercício no treino"
 msgid_plural "%(n)s alunos com este exercício no treino"
 msgstr[0] "%(n)s student with this exercise in their workout"
 msgstr[1] "%(n)s students with this exercise in their workout"
 
 #, python-format
-#| msgid "Treino do Aluno"
 msgid "%(n)s treino de aluno"
 msgid_plural "%(n)s treinos de alunos"
 msgstr[0] "%(n)s student workout"
 msgstr[1] "%(n)s student workouts"
 
 #, python-format
-#| msgid "%(sessions)s sessão de treino registrada"
-#| msgid_plural "%(sessions)s sessões de treino registradas"
 msgid "%(n)s sessão de treino registrada"
 msgid_plural "%(n)s sessões de treino registradas"
 msgstr[0] "%(n)s workout session recorded"
@@ -4558,18 +4551,12 @@ msgstr ""
 "it is. Really want to delete it? Remove it from the students' workouts "
 "first."
 
-#| msgid "Salvar exercício"
 msgid "Desativar exercício"
 msgstr "Deactivate exercise"
 
-#| msgid "Este dia já está na lista."
 msgid "Este exercício já está desativado."
 msgstr "This exercise is already deactivated."
 
-#| msgid ""
-#| "<strong>Esta ação não pode ser desfeita.</strong> O acesso do aluno e todos "
-#| "os dados abaixo serão apagados definitivamente, inclusive os arquivos de "
-#| "fotos."
 msgid ""
 "<strong>Esta ação não pode ser desfeita.</strong> O exercício e a imagem ou "
 "animação dele serão apagados."
@@ -4583,14 +4570,12 @@ msgid_plural "Ele será retirado de <strong>%(n)s</strong> modelos de treino."
 msgstr[0] "It will be removed from <strong>%(n)s</strong> workout template."
 msgstr[1] "It will be removed from <strong>%(n)s</strong> workout templates."
 
-#| msgid "Treinos com este exercício"
 msgid "Nenhum treino usa este exercício."
 msgstr "No workout uses this exercise."
 
 msgid "Só quer escondê-lo, sem apagar? Em vez de excluir,"
 msgstr "Just want to hide it, without deleting? Instead of deleting,"
 
-#| msgid "Mídia do exercício"
 msgid "desative o exercício"
 msgstr "deactivate the exercise"
 
@@ -4601,7 +4586,6 @@ msgstr "Delete permanently"
 msgid "%(exercise_name)s - %(brand_name)s"
 msgstr "%(exercise_name)s - %(brand_name)s"
 
-#| msgid "Editar exercício"
 msgid "Excluir exercício"
 msgstr "Delete exercise"
 
@@ -7384,9 +7368,6 @@ msgstr "BMI"
 msgid "%% gordura"
 msgstr "%% body fat"
 
-msgid "Remover esta avaliação?"
-msgstr "Remove this assessment?"
-
 #, python-format
 msgid "Abrir foto: %(label)s"
 msgstr "Open photo: %(label)s"
@@ -7400,6 +7381,9 @@ msgstr "Remove photo"
 
 msgid "Adicionar outra foto a esta avaliação"
 msgstr "Add another photo to this assessment"
+
+msgid "Remover esta avaliação?"
+msgstr "Remove this assessment?"
 
 msgid "Medidas em cm, peso em kg. Altura e peso geram o IMC."
 msgstr "Measurements in cm, weight in kg. Height and weight give the BMI."
@@ -8695,6 +8679,10 @@ msgstr ""
 
 msgid "Limpar busca"
 msgstr "Clear search"
+
+#| msgid "Deslize a aula para a esquerda para editar ou remover."
+msgid "Deslize um item para a esquerda para ver as ações."
+msgstr "Swipe an item to the left to see its actions."
 
 msgid "Remover filtro"
 msgstr "Remove filter"

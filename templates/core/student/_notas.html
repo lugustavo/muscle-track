@@ -9,19 +9,24 @@
     <button type="submit" class="btn btn-primary mt-2"><i class="bi bi-plus-circle"></i> {% trans "Salvar anotação" %}</button>
 </form>
 
-{% for note in notes %}
-<div class="card mb-2">
-    <div class="card-body py-2">
-        <div class="d-flex justify-content-between">
-            <small class="text-muted">{{ note.created_at|date:_('d/m/Y H:i') }}{% if note.author %} · {{ note.author.get_short_name|default:note.author.email }}{% endif %}</small>
+{% if notes %}
+<ul class="list-group" data-notes>
+    {% for note in notes %}
+    <li class="list-group-item p-0 swipe-row" data-swipe-row data-note="{{ note.pk }}">
+        <div class="swipe-content px-3 py-2">
+            <small class="text-muted d-block">{{ note.created_at|date:_('d/m/Y H:i') }}{% if note.author %} · {{ note.author.get_short_name|default:note.author.email }}{% endif %}</small>
+            <div>{{ note.text|linebreaksbr }}</div>
+        </div>
+        <div class="swipe-actions">
             <form method="post" action="{% nav_url 'core:note_delete' note.pk %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta anotação?" %}{% endfilter %}');">
                 {% csrf_token %}
-                <button class="btn btn-sm btn-link text-danger p-0" title="{% trans "Remover" %}"><i class="bi bi-trash"></i></button>
+                <button class="btn btn-sm btn-link swipe-remove" title="{% trans "Remover" %}"><i class="bi bi-trash" aria-hidden="true"></i><span class="swipe-label">{% trans "Remover" %}</span></button>
             </form>
         </div>
-        <div>{{ note.text|linebreaksbr }}</div>
-    </div>
-</div>
-{% empty %}
+    </li>
+    {% endfor %}
+</ul>
+{% include 'core/ui/_swipe_hint.html' %}
+{% else %}
 <div class="alert alert-info"><i class="bi bi-info-circle"></i> {% trans "Nenhuma anotação ainda." %}</div>
-{% endfor %}
+{% endif %}

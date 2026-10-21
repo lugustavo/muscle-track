@@ -124,15 +124,21 @@
         <div class="small text-uppercase text-muted mb-1">{% trans "Pacotes anteriores" %}</div>
         <ul class="list-unstyled small mb-0" data-package-history>
             {% for row in pkg.rows %}{% if row != cur %}
-            <li class="d-flex justify-content-between gap-2 py-1 border-top">
-                <span>{{ row.package.name }}{% if row.shared %} <i class="bi bi-people" title="{% trans "Dividido" %}"></i>{% endif %} <span class="text-muted">{% blocktrans trimmed with used=row.used sessions=row.sessions %}· {{ used }}/{{ sessions }} aulas{% endblocktrans %}{% if row.starts_on %} · {{ row.starts_on|date:_('d/m/y') }}{% endif %}</span></span>
-                <span class="d-flex align-items-center gap-2">
-                    {% if row.is_owner and row.state != 'cancelled' %}<a href="{% nav_url 'core:student_package_edit' student.pk row.package.pk %}" class="small" title="{% trans "Editar este pacote" %}"><i class="bi bi-pencil-square"></i><span class="visually-hidden">{% blocktrans trimmed with name=row.package.name %}Editar {{ name }}{% endblocktrans %}</span></a>{% endif %}
-                    <span class="ui-badge">{{ row.label }}</span>
-                </span>
+            <li class="swipe-row border-top" data-swipe-row>
+                <div class="swipe-content d-flex justify-content-between gap-2 py-1">
+                    <span>{{ row.package.name }}{% if row.shared %} <i class="bi bi-people" title="{% trans "Dividido" %}"></i>{% endif %} <span class="text-muted">{% blocktrans trimmed with used=row.used sessions=row.sessions %}· {{ used }}/{{ sessions }} aulas{% endblocktrans %}{% if row.starts_on %} · {{ row.starts_on|date:_('d/m/y') }}{% endif %}</span></span>
+                    <span class="ui-badge align-self-center">{{ row.label }}</span>
+                </div>
+                {% if row.is_owner and row.state != 'cancelled' %}
+                <div class="swipe-actions">
+                    <a href="{% nav_url 'core:student_package_edit' student.pk row.package.pk %}" class="btn btn-sm btn-link swipe-edit" title="{% trans "Editar este pacote" %}">
+                        <i class="bi bi-pencil" aria-hidden="true"></i><span class="swipe-label" aria-hidden="true">{% trans "Editar" %}</span><span class="visually-hidden">{% blocktrans trimmed with name=row.package.name %}Editar {{ name }}{% endblocktrans %}</span></a>
+                </div>
+                {% endif %}
             </li>
             {% endif %}{% endfor %}
         </ul>
+        {% include 'core/ui/_swipe_hint.html' %}
         {% endif %}
     </div>
 </div>
