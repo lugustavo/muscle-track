@@ -191,7 +191,8 @@
     <footer{% if tabbar %} class="d-none d-lg-block"{% endif %}>
         <div class="container text-center">
             <p class="mb-0">{% trans "&copy;" %} {% now "Y" %} {{ brand_name }}{% if studio_name %} {% blocktrans trimmed %}· feito com {{ app_name }}{% endblocktrans %}{% else %} {% trans "- Gestão para personal trainers" %}{% endif %}
-                · <a href="{% url 'core:privacy_policy' %}" class="text-white-50">{% trans "Privacidade" %}</a></p>
+                · <a href="{% url 'core:privacy_policy' %}" class="text-white-50">{% trans "Privacidade" %}</a>
+                · <a href="{% url 'core:credits' %}" class="text-white-50">{% trans "Créditos" %}</a></p>
         </div>
     </footer>
 

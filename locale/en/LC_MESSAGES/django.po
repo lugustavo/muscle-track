@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 19:05-0300\n"
+"POT-Creation-Date: 2026-10-21 08:34-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,6 +43,10 @@ msgstr "Default Settings"
 
 msgid "Mídia"
 msgstr "Media"
+
+#| msgid "Tipo de mídia"
+msgid "Crédito da mídia"
+msgstr "Media credit"
 
 msgid "Instruções"
 msgstr "Instructions"
@@ -284,6 +288,10 @@ msgstr "Search"
 msgid "Centro de avisos"
 msgstr "Notification center"
 
+#| msgid "Arquivo de mídia"
+msgid "Créditos das mídias"
+msgstr "Media credits"
+
 msgid "Notificações"
 msgstr "Notifications"
 
@@ -495,6 +503,10 @@ msgstr "Profile"
 #, python-format
 msgid "Nova aula para %(name)s"
 msgstr "New class for %(name)s"
+
+#, python-format
+msgid "Mídia: %(credit)s"
+msgstr "Media: %(credit)s"
 
 msgid "Exclusão de dados"
 msgstr "Data deletion"
@@ -1296,6 +1308,31 @@ msgstr "Media URL"
 msgid "Miniatura"
 msgstr "Thumbnail"
 
+msgid "Produção própria"
+msgstr "Own production"
+
+msgid "Domínio público (CC0, Unlicense)"
+msgstr "Public domain (CC0, Unlicense)"
+
+#| msgid "não autorizado"
+msgid "Uso autorizado pelo autor"
+msgstr "Used with the author's permission"
+
+msgid "Outra"
+msgstr "Other"
+
+#| msgid "Arquivo de mídia"
+msgid "Autor ou fonte da mídia"
+msgstr "Media author or source"
+
+#| msgid "URL da mídia"
+msgid "Licença da mídia"
+msgstr "Media license"
+
+#| msgid "Preview da mídia"
+msgid "Link de origem da mídia"
+msgstr "Media source link"
+
 msgid "Exercício"
 msgstr "Exercise"
 
@@ -1454,9 +1491,6 @@ msgstr "Photo position"
 
 msgid "Posições de foto"
 msgstr "Photo positions"
-
-msgid "Outra"
-msgstr "Other"
 
 msgid "Foto"
 msgstr "Photo"
@@ -3411,6 +3445,9 @@ msgstr "- Management for personal trainers"
 msgid "Privacidade"
 msgstr "Privacy"
 
+msgid "Créditos"
+msgstr "Credits"
+
 #, python-format
 msgid "%(get_kind_display)s · %(duration_minutes)s min"
 msgstr "%(get_kind_display)s · %(duration_minutes)s min"
@@ -4310,6 +4347,25 @@ msgid "pedir a exclusão dos seus dados"
 msgstr "request deletion of your data"
 
 #, python-format
+#| msgid "Centro de avisos - %(brand_name)s"
+msgid "Créditos das mídias - %(brand_name)s"
+msgstr "Media credits - %(brand_name)s"
+
+msgid ""
+"Quem fez as imagens e os vídeos dos exercícios e com que licença podem ser "
+"usados."
+msgstr ""
+"Who made the pictures and videos of the exercises and under which license "
+"they can be used."
+
+msgid "origem"
+msgstr "source"
+
+#| msgid "Nenhum aviso por enquanto"
+msgid "Nenhuma mídia com crédito por enquanto."
+msgstr "No media with a credit yet."
+
+#, python-format
 msgid "%(exercise_name)s - %(brand_name)s"
 msgstr "%(exercise_name)s - %(brand_name)s"
 
@@ -4358,6 +4414,9 @@ msgstr "Order: %(order)s"
 msgid "Sem imagem"
 msgstr "No image"
 
+msgid "Mídia sem crédito informado."
+msgstr "Media with no credit given."
+
 msgid "Informações básicas"
 msgstr "Basic information"
 
@@ -4405,6 +4464,35 @@ msgstr "Thumbnail"
 
 msgid "Imagem de visualização (recomendado 400x300px)"
 msgstr "Preview image (recommended 400x300px)"
+
+msgid ""
+"De onde veio a imagem ou o vídeo e com que licença pode ser usado. Mídias de"
+" bancos livres (CC BY, CC BY-SA) exigem citar o autor: o crédito aparece ao "
+"lado da mídia e na página de créditos. Se foi você quem gravou, escolha "
+"“Produção própria”."
+msgstr ""
+"Where the picture or video comes from and under which licence it can be "
+"used. Media from free libraries (CC BY, CC BY-SA) require crediting the "
+"author: the credit is shown next to the media and on the credits page. If "
+"you recorded it yourself, choose “Own production”."
+
+#| msgid "Autorizar fotos"
+msgid "Autor ou fonte"
+msgstr "Author or source"
+
+msgid "Ex.: Everkinetic, Maria Silva..."
+msgstr "E.g. Everkinetic, Maria Silva..."
+
+msgid "Licença"
+msgstr "License"
+
+#| msgid "Não enviada"
+msgid "Não informada"
+msgstr "Not given"
+
+#| msgid "Link de calendário"
+msgid "Link de origem"
+msgstr "Source link"
 
 msgid "Instruções de execução"
 msgstr "Execution instructions"
@@ -6690,7 +6778,6 @@ msgstr "Duration"
 msgid "Comentário do aluno sobre o treino:"
 msgstr "Student's comment on the workout:"
 
-#| msgid "Comentário do aluno sobre o treino:"
 msgid "Seu comentário sobre o treino:"
 msgstr "Your comment on the workout:"
 
@@ -6720,7 +6807,6 @@ msgid "<strong>Observação do aluno:</strong> %(notes)s"
 msgstr "<strong>Student note:</strong> %(notes)s"
 
 #, python-format
-#| msgid "<strong>Observação do aluno:</strong> %(notes)s"
 msgid "<strong>Sua observação:</strong> %(notes)s"
 msgstr "<strong>Your note:</strong> %(notes)s"
 
@@ -8332,6 +8418,9 @@ msgstr "Last time: <strong>%(previous_weight)s kg</strong>"
 #, python-format
 msgid "Recorde: <strong>%(record)s kg</strong>"
 msgstr "Record: <strong>%(record)s kg</strong>"
+
+msgid "Créditos das imagens e vídeos"
+msgstr "Image and video credits"
 
 #, python-format
 msgid "Diminuir a carga da série %(n)s"

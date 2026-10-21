@@ -230,7 +230,7 @@ class ExerciseForm(forms.ModelForm):
         model = Exercise
         fields = ['exercise_name', 'description', 'muscle_group', 'default_reps',
                   'default_sets', 'media_type', 'media_file', 'media_url',
-                  'thumbnail', 'instructions', 'is_active']
+                  'thumbnail', 'media_credit', 'media_license', 'media_source_url', 'instructions', 'is_active']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
             'instructions': forms.Textarea(attrs={'rows': 4}),

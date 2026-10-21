@@ -53,8 +53,8 @@ class PersonAdmin(admin.ModelAdmin):
 @admin.register(Exercise)
 class ExerciseAdmin(admin.ModelAdmin):
     list_display = ['exercise_name', 'muscle_group', 'default_sets', 'default_reps', 'media_type', 'is_active']
-    list_filter = ['muscle_group', 'media_type', 'is_active']
-    search_fields = ['exercise_name', 'description']
+    list_filter = ['muscle_group', 'media_type', 'media_license', 'is_active']
+    search_fields = ['exercise_name', 'description', 'media_credit']
     fieldsets = [
         (_('Informações Básicas'), {
             'fields': ['exercise_name', 'muscle_group', 'description']
@@ -64,6 +64,9 @@ class ExerciseAdmin(admin.ModelAdmin):
         }),
         (_('Mídia'), {
             'fields': ['media_type', 'media_file', 'media_url', 'thumbnail']
+        }),
+        (_('Crédito da mídia'), {
+            'fields': ['media_credit', 'media_license', 'media_source_url']
         }),
         (_('Instruções'), {
             'fields': ['instructions', 'is_active']

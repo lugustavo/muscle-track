@@ -144,6 +144,7 @@ urlpatterns = [
     path('manifest.webmanifest', views.pwa_manifest, name='pwa_manifest'),
     path('sw.js', views.service_worker, name='service_worker'),
     path('offline/', views.offline_page, name='offline'),
+    path('credits/', views.media_credits, name='credits'),
     path('notices/', views.notices, name='notices'),
     path('notices/read-all/', views.notices_read_all, name='notices_read_all'),
     path('notices/<int:pk>/open/', views.notice_open, name='notice_open'),

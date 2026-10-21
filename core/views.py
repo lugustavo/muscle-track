@@ -29,7 +29,7 @@ from django.views.decorators.http import require_POST, require_safe
 from allauth.account.models import EmailAddress
 
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, last_activity, trainer_dashboard
-from . import backup_status, inbox, photo_guides, photo_positions, telegram, workout_offline
+from . import backup_status, credits, inbox, photo_guides, photo_positions, telegram, workout_offline
 from .i18n import short_date
 from .listing import filter_tags, remember_view, view_mode as list_view_mode
 from .forms import (
@@ -94,6 +94,14 @@ def home(request):
     if not user.is_authenticated:
         return render(request, 'core/landing.html', context)
     return render(request, 'core/home.html', context)
+
+
+# ============= MEDIA CREDITS =============
+
+@require_safe
+def media_credits(request):
+    """Who made the pictures and videos of the exercises and under what licence (public: the workout sheet link has no login)."""
+    return render(request, 'core/credits.html', {'rows': credits.credited()})
 
 
 # ============= NOTICE CENTRE =============
@@ -1157,6 +1165,7 @@ def exercise_detail(request, pk):
     ).select_related('routine').order_by('routine__routine_name')
 
     return render(request, 'core/exercise_detail.html', {
+        'credit_label': credits.label(exercise),
         'exercise': exercise,
         'routines_count': routines_count,
         'active_students': active_students,

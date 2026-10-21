@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% blocktrans trimmed %}Créditos das mídias - {{ brand_name }}{% endblocktrans %}{% endblock %}
+
+{% block content %}
+<div class="mx-auto" style="max-width: 720px;">
+    <div class="ui-head inline">
+        <div class="ui-title">
+            <span class="ui-ico"><i class="bi bi-award" aria-hidden="true"></i></span>
+            <div class="min-w-0">
+                <h1>{% trans "Créditos das mídias" %}</h1>
+                <p class="ui-sub">{% trans "Quem fez as imagens e os vídeos dos exercícios e com que licença podem ser usados." %}</p>
+            </div>
+        </div>
+    </div>
+    {% if rows %}
+    <ul class="list-group mb-3" data-credits>
+        {% for row in rows %}
+        <li class="list-group-item d-flex flex-wrap justify-content-between gap-1" data-credit-row>
+            <strong>{{ row.name }}</strong>
+            <span class="text-muted">{{ row.credit }}{% if row.url %} · <a href="{{ row.url }}" target="_blank" rel="noopener noreferrer">{% trans "origem" %}</a>{% endif %}</span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="ui-empty" data-credits-empty>
+        <span class="ui-ico"><i class="bi bi-award" aria-hidden="true"></i></span>
+        <p>{% trans "Nenhuma mídia com crédito por enquanto." %}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
