@@ -1,6 +1,7 @@
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import connection
 from django.test import RequestFactory
@@ -209,6 +210,17 @@ class StudentBarTests(BaseTestCase):
         trail = self.client.get(reverse('core:my_history')).content.decode()
         self.assertIn('breadcrumb-nav d-none d-lg-block', trail)
         self.assertIn('class="tabbar d-lg-none"', page)
+
+    def test_bar_hides_only_for_fields_that_open_the_keyboard(self):
+        # A <select> or a date picker keeps the focus after it closes without a choice; counting them hid the bar for good.
+        script = (settings.BASE_DIR / 'static' / 'js' / 'tabbar.js').read_text()
+        textual = script.split('var textual =', 1)[1].split(';', 1)[0]
+        self.assertIn('textarea', textual)
+        for picker in ('select', 'type=date', 'type=time', 'type=datetime-local', 'type=checkbox', 'type=file'):
+            if picker == 'select':
+                self.assertNotIn('select', textual)
+            else:
+                self.assertIn(f':not([{picker}])', textual)
 
     def test_visitors_keep_footer_and_menu(self):
         self.client.logout()

@@ -18,7 +18,11 @@
     }
     if (timers.length) { tick(); window.setInterval(tick, 1000); }
 
-    var textual = 'input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]):not([type=file]), textarea, select';
+    // Only what opens the on-screen keyboard. A <select> or a date / time / colour field opens a picker instead, and keeps
+    // the focus after the picker closes: counting those hid the bar for good when nothing was chosen.
+    var textual = 'input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]):not([type=file])' +
+        ':not([type=date]):not([type=time]):not([type=datetime-local]):not([type=month]):not([type=week]):not([type=color])' +
+        ':not([type=range]):not([type=reset]):not([type=image]):not([type=hidden]), textarea';
     document.addEventListener('focusin', function (event) {
         if (event.target.matches && event.target.matches(textual)) { document.body.classList.add('kbd-open'); }
     });
