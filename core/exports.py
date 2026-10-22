@@ -47,7 +47,7 @@ def build_data(person, include_internal_notes):
             **_fields(routine, ['routine_name', 'description', 'difficulty_level', 'estimated_duration',
                                 'routine_date', 'start_date', 'end_date', 'is_active', 'notes']),
             'exercises': [
-                {'exercise': e.exercise.exercise_name, **_fields(e, ['order', 'sets', 'reps', 'rest_seconds', 'notes'])}
+                {'exercise': e.exercise.exercise_name, **_fields(e, ['order', 'sets', 'reps', 'measure', 'technique', 'rest_seconds', 'notes'])}
                 for e in routine.exercises.all()],
         })
 

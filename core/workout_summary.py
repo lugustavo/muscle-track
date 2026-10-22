@@ -11,9 +11,11 @@ def _done_sets(session):
 
 
 def session_volume(session):
-    """Sum of weight x reps over the finished sets (sets without a weight or reps count as zero)."""
+    """Sum of weight x reps over the finished sets (sets without a weight or reps count as zero). Exercises counted in
+    seconds are left out: seconds are not repetitions."""
     total = Decimal('0')
-    for weight, reps in _done_sets(session).values_list('weight', 'reps'):
+    counted = _done_sets(session).exclude(session_exercise__person_routine_exercise__measure='time')
+    for weight, reps in counted.values_list('weight', 'reps'):
         if weight is not None and reps is not None:
             total += weight * reps
     return total

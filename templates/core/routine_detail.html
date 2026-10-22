@@ -189,12 +189,14 @@
                                         <a href="{% nav_url 'core:exercise_detail' routine_exercise.exercise.pk %}" class="text-decoration-none">
                                             {{ routine_exercise.exercise.exercise_name }}
                                         </a>
+                                        {% if routine_exercise.group_label %}<span class="ui-badge info" data-group="{{ routine_exercise.group_label }}">{{ routine_exercise.group_label }}</span>{% endif %}
+                                        {% if routine_exercise.technique_label %}<span class="ui-badge warn" data-technique="{{ routine_exercise.technique }}">{{ routine_exercise.technique_label }}</span>{% endif %}
                                     </td>
                                     <td>
                                         <span class="ui-badge">{{ routine_exercise.exercise.muscle_group.label }}</span>
                                     </td>
                                     <td class="text-center">{{ routine_exercise.sets }}</td>
-                                    <td class="text-center">{{ routine_exercise.reps }}</td>
+                                    <td class="text-center">{{ routine_exercise.reps }}{% if routine_exercise.is_timed %} s{% endif %}</td>
                                     <td class="text-center">{{ routine_exercise.rest_seconds }}s</td>
                                 </tr>
                                 {% endfor %}

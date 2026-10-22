@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.translation import gettext as _
 
-from . import credits
+from . import credits, techniques
 from .history import log_event
 from .models import SheetLink, StudentEvent
 from .whatsapp_messages import language_of
@@ -75,11 +75,13 @@ def sheet(person):
         'exercises__exercise__muscle_group')
     for routine in queryset:
         exercises = []
-        for item in routine.exercises.all():
+        for item in techniques.annotate(routine.exercises.all()):
             exercise = item.exercise
             exercises.append({
                 'order': item.order, 'name': exercise.exercise_name, 'group': exercise.muscle_group.label,
                 'sets': item.sets, 'reps': item.reps, 'rest_seconds': item.rest_seconds, 'notes': item.notes,
+                'target': item.target_label, 'set_group': item.group_label, 'technique': item.technique_label,
+                'hint': item.technique_hint,
                 'instructions': exercise.instructions or exercise.description,
                 'image': exercise.thumbnail.url if exercise.thumbnail else '',
                 'credit': credits.sheet_credit(exercise),

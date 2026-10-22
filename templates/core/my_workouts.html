@@ -84,7 +84,9 @@
                                 <!-- Configuração do exercício -->
                                 <div class="d-flex gap-3 mt-2">
                                     <small><i class="bi bi-arrow-repeat"></i> {% blocktrans trimmed with sets=routine_exercise.sets %}{{ sets }} séries{% endblocktrans %}</small>
-                                    <small><i class="bi bi-123"></i> {% blocktrans trimmed with reps=routine_exercise.reps %}{{ reps }} reps{% endblocktrans %}</small>
+                                    <small><i class="bi bi-123"></i> {% if routine_exercise.is_timed %}{% blocktrans trimmed with reps=routine_exercise.reps %}{{ reps }} s{% endblocktrans %}{% else %}{% blocktrans trimmed with reps=routine_exercise.reps %}{{ reps }} reps{% endblocktrans %}{% endif %}</small>
+                                    {% if routine_exercise.group_label %}<small><span class="ui-badge info">{{ routine_exercise.group_label }}</span></small>{% endif %}
+                                    {% if routine_exercise.technique_label %}<small><span class="ui-badge warn">{{ routine_exercise.technique_label }}</span></small>{% endif %}
                                     {% if routine_exercise.rest_seconds %}
                                     <small><i class="bi bi-clock"></i> {{ routine_exercise.rest_seconds }}s</small>
                                     {% endif %}
