@@ -87,9 +87,13 @@
                 <input class="form-check-input" type="checkbox" id="notify_reassessment" name="notify_reassessment" {% if pref.notify_reassessment %}checked{% endif %}>
                 <label class="form-check-label" for="notify_reassessment">{% trans "Lembrete de uma nova avaliação" %}</label>
             </div>
-            <div class="form-check mb-3">
+            <div class="form-check mb-1">
                 <input class="form-check-input" type="checkbox" id="notify_inactivity" name="notify_inactivity" {% if pref.notify_inactivity %}checked{% endif %}>
                 <label class="form-check-label" for="notify_inactivity">{% trans "Aviso gentil quando eu passar uma semana sem treinar" %}</label>
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="notify_birthday" name="notify_birthday" {% if pref.notify_birthday %}checked{% endif %}>
+                <label class="form-check-label" for="notify_birthday">{% trans "Parabéns no meu aniversário" %}</label>
             </div>
             {% endif %}
             <div class="small text-muted mb-3">{% trans "Vale para todos os canais: só chega o que estiver marcado aqui e em um canal ligado." %}</div>

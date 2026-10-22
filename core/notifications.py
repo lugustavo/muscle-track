@@ -40,6 +40,7 @@ KIND_FLAG = {
     'package_attention': 'notify_renewals',
     'invite_accepted': 'notify_activity', 'student_photo': 'notify_activity',
     'daily_digest': 'notify_digest', 'reassessment': 'notify_reassessment', 'inactivity': 'notify_inactivity',
+    'birthday': 'notify_birthday',
 }
 Status = NotificationLog.Status
 
@@ -191,6 +192,14 @@ def inactivity_nudge(days):
                    reverse('core:my_workouts'))
 
 
+def birthday_greeting(person):
+    """The studio's greeting on the student's birthday (first name only; the age is never written)."""
+    name = person.person_name.split()[0] if person.person_name.strip() else ''
+    return Message('birthday', lazy_text(lambda: _('Feliz aniversário!')),
+                   lazy_text(lambda: _('Parabéns, %(name)s! Que o seu dia seja ótimo. 🎉') % {'name': name}),
+                   reverse('core:my_workouts'))
+
+
 def daily_digest(summary):
     """The trainer's morning summary. `summary` is {item: count} (see reminders.digest_summary); only the items that are
     not zero are written. Counts only: no names, no amounts, no health data."""
@@ -201,6 +210,9 @@ def daily_digest(summary):
             first = summary.get('first_class')
             out.append(ngettext('%(n)d aula hoje', '%(n)d aulas hoje', classes) % {'n': classes}
                        + (' ' + _('(a primeira às %(time)s)') % {'time': first} if first else ''))
+        n = summary.get('birthdays', 0)
+        if n:
+            out.append(ngettext('%(n)d aniversariante hoje', '%(n)d aniversariantes hoje', n) % {'n': n})
         n = summary.get('unmarked', 0)
         if n:
             out.append(ngettext('%(n)d aula de ontem sem presença marcada', '%(n)d aulas de ontem sem presença marcada', n) % {'n': n})

@@ -16,6 +16,7 @@ from .whatsapp_messages import Kind, current_text, language_of, render
 INACTIVE_DAYS = 7
 EXPIRING_DAYS = 14
 COMMENT_DAYS = 7
+BIRTHDAY_DAYS = 7
 TRIAL_DAYS = 14
 LIST_LIMIT = 8
 
@@ -32,7 +33,7 @@ PRIORITY = (
     ('invites', _l('Convites'), 'secondary'),
     ('routines', _l('Fichas terminando'), 'secondary'),
 )
-INFO_CARDS = ('sessions', 'comments')   # worth reading, never "to do": ordered after the ones above, outside the strip
+INFO_CARDS = ('sessions', 'comments', 'birthdays')   # worth reading, never "to do": ordered after the ones above, outside the strip
 
 # Student with the app whose account never got a password, i.e. never accepted the invite (a student without the app
 # has no invite to wait for)
@@ -136,6 +137,36 @@ def long_trials(now=None):
     return rows
 
 
+def next_birthday(born, today):
+    """The next date (today counts) on which someone born on `born` has a birthday. 29 Feb is celebrated on 28 Feb in the
+    years that have no 29th."""
+    def in_year(year):
+        try:
+            return born.replace(year=year)
+        except ValueError:
+            return born.replace(year=year, day=28)
+    date = in_year(today.year)
+    return date if date >= today else in_year(today.year + 1)
+
+
+def birthdays(today=None, ahead=BIRTHDAY_DAYS):
+    """Active students whose birthday is today or in the next `ahead` days, closest first, with a ready WhatsApp greeting."""
+    today = today or timezone.localdate()
+    rows = []
+    text = current_text(Kind.BIRTHDAY)
+    for student in Person.objects.filter(is_active=True, birth_date__isnull=False).select_related('user__notification_preference'):
+        date = next_birthday(student.birth_date, today)
+        days = (date - today).days
+        if days > ahead:
+            continue
+        with translation.override(language_of(student)):    # the greeting goes to the student, in their language
+            message = render(Kind.BIRTHDAY, {'nome': student.person_name.split()[0]}, text)
+        rows.append({'student': student, 'date': date, 'days': days, 'turning': date.year - student.birth_date.year,
+                     'whatsapp': whatsapp_url(student.phone, message)})
+    rows.sort(key=lambda r: (r['days'], r['student'].person_name.casefold()))
+    return rows
+
+
 def erasure_requests():
     """Students who asked for their data to be deleted (the event goes away with the student)."""
     seen, rows = set(), []
@@ -219,10 +250,12 @@ def trainer_dashboard():
     routines = ending_routines()
     sessions = todays_sessions()
     comments = recent_comments(now)
+    birthday_rows = birthdays(timezone.localdate(now))
     chips, order = priorities({
         'erasures': len(erasures), 'payments': len(overdue) + len(refunds_due), 'plans': len(plans),
         'classes': len(today_classes), 'misses': len(misses), 'inactive': len(inactive), 'trials': len(trials),
-        'invites': len(invites), 'routines': len(routines), 'sessions': len(sessions), 'comments': len(comments)})
+        'invites': len(invites), 'routines': len(routines), 'sessions': len(sessions), 'comments': len(comments),
+        'birthdays': len(birthday_rows)})
     return {
         'attention': chips, 'order': order,
         'counts': counts,
@@ -243,4 +276,6 @@ def trainer_dashboard():
         'routines': routines[:LIST_LIMIT], 'routines_total': len(routines),
         'sessions': sessions[:LIST_LIMIT], 'sessions_total': len(sessions),
         'comments': comments,
+        'birthdays': birthday_rows[:LIST_LIMIT], 'birthdays_total': len(birthday_rows),
+        'birthdays_today': sum(1 for r in birthday_rows if r['days'] == 0),
     }

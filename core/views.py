@@ -2566,9 +2566,10 @@ def notification_settings(request):
                     pref.notify_plan_expiry = 'notify_plan_expiry' in request.POST
                     pref.notify_reassessment = 'notify_reassessment' in request.POST
                     pref.notify_inactivity = 'notify_inactivity' in request.POST
+                    pref.notify_birthday = 'notify_birthday' in request.POST
                 pref.save(update_fields=['notify_changes', 'notify_class_reminder', 'notify_plan_expiry',
                                          'notify_renewals', 'notify_activity', 'notify_digest', 'notify_reassessment',
-                                         'notify_inactivity'])
+                                         'notify_inactivity', 'notify_birthday'])
             messages.success(request, _('Preferências de notificação salvas.'))
         return redirect('core:notification_settings')
     recent = list(request.user.notification_logs.all()[:5])

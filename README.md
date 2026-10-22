@@ -248,6 +248,8 @@ Cada botão só existe quando as duas chaves do provedor estão no `.env` (sem e
 - Cobrança automática com gateway (Pix/cartão)
 - ~~Lembrete automático de plano vencendo, de aula e de reavaliação~~ *(feito: ver "Mais lembretes automáticos" em Notificações)*; falta o lembrete de aniversário (depende do campo de data de nascimento) e o de metas com prazo
 - Metas com prazo e lembrete de reavaliação, marcação do aniversário, importação/exportação de alunos em CSV *(feito, ver "Alunos em CSV")*
+- ~~Lembrete automático de plano vencendo, de aula e de reavaliação~~ *(feito: ver "Mais lembretes automáticos" em Notificações)*; o de aniversário também está feito; falta o de metas com prazo
+- Metas com prazo e lembrete de reavaliação, marcação do aniversário, importação/exportação de alunos em CSV
 - ~~Aluno ver as próprias avaliações e fotos de progresso; comparação lado a lado de fotos~~ *(feito: Minha evolução e Comparar fotos, ver "Avaliações com fotos" abaixo)*
 - Séries por tempo/técnicas (drop-set, bi-set), periodização
 - Monitoramento/alertas e logs centralizados
@@ -334,6 +336,7 @@ Cada botão só existe quando as duas chaves do provedor estão no `.env` (sem e
   - **Aluno — nova avaliação** (`REMINDER_REASSESSMENT_DAYS`, padrão 45; 0 desliga): quando a última avaliação passa desse prazo (só quem já teve uma), de manhã, e de novo só depois de 30 dias.
   - **Aluno — sem treinar** (`REMINDER_INACTIVE_DAYS`, padrão 7; 0 desliga): aviso gentil de quem tem treino em andamento e parou, no máximo um por semana.
   - **Personal — resumo do dia** (`REMINDER_DIGEST_HOUR`, padrão 7; -1 desliga): um aviso por manhã com **aulas de hoje** (e a hora da primeira), **aulas de ontem sem presença marcada**, **pagamentos em aberto**, **alunos sem treinar**, **alunos para reavaliar**, **treinos terminando**, **convites sem aceitar há 3 dias ou mais** e **experimentais para decidir**; dia tranquilo não envia nada.
+  - **Aniversário** (usa a data de nascimento da ficha): o **painel** da personal ganha o cartão **Aniversariantes (7 dias)** (hoje, amanhã e os próximos dias, com a idade que a pessoa faz e o botão de **parabéns pelo WhatsApp**, com texto editável em Notificações → Mensagens do WhatsApp); o **resumo do dia** conta os aniversariantes de hoje; e o **aluno com o app recebe "Feliz aniversário!"** do estúdio no dia (só o primeiro nome, nunca a idade; uma vez por ano; interruptor "Parabéns no meu aniversário"). Quem nasceu em 29 de fevereiro comemora em 28/02 nos anos comuns.
   - Os avisos aos alunos saem de manhã (`REMINDER_NUDGE_HOUR`, padrão 10), numa janela de duas horas a partir dessa hora. De propósito **não há cobrança automática ao aluno** (pagamento em aberto só aparece para a personal, que decide como cobrar pelo WhatsApp).
 - Marcar **falta** não envia aviso (de propósito: é um clique de rotina e um engano seria constrangedor); dá para ligar depois se quiserem.
 

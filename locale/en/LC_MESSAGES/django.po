@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 17:27-0300\n"
+"POT-Creation-Date: 2026-10-22 17:45-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1807,6 +1807,9 @@ msgstr "Class the student missed"
 msgid "Convite de acesso"
 msgstr "Access invitation"
 
+msgid "Parabéns de aniversário"
+msgstr "Birthday greeting"
+
 msgid "Enviada"
 msgstr "Sent"
 
@@ -2029,6 +2032,13 @@ msgstr[0] ""
 msgstr[1] ""
 "It has been %(n)d days since you trained. How about a workout today?"
 
+msgid "Feliz aniversário!"
+msgstr "Happy birthday!"
+
+#, python-format
+msgid "Parabéns, %(name)s! Que o seu dia seja ótimo. 🎉"
+msgstr "Happy birthday, %(name)s! Have a great day. 🎉"
+
 #, python-format
 msgid "%(n)d aula hoje"
 msgid_plural "%(n)d aulas hoje"
@@ -2038,6 +2048,12 @@ msgstr[1] "%(n)d classes today"
 #, python-format
 msgid "(a primeira às %(time)s)"
 msgstr "(the first at %(time)s)"
+
+#, python-format
+msgid "%(n)d aniversariante hoje"
+msgid_plural "%(n)d aniversariantes hoje"
+msgstr[0] "%(n)d birthday today"
+msgstr[1] "%(n)d birthdays today"
 
 #, python-format
 msgid "%(n)d aula de ontem sem presença marcada"
@@ -3636,6 +3652,14 @@ msgstr ""
 "Hi, {nome}! Your Muscle Track access is ready. Create your password with "
 "this link (valid for 7 days): {link}"
 
+#, python-brace-format
+msgid ""
+"Parabéns, {nome}! 🎉 Que o seu dia seja incrível e que venha mais um ano de "
+"saúde e muito treino. 💪"
+msgstr ""
+"Happy birthday, {nome}! 🎉 May your day be amazing and may the next year "
+"bring lots of health and training. 💪"
+
 msgid "primeiro nome do aluno"
 msgstr "student's first name"
 
@@ -3665,6 +3689,9 @@ msgstr "When tapping WhatsApp on a recent absence (dashboard)."
 
 msgid "Ao enviar o link de acesso ao aluno (tela do convite)."
 msgstr "When sending the access link to the student (invitation screen)."
+
+msgid "Ao tocar no WhatsApp de um aniversariante (painel)."
+msgstr "When tapping the WhatsApp button of a birthday person (dashboard)."
 
 msgid "Carla"
 msgstr "Carla"
@@ -5690,6 +5717,19 @@ msgstr "in progress"
 msgid "Ninguém treinou ainda hoje."
 msgstr "No one has trained yet today."
 
+msgid "Aniversariantes (7 dias)"
+msgstr "Birthdays (7 days)"
+
+msgid "D d/m"
+msgstr "D m/d"
+
+#, python-format
+msgid "%(n)s anos"
+msgstr "%(n)s years old"
+
+msgid "Parabéns pelo WhatsApp"
+msgstr "Greet on WhatsApp"
+
 msgid "Comentários dos alunos (7 dias)"
 msgstr "Student comments (7 days)"
 
@@ -6460,6 +6500,9 @@ msgstr "Reminder of a new assessment"
 
 msgid "Aviso gentil quando eu passar uma semana sem treinar"
 msgstr "A gentle nudge when I go a week without training"
+
+msgid "Parabéns no meu aniversário"
+msgstr "A greeting on my birthday"
 
 msgid ""
 "Vale para todos os canais: só chega o que estiver marcado aqui e em um canal"
@@ -7690,9 +7733,6 @@ msgstr "attendance"
 
 msgid "Aula avulsa"
 msgstr "Single class"
-
-msgid "D d/m"
-msgstr "D m/d"
 
 #, python-format
 msgid "%(starts_at)s às %(starts_at2)s"
