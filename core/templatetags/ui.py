@@ -15,6 +15,16 @@ def qs(context, **changes):
 
 
 @register.simple_tag(takes_context=True)
+def page_url(context, param, number, fragment=''):
+    """The current address with page `number` of the list paged by `param` (a page that shares the screen with
+    other lists, like the assessments tab, has its own parameter); `fragment` keeps the tab open after the reload."""
+    params = [(key, value) for key, value in context['request'].GET.items() if key != param]
+    if number != 1:
+        params.append((param, number))
+    return ('?' + urlencode(params) if params else '?') + (f'#{fragment}' if fragment else '')
+
+
+@register.simple_tag(takes_context=True)
 def qs_remove(context, *keys):
     """The current query string without these filters (and without the page number)."""
     params = [(key, value) for key, value in context['request'].GET.items() if key not in keys and key != 'page']

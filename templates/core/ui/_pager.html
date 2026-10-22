@@ -1,0 +1,17 @@
+{% load i18n ui %}
+{% comment %}Pager for a list that shares its screen with other lists. Needs `page` (a Django Page), `param` (the query
+parameter that holds the page number) and optionally `fragment` (the tab to stay on).{% endcomment %}
+{% if page.has_other_pages %}
+<nav aria-label="{% trans "Paginação" %}" class="mt-3" data-pager="{{ param }}">
+    <p class="text-center text-muted small mb-2">{% blocktrans trimmed with first=page.start_index last=page.end_index total=page.paginator.count %}{{ first }}–{{ last }} de {{ total }}{% endblocktrans %}</p>
+    <ul class="pagination justify-content-center flex-wrap mb-0">
+        {% if page.has_previous %}
+        <li class="page-item"><a class="page-link" href="{% page_url param page.previous_page_number fragment %}" rel="prev">{% trans "&laquo; Anterior" %}</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">{% blocktrans trimmed with number=page.number num_pages=page.paginator.num_pages %}Página {{ number }} de {{ num_pages }}{% endblocktrans %}</span></li>
+        {% if page.has_next %}
+        <li class="page-item"><a class="page-link" href="{% page_url param page.next_page_number fragment %}" rel="next">{% trans "Próxima &raquo;" %}</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}

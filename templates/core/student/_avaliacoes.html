@@ -21,7 +21,7 @@
 
 {% if assessments %}
 <ul class="list-group assessment-list" data-assessments>
-    {% for a in assessments %}
+    {% for a in assessment_page %}
     <li class="list-group-item" data-assessment="{{ a.pk }}">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
@@ -91,6 +91,7 @@
     </li>
     {% endfor %}
 </ul>
+{% include 'core/ui/_pager.html' with page=assessment_page param='av' fragment='tab-avaliacoes' %}
 <p class="text-muted small mt-2">{% trans "Medidas em cm, peso em kg. Altura e peso geram o IMC." %}</p>
 {% else %}
 <div class="alert alert-info"><i class="bi bi-info-circle"></i> {% trans "Nenhuma avaliação registrada ainda." %}</div>

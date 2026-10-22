@@ -159,6 +159,7 @@ def search_suggest(request):
 # ============= STUDENT VIEWS =============
 
 STUDENT_PAGE_SIZE = 24
+ASSESSMENT_PAGE_SIZE = 5        # assessments shown at a time in the student file and in Minha evolução
 STUDENT_FILTERS = {
     'trial': _l('Experimental'),
     'paused': _l('Pausado'),
@@ -476,12 +477,14 @@ def student_detail(request, pk):
         })
 
     assessments = evolution.assessments_with_photos(student)
+    assessment_page = Paginator(assessments, ASSESSMENT_PAGE_SIZE).get_page(request.GET.get('av'))
     chart_points = evolution.chart_points(assessments)
     loose_photos = photo_positions.name_photos(list(student.progress_photos.filter(assessment__isnull=True)))
 
     return render(request, 'core/student_detail.html', {
         'student': student,
         'assessments': assessments,
+        'assessment_page': assessment_page,
         'latest_assessment': assessments[0] if assessments else None,
         'assessment_chart': chart_points,
         'can_compare': bool(evolution.comparable_angles(assessments, evolution.comparable_loose(loose_photos))),
@@ -985,7 +988,8 @@ def my_evolution(request, person):
     assessments = evolution.assessments_with_photos(person)
     loose_photos = photo_positions.name_photos(list(person.progress_photos.filter(assessment__isnull=True)))
     return render(request, 'core/my_evolution.html', {
-        'title': _('Minha evolução'), 'assessments': assessments, 'assessment_chart': evolution.chart_points(assessments),
+        'title': _('Minha evolução'), 'assessments': assessments,
+        'assessment_page': Paginator(assessments, ASSESSMENT_PAGE_SIZE).get_page(request.GET.get('av')), 'assessment_chart': evolution.chart_points(assessments),
         'can_compare': bool(evolution.comparable_angles(assessments, evolution.comparable_loose(loose_photos))),
         'photos_consent': _photos_consent(person), 'loose_photos': loose_photos})
 

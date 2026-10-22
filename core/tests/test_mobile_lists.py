@@ -43,7 +43,7 @@ class SwipeListsTests(RichDataMixin, BaseTestCase):
 
     def test_assessments_have_a_menu_not_a_swipe_and_keep_one_photo_strip(self):
         # a tall card (measures and photos) gets a menu in its header: swiping it made two giant buttons
-        section = self.page.split('data-assessments', 1)[1].split('</ul>\n<p class="text-muted small mt-2">', 1)[0]
+        section = self.page.split('data-assessments', 1)[1].split('Medidas em cm', 1)[0]
         self.assertEqual(section.count('data-assessment-menu'), 1)
         self.assertNotIn('data-swipe-row', section)
         self.assertNotIn('swipe-actions', section)
@@ -54,7 +54,7 @@ class SwipeListsTests(RichDataMixin, BaseTestCase):
         self.assertIn('60,00 kg', section)                      # the header carries the weight
 
     def test_adding_a_photo_is_in_the_menu_and_the_photos_sit_in_a_four_column_grid(self):
-        section = self.page.split('data-assessments', 1)[1].split('</ul>\n<p class="text-muted small mt-2">', 1)[0]
+        section = self.page.split('data-assessments', 1)[1].split('Medidas em cm', 1)[0]
         menu = section.split('data-assessment-menu', 1)[1].split('</ul>', 1)[0]
         self.assertIn('data-assessment-add-photo', menu)
         self.assertIn(f'assessment={self.assessment.pk}&amp;angle=other', menu)
