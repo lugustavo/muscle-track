@@ -183,11 +183,11 @@ class RoutineTemplateSaveContractTests(BaseTestCase):
     def test_the_submit_script_sends_the_keys_the_view_reads(self):
         page = self.client.get(reverse('core:routine_edit', kwargs={'pk': self.template.pk})).content.decode()
         keys = self.js_keys(page)
-        self.assertEqual(sorted(keys), ['id', 'reps', 'rest', 'sets'])
+        self.assertEqual(sorted(keys), ['id', 'measure', 'reps', 'rest', 'sets', 'technique'])
 
     def test_a_payload_built_from_those_keys_saves_the_new_order_and_values(self):
         page = self.client.get(reverse('core:routine_edit', kwargs={'pk': self.template.pk})).content.decode()
-        values = {'id': None, 'sets': 5, 'reps': 7, 'rest': 75}
+        values = {'id': None, 'sets': 5, 'reps': 7, 'rest': 75, 'measure': 'reps', 'technique': ''}
         rows = [dict(values, id=self.crucifixo.pk), dict(values, id=self.supino.pk)]
         payload = [{key: row[key] for key in self.js_keys(page)} for row in rows]     # reordered: crucifixo first
         response = self.client.post(reverse('core:routine_edit', kwargs={'pk': self.template.pk}), {

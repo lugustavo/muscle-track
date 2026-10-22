@@ -63,7 +63,7 @@
 
                         <!-- Exercise Parameters -->
                         <p class="mb-2">
-                            <strong>{% blocktrans trimmed with sets=item.exercise.sets reps=item.exercise.reps %}{{ sets }} séries x {{ reps }} repetições{% endblocktrans %}</strong>
+                            <strong>{% if item.exercise.is_timed %}{% blocktrans trimmed with sets=item.exercise.sets reps=item.exercise.reps %}{{ sets }} séries x {{ reps }} segundos{% endblocktrans %}{% else %}{% blocktrans trimmed with sets=item.exercise.sets reps=item.exercise.reps %}{{ sets }} séries x {{ reps }} repetições{% endblocktrans %}{% endif %}{% if item.exercise.technique %} · {{ item.exercise.get_technique_display }}{% endif %}</strong>
                             <br>
                             <small class="text-muted">{% blocktrans trimmed with rest_seconds=item.exercise.rest_seconds %}Descanso: {{ rest_seconds }}s{% endblocktrans %}</small>
                         </p>

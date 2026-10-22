@@ -1,0 +1,20 @@
+{% load i18n %}
+{# The "how it is counted" and "technique" fields of the edit sheet of a routine row (ids editMeasure and editTechnique). #}
+<div class="mb-3">
+    <label for="editMeasure" class="form-label fw-bold"><i class="bi bi-stopwatch"></i> {% trans "Contagem" %}</label>
+    <select class="form-select" id="editMeasure">
+        <option value="reps">{% trans "Repetições" %}</option>
+        <option value="time">{% trans "Tempo (segundos)" %}</option>
+    </select>
+    <div class="form-text">{% trans "Em tempo, o número acima é de segundos por série (ex.: prancha)." %}</div>
+</div>
+<div class="mb-3">
+    <label for="editTechnique" class="form-label fw-bold"><i class="bi bi-lightning-charge"></i> {% trans "Técnica" %}</label>
+    <select class="form-select" id="editTechnique">
+        <option value="">{% trans "Nenhuma" %}</option>
+        <option value="drop_set">{% trans "Drop-set" %}</option>
+        <option value="rest_pause">{% trans "Rest-pause" %}</option>
+        <option value="bi_set">{% trans "Bi-set (com o próximo exercício)" %}</option>
+        <option value="tri_set">{% trans "Tri-set (com os 2 próximos exercícios)" %}</option>
+    </select>
+</div>

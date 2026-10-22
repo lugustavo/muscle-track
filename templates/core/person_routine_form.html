@@ -217,6 +217,7 @@
                         <input type="number" id="editRest" class="form-control" min="0" inputmode="numeric">
                     </div>
                 </div>
+                {% include 'core/_prescription_fields.html' %}
                 <div>
                     <label for="editNotes" class="form-label">{% trans "Observações" %}</label>
                     <textarea id="editNotes" class="form-control" rows="2"></textarea>
@@ -237,6 +238,12 @@
 <script>
 const T_EXERCISES = "{% trans 'exercícios' as js_msg %}{{ js_msg|escapejs }}";
 const T_EDIT = "{% trans 'Editar' as js_msg %}{{ js_msg|escapejs }}";
+const T_TECHNIQUES = {
+    drop_set: "{% trans 'Drop-set' as js_msg %}{{ js_msg|escapejs }}",
+    rest_pause: "{% trans 'Rest-pause' as js_msg %}{{ js_msg|escapejs }}",
+    bi_set: "{% trans 'Bi-set (com o próximo exercício)' as js_msg %}{{ js_msg|escapejs }}",
+    tri_set: "{% trans 'Tri-set (com os 2 próximos exercícios)' as js_msg %}{{ js_msg|escapejs }}",
+};
 const T_EDIT_EXERCISE = "{% trans 'Editar exercício' as js_msg %}{{ js_msg|escapejs }}";
 const T_REMOVE = "{% trans 'Remover' as js_msg %}{{ js_msg|escapejs }}";
 const T_REMOVE_EXERCISE = "{% trans 'Remover exercício' as js_msg %}{{ js_msg|escapejs }}";
@@ -269,6 +276,8 @@ selectedExercises = [
         sets: {{ ex.sets }},
         reps: {{ ex.reps }},
         rest_seconds: {{ ex.rest_seconds }},
+        measure: "{{ ex.measure }}",
+        technique: "{{ ex.technique }}",
         notes: "{{ ex.notes|escapejs }}"
     }{% if not forloop.last %},{% endif %}
     {% endfor %}
@@ -322,6 +331,8 @@ async function selectTemplate(routine) {
             sets: ex.sets,
             reps: ex.reps,
             rest_seconds: ex.rest_seconds,
+            measure: ex.measure || 'reps',
+            technique: ex.technique || '',
             notes: ex.notes || ''
         }));
 
@@ -401,7 +412,9 @@ function addExercise() {
         name: exercise.name,
         sets: sets,
         reps: reps,
-        rest_seconds: rest
+        rest_seconds: rest,
+        measure: 'reps',
+        technique: ''
     });
 
     updateExercisesList();
@@ -435,7 +448,8 @@ function updateExercisesList() {
                 <span class="ui-badge brand rounded-circle me-3" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;">${index + 1}</span>
                 <div class="flex-grow-1 min-w-0">
                     <strong>${escapeHtml(ex.name)}</strong>
-                    <br><small class="text-muted">${ex.sets}x${ex.reps} • ${ex.rest_seconds}s</small>
+                    <br><small class="text-muted">${ex.sets}x${ex.reps}${ex.measure === 'time' ? ' s' : ''} • ${ex.rest_seconds}s</small>
+                    ${ex.technique ? `<span class="ui-badge warn">${escapeHtml(T_TECHNIQUES[ex.technique] || '')}</span>` : ''}
                 </div>
             </div>
             <div class="swipe-actions">
@@ -474,6 +488,8 @@ function editExercise(index) {
     document.getElementById('editReps').value = ex.reps;
     document.getElementById('editRest').value = ex.rest_seconds;
     document.getElementById('editNotes').value = ex.notes || '';
+    document.getElementById('editMeasure').value = ex.measure || 'reps';
+    document.getElementById('editTechnique').value = ex.technique || '';
     bootstrap.Modal.getOrCreateInstance(document.getElementById('editExerciseModal')).show();
 }
 
@@ -488,6 +504,8 @@ document.getElementById('saveExerciseEdit').addEventListener('click', () => {
     ex.reps = number('editReps', 1, ex.reps);
     ex.rest_seconds = number('editRest', 0, ex.rest_seconds);
     ex.notes = document.getElementById('editNotes').value.trim();
+    ex.measure = document.getElementById('editMeasure').value;
+    ex.technique = document.getElementById('editTechnique').value;
     updateExercisesList();
     bootstrap.Modal.getInstance(document.getElementById('editExerciseModal')).hide();
 });

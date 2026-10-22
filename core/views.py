@@ -29,7 +29,7 @@ from django.views.decorators.http import require_POST, require_safe
 from allauth.account.models import EmailAddress
 
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, last_activity, trainer_dashboard
-from . import backup_status, credits, goals, inbox, photo_guides, photo_positions, telegram, wger_import, workout_offline
+from . import backup_status, credits, goals, inbox, techniques, photo_guides, photo_positions, telegram, wger_import, workout_offline
 from .i18n import short_date
 from .listing import filter_tags, remember_view, view_mode as list_view_mode
 from .forms import (
@@ -1358,6 +1358,8 @@ def _replace_routine_exercises(routine, items, exercises):
             sets=_to_int(item.get('sets'), exercise.default_sets, 1),
             reps=_to_int(item.get('reps'), exercise.default_reps, 1),
             rest_seconds=_to_int(item.get('rest'), 60, 0),
+            measure=techniques.clean_measure(item.get('measure')),
+            technique=techniques.clean_technique(item.get('technique')),
         )
 
 
@@ -1380,6 +1382,8 @@ def _sync_person_routine_exercises(person_routine, items, exercises):
             'reps': _to_int(item.get('reps'), 12, 1),
             'rest_seconds': _to_int(item.get('rest_seconds'), 60, 0),
             'notes': str(item.get('notes') or ''),
+            'measure': techniques.clean_measure(item.get('measure')),
+            'technique': techniques.clean_technique(item.get('technique')),
         }
         pool = existing.get(item['exercise_id'])
         if pool:
@@ -1484,7 +1488,7 @@ def routine_create(request):
 def routine_detail(request, pk):
     """View routine details"""
     routine = get_object_or_404(Routine, pk=pk)
-    exercises = routine.exercises.all().order_by('order')
+    exercises = techniques.annotate(routine.exercises.all().order_by('order'))
 
     # Estatísticas
     person_routines = routine.person_routines.all()
@@ -1778,6 +1782,7 @@ def my_workouts(request, person):
 
     items = []
     for routine in active_routines:
+        techniques.annotate(routine.exercises.all())  # prefetched: the technique labels travel with the rows
         sessions = list(routine.sessions.all())  # prefetched
         active_session = next((x for x in sessions if not x.is_completed), None)
         if _close_if_stale(active_session):
@@ -1866,7 +1871,7 @@ class _DraftSet:
 def _execute_context(person, person_routine, session=None):
     """Everything the workout screen shows. With a `session` its sets are the real ones; without (a "draft", the
     screen opened offline before the server knows the workout) they are made from the previous workout, unsaved."""
-    routine_exercises = list(person_routine.exercises.select_related('exercise').order_by('order'))
+    routine_exercises = techniques.annotate(person_routine.exercises.select_related('exercise').order_by('order'))
 
     # Previous data: last completed session of this routine, matched by Exercise
     last_completed_session = person_routine.sessions.filter(is_completed=True).order_by('-end_time').first()
@@ -2238,6 +2243,8 @@ def api_routine_exercises(request, pk):
             'reps': routine_exercise.reps,
             'rest_seconds': routine_exercise.rest_seconds,
             'notes': routine_exercise.notes,
+            'measure': routine_exercise.measure,
+            'technique': routine_exercise.technique,
         })
 
     return JsonResponse(exercises_data, safe=False)

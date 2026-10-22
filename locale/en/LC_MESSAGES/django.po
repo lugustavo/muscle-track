@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 17:38-0300\n"
+"POT-Creation-Date: 2026-10-22 17:49-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -368,11 +368,9 @@ msgstr "Status"
 msgid "Vender pacote"
 msgstr "Sell package"
 
-#| msgid "Nova aula"
 msgid "Nova meta"
 msgstr "New goal"
 
-#| msgid "Editar rotina"
 msgid "Editar meta"
 msgstr "Edit goal"
 
@@ -745,18 +743,15 @@ msgstr "— text only, no number —"
 msgid "Escreva a meta."
 msgstr "Write the goal."
 
-#| msgid "A data não pode ser no futuro."
 msgid "O prazo não pode ser no passado."
 msgstr "The deadline cannot be in the past."
 
-#| msgid "Informe o valor."
 msgid "Informe o valor a atingir."
 msgstr "Enter the value to reach."
 
 msgid "Escolha a medida acompanhada, ou deixe os valores em branco."
 msgstr "Choose the measure to follow, or leave the values blank."
 
-#| msgid "Informe um valor maior que zero."
 msgid "O valor deve ser maior que zero."
 msgstr "The value must be greater than zero."
 
@@ -1425,6 +1420,13 @@ msgstr "Workout Template"
 msgid "Modelos de Treino"
 msgstr "Workout Templates"
 
+#| msgid "Conta"
+msgid "Contagem"
+msgstr "Counting"
+
+msgid "Técnica"
+msgstr "Technique"
+
 msgid "Treino"
 msgid_plural "Treinos"
 msgstr[0] "Workout"
@@ -1554,15 +1556,12 @@ msgstr "Goal"
 msgid "Prazo"
 msgstr "Deadline"
 
-#| msgid "Os dois acompanham tudo"
 msgid "Medida acompanhada"
 msgstr "Measure followed"
 
-#| msgid "valor a pagar"
 msgid "Valor a atingir"
 msgstr "Value to reach"
 
-#| msgid "Vale a partir de"
 msgid "Valor de partida"
 msgstr "Starting value"
 
@@ -2123,8 +2122,6 @@ msgstr[0] "%(n)d birthday today"
 msgstr[1] "%(n)d birthdays today"
 
 #, python-format
-#| msgid "%(n)d treino terminando"
-#| msgid_plural "%(n)d treinos terminando"
 msgid "%(n)d meta vencida ou vencendo"
 msgid_plural "%(n)d metas vencidas ou vencendo"
 msgstr[0] "%(n)d goal overdue or due soon"
@@ -2753,6 +2750,59 @@ msgstr ""
 "Hi, %(name)s! Here is your workout sheet, to read on your phone or print: "
 "%(link)s"
 
+#| msgid "Descanso (segundos)"
+msgid "Tempo (segundos)"
+msgstr "Time (seconds)"
+
+#| msgid "Nenhum"
+msgid "Nenhuma"
+msgstr "None"
+
+msgid "Drop-set"
+msgstr "Drop set"
+
+msgid "Rest-pause"
+msgstr "Rest-pause"
+
+msgid "Bi-set (com o próximo exercício)"
+msgstr "Bi-set (with the next exercise)"
+
+#| msgid "Treinos com este exercício"
+msgid "Tri-set (com os 2 próximos exercícios)"
+msgstr "Tri-set (with the next 2 exercises)"
+
+msgid ""
+"Drop-set: ao chegar na falha, reduza a carga uns 20% a 30% e continue, sem "
+"descanso, mais uma ou duas vezes."
+msgstr ""
+"Drop set: when you reach failure, lower the weight by about 20% to 30% and "
+"keep going, with no rest, one or two more times."
+
+msgid ""
+"Rest-pause: ao chegar na falha, descanse uns 15 segundos e faça mais "
+"repetições, mais uma ou duas vezes."
+msgstr ""
+"Rest-pause: when you reach failure, rest about 15 seconds and do more "
+"repetitions, one or two more times."
+
+msgid ""
+"Bi-set: faça este exercício e o próximo em sequência, sem descanso entre "
+"eles; descanse só depois do segundo."
+msgstr ""
+"Bi-set: do this exercise and the next one back to back, with no rest between"
+" them; rest only after the second."
+
+msgid ""
+"Tri-set: faça este exercício e os 2 próximos em sequência, sem descanso "
+"entre eles; descanse só depois do terceiro."
+msgstr ""
+"Tri-set: do this exercise and the next 2 back to back, with no rest between "
+"them; rest only after the third."
+
+#| msgid "Foto anterior"
+msgid "Junto com o anterior"
+msgstr "Together with the previous one"
+
 #, python-format
 msgid ""
 "Olá! Para receber os avisos do %(brand)s aqui, abra Notificações no app e "
@@ -3313,7 +3363,6 @@ msgstr "Assessment recorded."
 msgid "Avaliação atualizada."
 msgstr "Assessment updated."
 
-#| msgid "nome alterado"
 msgid "Meta alterada"
 msgstr "Goal changed"
 
@@ -3323,7 +3372,6 @@ msgstr "Goal created"
 msgid "Meta criada."
 msgstr "Goal created."
 
-#| msgid "Pacote atualizado."
 msgid "Meta atualizada."
 msgstr "Goal updated."
 
@@ -3331,16 +3379,13 @@ msgid "Situação inválida"
 msgstr "Invalid status"
 
 #, python-format
-#| msgid "para %(starts_at)s"
 msgid "Meta: %(status)s"
 msgstr "Goal: %(status)s"
 
 #, python-format
-#| msgid "remarcada de %(starts_at)s"
 msgid "Meta marcada como \"%(status)s\"."
 msgstr "Goal marked as \"%(status)s\"."
 
-#| msgid "Aula removida."
 msgid "Meta removida."
 msgstr "Goal removed."
 
@@ -4017,8 +4062,6 @@ msgid "abandonada"
 msgstr "dropped"
 
 #, python-format
-#| msgid "(venceu há %(days_left)s dia)"
-#| msgid_plural "(venceu há %(days_left)s dias)"
 msgid "venceu há %(n)s dia"
 msgid_plural "venceu há %(n)s dias"
 msgstr[0] "overdue by %(n)s day"
@@ -4028,33 +4071,27 @@ msgid "vence hoje"
 msgstr "expires today"
 
 #, python-format
-#| msgid "falta 1 dia"
 msgid "falta %(n)s dia"
 msgid_plural "faltam %(n)s dias"
 msgstr[0] "%(n)s day left"
 msgstr[1] "%(n)s days left"
 
 #, python-format
-#| msgid "até %(date)s"
 msgid "até %(day)s"
 msgstr "until %(day)s"
 
-#| msgid "Anotações da personal"
 msgid "Ações da meta"
 msgstr "Goal actions"
 
-#| msgid "Marcar tudo como lido"
 msgid "Marcar como cumprida"
 msgstr "Mark as achieved"
 
-#| msgid "Adicionar"
 msgid "Abandonar"
 msgstr "Drop"
 
 msgid "Reabrir"
 msgstr "Reopen"
 
-#| msgid "Remover esta foto?"
 msgid "Remover esta meta?"
 msgstr "Remove this goal?"
 
@@ -4188,6 +4225,10 @@ msgstr "Classes deducted (%(classes)s)"
 
 msgid "(tarde)"
 msgstr "(late)"
+
+msgid "Em tempo, o número acima é de segundos por série (ex.: prancha)."
+msgstr ""
+"When counted in time, the number above is seconds per set (e.g. plank)."
 
 msgid "Seu mês"
 msgstr "Your month"
@@ -5658,11 +5699,9 @@ msgid ""
 msgstr ""
 "With a measure chosen, the progress bar follows the student's assessments."
 
-#| msgid "Última avaliação"
 msgid "Em branco: usa a última avaliação."
 msgstr "Blank: uses the latest assessment."
 
-#| msgid "Salvar o nome"
 msgid "Salvar meta"
 msgstr "Save goal"
 
@@ -6413,6 +6452,11 @@ msgid "%(sets)s séries"
 msgstr "%(sets)s sets"
 
 #, python-format
+#| msgid "%(reps)s reps"
+msgid "%(reps)s s"
+msgstr "%(reps)s s"
+
+#, python-format
 msgid "%(reps)s reps"
 msgstr "%(reps)s reps"
 
@@ -6590,7 +6634,6 @@ msgstr "Reminder of a new assessment"
 msgid "Aviso gentil quando eu passar uma semana sem treinar"
 msgstr "A gentle nudge when I go a week without training"
 
-#| msgid "Aviso quando o meu pacote estiver acabando ou vencendo"
 msgid "Aviso quando uma meta minha estiver perto do prazo"
 msgstr "A heads-up when one of my goals is close to its deadline"
 
@@ -7231,10 +7274,6 @@ msgid "Imprimir"
 msgstr "Print"
 
 #, python-format
-msgid "%(sets)s × %(reps)s"
-msgstr "%(sets)s × %(reps)s"
-
-#, python-format
 msgid "descanso %(seconds)ss"
 msgstr "rest %(seconds)ss"
 
@@ -7516,6 +7555,9 @@ msgstr "sets"
 msgid "reps"
 msgstr "reps"
 
+msgid "seg"
+msgstr "sec"
+
 msgid "Remover este exercício do treino?"
 msgstr "Remove this exercise from the workout?"
 
@@ -7626,6 +7668,11 @@ msgstr "Exercises Performed"
 
 msgid "Não executado"
 msgstr "Not performed"
+
+#, python-format
+#| msgid "%(sets)s séries x %(reps)s reps"
+msgid "%(sets)s séries x %(reps)s segundos"
+msgstr "%(sets)s sets x %(reps)s seconds"
 
 #, python-format
 msgid "%(sets)s séries x %(reps)s repetições"
@@ -9284,6 +9331,11 @@ msgstr "Weight of set %(n)s"
 #, python-format
 msgid "Aumentar a carga da série %(n)s"
 msgstr "Increase the weight of set %(n)s"
+
+#, python-format
+#| msgid "Carga da série %(n)s"
+msgid "Segundos da série %(n)s"
+msgstr "Seconds of set %(n)s"
 
 #, python-format
 msgid "Repetições da série %(n)s"

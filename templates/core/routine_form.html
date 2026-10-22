@@ -263,6 +263,7 @@
                     </label>
                     <input type="number" class="form-control" id="editRest" min="0" value="60">
                 </div>
+                {% include 'core/_prescription_fields.html' %}
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -288,6 +289,13 @@ const T_LOAD_ERROR = "{% trans 'Erro ao carregar exercícios. Tente novamente.' 
 const T_NONE_FOUND = "{% trans 'Nenhum exercício encontrado' as js_msg %}{{ js_msg|escapejs }}";
 const T_SETS = "{% trans 'séries' as js_msg %}{{ js_msg|escapejs }}";
 const T_REPS = "{% trans 'reps' as js_msg %}{{ js_msg|escapejs }}";
+const T_SECONDS = "{% trans 'seg' as js_msg %}{{ js_msg|escapejs }}";
+const T_TECHNIQUES = {
+    drop_set: "{% trans 'Drop-set' as js_msg %}{{ js_msg|escapejs }}",
+    rest_pause: "{% trans 'Rest-pause' as js_msg %}{{ js_msg|escapejs }}",
+    bi_set: "{% trans 'Bi-set (com o próximo exercício)' as js_msg %}{{ js_msg|escapejs }}",
+    tri_set: "{% trans 'Tri-set (com os 2 próximos exercícios)' as js_msg %}{{ js_msg|escapejs }}",
+};
 const T_EDIT_PARAMS = "{% trans 'Editar parâmetros' as js_msg %}{{ js_msg|escapejs }}";
 const T_REMOVE_EXERCISE = "{% trans 'Remover exercício' as js_msg %}{{ js_msg|escapejs }}";
 const T_CONFIRM_REMOVE = "{% trans 'Remover este exercício do treino?' as js_msg %}{{ js_msg|escapejs }}";
@@ -310,6 +318,8 @@ selectedExercises = [
         sets: {{ re.sets }},
         reps: {{ re.reps }},
         rest: {{ re.rest_seconds }},
+        measure: "{{ re.measure }}",
+        technique: "{{ re.technique }}",
         thumbnail: "{% if re.exercise.thumbnail %}{{ re.exercise.thumbnail.url }}{% else %}{% static 'images/no-image.svg' %}{% endif %}"
     }{% if not forloop.last %},{% endif %}
     {% endfor %}
@@ -434,6 +444,8 @@ document.getElementById('confirmSelection').addEventListener('click', function()
                     sets: exercise.default_sets || 3,
                     reps: exercise.default_reps || 12,
                     rest: 60,
+                    measure: 'reps',
+                    technique: '',
                     thumbnail: exercise.thumbnail
                 });
             }
@@ -496,8 +508,9 @@ function updateSelectedExercisesList() {
                     <small class="text-muted">
                         <i class="bi bi-diagram-3"></i> ${escapeHtml(exercise.muscle_group)} |
                         <i class="bi bi-bar-chart"></i> ${exercise.sets} ${T_SETS} ×
-                        <i class="bi bi-arrow-repeat"></i> ${exercise.reps} ${T_REPS} |
+                        <i class="bi bi-arrow-repeat"></i> ${exercise.reps} ${exercise.measure === 'time' ? T_SECONDS : T_REPS} |
                         <i class="bi bi-clock"></i> ${exercise.rest}s
+                        ${exercise.technique ? `<span class="ui-badge warn">${escapeHtml(T_TECHNIQUES[exercise.technique] || '')}</span>` : ''}
                     </small>
                 </div>
             </div>
@@ -546,6 +559,8 @@ function editExercise(exerciseId) {
     document.getElementById('editSets').value = exercise.sets;
     document.getElementById('editReps').value = exercise.reps;
     document.getElementById('editRest').value = exercise.rest;
+    document.getElementById('editMeasure').value = exercise.measure || 'reps';
+    document.getElementById('editTechnique').value = exercise.technique || '';
 
     new bootstrap.Modal(document.getElementById('editExerciseModal')).show();
 }
@@ -559,6 +574,8 @@ document.getElementById('saveExerciseEdit').addEventListener('click', function()
         exercise.sets = parseInt(document.getElementById('editSets').value);
         exercise.reps = parseInt(document.getElementById('editReps').value);
         exercise.rest = parseInt(document.getElementById('editRest').value);
+        exercise.measure = document.getElementById('editMeasure').value;
+        exercise.technique = document.getElementById('editTechnique').value;
 
         updateSelectedExercisesList();
         updateSummary();
@@ -595,7 +612,9 @@ document.getElementById('routineForm').addEventListener('submit', function(e) {
         id: ex.id,
         sets: ex.sets,
         reps: ex.reps,
-        rest: ex.rest
+        rest: ex.rest,
+        measure: ex.measure,
+        technique: ex.technique
     }));
 
     document.getElementById('exercisesData').value = JSON.stringify(exercisesData);

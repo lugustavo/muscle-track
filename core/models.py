@@ -14,7 +14,7 @@ from django.utils.translation import gettext, gettext_lazy as _
 
 from PIL import Image, ImageOps
 
-from . import exercise_media
+from . import exercise_media, techniques
 from .validators import validate_avatar_image, validate_photo_image
 
 
@@ -342,7 +342,25 @@ class Routine(models.Model):
         return self.routine_name
 
 
-class RoutineExercise(models.Model):
+class Prescription(models.Model):
+    """What goes with sets x reps in a routine row: counted in seconds instead of repetitions, and an intensity technique
+    (core/techniques.py). Shared by the template rows and the students' rows."""
+    measure = models.CharField(max_length=4, choices=techniques.MEASURES, default='reps', verbose_name=_('Contagem'))
+    technique = models.CharField(max_length=12, choices=techniques.TECHNIQUES, blank=True, default='', verbose_name=_('Técnica'))
+
+    class Meta:
+        abstract = True
+
+    @property
+    def is_timed(self):
+        return self.measure == 'time'
+
+    @property
+    def target_label(self):
+        return techniques.target_label(self.sets, self.reps, self.measure)
+
+
+class RoutineExercise(Prescription):
     """Model linking exercises to routines with specific parameters"""
     routine = models.ForeignKey(Routine, on_delete=models.CASCADE, related_name='exercises', verbose_name=_('Treino'))
     exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE, related_name='routines', verbose_name=_('Exercício'))
@@ -414,7 +432,7 @@ class PersonRoutine(models.Model):
         return f"{self.person.person_name} - {self.routine_name} ({self.routine_date})"
 
 
-class PersonRoutineExercise(models.Model):
+class PersonRoutineExercise(Prescription):
     """Model representing exercises in a person's routine (personalized copy)"""
     person_routine = models.ForeignKey(
         PersonRoutine,

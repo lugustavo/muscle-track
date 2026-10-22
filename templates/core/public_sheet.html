@@ -70,9 +70,12 @@
                             <div class="fw-bold text-break">{{ e.name }}</div>
                             <div class="ui-meta mt-1">
                                 <span class="ui-badge brand">{{ e.group }}</span>
-                                <span class="ui-badge">{% blocktrans trimmed with sets=e.sets reps=e.reps %}{{ sets }} × {{ reps }}{% endblocktrans %}</span>
+                                <span class="ui-badge">{{ e.target }}</span>
+                                {% if e.set_group %}<span class="ui-badge info">{{ e.set_group }}</span>{% endif %}
+                                {% if e.technique %}<span class="ui-badge warn">{{ e.technique }}</span>{% endif %}
                                 {% if e.rest_seconds %}<span class="ui-badge"><i class="bi bi-stopwatch" aria-hidden="true"></i> {% blocktrans trimmed with seconds=e.rest_seconds %}descanso {{ seconds }}s{% endblocktrans %}</span>{% endif %}
                             </div>
+                            {% if e.hint %}<div class="small mt-2 sheet-note"><i class="bi bi-lightning-charge"></i> {{ e.hint }}</div>{% endif %}
                             {% if e.notes %}<div class="small mt-2 sheet-note"><i class="bi bi-chat-left-text"></i> {{ e.notes }}</div>{% endif %}
                             {% if e.instructions %}<details class="small mt-2"><summary class="text-muted">{% trans "Como fazer" %}</summary><div class="mt-1">{{ e.instructions|linebreaksbr }}</div></details>{% endif %}
                             {% if e.video %}<a class="btn btn-sm btn-outline-primary mt-2 no-print" href="{{ e.video }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-play-circle"></i> {% trans "Ver execução" %}</a>{% endif %}
