@@ -191,6 +191,44 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de edição dos parâmetros de um exercício do treino -->
+<div class="modal fade" id="editExerciseModal" tabindex="-1" aria-labelledby="editExerciseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editExerciseModalLabel"><i class="bi bi-sliders"></i> {% trans "Editar exercício" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans "Fechar" %}"></button>
+            </div>
+            <div class="modal-body">
+                <p class="fw-bold mb-3" id="editExerciseName"></p>
+                <input type="hidden" id="editExerciseIndex">
+                <div class="row g-2 mb-3">
+                    <div class="col-4">
+                        <label for="editSets" class="form-label">{% trans "Séries" %}</label>
+                        <input type="number" id="editSets" class="form-control" min="1" inputmode="numeric">
+                    </div>
+                    <div class="col-4">
+                        <label for="editReps" class="form-label">{% trans "Repetições" %}</label>
+                        <input type="number" id="editReps" class="form-control" min="1" inputmode="numeric">
+                    </div>
+                    <div class="col-4">
+                        <label for="editRest" class="form-label">{% trans "Descanso (s)" %}</label>
+                        <input type="number" id="editRest" class="form-control" min="0" inputmode="numeric">
+                    </div>
+                </div>
+                <div>
+                    <label for="editNotes" class="form-label">{% trans "Observações" %}</label>
+                    <textarea id="editNotes" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancelar" %}</button>
+                <button type="button" class="btn btn-primary" id="saveExerciseEdit"><i class="bi bi-check-circle"></i> {% trans "Salvar" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -198,6 +236,8 @@
 <script src="{% static 'js/swipe-rows.js' %}"></script>
 <script>
 const T_EXERCISES = "{% trans 'exercícios' as js_msg %}{{ js_msg|escapejs }}";
+const T_EDIT = "{% trans 'Editar' as js_msg %}{{ js_msg|escapejs }}";
+const T_EDIT_EXERCISE = "{% trans 'Editar exercício' as js_msg %}{{ js_msg|escapejs }}";
 const T_REMOVE = "{% trans 'Remover' as js_msg %}{{ js_msg|escapejs }}";
 const T_REMOVE_EXERCISE = "{% trans 'Remover exercício' as js_msg %}{{ js_msg|escapejs }}";
 let allRoutines = [];
@@ -399,6 +439,9 @@ function updateExercisesList() {
                 </div>
             </div>
             <div class="swipe-actions">
+                <button type="button" class="btn btn-sm btn-link swipe-edit" onclick="editExercise(${index})" title="${T_EDIT_EXERCISE}" data-edit-exercise>
+                    <i class="bi bi-pencil" aria-hidden="true"></i><span class="swipe-label">${T_EDIT}</span>
+                </button>
                 <button type="button" class="btn btn-sm btn-link swipe-remove" onclick="removeExercise(${index})" title="${T_REMOVE_EXERCISE}" data-remove-exercise>
                     <i class="bi bi-trash" aria-hidden="true"></i><span class="swipe-label">${T_REMOVE}</span>
                 </button>
@@ -421,6 +464,33 @@ function updateExercisesList() {
         });
     }
 }
+
+function editExercise(index) {
+    const ex = selectedExercises[index];
+    if (!ex) return;
+    document.getElementById('editExerciseIndex').value = index;
+    document.getElementById('editExerciseName').textContent = ex.name;
+    document.getElementById('editSets').value = ex.sets;
+    document.getElementById('editReps').value = ex.reps;
+    document.getElementById('editRest').value = ex.rest_seconds;
+    document.getElementById('editNotes').value = ex.notes || '';
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('editExerciseModal')).show();
+}
+
+document.getElementById('saveExerciseEdit').addEventListener('click', () => {
+    const ex = selectedExercises[parseInt(document.getElementById('editExerciseIndex').value)];
+    if (!ex) return;
+    const number = (id, min, fallback) => {
+        const value = parseInt(document.getElementById(id).value);
+        return Number.isNaN(value) ? fallback : Math.max(min, value);
+    };
+    ex.sets = number('editSets', 1, ex.sets);
+    ex.reps = number('editReps', 1, ex.reps);
+    ex.rest_seconds = number('editRest', 0, ex.rest_seconds);
+    ex.notes = document.getElementById('editNotes').value.trim();
+    updateExercisesList();
+    bootstrap.Modal.getInstance(document.getElementById('editExerciseModal')).hide();
+});
 
 function removeExercise(index) {
     selectedExercises.splice(index, 1);
