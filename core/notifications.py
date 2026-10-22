@@ -39,6 +39,7 @@ KIND_FLAG = {
     'class_reminder': 'notify_class_reminder', 'plan_expiry': 'notify_plan_expiry', 'package_low': 'notify_plan_expiry',
     'package_attention': 'notify_renewals',
     'invite_accepted': 'notify_activity', 'student_photo': 'notify_activity',
+    'daily_digest': 'notify_digest', 'reassessment': 'notify_reassessment', 'inactivity': 'notify_inactivity',
 }
 Status = NotificationLog.Status
 
@@ -162,6 +163,68 @@ def class_reminder(appointment, now=None):
         return _('Sua aula é %(day)s às %(time)s.') % {'day': day_word(starts, now), 'time': clock}
 
     return Message('class_reminder', lazy_text(lambda: _('Lembrete de aula')), lazy_text(body), reverse('core:my_agenda'))
+
+
+def class_soon(appointment, now=None):
+    """The short reminder a few hours before the class (the day-before one is `class_reminder`)."""
+    starts = appointment.starts_at
+
+    def body():
+        clock = formats.date_format(timezone.localtime(starts), 'H:i')
+        return _('Sua aula começa hoje às %(time)s.') % {'time': clock}
+
+    return Message('class_reminder', lazy_text(lambda: _('Sua aula é daqui a pouco')), lazy_text(body), reverse('core:my_agenda'))
+
+
+def reassessment_due(days):
+    return Message('reassessment', lazy_text(lambda: _('Hora de uma nova avaliação')),
+                   lazy_text(lambda: ngettext('Faz %(n)d dia desde a sua última avaliação. Combine uma nova com a sua personal.',
+                                              'Faz %(n)d dias desde a sua última avaliação. Combine uma nova com a sua personal.',
+                                              days) % {'n': days}),
+                   reverse('core:my_evolution'))
+
+
+def inactivity_nudge(days):
+    return Message('inactivity', lazy_text(lambda: _('Sentimos a sua falta')),
+                   lazy_text(lambda: ngettext('Faz %(n)d dia que você não treina. Que tal um treino hoje?',
+                                              'Faz %(n)d dias que você não treina. Que tal um treino hoje?', days) % {'n': days}),
+                   reverse('core:my_workouts'))
+
+
+def daily_digest(summary):
+    """The trainer's morning summary. `summary` is {item: count} (see reminders.digest_summary); only the items that are
+    not zero are written. Counts only: no names, no amounts, no health data."""
+    def lines():
+        out = []
+        classes = summary.get('classes', 0)
+        if classes:
+            first = summary.get('first_class')
+            out.append(ngettext('%(n)d aula hoje', '%(n)d aulas hoje', classes) % {'n': classes}
+                       + (' ' + _('(a primeira às %(time)s)') % {'time': first} if first else ''))
+        n = summary.get('unmarked', 0)
+        if n:
+            out.append(ngettext('%(n)d aula de ontem sem presença marcada', '%(n)d aulas de ontem sem presença marcada', n) % {'n': n})
+        n = summary.get('payments', 0)
+        if n:
+            out.append(ngettext('%(n)d pagamento em aberto', '%(n)d pagamentos em aberto', n) % {'n': n})
+        n = summary.get('inactive', 0)
+        if n:
+            out.append(ngettext('%(n)d aluno sem treinar', '%(n)d alunos sem treinar', n) % {'n': n})
+        n = summary.get('reassessment', 0)
+        if n:
+            out.append(ngettext('%(n)d aluno para reavaliar', '%(n)d alunos para reavaliar', n) % {'n': n})
+        n = summary.get('routines', 0)
+        if n:
+            out.append(ngettext('%(n)d treino terminando', '%(n)d treinos terminando', n) % {'n': n})
+        n = summary.get('invites', 0)
+        if n:
+            out.append(ngettext('%(n)d convite sem aceitar', '%(n)d convites sem aceitar', n) % {'n': n})
+        n = summary.get('trials', 0)
+        if n:
+            out.append(ngettext('%(n)d experimental para decidir', '%(n)d experimentais para decidir', n) % {'n': n})
+        return out
+
+    return Message('daily_digest', lazy_text(lambda: _('Resumo do dia')), lazy_text(lambda: ' · '.join(lines())), reverse('core:home'))
 
 
 def _in_days(days):

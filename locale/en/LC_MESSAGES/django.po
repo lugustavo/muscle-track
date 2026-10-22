@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 15:38-0300\n"
+"POT-Creation-Date: 2026-10-22 17:04-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -347,7 +347,6 @@ msgstr "Refunds and adjustments"
 msgid "Feriados"
 msgstr "Holidays"
 
-#| msgid "Dia do Trabalho"
 msgid "Horário de trabalho"
 msgstr "Working hours"
 
@@ -970,7 +969,6 @@ msgid "Este dia já está na lista."
 msgstr "This day is already in the list."
 
 #, python-format
-#| msgid "%(name)s: informe o nome e o grupo muscular."
 msgid "%(day)s: informe o começo e o fim."
 msgstr "%(day)s: enter the start and the end."
 
@@ -1991,6 +1989,112 @@ msgstr "Your class is %(day)s at %(time)s."
 
 msgid "Lembrete de aula"
 msgstr "Class reminder"
+
+#, python-format
+#| msgid "Sua aula é %(day)s às %(time)s."
+msgid "Sua aula começa hoje às %(time)s."
+msgstr "Your class starts today at %(time)s."
+
+msgid "Sua aula é daqui a pouco"
+msgstr "Your class is coming up"
+
+#| msgid "Ligar a uma avaliação"
+msgid "Hora de uma nova avaliação"
+msgstr "Time for a new assessment"
+
+#, python-format
+msgid ""
+"Faz %(n)d dia desde a sua última avaliação. Combine uma nova com a sua "
+"personal."
+msgid_plural ""
+"Faz %(n)d dias desde a sua última avaliação. Combine uma nova com a sua "
+"personal."
+msgstr[0] ""
+"It has been %(n)d day since your last assessment. Book a new one with your "
+"trainer."
+msgstr[1] ""
+"It has been %(n)d days since your last assessment. Book a new one with your "
+"trainer."
+
+msgid "Sentimos a sua falta"
+msgstr "We miss you"
+
+#, python-format
+msgid "Faz %(n)d dia que você não treina. Que tal um treino hoje?"
+msgid_plural "Faz %(n)d dias que você não treina. Que tal um treino hoje?"
+msgstr[0] ""
+"It has been %(n)d day since you trained. How about a workout today?"
+msgstr[1] ""
+"It has been %(n)d days since you trained. How about a workout today?"
+
+#, python-format
+#| msgid "%(n)s aula"
+#| msgid_plural "%(n)s aulas"
+msgid "%(n)d aula hoje"
+msgid_plural "%(n)d aulas hoje"
+msgstr[0] "%(n)d class today"
+msgstr[1] "%(n)d classes today"
+
+#, python-format
+#| msgid "%(date)s às %(time)s"
+msgid "(a primeira às %(time)s)"
+msgstr "(the first at %(time)s)"
+
+#, python-format
+#| msgid "%(n)d aula a marcar"
+#| msgid_plural "%(n)d aulas a marcar"
+msgid "%(n)d aula de ontem sem presença marcada"
+msgid_plural "%(n)d aulas de ontem sem presença marcada"
+msgstr[0] "%(n)d class from yesterday without attendance marked"
+msgstr[1] "%(n)d classes from yesterday without attendance marked"
+
+#, python-format
+#| msgid "Pagamento em aberto: %(pending)s"
+msgid "%(n)d pagamento em aberto"
+msgid_plural "%(n)d pagamentos em aberto"
+msgstr[0] "%(n)d open payment"
+msgstr[1] "%(n)d open payments"
+
+#, python-format
+#| msgid "%(n)d pacote para renovar"
+#| msgid_plural "%(n)d pacotes para renovar"
+msgid "%(n)d aluno sem treinar"
+msgid_plural "%(n)d alunos sem treinar"
+msgstr[0] "%(n)d student not training"
+msgstr[1] "%(n)d students not training"
+
+#, python-format
+#| msgid "%(n)d pacote para renovar"
+#| msgid_plural "%(n)d pacotes para renovar"
+msgid "%(n)d aluno para reavaliar"
+msgid_plural "%(n)d alunos para reavaliar"
+msgstr[0] "%(n)d student due a reassessment"
+msgstr[1] "%(n)d students due a reassessment"
+
+#, python-format
+#| msgid "%(n)s treino de aluno"
+#| msgid_plural "%(n)s treinos de alunos"
+msgid "%(n)d treino terminando"
+msgid_plural "%(n)d treinos terminando"
+msgstr[0] "%(n)d workout ending"
+msgstr[1] "%(n)d workouts ending"
+
+#, python-format
+#| msgid "Convite aceito"
+msgid "%(n)d convite sem aceitar"
+msgid_plural "%(n)d convites sem aceitar"
+msgstr[0] "%(n)d invite not accepted"
+msgstr[1] "%(n)d invites not accepted"
+
+#, python-format
+msgid "%(n)d experimental para decidir"
+msgid_plural "%(n)d experimentais para decidir"
+msgstr[0] "%(n)d trial to decide on"
+msgstr[1] "%(n)d trials to decide on"
+
+#| msgid "Resumo do treino"
+msgid "Resumo do dia"
+msgstr "Daily summary"
 
 #, python-format
 msgid "em %(n)d dias"
@@ -3208,7 +3312,6 @@ msgstr "Month"
 msgid "Lista"
 msgstr "List"
 
-#| msgid "Preview"
 msgid "Previsão"
 msgstr "Forecast"
 
@@ -3216,7 +3319,6 @@ msgid "Atenção: esta aula cai em um dia de folga do seu horário de trabalho."
 msgstr "Heads up: this class falls on a day off in your working hours."
 
 #, python-format
-#| msgid "Atenção: este horário se sobrepõe a outra aula (%(names)s)."
 msgid "Atenção: esta aula fica fora do seu horário de trabalho (%(hours)s)."
 msgstr "Heads up: this class is outside your working hours (%(hours)s)."
 
@@ -3634,7 +3736,6 @@ msgstr "rescheduled from %(starts_at)s"
 msgid "Sobreposta a outra aula"
 msgstr "Overlaps another class"
 
-#| msgid "Novo horário sugerido"
 msgid "Fora do horário de trabalho"
 msgstr "Outside working hours"
 
@@ -4209,16 +4310,12 @@ msgid "Quantos dias olhar"
 msgstr "How many days to look at"
 
 #, python-format
-#| msgid "%(n)d dia"
-#| msgid_plural "%(n)d dias"
 msgid "%(n)s dias"
 msgstr "%(n)s days"
 
-#| msgid "sem aula"
 msgid "Horas de aula"
 msgstr "Class hours"
 
-#| msgid "Duração"
 msgid "Ocupação"
 msgstr "Occupancy"
 
@@ -4229,7 +4326,6 @@ msgstr[0] "%(n)s class outside your working hours."
 msgstr[1] "%(n)s classes outside your working hours."
 
 #, python-format
-#| msgid "Aulas sobrepostas"
 msgid "%(n)s dia com aulas sobrepostas."
 msgid_plural "%(n)s dias com aulas sobrepostas."
 msgstr[0] "%(n)s day with overlapping classes."
@@ -4245,16 +4341,12 @@ msgid "Definir horário de trabalho"
 msgstr "Set working hours"
 
 #, python-format
-#| msgid "%(left)s aula · %(amount)s"
-#| msgid_plural "%(left)s aulas · %(amount)s"
 msgid "%(n)s aula · %(hours)s"
 msgid_plural "%(n)s aulas · %(hours)s"
 msgstr[0] "%(n)s class · %(hours)s"
 msgstr[1] "%(n)s classes · %(hours)s"
 
 #, python-format
-#| msgid "%(items)s aula"
-#| msgid_plural "%(items)s aulas"
 msgid "%(n)s aula"
 msgid_plural "%(n)s aulas"
 msgstr[0] "%(n)s class"
@@ -4263,7 +4355,6 @@ msgstr[1] "%(n)s classes"
 msgid "Folga"
 msgstr "Day off"
 
-#| msgid "sem aula"
 msgid "Sem aulas"
 msgstr "No classes"
 
@@ -4408,7 +4499,6 @@ msgstr ""
 " holidays, set <code>HOLIDAYS_REGION</code> (PT or BR)."
 
 #, python-format
-#| msgid "Centro de avisos - %(brand_name)s"
 msgid "Horário de trabalho - %(brand_name)s"
 msgstr "Working hours - %(brand_name)s"
 
@@ -4419,7 +4509,6 @@ msgstr ""
 "The days and hours you teach. The agenda warns when a class falls outside "
 "them and the Forecast shows the free time of each day."
 
-#| msgid "Dias"
 msgid "Das"
 msgstr "From"
 
@@ -4439,7 +4528,6 @@ msgid ""
 "Remover o horário de trabalho? A agenda deixa de avisar sobre horários."
 msgstr "Remove the working hours? The agenda stops warning about times."
 
-#| msgid "Todas: remover o horário fixo"
 msgid "Remover o horário de trabalho"
 msgstr "Remove working hours"
 
@@ -6268,6 +6356,13 @@ msgid "Aluno aceitou o convite ou enviou uma foto"
 msgstr "A student accepted the invite or sent a photo"
 
 msgid ""
+"Resumo do dia, de manhã (aulas de hoje, presenças por marcar, pagamentos e "
+"alunos que pedem atenção)"
+msgstr ""
+"Daily summary in the morning (today's classes, attendance to mark, payments "
+"and students who need attention)"
+
+msgid ""
 "Pedidos de exclusão de dados e problemas nos backups sempre avisam: não têm "
 "interruptor."
 msgstr ""
@@ -6282,6 +6377,13 @@ msgstr[1] "Class reminder (about %(reminder_hours)s hours before)"
 
 msgid "Aviso quando o meu pacote estiver acabando ou vencendo"
 msgstr "Notify me when my package is running out or expiring"
+
+#| msgid "Ligar a uma avaliação"
+msgid "Lembrete de uma nova avaliação"
+msgstr "Reminder of a new assessment"
+
+msgid "Aviso gentil quando eu passar uma semana sem treinar"
+msgstr "A gentle nudge when I go a week without training"
 
 msgid ""
 "Vale para todos os canais: só chega o que estiver marcado aqui e em um canal"
