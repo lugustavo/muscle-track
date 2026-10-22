@@ -138,11 +138,30 @@ class RoutineFormListTests(BaseTestCase):
         self.assertIn("handle: '.drag-handle'", page)
         self.assertIn('Arraste pela alça para reordenar', page)
         self.assertIn('data-remove-exercise', page)
+        self.assertIn('data-edit-exercise', page)           # Editar next to Remover on every row
+        self.assertIn('id="editExerciseModal"', page)
+        for field in ('editSets', 'editReps', 'editRest', 'editNotes'):
+            self.assertIn(f'id="{field}"', page)
         self.assertIn('escapeHtml(ex.name)', page)
         # the notes of each exercise travel with the list, so saving after a reorder does not wipe them
         self.assertIn('notes: "cuidado com o ombro"', page)
         # no server-drawn rows with a dead remove button any more
         self.assertNotIn('remove-exercise">', page)
+
+    def test_editing_sets_reps_rest_and_notes_saves_on_the_same_rows(self):
+        routine = self.alice_routine
+        rows = list(routine.exercises.order_by('order'))
+        ids = [row.pk for row in rows]
+        # what the edit sheet leaves in the list: the same exercises with other numbers and a note
+        payload = [{'exercise_id': row.exercise_id, 'sets': 5, 'reps': 8, 'rest_seconds': 90, 'notes': 'sem balançar'} for row in rows]
+        response = self.client.post(reverse('core:person_routine_edit', kwargs={'pk': routine.pk}), {
+            'person': routine.person_id, 'routine_name': routine.routine_name, 'difficulty_level': routine.difficulty_level,
+            'estimated_duration': routine.estimated_duration, 'routine_date': routine.routine_date.strftime('%d/%m/%Y'),
+            'start_date': (routine.start_date or routine.routine_date).strftime('%d/%m/%Y'), 'is_active': 'on', 'exercises_data': json.dumps(payload)})
+        self.assertEqual(response.status_code, 302, response.context['form'].errors if response.context else '')
+        saved = list(routine.exercises.order_by('order'))
+        self.assertEqual([row.pk for row in saved], ids)           # the session history stays tied to the same rows
+        self.assertTrue(all((r.sets, r.reps, r.rest_seconds, r.notes) == (5, 8, 90, 'sem balançar') for r in saved))
 
     def test_a_new_student_routine_starts_empty_and_draws_nothing_by_itself(self):
         page = self.client.get(reverse('core:person_routine_create')).content.decode()
