@@ -29,7 +29,7 @@ from django.views.decorators.http import require_POST, require_safe
 from allauth.account.models import EmailAddress
 
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, last_activity, trainer_dashboard
-from . import backup_status, credits, goals, inbox, photo_guides, photo_positions, telegram, wger_import, workout_offline
+from . import backup_status, credits, goals, inbox, photo_guides, photo_positions, student_csv, telegram, wger_import, workout_offline
 from .i18n import short_date
 from .listing import filter_tags, remember_view, view_mode as list_view_mode
 from .forms import (
@@ -227,9 +227,8 @@ def _apply_student_filter(students, name):
     return students
 
 
-@staff_required
-def student_list(request):
-    """List students with search, filters, statistics and pagination"""
+def _filtered_students(request):
+    """(students, search, status, filter name) for the list's query string (search, status, filtro); the export uses it too."""
     search = request.GET.get('search', '').strip()
     status = request.GET.get('status', '')
     if status not in ('active', 'inactive'):
@@ -237,14 +236,19 @@ def student_list(request):
     filter_name = request.GET.get('filtro', '')
     if filter_name not in STUDENT_FILTERS:
         filter_name = ''
-    view_mode = list_view_mode(request, 'student_view_mode')
-
     students = apply_student_search(_students_queryset(), search)
     if status == 'active':
         students = students.filter(is_active=True)
     elif status == 'inactive':
         students = students.filter(is_active=False)
-    students = _apply_student_filter(students, filter_name).order_by('person_name', 'pk')
+    return _apply_student_filter(students, filter_name).order_by('person_name', 'pk'), search, status, filter_name
+
+
+@staff_required
+def student_list(request):
+    """List students with search, filters, statistics and pagination"""
+    students, search, status, filter_name = _filtered_students(request)
+    view_mode = list_view_mode(request, 'student_view_mode')
 
     page = Paginator(students, STUDENT_PAGE_SIZE).get_page(request.GET.get('page'))
 
@@ -261,6 +265,77 @@ def student_list(request):
         'active_filters': bool(status) + bool(filter_name),
     })
     return remember_view(request, response, 'student_view_mode', view_mode)
+
+
+def _csv_response(rows, filename):
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    response['Cache-Control'] = 'no-store'
+    student_csv.write_csv(rows, response)
+    return response
+
+
+@staff_required
+def students_csv_export(request):
+    """The students as a CSV file: the same search and filters as the list (nothing private: see core/student_csv.py)."""
+    students, *_rest = _filtered_students(request)
+    return _csv_response(student_csv.export_rows(students.iterator()), f'alunos-{timezone.localdate():%Y-%m-%d}.csv')
+
+
+@staff_required
+def students_csv_template(request):
+    return _csv_response(student_csv.template_rows(), 'modelo-alunos.csv')
+
+
+CSV_SESSION_KEY = 'student_csv_rows'
+
+
+@staff_required
+def students_csv_import(request):
+    """Step 1 (send the file) and 2 (the preview of what would be created). Nothing is created here."""
+    results = None
+    if request.method == 'POST':
+        upload = request.FILES.get('file')
+        if upload is None:
+            messages.error(request, _('Escolha o arquivo CSV.'))
+        else:
+            try:
+                rows = student_csv.parse(upload.read(student_csv.MAX_BYTES + 1))
+            except student_csv.CsvError as error:
+                messages.error(request, str(error))
+            else:
+                request.session[CSV_SESSION_KEY] = rows
+                results = student_csv.check(rows)
+    else:
+        request.session.pop(CSV_SESSION_KEY, None)
+    counts = {state: sum(1 for r in results if r['state'] == state) for state in (
+        student_csv.READY, student_csv.DUPLICATE, student_csv.ERROR)} if results else {}
+    return render(request, 'core/students_csv_import.html', {
+        'results': results, 'counts': counts, 'max_rows': student_csv.MAX_ROWS,
+        'READY': student_csv.READY, 'DUPLICATE': student_csv.DUPLICATE, 'ERROR': student_csv.ERROR})
+
+
+@staff_required
+@require_POST
+def students_csv_confirm(request):
+    """Step 3: create the students the trainer left ticked (a ticked possible duplicate means "import anyway")."""
+    rows = request.session.get(CSV_SESSION_KEY)
+    if not rows:
+        messages.error(request, _('O arquivo expirou: envie-o de novo.'))
+        return redirect('core:students_csv_import')
+    chosen = {int(v) for v in request.POST.getlist('row') if v.isdigit()}
+    results = student_csv.check(rows, accept_duplicates=chosen)
+    created = student_csv.create(results, request.user, only=chosen)
+    request.session.pop(CSV_SESSION_KEY, None)
+    if not created:
+        messages.warning(request, _('Nenhum aluno foi importado.'))
+        return redirect('core:students_csv_import')
+    with_invite = sum(1 for p in created if p.has_app)
+    messages.success(request, ngettext('%(n)d aluno importado.', '%(n)d alunos importados.', len(created)) % {'n': len(created)}
+                     + (' ' + ngettext('%(n)d tem acesso ao app: abra a ficha e envie o link de convite.',
+                                       '%(n)d têm acesso ao app: abra cada ficha e envie o link de convite.', with_invite)
+                        % {'n': with_invite} if with_invite else ''))
+    return redirect(f"{reverse('core:student_list')}?filtro=invite_pending" if with_invite else reverse('core:student_list'))
 
 
 @staff_required
