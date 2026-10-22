@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 17:21-0300\n"
+"POT-Creation-Date: 2026-10-22 17:38-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -367,6 +367,14 @@ msgstr "Status"
 
 msgid "Vender pacote"
 msgstr "Sell package"
+
+#| msgid "Nova aula"
+msgid "Nova meta"
+msgstr "New goal"
+
+#| msgid "Editar rotina"
+msgid "Editar meta"
+msgstr "Edit goal"
 
 msgid "Posições das fotos"
 msgstr "Photo positions"
@@ -727,6 +735,30 @@ msgid ""
 msgstr ""
 "Fill in at least one measurement (weight, height, body fat % or "
 "circumference)."
+
+msgid "Ex.: chegar aos 70 kg, correr 5 km sem parar"
+msgstr "E.g.: reach 70 kg, run 5 km without stopping"
+
+msgid "— só o texto, sem número —"
+msgstr "— text only, no number —"
+
+msgid "Escreva a meta."
+msgstr "Write the goal."
+
+#| msgid "A data não pode ser no futuro."
+msgid "O prazo não pode ser no passado."
+msgstr "The deadline cannot be in the past."
+
+#| msgid "Informe o valor."
+msgid "Informe o valor a atingir."
+msgstr "Enter the value to reach."
+
+msgid "Escolha a medida acompanhada, ou deixe os valores em branco."
+msgstr "Choose the measure to follow, or leave the values blank."
+
+#| msgid "Informe um valor maior que zero."
+msgid "O valor deve ser maior que zero."
+msgstr "The value must be greater than zero."
 
 msgid "Foto avulsa (sem avaliação)"
 msgstr "Standalone photo (no assessment)"
@@ -1489,14 +1521,17 @@ msgstr "Completed on"
 msgid "%(exercise)s - série %(number)s"
 msgstr "%(exercise)s - set %(number)s"
 
+msgid "Em andamento"
+msgstr "In progress"
+
+msgid "Cumprida"
+msgstr "Achieved"
+
+msgid "Abandonada"
+msgstr "Dropped"
+
 msgid "Peso (kg)"
 msgstr "Weight (kg)"
-
-msgid "Altura (cm)"
-msgstr "Height (cm)"
-
-msgid "Peitoral (cm)"
-msgstr "Chest (cm)"
 
 msgid "Cintura (cm)"
 msgstr "Waist (cm)"
@@ -1504,11 +1539,35 @@ msgstr "Waist (cm)"
 msgid "Quadril (cm)"
 msgstr "Hips (cm)"
 
+msgid "Peitoral (cm)"
+msgstr "Chest (cm)"
+
 msgid "Braço (cm)"
 msgstr "Arm (cm)"
 
 msgid "Coxa (cm)"
 msgstr "Thigh (cm)"
+
+msgid "Meta"
+msgstr "Goal"
+
+msgid "Prazo"
+msgstr "Deadline"
+
+#| msgid "Os dois acompanham tudo"
+msgid "Medida acompanhada"
+msgstr "Measure followed"
+
+#| msgid "valor a pagar"
+msgid "Valor a atingir"
+msgstr "Value to reach"
+
+#| msgid "Vale a partir de"
+msgid "Valor de partida"
+msgstr "Starting value"
+
+msgid "Altura (cm)"
+msgstr "Height (cm)"
 
 msgid "Avaliação física"
 msgstr "Physical assessment"
@@ -2028,6 +2087,18 @@ msgstr[0] ""
 msgstr[1] ""
 "It has been %(n)d days since you trained. How about a workout today?"
 
+msgid "O prazo de uma das suas metas é hoje."
+msgstr "The deadline of one of your goals is today."
+
+#, python-format
+msgid "Falta %(n)d dia para o prazo de uma das suas metas."
+msgid_plural "Faltam %(n)d dias para o prazo de uma das suas metas."
+msgstr[0] "%(n)d day left until the deadline of one of your goals."
+msgstr[1] "%(n)d days left until the deadline of one of your goals."
+
+msgid "Uma meta sua está perto do prazo"
+msgstr "One of your goals is close to its deadline"
+
 msgid "Feliz aniversário!"
 msgstr "Happy birthday!"
 
@@ -2046,12 +2117,18 @@ msgid "(a primeira às %(time)s)"
 msgstr "(the first at %(time)s)"
 
 #, python-format
-#| msgid "%(n)d aula hoje"
-#| msgid_plural "%(n)d aulas hoje"
 msgid "%(n)d aniversariante hoje"
 msgid_plural "%(n)d aniversariantes hoje"
 msgstr[0] "%(n)d birthday today"
 msgstr[1] "%(n)d birthdays today"
+
+#, python-format
+#| msgid "%(n)d treino terminando"
+#| msgid_plural "%(n)d treinos terminando"
+msgid "%(n)d meta vencida ou vencendo"
+msgid_plural "%(n)d metas vencidas ou vencendo"
+msgstr[0] "%(n)d goal overdue or due soon"
+msgstr[1] "%(n)d goals overdue or due soon"
 
 #, python-format
 msgid "%(n)d aula de ontem sem presença marcada"
@@ -2356,9 +2433,6 @@ msgstr "Couldn't find free dates in the package's times."
 
 msgid "Aguardando a primeira aula"
 msgstr "Waiting for the first class"
-
-msgid "Em andamento"
-msgstr "In progress"
 
 msgid "Congelado"
 msgstr "Frozen"
@@ -3239,6 +3313,37 @@ msgstr "Assessment recorded."
 msgid "Avaliação atualizada."
 msgstr "Assessment updated."
 
+#| msgid "nome alterado"
+msgid "Meta alterada"
+msgstr "Goal changed"
+
+msgid "Meta criada"
+msgstr "Goal created"
+
+msgid "Meta criada."
+msgstr "Goal created."
+
+#| msgid "Pacote atualizado."
+msgid "Meta atualizada."
+msgstr "Goal updated."
+
+msgid "Situação inválida"
+msgstr "Invalid status"
+
+#, python-format
+#| msgid "para %(starts_at)s"
+msgid "Meta: %(status)s"
+msgstr "Goal: %(status)s"
+
+#, python-format
+#| msgid "remarcada de %(starts_at)s"
+msgid "Meta marcada como \"%(status)s\"."
+msgstr "Goal marked as \"%(status)s\"."
+
+#| msgid "Aula removida."
+msgid "Meta removida."
+msgstr "Goal removed."
+
 msgid "Avaliação removida."
 msgstr "Assessment removed."
 
@@ -3366,9 +3471,6 @@ msgstr "Request from %(name)s approved."
 #, python-format
 msgid "Pedido de %(name)s recusado."
 msgstr "Request from %(name)s declined."
-
-msgid "Situação inválida"
-msgstr "Invalid status"
 
 msgid ""
 "Este aluno já tem outra aula neste horário; remova ou cancele uma delas "
@@ -3599,7 +3701,6 @@ msgstr "When tapping WhatsApp on a recent absence (dashboard)."
 msgid "Ao enviar o link de acesso ao aluno (tela do convite)."
 msgstr "When sending the access link to the student (invitation screen)."
 
-#| msgid "Ao tocar no WhatsApp de uma falta recente (painel)."
 msgid "Ao tocar no WhatsApp de um aniversariante (painel)."
 msgstr "When tapping the WhatsApp button of a birthday person (dashboard)."
 
@@ -3906,6 +4007,76 @@ msgstr "Starting photo"
 msgid "Refazer a inicial"
 msgstr "Redo the starting one"
 
+msgid "Metas"
+msgstr "Goals"
+
+msgid "cumprida"
+msgstr "achieved"
+
+msgid "abandonada"
+msgstr "dropped"
+
+#, python-format
+#| msgid "(venceu há %(days_left)s dia)"
+#| msgid_plural "(venceu há %(days_left)s dias)"
+msgid "venceu há %(n)s dia"
+msgid_plural "venceu há %(n)s dias"
+msgstr[0] "overdue by %(n)s day"
+msgstr[1] "overdue by %(n)s days"
+
+msgid "vence hoje"
+msgstr "expires today"
+
+#, python-format
+#| msgid "falta 1 dia"
+msgid "falta %(n)s dia"
+msgid_plural "faltam %(n)s dias"
+msgstr[0] "%(n)s day left"
+msgstr[1] "%(n)s days left"
+
+#, python-format
+#| msgid "até %(date)s"
+msgid "até %(day)s"
+msgstr "until %(day)s"
+
+#| msgid "Anotações da personal"
+msgid "Ações da meta"
+msgstr "Goal actions"
+
+#| msgid "Marcar tudo como lido"
+msgid "Marcar como cumprida"
+msgstr "Mark as achieved"
+
+#| msgid "Adicionar"
+msgid "Abandonar"
+msgstr "Drop"
+
+msgid "Reabrir"
+msgstr "Reopen"
+
+#| msgid "Remover esta foto?"
+msgid "Remover esta meta?"
+msgstr "Remove this goal?"
+
+msgid "Remover"
+msgstr "Remove"
+
+#, python-format
+msgid "Agora %(current)s · meta %(target)s"
+msgstr "Now %(current)s · goal %(target)s"
+
+msgid "Atingida: marque como cumprida."
+msgstr "Reached: mark it as achieved."
+
+msgid "Atingida!"
+msgstr "Reached!"
+
+msgid "Nenhuma meta ainda. Uma meta com prazo ajuda o aluno a manter o foco."
+msgstr "No goals yet. A goal with a deadline helps the student stay focused."
+
+msgid "Sua personal ainda não definiu metas com prazo."
+msgstr "Your trainer has not set any goals with a deadline yet."
+
 #, python-format
 msgid "Comprado em %(sold_on)s"
 msgstr "Purchased on %(sold_on)s"
@@ -3984,9 +4155,6 @@ msgstr "No-expiration package: valid until all classes are used."
 msgid "Primeira aula em %(starts_on)s; vale até <strong>%(ends_on)s</strong>"
 msgstr ""
 "First class on %(starts_on)s; valid until <strong>%(ends_on)s</strong>"
-
-msgid "vence hoje"
-msgstr "expires today"
 
 msgid "falta 1 dia"
 msgstr "1 day left"
@@ -4477,9 +4645,6 @@ msgstr "D m/d/Y"
 #, python-format
 msgid "Tirar %(name)s da lista?"
 msgstr "Remove %(name)s from the list?"
-
-msgid "Remover"
-msgstr "Remove"
 
 #, python-format
 msgid "Remover %(name)s"
@@ -5487,6 +5652,20 @@ msgstr ""
 "To refund, open the student → Payments → <em>Refund or reverse</em>, or "
 "cancel the package on the profile (the calculation is ready for you)."
 
+msgid ""
+"Com uma medida escolhida, a barra de progresso acompanha as avaliações do "
+"aluno."
+msgstr ""
+"With a measure chosen, the progress bar follows the student's assessments."
+
+#| msgid "Última avaliação"
+msgid "Em branco: usa a última avaliação."
+msgstr "Blank: uses the latest assessment."
+
+#| msgid "Salvar o nome"
+msgid "Salvar meta"
+msgstr "Save goal"
+
 #, python-format
 msgid "Home - %(brand_name)s"
 msgstr "Home - %(brand_name)s"
@@ -5627,7 +5806,6 @@ msgstr "in progress"
 msgid "Ninguém treinou ainda hoje."
 msgstr "No one has trained yet today."
 
-#| msgid "Treinos (7 dias)"
 msgid "Aniversariantes (7 dias)"
 msgstr "Birthdays (7 days)"
 
@@ -5635,11 +5813,9 @@ msgid "D d/m"
 msgstr "D m/d"
 
 #, python-format
-#| msgid "%(age)s anos"
 msgid "%(n)s anos"
 msgstr "%(n)s years old"
 
-#| msgid "Cobrar pelo WhatsApp"
 msgid "Parabéns pelo WhatsApp"
 msgstr "Greet on WhatsApp"
 
@@ -6413,6 +6589,10 @@ msgstr "Reminder of a new assessment"
 
 msgid "Aviso gentil quando eu passar uma semana sem treinar"
 msgstr "A gentle nudge when I go a week without training"
+
+#| msgid "Aviso quando o meu pacote estiver acabando ou vencendo"
+msgid "Aviso quando uma meta minha estiver perto do prazo"
+msgstr "A heads-up when one of my goals is close to its deadline"
 
 msgid "Parabéns no meu aniversário"
 msgstr "A greeting on my birthday"

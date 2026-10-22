@@ -71,6 +71,8 @@ def build_data(person, include_internal_notes):
         'assessments': [
             _fields(a, ['date', 'weight_kg', 'height_cm', 'body_fat_pct', 'chest_cm', 'waist_cm', 'hip_cm',
                         'arm_cm', 'thigh_cm', 'notes']) for a in person.assessments.all()],
+        'goals': [_fields(g, ['title', 'target_date', 'metric', 'target_value', 'start_value', 'status', 'closed_on', 'created_at'])
+                  for g in person.goals.all()],
         'photos': [
             {**_fields(p, ['date', 'caption', 'angle']), 'file': f'fotos/{p.pk}{os.path.splitext(p.image.name)[1]}'}
             for p in person.progress_photos.all()],

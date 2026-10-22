@@ -29,11 +29,11 @@ from django.views.decorators.http import require_POST, require_safe
 from allauth.account.models import EmailAddress
 
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, last_activity, trainer_dashboard
-from . import backup_status, credits, inbox, photo_guides, photo_positions, telegram, wger_import, workout_offline
+from . import backup_status, credits, goals, inbox, photo_guides, photo_positions, telegram, wger_import, workout_offline
 from .i18n import short_date
 from .listing import filter_tags, remember_view, view_mode as list_view_mode
 from .forms import (
-    AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ClassRequestForm, ConsentForm, SaleForm, ExerciseForm, PaymentForm,
+    AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, GoalForm, ClassRequestForm, ConsentForm, SaleForm, ExerciseForm, PaymentForm,
     CancelPackageForm, HolidayForm, WorkingHoursForm, MyPhotoForm, PackageEditForm, PersonForm, RefundForm, PersonRoutineForm, PackageForm, RepeatForm, ScheduleSlotForm, SlotEditForm, SlotFillForm,
     PhotoLinkForm, PhotoPositionForm, ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
 )
@@ -56,7 +56,7 @@ from .exports import build_export
 from .history import log_event, log_profile_edit
 from .invites import build_invite_url, get_user_from_invite, revoke_invites
 from .models import (
-    Appointment, AppointmentRequest, Assessment, CalendarFeed, SheetLink, Holiday, Refund, NotificationPreference, PhotoPosition, PushSubscription, WhatsAppTemplate, ConsentRecord, Exercise, MuscleGroup, Payment, Package, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
+    Appointment, AppointmentRequest, Assessment, CalendarFeed, Goal, SheetLink, Holiday, Refund, NotificationPreference, PhotoPosition, PushSubscription, WhatsAppTemplate, ConsentRecord, Exercise, MuscleGroup, Payment, Package, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
     Routine, RoutineExercise, SessionExercise, SessionSet, StudentEvent, StudentNote, WorkingHours, WorkoutSession,
 )
 from .navigation import after_save_url, back_label, safe_next_url, with_next
@@ -486,6 +486,7 @@ def student_detail(request, pk):
         'student': student,
         'assessments': assessments,
         'assessment_page': assessment_page,
+        'goal_rows': goals.describe(student.goals.select_related('person')),
         'latest_assessment': assessments[0] if assessments else None,
         'assessment_chart': chart_points,
         'can_compare': bool(evolution.comparable_angles(assessments, evolution.comparable_loose(loose_photos))),
@@ -991,6 +992,7 @@ def my_evolution(request, person):
     loose_photos = photo_positions.name_photos(list(person.progress_photos.filter(assessment__isnull=True)))
     return render(request, 'core/my_evolution.html', {
         'title': _('Minha evolução'), 'assessments': assessments,
+        'goal_rows': goals.describe(person.goals.select_related('person')),
         'assessment_page': Paginator(assessments, ASSESSMENT_PAGE_SIZE).get_page(request.GET.get('av')), 'assessment_chart': evolution.chart_points(assessments),
         'can_compare': bool(evolution.comparable_angles(assessments, evolution.comparable_loose(loose_photos))),
         'photos_consent': _photos_consent(person), 'loose_photos': loose_photos})
@@ -2492,9 +2494,10 @@ def notification_settings(request):
                     pref.notify_reassessment = 'notify_reassessment' in request.POST
                     pref.notify_inactivity = 'notify_inactivity' in request.POST
                     pref.notify_birthday = 'notify_birthday' in request.POST
+                    pref.notify_goals = 'notify_goals' in request.POST
                 pref.save(update_fields=['notify_changes', 'notify_class_reminder', 'notify_plan_expiry',
                                          'notify_renewals', 'notify_activity', 'notify_digest', 'notify_reassessment',
-                                         'notify_inactivity', 'notify_birthday'])
+                                         'notify_inactivity', 'notify_birthday', 'notify_goals'])
             messages.success(request, _('Preferências de notificação salvas.'))
         return redirect('core:notification_settings')
     recent = list(request.user.notification_logs.all()[:5])
@@ -2738,6 +2741,68 @@ def assessment_edit(request, pk):
         return redirect(_student_tab(request, assessment.person_id, 'avaliacoes'))
     return render(request, 'core/assessment_form.html', {
         'form': form, 'student': assessment.person, 'title': _('Editar avaliação')})
+
+
+def _save_goal(request, form, student, goal=None):
+    """Saves a valid GoalForm for `student`, filling the start value from the latest assessment, and writes to the history."""
+    saved = form.save(commit=False)
+    saved.person = student
+    if saved.metric and saved.start_value is None:
+        saved.start_value = goals.starting_value(student, saved.metric)
+    if not saved.metric:
+        saved.target_value = saved.start_value = None
+    saved.save()
+    log_event(student, StudentEvent.Kind.GOAL, request.user,
+              _('Meta alterada') if goal else _('Meta criada'))
+    return saved
+
+
+@staff_required
+def goal_create(request, pk):
+    student = get_object_or_404(Person, pk=pk)
+    form = GoalForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        _save_goal(request, form, student)
+        messages.success(request, _('Meta criada.'))
+        return redirect(_student_tab(request, student.pk, 'avaliacoes'))
+    return render(request, 'core/goal_form.html', {'form': form, 'student': student, 'title': _('Nova meta')})
+
+
+@staff_required
+def goal_edit(request, pk):
+    goal = get_object_or_404(Goal.objects.select_related('person'), pk=pk)
+    form = GoalForm(request.POST or None, instance=goal)
+    if request.method == 'POST' and form.is_valid():
+        _save_goal(request, form, goal.person, goal)
+        messages.success(request, _('Meta atualizada.'))
+        return redirect(_student_tab(request, goal.person_id, 'avaliacoes'))
+    return render(request, 'core/goal_form.html', {'form': form, 'student': goal.person, 'title': _('Editar meta')})
+
+
+@staff_required
+@require_POST
+def goal_status(request, pk):
+    """Mark a goal as achieved, dropped or back in progress."""
+    goal = get_object_or_404(Goal.objects.select_related('person'), pk=pk)
+    wanted = request.POST.get('status')
+    if wanted not in Goal.Status.values:
+        return HttpResponseBadRequest(_('Situação inválida'))
+    goal.status = wanted
+    goal.closed_on = timezone.localdate() if wanted != Goal.Status.ACTIVE else None
+    goal.save(update_fields=['status', 'closed_on'])
+    log_event(goal.person, StudentEvent.Kind.GOAL, request.user, _('Meta: %(status)s') % {'status': goal.get_status_display()})
+    messages.success(request, _('Meta marcada como "%(status)s".') % {'status': goal.get_status_display()})
+    return redirect(_student_tab(request, goal.person_id, 'avaliacoes'))
+
+
+@staff_required
+@require_POST
+def goal_delete(request, pk):
+    goal = get_object_or_404(Goal, pk=pk)
+    student_id = goal.person_id
+    goal.delete()
+    messages.success(request, _('Meta removida.'))
+    return redirect(_student_tab(request, student_id, 'avaliacoes'))
 
 
 @staff_required

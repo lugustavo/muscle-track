@@ -602,6 +602,37 @@ class SessionSet(models.Model):
         return gettext('%(exercise)s - série %(number)s') % {'exercise': self.session_exercise, 'number': self.number}
 
 
+class Goal(models.Model):
+    """A goal of a student with a deadline: free text ("walk 5 km without stopping") or a number on a measure of the
+    assessments ("weight 70 kg"), whose progress follows the assessments (core/goals.py)."""
+
+    class Status(models.TextChoices):
+        ACTIVE = 'active', _('Em andamento')
+        ACHIEVED = 'achieved', _('Cumprida')
+        DROPPED = 'dropped', _('Abandonada')
+
+    METRICS = [('weight_kg', _('Peso (kg)')), ('body_fat_pct', _('% de gordura')), ('waist_cm', _('Cintura (cm)')),
+               ('hip_cm', _('Quadril (cm)')), ('chest_cm', _('Peitoral (cm)')), ('arm_cm', _('Braço (cm)')),
+               ('thigh_cm', _('Coxa (cm)'))]
+
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='goals', verbose_name=_('Aluno'))
+    title = models.CharField(max_length=120, verbose_name=_('Meta'))
+    target_date = models.DateField(verbose_name=_('Prazo'))
+    metric = models.CharField(max_length=20, blank=True, choices=METRICS, verbose_name=_('Medida acompanhada'))
+    target_value = models.DecimalField(max_digits=6, decimal_places=1, null=True, blank=True, verbose_name=_('Valor a atingir'))
+    start_value = models.DecimalField(max_digits=6, decimal_places=1, null=True, blank=True, verbose_name=_('Valor de partida'))
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE, verbose_name=_('Situação'))
+    closed_on = models.DateField(null=True, blank=True)
+    reminded_at = models.DateTimeField(null=True, blank=True)     # core/reminders.py: the "due soon" notice went out
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['status', 'target_date', 'pk']
+
+    def __str__(self):
+        return f'{self.person_id} {self.title}'
+
+
 class Assessment(models.Model):
     """Physical assessment of a student on a given date (all measures optional)"""
     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='assessments', verbose_name=_('Aluno'))
@@ -797,6 +828,7 @@ class StudentEvent(models.Model):
         PACKAGE = 'package', _('Pacote')
         APP_ACCESS = 'app_access', _('Acesso ao app')
         SHEET_LINK = 'sheet_link', _('Link da ficha')
+        GOAL = 'goal', _('Meta')
 
     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='events', verbose_name=_('Aluno'))
     actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+', verbose_name=_('Quem'))
@@ -1224,6 +1256,7 @@ class NotificationPreference(models.Model):
     notify_reassessment = models.BooleanField(default=True)     # student: "time for a new assessment"
     notify_inactivity = models.BooleanField(default=True)       # student: "it has been a while since you trained"
     notify_birthday = models.BooleanField(default=True)         # student: the studio's birthday greeting
+    notify_goals = models.BooleanField(default=True)            # student: "a goal of yours is due soon"
     # Language the person uses the app in (set by the language switcher, or learned at login); the notifications, e-mails
     # and WhatsApp texts meant for them are written in it. Empty = the site default.
     language = models.CharField(max_length=10, blank=True, default='')

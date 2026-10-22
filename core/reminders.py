@@ -10,10 +10,10 @@ from django.conf import settings
 from django.db.models import F, Max, Q
 from django.utils import timezone
 
-from . import backup_status, dashboard, inbox, notifications, packages, workout_sessions
+from . import backup_status, dashboard, goals, inbox, notifications, packages, workout_sessions
 from .agenda import ensure_appointments
 from .billing import overdue_rows
-from .models import Appointment, Notice, NotificationPreference, Person
+from .models import Appointment, Goal, Notice, NotificationPreference, Person
 
 # A class that starts in less than this is not reminded any more (it is too late to be useful)
 MIN_LEAD = timedelta(hours=1)
@@ -88,12 +88,13 @@ def send_student_nudges(now, today):
     """Once a day, in the morning: the students who are overdue a new assessment, and the ones who stopped training. Each
     is told again only after a month (assessment) or a week (training), and only the ones with the switch on."""
     if not _in_window(now, settings.REMINDER_NUDGE_HOUR):
-        return {'reassessment': 0, 'inactive': 0, 'birthday': 0}
-    told = {'reassessment': 0, 'inactive': 0, 'birthday': 0}
+        return {'reassessment': 0, 'inactive': 0, 'birthday': 0, 'goals': 0}
+    told = {'reassessment': 0, 'inactive': 0, 'birthday': 0, 'goals': 0}
     for student, days in reassessment_candidates(today, only_with_app=True):
         told['reassessment'] += notifications.notify_once(
             [student.user], notifications.reassessment_due(days), timedelta(days=30))
     told['birthday'] = send_birthday_greetings(today)
+    told['goals'] = send_goal_reminders(now, today)
     inactive_days = settings.REMINDER_INACTIVE_DAYS
     if inactive_days > 0:
         for row in dashboard.inactive_students(now, days=inactive_days):
@@ -102,6 +103,24 @@ def send_student_nudges(now, today):
                 told['inactive'] += notifications.notify_once(
                     [student.user], notifications.inactivity_nudge(row['days']), timedelta(days=inactive_days))
     return told
+
+
+def send_goal_reminders(now, today):
+    """Once per goal, when its deadline is DUE_SOON_DAYS away or less (and not past): the student is told a goal of theirs
+    is close to its deadline."""
+    due = Goal.objects.filter(
+        _wants_goal(), status=Goal.Status.ACTIVE, reminded_at__isnull=True, person__is_active=True, person__has_app=True,
+        target_date__gte=today, target_date__lte=today + timedelta(days=goals.DUE_SOON_DAYS)).select_related('person__user')
+    sent = 0
+    for goal in due:
+        notifications.notify([goal.person.user], notifications.goal_due((goal.target_date - today).days), sync=True)
+        Goal.objects.filter(pk=goal.pk).update(reminded_at=now)
+        sent += 1
+    return sent
+
+
+def _wants_goal():
+    return Q(person__user__notification_preference__notify_goals=True) | Q(person__user__notification_preference__isnull=True)
 
 
 def send_birthday_greetings(today):
@@ -128,6 +147,7 @@ def digest_summary(now, today):
         'first_class': f'{timezone.localtime(classes[0].starts_at):%H:%M}' if classes else '',
         'unmarked': unmarked,
         'birthdays': len(dashboard.birthdays(today, ahead=0)),
+        'goals': goals.attention(today).count(),
         'payments': len(overdue_rows(today)),
         'inactive': len(dashboard.inactive_students(now)) if settings.REMINDER_INACTIVE_DAYS > 0 else 0,
         'reassessment': len(reassessment_candidates(today)),
@@ -212,5 +232,5 @@ def run(now=None):
     return {'classes': send_class_reminders(now), 'soon': send_class_soon_reminders(now), 'plans': send_plan_reminders(today),
             'packages': send_package_reminders(now, today), 'backup': send_backup_alert(now),
             'digest': send_daily_digest(now, today), 'reassessment': nudges['reassessment'], 'inactive': nudges['inactive'],
-            'birthday': nudges['birthday'],
+            'birthday': nudges['birthday'], 'goals': nudges['goals'],
             'sessions': workout_sessions.close_stale(now=now)}

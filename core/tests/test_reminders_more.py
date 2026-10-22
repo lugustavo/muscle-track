@@ -123,7 +123,7 @@ class StudentNudgeTests(BaseTestCase):
         self.assess(60)
         for hour in (6, 9, 12, 20):
             moment = timezone.make_aware(datetime(2026, 10, 20, hour, 0))
-            self.assertEqual(reminders.send_student_nudges(moment, self.today), {'reassessment': 0, 'inactive': 0, 'birthday': 0}, hour)
+            self.assertEqual(reminders.send_student_nudges(moment, self.today), {'reassessment': 0, 'inactive': 0, 'birthday': 0, 'goals': 0}, hour)
         self.assertEqual(reminders.send_student_nudges(timezone.make_aware(datetime(2026, 10, 20, 11, 59)), self.today)['reassessment'], 1)
 
     def make_inactive(self, days):
@@ -150,7 +150,7 @@ class StudentNudgeTests(BaseTestCase):
     def test_zero_turns_both_off(self):
         self.assess(90)
         self.make_inactive(30)
-        self.assertEqual(reminders.send_student_nudges(LATE_MORNING, self.today), {'reassessment': 0, 'inactive': 0, 'birthday': 0})
+        self.assertEqual(reminders.send_student_nudges(LATE_MORNING, self.today), {'reassessment': 0, 'inactive': 0, 'birthday': 0, 'goals': 0})
 
 
 @override_settings(**CONFIG)

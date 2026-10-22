@@ -1,0 +1,55 @@
+{% load i18n %}
+{% load navigation %}
+{# The student's goals. Needs `goal_rows` (core/goals.py describe) and `student`; `can_edit` shows the trainer's buttons. #}
+<div class="card mb-3" data-goals>
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+        <strong class="ui-sec"><span class="ui-ico sm brand"><i class="bi bi-bullseye" aria-hidden="true"></i></span> {% trans "Metas" %}</strong>
+        {% if can_edit %}<a href="{% nav_url 'core:goal_create' student.pk %}" class="btn btn-sm btn-primary" data-goal-new><i class="bi bi-plus-circle"></i> {% trans "Nova meta" %}</a>{% endif %}
+    </div>
+    {% if goal_rows %}
+    <ul class="list-group list-group-flush">
+        {% for row in goal_rows %}
+        <li class="list-group-item" data-goal="{{ row.goal.pk }}" data-state="{{ row.state }}">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+                <div class="min-w-0">
+                    <div class="fw-semibold text-break {% if row.state == 'closed' %}text-muted{% endif %}">{{ row.goal.title }}</div>
+                    <div class="small">
+                        {% if row.goal.status == 'achieved' %}<span class="ui-badge ok">{% trans "cumprida" %}</span>
+                        {% elif row.goal.status == 'dropped' %}<span class="ui-badge">{% trans "abandonada" %}</span>
+                        {% elif row.state == 'overdue' %}<span class="ui-badge bad">{% blocktrans trimmed count n=row.days %}venceu há {{ n }} dia{% plural %}venceu há {{ n }} dias{% endblocktrans %}</span>
+                        {% elif row.days == 0 %}<span class="ui-badge warn">{% trans "vence hoje" %}</span>
+                        {% elif row.state == 'soon' %}<span class="ui-badge warn">{% blocktrans trimmed count n=row.days %}falta {{ n }} dia{% plural %}faltam {{ n }} dias{% endblocktrans %}</span>
+                        {% else %}<span class="ui-badge">{% blocktrans trimmed count n=row.days %}falta {{ n }} dia{% plural %}faltam {{ n }} dias{% endblocktrans %}</span>{% endif %}
+                        <span class="text-muted">{% blocktrans trimmed with day=row.goal.target_date|date:_('d/m/Y') %}até {{ day }}{% endblocktrans %}</span>
+                    </div>
+                </div>
+                {% if can_edit %}
+                <div class="dropdown row-menu" data-goal-menu>
+                    <button class="btn btn-sm btn-link text-body-secondary px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{% trans "Ações da meta" %}"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        {% if row.goal.status == 'active' %}
+                        <li><form method="post" action="{% nav_url 'core:goal_status' row.goal.pk %}">{% csrf_token %}<button class="dropdown-item" name="status" value="achieved"><i class="bi bi-check-circle" aria-hidden="true"></i> {% trans "Marcar como cumprida" %}</button></form></li>
+                        <li><a class="dropdown-item" href="{% nav_url 'core:goal_edit' row.goal.pk %}"><i class="bi bi-pencil" aria-hidden="true"></i> {% trans "Editar" %}</a></li>
+                        <li><form method="post" action="{% nav_url 'core:goal_status' row.goal.pk %}">{% csrf_token %}<button class="dropdown-item" name="status" value="dropped"><i class="bi bi-x-circle" aria-hidden="true"></i> {% trans "Abandonar" %}</button></form></li>
+                        {% else %}
+                        <li><form method="post" action="{% nav_url 'core:goal_status' row.goal.pk %}">{% csrf_token %}<button class="dropdown-item" name="status" value="active"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> {% trans "Reabrir" %}</button></form></li>
+                        {% endif %}
+                        <li><form method="post" action="{% nav_url 'core:goal_delete' row.goal.pk %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta meta?" %}{% endfilter %}');">{% csrf_token %}<button class="dropdown-item text-danger"><i class="bi bi-trash" aria-hidden="true"></i> {% trans "Remover" %}</button></form></li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            {% if row.progress %}
+            <div class="progress mt-2" style="height: .5rem;" role="progressbar" aria-valuenow="{{ row.progress.pct }}" aria-valuemin="0" aria-valuemax="100" data-goal-progress="{{ row.progress.pct }}"><div class="progress-bar" style="width: {{ row.progress.pct }}%"></div></div>
+            <div class="small text-muted mt-1">
+                {% blocktrans trimmed with current=row.progress.current target=row.goal.target_value %}Agora {{ current }} · meta {{ target }}{% endblocktrans %}
+                {% if row.progress.reached %}<span class="text-success-emphasis fw-semibold" data-goal-reached><i class="bi bi-stars" aria-hidden="true"></i> {% if can_edit %}{% trans "Atingida: marque como cumprida." %}{% else %}{% trans "Atingida!" %}{% endif %}</span>{% endif %}
+            </div>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="card-body text-muted small">{% if can_edit %}{% trans "Nenhuma meta ainda. Uma meta com prazo ajuda o aluno a manter o foco." %}{% else %}{% trans "Sua personal ainda não definiu metas com prazo." %}{% endif %}</div>
+    {% endif %}
+</div>
