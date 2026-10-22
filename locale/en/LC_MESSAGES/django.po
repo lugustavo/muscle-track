@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 15:06-0300\n"
+"POT-Creation-Date: 2026-10-22 15:30-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2037,22 +2037,17 @@ msgid_plural "%(n)d pacotes para renovar"
 msgstr[0] "%(n)d package to renew"
 msgstr[1] "%(n)d packages to renew"
 
-#| msgid "Pedidos de exclusão de dados"
 msgid "Pedido de exclusão de dados"
 msgstr "Data erasure request"
 
 #, python-format
-#| msgid "Pediu a exclusão dos próprios dados"
 msgid "%(name)s pediu a exclusão dos próprios dados."
 msgstr "%(name)s asked for their own data to be erased."
 
 #, python-format
-#| msgid ""
-#| "%(name)s já usou aulas deste pacote e não pode ser removido(a)."
 msgid "%(name)s criou a senha e já pode usar o app."
 msgstr "%(name)s created a password and can now use the app."
 
-#| msgid "Sem o nome do aluno"
 msgid "Foto nova de um aluno"
 msgstr "New photo from a student"
 
@@ -8718,6 +8713,11 @@ msgstr ""
 msgid "Quer apagar tudo? Use <em>Excluir</em> na ficha do aluno."
 msgstr ""
 "Want to delete everything? Use <em>Delete</em> on the student's profile."
+
+#, python-format
+#| msgid "%(first)s e %(last)s"
+msgid "%(first)s–%(last)s de %(total)s"
+msgstr "%(first)s–%(last)s of %(total)s"
 
 msgid "Limpar busca"
 msgstr "Clear search"
