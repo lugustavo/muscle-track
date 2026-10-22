@@ -15,6 +15,8 @@
     </div>
 </div>
 
+{% if phase_rows %}{% include 'core/_phases.html' with can_edit=False %}{% endif %}
+
 {% if routines_with_sessions %}
 <div class="row g-4">
     {% for item in routines_with_sessions %}

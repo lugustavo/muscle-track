@@ -10,10 +10,10 @@ from django.conf import settings
 from django.db.models import F, Max, Q
 from django.utils import timezone
 
-from . import backup_status, dashboard, goals, inbox, notifications, packages, workout_sessions
+from . import backup_status, dashboard, goals, inbox, notifications, packages, periodization, workout_sessions
 from .agenda import ensure_appointments
 from .billing import overdue_rows
-from .models import Appointment, Goal, Notice, NotificationPreference, Person
+from .models import Appointment, Goal, Notice, NotificationPreference, Person, TrainingPhase
 
 # A class that starts in less than this is not reminded any more (it is too late to be useful)
 MIN_LEAD = timedelta(hours=1)
@@ -123,6 +123,19 @@ def _wants_goal():
     return Q(person__user__notification_preference__notify_goals=True) | Q(person__user__notification_preference__isnull=True)
 
 
+def send_phase_reminders(now, today):
+    """Once per phase: the trainer is told (one notice for all, counts only) that phases are ending in PHASE_DAYS or less
+    with no phase after them. A phase edited afterwards can be announced again (editing clears `reminded_at`)."""
+    if not _in_window(now, settings.REMINDER_NUDGE_HOUR):
+        return 0
+    phases = [p for p in periodization.ending(today) if p.reminded_at is None]
+    if not phases:
+        return 0
+    notifications.notify(notifications.staff_users(), notifications.phase_ending(len(phases), periodization.ENDING_SOON_DAYS), sync=True)
+    TrainingPhase.objects.filter(pk__in=[p.pk for p in phases]).update(reminded_at=now)
+    return len(phases)
+
+
 def send_birthday_greetings(today):
     """The studio's greeting to each active student (with the app) on their birthday, once a year."""
     sent = 0
@@ -151,6 +164,7 @@ def digest_summary(now, today):
         'payments': len(overdue_rows(today)),
         'inactive': len(dashboard.inactive_students(now)) if settings.REMINDER_INACTIVE_DAYS > 0 else 0,
         'reassessment': len(reassessment_candidates(today)),
+        'phases': len(periodization.ending(today)),
         'routines': len(dashboard.ending_routines(today)),
         'invites': len([r for r in dashboard.pending_invites(now) if r['days'] >= 3]),
         'trials': len(dashboard.long_trials(now)),
@@ -232,5 +246,5 @@ def run(now=None):
     return {'classes': send_class_reminders(now), 'soon': send_class_soon_reminders(now), 'plans': send_plan_reminders(today),
             'packages': send_package_reminders(now, today), 'backup': send_backup_alert(now),
             'digest': send_daily_digest(now, today), 'reassessment': nudges['reassessment'], 'inactive': nudges['inactive'],
-            'birthday': nudges['birthday'], 'goals': nudges['goals'],
+            'birthday': nudges['birthday'], 'goals': nudges['goals'], 'phases': send_phase_reminders(now, today),
             'sessions': workout_sessions.close_stale(now=now)}
