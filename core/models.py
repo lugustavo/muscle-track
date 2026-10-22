@@ -1250,6 +1250,20 @@ class Holiday(models.Model):
         return f'{self.date:%d/%m/%Y} {self.name}'
 
 
+class WorkingHours(models.Model):
+    """The trainer's working window on one weekday (0 = Monday), e.g. 06:00-20:00. No rows at all = not configured: the
+    agenda then neither warns nor counts free time. With rows, a weekday without one is a day off (core/agenda.py)."""
+    weekday = models.PositiveSmallIntegerField(unique=True, choices=ScheduleSlot.WEEKDAYS)
+    start = models.TimeField()
+    end = models.TimeField()
+
+    class Meta:
+        ordering = ['weekday']
+
+    def __str__(self):
+        return f'{self.weekday} {self.start:%H:%M}-{self.end:%H:%M}'
+
+
 class PushSubscription(models.Model):
     """One browser/phone that agreed to receive web push (the subscription the browser handed to the page)."""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='push_subscriptions')

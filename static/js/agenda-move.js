@@ -32,7 +32,7 @@
     function done(result) {
         remember({
             text: interpolate(gettext('Aula de %(person)s movida para %(when)s.'), { person: result.person, when: result.when }, true),
-            overlap: result.overlap || [], undo: result.undo_url
+            overlap: result.overlap || [], hours: result.hours_warning || '', undo: result.undo_url
         });
         window.location.reload();
     }
@@ -43,7 +43,10 @@
         var warn = toastEl.querySelector('[data-toast-warn]');
         var undo = toastEl.querySelector('[data-toast-undo]');
         text.textContent = info.text;
-        warn.textContent = info.overlap && info.overlap.length ? interpolate(gettext('Atenção: se sobrepõe a outra aula (%(classes)s).'), { classes: info.overlap.join(', ') }, true) : '';
+        var notes = [];
+        if (info.overlap && info.overlap.length) { notes.push(interpolate(gettext('Atenção: se sobrepõe a outra aula (%(classes)s).'), { classes: info.overlap.join(', ') }, true)); }
+        if (info.hours) { notes.push(info.hours); }
+        warn.textContent = notes.join(' ');
         warn.hidden = !warn.textContent;
         undo.hidden = !info.undo;
         undo.onclick = function () {

@@ -6,7 +6,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext
 
-from .models import Appointment, AppointmentRequest, ScheduleSlot
+from .models import Appointment, AppointmentRequest, ScheduleSlot, WorkingHours
 
 # How far back opening the calendar still fills in classes, so last week's attendance can be marked
 BACKFILL_DAYS = 14
@@ -227,9 +227,11 @@ def attendance_stats(person, days=30, today=None):
 
 # ---- Views of the calendar (week is the default) -------------------------------------------------------
 
-VIEWS = ('semana', 'dia', 'mes', 'lista')
+VIEWS = ('semana', 'dia', 'mes', 'lista', 'previsao')
 DEFAULT_VIEW = 'semana'
 LIST_DAYS = 14
+FORECAST_CHOICES = (14, 30, 60)   # how many days the forecast can look ahead (the classes of those days are generated on view)
+DEFAULT_FORECAST_DAYS = 30
 LIST_DAYS_STUDENT = 60   # the list of one student's classes looks further ahead
 
 
@@ -273,7 +275,7 @@ def view_range(view, params, today, list_days=LIST_DAYS):
     if view == 'dia':
         day = parse_day(params.get('dia'), today)
         return view, day, day, day
-    if view == 'lista':
+    if view in ('lista', 'previsao'):
         day = parse_day(params.get('inicio'), today)
         return view, day, day + timedelta(days=list_days - 1), day
     monday = parse_week(params.get('semana'), today)
@@ -299,3 +301,90 @@ def month_cells(first, by_day, today, conflicts):
             day += timedelta(days=1)
         weeks.append(row)
     return weeks
+
+
+def parse_forecast_days(value):
+    """The forecast length asked for (?dias=), one of FORECAST_CHOICES; anything else -> the default."""
+    try:
+        days = int(value)
+    except (ValueError, TypeError):
+        return DEFAULT_FORECAST_DAYS
+    return days if days in FORECAST_CHOICES else DEFAULT_FORECAST_DAYS
+
+
+# ---- Working hours (the window the trainer takes classes in) and the forecast ---------------------------
+
+LIVE_OUT = (Appointment.Status.CANCELLED, Appointment.Status.RESCHEDULED)
+
+
+def working_hours():
+    """{weekday: (start, end)} of the days the trainer works; an empty dict when nothing is configured (the agenda then
+    neither warns about hours nor counts free time)."""
+    return {row.weekday: (row.start, row.end) for row in WorkingHours.objects.all()}
+
+
+def hours_text(window):
+    """'06:00–20:00' for a (start, end) window, 'folga' (day off) for None."""
+    return f'{window[0]:%H:%M}–{window[1]:%H:%M}' if window else ''
+
+
+def outside_hours(starts_at, ends_at, hours):
+    """Is the class (local time) outside the working window of its day? Always False when no hours are configured."""
+    if not hours:
+        return False
+    begin, finish = timezone.localtime(starts_at), timezone.localtime(ends_at)
+    window = hours.get(begin.weekday())
+    if window is None or finish.date() != begin.date():
+        return True
+    return begin.time() < window[0] or finish.time() > window[1]
+
+
+def _minutes(clock):
+    return clock.hour * 60 + clock.minute
+
+
+def forecast(appointments, start, days, today, hours, with_free=True):
+    """The next `days` days from `start` at a glance: classes, booked time and, when working hours are configured,
+    the free time of each working day. Returns {'days': [...], 'weeks': [...], 'totals': {...}}."""
+    by_day = {}
+    for item in appointments:
+        if item.status in LIVE_OUT:
+            continue
+        by_day.setdefault(timezone.localtime(item.starts_at).date(), []).append(item)
+    conflicts = conflicting_ids([a for items in by_day.values() for a in items])
+    rows = []
+    for offset in range(days):
+        day = start + timedelta(days=offset)
+        items = sorted(by_day.get(day, []), key=lambda a: a.starts_at)
+        window = hours.get(day.weekday()) if hours else None
+        booked = sum(a.duration_minutes for a in items)
+        row = {'date': day, 'is_today': day == today, 'classes': len(items), 'booked': booked,
+               'first': timezone.localtime(items[0].starts_at).time() if items else None,
+               'last': timezone.localtime(items[-1].ends_at).time() if items else None,
+               'window': window, 'off': bool(hours) and window is None, 'conflict': any(a.pk in conflicts for a in items),
+               'outside': sum(1 for a in items if outside_hours(a.starts_at, a.ends_at, hours)),
+               'free': None, 'busy_pct': None}
+        if with_free and window:
+            length = _minutes(window[1]) - _minutes(window[0])
+            inside = sum(max(0, min(_minutes(timezone.localtime(a.ends_at).time()), _minutes(window[1]))
+                             - max(_minutes(timezone.localtime(a.starts_at).time()), _minutes(window[0]))) for a in items
+                         if timezone.localtime(a.ends_at).date() == day)
+            row['free'] = max(0, length - inside)
+            row['busy_pct'] = min(100, round(100 * inside / length)) if length > 0 else None
+        rows.append(row)
+    weeks = []
+    for row in rows:
+        monday = week_start(row['date'])
+        if not weeks or weeks[-1]['monday'] != monday:
+            weeks.append({'monday': monday, 'sunday': monday + timedelta(days=6), 'days': [], 'classes': 0, 'booked': 0})
+        weeks[-1]['days'].append(row)
+        weeks[-1]['classes'] += row['classes']
+        weeks[-1]['booked'] += row['booked']
+    total_window = sum(_minutes(r['window'][1]) - _minutes(r['window'][0]) for r in rows if r['window']) if with_free else 0
+    total_free = sum(r['free'] for r in rows if r['free'] is not None)
+    totals = {'classes': sum(r['classes'] for r in rows), 'booked': sum(r['booked'] for r in rows),
+              'busy_days': sum(1 for r in rows if r['classes']), 'outside': sum(r['outside'] for r in rows),
+              'conflicts': sum(1 for r in rows if r['conflict']),
+              'busy_pct': round(100 * (total_window - total_free) / total_window) if total_window else None,
+              'free': total_free if total_window else None}
+    return {'days': rows, 'weeks': weeks, 'totals': totals}

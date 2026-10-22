@@ -1,3 +1,4 @@
+from datetime import time
 from decimal import Decimal
 
 from django import forms
@@ -852,6 +853,52 @@ class HolidayForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': 'form-control', 'maxlength': '80', 'placeholder': _('Ex.: São João, estúdio fechado')}),
         }
         error_messages = {'date': {'unique': _('Este dia já está na lista.')}}
+
+
+class WorkingHoursForm(forms.Form):
+    """The trainer's working window for each weekday: a checkbox ("I work this day") and the start and end times.
+    `windows` ({weekday: (start, end)}) holds the days marked, once the form is valid."""
+    DEFAULT_START, DEFAULT_END = time(6, 0), time(21, 0)
+
+    def __init__(self, data=None, saved=None):
+        super().__init__(data)
+        saved = saved or {}
+        self.windows = {}
+        self.rows = []
+        for weekday, name in ScheduleSlot.WEEKDAYS:
+            window = saved.get(weekday)
+            on = forms.BooleanField(required=False, initial=window is not None)
+            start = forms.TimeField(required=False, initial=(window or (self.DEFAULT_START, self.DEFAULT_END))[0],
+                                    widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}, format='%H:%M'))
+            end = forms.TimeField(required=False, initial=(window or (self.DEFAULT_START, self.DEFAULT_END))[1],
+                                  widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}, format='%H:%M'))
+            self.fields[f'on_{weekday}'], self.fields[f'start_{weekday}'], self.fields[f'end_{weekday}'] = on, start, end
+            self.rows.append({'weekday': weekday, 'name': name, 'fields': (f'on_{weekday}', f'start_{weekday}', f'end_{weekday}')})
+
+    @classmethod
+    def from_saved(cls, saved):
+        return cls(None, saved)
+
+    def bound_rows(self):
+        return [{'weekday': r['weekday'], 'name': r['name'], 'on': self[r['fields'][0]], 'start': self[r['fields'][1]],
+                 'end': self[r['fields'][2]]} for r in self.rows]
+
+    def clean(self):
+        cleaned = super().clean()
+        self.windows = {}
+        for weekday, name in ScheduleSlot.WEEKDAYS:
+            if not cleaned.get(f'on_{weekday}'):
+                for field in (f'start_{weekday}', f'end_{weekday}'):    # times of a day left unmarked do not matter
+                    self._errors.pop(field, None)
+                continue
+            start, end = cleaned.get(f'start_{weekday}'), cleaned.get(f'end_{weekday}')
+            if start is None or end is None:
+                self.add_error(f'start_{weekday}', gettext('%(day)s: informe o começo e o fim.') % {'day': name})
+            elif end <= start:
+                self.add_error(f'end_{weekday}', gettext('%(day)s: o fim precisa ser depois do começo.') % {'day': name})
+            else:
+                self.windows[weekday] = (start, end)
+        return cleaned
 
 
 MONEY_ATTRS = {'class': 'form-control', 'step': '0.01', 'min': '0', 'inputmode': 'decimal', 'data-no-draft': ''}

@@ -14,3 +14,14 @@ def google_event_url(context, appointment):
     if appointment.notes:
         details += f'\n{appointment.notes}'
     return google_template_url(appointment, summary, details)
+
+
+@register.filter
+def forecast_hours(minutes):
+    """90 -> '1 h 30', 120 -> '2 h', 0 -> '0 h' (booked or free time in the forecast)."""
+    try:
+        minutes = int(minutes)
+    except (TypeError, ValueError):
+        return ''
+    hours, rest = divmod(max(minutes, 0), 60)
+    return f'{hours} h {rest:02d}' if rest else f'{hours} h'

@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load navigation %}
+
+{% block title %}{% blocktrans trimmed %}Horário de trabalho - {{ brand_name }}{% endblocktrans %}{% endblock %}
+
+{% block content %}
+<div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-clock" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{% trans "Horário de trabalho" %}</h1>
+            <p class="ui-sub text-break">{% trans "Em que dias e horas você dá aula. A agenda avisa quando uma aula fica fora dele e a Previsão mostra o tempo livre de cada dia." %}</p>
+        </div>
+    </div>
+    <div class="ui-actions">
+        {% url 'core:agenda' as back_default %}{% back_button back_default %}
+    </div>
+</div>
+
+<form method="post" class="card card-body mb-3" data-work-hours-form novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="vstack gap-3">
+        {% for row in form.bound_rows %}
+        <div class="work-day" data-work-day="{{ row.weekday }}">
+            <div class="form-check form-switch mb-1">
+                <input type="checkbox" class="form-check-input" role="switch" id="{{ row.on.id_for_label }}" name="{{ row.on.html_name }}" {% if row.on.value %}checked{% endif %}>
+                <label class="form-check-label fw-bold" for="{{ row.on.id_for_label }}">{{ row.name }}</label>
+            </div>
+            <div class="row g-2 ps-4" data-work-times>
+                <div class="col-6 col-sm-4">
+                    <label class="form-label small mb-0" for="{{ row.start.id_for_label }}">{% trans "Das" %}</label>
+                    {{ row.start }}
+                </div>
+                <div class="col-6 col-sm-4">
+                    <label class="form-label small mb-0" for="{{ row.end.id_for_label }}">{% trans "Até" %}</label>
+                    {{ row.end }}
+                </div>
+            </div>
+            {% for error in row.start.errors %}<div class="text-danger small ps-4">{{ error }}</div>{% endfor %}
+            {% for error in row.end.errors %}<div class="text-danger small ps-4">{{ error }}</div>{% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+    <div class="d-flex flex-wrap gap-2 mt-3">
+        <button class="btn btn-primary"><i class="bi bi-check-circle"></i> {% trans "Salvar" %}</button>
+        <button type="button" class="btn btn-outline-secondary" data-work-copy title="{% trans "Copiar o horário de segunda para sexta" %}"><i class="bi bi-files"></i> {% trans "Copiar segunda para os dias úteis" %}</button>
+    </div>
+</form>
+
+{% if configured %}
+<form method="post" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover o horário de trabalho? A agenda deixa de avisar sobre horários." %}{% endfilter %}');">
+    {% csrf_token %}
+    <button class="btn btn-outline-danger btn-sm" name="action" value="clear"><i class="bi bi-trash"></i> {% trans "Remover o horário de trabalho" %}</button>
+</form>
+{% endif %}
+<p class="small text-muted mt-3"><i class="bi bi-info-circle" aria-hidden="true"></i> {% trans "Sem nenhum dia marcado, a agenda não avisa nada sobre horários. Com dias marcados, os que ficarem sem marcação contam como folga." %}</p>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var form = document.querySelector('[data-work-hours-form]');
+    if (!form) { return; }
+    function day(n) { return form.querySelector('[data-work-day="' + n + '"]'); }
+    function sync(row) {
+        var on = row.querySelector('input[type=checkbox]').checked;
+        row.querySelectorAll('input[type=time]').forEach(function (input) { input.disabled = !on; });
+        row.querySelector('[data-work-times]').classList.toggle('opacity-50', !on);
+    }
+    form.querySelectorAll('.work-day').forEach(function (row) {
+        sync(row);
+        row.querySelector('input[type=checkbox]').addEventListener('change', function () { sync(row); });
+    });
+    form.querySelector('[data-work-copy]').addEventListener('click', function () {
+        var monday = day(0), times = monday.querySelectorAll('input[type=time]');
+        for (var n = 1; n <= 4; n++) {
+            var row = day(n), inputs = row.querySelectorAll('input[type=time]');
+            row.querySelector('input[type=checkbox]').checked = monday.querySelector('input[type=checkbox]').checked;
+            inputs[0].value = times[0].value; inputs[1].value = times[1].value;
+            sync(row);
+        }
+    });
+})();
+</script>
+{% endblock %}

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 20:32-0300\n"
+"POT-Creation-Date: 2026-10-22 15:21-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -346,6 +346,10 @@ msgstr "Refunds and adjustments"
 
 msgid "Feriados"
 msgstr "Holidays"
+
+#| msgid "Dia do Trabalho"
+msgid "Horário de trabalho"
+msgstr "Working hours"
 
 msgid "Nova aula"
 msgstr "New class"
@@ -964,6 +968,15 @@ msgstr "E.g., São João, studio closed"
 
 msgid "Este dia já está na lista."
 msgstr "This day is already in the list."
+
+#, python-format
+#| msgid "%(name)s: informe o nome e o grupo muscular."
+msgid "%(day)s: informe o começo e o fim."
+msgstr "%(day)s: enter the start and the end."
+
+#, python-format
+msgid "%(day)s: o fim precisa ser depois do começo."
+msgstr "%(day)s: the end must be after the start."
 
 msgid "Aulas"
 msgstr "Classes"
@@ -3171,6 +3184,18 @@ msgstr "Month"
 msgid "Lista"
 msgstr "List"
 
+#| msgid "Preview"
+msgid "Previsão"
+msgstr "Forecast"
+
+msgid "Atenção: esta aula cai em um dia de folga do seu horário de trabalho."
+msgstr "Heads up: this class falls on a day off in your working hours."
+
+#, python-format
+#| msgid "Atenção: este horário se sobrepõe a outra aula (%(names)s)."
+msgid "Atenção: esta aula fica fora do seu horário de trabalho (%(hours)s)."
+msgstr "Heads up: this class is outside your working hours (%(hours)s)."
+
 #, python-format
 msgid "Atenção: este horário se sobrepõe a outra aula (%(names)s)."
 msgstr "Heads up: this time overlaps with another class (%(names)s)."
@@ -3323,6 +3348,15 @@ msgstr "%(n)d scheduled class(es) were recreated at the new time."
 msgid "Horário fixo removido. As aulas futuras dele saíram da agenda."
 msgstr ""
 "Recurring slot removed. Its future classes were taken off the schedule."
+
+msgid "Horário de trabalho removido: a agenda não avisa mais sobre horários."
+msgstr "Working hours removed: the agenda no longer warns about times."
+
+msgid "Horário de trabalho salvo."
+msgstr "Working hours saved."
+
+msgid "Nenhum dia marcado: a agenda não avisa sobre horários."
+msgstr "No day selected: the agenda does not warn about times."
 
 #, python-format
 msgid ""
@@ -3575,6 +3609,10 @@ msgstr "rescheduled from %(starts_at)s"
 
 msgid "Sobreposta a outra aula"
 msgstr "Overlaps another class"
+
+#| msgid "Novo horário sugerido"
+msgid "Fora do horário de trabalho"
+msgstr "Outside working hours"
 
 msgid "desconta do pacote"
 msgstr "deducts from the package"
@@ -4140,6 +4178,85 @@ msgstr "No classes on %(date)s."
 msgid "Nova aula neste dia"
 msgstr "New class on this day"
 
+msgid "Olhar"
+msgstr "Look at"
+
+msgid "Quantos dias olhar"
+msgstr "How many days to look at"
+
+#, python-format
+#| msgid "%(n)d dia"
+#| msgid_plural "%(n)d dias"
+msgid "%(n)s dias"
+msgstr "%(n)s days"
+
+#| msgid "sem aula"
+msgid "Horas de aula"
+msgstr "Class hours"
+
+#| msgid "Duração"
+msgid "Ocupação"
+msgstr "Occupancy"
+
+#, python-format
+msgid "%(n)s aula fora do seu horário de trabalho."
+msgid_plural "%(n)s aulas fora do seu horário de trabalho."
+msgstr[0] "%(n)s class outside your working hours."
+msgstr[1] "%(n)s classes outside your working hours."
+
+#, python-format
+#| msgid "Aulas sobrepostas"
+msgid "%(n)s dia com aulas sobrepostas."
+msgid_plural "%(n)s dias com aulas sobrepostas."
+msgstr[0] "%(n)s day with overlapping classes."
+msgstr[1] "%(n)s days with overlapping classes."
+
+msgid ""
+"Informe o seu horário de trabalho para ver a ocupação e o tempo livre de "
+"cada dia."
+msgstr ""
+"Enter your working hours to see the occupancy and free time of each day."
+
+msgid "Definir horário de trabalho"
+msgstr "Set working hours"
+
+#, python-format
+#| msgid "%(left)s aula · %(amount)s"
+#| msgid_plural "%(left)s aulas · %(amount)s"
+msgid "%(n)s aula · %(hours)s"
+msgid_plural "%(n)s aulas · %(hours)s"
+msgstr[0] "%(n)s class · %(hours)s"
+msgstr[1] "%(n)s classes · %(hours)s"
+
+#, python-format
+#| msgid "%(items)s aula"
+#| msgid_plural "%(items)s aulas"
+msgid "%(n)s aula"
+msgid_plural "%(n)s aulas"
+msgstr[0] "%(n)s class"
+msgstr[1] "%(n)s classes"
+
+msgid "Folga"
+msgstr "Day off"
+
+#| msgid "sem aula"
+msgid "Sem aulas"
+msgstr "No classes"
+
+#, python-format
+msgid "%(pct)s%% do horário ocupado"
+msgstr "%(pct)s%% of the time booked"
+
+msgid "Aula fora do horário de trabalho"
+msgstr "Class outside working hours"
+
+msgid "Aulas sobrepostas"
+msgstr "Overlapping classes"
+
+#, python-format
+msgid "%(free)s livres"
+msgstr "%(free)s free"
+
 msgid "j \\d\\e F"
 msgstr "F j"
 
@@ -4148,9 +4265,6 @@ msgid "%(day)s: %(n)s aula"
 msgid_plural "%(day)s: %(n)s aulas"
 msgstr[0] "%(day)s: %(n)s class"
 msgstr[1] "%(day)s: %(n)s classes"
-
-msgid "Aulas sobrepostas"
-msgstr "Overlapping classes"
 
 msgid "Toque em um dia para ver as aulas dele."
 msgstr "Tap a day to see its classes."
@@ -4270,6 +4384,49 @@ msgstr ""
 " holidays, set <code>HOLIDAYS_REGION</code> (PT or BR)."
 
 #, python-format
+#| msgid "Centro de avisos - %(brand_name)s"
+msgid "Horário de trabalho - %(brand_name)s"
+msgstr "Working hours - %(brand_name)s"
+
+msgid ""
+"Em que dias e horas você dá aula. A agenda avisa quando uma aula fica fora "
+"dele e a Previsão mostra o tempo livre de cada dia."
+msgstr ""
+"The days and hours you teach. The agenda warns when a class falls outside "
+"them and the Forecast shows the free time of each day."
+
+#| msgid "Dias"
+msgid "Das"
+msgstr "From"
+
+msgid "Até"
+msgstr "To"
+
+msgid "Salvar"
+msgstr "Save"
+
+msgid "Copiar o horário de segunda para sexta"
+msgstr "Copy Monday's hours to Friday"
+
+msgid "Copiar segunda para os dias úteis"
+msgstr "Copy Monday to the weekdays"
+
+msgid ""
+"Remover o horário de trabalho? A agenda deixa de avisar sobre horários."
+msgstr "Remove the working hours? The agenda stops warning about times."
+
+#| msgid "Todas: remover o horário fixo"
+msgid "Remover o horário de trabalho"
+msgstr "Remove working hours"
+
+msgid ""
+"Sem nenhum dia marcado, a agenda não avisa nada sobre horários. Com dias "
+"marcados, os que ficarem sem marcação contam como folga."
+msgstr ""
+"With no day selected, the agenda does not warn about times. Once days are "
+"selected, the ones left unmarked count as days off."
+
+#, python-format
 msgid "%(title)s - %(brand_name)s"
 msgstr "%(title)s - %(brand_name)s"
 
@@ -4288,9 +4445,6 @@ msgstr ""
 "The first class is on the chosen date; the others follow the marked days (or"
 " the day of the month, when repeating monthly). Only for classes of type "
 "\"Class\"."
-
-msgid "Salvar"
-msgstr "Save"
 
 msgid "Salvar avaliação"
 msgstr "Save assessment"

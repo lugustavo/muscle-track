@@ -230,6 +230,7 @@ TRAILS = {
     'finance_refunds': lambda request, ctx: [_home(), _finance(), (_('Devoluções e ajustes'), None)],
     'agenda': lambda request, ctx: [_home(), (_('Agenda'), None)],
     'agenda_holidays': lambda request, ctx: [_home(), _agenda(), (_('Feriados'), None)],
+    'agenda_work_hours': lambda request, ctx: [_home(), _agenda(), (_('Horário de trabalho'), None)],
     'appointment_create': lambda request, ctx: [_home(), _agenda(), (_('Nova aula'), None)],
     'appointment_reschedule': lambda request, ctx: [_home(), _agenda(), (_('Remarcar aula'), None)],
     'student_list': _student_list,
