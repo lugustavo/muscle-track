@@ -34,13 +34,13 @@ from .i18n import short_date
 from .listing import filter_tags, remember_view, view_mode as list_view_mode
 from .forms import (
     AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, ClassRequestForm, ConsentForm, SaleForm, ExerciseForm, PaymentForm,
-    CancelPackageForm, HolidayForm, MyPhotoForm, PackageEditForm, PersonForm, RefundForm, PersonRoutineForm, PackageForm, RepeatForm, ScheduleSlotForm, SlotEditForm, SlotFillForm,
+    CancelPackageForm, HolidayForm, WorkingHoursForm, MyPhotoForm, PackageEditForm, PersonForm, RefundForm, PersonRoutineForm, PackageForm, RepeatForm, ScheduleSlotForm, SlotEditForm, SlotFillForm,
     PhotoLinkForm, PhotoPositionForm, ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
 )
 from .agenda import (
-    DEFAULT_VIEW as DEFAULT_AGENDA_VIEW, LIST_DAYS, LIST_DAYS_STUDENT, VIEWS as AGENDA_VIEWS, add_months, at, attendance_stats,
-    MoveError, annotate_history, conflicting_ids, live_class_at, ensure_appointments, month_cells, move_appointment, overlap_names, parse_week,
-    undo_move, view_range,
+    DEFAULT_VIEW as DEFAULT_AGENDA_VIEW, FORECAST_CHOICES, LIST_DAYS, LIST_DAYS_STUDENT, VIEWS as AGENDA_VIEWS, add_months, at, attendance_stats,
+    MoveError, annotate_history, conflicting_ids, forecast, hours_text, live_class_at, ensure_appointments, month_cells, move_appointment,
+    outside_hours, overlap_names, parse_forecast_days, parse_week, undo_move, view_range, working_hours,
 )
 from .billing import (
     charge_message, delete_payment, money, month_bounds, month_summary, overdue_rows, parse_month, register_payment, service_report,
@@ -57,7 +57,7 @@ from .history import log_event, log_profile_edit
 from .invites import build_invite_url, get_user_from_invite, revoke_invites
 from .models import (
     Appointment, AppointmentRequest, Assessment, CalendarFeed, SheetLink, Holiday, Refund, NotificationPreference, PhotoPosition, PushSubscription, WhatsAppTemplate, ConsentRecord, Exercise, MuscleGroup, Payment, Package, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
-    Routine, RoutineExercise, SessionExercise, SessionSet, StudentEvent, StudentNote, WorkoutSession,
+    Routine, RoutineExercise, SessionExercise, SessionSet, StudentEvent, StudentNote, WorkingHours, WorkoutSession,
 )
 from .navigation import after_save_url, back_label, safe_next_url, with_next
 from .onboarding import trainer_steps
@@ -3101,7 +3101,8 @@ def _agenda_selected_day(value, by_day, today):
     return next((d for d in sorted(by_day) if by_day[d]), min(by_day))
 
 
-AGENDA_VIEW_LABELS = (('semana', _l('Semana')), ('dia', _l('Dia')), ('mes', _l('Mês')), ('lista', _l('Lista')))
+AGENDA_VIEW_LABELS = (('semana', _l('Semana')), ('dia', _l('Dia')), ('mes', _l('Mês')), ('lista', _l('Lista')),
+                      ('previsao', _l('Previsão')))
 
 
 def _agenda_url(**params):
@@ -3111,6 +3112,11 @@ def _agenda_url(**params):
 def _agenda_nav(view, pivot, today, student=None, list_days=LIST_DAYS):
     """(previous url, next url, "today" url, is the current period) of a view; the student filter, if any, is kept."""
     extra = {'aluno': student.pk} if student else {}
+    if view == 'previsao':
+        extra['dias'] = list_days
+        return (_agenda_url(vista='previsao', inicio=(pivot - timedelta(days=list_days)).isoformat(), **extra),
+                _agenda_url(vista='previsao', inicio=(pivot + timedelta(days=list_days)).isoformat(), **extra),
+                _agenda_url(vista='previsao', **extra), pivot == today)
     if view == 'mes':
         return (_agenda_url(vista='mes', mes=add_months(pivot, -1).strftime('%Y-%m'), **extra),
                 _agenda_url(vista='mes', mes=add_months(pivot, 1).strftime('%Y-%m'), **extra),
@@ -3145,6 +3151,8 @@ def agenda(request):
     view = requested if requested in AGENDA_VIEWS else (remembered if remembered in AGENDA_VIEWS else DEFAULT_AGENDA_VIEW)
     student = _agenda_student(request)
     list_days = LIST_DAYS_STUDENT if student else LIST_DAYS
+    if view == 'previsao':
+        list_days = parse_forecast_days(request.GET.get('dias'))
     view, start, end, pivot = view_range(view, request.GET, today, list_days)
     ensure_appointments(start, end, today)
     appointments = Appointment.objects.filter(
@@ -3153,6 +3161,10 @@ def agenda(request):
         appointments = appointments.filter(person=student)
     items = list(appointments.select_related('person', 'rescheduled_to', 'rescheduled_from'))
     conflicts = conflicting_ids(items)
+    hours = working_hours()
+    for item in items:     # a class outside the working window gets a small mark on its card
+        item.outside_hours = item.status not in (Appointment.Status.CANCELLED, Appointment.Status.RESCHEDULED) and outside_hours(
+            item.starts_at, item.ends_at, hours)
     by_day = {}
     for item in items:
         by_day.setdefault(timezone.localtime(item.starts_at).date(), []).append(item)
@@ -3170,9 +3182,11 @@ def agenda(request):
         'student': student, 'student_qs': student_qs, 'list_days': list_days,
         'students': Person.objects.filter(Q(is_active=True) | Q(pk=student.pk if student else None)).order_by('person_name'),
         'filter_params': [(k, v) for k, v in [('vista', view), ('semana', request.GET.get('semana')), ('dia', request.GET.get('dia')),
-                                              ('mes', request.GET.get('mes')), ('inicio', request.GET.get('inicio'))] if v],
+                                              ('mes', request.GET.get('mes')), ('inicio', request.GET.get('inicio')),
+                                              ('dias', request.GET.get('dias'))] if v],
         'student_total': len([a for a in items if a.status not in (Appointment.Status.CANCELLED, Appointment.Status.RESCHEDULED)]) if student else 0,
         'pending_requests': list(class_requests.pending_for_trainer()),
+        'has_hours': bool(hours),
     }
     if view == 'semana':
         days_map = {start + timedelta(days=i): by_day.get(start + timedelta(days=i), []) for i in range(7)}
@@ -3184,6 +3198,13 @@ def agenda(request):
             'prev_week': (start - timedelta(days=7)).isoformat(), 'next_week': (start + timedelta(days=7)).isoformat(),
             'is_current_week': is_current,
         })
+    elif view == 'previsao':
+        context.update({
+            'forecast': forecast(items, start, list_days, today, hours, with_free=not student),
+            'forecast_choices': [(n, _agenda_url(vista='previsao', inicio=start.isoformat(), dias=n,
+                                                  **({'aluno': student.pk} if student else {})), n == list_days)
+                                 for n in FORECAST_CHOICES],
+            'hours_texts': {d: hours_text(w) for d, w in hours.items()}})
     elif view == 'mes':
         context.update({'weeks': month_cells(pivot, by_day, today, conflicts), 'month': pivot,
                         'weekday_letters': [label[:3] for _, label in ScheduleSlot.WEEKDAYS],
@@ -3208,10 +3229,24 @@ def agenda(request):
     return response
 
 
+def hours_warning(appointment):
+    """Why this class is outside the trainer's working hours ('' when it is inside them or none are configured)."""
+    hours = working_hours()
+    if not outside_hours(appointment.starts_at, appointment.ends_at, hours):
+        return ''
+    window = hours.get(timezone.localtime(appointment.starts_at).weekday())
+    if window is None:
+        return _('Atenção: esta aula cai em um dia de folga do seu horário de trabalho.')
+    return _('Atenção: esta aula fica fora do seu horário de trabalho (%(hours)s).') % {'hours': hours_text(window)}
+
+
 def _warn_if_conflict(request, appointment):
     names = overlap_names(appointment)
     if names:
         messages.warning(request, _('Atenção: este horário se sobrepõe a outra aula (%(names)s).') % {'names': ', '.join(names)})
+    outside = hours_warning(appointment)
+    if outside:
+        messages.warning(request, outside)
 
 
 def _agenda_url_for(day):
@@ -3309,7 +3344,7 @@ def _move_response(new):
     return JsonResponse({
         'ok': True, 'id': new.pk, 'person': new.person.person_name,
         'when': _('%(date)s às %(time)s') % {'date': dateformat.format(local, _('d/m')), 'time': f'{local:%H:%M}'}, 'date': local.date().isoformat(),
-        'overlap': overlap_names(new),
+        'overlap': overlap_names(new), 'hours_warning': hours_warning(new),
         'undo_url': reverse('core:appointment_move_undo', args=[new.pk]),
     })
 
@@ -3659,6 +3694,28 @@ def agenda_holidays(request):
     return render(request, 'core/agenda_holidays.html', {
         'national': national, 'region': settings.HOLIDAYS_REGION, 'own': Holiday.objects.filter(date__gte=today),
         'past': Holiday.objects.filter(date__lt=today).order_by('-date')[:10], 'form': HolidayForm()})
+
+
+@staff_required
+def agenda_work_hours(request):
+    """The trainer's working window per weekday. No rows saved = nothing configured (no warnings, no free-time counts)."""
+    saved = {w: (start, end) for w, (start, end) in working_hours().items()}
+    if request.method == 'POST':
+        if request.POST.get('action') == 'clear':
+            WorkingHours.objects.all().delete()
+            messages.success(request, _('Horário de trabalho removido: a agenda não avisa mais sobre horários.'))
+            return redirect(after_save_url(request, reverse('core:agenda_work_hours')))
+        form = WorkingHoursForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                WorkingHours.objects.all().delete()
+                WorkingHours.objects.bulk_create(WorkingHours(weekday=w, start=a, end=b) for w, (a, b) in form.windows.items())
+            messages.success(request, _('Horário de trabalho salvo.') if form.windows else _(
+                'Nenhum dia marcado: a agenda não avisa sobre horários.'))
+            return redirect(after_save_url(request, reverse('core:agenda_work_hours')))
+    else:
+        form = WorkingHoursForm.from_saved(saved)
+    return render(request, 'core/agenda_work_hours.html', {'form': form, 'configured': bool(saved)})
 
 
 @staff_required

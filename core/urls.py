@@ -61,6 +61,7 @@ urlpatterns = [
     path('calendar/feed/<slug:token>.ics', views.calendar_feed, name='calendar_feed'),
     path('agenda/new/', views.appointment_create, name='appointment_create'),
     path('agenda/holidays/', views.agenda_holidays, name='agenda_holidays'),
+    path('agenda/work-hours/', views.agenda_work_hours, name='agenda_work_hours'),
     path('agenda/holidays/add/', views.agenda_holiday_add, name='agenda_holiday_add'),
     path('agenda/holidays/<int:pk>/delete/', views.agenda_holiday_delete, name='agenda_holiday_delete'),
     path('appointments/<int:pk>/reschedule/', views.appointment_reschedule, name='appointment_reschedule'),

@@ -82,9 +82,9 @@ class AgendaViewsTests(BaseTestCase):
     def test_selector_marks_the_current_view(self):
         response = self.client.get(self.url, {'vista': 'mes'})
         links = {key: active for key, _, _, active in response.context['view_links']}
-        self.assertEqual(links, {'semana': False, 'dia': False, 'mes': True, 'lista': False})
+        self.assertEqual(links, {'semana': False, 'dia': False, 'mes': True, 'lista': False, 'previsao': False})
         html = response.content.decode()
-        self.assertEqual(html.count('data-view='), 4)
+        self.assertEqual(html.count('data-view='), 5)
         self.assertIn('aria-current="true" data-view="mes"', html)
 
     def test_invalid_view_falls_back_to_week(self):

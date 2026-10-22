@@ -20,6 +20,7 @@ STAFF_GET_URLS = [
     ('core:person_routine_create', {}),
     ('core:person_routine_detail', lambda t: {'pk': t.alice_routine.pk}),
     ('core:person_routine_edit', lambda t: {'pk': t.alice_routine.pk}),
+    ('core:agenda_work_hours', {}),
     ('core:api_exercises_list', {}),
     ('core:api_routines_list', {}),
     ('core:api_routine_exercises', lambda t: {'pk': t.template.pk}),

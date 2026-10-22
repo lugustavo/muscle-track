@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load navigation %}
 {% load static %}
+{% load calendar_tags %}
 
 {% block title %}{% blocktrans trimmed %}Agenda - {{ brand_name }}{% endblocktrans %}{% endblock %}
 
@@ -19,6 +20,19 @@
     .drop-ok { outline: 2px dashed var(--bs-primary); outline-offset: 2px; border-radius: .5rem; }
     .agenda-toast { position: fixed; left: 1rem; right: 1rem; bottom: 1rem; z-index: 1080; max-width: 28rem; margin: 0 auto; }
     @media (max-width: 991.98px) { .agenda-toast { bottom: calc(var(--tabbar-h, 57px) + 5rem + env(safe-area-inset-bottom)); } }
+
+    /* Forecast */
+    .fc-week { border: 1px solid var(--bs-border-color); border-radius: var(--ui-radius); overflow: hidden; }
+    .fc-week-head { display: flex; justify-content: space-between; gap: .5rem; padding: .4rem .75rem; background: var(--bs-tertiary-bg); font-size: .85rem; }
+    .fc-row { display: grid; grid-template-columns: 5.2rem 1fr auto; align-items: center; gap: .5rem; padding: .45rem .75rem; border-top: 1px solid var(--bs-border-color); color: inherit; text-decoration: none; }
+    .fc-row:hover { background: var(--bs-tertiary-bg); }
+    .fc-row.today .fc-day { color: var(--primary-color); font-weight: 700; }
+    .fc-row.off { color: var(--bs-secondary-color); }
+    .fc-day { font-weight: 600; line-height: 1.15; }
+    .fc-day small { display: block; font-weight: 400; color: var(--bs-secondary-color); }
+    .fc-bar { height: .45rem; border-radius: 1rem; background: var(--bs-secondary-bg); overflow: hidden; margin-top: .25rem; }
+    .fc-bar > span { display: block; height: 100%; background: var(--primary-color); }
+    @media (max-width: 575.98px) { .fc-row { grid-template-columns: 4.2rem 1fr auto; padding: .4rem .6rem; } }
 
     /* Month grid */
     .month-grid { border: 1px solid var(--bs-border-color); border-radius: var(--ui-radius); overflow: hidden; }
@@ -49,6 +63,7 @@
         </div>
     </div>
     <div class="ui-actions">
+        <a href="{% nav_url 'core:agenda_work_hours' %}" class="btn btn-outline-secondary btn-icon" title="{% trans "Horário de trabalho" %}" data-work-hours-link><i class="bi bi-clock"></i><span class="visually-hidden">{% trans "Horário de trabalho" %}</span></a>
         <a href="{% nav_url 'core:agenda_holidays' %}" class="btn btn-outline-secondary btn-icon" title="{% trans "Feriados" %}"><i class="bi bi-flag"></i><span class="visually-hidden">{% trans "Feriados" %}</span></a>
         <a href="{% url 'core:calendar_settings' %}" class="btn btn-outline-secondary" title="{% trans "Ver a agenda no Google Agenda" %}"><i class="bi bi-google"></i><span class="d-none d-sm-inline"> {% trans "Google Agenda" %}</span></a>
         <a href="{% nav_url 'core:appointment_create' %}" class="btn btn-primary d-none d-lg-inline-block "><i class="bi bi-plus-circle"></i> {% trans "Nova aula" %}</a>
@@ -151,6 +166,59 @@
     </div>
     {% endfor %}
 </div>
+
+{% elif view == 'previsao' %}
+{% with t=forecast.totals %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3" data-forecast-range>
+    <span class="small text-muted">{% trans "Olhar" %}</span>
+    <div class="ui-seg" role="group" aria-label="{% trans "Quantos dias olhar" %}">
+        {% for n, url, active in forecast_choices %}<a href="{{ url }}" class="{% if active %}active{% endif %}" {% if active %}aria-current="true"{% endif %} data-forecast-days="{{ n }}">{% blocktrans trimmed %}{{ n }} dias{% endblocktrans %}</a>{% endfor %}
+    </div>
+</div>
+<div class="row row-cols-3 g-2 text-center mb-3" data-forecast-totals>
+    <div class="col"><div class="ui-tile"><div class="ui-tile-n">{{ t.classes }}</div><div class="ui-tile-l">{% trans "Aulas" %}</div></div></div>
+    <div class="col"><div class="ui-tile"><div class="ui-tile-n">{{ t.booked|forecast_hours }}</div><div class="ui-tile-l">{% trans "Horas de aula" %}</div></div></div>
+    <div class="col"><div class="ui-tile"><div class="ui-tile-n">{% if t.busy_pct is not None %}{{ t.busy_pct }}%{% else %}—{% endif %}</div><div class="ui-tile-l">{% trans "Ocupação" %}</div></div></div>
+</div>
+{% if t.outside or t.conflicts %}
+<div class="alert alert-warning py-2 small" role="status" data-forecast-alerts>
+    <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+    {% if t.outside %}{% blocktrans trimmed count n=t.outside %}{{ n }} aula fora do seu horário de trabalho.{% plural %}{{ n }} aulas fora do seu horário de trabalho.{% endblocktrans %}{% endif %}
+    {% if t.conflicts %}{% blocktrans trimmed count n=t.conflicts %}{{ n }} dia com aulas sobrepostas.{% plural %}{{ n }} dias com aulas sobrepostas.{% endblocktrans %}{% endif %}
+</div>
+{% endif %}
+{% if not has_hours and not student %}
+<p class="small text-muted" data-forecast-no-hours><i class="bi bi-info-circle" aria-hidden="true"></i> {% trans "Informe o seu horário de trabalho para ver a ocupação e o tempo livre de cada dia." %} <a href="{% nav_url 'core:agenda_work_hours' %}">{% trans "Definir horário de trabalho" %}</a></p>
+{% endif %}
+<div data-agenda-view="previsao">
+    {% for week in forecast.weeks %}
+    <section class="fc-week mb-3" data-forecast-week="{{ week.monday|date:'Y-m-d' }}">
+        <div class="fc-week-head">
+            <strong>{{ week.monday|date:_('d/m') }} – {{ week.sunday|date:_('d/m') }}</strong>
+            <span class="text-muted">{% blocktrans trimmed count n=week.classes with hours=week.booked|forecast_hours %}{{ n }} aula · {{ hours }}{% plural %}{{ n }} aulas · {{ hours }}{% endblocktrans %}</span>
+        </div>
+        {% for d in week.days %}
+        <a href="{% url 'core:agenda' %}?vista=dia&dia={{ d.date|date:'Y-m-d' }}{{ student_qs }}" class="fc-row {% if d.is_today %}today{% endif %} {% if d.off and not d.classes %}off{% endif %}" data-forecast-day="{{ d.date|date:'Y-m-d' }}">
+            <span class="fc-day">{{ d.date|date:"D"|capfirst }}<small>{{ d.date|date:_('d/m') }}</small></span>
+            <span>
+                {% if d.classes %}
+                <span class="fw-semibold">{% blocktrans trimmed count n=d.classes %}{{ n }} aula{% plural %}{{ n }} aulas{% endblocktrans %}</span>
+                <span class="text-muted small">· {{ d.first|time:"H:i" }}–{{ d.last|time:"H:i" }}</span>
+                {% elif d.off %}<span class="small">{% trans "Folga" %}</span>
+                {% else %}<span class="text-muted small">{% trans "Sem aulas" %}</span>{% endif %}
+                {% if d.busy_pct is not None %}<div class="fc-bar" role="img" aria-label="{% blocktrans trimmed with pct=d.busy_pct %}{{ pct }}% do horário ocupado{% endblocktrans %}"><span style="width: {{ d.busy_pct }}%"></span></div>{% endif %}
+            </span>
+            <span class="text-end small text-nowrap">
+                {% if d.outside %}<i class="bi bi-clock-history text-warning-emphasis" title="{% trans "Aula fora do horário de trabalho" %}"></i>{% endif %}
+                {% if d.conflict %}<i class="bi bi-exclamation-triangle text-warning-emphasis" title="{% trans "Aulas sobrepostas" %}"></i>{% endif %}
+                {% if d.free is not None %}<span class="text-muted">{% blocktrans trimmed with free=d.free|forecast_hours %}{{ free }} livres{% endblocktrans %}</span>{% endif %}
+            </span>
+        </a>
+        {% endfor %}
+    </section>
+    {% endfor %}
+</div>
+{% endwith %}
 
 {% elif view == 'mes' %}
 <div class="month-grid" role="grid" aria-label="{{ month|date:_('F \d\e Y') }}" data-agenda-view="mes">

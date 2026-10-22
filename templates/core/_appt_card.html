@@ -14,6 +14,7 @@
         {% if a.status == 'rescheduled' and a.rescheduled_to %}<div class="small text-muted" data-history="moved"><i class="bi bi-arrow-right-circle"></i> {% blocktrans trimmed with starts_at=a.rescheduled_to.starts_at|date:_("D d/m \à\s H:i") %}para {{ starts_at }}{% endblocktrans %}</div>{% endif %}
         {% if a.status == 'scheduled' and a.rescheduled_from %}<div class="small text-muted" data-history="from"><i class="bi bi-clock-history"></i> {% blocktrans trimmed with starts_at=a.rescheduled_from.starts_at|date:_("D d/m \à\s H:i") %}remarcada de {{ starts_at }}{% endblocktrans %}</div>{% endif %}
         {% if a.pk in conflicts %}<div class="small text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> {% trans "Sobreposta a outra aula" %}</div>{% endif %}
+        {% if a.outside_hours %}<div class="small text-warning-emphasis" data-outside-hours><i class="bi bi-clock-history"></i> {% trans "Fora do horário de trabalho" %}</div>{% endif %}
         {% if a.status == 'cancelled' or a.status == 'missed' %}
         <form method="post" action="{% nav_url 'core:appointment_counts' a.pk %}" class="small mt-1" data-package-count>
             {% csrf_token %}
