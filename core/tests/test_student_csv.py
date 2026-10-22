@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import SimpleTestCase
 from django.urls import reverse
+from django.utils import translation
 
 from core import student_csv
 from core.models import Person, StudentEvent
@@ -33,6 +34,9 @@ class SafeCellTests(SimpleTestCase):
 
 
 class ParseTests(SimpleTestCase):
+    def setUp(self):
+        translation.activate('pt-br')      # an earlier test may have left English on
+
     def test_semicolon_comma_and_tab_are_all_read(self):
         for delimiter in (';', ',', '\t'):
             rows = student_csv.parse(csv_bytes([['nome', 'email'], ['Ana', 'ana@x.com']], delimiter))
@@ -245,7 +249,7 @@ class ImportViewTests(BaseTestCase):
         before = Person.objects.count()
         response = self.upload([['Nova Pessoa', 'np@x.com', '', '', '', '', '', '', '', ''],
                                [self.alice.person.person_name, '', '', '', '', '', '', '', '', ''],
-                               ['', '', '', '', '', '', '', '', '', '']])
+                               ['', 'sem-nome@x.com', '', '', '', '', '', '', '', '']])
         page = response.content.decode()
         self.assertEqual(Person.objects.count(), before)
         self.assertIn('data-csv-preview', page)
