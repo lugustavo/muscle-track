@@ -26,6 +26,7 @@ DEFAULTS = {
     Kind.MISSED: _l('Oi, {nome}! Sentimos sua falta na aula de {data}. Vamos remarcar? 💪'),
     Kind.INVITE: _l('Olá, {nome}! Seu acesso ao Muscle Track está pronto. '
                     'Crie sua senha por este link (válido por 7 dias): {link}'),
+    Kind.BIRTHDAY: _l('Parabéns, {nome}! 🎉 Que o seu dia seja incrível e que venha mais um ano de saúde e muito treino. 💪'),
 }
 
 VARIABLES = {
@@ -33,6 +34,7 @@ VARIABLES = {
                   ('pix', _l('chave Pix do servidor'))),
     Kind.MISSED: (('nome', _l('primeiro nome do aluno')), ('data', _l('dia da aula (dd/mm)'))),
     Kind.INVITE: (('nome', _l('primeiro nome do aluno')), ('link', _l('link para criar a senha'))),
+    Kind.BIRTHDAY: (('nome', _l('primeiro nome do aluno')),),
 }
 REQUIRED = {Kind.INVITE: ('link',)}          # a text without them would be useless
 OPTIONAL = {'valor', 'pix'}                  # no value: the whole line is left out
@@ -41,6 +43,7 @@ LABELS = {
     Kind.CHARGE: (_l('Cobrança de pacote'), _l('Ao tocar no WhatsApp de um pagamento pendente (painel, Financeiro e ficha).')),
     Kind.MISSED: (_l('Aula que o aluno faltou'), _l('Ao tocar no WhatsApp de uma falta recente (painel).')),
     Kind.INVITE: (_l('Convite de acesso'), _l('Ao enviar o link de acesso ao aluno (tela do convite).')),
+    Kind.BIRTHDAY: (_l('Parabéns de aniversário'), _l('Ao tocar no WhatsApp de um aniversariante (painel).')),
 }
 
 # Example values for the preview: lazy, so the preview follows the language of whoever is editing the text
