@@ -141,9 +141,12 @@
 
     <div class="col-lg-6" id="card-classes" style="order: {{ dashboard.order.classes }};">
         <div class="card h-100">
-            <div class="card-header d-flex justify-content-between">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <strong class="ui-sec"><span class="ui-ico sm"><i class="bi bi-calendar-week" aria-hidden="true"></i></span> {% trans "Aulas de hoje" %}</strong>
-                <a href="{% url 'core:agenda' %}" class="small">{% trans "abrir a agenda" %}</a>
+                <span class="d-flex align-items-center gap-2">
+                    <span class="ui-badge" data-classes-count>{{ dashboard.classes|length }}</span>
+                    <a href="{% url 'core:agenda' %}" class="btn btn-sm btn-outline-primary" data-open-agenda><i class="bi bi-calendar-week" aria-hidden="true"></i> {% trans "Agenda" %}</a>
+                </span>
             </div>
             <div class="list-group list-group-flush">
                 {% for a in dashboard.classes %}

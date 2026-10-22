@@ -6,7 +6,7 @@
 
 {% block content %}
 <div class="mx-auto" style="max-width: 640px;">
-    <div class="ui-head inline">
+    <div class="ui-head">
         <div class="ui-title">
             <span class="ui-ico"><i class="bi bi-bell" aria-hidden="true"></i></span>
             <div class="min-w-0">
@@ -14,7 +14,7 @@
                 <div class="ui-sub">{% if unread %}{% blocktrans trimmed count n=unread %}{{ n }} não lido{% plural %}{{ n }} não lidos{% endblocktrans %}{% else %}{% trans "Tudo lido" %}{% endif %}</div>
             </div>
         </div>
-        <div class="ui-actions">
+        <div class="ui-actions fill">
             {% if unread %}
             <form method="post" action="{% url 'core:notices_read_all' %}">
                 {% csrf_token %}

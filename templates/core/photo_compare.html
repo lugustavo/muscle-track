@@ -51,14 +51,14 @@
     <div class="row g-2" data-compare>
         <div class="col-6 text-center" data-side="before">
             {% if data.before_photo %}
-            <a href="{% url 'core:photo_file' data.before_photo.pk %}" target="_blank" rel="noopener"><img src="{% url 'core:photo_file' data.before_photo.pk %}" alt="{% blocktrans trimmed with date=data.before_entry.date|date:_('d/m/Y') %}Antes, {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;"></a>
+            <a href="{% url 'core:photo_file' data.before_photo.pk %}" data-photo-view><img src="{% url 'core:photo_file' data.before_photo.pk %}" alt="{% blocktrans trimmed with date=data.before_entry.date|date:_('d/m/Y') %}Antes, {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;"></a>
             {% endif %}
             <div class="fw-bold mt-1">{% trans "Antes" %}</div>
             <div class="small text-muted">{{ data.before_entry.label }}</div>
         </div>
         <div class="col-6 text-center" data-side="after">
             {% if data.after_photo %}
-            <a href="{% url 'core:photo_file' data.after_photo.pk %}" target="_blank" rel="noopener"><img src="{% url 'core:photo_file' data.after_photo.pk %}" alt="{% blocktrans trimmed with date=data.after_entry.date|date:_('d/m/Y') %}Depois, {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;"></a>
+            <a href="{% url 'core:photo_file' data.after_photo.pk %}" data-photo-view><img src="{% url 'core:photo_file' data.after_photo.pk %}" alt="{% blocktrans trimmed with date=data.after_entry.date|date:_('d/m/Y') %}Depois, {{ date }}{% endblocktrans %}" class="rounded border w-100" style="aspect-ratio: 3/4; object-fit: cover;"></a>
             {% endif %}
             <div class="fw-bold mt-1">{% trans "Depois" %}</div>
             <div class="small text-muted">{{ data.after_entry.label }}</div>
