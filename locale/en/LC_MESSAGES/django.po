@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 18:11-0300\n"
+"POT-Creation-Date: 2026-10-22 18:25-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -376,6 +376,18 @@ msgstr "New goal"
 
 msgid "Editar meta"
 msgstr "Edit goal"
+
+#| msgid "Nova aula"
+msgid "Nova fase"
+msgstr "New phase"
+
+#| msgid "Editar pacote"
+msgid "Editar fase"
+msgstr "Edit phase"
+
+#| msgid "texto padrão"
+msgid "Ciclo padrão"
+msgstr "Standard cycle"
 
 msgid "Posições das fotos"
 msgstr "Photo positions"
@@ -758,6 +770,24 @@ msgstr "Choose the measure to follow, or leave the values blank."
 msgid "O valor deve ser maior que zero."
 msgstr "The value must be greater than zero."
 
+msgid "Ex.: Hipertrofia, Deload"
+msgstr "E.g.: Hypertrophy, Deload"
+
+msgid "Ex.: volume alto, cargas moderadas"
+msgstr "E.g.: high volume, moderate loads"
+
+msgid "— nenhum em especial —"
+msgstr "— none in particular —"
+
+msgid "Dê um nome à fase."
+msgstr "Give the phase a name."
+
+msgid "Ciclo"
+msgstr "Cycle"
+
+msgid "Começa em"
+msgstr "Starts on"
+
 msgid "Foto avulsa (sem avaliação)"
 msgstr "Standalone photo (no assessment)"
 
@@ -862,9 +892,6 @@ msgstr "Repeats every (months)"
 
 msgid "Repete a cada (semanas)"
 msgstr "Repeats every (weeks)"
-
-msgid "Começa em"
-msgstr "Starts on"
 
 msgid "Termina"
 msgstr "Ends"
@@ -1423,7 +1450,6 @@ msgstr "Workout Template"
 msgid "Modelos de Treino"
 msgstr "Workout Templates"
 
-#| msgid "Conta"
 msgid "Contagem"
 msgstr "Counting"
 
@@ -1525,6 +1551,20 @@ msgstr "Completed on"
 #, python-format
 msgid "%(exercise)s - série %(number)s"
 msgstr "%(exercise)s - set %(number)s"
+
+msgid "Fase"
+msgstr "Phase"
+
+msgid "Foco"
+msgstr "Focus"
+
+#| msgid "Semana"
+msgid "Semanas"
+msgstr "Weeks"
+
+#| msgid "Treinos"
+msgid "Treino usado"
+msgstr "Routine used"
 
 msgid "Em andamento"
 msgstr "In progress"
@@ -2101,6 +2141,25 @@ msgstr[1] "%(n)d days left until the deadline of one of your goals."
 msgid "Uma meta sua está perto do prazo"
 msgstr "One of your goals is close to its deadline"
 
+#, python-format
+msgid ""
+"%(n)d aluno termina uma fase de treino em até %(days)d dias e ainda não tem "
+"a próxima."
+msgid_plural ""
+"%(n)d alunos terminam uma fase de treino em até %(days)d dias e ainda não "
+"têm a próxima."
+msgstr[0] ""
+"%(n)d student ends a training phase within %(days)d days and has no next one"
+" yet."
+msgstr[1] ""
+"%(n)d students end a training phase within %(days)d days and have no next "
+"one yet."
+
+#| msgid "%(n)d treino terminando"
+#| msgid_plural "%(n)d treinos terminando"
+msgid "Fase de treino terminando"
+msgstr "Training phase ending"
+
 msgid "Feliz aniversário!"
 msgstr "Happy birthday!"
 
@@ -2153,6 +2212,14 @@ msgid "%(n)d aluno para reavaliar"
 msgid_plural "%(n)d alunos para reavaliar"
 msgstr[0] "%(n)d student due a reassessment"
 msgstr[1] "%(n)d students due a reassessment"
+
+#, python-format
+#| msgid "%(n)d treino terminando"
+#| msgid_plural "%(n)d treinos terminando"
+msgid "%(n)d fase de treino terminando"
+msgid_plural "%(n)d fases de treino terminando"
+msgstr[0] "%(n)d training phase ending"
+msgstr[1] "%(n)d training phases ending"
 
 #, python-format
 msgid "%(n)d treino terminando"
@@ -2520,6 +2587,56 @@ msgstr "This package has already been canceled."
 msgid "Pacote cancelado: %(name)s"
 msgstr "Package canceled: %(name)s"
 
+msgid "Ciclo de 12 semanas (hipertrofia)"
+msgstr "12-week cycle (hypertrophy)"
+
+#| msgid "Anotação"
+msgid "Adaptação"
+msgstr "Adaptation"
+
+msgid "Aprender os movimentos, cargas leves"
+msgstr "Learn the movements, light loads"
+
+msgid "Hipertrofia"
+msgstr "Hypertrophy"
+
+msgid "Volume moderado a alto"
+msgstr "Moderate to high volume"
+
+msgid "Força"
+msgstr "Strength"
+
+#| msgid "Pacotes de aulas, pagamentos e devoluções"
+msgid "Cargas altas, menos repetições"
+msgstr "Heavy loads, fewer reps"
+
+msgid "Deload"
+msgstr "Deload"
+
+msgid "Semana de recuperação, volume reduzido"
+msgstr "Recovery week, reduced volume"
+
+msgid "Ciclo de 8 semanas (força)"
+msgstr "8-week cycle (strength)"
+
+msgid "Base"
+msgstr "Base"
+
+msgid "Técnica e volume moderado"
+msgstr "Technique and moderate volume"
+
+#| msgid "Teste de notificação"
+msgid "Intensificação"
+msgstr "Intensification"
+
+#| msgid "as suas aulas"
+msgid "Cargas altas"
+msgstr "Heavy loads"
+
+#| msgid "sem base de comparação"
+msgid "Semana de recuperação"
+msgstr "Recovery week"
+
 msgid "Você não está cadastrado como aluno."
 msgstr "You are not registered as a student."
 
@@ -2814,11 +2931,9 @@ msgstr "Repeats line %(line)d of the file."
 msgid "Cadastro importado de um arquivo CSV (%(status)s)"
 msgstr "Record imported from a CSV file (%(status)s)"
 
-#| msgid "Descanso (segundos)"
 msgid "Tempo (segundos)"
 msgstr "Time (seconds)"
 
-#| msgid "Nenhum"
 msgid "Nenhuma"
 msgstr "None"
 
@@ -2831,7 +2946,6 @@ msgstr "Rest-pause"
 msgid "Bi-set (com o próximo exercício)"
 msgstr "Bi-set (with the next exercise)"
 
-#| msgid "Treinos com este exercício"
 msgid "Tri-set (com os 2 próximos exercícios)"
 msgstr "Tri-set (with the next 2 exercises)"
 
@@ -2863,7 +2977,6 @@ msgstr ""
 "Tri-set: do this exercise and the next 2 back to back, with no rest between "
 "them; rest only after the third."
 
-#| msgid "Foto anterior"
 msgid "Junto com o anterior"
 msgstr "Together with the previous one"
 
@@ -3474,6 +3587,25 @@ msgstr "Goal marked as \"%(status)s\"."
 
 msgid "Meta removida."
 msgstr "Goal removed."
+
+#| msgid "Meta criada."
+msgid "Fase criada."
+msgstr "Phase created."
+
+#| msgid "Meta atualizada."
+msgid "Fase atualizada."
+msgstr "Phase updated."
+
+#| msgid "Foto removida."
+msgid "Fase removida."
+msgstr "Phase removed."
+
+#, python-format
+#| msgid "%(n)d aula(s) criada(s)."
+msgid "%(n)d fase criada."
+msgid_plural "%(n)d fases criadas."
+msgstr[0] "%(n)d phase created."
+msgstr[1] "%(n)d phases created."
 
 msgid "Avaliação removida."
 msgstr "Assessment removed."
@@ -4311,6 +4443,54 @@ msgstr "Classes deducted (%(classes)s)"
 
 msgid "(tarde)"
 msgstr "(late)"
+
+#| msgid "Visualização"
+msgid "Periodização"
+msgstr "Periodization"
+
+#, python-format
+#| msgid "Meta da semana: %(done)s de %(goal)s treinos"
+msgid "semana %(week)s de %(total)s"
+msgstr "week %(week)s of %(total)s"
+
+#, python-format
+#| msgid "em %(n)d dias"
+msgid "começa em %(n)s dia"
+msgid_plural "começa em %(n)s dias"
+msgstr[0] "starts in %(n)s day"
+msgstr[1] "starts in %(n)s days"
+
+#| msgid "concluído"
+msgid "concluída"
+msgstr "completed"
+
+#, python-format
+#| msgid "%(first)s e %(last)s"
+msgid "%(start)s a %(end)s"
+msgstr "%(start)s to %(end)s"
+
+#| msgid "Ações da meta"
+msgid "Ações da fase"
+msgstr "Phase actions"
+
+#| msgid "Remover esta foto?"
+msgid "Remover esta fase?"
+msgstr "Remove this phase?"
+
+#, python-format
+#| msgid "falta %(n)s dia"
+#| msgid_plural "faltam %(n)s dias"
+msgid "falta %(n)s dia para o fim"
+msgid_plural "faltam %(n)s dias para o fim"
+msgstr[0] "%(n)s day left"
+msgstr[1] "%(n)s days left"
+
+msgid ""
+"Sem fases ainda. Divida o treino do aluno em blocos de semanas (adaptação, "
+"hipertrofia, força, deload) ou comece por um ciclo padrão."
+msgstr ""
+"No phases yet. Split the student's training into blocks of weeks "
+"(adaptation, hypertrophy, strength, deload) or start with a standard cycle."
 
 msgid "Em tempo, o número acima é de segundos por série (ex.: prancha)."
 msgstr ""
@@ -6538,7 +6718,6 @@ msgid "%(sets)s séries"
 msgstr "%(sets)s sets"
 
 #, python-format
-#| msgid "%(reps)s reps"
 msgid "%(reps)s s"
 msgstr "%(reps)s s"
 
@@ -6697,6 +6876,9 @@ msgid ""
 msgstr ""
 "Daily summary in the morning (today's classes, attendance to mark, payments "
 "and students who need attention)"
+
+msgid "Fase de treino de um aluno terminando sem a próxima"
+msgstr "A student's training phase ending with no next one"
 
 msgid ""
 "Pedidos de exclusão de dados e problemas nos backups sempre avisam: não têm "
@@ -6993,6 +7175,28 @@ msgstr "View details"
 
 msgid "Ainda não há sessões concluídas para este treino."
 msgstr "No completed sessions for this workout yet."
+
+msgid ""
+"Opcional: o treino do aluno que vale nesta fase. O app não troca nada "
+"sozinho; você decide quando trocar."
+msgstr ""
+"Optional: the student's routine that applies in this phase. The app never "
+"swaps anything by itself; you decide when to swap."
+
+#| msgid "Salvar pacote"
+msgid "Salvar fase"
+msgstr "Save phase"
+
+msgid ""
+"Cria as fases uma depois da outra, a partir do dia escolhido. Depois você "
+"pode editar, remover ou acrescentar fases."
+msgstr ""
+"Creates the phases one after another from the chosen day. You can edit, "
+"remove or add phases afterwards."
+
+#| msgid "Criar"
+msgid "Criar fases"
+msgstr "Create phases"
 
 #, python-format
 msgid "Comparar fotos - %(brand_name)s"
@@ -7756,7 +7960,6 @@ msgid "Não executado"
 msgstr "Not performed"
 
 #, python-format
-#| msgid "%(sets)s séries x %(reps)s reps"
 msgid "%(sets)s séries x %(reps)s segundos"
 msgstr "%(sets)s sets x %(reps)s seconds"
 
@@ -9526,7 +9729,6 @@ msgid "Aumentar a carga da série %(n)s"
 msgstr "Increase the weight of set %(n)s"
 
 #, python-format
-#| msgid "Carga da série %(n)s"
 msgid "Segundos da série %(n)s"
 msgstr "Seconds of set %(n)s"
 

@@ -1,0 +1,50 @@
+{% load i18n %}
+{% load navigation %}
+{# The student's periodization. Needs `phase_rows` (core/periodization.py describe) and `student`; `can_edit` shows the trainer's buttons. #}
+<div class="card mb-3" data-phases>
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+        <strong class="ui-sec"><span class="ui-ico sm brand"><i class="bi bi-calendar2-range" aria-hidden="true"></i></span> {% trans "Periodização" %}</strong>
+        {% if can_edit %}
+        <div class="d-flex gap-2">
+            <a href="{% nav_url 'core:phase_preset' student.pk %}" class="btn btn-sm btn-outline-primary" data-phase-preset><i class="bi bi-magic" aria-hidden="true"></i> {% trans "Ciclo padrão" %}</a>
+            <a href="{% nav_url 'core:phase_create' student.pk %}" class="btn btn-sm btn-primary" data-phase-new><i class="bi bi-plus-circle" aria-hidden="true"></i> {% trans "Nova fase" %}</a>
+        </div>
+        {% endif %}
+    </div>
+    {% if phase_rows %}
+    <ul class="list-group list-group-flush">
+        {% for row in phase_rows %}
+        <li class="list-group-item" data-phase="{{ row.phase.pk }}" data-state="{{ row.state }}">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+                <div class="min-w-0">
+                    <div class="fw-semibold text-break {% if row.state == 'past' %}text-muted{% endif %}">{{ row.phase.name }}</div>
+                    {% if row.phase.focus %}<div class="small text-muted text-break">{{ row.phase.focus }}</div>{% endif %}
+                    <div class="small mt-1">
+                        {% if row.state == 'current' %}<span class="ui-badge ok">{% blocktrans trimmed with week=row.week total=row.phase.weeks %}semana {{ week }} de {{ total }}{% endblocktrans %}</span>
+                        {% elif row.state == 'next' %}<span class="ui-badge info">{% blocktrans trimmed count n=row.days_to_start %}começa em {{ n }} dia{% plural %}começa em {{ n }} dias{% endblocktrans %}</span>
+                        {% elif row.state == 'past' %}<span class="ui-badge">{% trans "concluída" %}</span>{% endif %}
+                        <span class="text-muted">{% blocktrans trimmed with start=row.phase.start_date|date:_('d/m/Y') end=row.phase.end_date|date:_('d/m/Y') %}{{ start }} a {{ end }}{% endblocktrans %}</span>
+                        {% if row.phase.routine %}<span class="text-muted"> · {{ row.phase.routine.routine_name }}</span>{% endif %}
+                    </div>
+                </div>
+                {% if can_edit %}
+                <div class="dropdown row-menu" data-phase-menu>
+                    <button class="btn btn-sm btn-link text-body-secondary px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{% trans "Ações da fase" %}"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% nav_url 'core:phase_edit' row.phase.pk %}"><i class="bi bi-pencil" aria-hidden="true"></i> {% trans "Editar" %}</a></li>
+                        <li><form method="post" action="{% nav_url 'core:phase_delete' row.phase.pk %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Remover esta fase?" %}{% endfilter %}');">{% csrf_token %}<button class="dropdown-item text-danger"><i class="bi bi-trash" aria-hidden="true"></i> {% trans "Remover" %}</button></form></li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            {% if row.state == 'current' %}
+            <div class="progress mt-2" style="height: .5rem;" role="progressbar" aria-valuenow="{{ row.pct }}" aria-valuemin="0" aria-valuemax="100" data-phase-progress="{{ row.pct }}"><div class="progress-bar" style="width: {{ row.pct }}%"></div></div>
+            <div class="small text-muted mt-1">{% blocktrans trimmed count n=row.days_left %}falta {{ n }} dia para o fim{% plural %}faltam {{ n }} dias para o fim{% endblocktrans %}</div>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="card-body text-muted small">{% trans "Sem fases ainda. Divida o treino do aluno em blocos de semanas (adaptação, hipertrofia, força, deload) ou comece por um ciclo padrão." %}</div>
+    {% endif %}
+</div>

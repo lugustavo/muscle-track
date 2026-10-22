@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load navigation %}
+
+{% block title %}{{ title }} - {{ student.person_name }}{% endblock %}
+
+{% block content %}
+<div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-calendar2-range" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{{ title }}</h1>
+            <p class="ui-sub text-break">{{ student.person_name }}</p>
+        </div>
+    </div>
+    <div class="ui-actions">
+        {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default fragment='#tab-treinos' %}
+    </div>
+</div>
+
+<form method="post" class="row" data-phase-form>
+    {% csrf_token %}
+    <div class="col-lg-8">
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-bold" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                        {{ form.name }}{{ form.name.errors }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold" for="{{ form.focus.id_for_label }}">{{ form.focus.label }}</label>
+                        {{ form.focus }}{{ form.focus.errors }}
+                    </div>
+                    <div class="col-7 col-md-5">
+                        <label class="form-label fw-bold" for="{{ form.start_date.id_for_label }}">{{ form.start_date.label }}</label>
+                        {{ form.start_date }}{{ form.start_date.errors }}
+                    </div>
+                    <div class="col-5 col-md-3">
+                        <label class="form-label fw-bold" for="{{ form.weeks.id_for_label }}">{{ form.weeks.label }}</label>
+                        {{ form.weeks }}{{ form.weeks.errors }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold" for="{{ form.routine.id_for_label }}">{{ form.routine.label }}</label>
+                        {{ form.routine }}{{ form.routine.errors }}
+                        <div class="form-text">{% trans "Opcional: o treino do aluno que vale nesta fase. O app não troca nada sozinho; você decide quando trocar." %}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> {% trans "Salvar fase" %}</button>
+        {% back_button back_default label=_('Cancelar') css='btn btn-outline-secondary' icon='' fragment='#tab-treinos' %}
+    </div>
+</form>
+{% endblock %}

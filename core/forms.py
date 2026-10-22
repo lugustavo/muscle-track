@@ -14,7 +14,7 @@ from .validators import (
     normalize_phone, normalize_state, normalize_zip_code, validate_birth_date, digits_only, validate_photo_image,
 )
 from .models import (
-    Appointment, Goal, Holiday, Payment, Package, Refund, ScheduleSlot, StudentPackage,
+    Appointment, Goal, Holiday, Payment, TrainingPhase, Package, Refund, ScheduleSlot, StudentPackage,
     Assessment, Exercise, Person, PersonRoutine, PhotoPosition, ProgressPhoto, Routine, RoutineExercise, StudentNote,
 )
 
@@ -418,6 +418,47 @@ class GoalForm(forms.ModelForm):
         if target is not None and target <= 0:
             self.add_error('target_value', gettext('O valor deve ser maior que zero.'))
         return cleaned
+
+
+class PhaseForm(forms.ModelForm):
+    """A phase of a student's periodization; the routine to choose from is the student's own."""
+
+    class Meta:
+        model = TrainingPhase
+        fields = ['name', 'focus', 'start_date', 'weeks', 'routine']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'maxlength': '80', 'placeholder': _('Ex.: Hipertrofia, Deload')}),
+            'focus': forms.TextInput(attrs={'class': 'form-control', 'maxlength': '160', 'placeholder': _('Ex.: volume alto, cargas moderadas')}),
+            'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
+            'weeks': forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': '52', 'inputmode': 'numeric'}),
+            'routine': forms.Select(attrs={'class': 'form-select'}),
+        }
+
+    def __init__(self, *args, student=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['routine'].required = False
+        self.fields['routine'].empty_label = gettext('— nenhum em especial —')
+        self.fields['routine'].queryset = PersonRoutine.objects.filter(person=student or self.instance.person_id, is_active=True) \
+            if (student or self.instance.pk) else PersonRoutine.objects.none()
+
+    def clean_name(self):
+        name = (self.cleaned_data.get('name') or '').strip()
+        if not name:
+            raise forms.ValidationError(gettext('Dê um nome à fase.'))
+        return name
+
+
+class PresetForm(forms.Form):
+    """Start a standard cycle: which one and the day it starts."""
+    preset = forms.ChoiceField(widget=forms.RadioSelect, label=_('Ciclo'))
+    start_date = forms.DateField(label=_('Começa em'), widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from .periodization import PRESETS
+        self.fields['preset'].choices = [
+            (key, f"{gettext(title)}: " + ' · '.join(f'{gettext(name)} {weeks}' for name, weeks, _f in steps))
+            for key, (title, steps) in PRESETS.items()]
 
 
 class ProgressPhotoForm(forms.ModelForm):
