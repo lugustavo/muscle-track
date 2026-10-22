@@ -29,13 +29,13 @@ from django.views.decorators.http import require_POST, require_safe
 from allauth.account.models import EmailAddress
 
 from .dashboard import INACTIVE_DAYS, INVITE_PENDING, last_activity, trainer_dashboard
-from . import backup_status, credits, goals, inbox, techniques, photo_guides, photo_positions, telegram, wger_import, workout_offline
+from . import backup_status, credits, goals, inbox, periodization, techniques, photo_guides, photo_positions, telegram, wger_import, workout_offline
 from .i18n import short_date
 from .listing import filter_tags, remember_view, view_mode as list_view_mode
 from .forms import (
     AIWorkoutGenerationForm, AppointmentForm, AssessmentForm, GoalForm, ClassRequestForm, ConsentForm, SaleForm, ExerciseForm, PaymentForm,
     CancelPackageForm, HolidayForm, WorkingHoursForm, MyPhotoForm, PackageEditForm, PersonForm, RefundForm, PersonRoutineForm, PackageForm, RepeatForm, ScheduleSlotForm, SlotEditForm, SlotFillForm,
-    PhotoLinkForm, PhotoPositionForm, ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
+    PhaseForm, PresetForm, PhotoLinkForm, PhotoPositionForm, ProgressPhotoForm, RoutineForm, StatusForm, StudentNoteForm,
 )
 from .agenda import (
     DEFAULT_VIEW as DEFAULT_AGENDA_VIEW, FORECAST_CHOICES, LIST_DAYS, LIST_DAYS_STUDENT, VIEWS as AGENDA_VIEWS, add_months, at, attendance_stats,
@@ -57,7 +57,7 @@ from .history import log_event, log_profile_edit
 from .invites import build_invite_url, get_user_from_invite, revoke_invites
 from .models import (
     Appointment, AppointmentRequest, Assessment, CalendarFeed, Goal, SheetLink, Holiday, Refund, NotificationPreference, PhotoPosition, PushSubscription, WhatsAppTemplate, ConsentRecord, Exercise, MuscleGroup, Payment, Package, ScheduleSlot, Person, PersonRoutine, PersonRoutineExercise, ProgressPhoto,
-    Routine, RoutineExercise, SessionExercise, SessionSet, StudentEvent, StudentNote, WorkingHours, WorkoutSession,
+    Routine, RoutineExercise, SessionExercise, SessionSet, StudentEvent, StudentNote, TrainingPhase, WorkingHours, WorkoutSession,
 )
 from .navigation import after_save_url, back_label, safe_next_url, with_next
 from .onboarding import trainer_steps
@@ -487,6 +487,7 @@ def student_detail(request, pk):
         'assessments': assessments,
         'assessment_page': assessment_page,
         'goal_rows': goals.describe(student.goals.select_related('person')),
+        'phase_rows': periodization.describe(list(student.phases.select_related('routine'))),
         'latest_assessment': assessments[0] if assessments else None,
         'assessment_chart': chart_points,
         'can_compare': bool(evolution.comparable_angles(assessments, evolution.comparable_loose(loose_photos))),
@@ -1804,7 +1805,8 @@ def my_workouts(request, person):
 
     return render(request, 'core/my_workouts.html', {
         'person': person,
-        'routines_with_sessions': items
+        'routines_with_sessions': items,
+        'phase_rows': [r for r in periodization.describe(list(person.phases.all())) if r['state'] in ('current', 'next')],
     })
 
 
@@ -2495,6 +2497,7 @@ def notification_settings(request):
                     pref.notify_renewals = 'notify_renewals' in request.POST
                     pref.notify_activity = 'notify_activity' in request.POST
                     pref.notify_digest = 'notify_digest' in request.POST
+                    pref.notify_phases = 'notify_phases' in request.POST
                 if person is not None:
                     pref.notify_class_reminder = 'notify_class_reminder' in request.POST
                     pref.notify_plan_expiry = 'notify_plan_expiry' in request.POST
@@ -2504,7 +2507,7 @@ def notification_settings(request):
                     pref.notify_goals = 'notify_goals' in request.POST
                 pref.save(update_fields=['notify_changes', 'notify_class_reminder', 'notify_plan_expiry',
                                          'notify_renewals', 'notify_activity', 'notify_digest', 'notify_reassessment',
-                                         'notify_inactivity', 'notify_birthday', 'notify_goals'])
+                                         'notify_inactivity', 'notify_birthday', 'notify_goals', 'notify_phases'])
             messages.success(request, _('Preferências de notificação salvas.'))
         return redirect('core:notification_settings')
     recent = list(request.user.notification_logs.all()[:5])
@@ -2810,6 +2813,54 @@ def goal_delete(request, pk):
     goal.delete()
     messages.success(request, _('Meta removida.'))
     return redirect(_student_tab(request, student_id, 'avaliacoes'))
+
+
+@staff_required
+def phase_create(request, pk):
+    student = get_object_or_404(Person, pk=pk)
+    form = PhaseForm(request.POST or None, student=student, initial={'start_date': periodization.next_start(student)})
+    if request.method == 'POST' and form.is_valid():
+        phase = form.save(commit=False)
+        phase.person = student
+        phase.save()
+        messages.success(request, _('Fase criada.'))
+        return redirect(_student_tab(request, student.pk, 'treinos'))
+    return render(request, 'core/phase_form.html', {'form': form, 'student': student, 'title': _('Nova fase')})
+
+
+@staff_required
+def phase_edit(request, pk):
+    phase = get_object_or_404(TrainingPhase.objects.select_related('person'), pk=pk)
+    form = PhaseForm(request.POST or None, instance=phase, student=phase.person)
+    if request.method == 'POST' and form.is_valid():
+        phase = form.save(commit=False)
+        phase.reminded_at = None    # the dates may have moved: the "ending" notice can go again
+        phase.save()
+        messages.success(request, _('Fase atualizada.'))
+        return redirect(_student_tab(request, phase.person_id, 'treinos'))
+    return render(request, 'core/phase_form.html', {'form': form, 'student': phase.person, 'title': _('Editar fase')})
+
+
+@staff_required
+@require_POST
+def phase_delete(request, pk):
+    phase = get_object_or_404(TrainingPhase, pk=pk)
+    student_id = phase.person_id
+    phase.delete()
+    messages.success(request, _('Fase removida.'))
+    return redirect(_student_tab(request, student_id, 'treinos'))
+
+
+@staff_required
+def phase_preset(request, pk):
+    """Start a standard cycle (its phases one after the other) for a student."""
+    student = get_object_or_404(Person, pk=pk)
+    form = PresetForm(request.POST or None, initial={'start_date': periodization.next_start(student), 'preset': next(iter(periodization.PRESETS))})
+    if request.method == 'POST' and form.is_valid():
+        created = periodization.create_preset(student, form.cleaned_data['preset'], form.cleaned_data['start_date'])
+        messages.success(request, ngettext('%(n)d fase criada.', '%(n)d fases criadas.', len(created)) % {'n': len(created)})
+        return redirect(_student_tab(request, student.pk, 'treinos'))
+    return render(request, 'core/phase_preset.html', {'form': form, 'student': student})
 
 
 @staff_required

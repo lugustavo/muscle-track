@@ -73,6 +73,10 @@
                 <input class="form-check-input" type="checkbox" id="notify_digest" name="notify_digest" {% if pref.notify_digest %}checked{% endif %}>
                 <label class="form-check-label" for="notify_digest">{% trans "Resumo do dia, de manhã (aulas de hoje, presenças por marcar, pagamentos e alunos que pedem atenção)" %}</label>
             </div>
+            <div class="form-check mb-1">
+                <input class="form-check-input" type="checkbox" id="notify_phases" name="notify_phases" {% if pref.notify_phases %}checked{% endif %}>
+                <label class="form-check-label" for="notify_phases">{% trans "Fase de treino de um aluno terminando sem a próxima" %}</label>
+            </div>
             <div class="form-text mb-3">{% trans "Pedidos de exclusão de dados e problemas nos backups sempre avisam: não têm interruptor." %}</div>{% endif %}
             {% if person %}
             {% if reminder_hours %}<div class="form-check mb-1">

@@ -40,7 +40,7 @@ KIND_FLAG = {
     'package_attention': 'notify_renewals',
     'invite_accepted': 'notify_activity', 'student_photo': 'notify_activity',
     'daily_digest': 'notify_digest', 'reassessment': 'notify_reassessment', 'inactivity': 'notify_inactivity',
-    'birthday': 'notify_birthday', 'goal_due': 'notify_goals',
+    'birthday': 'notify_birthday', 'goal_due': 'notify_goals', 'phase_ending': 'notify_phases',
 }
 Status = NotificationLog.Status
 
@@ -204,6 +204,16 @@ def goal_due(days):
     return Message('goal_due', lazy_text(lambda: _('Uma meta sua está perto do prazo')), lazy_text(body), reverse('core:my_evolution'))
 
 
+def phase_ending(count, days):
+    """The trainer is told that training phases are about to end with nothing after them. Counts only, no names."""
+    def body():
+        return ngettext('%(n)d aluno termina uma fase de treino em até %(days)d dias e ainda não tem a próxima.',
+                        '%(n)d alunos terminam uma fase de treino em até %(days)d dias e ainda não têm a próxima.',
+                        count) % {'n': count, 'days': days}
+
+    return Message('phase_ending', lazy_text(lambda: _('Fase de treino terminando')), lazy_text(body), reverse('core:student_list'))
+
+
 def birthday_greeting(person):
     """The studio's greeting on the student's birthday (first name only; the age is never written)."""
     name = person.person_name.split()[0] if person.person_name.strip() else ''
@@ -240,6 +250,9 @@ def daily_digest(summary):
         n = summary.get('reassessment', 0)
         if n:
             out.append(ngettext('%(n)d aluno para reavaliar', '%(n)d alunos para reavaliar', n) % {'n': n})
+        n = summary.get('phases', 0)
+        if n:
+            out.append(ngettext('%(n)d fase de treino terminando', '%(n)d fases de treino terminando', n) % {'n': n})
         n = summary.get('routines', 0)
         if n:
             out.append(ngettext('%(n)d treino terminando', '%(n)d treinos terminando', n) % {'n': n})

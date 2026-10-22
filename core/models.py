@@ -620,6 +620,32 @@ class SessionSet(models.Model):
         return gettext('%(exercise)s - série %(number)s') % {'exercise': self.session_exercise, 'number': self.number}
 
 
+class TrainingPhase(models.Model):
+    """One block of a student's periodization (adaptation, hypertrophy, strength, deload...): a name, a start day and a number
+    of weeks, optionally with the routine used in it. The phases of a student follow one another (core/periodization.py)."""
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='phases', verbose_name=_('Aluno'))
+    name = models.CharField(max_length=80, verbose_name=_('Fase'))
+    focus = models.CharField(max_length=160, blank=True, verbose_name=_('Foco'))
+    start_date = models.DateField(verbose_name=_('Começa em'))
+    weeks = models.PositiveSmallIntegerField(default=4, validators=[MinValueValidator(1), MaxValueValidator(52)],
+                                             verbose_name=_('Semanas'))
+    routine = models.ForeignKey('PersonRoutine', on_delete=models.SET_NULL, null=True, blank=True, related_name='phases',
+                                verbose_name=_('Treino usado'))
+    reminded_at = models.DateTimeField(null=True, blank=True)    # core/reminders.py: "this phase is ending" went to the trainer
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['start_date', 'pk']
+
+    def __str__(self):
+        return f'{self.person_id} {self.name}'
+
+    @property
+    def end_date(self):
+        """The last day of the phase."""
+        return self.start_date + timedelta(weeks=self.weeks) - timedelta(days=1)
+
+
 class Goal(models.Model):
     """A goal of a student with a deadline: free text ("walk 5 km without stopping") or a number on a measure of the
     assessments ("weight 70 kg"), whose progress follows the assessments (core/goals.py)."""
@@ -1275,6 +1301,7 @@ class NotificationPreference(models.Model):
     notify_inactivity = models.BooleanField(default=True)       # student: "it has been a while since you trained"
     notify_birthday = models.BooleanField(default=True)         # student: the studio's birthday greeting
     notify_goals = models.BooleanField(default=True)            # student: "a goal of yours is due soon"
+    notify_phases = models.BooleanField(default=True)           # trainer: a training phase is about to end
     # Language the person uses the app in (set by the language switcher, or learned at login); the notifications, e-mails
     # and WhatsApp texts meant for them are written in it. Empty = the site default.
     language = models.CharField(max_length=10, blank=True, default='')
