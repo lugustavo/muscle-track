@@ -213,6 +213,7 @@
     <script src="{% static 'js/pwa.js' %}"></script>
     <script src="{% static 'js/card-collapse.js' %}" defer></script>
     <script src="{% static 'js/photo-viewer.js' %}" defer></script>
+    <script src="{% static 'js/no-zoom.js' %}" defer></script>
     {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}<script src="{% static 'js/workout_offline.js' %}"></script>{% endif %}
     {% if user.is_staff or user.is_superuser %}<script src="{% static 'js/search.js' %}"></script>{% endif %}
     {% block extra_js %}{% endblock %}

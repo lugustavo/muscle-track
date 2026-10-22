@@ -46,7 +46,8 @@
             startX = null;
             if (Math.abs(dx) > 60) go(dx < 0 ? 1 : -1);
         }, {passive: true});
-        root.addEventListener('hidden.bs.modal', function () { image.removeAttribute('src'); });
+        root.addEventListener('show.bs.modal', function () { document.documentElement.classList.add('viewer-open'); });   // lifts the no-zoom block (css/ui.css)
+        root.addEventListener('hidden.bs.modal', function () { image.removeAttribute('src'); document.documentElement.classList.remove('viewer-open'); });
         modal = new bootstrap.Modal(root);
     }
 

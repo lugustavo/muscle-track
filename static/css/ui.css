@@ -258,3 +258,6 @@ input[type="radio"], input[type="checkbox"], input[type="range"] { accent-color:
 .photo-viewer .photo-viewer-nav.prev { left: .5rem; }
 .photo-viewer .photo-viewer-nav.next { right: .5rem; }
 .photo-viewer .photo-viewer-nav:focus-visible { outline: 2px solid var(--bs-white); }
+
+/* No pinch / double-tap zoom on a phone: panning and scrolling stay. The photo viewer lifts it while it is open (js/photo-viewer.js, js/no-zoom.js) */
+html:not(.viewer-open) { touch-action: manipulation; touch-action: pan-x pan-y; }
