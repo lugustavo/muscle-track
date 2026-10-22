@@ -10,7 +10,7 @@ from django.conf import settings
 from django.db.models import F, Q
 from django.utils import timezone
 
-from . import inbox, notifications, packages, workout_sessions
+from . import backup_status, inbox, notifications, packages, workout_sessions
 from .agenda import ensure_appointments
 from .models import Appointment, Person
 
@@ -75,6 +75,17 @@ def send_package_reminders(now, today):
     return len(rows)
 
 
+BACKUP_REPEAT = timedelta(hours=24)
+
+
+def send_backup_alert(now):
+    """Tell the trainer the backups are not happening (core/backup_status.py), at most once a day while it lasts: the
+    dashboard shows it too, but nobody opens the dashboard every day."""
+    if backup_status.problem(now) is None:
+        return 0
+    return notifications.notify_once(notifications.staff_users(), notifications.backup_problem(now), BACKUP_REPEAT)
+
+
 def run(now=None):
     """Create the classes of the next days (fixed times are generated lazily), send what is due and end the workouts
     students left running."""
@@ -83,5 +94,5 @@ def run(now=None):
     ensure_appointments(today, today + timedelta(days=3), today)
     inbox.prune(now)
     return {'classes': send_class_reminders(now), 'plans': send_plan_reminders(today),
-            'packages': send_package_reminders(now, today),
+            'packages': send_package_reminders(now, today), 'backup': send_backup_alert(now),
             'sessions': workout_sessions.close_stale(now=now)}

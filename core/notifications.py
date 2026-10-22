@@ -26,7 +26,7 @@ from django.utils.translation import gettext as _, ngettext
 
 from . import inbox, telegram
 from .i18n import language_for, lazy_text
-from .models import NotificationLog, NotificationPreference, StudentEvent
+from .models import Notice, NotificationLog, NotificationPreference, StudentEvent
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +38,7 @@ KIND_FLAG = {
     'class_cancelled': 'notify_changes', 'move_undone': 'notify_changes',
     'class_reminder': 'notify_class_reminder', 'plan_expiry': 'notify_plan_expiry', 'package_low': 'notify_plan_expiry',
     'package_attention': 'notify_renewals',
+    'invite_accepted': 'notify_activity', 'student_photo': 'notify_activity',
 }
 Status = NotificationLog.Status
 
@@ -214,6 +215,39 @@ def package_attention(rows, today):
                    lazy_text(body), reverse('core:finance'))
 
 
+def erasure_requested(person):
+    """A student asked for their data to be erased: the law gives the trainer a deadline, so this one has no switch."""
+    name = person.person_name
+    return Message('erasure_request', lazy_text(lambda: _('Pedido de exclusão de dados')),
+                   lazy_text(lambda: _('%(name)s pediu a exclusão dos próprios dados.') % {'name': name}),
+                   reverse('core:student_detail', kwargs={'pk': person.pk}))
+
+
+def invite_accepted(person):
+    name = person.person_name
+    return Message('invite_accepted', lazy_text(lambda: _('Convite aceito')),
+                   lazy_text(lambda: _('%(name)s criou a senha e já pode usar o app.') % {'name': name}),
+                   reverse('core:student_detail', kwargs={'pk': person.pk}))
+
+
+def student_photo(person):
+    name = person.person_name
+    return Message('student_photo', lazy_text(lambda: _('Foto nova de um aluno')),
+                   lazy_text(lambda: _('%(name)s enviou uma foto de progresso.') % {'name': name}),
+                   reverse('core:student_detail', kwargs={'pk': person.pk}) + '#tab-avaliacoes')
+
+
+def backup_problem(now=None):
+    """The backups are not happening (core/backup_status.py); the text is the same as the warning on the dashboard."""
+    from . import backup_status
+
+    def body():
+        found = backup_status.problem(now)
+        return found['text'] if found else _('Os backups voltaram ao normal.')
+
+    return Message('backup_problem', lazy_text(lambda: _('Problema nos backups')), lazy_text(body), reverse('core:home'))
+
+
 def test_message():
     return Message('test', lazy_text(lambda: _('Teste de notificação')),
                    lazy_text(lambda: _('Tudo certo: este aparelho recebe os avisos do Muscle Track.')),
@@ -294,6 +328,20 @@ def notify(users, message, sync=False):
         threading.Thread(target=_run, args=(ids, message, True), daemon=True).start()
     else:
         _run(ids, message, False)
+
+
+def notify_once(users, message, within):
+    """`notify`, but not to someone who already has a notice of this kind with the same destination from the last
+    `within` (a timedelta): a student sending four photos in a row tells the trainer once, a backup that stays broken
+    is repeated a day later, not every ten minutes. Returns how many people were told."""
+    since = timezone.now() - within
+    told = set(Notice.objects.filter(
+        user__in=[u for u in users if u is not None], kind=message.kind, path=message.path or '', created_at__gte=since
+    ).values_list('user_id', flat=True))
+    fresh = [u for u in users if u is not None and u.pk not in told]
+    if fresh:
+        notify(fresh, message, sync=True)
+    return len(fresh)
 
 
 def _run(user_ids, message, close):
