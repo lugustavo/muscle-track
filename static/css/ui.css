@@ -238,6 +238,20 @@ input[type="radio"], input[type="checkbox"], input[type="range"] { accent-color:
 .photo-tile { min-width: 0; }
 .photo-tile .small { overflow-wrap: anywhere; }
 
+/* One title bar for every content card: soft surface, brand accent, a bold 1rem title and a brand-colored leading icon.
+   The dashboard tiles (icon-chip titles) and the semantic bars (warning) keep their own look. */
+.card > .card-header:not([class*="bg-warning"]):not(:has(.ui-sec)) { border-left: 4px solid var(--primary-color); font-weight: 600; }
+.card-header :is(h5, h6) { font-size: 1rem; font-weight: 700; margin: 0; }
+.card-header :is(h5, h6, strong) > .bi:first-child:not([class*="text-"]) { color: var(--primary-color); }
+
+/* Long cards fold up when their title bar is clicked (static/js/card-collapse.js) */
+.card-toggle { cursor: pointer; user-select: none; }
+.card-toggle .card-toggle-main { flex: 1 1 auto; min-width: 0; }
+.card-toggle .card-chevron { flex: 0 0 auto; margin-left: .5rem; color: var(--bs-secondary-color); transition: transform .2s; }
+.card-toggle[aria-expanded="false"] .card-chevron { transform: rotate(-90deg); }
+.card-toggle:focus-visible { outline: 2px solid var(--primary-color); outline-offset: -2px; }
+.card.is-collapsed { height: auto !important; }
+.card.is-collapsed > .card-header { border-bottom: 0; }
 /* In-app photo viewer (static/js/photo-viewer.js): the picture fits the screen, can be pinched, and has arrows to walk the gallery */
 .photo-viewer .photo-viewer-img { max-width: 100%; max-height: calc(100vh - 9rem); object-fit: contain; touch-action: pan-x pan-y pinch-zoom; }
 .photo-viewer .photo-viewer-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 2.6rem; height: 2.6rem; border: 0; border-radius: 50%; background: rgba(0, 0, 0, .45); color: var(--bs-white); font-size: 1.3rem; display: flex; align-items: center; justify-content: center; }
