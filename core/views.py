@@ -377,6 +377,7 @@ def accept_invite(request, uidb64, token):
             EmailAddress.objects.update_or_create(
                 user=user, email=user.email, defaults={'primary': True, 'verified': True})
             log_event(user.person, StudentEvent.Kind.INVITE_ACCEPTED, user, _('Criou a senha pelo link de acesso'))
+            notifications.notify(notifications.staff_users(), notifications.invite_accepted(user.person))
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, _('Senha criada! Bem-vindo(a) ao Muscle Track.'))
             return redirect('core:my_workouts')
@@ -901,6 +902,7 @@ def my_consent_photos(request, person):
 def my_erasure_request(request, person):
     if not person.events.filter(kind=StudentEvent.Kind.ERASURE_REQUEST).exists():
         log_event(person, StudentEvent.Kind.ERASURE_REQUEST, request.user, _('Pediu a exclusão dos próprios dados'))
+        notifications.notify(notifications.staff_users(), notifications.erasure_requested(person))
     messages.success(request, _('Pedido enviado. Sua personal vai apagar seus dados e avisar você.'))
     return redirect('core:my_privacy')
 
@@ -1008,6 +1010,7 @@ def my_photo_upload(request, person):
         photo.person = person
         photo.uploaded_by_student = True
         photo.save()
+        notifications.notify_once(notifications.staff_users(), notifications.student_photo(person), timedelta(hours=1))
         messages.success(request, _('Foto enviada. Só você e a sua personal conseguem vê-la.'))
         return redirect(after_save_url(request, reverse('core:my_evolution')))
     return render(request, 'core/my_photo_form.html', {
@@ -2477,11 +2480,12 @@ def notification_settings(request):
                 pref.notify_changes = 'notify_changes' in request.POST
                 if request.user.is_staff:
                     pref.notify_renewals = 'notify_renewals' in request.POST
+                    pref.notify_activity = 'notify_activity' in request.POST
                 if person is not None:
                     pref.notify_class_reminder = 'notify_class_reminder' in request.POST
                     pref.notify_plan_expiry = 'notify_plan_expiry' in request.POST
                 pref.save(update_fields=['notify_changes', 'notify_class_reminder', 'notify_plan_expiry',
-                                                 'notify_renewals'])
+                                                 'notify_renewals', 'notify_activity'])
             messages.success(request, _('Preferências de notificação salvas.'))
         return redirect('core:notification_settings')
     recent = list(request.user.notification_logs.all()[:5])

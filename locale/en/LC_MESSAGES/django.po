@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 20:32-0300\n"
+"POT-Creation-Date: 2026-10-22 15:06-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2036,6 +2036,35 @@ msgid "%(n)d pacote para renovar"
 msgid_plural "%(n)d pacotes para renovar"
 msgstr[0] "%(n)d package to renew"
 msgstr[1] "%(n)d packages to renew"
+
+#| msgid "Pedidos de exclusão de dados"
+msgid "Pedido de exclusão de dados"
+msgstr "Data erasure request"
+
+#, python-format
+#| msgid "Pediu a exclusão dos próprios dados"
+msgid "%(name)s pediu a exclusão dos próprios dados."
+msgstr "%(name)s asked for their own data to be erased."
+
+#, python-format
+#| msgid ""
+#| "%(name)s já usou aulas deste pacote e não pode ser removido(a)."
+msgid "%(name)s criou a senha e já pode usar o app."
+msgstr "%(name)s created a password and can now use the app."
+
+#| msgid "Sem o nome do aluno"
+msgid "Foto nova de um aluno"
+msgstr "New photo from a student"
+
+#, python-format
+msgid "%(name)s enviou uma foto de progresso."
+msgstr "%(name)s sent a progress photo."
+
+msgid "Os backups voltaram ao normal."
+msgstr "Backups are back to normal."
+
+msgid "Problema nos backups"
+msgstr "Backup problem"
 
 msgid "Teste de notificação"
 msgstr "Notification test"
@@ -6085,6 +6114,16 @@ msgstr "Changes to my classes and replies to my requests"
 
 msgid "Pacotes de alunos acabando ou vencendo"
 msgstr "Student packages running out or expiring"
+
+msgid "Aluno aceitou o convite ou enviou uma foto"
+msgstr "A student accepted the invite or sent a photo"
+
+msgid ""
+"Pedidos de exclusão de dados e problemas nos backups sempre avisam: não têm "
+"interruptor."
+msgstr ""
+"Data erasure requests and backup problems always notify you: they have no "
+"switch."
 
 #, python-format
 msgid "Lembrete de aula (cerca de %(reminder_hours)s hora antes)"
