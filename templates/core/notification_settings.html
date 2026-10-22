@@ -91,6 +91,10 @@
                 <input class="form-check-input" type="checkbox" id="notify_inactivity" name="notify_inactivity" {% if pref.notify_inactivity %}checked{% endif %}>
                 <label class="form-check-label" for="notify_inactivity">{% trans "Aviso gentil quando eu passar uma semana sem treinar" %}</label>
             </div>
+            <div class="form-check mb-1">
+                <input class="form-check-input" type="checkbox" id="notify_goals" name="notify_goals" {% if pref.notify_goals %}checked{% endif %}>
+                <label class="form-check-label" for="notify_goals">{% trans "Aviso quando uma meta minha estiver perto do prazo" %}</label>
+            </div>
             <div class="form-check mb-3">
                 <input class="form-check-input" type="checkbox" id="notify_birthday" name="notify_birthday" {% if pref.notify_birthday %}checked{% endif %}>
                 <label class="form-check-label" for="notify_birthday">{% trans "Parabéns no meu aniversário" %}</label>

@@ -9,6 +9,8 @@
 </div>
 <p class="text-muted small"><i class="bi bi-lock"></i> {% trans "Cada avaliação tem as fotos das posições (frente, lados e costas). As fotos são privadas: só você e o próprio aluno conseguem abrir." %}</p>
 
+{% include 'core/_goals.html' with can_edit=True %}
+
 {% if assessment_chart %}
 <div class="card mb-4">
     <div class="card-body">

@@ -14,7 +14,7 @@ from .validators import (
     normalize_phone, normalize_state, normalize_zip_code, validate_birth_date, digits_only, validate_photo_image,
 )
 from .models import (
-    Appointment, Holiday, Payment, Package, Refund, ScheduleSlot, StudentPackage,
+    Appointment, Goal, Holiday, Payment, Package, Refund, ScheduleSlot, StudentPackage,
     Assessment, Exercise, Person, PersonRoutine, PhotoPosition, ProgressPhoto, Routine, RoutineExercise, StudentNote,
 )
 
@@ -372,6 +372,51 @@ class AssessmentForm(forms.ModelForm):
         cleaned = super().clean()
         if not any(cleaned.get(name) is not None for name in self.MEASURE_FIELDS):
             raise forms.ValidationError(gettext('Preencha pelo menos uma medida (peso, altura, % de gordura ou circunferência).'))
+        return cleaned
+
+
+class GoalForm(forms.ModelForm):
+    """A goal with a deadline; with a measure chosen, the number to reach is required (and the start is the student's latest
+    value unless the trainer types one)."""
+
+    class Meta:
+        model = Goal
+        fields = ['title', 'target_date', 'metric', 'target_value', 'start_value']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'maxlength': '120',
+                                            'placeholder': _('Ex.: chegar aos 70 kg, correr 5 km sem parar')}),
+            'target_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}, format='%Y-%m-%d'),
+            'metric': forms.Select(attrs={'class': 'form-select'}),
+            'target_value': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'inputmode': 'decimal'}),
+            'start_value': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'inputmode': 'decimal'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['metric'].choices = [('', gettext('— só o texto, sem número —')), *Goal.METRICS]
+        self.fields['metric'].required = False
+
+    def clean_title(self):
+        title = (self.cleaned_data.get('title') or '').strip()
+        if not title:
+            raise forms.ValidationError(gettext('Escreva a meta.'))
+        return title
+
+    def clean_target_date(self):
+        day = self.cleaned_data.get('target_date')
+        if day and not self.instance.pk and day < timezone.localdate():
+            raise forms.ValidationError(gettext('O prazo não pode ser no passado.'))
+        return day
+
+    def clean(self):
+        cleaned = super().clean()
+        metric, target = cleaned.get('metric'), cleaned.get('target_value')
+        if metric and target is None:
+            self.add_error('target_value', gettext('Informe o valor a atingir.'))
+        if not metric and (target is not None or cleaned.get('start_value') is not None):
+            self.add_error('metric', gettext('Escolha a medida acompanhada, ou deixe os valores em branco.'))
+        if target is not None and target <= 0:
+            self.add_error('target_value', gettext('O valor deve ser maior que zero.'))
         return cleaned
 
 

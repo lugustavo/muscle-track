@@ -40,7 +40,7 @@ KIND_FLAG = {
     'package_attention': 'notify_renewals',
     'invite_accepted': 'notify_activity', 'student_photo': 'notify_activity',
     'daily_digest': 'notify_digest', 'reassessment': 'notify_reassessment', 'inactivity': 'notify_inactivity',
-    'birthday': 'notify_birthday',
+    'birthday': 'notify_birthday', 'goal_due': 'notify_goals',
 }
 Status = NotificationLog.Status
 
@@ -192,6 +192,18 @@ def inactivity_nudge(days):
                    reverse('core:my_workouts'))
 
 
+def goal_due(days):
+    """The student is told a goal is close to its deadline. The goal's own words are never in the notice (a goal can be
+    about health), only that there is one."""
+    def body():
+        if days <= 0:
+            return _('O prazo de uma das suas metas é hoje.')
+        return ngettext('Falta %(n)d dia para o prazo de uma das suas metas.',
+                        'Faltam %(n)d dias para o prazo de uma das suas metas.', days) % {'n': days}
+
+    return Message('goal_due', lazy_text(lambda: _('Uma meta sua está perto do prazo')), lazy_text(body), reverse('core:my_evolution'))
+
+
 def birthday_greeting(person):
     """The studio's greeting on the student's birthday (first name only; the age is never written)."""
     name = person.person_name.split()[0] if person.person_name.strip() else ''
@@ -213,6 +225,9 @@ def daily_digest(summary):
         n = summary.get('birthdays', 0)
         if n:
             out.append(ngettext('%(n)d aniversariante hoje', '%(n)d aniversariantes hoje', n) % {'n': n})
+        n = summary.get('goals', 0)
+        if n:
+            out.append(ngettext('%(n)d meta vencida ou vencendo', '%(n)d metas vencidas ou vencendo', n) % {'n': n})
         n = summary.get('unmarked', 0)
         if n:
             out.append(ngettext('%(n)d aula de ontem sem presença marcada', '%(n)d aulas de ontem sem presença marcada', n) % {'n': n})

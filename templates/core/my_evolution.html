@@ -19,6 +19,8 @@
         </div>
     </div>
 
+    {% if goal_rows %}{% include 'core/_goals.html' with can_edit=False %}{% endif %}
+
     {% if assessment_chart %}
     <div class="card mb-3"><div class="card-body">
         <h2 class="h6 card-title">{% trans "Evolução" %}</h2>

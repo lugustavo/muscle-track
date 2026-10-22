@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load navigation %}
+
+{% block title %}{{ title }} - {{ student.person_name }}{% endblock %}
+
+{% block content %}
+<div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-bullseye" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{{ title }}</h1>
+            <p class="ui-sub text-break">{{ student.person_name }}</p>
+        </div>
+    </div>
+    <div class="ui-actions">
+        {% url 'core:student_detail' student.pk as back_default %}{% back_button back_default fragment='#tab-avaliacoes' %}
+    </div>
+</div>
+
+<form method="post" class="row" data-goal-form>
+    {% csrf_token %}
+    <div class="col-lg-8">
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-bold" for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+                        {{ form.title }}{{ form.title.errors }}
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold" for="{{ form.target_date.id_for_label }}">{{ form.target_date.label }}</label>
+                        {{ form.target_date }}{{ form.target_date.errors }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold" for="{{ form.metric.id_for_label }}">{{ form.metric.label }}</label>
+                        {{ form.metric }}{{ form.metric.errors }}
+                        <div class="form-text">{% trans "Com uma medida escolhida, a barra de progresso acompanha as avaliações do aluno." %}</div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <label class="form-label fw-bold" for="{{ form.target_value.id_for_label }}">{{ form.target_value.label }}</label>
+                        {{ form.target_value }}{{ form.target_value.errors }}
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <label class="form-label fw-bold" for="{{ form.start_value.id_for_label }}">{{ form.start_value.label }}</label>
+                        {{ form.start_value }}{{ form.start_value.errors }}
+                        <div class="form-text">{% trans "Em branco: usa a última avaliação." %}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> {% trans "Salvar meta" %}</button>
+        {% back_button back_default label=_('Cancelar') css='btn btn-outline-secondary' icon='' fragment='#tab-avaliacoes' %}
+    </div>
+</form>
+{% endblock %}
