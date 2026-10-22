@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load navigation %}
+
+{% block title %}{% blocktrans trimmed %}Importar alunos - {{ brand_name }}{% endblocktrans %}{% endblock %}
+
+{% block content %}
+<div class="ui-head inline">
+    <div class="ui-title">
+        <span class="ui-ico"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i></span>
+        <div class="min-w-0">
+            <h1>{% trans "Importar alunos" %}</h1>
+            <p class="ui-sub text-break">{% trans "Traga uma lista de alunos de uma planilha (CSV). Você vê uma prévia antes de criar qualquer coisa." %}</p>
+        </div>
+    </div>
+    <div class="ui-actions">
+        {% url 'core:student_list' as back_default %}{% back_button back_default %}
+    </div>
+</div>
+
+{% if not results %}
+<div class="card card-body mb-3" data-csv-upload>
+    <form method="post" enctype="multipart/form-data" class="vstack gap-3">
+        {% csrf_token %}
+        <div>
+            <label for="csvFile" class="form-label fw-bold">{% trans "Arquivo CSV" %}</label>
+            <input type="file" id="csvFile" name="file" class="form-control" accept=".csv,text/csv,text/plain" required>
+            <div class="form-text">{% blocktrans trimmed %}Até {{ max_rows }} alunos por arquivo, 1 MB. No Excel ou no Google Planilhas: Arquivo → Salvar como/Fazer download → CSV.{% endblocktrans %}</div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-primary"><i class="bi bi-eye"></i> {% trans "Ver a prévia" %}</button>
+            <a href="{% url 'core:students_csv_template' %}" class="btn btn-outline-secondary" data-csv-template><i class="bi bi-download"></i> {% trans "Baixar o modelo" %}</a>
+        </div>
+    </form>
+</div>
+<div class="card card-body small">
+    <div class="fw-bold mb-1">{% trans "Colunas (a primeira linha do arquivo leva os títulos)" %}</div>
+    <ul class="mb-2">
+        <li><code>nome</code> — {% trans "obrigatório" %}</li>
+        <li><code>email</code> — {% trans "para o aluno usar o app (ele recebe o link de convite depois)" %}</li>
+        <li><code>telefone</code>, <code>nascimento</code> ({% trans "dd/mm/aaaa" %}), <code>cidade</code>, <code>estado</code>, <code>objetivo</code></li>
+        <li><code>situacao</code> — {% trans "ativo ou experimental" %}; <code>modalidade</code> — {% trans "presencial, online ou híbrido" %}</li>
+        <li><code>app</code> — {% trans "sim ou não; em branco: sim quando há e-mail" %}</li>
+    </ul>
+    <div class="text-muted"><i class="bi bi-shield-lock" aria-hidden="true"></i> {% trans "Saúde e anotações internas não entram na importação. Ninguém recebe mensagem: o aluno só é cadastrado." %}</div>
+</div>
+{% else %}
+<form method="post" action="{% url 'core:students_csv_confirm' %}" data-csv-preview>
+    {% csrf_token %}
+    <div class="row row-cols-3 g-2 text-center mb-3" data-csv-counts>
+        <div class="col"><div class="ui-tile"><div class="ui-tile-n">{{ counts.ready|default:0 }}</div><div class="ui-tile-l">{% trans "Prontos" %}</div></div></div>
+        <div class="col"><div class="ui-tile"><div class="ui-tile-n">{{ counts.duplicate|default:0 }}</div><div class="ui-tile-l">{% trans "Parecem repetidos" %}</div></div></div>
+        <div class="col"><div class="ui-tile"><div class="ui-tile-n">{{ counts.error|default:0 }}</div><div class="ui-tile-l">{% trans "Com erro" %}</div></div></div>
+    </div>
+    <p class="small text-muted">{% trans "Marque quem entra. Os prontos já vêm marcados; um que parece repetido só entra se você marcar (é outra pessoa com o mesmo nome ou telefone). Linhas com erro ficam de fora: corrija a planilha e envie de novo." %}</p>
+    <ul class="list-group mb-3">
+        {% for r in results %}
+        <li class="list-group-item" data-csv-row="{{ r.index }}" data-state="{{ r.state }}">
+            <div class="d-flex gap-2 align-items-start">
+                {% if r.state != ERROR %}
+                <input class="form-check-input mt-1 flex-shrink-0" type="checkbox" name="row" value="{{ r.index }}" id="row{{ r.index }}" {% if r.state == READY %}checked{% endif %} aria-label="{% blocktrans trimmed with name=r.name %}Importar {{ name }}{% endblocktrans %}">
+                {% else %}<i class="bi bi-x-circle text-danger mt-1 flex-shrink-0" aria-hidden="true"></i>{% endif %}
+                <div class="min-w-0 flex-grow-1">
+                    <label for="row{{ r.index }}" class="fw-semibold text-break">{{ r.name|default:"—" }}</label>
+                    <span class="ui-badge {% if r.state == READY %}ok{% elif r.state == DUPLICATE %}warn{% else %}bad{% endif %}">{% if r.state == READY %}{% trans "pronto" %}{% elif r.state == DUPLICATE %}{% trans "parece repetido" %}{% else %}{% trans "erro" %}{% endif %}</span>
+                    <div class="small text-muted text-break">{{ r.row.email }}{% if r.row.email and r.row.telefone %} · {% endif %}{{ r.row.telefone }}</div>
+                    {% for m in r.messages %}<div class="small text-danger text-break">{{ m }}</div>{% endfor %}
+                    {% for d in r.duplicates %}<div class="small text-warning-emphasis text-break"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> {% blocktrans trimmed with other=d %}Já existe: {{ other }}{% endblocktrans %}</div>{% endfor %}
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    <div class="d-flex flex-wrap gap-2">
+        <button class="btn btn-primary"><i class="bi bi-check-circle"></i> {% trans "Importar os marcados" %}</button>
+        <a href="{% url 'core:students_csv_import' %}" class="btn btn-outline-secondary">{% trans "Enviar outro arquivo" %}</a>
+    </div>
+</form>
+{% endif %}
+{% endblock %}

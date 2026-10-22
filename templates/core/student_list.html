@@ -16,8 +16,15 @@
         </div>
     </div>
     {% if user.is_staff %}
-    <div class="ui-actions d-none d-lg-flex">
-        <a href="{% nav_url 'core:student_create' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> {% trans "Novo aluno" %}</a>
+    <div class="ui-actions">
+        <div class="dropdown" data-students-csv-menu>
+            <button class="btn btn-outline-secondary btn-icon" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="{% trans "Importar ou exportar (CSV)" %}"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i><span class="visually-hidden">{% trans "Importar ou exportar (CSV)" %}</span></button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="{% nav_url 'core:students_csv_import' %}" data-csv-import><i class="bi bi-upload" aria-hidden="true"></i> {% trans "Importar alunos (CSV)" %}</a></li>
+                <li><a class="dropdown-item" href="{% url 'core:students_csv_export' %}{% qs %}" data-csv-export><i class="bi bi-download" aria-hidden="true"></i> {% trans "Exportar esta lista (CSV)" %}</a></li>
+            </ul>
+        </div>
+        <a href="{% nav_url 'core:student_create' %}" class="btn btn-primary d-none d-lg-inline-flex"><i class="bi bi-plus-circle"></i> {% trans "Novo aluno" %}</a>
     </div>
     {% endif %}
 </div>

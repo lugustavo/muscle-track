@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 17:49-0300\n"
+"POT-Creation-Date: 2026-10-22 18:11-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -355,6 +355,9 @@ msgstr "New class"
 
 msgid "Remarcar aula"
 msgstr "Reschedule class"
+
+msgid "Importar alunos"
+msgstr "Import students"
 
 msgid "Convite"
 msgstr "Invitation"
@@ -2750,6 +2753,67 @@ msgstr ""
 "Hi, %(name)s! Here is your workout sheet, to read on your phone or print: "
 "%(link)s"
 
+msgid "sim"
+msgstr "yes"
+
+msgid "não"
+msgstr "no"
+
+msgid "O arquivo passa de 1 MB."
+msgstr "The file is larger than 1 MB."
+
+msgid "Não consegui ler o arquivo: salve-o como CSV (UTF-8)."
+msgstr "I could not read the file: save it as CSV (UTF-8)."
+
+msgid "O arquivo está vazio."
+msgstr "The file is empty."
+
+msgid ""
+"Não achei a coluna \"nome\" na primeira linha do arquivo. Baixe o modelo "
+"para ver o formato."
+msgstr ""
+"I could not find the \"nome\" (name) column in the first line of the file. "
+"Download the template to see the format."
+
+#, python-format
+msgid "O arquivo tem mais de %(max)d alunos: envie em partes."
+msgstr "The file has more than %(max)d students: send it in parts."
+
+msgid "O arquivo não parece um CSV válido."
+msgstr "The file does not look like a valid CSV."
+
+msgid "O arquivo só tem a linha de títulos: nenhum aluno para importar."
+msgstr "The file only has the title line: no students to import."
+
+#, python-format
+msgid "Nascimento \"%(value)s\" não é uma data (use dd/mm/aaaa)."
+msgstr "Birth date \"%(value)s\" is not a date (use dd/mm/yyyy)."
+
+#, python-format
+msgid "Situação \"%(value)s\" não existe (use ativo ou experimental)."
+msgstr "Status \"%(value)s\" does not exist (use ativo or experimental)."
+
+#, python-format
+msgid ""
+"Só dá para importar alunos ativos ou experimentais (situação \"%(value)s\")."
+msgstr "Only active or trial students can be imported (status \"%(value)s\")."
+
+#, python-format
+msgid "Modalidade \"%(value)s\" não existe (presencial, online ou híbrido)."
+msgstr "Modality \"%(value)s\" does not exist (presencial, online or híbrido)."
+
+#, python-format
+msgid "\"%(value)s\" na coluna app não é sim nem não."
+msgstr "\"%(value)s\" in the app column is neither yes nor no."
+
+#, python-format
+msgid "Repete a linha %(line)d do arquivo."
+msgstr "Repeats line %(line)d of the file."
+
+#, python-format
+msgid "Cadastro importado de um arquivo CSV (%(status)s)"
+msgstr "Record imported from a CSV file (%(status)s)"
+
 #| msgid "Descanso (segundos)"
 msgid "Tempo (segundos)"
 msgstr "Time (seconds)"
@@ -2941,6 +3005,28 @@ msgstr "Active"
 
 msgid "Inativos"
 msgstr "Inactive"
+
+msgid "Escolha o arquivo CSV."
+msgstr "Choose the CSV file."
+
+msgid "O arquivo expirou: envie-o de novo."
+msgstr "The file expired: send it again."
+
+msgid "Nenhum aluno foi importado."
+msgstr "No student was imported."
+
+#, python-format
+msgid "%(n)d aluno importado."
+msgid_plural "%(n)d alunos importados."
+msgstr[0] "%(n)d student imported."
+msgstr[1] "%(n)d students imported."
+
+#, python-format
+msgid "%(n)d tem acesso ao app: abra a ficha e envie o link de convite."
+msgid_plural ""
+"%(n)d têm acesso ao app: abra cada ficha e envie o link de convite."
+msgstr[0] "%(n)d has app access: open the file and send the invite link."
+msgstr[1] "%(n)d have app access: open each file and send the invite link."
 
 #, python-format
 msgid "Cadastro criado (%(status)s)"
@@ -8812,6 +8898,15 @@ msgstr "Revoke and generate new link"
 msgid "Quem você acompanha, com situação, pacote e último treino."
 msgstr "Everyone you coach, with status, package and last workout."
 
+msgid "Importar ou exportar (CSV)"
+msgstr "Import or export (CSV)"
+
+msgid "Importar alunos (CSV)"
+msgstr "Import students (CSV)"
+
+msgid "Exportar esta lista (CSV)"
+msgstr "Export this list (CSV)"
+
 msgid "Nome, e-mail, telefone ou #ID..."
 msgstr "Name, email, phone or #ID..."
 
@@ -9225,6 +9320,104 @@ msgstr ""
 msgid "Quer apagar tudo? Use <em>Excluir</em> na ficha do aluno."
 msgstr ""
 "Want to delete everything? Use <em>Delete</em> on the student's profile."
+
+#, python-format
+msgid "Importar alunos - %(brand_name)s"
+msgstr "Import students - %(brand_name)s"
+
+msgid ""
+"Traga uma lista de alunos de uma planilha (CSV). Você vê uma prévia antes de"
+" criar qualquer coisa."
+msgstr ""
+"Bring a list of students from a spreadsheet (CSV). You see a preview before "
+"anything is created."
+
+msgid "Arquivo CSV"
+msgstr "CSV file"
+
+#, python-format
+msgid ""
+"Até %(max_rows)s alunos por arquivo, 1 MB. No Excel ou no Google Planilhas: "
+"Arquivo → Salvar como/Fazer download → CSV."
+msgstr ""
+"Up to %(max_rows)s students per file, 1 MB. In Excel or Google Sheets: File "
+"→ Save as/Download → CSV."
+
+msgid "Ver a prévia"
+msgstr "See the preview"
+
+msgid "Baixar o modelo"
+msgstr "Download the template"
+
+msgid "Colunas (a primeira linha do arquivo leva os títulos)"
+msgstr "Columns (the first line of the file holds the titles)"
+
+msgid "obrigatório"
+msgstr "required"
+
+msgid "para o aluno usar o app (ele recebe o link de convite depois)"
+msgstr "for the student to use the app (they get the invite link later)"
+
+msgid "dd/mm/aaaa"
+msgstr "dd/mm/yyyy"
+
+msgid "ativo ou experimental"
+msgstr "ativo (active) or experimental (trial)"
+
+msgid "presencial, online ou híbrido"
+msgstr "presencial (in person), online or híbrido (hybrid)"
+
+msgid "sim ou não; em branco: sim quando há e-mail"
+msgstr "sim or não (yes or no); blank: yes when there is an e-mail"
+
+msgid ""
+"Saúde e anotações internas não entram na importação. Ninguém recebe "
+"mensagem: o aluno só é cadastrado."
+msgstr ""
+"Health data and internal notes are not part of the import. Nobody gets a "
+"message: the student is just registered."
+
+msgid "Prontos"
+msgstr "Ready"
+
+msgid "Parecem repetidos"
+msgstr "Look like duplicates"
+
+msgid "Com erro"
+msgstr "With errors"
+
+msgid ""
+"Marque quem entra. Os prontos já vêm marcados; um que parece repetido só "
+"entra se você marcar (é outra pessoa com o mesmo nome ou telefone). Linhas "
+"com erro ficam de fora: corrija a planilha e envie de novo."
+msgstr ""
+"Tick who gets in. The ready ones come ticked; one that looks like a "
+"duplicate only gets in if you tick it (it is another person with the same "
+"name or phone). Rows with errors stay out: fix the spreadsheet and send it "
+"again."
+
+#, python-format
+msgid "Importar %(name)s"
+msgstr "Import %(name)s"
+
+msgid "pronto"
+msgstr "ready"
+
+msgid "parece repetido"
+msgstr "looks like a duplicate"
+
+msgid "erro"
+msgstr "error"
+
+#, python-format
+msgid "Já existe: %(other)s"
+msgstr "Already exists: %(other)s"
+
+msgid "Importar os marcados"
+msgstr "Import the ticked ones"
+
+msgid "Enviar outro arquivo"
+msgstr "Send another file"
 
 #, python-format
 msgid "%(first)s–%(last)s de %(total)s"
