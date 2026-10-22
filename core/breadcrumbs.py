@@ -235,6 +235,7 @@ TRAILS = {
     'appointment_reschedule': lambda request, ctx: [_home(), _agenda(), (_('Remarcar aula'), None)],
     'student_list': _student_list,
     'student_create': _student_create,
+    'students_csv_import': lambda request, ctx: [_home(), _students(), (_('Importar alunos'), None)],
     'student_detail': _student_detail,
     'student_edit': _student_edit,
     'student_invite': _student_page(_l('Convite')),
