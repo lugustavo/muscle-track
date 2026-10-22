@@ -88,11 +88,12 @@ def send_student_nudges(now, today):
     """Once a day, in the morning: the students who are overdue a new assessment, and the ones who stopped training. Each
     is told again only after a month (assessment) or a week (training), and only the ones with the switch on."""
     if not _in_window(now, settings.REMINDER_NUDGE_HOUR):
-        return {'reassessment': 0, 'inactive': 0}
-    told = {'reassessment': 0, 'inactive': 0}
+        return {'reassessment': 0, 'inactive': 0, 'birthday': 0}
+    told = {'reassessment': 0, 'inactive': 0, 'birthday': 0}
     for student, days in reassessment_candidates(today, only_with_app=True):
         told['reassessment'] += notifications.notify_once(
             [student.user], notifications.reassessment_due(days), timedelta(days=30))
+    told['birthday'] = send_birthday_greetings(today)
     inactive_days = settings.REMINDER_INACTIVE_DAYS
     if inactive_days > 0:
         for row in dashboard.inactive_students(now, days=inactive_days):
@@ -101,6 +102,16 @@ def send_student_nudges(now, today):
                 told['inactive'] += notifications.notify_once(
                     [student.user], notifications.inactivity_nudge(row['days']), timedelta(days=inactive_days))
     return told
+
+
+def send_birthday_greetings(today):
+    """The studio's greeting to each active student (with the app) on their birthday, once a year."""
+    sent = 0
+    for row in dashboard.birthdays(today, ahead=0):
+        student = row['student']
+        if student.has_app and student.user is not None:
+            sent += notifications.notify_once([student.user], notifications.birthday_greeting(student), timedelta(days=300))
+    return sent
 
 
 def digest_summary(now, today):
@@ -116,6 +127,7 @@ def digest_summary(now, today):
         'classes': len(classes),
         'first_class': f'{timezone.localtime(classes[0].starts_at):%H:%M}' if classes else '',
         'unmarked': unmarked,
+        'birthdays': len(dashboard.birthdays(today, ahead=0)),
         'payments': len(overdue_rows(today)),
         'inactive': len(dashboard.inactive_students(now)) if settings.REMINDER_INACTIVE_DAYS > 0 else 0,
         'reassessment': len(reassessment_candidates(today)),
@@ -200,4 +212,5 @@ def run(now=None):
     return {'classes': send_class_reminders(now), 'soon': send_class_soon_reminders(now), 'plans': send_plan_reminders(today),
             'packages': send_package_reminders(now, today), 'backup': send_backup_alert(now),
             'digest': send_daily_digest(now, today), 'reassessment': nudges['reassessment'], 'inactive': nudges['inactive'],
+            'birthday': nudges['birthday'],
             'sessions': workout_sessions.close_stale(now=now)}

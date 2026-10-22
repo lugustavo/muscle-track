@@ -351,6 +351,28 @@
         </div>
     </div>
 
+    {% if dashboard.birthdays_total %}
+    <div class="col-lg-6" id="card-birthdays" style="order: {{ dashboard.order.birthdays }};">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between">
+                <strong class="ui-sec"><span class="ui-ico sm info"><i class="bi bi-gift" aria-hidden="true"></i></span> {% trans "Aniversariantes (7 dias)" %}</strong>
+                <span class="ui-badge {% if dashboard.birthdays_today %}brand{% endif %}">{{ dashboard.birthdays_total }}</span>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for row in dashboard.birthdays %}
+                <div class="list-group-item d-flex justify-content-between align-items-center" data-birthday="{{ row.student.pk }}">
+                    <span>
+                        <a href="{% nav_url 'core:student_detail' row.student.pk %}" class="text-decoration-none">{{ row.student.person_name }}</a>
+                        <small class="text-muted d-block">{% if row.days == 0 %}{% trans "hoje" %}{% elif row.days == 1 %}{% trans "amanhã" %}{% else %}{{ row.date|date:_('D d/m') }}{% endif %} · {% blocktrans trimmed with n=row.turning %}{{ n }} anos{% endblocktrans %}</small>
+                    </span>
+                    {% if row.whatsapp %}<a href="{{ row.whatsapp }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success" title="{% trans "Parabéns pelo WhatsApp" %}"><i class="bi bi-whatsapp"></i></a>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="col-12" id="card-comments" style="order: {{ dashboard.order.comments }};">
         <div class="card">
             <div class="card-header"><strong class="ui-sec"><span class="ui-ico sm info"><i class="bi bi-chat-left-text" aria-hidden="true"></i></span> {% trans "Comentários dos alunos (7 dias)" %}</strong></div>

@@ -30,7 +30,7 @@ class PriorityOrderTests(BaseTestCase):
 
     def test_every_card_has_an_order_and_a_chip_key_has_a_card(self):
         data = trainer_dashboard()
-        self.assertEqual(set(data['order']), {key for key, _l, _v in PRIORITY} | {'sessions', 'comments'})
+        self.assertEqual(set(data['order']), {key for key, _l, _v in PRIORITY} | {'sessions', 'comments', 'birthdays'})
         self.client.force_login(self.trainer)
         page = self.client.get(reverse('core:home')).content.decode()
         always_there = ('inactive', 'classes', 'plans', 'routines', 'sessions', 'comments')   # the others appear only with something to list
