@@ -117,13 +117,17 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('push', (event) => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; } catch (e) { data = { body: event.data ? event.data.text() : '' }; }
-  event.waitUntil(self.registration.showNotification(data.title || 'Muscle Track', {
-    body: data.body || '',
-    icon: '/static/images/icon-192.png',
-    badge: '/static/images/icon-192.png',
-    tag: data.tag || undefined,
-    data: { url: data.url || '/' },
-  }));
+  event.waitUntil(Promise.all([
+    self.registration.showNotification(data.title || 'Muscle Track', {
+      body: data.body || '',
+      icon: '/static/images/icon-192.png',
+      badge: '/static/images/icon-192.png',
+      tag: data.tag || undefined,
+      data: { url: data.url || '/' },
+    }),
+    // a dot on the app icon until the next page load puts the real number there
+    (self.navigator && self.navigator.setAppBadge ? self.navigator.setAppBadge() : Promise.resolve()).catch(() => {}),
+  ]));
 });
 
 self.addEventListener('notificationclick', (event) => {

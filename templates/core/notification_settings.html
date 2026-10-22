@@ -61,10 +61,15 @@
                 <input class="form-check-input" type="checkbox" id="notify_changes" name="notify_changes" {% if pref.notify_changes %}checked{% endif %}>
                 <label class="form-check-label" for="notify_changes">{% if is_trainer %}{% trans "Pedidos de remarcação e cancelamento dos alunos" %}{% else %}{% trans "Mudanças nas minhas aulas e respostas aos meus pedidos" %}{% endif %}</label>
             </div>
-            {% if is_trainer %}<div class="form-check mb-3">
+            {% if is_trainer %}<div class="form-check mb-1">
                 <input class="form-check-input" type="checkbox" id="notify_renewals" name="notify_renewals" {% if pref.notify_renewals %}checked{% endif %}>
                 <label class="form-check-label" for="notify_renewals">{% trans "Pacotes de alunos acabando ou vencendo" %}</label>
-            </div>{% endif %}
+            </div>
+            <div class="form-check mb-1">
+                <input class="form-check-input" type="checkbox" id="notify_activity" name="notify_activity" {% if pref.notify_activity %}checked{% endif %}>
+                <label class="form-check-label" for="notify_activity">{% trans "Aluno aceitou o convite ou enviou uma foto" %}</label>
+            </div>
+            <div class="form-text mb-3">{% trans "Pedidos de exclusão de dados e problemas nos backups sempre avisam: não têm interruptor." %}</div>{% endif %}
             {% if person %}
             {% if reminder_hours %}<div class="form-check mb-1">
                 <input class="form-check-input" type="checkbox" id="notify_class_reminder" name="notify_class_reminder" {% if pref.notify_class_reminder %}checked{% endif %}>

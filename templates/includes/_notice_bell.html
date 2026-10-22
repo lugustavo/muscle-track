@@ -1,6 +1,6 @@
 {% load i18n %}
 {# The bell in the top bar: the notice centre, with the number of unread notices #}
-<a href="{% url 'core:notices' %}" class="btn btn-link nav-link px-2 notice-bell" data-notice-bell
+<a href="{% url 'core:notices' %}" class="btn btn-link nav-link px-2 notice-bell" data-notice-bell data-notice-total="{{ notice_unread|default:0 }}"
    aria-label="{% if notice_unread %}{% blocktrans trimmed count n=notice_unread %}Avisos: {{ n }} não lido{% plural %}Avisos: {{ n }} não lidos{% endblocktrans %}{% else %}{% trans "Avisos" %}{% endif %}">
     <i class="bi {% if notice_unread %}bi-bell-fill{% else %}bi-bell{% endif %} fs-5" aria-hidden="true"></i>
     {% if notice_unread %}<span class="notice-count" aria-hidden="true">{% if notice_unread > 9 %}9+{% else %}{{ notice_unread }}{% endif %}</span>{% endif %}

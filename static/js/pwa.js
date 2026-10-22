@@ -76,3 +76,12 @@
     });
     card.querySelector('[data-install-dismiss]').addEventListener('click', snooze);
 })();
+
+// The icon of the installed app carries the number of unread notices (where the browser can: Chrome, Edge, Safari 17+)
+(function () {
+    var bell = document.querySelector('[data-notice-bell]');
+    if (!bell || !navigator.setAppBadge) { return; }
+    var unread = parseInt(bell.getAttribute('data-notice-total') || '0', 10) || 0;
+    var done = unread > 0 ? navigator.setAppBadge(unread) : navigator.clearAppBadge();
+    if (done && done.catch) { done.catch(function () {}); }
+})();
