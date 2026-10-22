@@ -2485,11 +2485,15 @@ def notification_settings(request):
                 if request.user.is_staff:
                     pref.notify_renewals = 'notify_renewals' in request.POST
                     pref.notify_activity = 'notify_activity' in request.POST
+                    pref.notify_digest = 'notify_digest' in request.POST
                 if person is not None:
                     pref.notify_class_reminder = 'notify_class_reminder' in request.POST
                     pref.notify_plan_expiry = 'notify_plan_expiry' in request.POST
+                    pref.notify_reassessment = 'notify_reassessment' in request.POST
+                    pref.notify_inactivity = 'notify_inactivity' in request.POST
                 pref.save(update_fields=['notify_changes', 'notify_class_reminder', 'notify_plan_expiry',
-                                                 'notify_renewals', 'notify_activity'])
+                                         'notify_renewals', 'notify_activity', 'notify_digest', 'notify_reassessment',
+                                         'notify_inactivity'])
             messages.success(request, _('Preferências de notificação salvas.'))
         return redirect('core:notification_settings')
     recent = list(request.user.notification_logs.all()[:5])

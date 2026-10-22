@@ -1138,6 +1138,7 @@ class Appointment(models.Model):
     cancelled_late = models.BooleanField(default=False)   # cancelled with less notice than allowed: the class counts
     counts_override = models.BooleanField(null=True, blank=True)   # trainer's choice: True/False overrides the rule
     reminder_sent_at = models.DateTimeField(null=True, blank=True)   # core/reminders.py: the class reminder went out
+    soon_reminder_sent_at = models.DateTimeField(null=True, blank=True)   # ... and the "it starts soon" one, a few hours before
     rescheduled_to = models.OneToOneField('self', on_delete=models.SET_NULL, null=True, blank=True,
                                           related_name='rescheduled_from')
 
@@ -1219,6 +1220,9 @@ class NotificationPreference(models.Model):
     notify_plan_expiry = models.BooleanField(default=True)      # student: "your plan expires in 3 days", "2 classes left"
     notify_renewals = models.BooleanField(default=True)         # trainer: packages running out or expiring
     notify_activity = models.BooleanField(default=True)         # trainer: a student accepted the invite or sent a photo
+    notify_digest = models.BooleanField(default=True)           # trainer: the morning summary of the day
+    notify_reassessment = models.BooleanField(default=True)     # student: "time for a new assessment"
+    notify_inactivity = models.BooleanField(default=True)       # student: "it has been a while since you trained"
     # Language the person uses the app in (set by the language switcher, or learned at login); the notifications, e-mails
     # and WhatsApp texts meant for them are written in it. Empty = the site default.
     language = models.CharField(max_length=10, blank=True, default='')

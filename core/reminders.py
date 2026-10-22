@@ -4,15 +4,16 @@ centre, and also by e-mail, push or Telegram on the channels they turned on.
 `run()` is idempotent and meant to be called every few minutes (management command `send_reminders`, run by the
 `scheduler` service of docker-compose): each class, each plan expiry and each package alert is told once (`Appointment.reminder_sent_at`,
 `Person.plan_reminder_for`, `StudentPackage.low_notified_at` and friends)."""
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 
 from django.conf import settings
-from django.db.models import F, Q
+from django.db.models import F, Max, Q
 from django.utils import timezone
 
-from . import backup_status, inbox, notifications, packages, workout_sessions
+from . import backup_status, dashboard, inbox, notifications, packages, workout_sessions
 from .agenda import ensure_appointments
-from .models import Appointment, Person
+from .billing import overdue_rows
+from .models import Appointment, Notice, NotificationPreference, Person
 
 # A class that starts in less than this is not reminded any more (it is too late to be useful)
 MIN_LEAD = timedelta(hours=1)
@@ -39,6 +40,108 @@ def send_class_reminders(now):
         Appointment.objects.filter(pk=appointment.pk).update(reminder_sent_at=now)
         sent += 1
     return sent
+
+
+SOON_MIN_LEAD = timedelta(minutes=30)     # a class that starts in less than this is not reminded again
+WINDOW_HOURS = 2                           # the daily jobs run in the first hours after their time (the command runs often)
+
+
+def send_class_soon_reminders(now):
+    """The short "starts soon" reminder, REMINDER_CLASS_SOON_HOURS before the class. When the day-before reminder went out
+    only a moment ago (a class made for later today), this one is skipped: one message is enough."""
+    hours = settings.REMINDER_CLASS_SOON_HOURS
+    if hours <= 0:
+        return 0
+    due = Appointment.objects.filter(
+        _wants('appointment', 'notify_class_reminder'),
+        status=Appointment.Status.SCHEDULED, soon_reminder_sent_at__isnull=True, person__is_active=True,
+        starts_at__gte=now + SOON_MIN_LEAD, starts_at__lte=now + timedelta(hours=hours)).select_related('person__user')
+    sent = 0
+    for appointment in due:
+        just_told = appointment.reminder_sent_at and now - appointment.reminder_sent_at < timedelta(hours=hours + 1)
+        if not just_told:
+            notifications.notify([appointment.person.user], notifications.class_soon(appointment, now), sync=True)
+            sent += 1
+        Appointment.objects.filter(pk=appointment.pk).update(soon_reminder_sent_at=now)
+    return sent
+
+
+def _in_window(now, hour):
+    """Is it the first WINDOW_HOURS hours after `hour` o'clock (local time)? A negative hour means never."""
+    return hour >= 0 and hour <= timezone.localtime(now).hour < hour + WINDOW_HOURS
+
+
+def reassessment_candidates(today, only_with_app=False):
+    """[(student, days since the last assessment)] for the active students whose last assessment is older than
+    REMINDER_REASSESSMENT_DAYS. A student who never had one is not here: there is nothing to "do again"."""
+    days = settings.REMINDER_REASSESSMENT_DAYS
+    if days <= 0:
+        return []
+    students = Person.objects.filter(is_active=True).annotate(last_assessed=Max('assessments__date')).filter(
+        last_assessed__lt=today - timedelta(days=days))
+    if only_with_app:
+        students = students.filter(has_app=True, user__isnull=False).exclude(dashboard.INVITE_PENDING).select_related('user')
+    return [(p, (today - p.last_assessed).days) for p in students]
+
+
+def send_student_nudges(now, today):
+    """Once a day, in the morning: the students who are overdue a new assessment, and the ones who stopped training. Each
+    is told again only after a month (assessment) or a week (training), and only the ones with the switch on."""
+    if not _in_window(now, settings.REMINDER_NUDGE_HOUR):
+        return {'reassessment': 0, 'inactive': 0}
+    told = {'reassessment': 0, 'inactive': 0}
+    for student, days in reassessment_candidates(today, only_with_app=True):
+        told['reassessment'] += notifications.notify_once(
+            [student.user], notifications.reassessment_due(days), timedelta(days=30))
+    inactive_days = settings.REMINDER_INACTIVE_DAYS
+    if inactive_days > 0:
+        for row in dashboard.inactive_students(now, days=inactive_days):
+            student = row['student']
+            if student.has_app and student.user is not None:
+                told['inactive'] += notifications.notify_once(
+                    [student.user], notifications.inactivity_nudge(row['days']), timedelta(days=inactive_days))
+    return told
+
+
+def digest_summary(now, today):
+    """{item: how many} of what the trainer should look at today (counts only; see notifications.daily_digest)."""
+    ensure_appointments(today, today, today)
+    start_today = timezone.make_aware(datetime.combine(today, time.min))
+    live = Appointment.objects.exclude(status__in=(Appointment.Status.CANCELLED, Appointment.Status.RESCHEDULED))
+    classes = list(live.filter(starts_at__gte=start_today, starts_at__lt=start_today + timedelta(days=1)).order_by('starts_at'))
+    unmarked = Appointment.objects.filter(
+        status=Appointment.Status.SCHEDULED, person__is_active=True,
+        starts_at__gte=start_today - timedelta(days=1), starts_at__lt=start_today).count()
+    return {
+        'classes': len(classes),
+        'first_class': f'{timezone.localtime(classes[0].starts_at):%H:%M}' if classes else '',
+        'unmarked': unmarked,
+        'payments': len(overdue_rows(today)),
+        'inactive': len(dashboard.inactive_students(now)) if settings.REMINDER_INACTIVE_DAYS > 0 else 0,
+        'reassessment': len(reassessment_candidates(today)),
+        'routines': len(dashboard.ending_routines(today)),
+        'invites': len([r for r in dashboard.pending_invites(now) if r['days'] >= 3]),
+        'trials': len(dashboard.long_trials(now)),
+    }
+
+
+DIGEST_REPEAT = timedelta(hours=20)
+
+
+def send_daily_digest(now, today):
+    """One notice to each trainer in the morning with the counts of what needs attention (nothing is sent on a quiet day)."""
+    if not _in_window(now, settings.REMINDER_DIGEST_HOUR):
+        return 0
+    staff = notifications.staff_users()
+    prefs = {p.user_id: p for p in NotificationPreference.objects.filter(user__in=staff)}
+    waiting = [u for u in staff if inbox.wants(prefs.get(u.pk), 'daily_digest') and not Notice.objects.filter(
+        user=u, kind='daily_digest', created_at__gte=now - DIGEST_REPEAT).exists()]
+    if not waiting:
+        return 0
+    summary = digest_summary(now, today)
+    if not any(v for k, v in summary.items() if k != 'first_class'):
+        return 0
+    return notifications.notify_once(waiting, notifications.daily_digest(summary), DIGEST_REPEAT)
 
 
 def send_plan_reminders(today):
@@ -93,6 +196,8 @@ def run(now=None):
     today = timezone.localdate(now)
     ensure_appointments(today, today + timedelta(days=3), today)
     inbox.prune(now)
-    return {'classes': send_class_reminders(now), 'plans': send_plan_reminders(today),
+    nudges = send_student_nudges(now, today)
+    return {'classes': send_class_reminders(now), 'soon': send_class_soon_reminders(now), 'plans': send_plan_reminders(today),
             'packages': send_package_reminders(now, today), 'backup': send_backup_alert(now),
+            'digest': send_daily_digest(now, today), 'reassessment': nudges['reassessment'], 'inactive': nudges['inactive'],
             'sessions': workout_sessions.close_stale(now=now)}

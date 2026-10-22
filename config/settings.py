@@ -209,6 +209,15 @@ NOTIFICATIONS_ASYNC = config('NOTIFICATIONS_ASYNC', default=True, cast=bool)   #
 # and days before the plan expires (0 = off)
 REMINDER_CLASS_HOURS = config('REMINDER_CLASS_HOURS', default=24, cast=int)
 REMINDER_PLAN_DAYS = config('REMINDER_PLAN_DAYS', default=3, cast=int)
+# a second, short reminder a few hours before the class (0 = off); days without an assessment before the student is
+# reminded of a new one (0 = off); days without training before the student is nudged (0 = off)
+REMINDER_CLASS_SOON_HOURS = config('REMINDER_CLASS_SOON_HOURS', default=2, cast=int)
+REMINDER_REASSESSMENT_DAYS = config('REMINDER_REASSESSMENT_DAYS', default=45, cast=int)
+REMINDER_INACTIVE_DAYS = config('REMINDER_INACTIVE_DAYS', default=7, cast=int)
+# the local hour the trainer's morning summary and the students' nudges go out (they are sent in a two-hour window from
+# then on; -1 turns the summary off)
+REMINDER_DIGEST_HOUR = config('REMINDER_DIGEST_HOUR', default=7, cast=int)
+REMINDER_NUDGE_HOUR = config('REMINDER_NUDGE_HOUR', default=10, cast=int)
 
 # Django-allauth settings
 ACCOUNT_ADAPTER = 'core.adapters.AccountAdapter'

@@ -69,15 +69,27 @@
                 <input class="form-check-input" type="checkbox" id="notify_activity" name="notify_activity" {% if pref.notify_activity %}checked{% endif %}>
                 <label class="form-check-label" for="notify_activity">{% trans "Aluno aceitou o convite ou enviou uma foto" %}</label>
             </div>
+            <div class="form-check mb-1">
+                <input class="form-check-input" type="checkbox" id="notify_digest" name="notify_digest" {% if pref.notify_digest %}checked{% endif %}>
+                <label class="form-check-label" for="notify_digest">{% trans "Resumo do dia, de manhã (aulas de hoje, presenças por marcar, pagamentos e alunos que pedem atenção)" %}</label>
+            </div>
             <div class="form-text mb-3">{% trans "Pedidos de exclusão de dados e problemas nos backups sempre avisam: não têm interruptor." %}</div>{% endif %}
             {% if person %}
             {% if reminder_hours %}<div class="form-check mb-1">
                 <input class="form-check-input" type="checkbox" id="notify_class_reminder" name="notify_class_reminder" {% if pref.notify_class_reminder %}checked{% endif %}>
                 <label class="form-check-label" for="notify_class_reminder">{% blocktrans trimmed count reminder_hours=reminder_hours %}Lembrete de aula (cerca de {{ reminder_hours }} hora antes){% plural %}Lembrete de aula (cerca de {{ reminder_hours }} horas antes){% endblocktrans %}</label>
             </div>{% endif %}
-            <div class="form-check mb-3">
+            <div class="form-check mb-1">
                 <input class="form-check-input" type="checkbox" id="notify_plan_expiry" name="notify_plan_expiry" {% if pref.notify_plan_expiry %}checked{% endif %}>
                 <label class="form-check-label" for="notify_plan_expiry">{% trans "Aviso quando o meu pacote estiver acabando ou vencendo" %}</label>
+            </div>
+            <div class="form-check mb-1">
+                <input class="form-check-input" type="checkbox" id="notify_reassessment" name="notify_reassessment" {% if pref.notify_reassessment %}checked{% endif %}>
+                <label class="form-check-label" for="notify_reassessment">{% trans "Lembrete de uma nova avaliação" %}</label>
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="notify_inactivity" name="notify_inactivity" {% if pref.notify_inactivity %}checked{% endif %}>
+                <label class="form-check-label" for="notify_inactivity">{% trans "Aviso gentil quando eu passar uma semana sem treinar" %}</label>
             </div>
             {% endif %}
             <div class="small text-muted mb-3">{% trans "Vale para todos os canais: só chega o que estiver marcado aqui e em um canal ligado." %}</div>

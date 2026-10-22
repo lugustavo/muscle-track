@@ -53,12 +53,12 @@ def _start_of_today():
     return timezone.make_aware(datetime.combine(timezone.localdate(), time.min))
 
 
-def inactive_students(now=None):
+def inactive_students(now=None, days=INACTIVE_DAYS):
     """Active students with a running routine who have not trained for INACTIVE_DAYS (or never).
 
     Students who never accepted the invite are not here: they cannot train yet (see pending_invites)."""
     now = now or timezone.now()
-    cutoff = now - timedelta(days=INACTIVE_DAYS)
+    cutoff = now - timedelta(days=days)
     students = Person.objects.filter(is_active=True).annotate(
         has_routine=Exists(PersonRoutine.objects.filter(person=OuterRef('pk'), is_active=True)),
         last_session_at=last_activity('pk'),
@@ -151,9 +151,9 @@ def expiring_plans():
     return packages.renewals(expiring_days=EXPIRING_DAYS)
 
 
-def ending_routines():
+def ending_routines(today=None):
     """Running routines whose end date is past or within EXPIRING_DAYS."""
-    limit = timezone.localdate() + timedelta(days=EXPIRING_DAYS)
+    limit = (today or timezone.localdate()) + timedelta(days=EXPIRING_DAYS)
     return list(PersonRoutine.objects.filter(
         is_active=True, person__is_active=True, end_date__isnull=False, end_date__lte=limit
     ).select_related('person').order_by('end_date'))

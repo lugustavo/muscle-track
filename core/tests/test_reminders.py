@@ -191,7 +191,8 @@ class RunTests(BaseTestCase):
         result = reminders.run(NOW)
         self.assertEqual(result['classes'], 1)
         self.assertTrue(Appointment.objects.filter(person=self.alice.person, starts_at=starts(5)).exists())
-        self.assertEqual(reminders.run(NOW), {'classes': 0, 'plans': 0, 'packages': 0, 'backup': 0, 'sessions': 0})
+        self.assertEqual(reminders.run(NOW), {'classes': 0, 'soon': 0, 'plans': 0, 'packages': 0, 'backup': 0, 'digest': 0, 'reassessment': 0,
+                          'inactive': 0, 'sessions': 0})
 
     def test_command_prints_counts(self):
         out = StringIO()
