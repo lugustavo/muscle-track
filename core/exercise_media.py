@@ -8,6 +8,7 @@ not from the "media type" field, which is easy to leave at its default: a GIF sa
   video  - shown inline with controls (muted, so it can loop on a phone)
   link   - anything else (YouTube, Vimeo, a page): offered as a link that opens in a new tab"""
 import io
+import uuid
 from os.path import splitext
 from urllib.parse import urlparse
 
@@ -73,3 +74,36 @@ def first_frame_thumbnail(media_file):
                 media_file.seek(0)
         except Exception:
             pass
+
+
+STILL_MAX_SIDE = 1600           # a picture of an exercise is shown on a phone: more pixels only cost data
+
+
+def clean_still_image(media_file):
+    """A new JPG/PNG upload re-encoded without its metadata (EXIF: GPS position, camera, date), turned upright and at most
+    STILL_MAX_SIDE px on its longest side. Returns (name, ContentFile) or None when the file is not a still JPG/PNG
+    (GIFs, WebP, videos and everything else are kept exactly as sent: re-encoding would stop an animation)."""
+    from django.core.files.base import ContentFile
+    from PIL import Image, ImageOps
+
+    extension = _extension(media_file.name)
+    if extension not in ('.jpg', '.jpeg', '.png'):
+        return None
+    try:
+        media_file.seek(0)
+        with Image.open(media_file) as image:
+            if getattr(image, 'is_animated', False):
+                return None
+            image = ImageOps.exif_transpose(image)
+            image.thumbnail((STILL_MAX_SIDE, STILL_MAX_SIDE))
+            buffer = io.BytesIO()
+            if extension == '.png':
+                image.save(buffer, 'PNG', optimize=True)
+                name = f'{uuid.uuid4().hex}.png'
+            else:
+                image.convert('RGB').save(buffer, 'JPEG', quality=88, optimize=True)
+                name = f'{uuid.uuid4().hex}.jpg'
+    except Exception:   # a broken file: keep it as it came, the form already accepted it
+        media_file.seek(0)
+        return None
+    return name, ContentFile(buffer.getvalue())
