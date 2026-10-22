@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("core", "0045_exercise_media_credit"),
+        ("core", "0046_notification_activity"),
     ]
 
     operations = [

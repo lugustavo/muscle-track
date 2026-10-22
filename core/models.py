@@ -1214,6 +1214,7 @@ class NotificationPreference(models.Model):
     notify_class_reminder = models.BooleanField(default=True)   # "your class is tomorrow"
     notify_plan_expiry = models.BooleanField(default=True)      # student: "your plan expires in 3 days", "2 classes left"
     notify_renewals = models.BooleanField(default=True)         # trainer: packages running out or expiring
+    notify_activity = models.BooleanField(default=True)         # trainer: a student accepted the invite or sent a photo
     # Language the person uses the app in (set by the language switcher, or learned at login); the notifications, e-mails
     # and WhatsApp texts meant for them are written in it. Empty = the site default.
     language = models.CharField(max_length=10, blank=True, default='')
