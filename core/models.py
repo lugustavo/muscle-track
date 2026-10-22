@@ -282,6 +282,10 @@ class Exercise(models.Model):
         return exercise_media.describe(self)
 
     def save(self, *args, **kwargs):
+        if self.media_file and not self.media_file._committed:    # a new upload: a still picture loses its metadata (GPS...)
+            cleaned = exercise_media.clean_still_image(self.media_file)
+            if cleaned:
+                self.media_file.save(cleaned[0], cleaned[1], save=False)
         # No thumbnail uploaded: make one from the first frame of the media file (an image, GIF or WebP). A thumbnail made
         # this way (named auto_...) is remade when the file is replaced; one the trainer uploaded is never touched.
         if self.media_file and exercise_media.kind_of(self.media_file.name) == 'image':
