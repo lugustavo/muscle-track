@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 17:04-0300\n"
+"POT-Creation-Date: 2026-10-22 17:14-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1803,6 +1803,9 @@ msgstr "Class the student missed"
 msgid "Convite de acesso"
 msgstr "Access invitation"
 
+msgid "Parabéns de aniversário"
+msgstr "Birthday greeting"
+
 msgid "Enviada"
 msgstr "Sent"
 
@@ -1991,14 +1994,12 @@ msgid "Lembrete de aula"
 msgstr "Class reminder"
 
 #, python-format
-#| msgid "Sua aula é %(day)s às %(time)s."
 msgid "Sua aula começa hoje às %(time)s."
 msgstr "Your class starts today at %(time)s."
 
 msgid "Sua aula é daqui a pouco"
 msgstr "Your class is coming up"
 
-#| msgid "Ligar a uma avaliação"
 msgid "Hora de uma nova avaliação"
 msgstr "Time for a new assessment"
 
@@ -2027,60 +2028,62 @@ msgstr[0] ""
 msgstr[1] ""
 "It has been %(n)d days since you trained. How about a workout today?"
 
+msgid "Feliz aniversário!"
+msgstr "Happy birthday!"
+
 #, python-format
-#| msgid "%(n)s aula"
-#| msgid_plural "%(n)s aulas"
+msgid "Parabéns, %(name)s! Que o seu dia seja ótimo. 🎉"
+msgstr "Happy birthday, %(name)s! Have a great day. 🎉"
+
+#, python-format
 msgid "%(n)d aula hoje"
 msgid_plural "%(n)d aulas hoje"
 msgstr[0] "%(n)d class today"
 msgstr[1] "%(n)d classes today"
 
 #, python-format
-#| msgid "%(date)s às %(time)s"
 msgid "(a primeira às %(time)s)"
 msgstr "(the first at %(time)s)"
 
 #, python-format
-#| msgid "%(n)d aula a marcar"
-#| msgid_plural "%(n)d aulas a marcar"
+#| msgid "%(n)d aula hoje"
+#| msgid_plural "%(n)d aulas hoje"
+msgid "%(n)d aniversariante hoje"
+msgid_plural "%(n)d aniversariantes hoje"
+msgstr[0] "%(n)d birthday today"
+msgstr[1] "%(n)d birthdays today"
+
+#, python-format
 msgid "%(n)d aula de ontem sem presença marcada"
 msgid_plural "%(n)d aulas de ontem sem presença marcada"
 msgstr[0] "%(n)d class from yesterday without attendance marked"
 msgstr[1] "%(n)d classes from yesterday without attendance marked"
 
 #, python-format
-#| msgid "Pagamento em aberto: %(pending)s"
 msgid "%(n)d pagamento em aberto"
 msgid_plural "%(n)d pagamentos em aberto"
 msgstr[0] "%(n)d open payment"
 msgstr[1] "%(n)d open payments"
 
 #, python-format
-#| msgid "%(n)d pacote para renovar"
-#| msgid_plural "%(n)d pacotes para renovar"
 msgid "%(n)d aluno sem treinar"
 msgid_plural "%(n)d alunos sem treinar"
 msgstr[0] "%(n)d student not training"
 msgstr[1] "%(n)d students not training"
 
 #, python-format
-#| msgid "%(n)d pacote para renovar"
-#| msgid_plural "%(n)d pacotes para renovar"
 msgid "%(n)d aluno para reavaliar"
 msgid_plural "%(n)d alunos para reavaliar"
 msgstr[0] "%(n)d student due a reassessment"
 msgstr[1] "%(n)d students due a reassessment"
 
 #, python-format
-#| msgid "%(n)s treino de aluno"
-#| msgid_plural "%(n)s treinos de alunos"
 msgid "%(n)d treino terminando"
 msgid_plural "%(n)d treinos terminando"
 msgstr[0] "%(n)d workout ending"
 msgstr[1] "%(n)d workouts ending"
 
 #, python-format
-#| msgid "Convite aceito"
 msgid "%(n)d convite sem aceitar"
 msgid_plural "%(n)d convites sem aceitar"
 msgstr[0] "%(n)d invite not accepted"
@@ -2092,7 +2095,6 @@ msgid_plural "%(n)d experimentais para decidir"
 msgstr[0] "%(n)d trial to decide on"
 msgstr[1] "%(n)d trials to decide on"
 
-#| msgid "Resumo do treino"
 msgid "Resumo do dia"
 msgstr "Daily summary"
 
@@ -3559,6 +3561,14 @@ msgstr ""
 "Hi, {nome}! Your Muscle Track access is ready. Create your password with "
 "this link (valid for 7 days): {link}"
 
+#, python-brace-format
+msgid ""
+"Parabéns, {nome}! 🎉 Que o seu dia seja incrível e que venha mais um ano de "
+"saúde e muito treino. 💪"
+msgstr ""
+"Happy birthday, {nome}! 🎉 May your day be amazing and may the next year "
+"bring lots of health and training. 💪"
+
 msgid "primeiro nome do aluno"
 msgstr "student's first name"
 
@@ -3588,6 +3598,10 @@ msgstr "When tapping WhatsApp on a recent absence (dashboard)."
 
 msgid "Ao enviar o link de acesso ao aluno (tela do convite)."
 msgstr "When sending the access link to the student (invitation screen)."
+
+#| msgid "Ao tocar no WhatsApp de uma falta recente (painel)."
+msgid "Ao tocar no WhatsApp de um aniversariante (painel)."
+msgstr "When tapping the WhatsApp button of a birthday person (dashboard)."
 
 msgid "Carla"
 msgstr "Carla"
@@ -5613,6 +5627,22 @@ msgstr "in progress"
 msgid "Ninguém treinou ainda hoje."
 msgstr "No one has trained yet today."
 
+#| msgid "Treinos (7 dias)"
+msgid "Aniversariantes (7 dias)"
+msgstr "Birthdays (7 days)"
+
+msgid "D d/m"
+msgstr "D m/d"
+
+#, python-format
+#| msgid "%(age)s anos"
+msgid "%(n)s anos"
+msgstr "%(n)s years old"
+
+#| msgid "Cobrar pelo WhatsApp"
+msgid "Parabéns pelo WhatsApp"
+msgstr "Greet on WhatsApp"
+
 msgid "Comentários dos alunos (7 dias)"
 msgstr "Student comments (7 days)"
 
@@ -6378,12 +6408,14 @@ msgstr[1] "Class reminder (about %(reminder_hours)s hours before)"
 msgid "Aviso quando o meu pacote estiver acabando ou vencendo"
 msgstr "Notify me when my package is running out or expiring"
 
-#| msgid "Ligar a uma avaliação"
 msgid "Lembrete de uma nova avaliação"
 msgstr "Reminder of a new assessment"
 
 msgid "Aviso gentil quando eu passar uma semana sem treinar"
 msgstr "A gentle nudge when I go a week without training"
+
+msgid "Parabéns no meu aniversário"
+msgstr "A greeting on my birthday"
 
 msgid ""
 "Vale para todos os canais: só chega o que estiver marcado aqui e em um canal"
@@ -7614,9 +7646,6 @@ msgstr "attendance"
 
 msgid "Aula avulsa"
 msgstr "Single class"
-
-msgid "D d/m"
-msgstr "D m/d"
 
 #, python-format
 msgid "%(starts_at)s às %(starts_at2)s"

@@ -1219,6 +1219,7 @@ class NotificationPreference(models.Model):
     notify_digest = models.BooleanField(default=True)           # trainer: the morning summary of the day
     notify_reassessment = models.BooleanField(default=True)     # student: "time for a new assessment"
     notify_inactivity = models.BooleanField(default=True)       # student: "it has been a while since you trained"
+    notify_birthday = models.BooleanField(default=True)         # student: the studio's birthday greeting
     # Language the person uses the app in (set by the language switcher, or learned at login); the notifications, e-mails
     # and WhatsApp texts meant for them are written in it. Empty = the site default.
     language = models.CharField(max_length=10, blank=True, default='')
@@ -1231,6 +1232,7 @@ class WhatsAppTemplate(models.Model):
         CHARGE = 'charge', _('Cobrança de pacote')
         MISSED = 'missed', _('Aula que o aluno faltou')
         INVITE = 'invite', _('Convite de acesso')
+        BIRTHDAY = 'birthday', _('Parabéns de aniversário')
 
     kind = models.CharField(max_length=10, choices=Kind.choices, unique=True)
     text = models.TextField(max_length=1000)

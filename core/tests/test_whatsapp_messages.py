@@ -69,12 +69,12 @@ class ScreenTests(BaseTestCase):
         self.page = lambda: self.client.get(reverse('core:notification_settings')).content.decode()
         self.save = lambda kind, **data: self.client.post(reverse('core:whatsapp_template_save', kwargs={'kind': kind}), data)
 
-    def test_tab_shows_the_three_texts_with_variables_and_preview(self):
+    def test_tab_shows_the_four_texts_with_variables_and_preview(self):
         html = self.page()
         self.assertIn('id="tab-mensagens"', html)
-        for label in ('Cobrança de pacote', 'Aula que o aluno faltou', 'Convite de acesso'):
+        for label in ('Cobrança de pacote', 'Aula que o aluno faltou', 'Convite de acesso', 'Parabéns de aniversário'):
             self.assertIn(label, html)
-        self.assertEqual(html.count('data-whatsapp-card'), 3)
+        self.assertEqual(html.count('data-whatsapp-card'), 4)
         self.assertIn('data-wa-var="valor"', html)
         self.assertIn('Olá, Carla! Passando para lembrar do pagamento do pacote Pacote 10 aulas.', html)   # the sample student
         self.assertIn('texto padrão', html)
